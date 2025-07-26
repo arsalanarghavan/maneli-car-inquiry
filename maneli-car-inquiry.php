@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.10.3
+ * Version:           0.10.5
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -20,35 +20,46 @@ if (!defined('ABSPATH')) {
 define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Register custom user role on plugin activation
-register_activation_hook(__FILE__, 'maneli_add_expert_role');
-function maneli_add_expert_role() {
-    add_role(
-        'maneli_expert',
-        'کارشناس مانلی',
-        [
-            'read'         => true,
-            'edit_posts'   => false,
-            'delete_posts' => false,
-        ]
-    );
+/**
+ * Ensures the 'maneli_expert' role exists.
+ * This is more robust than an activation hook as it runs on init.
+ */
+function maneli_ensure_expert_role_exists() {
+    if (!get_role('maneli_expert')) {
+        add_role(
+            'maneli_expert',
+            'کارشناس مانلی',
+            [
+                'read' => true, // Base capability
+            ]
+        );
+    }
 }
+add_action('init', 'maneli_ensure_expert_role_exists');
 
-// Remove custom user role on plugin deactivation
+
+/**
+ * Removes the custom user role on plugin deactivation for cleanup.
+ */
 register_deactivation_hook(__FILE__, 'maneli_remove_expert_role');
 function maneli_remove_expert_role() {
     remove_role('maneli_expert');
 }
 
-// Redirect experts from /wp-admin/ to the frontend dashboard
+/**
+ * Redirects users with the 'maneli_expert' role away from the backend dashboard.
+ */
 add_action('admin_init', 'maneli_redirect_experts_from_admin');
 function maneli_redirect_experts_from_admin() {
     if (current_user_can('maneli_expert') && !current_user_can('manage_options') && !wp_doing_ajax()) {
-        wp_redirect(home_url('/dashboard/'));
+        wp_redirect(home_url('/dashboard/')); // Or any other frontend URL you prefer for experts
         exit;
     }
 }
 
+/**
+ * Main plugin class.
+ */
 final class Maneli_Car_Inquiry_Plugin {
 
     public function __construct() {

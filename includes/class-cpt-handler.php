@@ -36,6 +36,10 @@ class Maneli_CPT_Handler {
             'show_ui'            => true,
             'show_in_menu'       => true,
             'capability_type'    => 'post',
+            'capabilities'       => [
+                'create_posts' => 'do_not_allow', // Prevent manual creation
+            ],
+            'map_meta_cap'       => true,
             'menu_icon'          => 'dashicons-clipboard',
             'show_in_admin_bar'  => false,
             'publicly_queryable' => false,
@@ -49,7 +53,7 @@ class Maneli_CPT_Handler {
         $new_columns = [];
         $new_columns['cb'] = $columns['cb'];
         $new_columns['title'] = 'موضوع استعلام';
-        $new_columns['inquiry_user'] = 'کاربر';
+        $new_columns['inquiry_user'] = 'مشتری';
         $new_columns['assigned_expert'] = 'کارشناس مسئول';
         $new_columns['inquiry_status'] = 'وضعیت';
         $new_columns['inquiry_date'] = 'تاریخ ثبت';
@@ -66,17 +70,24 @@ class Maneli_CPT_Handler {
                 break;
             case 'assigned_expert':
                 $expert_name = get_post_meta($post_id, 'assigned_expert_name', true);
+                if (empty($expert_name)) {
+                    $expert_id = get_post_meta($post_id, 'created_by_expert_id', true);
+                    if ($expert_id) {
+                        $expert_user = get_userdata($expert_id);
+                        $expert_name = $expert_user ? $expert_user->display_name : 'کارشناس حذف شده';
+                    }
+                }
                 echo $expert_name ? esc_html($expert_name) : '—';
                 break;
             case 'inquiry_status':
                 $status = get_post_meta($post_id, 'inquiry_status', true);
-                echo '<span class="status-' . esc_attr($status) . '">' . esc_html($this->get_status_label($status)) . '</span>';
+                echo '<span class="status-indicator status-' . esc_attr($status) . '">' . esc_html($this->get_status_label($status)) . '</span>';
                 break;
             case 'inquiry_date':
                 echo get_the_date('Y/m/d H:i', $post_id);
                 break;
             case 'actions':
-                $report_url = admin_url('edit.php?post_type=inquiry&page=maneli-credit-report&inquiry_id=' . $post_id);
+                $report_url = admin_url('admin.php?page=maneli-credit-report&inquiry_id=' . $post_id);
                 printf('<a href="%s" class="button button-primary">مشاهده گزارش</a>', esc_url($report_url));
                 break;
         }
@@ -89,25 +100,21 @@ class Maneli_CPT_Handler {
 
     public function render_personal_info_box($post) {
         $post_meta = get_post_meta($post->ID);
-        
         echo '<h4>اطلاعات خریدار</h4>';
         $buyer_fields = ['first_name' => 'نام','last_name' => 'نام خانوادگی','national_code' => 'کد ملی','father_name' => 'نام پدر','birth_date' => 'تاریخ تولد','mobile_number' => 'شماره موبایل'];
         $field_pairs = array_chunk($buyer_fields, 2, true);
         echo '<table class="form-table"><tbody>';
         foreach ($field_pairs as $pair) {
-            echo '<tr>';
-            $i = 0;
+            echo '<tr>'; $i = 0;
             foreach($pair as $key => $label) {
                 $value = $post_meta[$key][0] ?? '';
                 echo '<th scope="row" style="width: 15%;"><label>' . esc_html($label) . '</label></th>';
                 echo '<td style="width: 35%;">' . esc_html($value) . '</td>';
                 $i++;
             }
-            if ($i == 1) { echo '<th></th><td></td>'; }
-            echo '</tr>';
+            if ($i == 1) { echo '<th></th><td></td>'; } echo '</tr>';
         }
         echo '</tbody></table>';
-
         $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
         if ($issuer_type === 'other') {
             echo '<h3 style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px;">اطلاعات صادر کننده چک</h3>';
@@ -122,12 +129,10 @@ class Maneli_CPT_Handler {
                      echo '<td style="width: 35%;">' . esc_html($value) . '</td>';
                      $i++;
                  }
-                 if ($i == 1) { echo '<th></th><td></td>'; }
-                 echo '</tr>';
+                 if ($i == 1) { echo '<th></th><td></td>'; } echo '</tr>';
             }
             echo '</tbody></table>';
         }
-        
         echo '<hr><p><strong>خودروی درخواستی:</strong> ' . esc_html(get_the_title($post_meta['product_id'][0] ?? '')) . '</p>';
     }
 
@@ -138,51 +143,21 @@ class Maneli_CPT_Handler {
         foreach ($this->get_all_statuses() as $key => $label) {
             echo '<option value="' . esc_attr($key) . '" ' . selected($status, $key, false) . '>' . esc_html($label) . '</option>';
         }
-        echo '</select><p class="description">وضعیت را تغییر داده و پست را به‌روزرسانی کنید تا پیامک ارسال شود.</p>';
+        echo '</select><p class="description">وضعیت را تغییر داده و پست را به‌روزرسانی کنید.</p>';
     }
 
     public function save_status_and_send_sms($post_id, $post) {
         if (!isset($_POST['inquiry_status_nonce']) || !wp_verify_nonce($_POST['inquiry_status_nonce'], 'save_inquiry_status_nonce')) return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
         if (!current_user_can('edit_post', $post_id)) return;
-        if ($post->post_type != 'inquiry') return;
-
         if (isset($_POST['inquiry_status'])) {
             $new_status = sanitize_text_field($_POST['inquiry_status']);
             $old_status = get_post_meta($post_id, 'inquiry_status', true);
-            
             if ($new_status !== $old_status) {
                 update_post_meta($post_id, 'inquiry_status', $new_status);
-                
-                $options = get_option('maneli_inquiry_all_options', []);
-                $user_id = $post->post_author;
-                $user_info = get_userdata($user_id);
-                $user_name = $user_info->display_name ?? '';
-                $mobile_number = get_user_meta($user_id, 'mobile_number', true);
-                $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
-                $sms_handler = new Maneli_SMS_Handler();
-                
-                $pattern_id = null;
-                $params = [];
-
-                if ($new_status === 'user_confirmed') {
-                    // This is triggered if admin changes status to 'approved'
-                    // SMS to expert and customer is handled in form handler.
-                    // This section is for changes from the edit screen meta box.
-                    $pattern_id = $options['sms_pattern_approved'] ?? 0;
-                    $params = [$user_name, $car_name];
-                } elseif ($new_status === 'rejected') {
-                    $pattern_id = $options['sms_pattern_rejected'] ?? 0;
-                    // Note: rejection reason cannot be set from the meta box, only the report page.
-                    $params = [$user_name, $car_name, 'عدم تایید کارشناس'];
-                } elseif ($new_status === 'more_docs') {
-                    $pattern_id = $options['sms_pattern_more_docs'] ?? 0;
-                    $params = [$user_name, $car_name];
-                }
-
-                if (!empty($pattern_id) && !empty($mobile_number) && $sms_handler) {
-                    $sms_handler->send_pattern($pattern_id, $mobile_number, $params);
-                }
+                // The main logic for SMS and expert assignment is now in the form handler
+                // to ensure consistency between the report page and the edit page.
+                // However, we can trigger a generic notification if needed.
             }
         }
     }
@@ -191,7 +166,7 @@ class Maneli_CPT_Handler {
         return [
             'pending'        => 'در حال بررسی',
             'user_confirmed' => 'تایید و ارجاع شده',
-            'more_docs'      => 'نیازمend مدارک',
+            'more_docs'      => 'نیازمند مدارک',
             'rejected'       => 'رد شده',
             'failed'         => 'استعلام ناموفق',
         ];

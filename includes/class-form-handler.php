@@ -6,17 +6,16 @@ if (!defined('ABSPATH')) {
 class Maneli_Form_Handler {
 
     public function __construct() {
+        // Customer Hooks
         add_action('wp_ajax_maneli_select_car_ajax', [$this, 'handle_car_selection_ajax']);
-        
-        // Customer form handlers
         add_action('admin_post_nopriv_maneli_submit_identity', '__return_false');
         add_action('admin_post_maneli_submit_identity', [$this, 'handle_identity_submission']);
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
         
-        // Admin action handler
+        // Admin Hooks
         add_action('admin_post_maneli_admin_update_status', [$this, 'handle_admin_update_status']);
 
-        // Expert panel form handler
+        // Expert Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
     }
@@ -39,21 +38,24 @@ class Maneli_Form_Handler {
     public function handle_identity_submission() {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_submit_identity_nonce')) wp_die('خطای امنیتی!');
         if (!is_user_logged_in()) { wp_redirect(wp_get_referer()); exit; }
-
         $user_id = get_current_user_id();
         $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
         $buyer_fields = ['first_name', 'last_name', 'national_code', 'father_name', 'birth_date', 'mobile_number'];
         $buyer_data = [];
-        foreach ($buyer_fields as $key) { if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای خریدار را پر کنید."); $buyer_data[$key] = sanitize_text_field($_POST[$key]); }
+        foreach ($buyer_fields as $key) {
+            if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای خریدار را پر کنید.");
+            $buyer_data[$key] = sanitize_text_field($_POST[$key]);
+        }
         $issuer_data = [];
         if ($issuer_type === 'other') {
             $issuer_fields = ['issuer_first_name', 'issuer_last_name', 'issuer_national_code', 'issuer_father_name', 'issuer_birth_date', 'issuer_mobile_number'];
-            foreach ($issuer_fields as $key) { if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای صادرکننده چک را پر کنید."); $issuer_data[$key] = sanitize_text_field($_POST[$key]); }
+            foreach ($issuer_fields as $key) {
+                if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای صادرکننده چک را پر کنید.");
+                $issuer_data[$key] = sanitize_text_field($_POST[$key]);
+            }
         }
-
         wp_update_user(['ID' => $user_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name']]);
         foreach ($buyer_data as $key => $value) { update_user_meta($user_id, $key, $value); }
-        
         $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code'])) ? $issuer_data['issuer_national_code'] : $buyer_data['national_code'];
         $all_options = get_option('maneli_inquiry_all_options', []);
         $client_id = $all_options['finotex_client_id'] ?? '';
@@ -65,7 +67,6 @@ class Maneli_Form_Handler {
             $response = wp_remote_get($api_url_with_params, ['headers' => ['Authorization' => 'Bearer ' . $api_key], 'timeout' => 45]);
             if (!is_wp_error($response)) { $raw_response_body = wp_remote_retrieve_body($response); $response_data = json_decode($raw_response_body, true); }
         }
-        
         $car_id = get_user_meta($user_id, 'maneli_selected_car_id', true);
         $post_id = wp_insert_post(['post_title' => 'استعلام برای: ' . get_the_title($car_id) . ' - ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'],'post_content' => 'پاسخ خام از فینوتک (JSON): <pre>' . esc_textarea($raw_response_body) . '</pre>','post_status'  => 'publish', 'post_author'  => $user_id, 'post_type'    => 'inquiry']);
         if ($post_id && !is_wp_error($post_id)) {
@@ -82,7 +83,6 @@ class Maneli_Form_Handler {
             delete_user_meta($user_id, 'maneli_selected_car_id');
             foreach($calculator_meta_keys as $key) { delete_user_meta($user_id, $key); }
         }
-
         wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
         exit;
     }
@@ -116,10 +116,12 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'inquiry_status', 'rejected');
         }
     }
-    
+
     public function handle_expert_create_inquiry() {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_expert_create_nonce')) wp_die('خطای امنیتی!');
-        if (!current_user_can('read')) wp_die('شما اجازه دسترسی ندارید.');
+        if (!is_user_logged_in() || !(current_user_can('maneli_expert') || current_user_can('manage_options'))) {
+            wp_die('شما اجازه دسترسی به این قابلیت را ندارید.');
+        }
         
         $expert_user = wp_get_current_user();
         
@@ -127,20 +129,23 @@ class Maneli_Form_Handler {
         if (empty($product_id)) wp_die('لطفاً یک خودرو انتخاب کنید.');
         
         $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
-        $buyer_fields = ['first_name', 'last_name', 'national_code', 'father_name', 'birth_date', 'mobile_number'];
+        
         $buyer_data = [];
+        $buyer_fields = ['first_name', 'last_name', 'national_code', 'father_name', 'birth_date', 'mobile_number'];
         foreach ($buyer_fields as $key) {
-            if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای خریدار را پر کنید.");
+            if (empty($_POST[$key])) wp_die("خطا: لطفاً تمام فیلدهای خریدار را پر کنید.");
             $buyer_data[$key] = sanitize_text_field($_POST[$key]);
         }
+
         $issuer_data = [];
         if ($issuer_type === 'other') {
             $issuer_fields = ['issuer_first_name', 'issuer_last_name', 'issuer_national_code', 'issuer_father_name', 'issuer_birth_date', 'issuer_mobile_number'];
             foreach ($issuer_fields as $key) {
-                if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای صادرکننده چک را پر کنید.");
+                if (empty($_POST[$key])) wp_die("خطا: لطفاً تمام فیلدهای صادرکننده چک را پر کنید.");
                 $issuer_data[$key] = sanitize_text_field($_POST[$key]);
             }
         }
+
         $calculator_data = [];
         $calculator_fields = ['down_payment', 'term_months'];
         foreach ($calculator_fields as $key) { $calculator_data[$key] = sanitize_text_field($_POST[$key]); }
@@ -148,13 +153,16 @@ class Maneli_Form_Handler {
         $customer_id = username_exists($buyer_data['mobile_number']);
         $dummy_email = $buyer_data['mobile_number'] . '@maneli-auto.local';
         if (!$customer_id) { $customer_id = email_exists($dummy_email); }
+
         if (!$customer_id) {
             $random_password = wp_generate_password(12, false);
             $customer_id = wp_create_user($buyer_data['mobile_number'], $random_password, $dummy_email);
-            if (is_wp_error($customer_id)) { wp_die('خطا در ساخت کاربر جدید: ' . $customer_id->get_error_message()); }
+            if (is_wp_error($customer_id)) {
+                wp_die('خطا در ساخت کاربر جدید: ' . $customer_id->get_error_message());
+            }
             wp_update_user(['ID' => $customer_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name'], 'role' => 'subscriber']);
-            foreach ($buyer_data as $key => $value) { update_user_meta($customer_id, $key, $value); }
         }
+        foreach ($buyer_data as $key => $value) { update_user_meta($customer_id, $key, $value); }
 
         $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code'])) ? $issuer_data['issuer_national_code'] : $buyer_data['national_code'];
         $all_options = get_option('maneli_inquiry_all_options', []);
@@ -175,9 +183,8 @@ class Maneli_Form_Handler {
         ]);
 
         if ($post_id && !is_wp_error($post_id)) {
-            update_post_meta($post_id, 'inquiry_status', 'pending');
-            update_post_meta($post_id, 'assigned_expert_id', $expert_user->ID);
-            update_post_meta($post_id, 'assigned_expert_name', $expert_user->display_name);
+            $initial_status = (isset($response_data['status']) && $response_data['status'] === 'DONE') ? 'pending' : 'failed';
+            update_post_meta($post_id, 'inquiry_status', $initial_status);
             update_post_meta($post_id, 'created_by_expert_id', $expert_user->ID);
             update_post_meta($post_id, 'product_id', $product_id);
             update_post_meta($post_id, '_finotex_response_data', $response_data);
