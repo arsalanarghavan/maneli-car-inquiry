@@ -39,14 +39,14 @@ class Maneli_Settings_Page {
             <form method="post" action="options.php">
                 <?php
                 settings_fields('maneli_inquiry_settings_group');
-                if ($this->active_tab == 'payment') {
+                if ($this->active_tab == 'finotex') {
+                    do_settings_sections('maneli-finotex-settings-section');
+                } elseif ($this->active_tab == 'payment') {
                     do_settings_sections('maneli-payment-settings-section');
-                } elseif ($this->active_tab == 'sms') {
-                    do_settings_sections('maneli-sms-settings-section');
                 } elseif ($this->active_tab == 'experts') {
                     do_settings_sections('maneli-experts-settings-section');
-                } else { // finotex tab
-                    do_settings_sections('maneli-finotex-settings-section');
+                } else { // sms tab
+                    do_settings_sections('maneli-sms-settings-section');
                 }
                 submit_button('ذخیره تنظیمات');
                 ?>
@@ -82,16 +82,17 @@ class Maneli_Settings_Page {
         add_settings_section('maneli_sms_api_section', 'اطلاعات پنل ملی پیامک', null, 'maneli-sms-settings-section');
         add_settings_field('sms_username', 'نام کاربری', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_username']);
         add_settings_field('sms_password', 'رمز عبور', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_password', 'type' => 'password']);
-        
+
         add_settings_section('maneli_sms_patterns_section', 'کدهای پترن پیامک (Body ID)', [$this, 'render_sms_patterns_description'], 'maneli-sms-settings-section');
-        add_settings_field('sms_pattern_approved', 'پترن تایید (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_approved', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
-        add_settings_field('sms_pattern_rejected', 'پترن رد (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_rejected', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد']);
-        add_settings_field('sms_pattern_more_docs', 'پترن نیاز به مدارک (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_more_docs', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
+        add_settings_field('sms_pattern_pending', 'پترن «در انتظار بررسی» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_pending', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
+        add_settings_field('sms_pattern_approved', 'پترن «تایید شده» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_approved', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
+        add_settings_field('sms_pattern_rejected', 'پترن «رد شده» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_rejected', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد']);
+        add_settings_field('sms_pattern_more_docs', 'پترن «نیازمند مدارک» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_more_docs', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
         
         add_settings_field('admin_notification_mobile', 'شماره موبایل مدیر', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'admin_notification_mobile', 'desc' => 'شماره موبایل برای دریافت پیام ثبت استعلام جدید.']);
-        add_settings_field('sms_pattern_new_inquiry', 'پترن استعلام جدید (به مدیر)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_new_inquiry', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
+        add_settings_field('sms_pattern_new_inquiry', 'پترن «استعلام جدید» (به مدیر)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_new_inquiry', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
         
-        add_settings_field('sms_pattern_expert_referral', 'پترن ارجاع به کارشناس', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_expert_referral', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو']);
+        add_settings_field('sms_pattern_expert_referral', 'پترن «ارجاع به کارشناس»', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_expert_referral', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو']);
 
         // Experts Section
         add_settings_section('maneli_experts_list_section', 'لیست کارشناسان فروش', [$this, 'render_experts_description'], 'maneli-experts-settings-section');

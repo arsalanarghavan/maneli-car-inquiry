@@ -1,7 +1,5 @@
 <?php
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 class Maneli_Form_Handler {
 
@@ -15,9 +13,7 @@ class Maneli_Form_Handler {
 
     public function handle_car_selection_ajax() {
         check_ajax_referer('maneli_ajax_nonce', 'nonce');
-        if (!is_user_logged_in() || empty($_POST['product_id'])) {
-            wp_send_json_error(['message' => 'درخواست نامعتبر است.']);
-        }
+        if (!is_user_logged_in() || empty($_POST['product_id'])) { wp_send_json_error(['message' => 'درخواست نامعتبر است.']); }
         $user_id = get_current_user_id();
         update_user_meta($user_id, 'maneli_selected_car_id', intval($_POST['product_id']));
         update_user_meta($user_id, 'maneli_inquiry_step', 'form_pending');
@@ -35,17 +31,11 @@ class Maneli_Form_Handler {
         $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
         $buyer_fields = ['first_name', 'last_name', 'national_code', 'father_name', 'birth_date', 'mobile_number'];
         $buyer_data = [];
-        foreach ($buyer_fields as $key) {
-            if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای خریدار را پر کنید.");
-            $buyer_data[$key] = sanitize_text_field($_POST[$key]);
-        }
+        foreach ($buyer_fields as $key) { if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای خریدار را پر کنید."); $buyer_data[$key] = sanitize_text_field($_POST[$key]); }
         $issuer_data = [];
         if ($issuer_type === 'other') {
             $issuer_fields = ['issuer_first_name', 'issuer_last_name', 'issuer_national_code', 'issuer_father_name', 'issuer_birth_date', 'issuer_mobile_number'];
-            foreach ($issuer_fields as $key) {
-                if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای صادرکننده چک را پر کنید.");
-                $issuer_data[$key] = sanitize_text_field($_POST[$key]);
-            }
+            foreach ($issuer_fields as $key) { if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای صادرکننده چک را پر کنید."); $issuer_data[$key] = sanitize_text_field($_POST[$key]); }
         }
         wp_update_user(['ID' => $user_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name']]);
         foreach ($buyer_data as $key => $value) { update_user_meta($user_id, $key, $value); }
@@ -72,6 +62,19 @@ class Maneli_Form_Handler {
             foreach($calculator_meta_keys as $key) { $value = get_user_meta($user_id, $key, true); if ($value) { update_post_meta($post_id, $key, $value); } }
             $initial_status = (!is_wp_error($response) && isset($response_data['status']) && $response_data['status'] === 'DONE') ? 'pending' : 'failed';
             update_post_meta($post_id, 'inquiry_status', $initial_status);
+
+            // Send pending SMS to customer
+            if ($initial_status === 'pending') {
+                $customer_mobile = $buyer_data['mobile_number'] ?? '';
+                $pattern_customer = $all_options['sms_pattern_pending'] ?? 0;
+                if (!empty($customer_mobile) && $pattern_customer > 0) {
+                    $customer_name = ($buyer_data['first_name'] ?? '') . ' ' . ($buyer_data['last_name'] ?? '');
+                    $car_name = get_the_title($car_id) ?? '';
+                    $sms_handler = new Maneli_SMS_Handler();
+                    $sms_handler->send_pattern($pattern_customer, $customer_mobile, [$customer_name, $car_name]);
+                }
+            }
+
             delete_user_meta($user_id, 'maneli_inquiry_step');
             delete_user_meta($user_id, 'maneli_selected_car_id');
             foreach($calculator_meta_keys as $key) { delete_user_meta($user_id, $key); }

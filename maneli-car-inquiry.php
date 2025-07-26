@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.10.1
+ * Version:           0.10.2
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -13,41 +13,26 @@
  */
 
 
+// --- Final Debugging: Custom Fatal Error Handler ---
+register_shutdown_function('maneli_fatal_error_handler');
+function maneli_fatal_error_handler() {
+    $error = error_get_last();
+    // We are only interested in fatal errors
+    if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR])) {
+        $log_file_path = WP_CONTENT_DIR . '/maneli-plugin-errors.log';
+        $error_message = "[" . date("Y-m-d H:i:s") . "] FATAL ERROR: " . $error['message'] . " in " . $error['file'] . " on line " . $error['line'] . "\n";
+        // Write the error to our custom log file
+        @file_put_contents($log_file_path, $error_message, FILE_APPEND);
+    }
+}
+// --- End of Debugging Code ---
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
 define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
-
-// Register custom user role on plugin activation
-register_activation_hook(__FILE__, 'maneli_add_expert_role');
-function maneli_add_expert_role() {
-    add_role(
-        'maneli_expert',
-        'کارشناس مانلی',
-        [
-            'read'         => true,
-            'edit_posts'   => false,
-            'delete_posts' => false,
-        ]
-    );
-}
-
-// Remove custom user role on plugin deactivation
-register_deactivation_hook(__FILE__, 'maneli_remove_expert_role');
-function maneli_remove_expert_role() {
-    remove_role('maneli_expert');
-}
-
-// Redirect experts from /wp-admin/ to the frontend dashboard
-add_action('admin_init', 'maneli_redirect_experts_from_admin');
-function maneli_redirect_experts_from_admin() {
-    if (current_user_can('maneli_expert') && !current_user_can('manage_options') && !wp_doing_ajax()) {
-        wp_redirect(home_url('/dashboard/'));
-        exit;
-    }
-}
 
 final class Maneli_Car_Inquiry_Plugin {
 
@@ -72,7 +57,6 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
     }
 
     private function init_classes() {
@@ -82,7 +66,6 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Shortcode_Handler();
         new Maneli_User_Profile();
         new Maneli_Credit_Report_Page();
-        new Maneli_Expert_Panel();
     }
 
     public function woocommerce_not_active_notice() {
@@ -91,5 +74,4 @@ final class Maneli_Car_Inquiry_Plugin {
         <?php
     }
 }
-
 new Maneli_Car_Inquiry_Plugin();
