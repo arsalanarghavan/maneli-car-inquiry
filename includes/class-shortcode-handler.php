@@ -61,6 +61,10 @@ class Maneli_Shortcode_Handler {
         ob_start();
         echo '<div class="maneli-inquiry-wrapper">';
 
+        if (isset($_GET['payment_status'])) {
+            $this->display_payment_message(sanitize_text_field($_GET['payment_status']));
+        }
+        
         $current_step_number = 1;
         if ($latest_inquiry) {
             $status = get_post_meta($latest_inquiry[0]->ID, 'inquiry_status', true);
@@ -307,7 +311,7 @@ class Maneli_Shortcode_Handler {
         </div>
         <?php
     }
-    
+
     public function render_customer_report_html($inquiry_id) {
         $status = get_post_meta($inquiry_id, 'inquiry_status', true);
         $post_meta = get_post_meta($inquiry_id);

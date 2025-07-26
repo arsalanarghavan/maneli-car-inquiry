@@ -82,21 +82,23 @@ class Maneli_Settings_Page {
         add_settings_section('maneli_sms_api_section', 'اطلاعات پنل ملی پیامک', null, 'maneli-sms-settings-section');
         add_settings_field('sms_username', 'نام کاربری', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_username']);
         add_settings_field('sms_password', 'رمز عبور', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_password', 'type' => 'password']);
-
+        
         add_settings_section('maneli_sms_patterns_section', 'کدهای پترن پیامک (Body ID)', [$this, 'render_sms_patterns_description'], 'maneli-sms-settings-section');
         add_settings_field('sms_pattern_pending', 'پترن «در انتظار بررسی» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_pending', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
         add_settings_field('sms_pattern_approved', 'پترن «تایید شده» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_approved', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
         add_settings_field('sms_pattern_rejected', 'پترن «رد شده» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_rejected', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد']);
         add_settings_field('sms_pattern_more_docs', 'پترن «نیازمند مدارک» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_more_docs', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
-        
         add_settings_field('admin_notification_mobile', 'شماره موبایل مدیر', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'admin_notification_mobile', 'desc' => 'شماره موبایل برای دریافت پیام ثبت استعلام جدید.']);
         add_settings_field('sms_pattern_new_inquiry', 'پترن «استعلام جدید» (به مدیر)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_new_inquiry', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
-        
         add_settings_field('sms_pattern_expert_referral', 'پترن «ارجاع به کارشناس»', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_expert_referral', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو']);
 
         // Experts Section
-        add_settings_section('maneli_experts_list_section', 'لیست کارشناسان فروش', [$this, 'render_experts_description'], 'maneli-experts-settings-section');
-        add_settings_field('experts_list', 'لیست کارشناسان', [$this, 'render_field'], 'maneli-experts-settings-section', 'maneli_experts_list_section', ['name' => 'experts_list', 'type' => 'textarea']);
+        add_settings_section(
+            'maneli_experts_list_section',
+            'مدیریت چرخشی کارشناسان',
+            [$this, 'render_experts_description'],
+            'maneli-experts-settings-section'
+        );
     }
     
     public function sanitize_and_merge_options($input) {
@@ -145,11 +147,12 @@ class Maneli_Settings_Page {
     }
 
     public function render_sms_patterns_description() {
-        echo '<p>در این بخش، به جای متن کامل پیامک، فقط **کد پترن (Body ID)** که در پنل ملی پیامک شما تایید شده است را وارد کنید.</p><p>ترتیب متغیرها باید دقیقاً مطابق توضیحات هر فیلد باشد.</p>';
+        echo '<p>در این بخش، به جای متن کامل پیامک، فقط **کد پترن (Body ID)** که در پنل ملی پیامک شما تایید شده است را وارد کنید.</p>';
     }
 
     public function render_experts_description() {
-        echo '<p>هر کارشناس را در یک خط جداگانه وارد کنید. نام و شماره تماس را با یک خط عمودی | از هم جدا کنید.</p>';
-        echo '<p>مثال:</p><pre>علی رضایی | 09120000001<br>سارا محمدی | 09120000002</pre>';
+        echo '<p>سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.</p>';
+        echo '<p>استعلام‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.</p>';
+        echo '<p>برای افزودن کارشناس جدید، کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.</p>';
     }
 }

@@ -3,6 +3,10 @@
 
     $(document).ready(function() {
 
+        const productSelect = $('#product_id_expert');
+        const detailsWrapper = $('#expert-form-details');
+        const calculatorWrapper = $('#loan-calculator-wrapper');
+
         // --- Logic for conditional issuer form ---
         const buyerForm = $('#buyer-form-wrapper');
         const issuerForm = $('#issuer-form-wrapper');
@@ -19,44 +23,42 @@
             }
         }
         $('input[name="issuer_type"]').on('change', toggleIssuerForm);
-        toggleIssuerForm(); // Run on page load to set the initial state
+        // Initial state is set after a car is selected
 
-        // --- Logic for loan calculator ---
-        const productSelect = $('#product_id_expert');
-        const calculatorWrapper = $('#loan-calculator-wrapper');
-
+        // --- Logic for showing form and loan calculator after car selection ---
         productSelect.on('change', function() {
             const selectedOption = $(this).find('option:selected');
             const price = parseInt(selectedOption.data('price'));
 
             if (price > 0) {
-                // Simplified calculator HTML for the expert panel
                 const calculatorHTML = `
-                    <table class="form-table">
-                        <tbody>
-                            <tr>
-                                <th scope="row"><label for="expert_down_payment">مبلغ پیش پرداخت (تومان)</label></th>
-                                <td><input type="number" id="expert_down_payment" name="down_payment" class="regular-text" required></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><label for="expert_term_months">مدت بازپرداخت (ماه)</label></th>
-                                <td>
-                                    <select name="term_months" id="expert_term_months">
-                                        <option value="12">۱۲ ماهه</option>
-                                        <option value="18">۱۸ ماهه</option>
-                                        <option value="24">۲۴ ماهه</option>
-                                        <option value="36">۳۶ ماهه</option>
-                                    </select>
-                                </td>
-                            </tr>
-                             <tr>
-                                <th scope="row"><label>مبلغ تقریبی هر قسط</label></th>
-                                <td><div class="result-display"><span id="expert-installment-amount">-</span> تومان</div></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                `;
-                calculatorWrapper.html(calculatorHTML).slideDown();
+                    <div class="form-grid" style="margin-top: 20px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expert_down_payment">مبلغ پیش پرداخت (تومان)</label>
+                                <input type="number" id="expert_down_payment" name="down_payment" class="regular-text" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="expert_term_months">مدت بازپرداخت (ماه)</label>
+                                <select name="term_months" id="expert_term_months">
+                                    <option value="12">۱۲ ماهه</option>
+                                    <option value="18">۱۸ ماهه</option>
+                                    <option value="24">۲۴ ماهه</option>
+                                    <option value="36">۳۶ ماهه</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>مبلغ تقریبی هر قسط</label>
+                                <div class="result-display"><span id="expert-installment-amount">-</span> تومان</div>
+                            </div>
+                        </div>
+                    </div>`;
+                
+                calculatorWrapper.html(calculatorHTML);
+                detailsWrapper.slideDown();
+                toggleIssuerForm(); // Set initial state for issuer form
 
                 // Add live calculation logic to the newly added elements
                 const downPaymentInput = $('#expert_down_payment');
@@ -73,23 +75,19 @@
                         return;
                     }
 
-                    // The calculation logic is assumed to be the same as the frontend calculator
-                    // (3.5% monthly interest on the remaining amount for the duration)
                     const monthlyInterestAmount = loanAmount * 0.035;
                     const totalInterest = monthlyInterestAmount * (months + 1);
                     const totalRepayment = loanAmount + totalInterest;
                     const installment = totalRepayment / months;
                     
-                    // Format number with commas for Persian locale
                     installmentDisplay.text(Math.ceil(installment).toLocaleString('fa-IR'));
                 }
 
-                // Attach event listeners to the new inputs
                 downPaymentInput.on('keyup change', calculateInstallment);
                 termSelect.on('change', calculateInstallment);
-
             } else {
-                calculatorWrapper.slideUp().empty();
+                detailsWrapper.slideUp();
+                calculatorWrapper.empty();
             }
         });
     });
