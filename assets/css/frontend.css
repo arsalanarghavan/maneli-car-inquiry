@@ -430,3 +430,39 @@
 .bar-segment.segment-orange { background-color: #FF9800; }
 .bar-segment.segment-brown { background-color: #795548; }
 .bar-segment.segment-red { background-color: #F44336; }
+
+/* Expert Panel Styles */
+.maneli-expert-panel {
+    max-width: 800px;
+    margin: 20px auto;
+}
+.maneli-expert-panel .expert-form-section {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 20px 25px;
+    margin-bottom: 25px;
+    border-radius: 4px;
+}
+.maneli-expert-panel h2, .maneli-expert-panel h3 {
+    margin-top: 0;
+}
+.maneli-expert-panel .form-group {
+    margin-bottom: 15px;
+}
+.maneli-expert-panel .form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.maneli-expert-panel select, .maneli-expert-panel input[type="text"], .maneli-expert-panel input[type="number"] {
+    width: 100%;
+    padding: 8px;
+}
+.maneli-expert-panel .result-display {
+    padding: 8px;
+    background-color: #f0f0f1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 1.2em;
+}

@@ -9,19 +9,27 @@ class Maneli_Shortcode_Handler {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
+        add_shortcode('maneli_expert_new_inquiry_form', [$this, 'render_expert_new_inquiry_form']);
     }
 
     public function enqueue_assets() {
-        wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.1.1');
+        wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.1.0');
         
         if (is_product()) {
-            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', [], '6.1.1', true);
+            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', [], '6.1.0', true);
             if (is_user_logged_in()) {
                 wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
                     'ajax_url'         => admin_url('admin-ajax.php'),
                     'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
                     'nonce'            => wp_create_nonce('maneli_ajax_nonce')
                 ]);
+            }
+        }
+
+        if (is_page()) {
+            global $post;
+            if (has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
+                wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery'], '6.1.0', true);
             }
         }
     }
@@ -39,6 +47,10 @@ class Maneli_Shortcode_Handler {
         ob_start();
         echo '<div class="maneli-inquiry-wrapper">';
 
+        if (isset($_GET['payment_status'])) {
+            $this->display_payment_message(sanitize_text_field($_GET['payment_status']));
+        }
+        
         $current_step_number = 1;
         if ($latest_inquiry) {
             $status = get_post_meta($latest_inquiry[0]->ID, 'inquiry_status', true);
@@ -74,6 +86,73 @@ class Maneli_Shortcode_Handler {
             }
         }
         echo '</div>';
+        return ob_get_clean();
+    }
+
+    public function render_expert_new_inquiry_form() {
+        if (!is_user_logged_in()) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>برای دسترسی به این بخش، لطفاً وارد شوید.</p></div>';
+        }
+        if (!current_user_can('manage_options') && !current_user_can('read')) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما اجازه دسترسی به این بخش را ندارید.</p></div>';
+        }
+
+        $products = wc_get_products(['limit' => -1, 'status' => 'publish']);
+        ob_start();
+        ?>
+        <div class="maneli-expert-panel">
+            <h2>ثبت استعلام جدید برای مشتری</h2>
+            <p>از این فرم برای ثبت نام مشتری جدید و ایجاد اولین استعلام برای او استفاده کنید.</p>
+            
+            <form id="expert-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="maneli_expert_create_inquiry">
+                <?php wp_nonce_field('maneli_expert_create_nonce'); ?>
+
+                <div class="expert-form-section">
+                    <h3>۱. انتخاب خودرو و شرایط</h3>
+                    <div class="form-group">
+                        <label for="product_id_expert">انتخاب خودرو</label>
+                        <select name="product_id" id="product_id_expert" required>
+                            <option value="">-- یک خودرو انتخاب کنید --</option>
+                            <?php foreach ($products as $product) : ?>
+                                <option value="<?php echo esc_attr($product->get_id()); ?>" data-price="<?php echo esc_attr($product->get_price()); ?>"><?php echo esc_html($product->get_name()); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div id="loan-calculator-wrapper" style="display:none;"></div>
+                </div>
+
+                <div class="expert-form-section">
+                    <h3>۲. اطلاعات هویتی</h3>
+                    <div class="issuer-choice-wrapper">
+                        <h4>اطلاعات صادر کننده چک</h4>
+                        <div class="form-group-radio"><label><input type="radio" name="issuer_type" value="self" checked> خریدار و صادرکننده چک یک نفر هستند.</label></div>
+                        <div class="form-group-radio"><label><input type="radio" name="issuer_type" value="other"> صادرکننده چک شخص دیگری است.</label></div>
+                    </div>
+
+                    <div id="buyer-form-wrapper">
+                         <p class="form-section-title">فرم اطلاعات خریدار</p>
+                         <div class="form-grid">
+                            <div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" required></div></div>
+                            <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required></div></div>
+                            <div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه (نام کاربری):</label><input type="text" name="mobile_number" placeholder="مثال: 09123456789" required></div></div>
+                         </div>
+                    </div>
+
+                    <div id="issuer-form-wrapper" style="display: none;">
+                        <p class="form-section-title">فرم اطلاعات صادر کننده چک</p>
+                        <div class="form-grid">
+                           <div class="form-row"><div class="form-group"><label>نام صادرکننده چک:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده چک:</label><input type="text" name="issuer_last_name"></div></div>
+                           <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده چک:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده چک:</label><input type="text" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱"></div></div>
+                           <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده چک:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده چک:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="button button-primary">ثبت استعلام جدید</button>
+            </form>
+        </div>
+        <?php
         return ob_get_clean();
     }
     
@@ -265,87 +344,6 @@ class Maneli_Shortcode_Handler {
             <p><?php echo $message; ?></p>
         </div>
         <?php
-    }
-
-    public function render_customer_report_html($inquiry_id) {
-        $status = get_post_meta($inquiry_id, 'inquiry_status', true);
-        $post_meta = get_post_meta($inquiry_id);
-        $car_id = $post_meta['product_id'][0] ?? 0;
-        $car_name = get_the_title($car_id);
-        $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
-        $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
-        
-        ob_start();
-        ?>
-        <h3>مرحله ۵: نتیجه نهایی</h3>
-        <div class="customer-report">
-            <?php if ($status === 'user_confirmed'): ?>
-                <div class="status-box status-final">
-                    <p><strong>نتیجه نهایی: درخواست شما تایید شد.</strong></p>
-                    <p>درخواست شما توسط کارشناسان ما تایید و به واحد فروش ارجاع داده شد. به زودی یکی از همکاران ما برای هماهنگی‌های نهایی با شما تماس خواهد گرفت.</p>
-                </div>
-            <?php elseif ($status === 'rejected'): 
-                $reason = get_post_meta($inquiry_id, 'rejection_reason', true);
-            ?>
-                <div class="status-box status-rejected">
-                    <p><strong>نتیجه نهایی: درخواست شما رد شد.</strong></p>
-                    <?php if (!empty($reason)): ?>
-                        <p><strong>دلیل:</strong> <?php echo esc_html($reason); ?></p>
-                    <?php endif; ?>
-                </div>
-            <?php endif; ?>
-            
-            <div class="report-section">
-                <h4>خلاصه درخواست</h4>
-                <table class="summary-table">
-                    <tr><td><strong>خودروی انتخابی:</strong></td><td><?php echo esc_html($car_name); ?></td></tr>
-                    <tr><td><strong>مبلغ پیش پرداخت:</strong></td><td><?php echo esc_html(number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0))); ?> <span>تومان</span></td></tr>
-                    <tr><td><strong>تعداد اقساط:</strong></td><td><?php echo esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0); ?> <span>ماهه</span></td></tr>
-                </table>
-            </div>
-
-            <div class="report-section">
-                <h4>نتیجه اعتبارسنجی</h4>
-                <div class="maneli-status-bar">
-                    <?php
-                    $colors = [
-                        1 => ['name' => 'سفید', 'class' => 'white'],
-                        2 => ['name' => 'زرد', 'class' => 'yellow'],
-                        3 => ['name' => 'نارنجی', 'class' => 'orange'],
-                        4 => ['name' => 'قهوه‌ای', 'class' => 'brown'],
-                        5 => ['name' => 'قرمز', 'class' => 'red']
-                    ];
-                    foreach ($colors as $code => $color) {
-                        $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
-                        echo "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>" . esc_html($color['name']) . "</span></div>";
-                    }
-                    ?>
-                </div>
-                <table class="summary-table" style="margin-top:20px;">
-                    <?php
-                    $cheque_color_map = [
-                        '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],
-                        '2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی.'],
-                        '3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی.'],
-                        '4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی.'],
-                        '5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی.'],
-                         0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد.']
-                    ];
-                    $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
-                    ?>
-                    <tr>
-                        <td><strong>وضعیت چک صیادی:</strong></td>
-                        <td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td>
-                    </tr>
-                    <tr>
-                        <td><strong>توضیح وضعیت:</strong></td>
-                        <td><?php echo esc_html($color_info['desc']); ?></td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
     }
     
     private function render_failed_inquiry($inquiry) {
