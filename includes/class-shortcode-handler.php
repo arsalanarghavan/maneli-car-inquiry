@@ -5,25 +5,57 @@ if (!defined('ABSPATH')) {
 
 class Maneli_Shortcode_Handler {
 
+    private static $assets_enqueued = false;
+
     public function __construct() {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
-        add_shortcode('expert_inquiries_list', [$this, 'render_expert_inquiries_list']); // Shortcode for expert's inquiries
+        add_shortcode('maneli_expert_inquiry_list', [$this, 'render_maneli_expert_inquiry_list']);
+        add_shortcode('maneli_expert_new_inquiry_form', [$this, 'render_maneli_expert_new_inquiry_form']);
     }
 
     public function enqueue_assets() {
-        wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.1.1');
-        
+        global $post;
+        // Enqueue only once per page load
+        if (self::$assets_enqueued) {
+            return;
+        }
+
+        $load_assets = false;
         if (is_product()) {
-            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', [], '6.1.1', true);
-            if (is_user_logged_in()) {
-                wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
-                    'ajax_url'         => admin_url('admin-ajax.php'),
-                    'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
-                    'nonce'            => wp_create_nonce('maneli_ajax_nonce')
+            $load_assets = true;
+        } elseif (is_a($post, 'WP_Post') && (has_shortcode($post->post_content, 'car_inquiry_form') || has_shortcode($post->post_content, 'maneli_expert_inquiry_list') || has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form'))) {
+            $load_assets = true;
+        }
+
+        if ($load_assets) {
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.2.0');
+            
+            // For customer-facing calculator
+            if (is_product()) {
+                wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '6.2.0', true);
+                if (is_user_logged_in()) {
+                    wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
+                        'ajax_url'         => admin_url('admin-ajax.php'),
+                        'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
+                        'nonce'            => wp_create_nonce('maneli_ajax_nonce')
+                    ]);
+                }
+            }
+            
+            // For expert panel form
+            if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
+                wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+                wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+
+                wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '1.2.0', true);
+                wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce'    => wp_create_nonce('maneli_expert_nonce')
                 ]);
             }
+            self::$assets_enqueued = true;
         }
     }
 
@@ -365,11 +397,68 @@ class Maneli_Shortcode_Handler {
         <?php
     }
 
-    /**
-     * Renders the list of inquiries created by the current expert.
-     * Shortcode: [expert_inquiries_list]
-     */
-    public function render_expert_inquiries_list() {
+    public function render_maneli_expert_new_inquiry_form() {
+        if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما برای استفاده از این فرم باید با نقش کارشناس وارد شده باشید.</p></div>';
+        }
+
+        ob_start();
+
+        if (isset($_GET['inquiry_created']) && $_GET['inquiry_created'] == '1') {
+            echo '<div class="status-box status-approved"><p>استعلام جدید با موفقیت برای مشتری ثبت شد.</p></div>';
+        }
+        ?>
+        <div class="maneli-inquiry-wrapper">
+            <form id="expert-inquiry-form" class="maneli-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="maneli_expert_create_inquiry">
+                <?php wp_nonce_field('maneli_expert_create_nonce'); ?>
+
+                <h3>۱. انتخاب خودرو و محاسبه اقساط</h3>
+                <div class="form-group">
+                    <label for="product_id_expert"><strong>جستجوی خودرو</strong></label>
+                    <select id="product_id_expert" name="product_id" style="width: 100%;" required></select>
+                </div>
+                
+                <div id="loan-calculator-wrapper"></div>
+
+                <div id="expert-form-details" style="display: none; margin-top: 20px;">
+                    <h3 style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">۲. اطلاعات هویتی</h3>
+                     <div class="issuer-choice-wrapper" style="background: transparent; border: none; padding: 0; margin: 10px 0;">
+                        <div class="form-group-radio" style="display: flex; gap: 20px; margin-bottom: 20px;">
+                            <label><input type="radio" name="issuer_type" value="self" checked> خریدار و صادرکننده چک یکی هستند.</label>
+                            <label><input type="radio" name="issuer_type" value="other"> صادرکننده چک شخص دیگری است.</label>
+                        </div>
+                    </div>
+                
+                    <div id="buyer-form-wrapper">
+                        <p class="form-section-title">فرم اطلاعات خریدار</p>
+                        <div class="form-grid">
+                            <div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" required></div></div>
+                            <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required></div></div>
+                            <div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه (نام کاربری):</label><input type="text" name="mobile_number" placeholder="مثال: 09123456789" required></div></div>
+                        </div>
+                    </div>
+                    
+                    <div id="issuer-form-wrapper" style="display: none;">
+                        <p class="form-section-title">فرم اطلاعات صادر کننده چک</p>
+                        <div class="form-grid">
+                            <div class="form-row"><div class="form-group"><label>نام صادرکننده:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده:</label><input type="text" name="issuer_last_name"></div></div>
+                            <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده:</label><input type="text" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱"></div></div>
+                            <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 30px;">
+                        <button type="submit" class="loan-action-btn">ثبت استعلام و ایجاد کاربر</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    public function render_maneli_expert_inquiry_list() {
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
         }
@@ -378,8 +467,12 @@ class Maneli_Shortcode_Handler {
         $inquiries = get_posts([
             'post_type'      => 'inquiry',
             'posts_per_page' => -1,
-            'meta_key'       => 'assigned_expert_id', // Query by the expert who created it
-            'meta_value'     => $expert_id,
+            'meta_query' => [
+                [
+                    'key'   => 'assigned_expert_id',
+                    'value' => $expert_id,
+                ]
+            ],
             'orderby'        => 'date',
             'order'          => 'DESC',
         ]);
@@ -388,7 +481,7 @@ class Maneli_Shortcode_Handler {
     
         echo '<div class="maneli-inquiry-wrapper">';
         if (empty($inquiries)) {
-            echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی توسط شما ثبت نشده است. برای شروع، از پنل کاربری خود یک استعلام جدید ثبت کنید.</p></div>';
+            echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی توسط شما ثبت نشده است.</p></div>';
         } else {
             echo '<h3>لیست استعلام‌های ثبت شده توسط شما</h3>';
             echo '<table class="shop_table shop_table_responsive my_account_orders">';
@@ -407,16 +500,15 @@ class Maneli_Shortcode_Handler {
                 $customer = get_userdata($customer_id);
                 $product_id = get_post_meta($inquiry_id, 'product_id', true);
                 $status = get_post_meta($inquiry_id, 'inquiry_status', true);
-                // Experts should see the same admin report page
-                $report_url = admin_url('admin.php?page=maneli-credit-report&inquiry_id=' . $inquiry_id);
+                $report_url = admin_url('post.php?post=' . $inquiry_id . '&action=edit');
                 
                 echo '<tr class="woocommerce-orders-table__row">';
                 echo '<td data-title="شناسه">#' . esc_html($inquiry_id) . '</td>';
                 echo '<td data-title="مشتری">' . esc_html($customer->display_name) . '</td>';
                 echo '<td data-title="خودرو">' . esc_html(get_the_title($product_id)) . '</td>';
-                echo '<td data-title="وضعیت"><span class="status-indicator status-' . esc_attr($status) . '">' . esc_html(Maneli_CPT_Handler::get_status_label($status)) . '</span></td>';
+                echo '<td data-title="وضعیت">' . esc_html(Maneli_CPT_Handler::get_status_label($status)) . '</td>';
                 echo '<td data-title="تاریخ">' . get_the_date('Y/m/d', $inquiry_id) . '</td>';
-                echo '<td><a href="' . esc_url($report_url) . '" class="button view">مشاهده جزئیات</a></td>';
+                echo '<td class="woocommerce-orders-table__cell-order-actions"><a href="' . esc_url($report_url) . '" class="button view">مشاهده جزئیات</a></td>';
                 echo '</tr>';
             }
             echo '</tbody>';

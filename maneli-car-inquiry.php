@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.10.20
+ * Version:           0.10.21
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -46,20 +46,19 @@ function maneli_remove_expert_role() {
 
 /**
  * Redirects users with the 'maneli_expert' role away from the backend dashboard,
- * but allows them to access admin-post.php, admin-ajax.php and their own panel.
+ * but allows them to access admin-post.php and admin-ajax.php for form processing.
+ * This function is now less strict to allow experts to access frontend pages.
  */
 add_action('admin_init', 'maneli_redirect_experts_from_admin');
 function maneli_redirect_experts_from_admin() {
+    // We remove the forceful redirect to allow experts to use frontend pages with shortcodes.
+    // They are already blocked from most admin pages by capability checks.
+    // If specific pages need to be blocked, it can be done here.
+    // For example, to block the main dashboard:
     global $pagenow;
-    if (current_user_can('maneli_expert') && !current_user_can('manage_options')) {
-        // Allowed pages for experts
-        $allowed_pages = ['admin-post.php', 'admin-ajax.php', 'profile.php'];
-        $is_expert_panel = isset($_GET['page']) && $_GET['page'] === 'maneli-expert-panel';
-
-        if (!in_array($pagenow, $allowed_pages) && !$is_expert_panel) {
-            wp_redirect(admin_url('admin.php?page=maneli-expert-panel'));
-            exit;
-        }
+    if (current_user_can('maneli_expert') && !current_user_can('manage_options') && $pagenow === 'index.php' && !wp_doing_ajax()) {
+         wp_redirect(home_url()); // Redirect from main dashboard to homepage
+         exit;
     }
 }
 
@@ -82,15 +81,12 @@ final class Maneli_Car_Inquiry_Plugin {
     }
 
     public function includes() {
-        // Correct loading order: Handlers that are used by other classes must be loaded first.
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
-        
-        // Classes that depend on the above
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-settings-page.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-shortcode-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php'; // This class will now handle the new panel
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
     }
@@ -100,10 +96,9 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Settings_Page();
         new Maneli_Form_Handler();
         new Maneli_Shortcode_Handler();
-        new Maneli_Expert_Panel(); // This class is now responsible for the expert's own panel
+        new Maneli_Expert_Panel();
         new Maneli_Credit_Report_Page();
         new Maneli_User_Profile();
-        // Maneli_SMS_Handler does not need to be instantiated here as it's a utility class.
     }
 
     public function woocommerce_not_active_notice() {

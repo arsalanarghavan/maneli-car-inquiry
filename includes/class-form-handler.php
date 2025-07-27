@@ -23,6 +23,44 @@ class Maneli_Form_Handler {
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
     }
 
+    private function execute_finotex_inquiry($national_code) {
+        $all_options = get_option('maneli_inquiry_all_options', []);
+        $client_id = $all_options['finotex_client_id'] ?? '';
+        $api_key = $all_options['finotex_api_key'] ?? '';
+        $result = ['status' => 'failed', 'data' => null, 'raw_response' => ''];
+
+        if (empty($client_id) || empty($api_key)) {
+            $result['raw_response'] = 'خطای پلاگین: شناسه کلاینت یا توکن فینوتک در تنظیمات وارد نشده است.';
+            return $result;
+        }
+
+        $api_url = "https://api.finnotech.ir/credit/v2/clients/{$client_id}/chequeColorInquiry";
+        $api_url_with_params = add_query_arg(['idCode' => $national_code], $api_url);
+        
+        $response = wp_remote_get($api_url_with_params, [
+            'headers' => ['Authorization' => 'Bearer ' . $api_key],
+            'timeout' => 45
+        ]);
+
+        if (is_wp_error($response)) {
+            $result['raw_response'] = 'خطای اتصال وردپرس: ' . $response->get_error_message();
+            return $result;
+        }
+
+        $response_body = wp_remote_retrieve_body($response);
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_data = json_decode($response_body, true);
+
+        $result['raw_response'] = "کد وضعیت HTTP: {$response_code}\nپاسخ دریافتی:\n" . print_r($response_body, true);
+
+        if ($response_code === 200 && isset($response_data['status']) && $response_data['status'] === 'DONE') {
+            $result['status'] = 'DONE';
+            $result['data'] = $response_data;
+        }
+
+        return $result;
+    }
+
     public function handle_car_selection_ajax() {
         check_ajax_referer('maneli_ajax_nonce', 'nonce');
         if (!is_user_logged_in() || empty($_POST['product_id'])) {
@@ -137,36 +175,49 @@ class Maneli_Form_Handler {
     private function finalize_inquiry($user_id, $is_new = false) {
         $temp_data = get_user_meta($user_id, 'maneli_temp_inquiry_data', true);
         if (empty($temp_data)) return false;
-        $buyer_data = $temp_data['buyer_data']; $issuer_data = $temp_data['issuer_data']; $issuer_type = $temp_data['issuer_type'];
+
+        $buyer_data = $temp_data['buyer_data'];
+        $issuer_data = $temp_data['issuer_data'];
+        $issuer_type = $temp_data['issuer_type'];
+
         wp_update_user(['ID' => $user_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name']]);
         foreach ($buyer_data as $key => $value) { update_user_meta($user_id, $key, $value); }
+        
         $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code'])) ? $issuer_data['issuer_national_code'] : $buyer_data['national_code'];
-        $all_options = get_option('maneli_inquiry_all_options', []);
-        $client_id = $all_options['finotex_client_id'] ?? '';
-        $api_key = $all_options['finotex_api_key'] ?? '';
-        $response_data = null; $raw_response_body = '';
-        if (!empty($client_id) && !empty($api_key)) {
-            $api_url = "https://api.finnotech.ir/credit/v2/clients/{$client_id}/chequeColorInquiry";
-            $api_url_with_params = add_query_arg(['idCode' => $national_code_for_api], $api_url);
-            $response = wp_remote_get($api_url_with_params, ['headers' => ['Authorization' => 'Bearer ' . $api_key], 'timeout' => 45]);
-            if (!is_wp_error($response)) { $raw_response_body = wp_remote_retrieve_body($response); $response_data = json_decode($raw_response_body, true); }
-        }
+        
+        $finotex_result = $this->execute_finotex_inquiry($national_code_for_api);
+        
         $car_id = get_user_meta($user_id, 'maneli_selected_car_id', true);
-        $post_id = wp_insert_post(['post_title' => 'استعلام برای: ' . get_the_title($car_id) . ' - ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'],'post_content' => 'پاسخ خام از فینوتک (JSON): <pre>' . esc_textarea($raw_response_body) . '</pre>','post_status'  => 'publish', 'post_author'  => $user_id, 'post_type'    => 'inquiry']);
+        $post_content = "گزارش استعلام از فینوتک:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>";
+        $post_title = 'استعلام برای: ' . get_the_title($car_id) . ' - ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'];
+        
+        $post_id = wp_insert_post([
+            'post_title'   => $post_title,
+            'post_content' => $post_content,
+            'post_status'  => 'publish',
+            'post_author'  => $user_id,
+            'post_type'    => 'inquiry'
+        ]);
+
         if ($post_id && !is_wp_error($post_id)) {
+            $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
+            update_post_meta($post_id, 'inquiry_status', $initial_status);
+
             update_post_meta($post_id, 'issuer_type', $issuer_type);
             foreach ($buyer_data as $key => $value) { update_post_meta($post_id, $key, $value); }
             if (!empty($issuer_data)) { foreach ($issuer_data as $key => $value) { update_post_meta($post_id, $key, $value); } }
+            
             update_post_meta($post_id, 'product_id', $car_id);
-            update_post_meta($post_id, '_finotex_response_data', $response_data);
+            update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
+            
             $calculator_meta_keys = ['maneli_inquiry_down_payment', 'maneli_inquiry_term_months', 'maneli_inquiry_total_price', 'maneli_inquiry_installment'];
             foreach($calculator_meta_keys as $key) { $value = get_user_meta($user_id, $key, true); if ($value) { update_post_meta($post_id, $key, $value); } }
-            $initial_status = (!is_wp_error($response) && isset($response_data['status']) && $response_data['status'] === 'DONE') ? 'pending' : 'failed';
-            update_post_meta($post_id, 'inquiry_status', $initial_status);
+            
             if ($is_new && $initial_status === 'pending') {
                 $sms_handler = new Maneli_SMS_Handler();
                 $customer_name = ($buyer_data['first_name'] ?? '') . ' ' . ($buyer_data['last_name'] ?? '');
                 $car_name = get_the_title($car_id) ?? '';
+                $all_options = get_option('maneli_inquiry_all_options', []);
                 $admin_mobile = $all_options['admin_notification_mobile'] ?? '';
                 $pattern_admin = $all_options['sms_pattern_new_inquiry'] ?? 0;
                 if (!empty($admin_mobile) && $pattern_admin > 0) { $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name]); }
@@ -174,6 +225,7 @@ class Maneli_Form_Handler {
                 $pattern_customer = $all_options['sms_pattern_pending'] ?? 0;
                 if (!empty($customer_mobile) && $pattern_customer > 0) { $sms_handler->send_pattern($pattern_customer, $customer_mobile, [$customer_name, $car_name]); }
             }
+            
             delete_user_meta($user_id, 'maneli_inquiry_step');
             delete_user_meta($user_id, 'maneli_selected_car_id');
             delete_user_meta($user_id, 'maneli_temp_inquiry_data');
@@ -200,7 +252,7 @@ class Maneli_Form_Handler {
         $post_id = intval($_POST['inquiry_id']);
         $new_status_request = sanitize_text_field($_POST['new_status']);
         if (!in_array($new_status_request, ['approved', 'rejected', 'more_docs'])) { wp_die('وضعیت نامعتبر است.'); }
-        $old_status = get_post_meta($post_id, 'inquiry_status', true);
+        
         $post = get_post($post_id);
         $user_id = $post->post_author;
         $options = get_option('maneli_inquiry_all_options', []);
@@ -208,26 +260,28 @@ class Maneli_Form_Handler {
 
         if ($new_status_request === 'approved') {
             $final_status = 'user_confirmed';
-            $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'ID', 'order' => 'ASC']);
-            if (!empty($expert_users)) {
-                $last_index = get_option('maneli_expert_last_assigned_index', -1);
-                $next_index = ($last_index + 1) % count($expert_users);
-                $assigned_expert = $expert_users[$next_index];
-                $expert_name = $assigned_expert->display_name;
-                $expert_phone = get_user_meta($assigned_expert->ID, 'mobile_number', true);
-                update_post_meta($post_id, 'assigned_expert_id', $assigned_expert->ID);
-                update_post_meta($post_id, 'assigned_expert_name', $expert_name);
-                update_post_meta($post_id, 'assigned_expert_phone', $expert_phone);
-                update_option('maneli_expert_last_assigned_index', $next_index);
-                $pattern_id = $options['sms_pattern_expert_referral'] ?? 0;
-                if ($pattern_id > 0 && !empty($expert_phone)) {
-                    $customer_info = get_userdata($user_id);
-                    $customer_name = ($customer_info->first_name ?? '') . ' ' . ($customer_info->last_name ?? '');
-                    $customer_mobile = get_post_meta($post_id, 'mobile_number', true) ?? '';
-                    $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
-                    $params = [(string)$expert_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
-                    $sms_handler = new Maneli_SMS_Handler();
-                    $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
+            // Only assign an expert if one isn't already assigned
+            if (!get_post_meta($post_id, 'assigned_expert_id', true)) {
+                $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'ID', 'order' => 'ASC']);
+                if (!empty($expert_users)) {
+                    $last_index = get_option('maneli_expert_last_assigned_index', -1);
+                    $next_index = ($last_index + 1) % count($expert_users);
+                    $assigned_expert = $expert_users[$next_index];
+                    update_post_meta($post_id, 'assigned_expert_id', $assigned_expert->ID);
+                    update_post_meta($post_id, 'assigned_expert_name', $assigned_expert->display_name);
+                    update_option('maneli_expert_last_assigned_index', $next_index);
+                    
+                    $expert_phone = get_user_meta($assigned_expert->ID, 'mobile_number', true);
+                    $pattern_id = $options['sms_pattern_expert_referral'] ?? 0;
+                    if ($pattern_id > 0 && !empty($expert_phone)) {
+                        $customer_info = get_userdata($user_id);
+                        $customer_name = ($customer_info->first_name ?? '') . ' ' . ($customer_info->last_name ?? '');
+                        $customer_mobile = get_post_meta($post_id, 'mobile_number', true) ?? '';
+                        $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
+                        $params = [(string)$assigned_expert->display_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
+                        $sms_handler = new Maneli_SMS_Handler();
+                        $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
+                    }
                 }
             }
         } elseif ($final_status === 'rejected' && !empty($_POST['rejection_reason'])) {
@@ -235,29 +289,35 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'rejection_reason', $reason);
         }
         
-        if ($old_status !== $final_status) {
-            update_post_meta($post_id, 'inquiry_status', $final_status);
-            $user_info = get_userdata($user_id);
-            $user_name = $user_info->display_name ?? '';
-            $mobile_number = get_user_meta($user_id, 'mobile_number', true);
-            $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
-            $pattern_id = 0; $params = [];
-            if ($final_status === 'user_confirmed') {
+        update_post_meta($post_id, 'inquiry_status', $final_status);
+        
+        $user_info = get_userdata($user_id);
+        $user_name = $user_info->display_name ?? '';
+        $mobile_number = get_user_meta($user_id, 'mobile_number', true);
+        $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
+        $pattern_id = 0; $params = [];
+
+        switch ($final_status) {
+            case 'user_confirmed':
                 $pattern_id = $options['sms_pattern_approved'] ?? 0;
                 $params = [(string)$user_name, (string)$car_name];
-            } elseif ($final_status === 'rejected') {
+                break;
+            case 'rejected':
                 $pattern_id = $options['sms_pattern_rejected'] ?? 0;
                 $rejection_reason = get_post_meta($post_id, 'rejection_reason', true) ?? '';
                 $params = [(string)$user_name, (string)$car_name, (string)$rejection_reason];
-            } elseif ($final_status === 'more_docs') {
+                break;
+            case 'more_docs':
                 $pattern_id = $options['sms_pattern_more_docs'] ?? 0;
                 $params = [(string)$user_name, (string)$car_name];
-            }
-            if ($pattern_id > 0 && !empty($mobile_number)) {
-                $sms_handler = new Maneli_SMS_Handler();
-                $sms_handler->send_pattern($pattern_id, $mobile_number, $params);
-            }
+                break;
         }
+
+        if ($pattern_id > 0 && !empty($mobile_number)) {
+            $sms_handler = new Maneli_SMS_Handler();
+            $sms_handler->send_pattern($pattern_id, $mobile_number, $params);
+        }
+        
         wp_redirect(admin_url('edit.php?post_type=inquiry'));
         exit;
     }
@@ -293,29 +353,29 @@ class Maneli_Form_Handler {
         foreach ($buyer_data as $key => $value) { update_user_meta($customer_id, $key, $value); }
     
         $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code'])) ? $issuer_data['issuer_national_code'] : $buyer_data['national_code'];
-        $all_options = get_option('maneli_inquiry_all_options', []);
-        $client_id = $all_options['finotex_client_id'] ?? '';
-        $api_key = $all_options['finotex_api_key'] ?? '';
-        $response_data = null; $raw_response_body = '';
-        if (!empty($client_id) && !empty($api_key)) {
-            $api_url = "https://api.finnotech.ir/credit/v2/clients/{$client_id}/chequeColorInquiry";
-            $api_url_with_params = add_query_arg(['idCode' => $national_code_for_api], $api_url);
-            $response = wp_remote_get($api_url_with_params, ['headers' => ['Authorization' => 'Bearer ' . $api_key], 'timeout' => 45]);
-            if (!is_wp_error($response)) { $raw_response_body = wp_remote_retrieve_body($response); $response_data = json_decode($raw_response_body, true); }
-        }
+        
+        $finotex_result = $this->execute_finotex_inquiry($national_code_for_api);
         
         $post_title = 'استعلام برای ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'] . ' (توسط ' . $expert_user->display_name . ')';
-        $post_id = wp_insert_post(['post_title' => $post_title,'post_author'  => $customer_id,'post_status'  => 'publish','post_type'    => 'inquiry','post_content' => 'پاسخ خام فینوتک: <pre>' . esc_textarea($raw_response_body) . '</pre>']);
+        $post_content = "گزارش استعلام از فینوتک:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>";
+        
+        $post_id = wp_insert_post([
+            'post_title'   => $post_title,
+            'post_author'  => $customer_id,
+            'post_status'  => 'publish',
+            'post_type'    => 'inquiry',
+            'post_content' => $post_content
+        ]);
         
         if ($post_id && !is_wp_error($post_id)) {
-            $initial_status = (isset($response_data['status']) && $response_data['status'] === 'DONE') ? 'pending' : 'failed';
+            $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
             update_post_meta($post_id, 'inquiry_status', $initial_status);
             
             update_post_meta($post_id, 'assigned_expert_id', $expert_user->ID);
             update_post_meta($post_id, 'assigned_expert_name', $expert_user->display_name);
     
             update_post_meta($post_id, 'product_id', $product_id);
-            update_post_meta($post_id, '_finotex_response_data', $response_data);
+            update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
             update_post_meta($post_id, 'issuer_type', $issuer_type);
             foreach ($buyer_data as $key => $value) { update_post_meta($post_id, $key, $value); }
             if (!empty($issuer_data)) { foreach ($issuer_data as $key => $value) { update_post_meta($post_id, $key, $value); } }
@@ -326,7 +386,8 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'maneli_inquiry_term_months', $term_months);
         }
         
-        wp_redirect(admin_url('admin.php?page=maneli-expert-panel&inquiry_created=1'));
+        $redirect_url = add_query_arg('inquiry_created', '1', wp_get_referer());
+        wp_redirect($redirect_url);
         exit;
     }
 }
