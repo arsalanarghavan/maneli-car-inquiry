@@ -4,7 +4,6 @@
     $(document).ready(function() {
 
         const expertForm = $('#expert-inquiry-form');
-        // If the expert form is not on the page, do nothing.
         if (!expertForm.length) {
             return;
         }
@@ -12,11 +11,25 @@
         const productSelect = $('#product_id_expert');
         const detailsWrapper = $('#expert-form-details');
 
+        // --- HELPER FUNCTIONS ---
+        const formatMoney = (num) => {
+            if (isNaN(num) || num === null) return '-';
+            return Math.ceil(num).toLocaleString('fa-IR');
+        };
+
+        const parseMoney = (str) => {
+             if (!str) return 0;
+             // Use en-US formatted numbers from input for reliable parsing
+             return parseInt(String(str).replace(/,/g, ''), 10) || 0;
+        };
+
+
         // --- Initialize Select2 AJAX Car Search ---
         productSelect.select2({
             placeholder: 'نام خودرو را جستجو کنید...',
             dir: "rtl",
             width: '100%',
+            allowClear: true,
             ajax: {
                 url: maneli_expert_ajax.ajax_url,
                 dataType: 'json',
@@ -46,94 +59,92 @@
             if (price > 0) {
                 const calculatorWrapper = $('#loan-calculator-wrapper');
                 const calculatorHTML = `
-                    <div class="form-grid" style="margin-top: 20px;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expert_down_payment">مبلغ پیش پرداخت (تومان)</label>
-                                <input type="text" id="expert_down_payment" name="down_payment" class="regular-text" required>
-                                <div class="input-note">حداقل پیش‌پرداخت: ${minDownPayment.toLocaleString('fa-IR')} تومان</div>
-                            </div>
-                            <div class="form-group">
-                                <label for="expert_term_months">مدت بازپرداخت (ماه)</label>
-                                <select name="term_months" id="expert_term_months">
-                                    <option value="12">۱۲ ماهه</option>
-                                    <option value="18">۱۸ ماهه</option>
-                                    <option value="24">۲۴ ماهه</option>
-                                    <option value="36">۳۶ ماهه</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>مبلغ تقریبی هر قسط</label>
-                                <div class="result-display"><span>تومان</span> <span id="expert-installment-amount">-</span></div>
-                            </div>
-                        </div>
-                    </div>`;
-                
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th><label for="expert_down_payment">مبلغ پیش پرداخت (تومان)</label></th>
+                                <td>
+                                    <input type="text" id="expert_down_payment" name="down_payment" class="regular-text" required>
+                                    <p class="description">حداقل پیش‌پرداخت پیشنهادی: ${formatMoney(minDownPayment)} تومان</p>
+                                </td>
+                                <th><label for="expert_term_months">مدت بازپرداخت (ماه)</label></th>
+                                <td>
+                                    <select name="term_months" id="expert_term_months" class="regular-text">
+                                        <option value="12">۱۲ ماهه</option>
+                                        <option value="18" selected>۱۸ ماهه</option>
+                                        <option value="24">۲۴ ماهه</option>
+                                        <option value="36">۳۶ ماهه</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th><label>مبلغ کل وام</label></th>
+                                <td class="result-display"><span id="expert-loan-amount">-</span> تومان</td>
+                                <th><label>مبلغ کل بازپرداخت</label></th>
+                                <td class="result-display"><span id="expert-total-repayment">-</span> تومان</td>
+                            </tr>
+                            <tr>
+                                <th style="font-size: 1.2em;"><label>مبلغ هر قسط</label></th>
+                                <td class="result-display" style="font-size: 1.2em; color: #2D89BE; font-weight: bold;"><span id="expert-installment-amount">-</span> تومان</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>`;
+
                 calculatorWrapper.html(calculatorHTML);
                 detailsWrapper.slideDown();
-                
+
                 const downPaymentInput = $('#expert_down_payment');
                 const termSelect = $('#expert_term_months');
                 const installmentDisplay = $('#expert-installment-amount');
-
-                // Add Thousand Separator Logic
+                const loanAmountDisplay = $('#expert-loan-amount');
+                const totalRepaymentDisplay = $('#expert-total-repayment');
+                
                 downPaymentInput.on('keyup input', function(event) {
-                    // Get raw number value by removing commas
-                    let value = $(this).val().replace(/,/g, '');
-                    
-                    // Check if it's a valid number
-                    if ($.isNumeric(value)) {
-                        // Format with US-style commas, which are easy to parse back
-                        $(this).val(parseInt(value, 10).toLocaleString('en-US'));
+                    let value = parseMoney($(this).val());
+                    if (value > 0) {
+                       $(this).val(value.toLocaleString('en-US'));
                     } else {
-                        // Clear the field if invalid characters are entered
-                        $(this).val('');
+                       $(this).val('');
                     }
-                    // Trigger calculation on every keyup
                     calculateInstallment();
                 });
 
                 function calculateInstallment() {
-                    let dp_string = downPaymentInput.val() || '0';
-                    // Always remove commas before parsing to an integer
-                    const dp = parseInt(dp_string.replace(/,/g, '')) || 0;
+                    let dp = parseMoney(downPaymentInput.val());
                     const months = parseInt(termSelect.val()) || 12;
                     const loanAmount = price - dp;
 
-                    if (loanAmount < 0) {
-                        installmentDisplay.text('نامعتبر');
-                        return;
-                    }
-                    if (loanAmount === 0) {
+                    if (loanAmount <= 0) {
                         installmentDisplay.text('0');
+                        loanAmountDisplay.text('0');
+                        totalRepaymentDisplay.text(formatMoney(price));
                         return;
                     }
-                    
+
                     const monthlyInterestAmount = loanAmount * 0.035;
                     const totalInterest = monthlyInterestAmount * (months + 1);
                     const totalRepayment = loanAmount + totalInterest;
                     const installment = totalRepayment / months;
-                    
-                    // Format the final result with Persian locale for display
-                    installmentDisplay.text(Math.ceil(installment).toLocaleString('fa-IR'));
+
+                    loanAmountDisplay.text(formatMoney(loanAmount));
+                    totalRepaymentDisplay.text(formatMoney(totalRepayment));
+                    installmentDisplay.text(formatMoney(installment));
                 }
 
                 downPaymentInput.on('change', calculateInstallment);
                 termSelect.on('change', calculateInstallment);
-                
-                // Set initial value and trigger the formatting and calculation
+
                 downPaymentInput.val(minDownPayment.toString()).trigger('keyup');
             }
         });
-        
-        productSelect.on('select2:unselect', function (e) {
+
+        productSelect.on('select2:unselect', function(e) {
             detailsWrapper.slideUp();
             $('#loan-calculator-wrapper').empty();
         });
 
-        // --- Logic for conditional issuer form ---
         const issuerRadios = expertForm.find('input[name="issuer_type"]');
         const issuerForm = $('#issuer-form-wrapper');
         const issuerInputs = issuerForm.find('input');
@@ -149,7 +160,7 @@
             }
         }
         issuerRadios.on('change', toggleIssuerForm);
-        toggleIssuerForm(); // Set initial state on page load
+        toggleIssuerForm(); 
     });
 
 })(jQuery);

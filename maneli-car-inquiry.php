@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.10.18
+ * Version:           0.10.20
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -46,14 +46,20 @@ function maneli_remove_expert_role() {
 
 /**
  * Redirects users with the 'maneli_expert' role away from the backend dashboard,
- * but allows them to access admin-post.php and admin-ajax.php for form processing.
+ * but allows them to access admin-post.php, admin-ajax.php and their own panel.
  */
 add_action('admin_init', 'maneli_redirect_experts_from_admin');
 function maneli_redirect_experts_from_admin() {
     global $pagenow;
-    if (current_user_can('maneli_expert') && !current_user_can('manage_options') && $pagenow !== 'admin-post.php' && !wp_doing_ajax()) {
-        wp_redirect(home_url('/dashboard/'));
-        exit;
+    if (current_user_can('maneli_expert') && !current_user_can('manage_options')) {
+        // Allowed pages for experts
+        $allowed_pages = ['admin-post.php', 'admin-ajax.php', 'profile.php'];
+        $is_expert_panel = isset($_GET['page']) && $_GET['page'] === 'maneli-expert-panel';
+
+        if (!in_array($pagenow, $allowed_pages) && !$is_expert_panel) {
+            wp_redirect(admin_url('admin.php?page=maneli-expert-panel'));
+            exit;
+        }
     }
 }
 
@@ -84,7 +90,7 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-settings-page.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-shortcode-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php'; // This class will now handle the new panel
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
     }
@@ -94,7 +100,7 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Settings_Page();
         new Maneli_Form_Handler();
         new Maneli_Shortcode_Handler();
-        new Maneli_Expert_Panel();
+        new Maneli_Expert_Panel(); // This class is now responsible for the expert's own panel
         new Maneli_Credit_Report_Page();
         new Maneli_User_Profile();
         // Maneli_SMS_Handler does not need to be instantiated here as it's a utility class.

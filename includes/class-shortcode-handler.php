@@ -9,6 +9,7 @@ class Maneli_Shortcode_Handler {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
+        add_shortcode('expert_inquiries_list', [$this, 'render_expert_inquiries_list']); // Shortcode for expert's inquiries
     }
 
     public function enqueue_assets() {
@@ -362,5 +363,67 @@ class Maneli_Shortcode_Handler {
             <button type="submit">تلاش مجدد و اصلاح اطلاعات</button>
         </form>
         <?php
+    }
+
+    /**
+     * Renders the list of inquiries created by the current expert.
+     * Shortcode: [expert_inquiries_list]
+     */
+    public function render_expert_inquiries_list() {
+        if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
+        }
+    
+        $expert_id = get_current_user_id();
+        $inquiries = get_posts([
+            'post_type'      => 'inquiry',
+            'posts_per_page' => -1,
+            'meta_key'       => 'assigned_expert_id', // Query by the expert who created it
+            'meta_value'     => $expert_id,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+        ]);
+    
+        ob_start();
+    
+        echo '<div class="maneli-inquiry-wrapper">';
+        if (empty($inquiries)) {
+            echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی توسط شما ثبت نشده است. برای شروع، از پنل کاربری خود یک استعلام جدید ثبت کنید.</p></div>';
+        } else {
+            echo '<h3>لیست استعلام‌های ثبت شده توسط شما</h3>';
+            echo '<table class="shop_table shop_table_responsive my_account_orders">';
+            echo '<thead><tr>';
+            echo '<th class="woocommerce-orders-table__header"><span class="nobr">شناسه</span></th>';
+            echo '<th class="woocommerce-orders-table__header"><span class="nobr">مشتری</span></th>';
+            echo '<th class="woocommerce-orders-table__header"><span class="nobr">خودرو</span></th>';
+            echo '<th class="woocommerce-orders-table__header"><span class="nobr">وضعیت</span></th>';
+            echo '<th class="woocommerce-orders-table__header"><span class="nobr">تاریخ ثبت</span></th>';
+            echo '<th class="woocommerce-orders-table__header"></th>';
+            echo '</tr></thead>';
+            echo '<tbody>';
+            foreach ($inquiries as $inquiry) {
+                $inquiry_id = $inquiry->ID;
+                $customer_id = get_post_field('post_author', $inquiry_id);
+                $customer = get_userdata($customer_id);
+                $product_id = get_post_meta($inquiry_id, 'product_id', true);
+                $status = get_post_meta($inquiry_id, 'inquiry_status', true);
+                // Experts should see the same admin report page
+                $report_url = admin_url('admin.php?page=maneli-credit-report&inquiry_id=' . $inquiry_id);
+                
+                echo '<tr class="woocommerce-orders-table__row">';
+                echo '<td data-title="شناسه">#' . esc_html($inquiry_id) . '</td>';
+                echo '<td data-title="مشتری">' . esc_html($customer->display_name) . '</td>';
+                echo '<td data-title="خودرو">' . esc_html(get_the_title($product_id)) . '</td>';
+                echo '<td data-title="وضعیت"><span class="status-indicator status-' . esc_attr($status) . '">' . esc_html(Maneli_CPT_Handler::get_status_label($status)) . '</span></td>';
+                echo '<td data-title="تاریخ">' . get_the_date('Y/m/d', $inquiry_id) . '</td>';
+                echo '<td><a href="' . esc_url($report_url) . '" class="button view">مشاهده جزئیات</a></td>';
+                echo '</tr>';
+            }
+            echo '</tbody>';
+            echo '</table>';
+        }
+        echo '</div>';
+    
+        return ob_get_clean();
     }
 }
