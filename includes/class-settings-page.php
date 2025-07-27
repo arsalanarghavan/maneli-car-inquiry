@@ -82,7 +82,7 @@ class Maneli_Settings_Page {
         add_settings_section('maneli_sms_api_section', 'اطلاعات پنل ملی پیامک', null, 'maneli-sms-settings-section');
         add_settings_field('sms_username', 'نام کاربری', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_username']);
         add_settings_field('sms_password', 'رمز عبور', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_password', 'type' => 'password']);
-        
+
         add_settings_section('maneli_sms_patterns_section', 'کدهای پترن پیامک (Body ID)', [$this, 'render_sms_patterns_description'], 'maneli-sms-settings-section');
         add_settings_field('sms_pattern_pending', 'پترن «در انتظار بررسی» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_pending', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
         add_settings_field('sms_pattern_approved', 'پترن «تایید شده» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_approved', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
@@ -93,12 +93,7 @@ class Maneli_Settings_Page {
         add_settings_field('sms_pattern_expert_referral', 'پترن «ارجاع به کارشناس»', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_expert_referral', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو']);
 
         // Experts Section
-        add_settings_section(
-            'maneli_experts_list_section',
-            'مدیریت چرخشی کارشناسان',
-            [$this, 'render_experts_description'],
-            'maneli-experts-settings-section'
-        );
+        add_settings_section('maneli_experts_list_section', 'مدیریت چرخشی کارشناسان', [$this, 'render_experts_description'], 'maneli-experts-settings-section');
     }
     
     public function sanitize_and_merge_options($input) {
@@ -111,7 +106,7 @@ class Maneli_Settings_Page {
         $sanitized_options = [];
         foreach ($merged_options as $key => $value) {
             if (is_string($value)) {
-                if (strpos($key, 'template') !== false || $key === 'experts_list' || $key === 'zero_fee_message') {
+                if ($key === 'experts_list' || $key === 'zero_fee_message') {
                      $sanitized_options[$key] = sanitize_textarea_field($value);
                 } else {
                      $sanitized_options[$key] = sanitize_text_field($value);
@@ -147,7 +142,7 @@ class Maneli_Settings_Page {
     }
 
     public function render_sms_patterns_description() {
-        echo '<p>در این بخش، به جای متن کامل پیامک، فقط **کد پترن (Body ID)** که در پنل ملی پیامک شما تایید شده است را وارد کنید.</p>';
+        echo '<p>در این بخش، به جای متن کامل پیامک، فقط **کد پترن (Body ID)** که در پنل ملی پیامک شما تایید شده است را وارد کنید.</p><p>ترتیب متغیرها باید دقیقاً مطابق توضیحات هر فیلد باشد.</p>';
     }
 
     public function render_experts_description() {

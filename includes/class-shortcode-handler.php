@@ -9,15 +9,13 @@ class Maneli_Shortcode_Handler {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
-        add_shortcode('maneli_expert_new_inquiry_form', [$this, 'render_expert_new_inquiry_form']);
-        add_shortcode('maneli_expert_inquiry_list', [$this, 'render_expert_inquiry_list']);
     }
 
     public function enqueue_assets() {
-        wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.2.1');
+        wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.1.1');
         
         if (is_product()) {
-            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', [], '6.2.1', true);
+            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', [], '6.1.1', true);
             if (is_user_logged_in()) {
                 wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
                     'ajax_url'         => admin_url('admin-ajax.php'),
@@ -26,45 +24,21 @@ class Maneli_Shortcode_Handler {
                 ]);
             }
         }
-
-        if (is_page()) {
-            global $post;
-            if ($post && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
-                wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery'], '6.2.1', true);
-            }
-        }
     }
 
     public function render_inquiry_form() {
         if (!is_user_logged_in()) { 
-            $login_url = home_url('/login/?redirect_to=' . urlencode(home_url('/dashboard/?endp=inf_menu_1')));
+            $login_url = home_url('/login/');
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای ثبت و پیگیری استعلام، لطفاً ابتدا <a href="' . esc_url($login_url) . '">وارد شوید</a>.</p></div>'; 
         }
         
         $user_id = get_current_user_id();
-        
-        if (isset($_GET['inquiry_id_view']) && (current_user_can('maneli_expert') || current_user_can('manage_options'))) {
-            $inquiry_id_to_view = intval($_GET['inquiry_id_view']);
-            $inquiry_post = get_post($inquiry_id_to_view);
-            $created_by_expert_id = (int)get_post_meta($inquiry_id_to_view, 'created_by_expert_id', true);
-
-            if ($inquiry_post && ($user_id === $created_by_expert_id || current_user_can('manage_options'))) {
-                return $this->render_customer_report_html($inquiry_id_to_view);
-            } else {
-                 return '<div class="maneli-inquiry-wrapper error-box"><p>شما اجازه دسترسی به این گزارش را ندارید.</p></div>';
-            }
-        }
-        
         $latest_inquiry = get_posts(['author' => $user_id, 'post_type' => 'inquiry', 'posts_per_page' => 1, 'orderby' => 'date', 'order' => 'DESC', 'post_status' => 'publish']);
         $inquiry_step_meta = get_user_meta($user_id, 'maneli_inquiry_step', true);
         
         ob_start();
         echo '<div class="maneli-inquiry-wrapper">';
 
-        if (isset($_GET['payment_status'])) {
-            $this->display_payment_message(sanitize_text_field($_GET['payment_status']));
-        }
-        
         $current_step_number = 1;
         if ($latest_inquiry) {
             $status = get_post_meta($latest_inquiry[0]->ID, 'inquiry_status', true);
@@ -102,83 +76,64 @@ class Maneli_Shortcode_Handler {
         echo '</div>';
         return ob_get_clean();
     }
-
-    public function render_expert_new_inquiry_form() {
-        if (!is_user_logged_in()) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>برای دسترسی به این بخش، لطفاً وارد شوید.</p></div>';
-        }
-        if (!current_user_can('manage_options') && !current_user_can('read')) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>شما اجازه دسترسی به این بخش را ندارید.</p></div>';
-        }
-        $products = wc_get_products(['limit' => -1, 'status' => 'publish']);
-        ob_start();
+    
+    private function render_progress_tracker($active_step) {
+        $steps = [1 => 'انتخاب خودرو', 2 => 'تکمیل اطلاعات', 3 => 'پرداخت هزینه', 4 => 'در انتظار بررسی', 5 => 'نتیجه نهایی'];
         ?>
-        <div class="maneli-expert-panel">
-            <h2>ثبت استعلام جدید برای مشتری</h2>
-            <p>از این فرم برای ثبت نام مشتری جدید و ایجاد اولین استعلام برای او استفاده کنید.</p>
-            <form id="expert-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                <input type="hidden" name="action" value="maneli_expert_create_inquiry">
-                <?php wp_nonce_field('maneli_expert_create_nonce'); ?>
-                <div class="expert-form-section">
-                    <h3>۱. انتخاب خودرو و شرایط</h3>
-                    <div class="form-group"><label for="product_id_expert">انتخاب خودرو</label><select name="product_id" id="product_id_expert" required><option value="">-- یک خودرو انتخاب کنید --</option><?php foreach ($products as $product) : ?><option value="<?php echo esc_attr($product->get_id()); ?>" data-price="<?php echo esc_attr($product->get_price()); ?>"><?php echo esc_html($product->get_name()); ?></option><?php endforeach; ?></select></div>
-                    <div id="loan-calculator-wrapper" style="display:none;"></div>
+        <div class="progress-tracker">
+            <?php foreach ($steps as $number => $title) : ?>
+                <?php
+                $step_class = '';
+                if ($number < $active_step) { $step_class = 'completed'; } 
+                elseif ($number == $active_step) { $step_class = 'active'; }
+                ?>
+                <div class="step <?php echo $step_class; ?>">
+                    <div class="circle"><?php echo number_format_i18n($number); ?></div>
+                    <div class="label"><span class="step-title">مرحله <?php echo number_format_i18n($number); ?></span><span class="step-name"><?php echo esc_html($title); ?></span></div>
                 </div>
-                <div class="expert-form-section">
-                    <h3>۲. اطلاعات هویتی</h3>
-                    <div class="issuer-choice-wrapper" style="max-width: 100%; margin: 20px 0;"><h4>اطلاعات صادر کننده چک</h4><div class="form-group-radio"><label><input type="radio" name="issuer_type" value="self" checked> خریدار و صادرکننده چک یک نفر هستند.</label></div><div class="form-group-radio"><label><input type="radio" name="issuer_type" value="other"> صادرکننده چک شخص دیگری است.</label></div></div>
-                    <div id="buyer-form-wrapper"><p class="form-section-title">فرم اطلاعات خریدار</p><div class="form-grid"><div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" required></div></div><div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required></div></div><div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه (نام کاربری):</label><input type="text" name="mobile_number" placeholder="مثال: 09123456789" required></div></div></div></div>
-                    <div id="issuer-form-wrapper" style="display: none;"><p class="form-section-title">فرم اطلاعات صادر کننده چک</p><div class="form-grid"><div class="form-row"><div class="form-group"><label>نام صادرکننده چک:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده چک:</label><input type="text" name="issuer_last_name"></div></div><div class="form-row"><div class="form-group"><label>نام پدر صادرکننده چک:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده چک:</label><input type="text" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱"></div></div><div class="form-row"><div class="form-group"><label>کد ملی صادرکننده چک:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده چک:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div></div></div>
-                </div>
-                <button type="submit" class="button button-primary">ثبت استعلام برای مشتری</button>
+            <?php endforeach; ?>
+        </div>
+        <?php
+    }
+
+    private function render_step_payment($user_id) {
+        $options = get_option('maneli_inquiry_all_options', []);
+        $amount = (int)($options['inquiry_fee'] ?? 0);
+        $discount_code_exists = !empty($options['discount_code']);
+        $discount_text = $options['discount_code_text'] ?? 'تخفیف ۱۰۰٪ با موفقیت اعمال شد.';
+        $zero_fee_message = $options['zero_fee_message'] ?? 'هزینه استعلام برای شما رایگان در نظر گرفته شده است. لطفاً برای ادامه روی دکمه زیر کلیک کنید.';
+        if (get_user_meta($user_id, 'maneli_discount_applied', true)) {
+            echo '<div class="status-box status-approved" style="margin-bottom:20px;"><p>' . esc_html($discount_text) . '</p></div>';
+            delete_user_meta($user_id, 'maneli_discount_applied');
+        }
+        ?>
+        <h3>مرحله ۳: پرداخت هزینه استعلام</h3>
+        <div class="payment-box">
+            <?php if ($amount > 0): ?>
+                <p>برای ثبت نهایی درخواست و ارسال آن برای کارشناسان، لطفاً هزینه استعلام به مبلغ <strong><?php echo number_format_i18n($amount); ?> تومان</strong> را پرداخت نمایید.</p>
+            <?php else: ?>
+                <p><?php echo esc_html($zero_fee_message); ?></p>
+            <?php endif; ?>
+            <form id="payment-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
+                <input type="hidden" name="action" value="maneli_start_payment">
+                <?php wp_nonce_field('maneli_payment_nonce'); ?>
+                <?php if ($amount > 0 && $discount_code_exists): ?>
+                <div class="form-group"><label for="discount_code_input">کد تخفیف دارید؟</label><input type="text" name="discount_code_input" placeholder="کد تخفیف را وارد کنید"></div>
+                <?php endif; ?>
+                <button type="submit" class="button button-primary"><?php echo ($amount > 0) ? 'پرداخت و ثبت نهایی' : 'ثبت نهایی درخواست'; ?></button>
             </form>
         </div>
         <?php
-        return ob_get_clean();
-    }
-
-    public function render_expert_inquiry_list() {
-        if (!is_user_logged_in() || (!current_user_can('manage_options') && !current_user_can('maneli_expert'))) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>شما اجازه دسترسی به این بخش را ندارید.</p></div>';
-        }
-        $expert_id = get_current_user_id();
-        $args = ['post_type' => 'inquiry','posts_per_page' => -1,'meta_query' => [['key' => 'created_by_expert_id','value' => $expert_id,'compare' => '=']]];
-        $my_inquiries = new WP_Query($args);
-        ob_start();
-        ?>
-        <div class="maneli-expert-panel">
-            <h2>استعلام‌های من</h2>
-            <table class="wp-list-table widefat striped maneli-table">
-                <thead><tr><th>مشتری</th><th>خودرو</th><th>وضعیت</th><th>تاریخ ثبت</th><th>عملیات</th></tr></thead>
-                <tbody>
-                    <?php if ($my_inquiries->have_posts()): ?>
-                        <?php while ($my_inquiries->have_posts()): $my_inquiries->the_post(); 
-                            $post_id = get_the_ID();
-                            $customer_id = get_post_field('post_author', $post_id);
-                            $customer = get_userdata($customer_id);
-                            $car_id = get_post_meta($post_id, 'product_id', true);
-                            $status = get_post_meta($post_id, 'inquiry_status', true);
-                            $cpt_handler = new Maneli_CPT_Handler();
-                            $report_url = add_query_arg(['inquiry_id_view' => $post_id], home_url('/dashboard/?endp=inf_menu_1'));
-                        ?>
-                        <tr>
-                            <td><?php echo esc_html($customer->display_name); ?></td>
-                            <td><?php echo get_the_title($car_id); ?></td>
-                            <td><?php echo $cpt_handler->get_status_label($status); ?></td>
-                            <td><?php echo get_the_date('Y/m/d', $post_id); ?></td>
-                            <td><a href="<?php echo esc_url($report_url); ?>" class="button">مشاهده گزارش</a></td>
-                        </tr>
-                        <?php endwhile; wp_reset_postdata(); ?>
-                    <?php else: ?>
-                        <tr><td colspan="5">هیچ استعلامی توسط شما ثبت نشده است.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-        <?php
-        return ob_get_clean();
     }
     
+    private function display_payment_message($status) {
+        switch($status) {
+            case 'success': echo '<div class="status-box status-approved" style="margin-bottom:20px;"><p>پرداخت شما با موفقیت انجام شد.</p></div>'; break;
+            case 'failed': echo '<div class="status-box status-failed" style="margin-bottom:20px;"><p>متاسفانه پرداخت شما ناموفق بود. لطفاً دوباره تلاش کنید.</p></div>'; break;
+            case 'cancelled': echo '<div class="status-box status-pending" style="margin-bottom:20px;"><p>شما پرداخت را لغو کردید. درخواست شما هنوز نهایی نشده است.</p></div>'; break;
+        }
+    }
+
     public function render_loan_calculator() {
         if (!function_exists('is_product') || !is_product() || !function_exists('WC')) return '';
         global $product;

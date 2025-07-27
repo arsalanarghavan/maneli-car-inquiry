@@ -3,54 +3,75 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/**
- * Maneli_User_Profile Class
- * Adds custom identity fields to the user profile page in the admin area.
- */
 class Maneli_User_Profile {
 
-    private $user_fields = [
-        'father_name'   => 'نام پدر',
-        'birth_date'    => 'تاریخ تولد (مثال: 1365/04/15)',
-        'mobile_number' => 'شماره موبایل',
-        'national_code' => 'کد ملی',
-    ];
-
     public function __construct() {
-        add_action('show_user_profile', [$this, 'render_fields']);
-        add_action('edit_user_profile', [$this, 'render_fields']);
-        add_action('personal_options_update', [$this, 'save_fields']);
-        add_action('edit_user_profile_update', [$this, 'save_fields']);
+        add_action('show_user_profile', [$this, 'add_custom_user_fields']);
+        add_action('edit_user_profile', [$this, 'add_custom_user_fields']);
+        add_action('personal_options_update', [$this, 'save_custom_user_fields']);
+        add_action('edit_user_profile_update', [$this, 'save_custom_user_fields']);
     }
 
-    public function render_fields($user) {
-        if (!current_user_can('edit_user', $user->ID)) {
-            return;
-        }
+    /**
+     * Renders the custom fields on the user profile page.
+     *
+     * @param WP_User $user The user object.
+     */
+    public function add_custom_user_fields($user) {
         ?>
-        <h2>اطلاعات تکمیلی استعلام</h2>
+        <h3>اطلاعات تکمیلی استعلام</h3>
         <table class="form-table">
-            <?php foreach ($this->user_fields as $key => $label) : ?>
-                <tr>
-                    <th><label for="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></label></th>
-                    <td>
-                        <input type="text" name="<?php echo esc_attr($key); ?>" id="<?php echo esc_attr($key); ?>" value="<?php echo esc_attr(get_user_meta($user->ID, $key, true)); ?>" class="regular-text" />
-                    </td>
-                </tr>
-            <?php endforeach; ?>
+            <tr>
+                <th><label for="national_code">کد ملی</label></th>
+                <td>
+                    <input type="text" name="national_code" id="national_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'national_code', true)); ?>" class="regular-text" />
+                </td>
+            </tr>
+            <tr>
+                <th><label for="father_name">نام پدر</label></th>
+                <td>
+                    <input type="text" name="father_name" id="father_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'father_name', true)); ?>" class="regular-text" />
+                </td>
+            </tr>
+            <tr>
+                <th><label for="birth_date">تاریخ تولد</label></th>
+                <td>
+                    <input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" />
+                </td>
+            </tr>
+            <tr>
+                <th><label for="mobile_number">شماره موبایل</label></th>
+                <td>
+                    <input type="text" name="mobile_number" id="mobile_number" value="<?php echo esc_attr(get_user_meta($user->ID, 'mobile_number', true)); ?>" class="regular-text" />
+                    <p class="description">این شماره برای ارسال پیامک‌ها استفاده می‌شود.</p>
+                </td>
+            </tr>
         </table>
         <?php
     }
 
-    public function save_fields($user_id) {
+    /**
+     * Saves the custom user profile fields.
+     *
+     * @param int $user_id The ID of the user being updated.
+     * @return bool|void
+     */
+    public function save_custom_user_fields($user_id) {
         if (!current_user_can('edit_user', $user_id)) {
             return false;
         }
 
-        foreach ($this->user_fields as $key => $label) {
-            if (isset($_POST[$key])) {
-                update_user_meta($user_id, $key, sanitize_text_field($_POST[$key]));
-            }
+        if (isset($_POST['national_code'])) {
+            update_user_meta($user_id, 'national_code', sanitize_text_field($_POST['national_code']));
+        }
+        if (isset($_POST['father_name'])) {
+            update_user_meta($user_id, 'father_name', sanitize_text_field($_POST['father_name']));
+        }
+        if (isset($_POST['birth_date'])) {
+            update_user_meta($user_id, 'birth_date', sanitize_text_field($_POST['birth_date']));
+        }
+        if (isset($_POST['mobile_number'])) {
+            update_user_meta($user_id, 'mobile_number', sanitize_text_field($_POST['mobile_number']));
         }
     }
 }

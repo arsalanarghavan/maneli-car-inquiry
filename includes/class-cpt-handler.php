@@ -10,7 +10,7 @@ class Maneli_CPT_Handler {
         add_filter('manage_inquiry_posts_columns', [$this, 'set_custom_columns']);
         add_action('manage_inquiry_posts_custom_column', [$this, 'render_custom_columns'], 10, 2);
         add_action('add_meta_boxes', [$this, 'add_meta_boxes']);
-        add_action('save_post_inquiry', [$this, 'save_status_and_send_sms'], 10, 2);
+        add_action('save_post_inquiry', [$this, 'save_meta_data']);
     }
 
     public function register_inquiry_post_type() {
@@ -41,8 +41,6 @@ class Maneli_CPT_Handler {
             ],
             'map_meta_cap'       => true,
             'menu_icon'          => 'dashicons-clipboard',
-            'show_in_admin_bar'  => false,
-            'publicly_queryable' => false,
             'rewrite'            => false,
         ];
         register_post_type('inquiry', $args);
@@ -81,7 +79,7 @@ class Maneli_CPT_Handler {
                 break;
             case 'inquiry_status':
                 $status = get_post_meta($post_id, 'inquiry_status', true);
-                echo '<span class="status-indicator status-' . esc_attr($status) . '">' . esc_html($this->get_status_label($status)) . '</span>';
+                echo '<span class="status-indicator status-' . esc_attr($status) . '">' . esc_html(self::get_status_label($status)) . '</span>';
                 break;
             case 'inquiry_date':
                 echo get_the_date('Y/m/d H:i', $post_id);
@@ -140,29 +138,23 @@ class Maneli_CPT_Handler {
         wp_nonce_field('save_inquiry_status_nonce', 'inquiry_status_nonce');
         $status = get_post_meta($post->ID, 'inquiry_status', true);
         echo '<select name="inquiry_status" id="inquiry_status" style="width: 100%;">';
-        foreach ($this->get_all_statuses() as $key => $label) {
+        foreach (self::get_all_statuses() as $key => $label) {
             echo '<option value="' . esc_attr($key) . '" ' . selected($status, $key, false) . '>' . esc_html($label) . '</option>';
         }
-        echo '</select><p class="description">وضعیت را تغییر داده و پست را به‌روزرسانی کنید.</p>';
+        echo '</select><p class="description">برای ارسال پیامک از صفحه گزارش کامل اقدام کنید.</p>';
     }
 
-    public function save_status_and_send_sms($post_id, $post) {
+    public function save_meta_data($post_id) {
         if (!isset($_POST['inquiry_status_nonce']) || !wp_verify_nonce($_POST['inquiry_status_nonce'], 'save_inquiry_status_nonce')) return;
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
         if (!current_user_can('edit_post', $post_id)) return;
         if (isset($_POST['inquiry_status'])) {
             $new_status = sanitize_text_field($_POST['inquiry_status']);
-            $old_status = get_post_meta($post_id, 'inquiry_status', true);
-            if ($new_status !== $old_status) {
-                update_post_meta($post_id, 'inquiry_status', $new_status);
-                // The main logic for SMS and expert assignment is now in the form handler
-                // to ensure consistency between the report page and the edit page.
-                // However, we can trigger a generic notification if needed.
-            }
+            update_post_meta($post_id, 'inquiry_status', $new_status);
         }
     }
 
-    public function get_all_statuses() {
+    public static function get_all_statuses() {
         return [
             'pending'        => 'در حال بررسی',
             'user_confirmed' => 'تایید و ارجاع شده',
@@ -172,8 +164,8 @@ class Maneli_CPT_Handler {
         ];
     }
     
-    public function get_status_label($status_key) {
-        $statuses = $this->get_all_statuses();
+    public static function get_status_label($status_key) {
+        $statuses = self::get_all_statuses();
         return $statuses[$status_key] ?? 'نامشخص';
     }
 }

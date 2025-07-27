@@ -2,7 +2,6 @@
     'use strict';
 
     $(document).ready(function() {
-        // All chart-related JavaScript has been removed.
 
         /**
          * Admin Action Buttons and Modal Logic
@@ -24,10 +23,20 @@
         const customReasonText = $('#rejection-reason-custom');
         const finalReasonInput = $('#rejection-reason-input');
         
-        rejectBtn.on('click', function() { modal.show(); });
-        closeModalBtn.on('click', function() { modal.hide(); });
-        $(window).on('click', function(e) { if ($(e.target).is(modal)) { modal.hide(); } });
+        rejectBtn.on('click', function() {
+            modal.show();
+        });
+
+        closeModalBtn.on('click', function() {
+            modal.hide();
+        });
         
+        $(window).on('click', function(e) {
+            if ($(e.target).is(modal)) {
+                modal.hide();
+            }
+        });
+
         reasonSelect.on('change', function() {
             if ($(this).val() === 'custom') {
                 customReasonWrapper.show();
@@ -41,10 +50,12 @@
             if (reason === 'custom') {
                 reason = customReasonText.val();
             }
+
             if (!reason) {
                 alert('لطفاً یک دلیل برای رد درخواست انتخاب یا وارد کنید.');
                 return;
             }
+
             finalReasonInput.val(reason);
             finalStatusInput.val('rejected');
             adminActionForm.submit();

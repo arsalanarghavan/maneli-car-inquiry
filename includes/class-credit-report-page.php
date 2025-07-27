@@ -23,9 +23,10 @@ class Maneli_Credit_Report_Page {
     
     public function enqueue_admin_assets($hook) {
         $current_screen = get_current_screen();
-        if ($current_screen && $current_screen->id === 'inquiry_page_maneli-credit-report') {
-            wp_enqueue_script('maneli-admin-report-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin-report.js', ['jquery'], '6.0.0', true);
-            wp_enqueue_style('maneli-admin-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/admin-styles.css', [], '6.0.0');
+        if ($current_screen && $current_screen->id === 'toplevel_page_maneli-car-inquiry_page_maneli-credit-report') {
+            $version = '7.0.0';
+            wp_enqueue_script('maneli-admin-report-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin-report.js', ['jquery'], $version, true);
+            wp_enqueue_style('maneli-admin-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/admin-styles.css', [], $version);
         }
     }
 
@@ -117,7 +118,7 @@ class Maneli_Credit_Report_Page {
                     ];
                     foreach ($colors as $code => $color) {
                         $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
-                        echo "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>{$color['name']}</span></div>";
+                        echo "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>" . esc_html($color['name']) . "</span></div>";
                     }
                     ?>
                 </div>
