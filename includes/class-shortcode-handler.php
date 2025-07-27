@@ -16,46 +16,44 @@ class Maneli_Shortcode_Handler {
     }
 
     public function enqueue_assets() {
-        global $post;
-        // Enqueue only once per page load
         if (self::$assets_enqueued) {
             return;
         }
 
-        $load_assets = false;
-        if (is_product()) {
-            $load_assets = true;
-        } elseif (is_a($post, 'WP_Post') && (has_shortcode($post->post_content, 'car_inquiry_form') || has_shortcode($post->post_content, 'maneli_expert_inquiry_list') || has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form'))) {
-            $load_assets = true;
+        global $post;
+        $has_plugin_shortcode = is_a($post, 'WP_Post') && (
+            has_shortcode($post->post_content, 'car_inquiry_form') ||
+            has_shortcode($post->post_content, 'loan_calculator') ||
+            has_shortcode($post->post_content, 'maneli_expert_inquiry_list') ||
+            has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')
+        );
+
+        if (is_product() || $has_plugin_shortcode) {
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.3.0');
+            self::$assets_enqueued = true;
         }
 
-        if ($load_assets) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.2.0');
-            
-            // For customer-facing calculator
-            if (is_product()) {
-                wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '6.2.0', true);
-                if (is_user_logged_in()) {
-                    wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
-                        'ajax_url'         => admin_url('admin-ajax.php'),
-                        'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
-                        'nonce'            => wp_create_nonce('maneli_ajax_nonce')
-                    ]);
-                }
-            }
-            
-            // For expert panel form
-            if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
-                wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-                wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-
-                wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '1.2.0', true);
-                wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce'    => wp_create_nonce('maneli_expert_nonce')
+        // Enqueue scripts for specific shortcodes
+        if (is_product()) {
+            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '6.3.0', true);
+            if (is_user_logged_in()) {
+                wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
+                    'ajax_url'         => admin_url('admin-ajax.php'),
+                    'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
+                    'nonce'            => wp_create_nonce('maneli_ajax_nonce')
                 ]);
             }
-            self::$assets_enqueued = true;
+        }
+        
+        if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
+            wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+            wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+
+            wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '1.3.0', true);
+            wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('maneli_expert_nonce')
+            ]);
         }
     }
 
@@ -66,7 +64,7 @@ class Maneli_Shortcode_Handler {
         }
         
         $user_id = get_current_user_id();
-        $latest_inquiry = get_posts(['author' => $user_id, 'post_type' => 'inquiry', 'posts_per_page' => 1, 'orderby' => 'date', 'order' => 'DESC', 'post_status' => 'publish']);
+        $latest_inquiry = get_posts(['author' => $user_id, 'post_type' => 'inquiry', 'posts_per_page' => 1, 'orderby' => 'date', 'order' => 'DESC', 'post_status' => ['publish', 'private']]);
         $inquiry_step_meta = get_user_meta($user_id, 'maneli_inquiry_step', true);
         
         ob_start();
@@ -358,10 +356,10 @@ class Maneli_Shortcode_Handler {
                     <?php
                     $cheque_color_map = [
                         '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],
-                        '2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی.'],
-                        '3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی.'],
-                        '4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی.'],
-                        '5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی.'],
+                        '2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر مبلغ 50 میلیون ریال تعهد برگشتی.'],
+                        '3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر مبلغ 200 میلیون ریال تعهد برگشتی.'],
+                        '4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر مبلغ 500 میلیون ریال تعهد برگشتی.'],
+                        '5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از مبلغ 500 میلیون ریال تعهد برگشتی.'],
                          0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد.']
                     ];
                     $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];

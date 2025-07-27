@@ -18,7 +18,7 @@ class Maneli_Form_Handler {
         // Admin Workflow Hooks
         add_action('admin_post_maneli_admin_update_status', [$this, 'handle_admin_update_status']);
 
-        // Expert Panel Workflow Hooks
+        // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
     }
@@ -27,7 +27,7 @@ class Maneli_Form_Handler {
         $all_options = get_option('maneli_inquiry_all_options', []);
         $client_id = $all_options['finotex_client_id'] ?? '';
         $api_key = $all_options['finotex_api_key'] ?? '';
-        $result = ['status' => 'failed', 'data' => null, 'raw_response' => ''];
+        $result = ['status' => 'FAILED', 'data' => null, 'raw_response' => ''];
 
         if (empty($client_id) || empty($api_key)) {
             $result['raw_response'] = 'خطای پلاگین: شناسه کلاینت یا توکن فینوتک در تنظیمات وارد نشده است.';
@@ -35,7 +35,8 @@ class Maneli_Form_Handler {
         }
 
         $api_url = "https://api.finnotech.ir/credit/v2/clients/{$client_id}/chequeColorInquiry";
-        $api_url_with_params = add_query_arg(['idCode' => $national_code], $api_url);
+        $track_id = 'maneli_' . uniqid();
+        $api_url_with_params = add_query_arg(['idCode' => $national_code, 'trackId' => $track_id], $api_url);
         
         $response = wp_remote_get($api_url_with_params, [
             'headers' => ['Authorization' => 'Bearer ' . $api_key],

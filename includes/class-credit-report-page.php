@@ -12,7 +12,7 @@ class Maneli_Credit_Report_Page {
 
     public function add_report_page() {
         add_submenu_page(
-            null,
+            'edit.php?post_type=inquiry', // Parent slug for the CPT
             'گزارش کامل اعتبار',
             'گزارش کامل اعتبار',
             'manage_options',
@@ -22,12 +22,13 @@ class Maneli_Credit_Report_Page {
     }
     
     public function enqueue_admin_assets($hook) {
-        $current_screen = get_current_screen();
-        if ($current_screen && $current_screen->id === 'toplevel_page_maneli-car-inquiry_page_maneli-credit-report') {
-            $version = '7.0.0';
-            wp_enqueue_script('maneli-admin-report-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin-report.js', ['jquery'], $version, true);
-            wp_enqueue_style('maneli-admin-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/admin-styles.css', [], $version);
+        // Correct hook for CPT submenu page is 'inquiry_page_maneli-credit-report'
+        if ($hook !== 'inquiry_page_maneli-credit-report') {
+            return;
         }
+        $version = '7.0.1';
+        wp_enqueue_script('maneli-admin-report-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin-report.js', ['jquery'], $version, true);
+        wp_enqueue_style('maneli-admin-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/admin-styles.css', [], $version);
     }
 
     public function render_report_page() {
@@ -127,12 +128,16 @@ class Maneli_Credit_Report_Page {
                     <tbody>
                         <?php
                         $cheque_color_map = [
-                            '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],'2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر ۵۰ م ریال تعهد.'],'3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر ۲۰۰ م ریال تعهد.'],'4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر ۵۰۰ م ریال تعهد.'],'5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از ۵۰۰ م ریال تعهد.'], 0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد یا استعلام ناموفق بود.']];
+                            '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],'2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر مبلغ 50 میلیون ریال تعهد برگشتی.'],'3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر مبلغ 200 میلیون ریال تعهد برگشتی.'],'4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر مبلغ 500 میلیون ریال تعهد برگشتی.'],'5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از مبلغ 500 میلیون ریال تعهد برگشتی.'], 0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد یا استعلام ناموفق بود.']];
                         $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
                         ?>
                         <tr><td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td><td><?php echo esc_html($color_info['desc']); ?></td></tr>
                     </tbody>
                 </table>
+                 <div style="margin-top: 20px;">
+                    <h4>پاسخ خام سرویس:</h4>
+                    <pre style="direction: ltr; text-align: left; background-color: #f1f1f1; padding: 15px; border-radius: 4px; max-height: 300px; overflow-y: auto;"><?php echo esc_html($inquiry->post_content); ?></pre>
+                </div>
             </div>
             
             <div class="report-box report-actions">
