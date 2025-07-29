@@ -14,10 +14,12 @@ class Maneli_Shortcode_Handler {
     }
 
     public function enqueue_assets() {
+        // Always load the main frontend CSS on all frontend pages.
         if (!is_admin()) {
             wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.0');
         }
 
+        // Load scripts for the product page calculator
         if (is_product()) {
             wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.1.0', true);
             if (is_user_logged_in()) {
@@ -29,6 +31,7 @@ class Maneli_Shortcode_Handler {
             }
         }
 
+        // Load scripts ONLY for the expert form shortcode
         global $post;
         if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
             wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
