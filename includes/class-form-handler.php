@@ -223,7 +223,7 @@ class Maneli_Form_Handler {
         $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
 
         if ($authority !== $saved_authority) { 
-            wp_redirect(add_query_arg('payment_status', 'failed', $redirect_url)); 
+            wp_redirect(add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('اطلاعات تراکنش مغایرت دارد.')], $redirect_url)); 
             exit; 
         }
 
@@ -238,10 +238,11 @@ class Maneli_Form_Handler {
                     $this->finalize_inquiry($user_id, true);
                     $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
                 } else {
-                    $redirect_url = add_query_arg('payment_status', 'failed', $redirect_url);
+                    $error_message = $result['errors']['message'] ?? 'تراکنش توسط درگاه تایید نشد.';
+                    $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
                 }
             } else {
-                $redirect_url = add_query_arg('payment_status', 'failed', $redirect_url);
+                $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('خطا در برقراری ارتباط با درگاه پرداخت.')], $redirect_url);
             }
         } else {
             $redirect_url = add_query_arg('payment_status', 'cancelled', $redirect_url);
@@ -255,35 +256,37 @@ class Maneli_Form_Handler {
     }
     
     private function verify_sadad_payment() {
-        if (empty($_POST["OrderId"]) || empty($_POST["token"]) || !isset($_POST["ResCode"])) return;
+        if (empty($_POST["OrderId"]) || !isset($_POST["ResCode"])) return;
 
-        $options = get_option('maneli_inquiry_all_options', []);
-        $terminal_key = $options['sadad_key'] ?? '';
         $order_id = $_POST["OrderId"];
-        $token = $_POST["token"];
         $res_code = $_POST["ResCode"];
-        
-        $user_id = substr($order_id, 10);
-        $user_id = intval($user_id);
-        
+        $user_id = intval(substr($order_id, 10));
         $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
 
         if ($res_code == 0) {
-            $verify_data = [
-                'Token' => $token,
-                'SignData' => $this->sadad_encrypt_pkcs7($token, $terminal_key)
-            ];
-
-            $result = $this->sadad_call_api('https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify', $verify_data);
-
-            if ($result && isset($result->ResCode) && $result->ResCode == 0) {
-                $this->finalize_inquiry($user_id, true);
-                $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
+            if (empty($_POST["token"])) {
+                $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('توکن بازگشتی از بانک نامعتبر است.')], $redirect_url);
             } else {
-                $redirect_url = add_query_arg('payment_status', 'failed', $redirect_url);
+                $token = $_POST["token"];
+                $options = get_option('maneli_inquiry_all_options', []);
+                $terminal_key = $options['sadad_key'] ?? '';
+                $verify_data = [
+                    'Token' => $token,
+                    'SignData' => $this->sadad_encrypt_pkcs7($token, $terminal_key)
+                ];
+                $result = $this->sadad_call_api('https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify', $verify_data);
+
+                if ($result && isset($result->ResCode) && $result->ResCode == 0) {
+                    $this->finalize_inquiry($user_id, true);
+                    $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
+                } else {
+                    $error_message = $result->Description ?? 'تراکنش در مرحله تایید نهایی ناموفق بود.';
+                    $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
+                }
             }
         } else {
-            $redirect_url = add_query_arg('payment_status', 'cancelled', $redirect_url);
+            $error_message = $_POST['Description'] ?? 'تراکنش توسط بانک لغو شد.';
+            $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
         }
 
         delete_user_meta($user_id, 'maneli_payment_order_id');

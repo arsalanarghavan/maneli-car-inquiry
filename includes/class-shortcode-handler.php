@@ -173,22 +173,46 @@ class Maneli_Shortcode_Handler {
             <form id="payment-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
                 <input type="hidden" name="action" value="maneli_start_payment">
                 <?php wp_nonce_field('maneli_payment_nonce'); ?>
+
                 <?php if ($amount > 0 && $discount_code_exists): ?>
-                <div class="form-group"><label for="discount_code_input">کد تخفیف دارید؟</label><input type="text" name="discount_code_input" placeholder="کد تخفیف را وارد کنید"></div>
+                <p class="discount-toggle" style="cursor: pointer;"><a id="show-discount-form">کد تخفیف دارید؟</a></p>
+                <div class="form-group" id="discount-form-wrapper" style="display:none;">
+                    <label for="discount_code_input">کد تخفیف را وارد کنید:</label>
+                    <input type="text" name="discount_code_input" placeholder="کد تخفیف">
+                </div>
                 <?php endif; ?>
+
                 <button type="submit" class="button button-primary"><?php echo ($amount > 0) ? 'پرداخت و ثبت نهایی' : 'ثبت نهایی درخواست'; ?></button>
             </form>
         </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const showDiscountLink = document.getElementById('show-discount-form');
+            if (showDiscountLink) {
+                showDiscountLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const discountWrapper = document.getElementById('discount-form-wrapper');
+                    discountWrapper.style.display = 'block';
+                    this.parentElement.style.display = 'none';
+                });
+            }
+        });
+        </script>
         <?php
     }
     
     private function display_payment_message($status) {
+        $reason = isset($_GET['reason']) ? sanitize_text_field(urldecode($_GET['reason'])) : '';
         switch($status) {
             case 'success': 
                 echo '<div class="status-box status-approved" style="margin-bottom:20px;"><p>پرداخت شما با موفقیت انجام شد. درخواست شما برای کارشناسان ارسال گردید.</p></div>'; 
                 break;
             case 'failed': 
-                echo '<div class="status-box status-failed" style="margin-bottom:20px;"><p>متاسفانه تراکنش شما ناموفق بود. در صورت کسر وجه، مبلغ تا ۷۲ ساعت آینده به حساب شما باز خواهد گشت. لطفاً دوباره تلاش کنید.</p></div>'; 
+                $message = '<p>متاسفانه تراکنش شما ناموفق بود. در صورت کسر وجه، مبلغ تا ۷۲ ساعت آینده به حساب شما باز خواهد گشت.</p>';
+                if (!empty($reason)) {
+                    $message .= '<p><strong>دلیل:</strong> ' . esc_html($reason) . '</p>';
+                }
+                echo '<div class="status-box status-failed" style="margin-bottom:20px;">' . $message . '</div>'; 
                 break;
             case 'cancelled': 
                 echo '<div class="status-box status-pending" style="margin-bottom:20px;"><p>شما پرداخت را لغو کردید. درخواست شما هنوز نهایی نشده است.</p></div>'; 
