@@ -6,50 +6,51 @@ if (!defined('ABSPATH')) {
 class Maneli_Shortcode_Handler {
 
     public function __construct() {
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+        // Register all assets on a standard hook
+        add_action('wp_enqueue_scripts', [$this, 'register_assets']);
+
+        // Define shortcodes
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
         add_shortcode('maneli_expert_inquiry_list', [$this, 'render_maneli_expert_inquiry_list']);
         add_shortcode('maneli_expert_new_inquiry_form', [$this, 'render_maneli_expert_new_inquiry_form']);
     }
 
-    public function enqueue_assets() {
-        // --- START: REVISED ASSET LOADING LOGIC ---
+    public function register_assets() {
+        // Register styles and scripts so they can be enqueued later from the shortcodes
+        wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.8.0');
+        wp_register_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+        
+        wp_register_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '6.8.0', true);
+        wp_register_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+        wp_register_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '1.8.0', true);
 
-        // 1. Always load the main frontend CSS on all frontend pages.
-        // This is the most reliable way to fix styling issues everywhere.
-        if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.7.0');
-        }
+        // Localize data for scripts
+        wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
+            'ajax_url'         => admin_url('admin-ajax.php'),
+            'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
+            'nonce'            => wp_create_nonce('maneli_ajax_nonce')
+        ]);
+        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('maneli_expert_nonce')
+        ]);
+    }
 
-        // 2. Load scripts for the product page calculator
-        if (is_product()) {
-            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '6.7.0', true);
-            if (is_user_logged_in()) {
-                wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
-                    'ajax_url'         => admin_url('admin-ajax.php'),
-                    'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
-                    'nonce'            => wp_create_nonce('maneli_ajax_nonce')
-                ]);
-            }
-        }
+    private function enqueue_customer_assets() {
+        wp_enqueue_style('maneli-frontend-styles');
+    }
 
-        // 3. Load scripts ONLY for the expert form shortcode
-        global $post;
-        if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
-            wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-            wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-
-            wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '1.7.0', true);
-            wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('maneli_expert_nonce')
-            ]);
-        }
-        // --- END: REVISED ASSET LOADING LOGIC ---
+    private function enqueue_expert_form_assets() {
+        wp_enqueue_style('maneli-frontend-styles');
+        wp_enqueue_style('select2');
+        wp_enqueue_script('select2');
+        wp_enqueue_script('maneli-expert-panel-js');
     }
 
     public function render_inquiry_form() {
+        $this->enqueue_customer_assets();
+        
         if (!is_user_logged_in()) { 
             $login_url = home_url('/login/');
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای ثبت و پیگیری استعلام، لطفاً ابتدا <a href="' . esc_url($login_url) . '">وارد شوید</a>.</p></div>'; 
@@ -158,6 +159,8 @@ class Maneli_Shortcode_Handler {
     }
 
     public function render_loan_calculator() {
+        wp_enqueue_style('maneli-frontend-styles');
+        wp_enqueue_script('maneli-calculator-js');
         if (!function_exists('is_product') || !is_product() || !function_exists('WC')) return '';
         global $product;
         if (!$product instanceof WC_Product) return '';
@@ -381,6 +384,8 @@ class Maneli_Shortcode_Handler {
     }
 
     public function render_maneli_expert_new_inquiry_form() {
+        $this->enqueue_expert_form_assets();
+
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما برای استفاده از این فرم باید با نقش کارشناس وارد شده باشید.</p></div>';
         }
@@ -442,6 +447,8 @@ class Maneli_Shortcode_Handler {
     }
 
     public function render_maneli_expert_inquiry_list() {
+        $this->enqueue_customer_assets();
+
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
         }

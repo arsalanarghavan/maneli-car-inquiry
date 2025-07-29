@@ -110,16 +110,16 @@ class Maneli_Form_Handler {
         
         $user_id = get_current_user_id();
         $options = get_option('maneli_inquiry_all_options', []);
-        $amount = (int)($options['inquiry_fee'] ?? 0);
+        $amount_toman = (int)($options['inquiry_fee'] ?? 0);
         $discount_code = $options['discount_code'] ?? '';
         $submitted_code = isset($_POST['discount_code_input']) ? trim($_POST['discount_code_input']) : '';
 
         if (!empty($discount_code) && !empty($submitted_code) && $submitted_code === $discount_code) {
-            $amount = 0;
+            $amount_toman = 0;
             update_user_meta($user_id, 'maneli_discount_applied', 'yes');
         }
 
-        if ($amount <= 0) {
+        if ($amount_toman <= 0) {
             $this->finalize_inquiry($user_id, true);
             wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
             exit;
@@ -129,16 +129,16 @@ class Maneli_Form_Handler {
         $order_id = time() . '-' . $user_id;
 
         update_user_meta($user_id, 'maneli_payment_order_id', $order_id);
-        update_user_meta($user_id, 'maneli_payment_amount', $amount);
+        update_user_meta($user_id, 'maneli_payment_amount', $amount_toman);
 
         if ($active_gateway === 'sadad') {
-            $this->process_sadad_payment($user_id, $order_id, $amount, $options);
+            $this->process_sadad_payment($user_id, $order_id, $amount_toman, $options);
         } else {
-            $this->process_zarinpal_payment($user_id, $order_id, $amount, $options);
+            $this->process_zarinpal_payment($user_id, $order_id, $amount_toman, $options);
         }
     }
     
-    private function process_zarinpal_payment($user_id, $order_id, $amount, $options) {
+    private function process_zarinpal_payment($user_id, $order_id, $amount_toman, $options) {
         $merchant_id = $options['zarinpal_merchant_code'] ?? '';
         if (empty($merchant_id)) { wp_die('مرچنت کد زرین‌پال در تنظیمات وارد نشده است.'); }
         
@@ -146,7 +146,7 @@ class Maneli_Form_Handler {
         $description = "هزینه استعلام به شماره سفارش " . $order_id;
         $callback_url = home_url('/?maneli_payment_verify=zarinpal&uid=' . $user_id);
         
-        $data = ['merchant_id' => $merchant_id, 'amount' => $amount * 10, 'description' => $description, 'callback_url' => $callback_url, 'metadata' => ['email' => $user_info->user_email, 'order_id' => $order_id]];
+        $data = ['merchant_id' => $merchant_id, 'amount' => $amount_toman * 10, 'description' => $description, 'callback_url' => $callback_url, 'metadata' => ['email' => $user_info->user_email, 'order_id' => $order_id]];
         $jsonData = json_encode($data);
         $response = wp_remote_post('https://api.zarinpal.com/pg/v4/payment/request.json', ['method' => 'POST', 'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json'], 'body' => $jsonData]);
         
@@ -162,7 +162,7 @@ class Maneli_Form_Handler {
         }
     }
 
-    private function process_sadad_payment($user_id, $order_id, $amount, $options) {
+    private function process_sadad_payment($user_id, $order_id, $amount_toman, $options) {
         $merchant_id = $options['sadad_merchant_id'] ?? '';
         $terminal_id = $options['sadad_terminal_id'] ?? '';
         $terminal_key = $options['sadad_key'] ?? '';
@@ -170,12 +170,14 @@ class Maneli_Form_Handler {
             wp_die('اطلاعات درگاه پرداخت سداد در تنظیمات کامل نیست.');
         }
 
-        $sign_data = $this->sadad_encrypt_pkcs7("$terminal_id;$order_id;$amount", $terminal_key);
+        $amount_rial = $amount_toman * 10;
+        
+        $sign_data = $this->sadad_encrypt_pkcs7("$terminal_id;$order_id;$amount_rial", $terminal_key);
         
         $data = [
             'TerminalId' => $terminal_id,
             'MerchantId' => $merchant_id,
-            'Amount' => $amount,
+            'Amount' => $amount_rial,
             'SignData' => $sign_data,
             'ReturnUrl' => home_url('/?maneli_payment_verify=sadad'),
             'LocalDateTime' => date("m/d/Y g:i:s a"),
