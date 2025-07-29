@@ -52,7 +52,7 @@
 
             if (price > 0) {
                 const calculatorWrapper = $('#loan-calculator-wrapper');
-                // --- THIS IS THE FIX ---
+                // --- FIX: Corrected the order of number and currency spans ---
                 const calculatorHTML = `
                     <div class="form-grid" style="margin-top: 20px;">
                         <div class="form-row">

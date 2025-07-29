@@ -405,10 +405,10 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما برای استفاده از این فرم باید با نقش کارشناس وارد شده باشید.</p></div>';
         }
         
-        // --- FIX: Enqueue scripts directly here to ensure they are loaded ---
+        // --- Enqueue scripts directly here to ensure they are loaded ---
         wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
         wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.0', true); // Version bump
+        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.2', true); // Version bump
         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('maneli_expert_nonce')

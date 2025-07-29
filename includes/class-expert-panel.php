@@ -18,8 +18,8 @@ class Maneli_Expert_Panel {
         // Security check
         check_ajax_referer('maneli_expert_nonce', 'nonce');
 
-        // Permission check - 'read' is a basic capability that all logged-in users, including experts, have.
-        if (!current_user_can('read')) {
+        // Permission check - Experts need 'edit_posts' capability to search products via admin-ajax.
+        if (!current_user_can('edit_posts')) {
             wp_send_json_error(['message' => 'دسترسی غیر مجاز.']);
         }
 
