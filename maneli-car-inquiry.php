@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.10.45
+ * Version:           0.10.48
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -20,17 +20,22 @@ define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 /**
- * Ensures the 'maneli_expert' role exists on every page load.
+ * Ensures the 'maneli_expert' role exists and has the correct capabilities.
+ * The 'edit_posts' capability is required for product search via admin-ajax.
  */
 function maneli_ensure_expert_role_exists() {
-    if (!get_role('maneli_expert')) {
+    $role = get_role('maneli_expert');
+    if (!$role) {
         add_role(
             'maneli_expert',
             'کارشناس مانلی',
             [
                 'read' => true,
+                'edit_posts' => true, // Capability to access AJAX functionalities and reports
             ]
         );
+    } elseif (!$role->has_cap('edit_posts')) {
+        $role->add_cap('edit_posts');
     }
 }
 add_action('init', 'maneli_ensure_expert_role_exists');
@@ -47,14 +52,9 @@ function maneli_remove_expert_role() {
 /**
  * Redirects users with the 'maneli_expert' role away from the backend dashboard,
  * but allows them to access admin-post.php and admin-ajax.php for form processing.
- * This function is now less strict to allow experts to access frontend pages.
  */
 add_action('admin_init', 'maneli_redirect_experts_from_admin');
 function maneli_redirect_experts_from_admin() {
-    // We remove the forceful redirect to allow experts to use frontend pages with shortcodes.
-    // They are already blocked from most admin pages by capability checks.
-    // If specific pages need to be blocked, it can be done here.
-    // For example, to block the main dashboard:
     global $pagenow;
     if (current_user_can('maneli_expert') && !current_user_can('manage_options') && $pagenow === 'index.php' && !wp_doing_ajax()) {
          wp_redirect(home_url()); // Redirect from main dashboard to homepage

@@ -18,8 +18,8 @@ class Maneli_Expert_Panel {
         // Security check
         check_ajax_referer('maneli_expert_nonce', 'nonce');
 
-        // Permission check
-        if (!current_user_can('read')) { // 'read' is a base capability for experts and admins
+        // Permission check - 'read' is a basic capability that all logged-in users, including experts, have.
+        if (!current_user_can('read')) {
             wp_send_json_error(['message' => 'دسترسی غیر مجاز.']);
         }
 

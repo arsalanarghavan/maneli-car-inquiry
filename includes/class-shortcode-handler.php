@@ -18,7 +18,7 @@ class Maneli_Shortcode_Handler {
     public function enqueue_assets() {
         // Always load the main frontend CSS on all frontend pages.
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.2');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.5');
         }
 
         // Load scripts for the product page calculator
@@ -38,7 +38,7 @@ class Maneli_Shortcode_Handler {
         if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
             wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
             wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-            wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.1.0', true);
+            wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.1.2', true);
             wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce'    => wp_create_nonce('maneli_expert_nonce')
@@ -503,7 +503,6 @@ class Maneli_Shortcode_Handler {
         if (empty($inquiries)) {
             echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی به شما ارجاع داده نشده یا توسط شما ثبت نشده است.</p></div>';
         } else {
-            // IMPORTANT: Make sure you have a page with the slug 'expert-report'
             $report_page_url = home_url('/expert-report/'); 
 
             echo '<h3>لیست استعلام‌های شما</h3>';
@@ -523,7 +522,6 @@ class Maneli_Shortcode_Handler {
                 $customer = get_userdata($customer_id);
                 $product_id = get_post_meta($inquiry_id, 'product_id', true);
                 $status = get_post_meta($inquiry_id, 'inquiry_status', true);
-                // Corrected URL to point to the new frontend report page
                 $report_url = add_query_arg('inquiry_id', $inquiry_id, $report_page_url);
                 
                 echo '<tr class="woocommerce-orders-table__row">';
@@ -543,9 +541,6 @@ class Maneli_Shortcode_Handler {
         return ob_get_clean();
     }
     
-    /**
-     * Renders the full credit report on a frontend page for experts.
-     */
     public function render_frontend_credit_report() {
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
@@ -561,7 +556,6 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>استعلام یافت نشد.</p></div>';
         }
 
-        // Security check: Make sure the current expert is assigned to this inquiry
         $expert_id = get_current_user_id();
         $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
         $created_by_expert_id = get_post_meta($inquiry_id, 'created_by_expert_id', true);
@@ -577,67 +571,68 @@ class Maneli_Shortcode_Handler {
 
         ob_start();
         ?>
-        <div class="maneli-inquiry-wrapper frontend-report-wrapper">
-            <h2 style="text-align:center; margin-bottom: 30px;">گزارش کامل اعتبار <small>(برای استعلام #<?php echo esc_html($inquiry_id); ?>)</small></h2>
+        <div class="maneli-inquiry-wrapper frontend-expert-report">
+            <h2 class="report-main-title">گزارش کامل اعتبار <small>(برای استعلام #<?php echo esc_html($inquiry_id); ?>)</small></h2>
             
             <div class="report-box">
                 <h3 class="report-box-title">خودروی درخواستی</h3>
-                <div class="report-flex-container">
-                    <div class="report-details-table">
-                        <table class="summary-table">
-                            <tbody>
-                                <tr><th scope="row">خودروی انتخابی</th><td><?php echo get_the_title($product_id); ?></td></tr>
-                                <tr><th scope="row">قیمت کل</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)); ?> تومان</td></tr>
-                                <tr><th scope="row">مقدار پیش پرداخت</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)); ?> تومان</td></tr>
-                                <tr><th scope="row">تعداد اقساط</th><td><?php echo esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0); ?> ماهه</td></tr>
-                                <tr><th scope="row">مبلغ هر قسط</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)); ?> تومان</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="report-image-container">
-                        <?php
-                        if ($product_id && has_post_thumbnail($product_id)) {
-                            echo get_the_post_thumbnail($product_id, 'medium');
-                        } else {
-                            echo '<div class="no-image">تصویری برای این محصول ثبت نشده است.</div>';
-                        }
-                        ?>
-                    </div>
+                <div class="report-car-image">
+                    <?php
+                    if ($product_id && has_post_thumbnail($product_id)) {
+                        echo get_the_post_thumbnail($product_id, 'medium');
+                    } else {
+                        echo '<div class="no-image">تصویری برای این محصول ثبت نشده است.</div>';
+                    }
+                    ?>
                 </div>
+                <table class="summary-table">
+                    <tbody>
+                        <tr><th>خودروی انتخابی</th><td><?php echo get_the_title($product_id); ?></td></tr>
+                        <tr><th>قیمت کل</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)); ?> <span>تومان</span></td></tr>
+                        <tr><th>مقدار پیش پرداخت</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)); ?> <span>تومان</span></td></tr>
+                        <tr><th>تعداد اقساط</th><td><?php echo esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0); ?> <span>ماهه</span></td></tr>
+                        <tr><th>مبلغ هر قسط</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)); ?> <span>تومان</span></td></tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="report-box">
                 <h3 class="report-box-title">اطلاعات فردی</h3>
-                <?php
-                $buyer_fields = ['first_name' => 'نام (خریدار)','last_name' => 'نام خانوادگی (خریدار)','national_code' => 'کد ملی (خریدار)','father_name' => 'نام پدر (خریدار)','birth_date' => 'تاریخ تولد (خریدار)','mobile_number' => 'شماره موبایل (خریدار)'];
-                ?>
-                <table class="summary-table full-details-table">
-                    <tbody>
-                        <?php foreach ($buyer_fields as $key => $label): ?>
-                        <tr>
-                            <th scope="row"><?php echo esc_html($label); ?></th>
-                            <td><?php echo esc_html($post_meta[$key][0] ?? ''); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-
+                <div class="form-grid">
+                    <?php
+                    $buyer_fields = ['first_name' => 'نام (خریدار)','last_name' => 'نام خانوادگی (خریدار)','national_code' => 'کد ملی (خریدار)','father_name' => 'نام پدر (خریدار)','birth_date' => 'تاریخ تولد (خریدار)','mobile_number' => 'شماره موبایل (خریدار)'];
+                    $buyer_field_pairs = array_chunk($buyer_fields, 2, true);
+                    foreach ($buyer_field_pairs as $pair) {
+                        echo '<div class="form-row">';
+                        foreach($pair as $key => $label) {
+                            $value = $post_meta[$key][0] ?? '';
+                            echo '<div class="form-group"><label>' . esc_html($label) . '</label><div class="detail-value-box">' . esc_html($value) . '</div></div>';
+                        }
+                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; } // Placeholder for alignment
+                        echo '</div>';
+                    }
+                    ?>
+                </div>
                 <?php
                 $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 if ($issuer_type === 'other'):
-                    $issuer_fields = ['issuer_first_name' => 'نام (صادر کننده چک)','issuer_last_name' => 'نام خانوادگی (صادر کننده چک)','issuer_national_code' => 'کد ملی (صادر کننده چک)','issuer_father_name' => 'نام پدر (صادر کننده چک)','issuer_birth_date' => 'تاریخ تولد (صادر کننده چک)','issuer_mobile_number' => 'شماره موبایل (صادر کننده چک)'];
+                    $issuer_fields = ['issuer_first_name' => 'نام (صادر کننده)','issuer_last_name' => 'نام خانوادگی (صادر کننده)','issuer_national_code' => 'کد ملی (صادر کننده)','issuer_father_name' => 'نام پدر (صادر کننده)','issuer_birth_date' => 'تاریخ تولد (صادر کننده)','issuer_mobile_number' => 'شماره موبایل (صادر کننده)'];
+                    $issuer_field_pairs = array_chunk($issuer_fields, 2, true);
                 ?>
-                    <h4 style="margin-top:25px; border-top:1px solid #eee; padding-top:25px;">اطلاعات صادر کننده چک</h4>
-                    <table class="summary-table full-details-table">
-                        <tbody>
-                            <?php foreach ($issuer_fields as $key => $label): ?>
-                            <tr>
-                                <th scope="row"><?php echo esc_html($label); ?></th>
-                                <td><?php echo esc_html($post_meta[$key][0] ?? ''); ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                    <h4 class="report-section-divider">اطلاعات صادر کننده چک</h4>
+                    <div class="form-grid">
+                    <?php
+                    foreach ($issuer_field_pairs as $pair) {
+                        echo '<div class="form-row">';
+                        foreach($pair as $key => $label) {
+                            $value = $post_meta[$key][0] ?? '';
+                            echo '<div class="form-group"><label>' . esc_html($label) . '</label><div class="detail-value-box">' . esc_html($value) . '</div></div>';
+                        }
+                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; } // Placeholder for alignment
+                        echo '</div>';
+                    }
+                    ?>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -652,21 +647,21 @@ class Maneli_Shortcode_Handler {
                     }
                     ?>
                 </div>
-                 <table class="summary-table" style="margin-top: 20px;">
+                 <table class="summary-table right-aligned-table" style="margin-top: 20px;">
                     <tbody>
                         <?php
                         $cheque_color_map = [
                             '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],'2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر مبلغ 50 میلیون ریال تعهد برگشتی.'],'3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر مبلغ 200 میلیون ریال تعهد برگشتی.'],'4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر مبلغ 500 میلیون ریال تعهد برگشتی.'],'5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از مبلغ 500 میلیون ریال تعهد برگشتی.'], 0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد یا استعلام ناموفق بود.']];
                         $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
                         ?>
-                        <tr><th scope="row" style="width: 20%;">وضعیت اعتباری</th><td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td></tr>
-                        <tr><th scope="row">توضیح</th><td><?php echo esc_html($color_info['desc']); ?></td></tr>
+                        <tr><th>وضعیت اعتباری</th><td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td></tr>
+                        <tr><th>توضیح</th><td><?php echo esc_html($color_info['desc']); ?></td></tr>
                     </tbody>
                 </table>
             </div>
 
-            <div style="margin-top: 40px; text-align:center;">
-                <a href="<?php echo esc_url(home_url('/expert-dashboard/')); ?>" class="loan-action-btn">بازگشت به لیست استعلام‌ها</a>
+            <div class="report-back-button-wrapper">
+                <a href="<?php echo esc_url(home_url('/dashboard/?endp=inf_menu_3')); ?>" class="loan-action-btn">بازگشت به لیست استعلام‌ها</a>
             </div>
         </div>
         <?php

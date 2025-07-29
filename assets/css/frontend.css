@@ -9,10 +9,6 @@
 .loan-calculator-form {
     max-width: 600px;
     margin: 40px auto;
-    border: none;
-    padding: 0;
-    background-color: transparent;
-    box-shadow: none;
 }
 
 .loan-calculator-form .loan-section {
@@ -286,7 +282,7 @@
     border-collapse: collapse;
     font-size: 14px;
 }
-.summary-table td {
+.summary-table td, .summary-table th {
     padding: 10px 5px;
     border: none;
 }
@@ -296,16 +292,18 @@
 .summary-table tr:last-child {
     border-bottom: none;
 }
+.summary-table th,
 .summary-table td:first-child {
     text-align: right;
     font-weight: bold;
     color: #555;
+    width: 30%;
 }
-.summary-table td:last-child {
+.summary-table td {
     text-align: left;
     direction: ltr;
 }
-.summary-table td:last-child span {
+.summary-table td span {
     margin-right: 5px;
     font-weight: normal;
     color: #555;
@@ -428,3 +426,107 @@
 .maneli-expert-panel .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 30px; }
 .maneli-expert-panel .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px; }
 .maneli-table { font-family: inherit; }
+
+/* === START: Button Hover Fix === */
+.loan-action-btn {
+    border: 2px solid var(--theme-blue);
+    transition: all 0.2s ease-in-out;
+}
+.loan-action-btn:hover {
+    background: #fff;
+    color: var(--theme-blue);
+    opacity: 1;
+}
+/* === END: Button Hover Fix === */
+
+
+/* === START: Expert Frontend Report Styles === */
+.frontend-expert-report {
+    max-width: 800px;
+    margin: 40px auto;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.frontend-expert-report .report-main-title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+.frontend-expert-report .report-main-title small {
+    font-size: 16px;
+    color: #777;
+    display: block;
+    margin-top: 5px;
+}
+.frontend-expert-report .report-box {
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eee;
+}
+.frontend-expert-report .report-box:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.frontend-expert-report .report-box-title {
+    font-size: 18px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Car Section */
+.frontend-expert-report .report-car-image {
+    text-align: center;
+    margin-bottom: 25px;
+}
+.frontend-expert-report .report-car-image img {
+    max-width: 300px;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Personal Info Section */
+.frontend-expert-report .form-grid .form-group label {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+}
+.frontend-expert-report .form-grid .form-group .detail-value-box {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    min-height: 42px;
+    text-align: right;
+    width: 100%;
+    box-sizing: border-box;
+}
+.frontend-expert-report .report-section-divider {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #eee;
+}
+
+/* Result Table */
+.frontend-expert-report .right-aligned-table th,
+.frontend-expert-report .right-aligned-table td {
+    text-align: right;
+}
+.frontend-expert-report .right-aligned-table th {
+    width: 30%;
+}
+
+/* Back Button */
+.frontend-expert-report .report-back-button-wrapper {
+    margin-top: 30px;
+    text-align: center;
+}
+/* === END: Expert Frontend Report Styles === */
