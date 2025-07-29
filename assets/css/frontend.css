@@ -9,7 +9,10 @@
 .loan-calculator-form {
     max-width: 600px;
     margin: 40px auto;
-    /* The border, padding, background-color, and box-shadow have been removed. */
+    border: none;
+    padding: 0;
+    background-color: transparent;
+    box-shadow: none;
 }
 
 .loan-calculator-form .loan-section {
