@@ -2,7 +2,6 @@
     'use strict';
 
     $(document).ready(function() {
-
         const expertForm = $('#expert-inquiry-form');
         if (!expertForm.length) {
             return;
@@ -11,7 +10,6 @@
         const productSelect = $('#product_id_expert');
         const detailsWrapper = $('#expert-form-details');
 
-        // --- HELPER FUNCTIONS ---
         const formatMoney = (num) => {
             if (isNaN(num) || num === null) return '-';
             return Math.ceil(num).toLocaleString('fa-IR');
@@ -19,12 +17,9 @@
 
         const parseMoney = (str) => {
              if (!str) return 0;
-             // Use en-US formatted numbers from input for reliable parsing
              return parseInt(String(str).replace(/,/g, ''), 10) || 0;
         };
 
-
-        // --- Initialize Select2 AJAX Car Search ---
         productSelect.select2({
             placeholder: 'نام خودرو را جستجو کنید...',
             dir: "rtl",
@@ -50,7 +45,6 @@
             }
         });
 
-        // --- Handle actions after a car is selected ---
         productSelect.on('select2:select', function(e) {
             const data = e.params.data;
             const price = parseInt(data.price);
@@ -58,7 +52,6 @@
 
             if (price > 0) {
                 const calculatorWrapper = $('#loan-calculator-wrapper');
-                // --- CORRECTED HTML STRUCTURE ---
                 const calculatorHTML = `
                     <div class="form-grid" style="margin-top: 20px;">
                         <div class="form-row">
