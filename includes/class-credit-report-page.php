@@ -52,10 +52,10 @@ class Maneli_Credit_Report_Page {
                         <table class="form-table">
                             <tbody>
                                 <tr><th scope="row">خودروی انتخابی</th><td><?php echo get_the_title($product_id); ?></td></tr>
-                                <tr><th scope="row">قیمت کل</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)); ?> تومان</td></tr>
-                                <tr><th scope="row">مقدار پیش پرداخت</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)); ?> تومان</td></tr>
-                                <tr><th scope="row">تعداد اقساط</th><td><?php echo esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0); ?> ماهه</td></tr>
-                                <tr><th scope="row">مبلغ هر قسط</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)); ?> تومان</td></tr>
+                                <tr><th scope="row">قیمت کل</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0))); ?></td></tr>
+                                <tr><th scope="row">مقدار پیش پرداخت</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0))); ?></td></tr>
+                                <tr><th scope="row">تعداد اقساط</th><td><?php printf('%s <span>ماهه</span>', esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0)); ?></td></tr>
+                                <tr><th scope="row">مبلغ هر قسط</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0))); ?></td></tr>
                             </tbody>
                         </table>
                     </div>

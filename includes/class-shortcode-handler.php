@@ -18,7 +18,7 @@ class Maneli_Shortcode_Handler {
     public function enqueue_assets() {
         // Always load the main frontend CSS on all frontend pages.
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.5');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.7');
         }
 
         // Load scripts for the product page calculator
@@ -31,18 +31,6 @@ class Maneli_Shortcode_Handler {
                     'nonce'            => wp_create_nonce('maneli_ajax_nonce')
                 ]);
             }
-        }
-
-        // Load scripts ONLY for the expert form shortcode
-        global $post;
-        if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
-            wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-            wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-            wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.1.2', true);
-            wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('maneli_expert_nonce')
-            ]);
         }
     }
 
@@ -416,6 +404,15 @@ class Maneli_Shortcode_Handler {
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما برای استفاده از این فرم باید با نقش کارشناس وارد شده باشید.</p></div>';
         }
+        
+        // --- FIX: Enqueue scripts directly here to ensure they are loaded ---
+        wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.0', true); // Version bump
+        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('maneli_expert_nonce')
+        ]);
 
         ob_start();
 
@@ -588,10 +585,10 @@ class Maneli_Shortcode_Handler {
                 <table class="summary-table">
                     <tbody>
                         <tr><th>خودروی انتخابی</th><td><?php echo get_the_title($product_id); ?></td></tr>
-                        <tr><th>قیمت کل</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)); ?> <span>تومان</span></td></tr>
-                        <tr><th>مقدار پیش پرداخت</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)); ?> <span>تومان</span></td></tr>
-                        <tr><th>تعداد اقساط</th><td><?php echo esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0); ?> <span>ماهه</span></td></tr>
-                        <tr><th>مبلغ هر قسط</th><td><?php echo number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)); ?> <span>تومان</span></td></tr>
+                        <tr><th>قیمت کل</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0))); ?></td></tr>
+                        <tr><th>مقدار پیش پرداخت</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0))); ?></td></tr>
+                        <tr><th>تعداد اقساط</th><td><?php printf('%s <span>ماهه</span>', esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0)); ?></td></tr>
+                        <tr><th>مبلغ هر قسط</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0))); ?></td></tr>
                     </tbody>
                 </table>
             </div>

@@ -299,9 +299,9 @@
     color: #555;
     width: 30%;
 }
+/* THIS IS THE FIX: Removed 'direction: ltr' and set text-align to right */
 .summary-table td {
-    text-align: left;
-    direction: ltr;
+    text-align: right;
 }
 .summary-table td span {
     margin-right: 5px;

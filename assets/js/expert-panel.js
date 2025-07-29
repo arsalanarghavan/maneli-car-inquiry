@@ -52,6 +52,7 @@
 
             if (price > 0) {
                 const calculatorWrapper = $('#loan-calculator-wrapper');
+                // --- THIS IS THE FIX ---
                 const calculatorHTML = `
                     <div class="form-grid" style="margin-top: 20px;">
                         <div class="form-row">
@@ -73,15 +74,15 @@
                         <div class="form-row" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
                            <div class="form-group">
                                 <label>مبلغ کل وام</label>
-                                <div class="result-display"><span>تومان</span> <span id="expert-loan-amount">-</span></div>
+                                <div class="result-display"><span id="expert-loan-amount">-</span> <span>تومان</span></div>
                             </div>
                              <div class="form-group">
                                 <label>مبلغ کل بازپرداخت</label>
-                                <div class="result-display"><span>تومان</span> <span id="expert-total-repayment">-</span></div>
+                                <div class="result-display"><span id="expert-total-repayment">-</span> <span>تومان</span></div>
                             </div>
                              <div class="form-group">
                                 <label>مبلغ تقریبی هر قسط</label>
-                                <div class="result-display" style="color: #2D89BE; font-size: 1.3em;"><span>تومان</span> <span id="expert-installment-amount">-</span></div>
+                                <div class="result-display" style="color: #2D89BE; font-size: 1.3em;"><span id="expert-installment-amount">-</span> <span>تومان</span></div>
                             </div>
                         </div>
                     </div>`;
