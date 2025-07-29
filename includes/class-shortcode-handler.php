@@ -6,51 +6,77 @@ if (!defined('ABSPATH')) {
 class Maneli_Shortcode_Handler {
 
     public function __construct() {
-        // Register all assets on a standard hook
-        add_action('wp_enqueue_scripts', [$this, 'register_assets']);
-
-        // Define shortcodes
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
         add_shortcode('maneli_expert_inquiry_list', [$this, 'render_maneli_expert_inquiry_list']);
         add_shortcode('maneli_expert_new_inquiry_form', [$this, 'render_maneli_expert_new_inquiry_form']);
     }
 
-    public function register_assets() {
-        // Register styles and scripts so they can be enqueued later from the shortcodes
-        wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '6.8.0');
-        wp_register_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-        
-        wp_register_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '6.8.0', true);
-        wp_register_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-        wp_register_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '1.8.0', true);
+    public function enqueue_assets() {
+        if (!is_admin()) {
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.0');
+        }
 
-        // Localize data for scripts
-        wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
-            'ajax_url'         => admin_url('admin-ajax.php'),
-            'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
-            'nonce'            => wp_create_nonce('maneli_ajax_nonce')
-        ]);
-        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('maneli_expert_nonce')
-        ]);
+        if (is_product()) {
+            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.1.0', true);
+            if (is_user_logged_in()) {
+                wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
+                    'ajax_url'         => admin_url('admin-ajax.php'),
+                    'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
+                    'nonce'            => wp_create_nonce('maneli_ajax_nonce')
+                ]);
+            }
+        }
+
+        global $post;
+        if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_expert_new_inquiry_form')) {
+            wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+            wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+            wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.1.0', true);
+            wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('maneli_expert_nonce')
+            ]);
+        }
     }
 
-    private function enqueue_customer_assets() {
-        wp_enqueue_style('maneli-frontend-styles');
-    }
-
-    private function enqueue_expert_form_assets() {
-        wp_enqueue_style('maneli-frontend-styles');
-        wp_enqueue_style('select2');
-        wp_enqueue_script('select2');
-        wp_enqueue_script('maneli-expert-panel-js');
+    public function render_loan_calculator() {
+        if (!function_exists('is_product') || !is_product() || !function_exists('WC')) return '';
+        global $product;
+        if (!$product instanceof WC_Product) return '';
+        $price = (int)$product->get_price();
+        $min_down_payment = (int)get_post_meta($product->get_id(), 'min_downpayment', true);
+        $max_down_payment = (int)($price * 0.8);
+        ob_start();
+        ?>
+        <div class="maneli-calculator-container">
+            <form class="loan-calculator-form" method="post">
+                <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
+                <?php wp_nonce_field('maneli_ajax_nonce'); ?>
+                <div id="loan-calculator" data-price="<?php echo esc_attr($price); ?>" data-min-down="<?php echo esc_attr($min_down_payment); ?>" data-max-down="<?php echo esc_attr($max_down_payment); ?>">
+                    <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
+                    <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" step="1000000"></div><input type="range" id="downPaymentSlider" step="1000000"><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span><span id="minDownDisplay"></span> تومان</span></div></div>
+                    <div class="loan-section"><h4 class="loan-subtitle">شرایط مورد نیاز</h4><ul class="loan-requirements"><li>۱. شناسنامه - کارت ملی</li><li>۲. دسته چک</li><li>۳. پرینت سه ماه آخر حساب (صاحب چک)</li><li>۴. فیش حقوق یا جواز کسب (متقاضی و صاحب چک)</li></ul></div>
+                    <div class="loan-section"><label class="loan-label">مدت زمان باز پرداخت:</label><div class="loan-buttons"><button type="button" class="term-btn active" data-months="12">۱۲ ماهه</button><button type="button" class="term-btn" data-months="18">۱۸ ماهه</button><button type="button" class="term-btn" data-months="24">۲۴ ماهه</button><button type="button" class="term-btn" data-months="36">۳۶ ماهه</button></div></div>
+                    <div class="loan-section result-section"><strong>مبلغ تقریبی هر قسط:</strong><span id="installmentAmount">0</span><span> تومان</span></div>
+                    <div class="loan-section loan-action-wrapper">
+                        <?php if (is_user_logged_in()): ?>
+                            <button type="button" class="loan-action-btn">استعلام سنجی بانکی جهت خرید خودرو</button>
+                        <?php else:
+                            $login_url = home_url('/login/?redirect_to=' . urlencode(get_permalink()));
+                            ?>
+                            <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn">برای استعلام ابتدا وارد شوید</a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <?php
+        return ob_get_clean();
     }
 
     public function render_inquiry_form() {
-        $this->enqueue_customer_assets();
-        
         if (!is_user_logged_in()) { 
             $login_url = home_url('/login/');
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای ثبت و پیگیری استعلام، لطفاً ابتدا <a href="' . esc_url($login_url) . '">وارد شوید</a>.</p></div>'; 
@@ -69,6 +95,9 @@ class Maneli_Shortcode_Handler {
             if (in_array($status, ['user_confirmed', 'rejected'])) { $current_step_number = 5; } 
             else { $current_step_number = 4; }
         } else {
+            if (isset($_GET['payment_status'])) {
+                $this->display_payment_message(sanitize_text_field($_GET['payment_status']));
+            }
             if ($inquiry_step_meta === 'form_pending') { $current_step_number = 2; }
             elseif ($inquiry_step_meta === 'payment_pending') { $current_step_number = 3; }
         }
@@ -152,47 +181,18 @@ class Maneli_Shortcode_Handler {
     
     private function display_payment_message($status) {
         switch($status) {
-            case 'success': echo '<div class="status-box status-approved" style="margin-bottom:20px;"><p>پرداخت شما با موفقیت انجام شد.</p></div>'; break;
-            case 'failed': echo '<div class="status-box status-failed" style="margin-bottom:20px;"><p>متاسفانه پرداخت شما ناموفق بود. لطفاً دوباره تلاش کنید.</p></div>'; break;
-            case 'cancelled': echo '<div class="status-box status-pending" style="margin-bottom:20px;"><p>شما پرداخت را لغو کردید. درخواست شما هنوز نهایی نشده است.</p></div>'; break;
+            case 'success': 
+                echo '<div class="status-box status-approved" style="margin-bottom:20px;"><p>پرداخت شما با موفقیت انجام شد. درخواست شما برای کارشناسان ارسال گردید.</p></div>'; 
+                break;
+            case 'failed': 
+                echo '<div class="status-box status-failed" style="margin-bottom:20px;"><p>متاسفانه تراکنش شما ناموفق بود. در صورت کسر وجه، مبلغ تا ۷۲ ساعت آینده به حساب شما باز خواهد گشت. لطفاً دوباره تلاش کنید.</p></div>'; 
+                break;
+            case 'cancelled': 
+                echo '<div class="status-box status-pending" style="margin-bottom:20px;"><p>شما پرداخت را لغو کردید. درخواست شما هنوز نهایی نشده است.</p></div>'; 
+                break;
         }
     }
-
-    public function render_loan_calculator() {
-        wp_enqueue_style('maneli-frontend-styles');
-        wp_enqueue_script('maneli-calculator-js');
-        if (!function_exists('is_product') || !is_product() || !function_exists('WC')) return '';
-        global $product;
-        if (!$product instanceof WC_Product) return '';
-        $price = (int)$product->get_price();
-        $min_down_payment = (int)get_post_meta($product->get_id(), 'min_downpayment', true);
-        $max_down_payment = (int)($price * 0.8);
-        ob_start();
-        ?>
-        <form class="loan-calculator-form" method="post">
-            <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
-            <?php wp_nonce_field('maneli_ajax_nonce'); ?>
-            <div id="loan-calculator" data-price="<?php echo esc_attr($price); ?>" data-min-down="<?php echo esc_attr($min_down_payment); ?>" data-max-down="<?php echo esc_attr($max_down_payment); ?>">
-                <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
-                <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" step="1000000"></div><input type="range" id="downPaymentSlider" step="1000000"><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span><span id="minDownDisplay"></span> تومان</span></div></div>
-                <div class="loan-section"><h4 class="loan-subtitle">شرایط مورد نیاز</h4><ul class="loan-requirements"><li>۱. شناسنامه - کارت ملی</li><li>۲. دسته چک</li><li>۳. پرینت سه ماه آخر حساب (صاحب چک)</li><li>۴. فیش حقوق یا جواز کسب (متقاضی و صاحب چک)</li></ul></div>
-                <div class="loan-section"><label class="loan-label">مدت زمان باز پرداخت:</label><div class="loan-buttons"><button type="button" class="term-btn active" data-months="12">۱۲ ماهه</button><button type="button" class="term-btn" data-months="18">۱۸ ماهه</button><button type="button" class="term-btn" data-months="24">۲۴ ماهه</button><button type="button" class="term-btn" data-months="36">۳۶ ماهه</button></div></div>
-                <div class="loan-section result-section"><strong>مبلغ تقریبی هر قسط:</strong><span id="installmentAmount">0</span><span> تومان</span></div>
-                <div class="loan-section loan-action-wrapper">
-                    <?php if (is_user_logged_in()): ?>
-                        <button type="button" class="loan-action-btn">استعلام سنجی بانکی جهت خرید خودرو</button>
-                    <?php else:
-                        $login_url = home_url('/login/?redirect_to=' . urlencode(get_permalink()));
-                        ?>
-                        <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn">برای استعلام ابتدا وارد شوید</a>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </form>
-        <?php
-        return ob_get_clean();
-    }
-
+    
     private function render_step1_car_selection() {
         echo "<div class='maneli-inquiry-form'><h3>مرحله ۱: انتخاب خودرو</h3><p>برای شروع فرآیند استعلام، لطفاً ابتدا از صفحه یکی از محصولات، خودروی مورد نظر خود را انتخاب کرده و روی دکمه «استعلام سنجی بانکی» کلیک کنید.</p></div>";
     }
@@ -384,8 +384,6 @@ class Maneli_Shortcode_Handler {
     }
 
     public function render_maneli_expert_new_inquiry_form() {
-        $this->enqueue_expert_form_assets();
-
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما برای استفاده از این فرم باید با نقش کارشناس وارد شده باشید.</p></div>';
         }
@@ -447,8 +445,6 @@ class Maneli_Shortcode_Handler {
     }
 
     public function render_maneli_expert_inquiry_list() {
-        $this->enqueue_customer_assets();
-
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
         }

@@ -125,7 +125,7 @@ class Maneli_Form_Handler {
         }
 
         $active_gateway = $options['active_gateway'] ?? 'zarinpal';
-        $order_id = time() . $user_id; // Using a purely numeric Order ID
+        $order_id = time() . $user_id;
 
         update_user_meta($user_id, 'maneli_payment_order_id', $order_id);
         update_user_meta($user_id, 'maneli_payment_amount', $amount_toman);
@@ -171,7 +171,7 @@ class Maneli_Form_Handler {
 
         $amount_rial = $amount_toman * 10;
         if ($amount_rial < 1000) {
-            $amount_rial = 1000; // Sadad minimum amount is 1000 Rials
+            $amount_rial = 1000;
         }
         
         $sign_data = $this->sadad_encrypt_pkcs7("$terminal_id;$order_id;$amount_rial", $terminal_key);
@@ -263,7 +263,7 @@ class Maneli_Form_Handler {
         $token = $_POST["token"];
         $res_code = $_POST["ResCode"];
         
-        $user_id = substr($order_id, 10); // Extract user_id from OrderId
+        $user_id = substr($order_id, 10);
         $user_id = intval($user_id);
         
         $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
