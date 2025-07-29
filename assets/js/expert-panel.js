@@ -58,39 +58,40 @@
 
             if (price > 0) {
                 const calculatorWrapper = $('#loan-calculator-wrapper');
+                // --- CORRECTED HTML STRUCTURE ---
                 const calculatorHTML = `
-                    <table class="form-table">
-                        <tbody>
-                            <tr>
-                                <th><label for="expert_down_payment">مبلغ پیش پرداخت (تومان)</label></th>
-                                <td>
-                                    <input type="text" id="expert_down_payment" name="down_payment" class="regular-text" required>
-                                    <p class="description">حداقل پیش‌پرداخت پیشنهادی: ${formatMoney(minDownPayment)} تومان</p>
-                                </td>
-                                <th><label for="expert_term_months">مدت بازپرداخت (ماه)</label></th>
-                                <td>
-                                    <select name="term_months" id="expert_term_months" class="regular-text">
-                                        <option value="12">۱۲ ماهه</option>
-                                        <option value="18" selected>۱۸ ماهه</option>
-                                        <option value="24">۲۴ ماهه</option>
-                                        <option value="36">۳۶ ماهه</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th><label>مبلغ کل وام</label></th>
-                                <td class="result-display"><span id="expert-loan-amount">-</span> تومان</td>
-                                <th><label>مبلغ کل بازپرداخت</label></th>
-                                <td class="result-display"><span id="expert-total-repayment">-</span> تومان</td>
-                            </tr>
-                            <tr>
-                                <th style="font-size: 1.2em;"><label>مبلغ هر قسط</label></th>
-                                <td class="result-display" style="font-size: 1.2em; color: #2D89BE; font-weight: bold;"><span id="expert-installment-amount">-</span> تومان</td>
-                                <td></td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </table>`;
+                    <div class="form-grid" style="margin-top: 20px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expert_down_payment">مبلغ پیش پرداخت (تومان)</label>
+                                <input type="text" id="expert_down_payment" name="down_payment" class="regular-text" required>
+                                <p class="description" style="margin-top: 5px;">حداقل پیش‌پرداخت پیشنهادی: ${formatMoney(minDownPayment)} تومان</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="expert_term_months">مدت بازپرداخت (ماه)</label>
+                                <select name="term_months" id="expert_term_months" class="regular-text">
+                                    <option value="12">۱۲ ماهه</option>
+                                    <option value="18" selected>۱۸ ماهه</option>
+                                    <option value="24">۲۴ ماهه</option>
+                                    <option value="36">۳۶ ماهه</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
+                           <div class="form-group">
+                                <label>مبلغ کل وام</label>
+                                <div class="result-display"><span>تومان</span> <span id="expert-loan-amount">-</span></div>
+                            </div>
+                             <div class="form-group">
+                                <label>مبلغ کل بازپرداخت</label>
+                                <div class="result-display"><span>تومان</span> <span id="expert-total-repayment">-</span></div>
+                            </div>
+                             <div class="form-group">
+                                <label>مبلغ تقریبی هر قسط</label>
+                                <div class="result-display" style="color: #2D89BE; font-size: 1.3em;"><span>تومان</span> <span id="expert-installment-amount">-</span></div>
+                            </div>
+                        </div>
+                    </div>`;
 
                 calculatorWrapper.html(calculatorHTML);
                 detailsWrapper.slideDown();
@@ -119,7 +120,7 @@
                     if (loanAmount <= 0) {
                         installmentDisplay.text('0');
                         loanAmountDisplay.text('0');
-                        totalRepaymentDisplay.text(formatMoney(price));
+                        totalRepaymentDisplay.text(formatMoney(dp));
                         return;
                     }
 
