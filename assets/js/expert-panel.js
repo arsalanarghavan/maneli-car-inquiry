@@ -33,7 +33,7 @@
                 data: function(params) {
                     return {
                         action: 'maneli_search_cars',
-                        nonce: maneli_expert_ajax.nonce,
+                        security_nonce: maneli_expert_ajax.security_nonce, // Corrected nonce key
                         search: params.term,
                     };
                 },
@@ -52,7 +52,6 @@
 
             if (price > 0) {
                 const calculatorWrapper = $('#loan-calculator-wrapper');
-                // --- FIX: Corrected the order of number and currency spans ---
                 const calculatorHTML = `
                     <div class="form-grid" style="margin-top: 20px;">
                         <div class="form-row">

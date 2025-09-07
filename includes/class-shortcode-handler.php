@@ -24,7 +24,7 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.3');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.4');
             
             // Enqueue scripts for the product page calculator
             if (is_product()) {
@@ -39,16 +39,15 @@ class Maneli_Shortcode_Handler {
             }
             
             // Enqueue scripts for the expert/admin new inquiry form
-            // FIX: Check if the current user has the capability to see the form, then load scripts.
             if (is_user_logged_in() && (current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
                 global $post;
                 if ($post && has_shortcode($post->post_content, 'car_inquiry_form')) {
                     wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-                    wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.7', true);
+                    wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.8', true);
                     wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
                         'ajax_url' => admin_url('admin-ajax.php'),
-                        'nonce'    => wp_create_nonce('maneli_expert_nonce')
+                        'security_nonce'    => wp_create_nonce('maneli_expert_search_nonce')
                     ]);
                 }
             }
@@ -170,6 +169,10 @@ class Maneli_Shortcode_Handler {
     private function render_step_payment($user_id) {
         $options = get_option('maneli_inquiry_all_options', []);
         $amount = (int)($options['inquiry_fee'] ?? 0);
+        $payment_enabled = isset($options['payment_enabled']) && $options['payment_enabled'] == '1';
+
+        if (!$payment_enabled) { return; }
+
         $discount_code_exists = !empty($options['discount_code']);
         $discount_text = $options['discount_code_text'] ?? 'تخفیف ۱۰۰٪ با موفقیت اعمال شد.';
         $zero_fee_message = $options['zero_fee_message'] ?? 'هزینه استعلام برای شما رایگان در نظر گرفته شده است. لطفاً برای ادامه روی دکمه زیر کلیک کنید.';
@@ -762,7 +765,10 @@ class Maneli_Shortcode_Handler {
         ob_start();
         ?>
         <div class="maneli-inquiry-wrapper">
-            <h3>لیست کامل کاربران</h3>
+            <div class="user-list-header">
+                <h3>لیست کامل کاربران</h3>
+                <a href="<?php echo esc_url(admin_url('user-new.php')); ?>" target="_blank" class="button button-primary">افزودن کاربر جدید</a>
+            </div>
             <table class="shop_table shop_table_responsive">
                 <thead>
                     <tr>

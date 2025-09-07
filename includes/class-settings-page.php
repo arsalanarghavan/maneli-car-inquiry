@@ -1,4 +1,5 @@
 <?php
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -93,8 +94,7 @@ class Maneli_Settings_Page {
     public function sanitize_and_merge_options($input) {
         $old_options = get_option($this->options_name, []);
         
-        // Ensure checkboxes are saved correctly
-        $checkboxes = ['finotex_enabled', 'zarinpal_enabled', 'sadad_enabled'];
+        $checkboxes = ['payment_enabled', 'finotex_enabled', 'zarinpal_enabled', 'sadad_enabled'];
         foreach ($checkboxes as $cb) {
             if (!isset($input[$cb])) {
                 $input[$cb] = '0';
@@ -127,15 +127,10 @@ class Maneli_Settings_Page {
             case 'textarea':
                 echo "<textarea name='{$field_name}' rows='3' class='large-text' dir='ltr'>" . esc_textarea($value) . "</textarea>";
                 break;
-            case 'checkbox':
-                echo "<label><input type='checkbox' name='{$field_name}' value='1' " . checked('1', $value, false) . "></label>";
-                break;
-            case 'radio':
-                 if (!empty($args['options'])) {
-                    foreach ($args['options'] as $key => $label) {
-                        echo "<label style='margin-left: 15px;'><input type='radio' name='{$field_name}' value='{$key}' " . checked($key, $value, false) . "> " . esc_html($label) . "</label>";
-                    }
-                 }
+            case 'switch':
+                echo '<label class="maneli-switch">';
+                echo "<input type='checkbox' name='{$field_name}' value='1' " . checked('1', $value, false) . '>';
+                echo '<span class="maneli-slider round"></span></label>';
                 break;
             default:
                 echo "<input type='{$type}' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
@@ -172,6 +167,15 @@ class Maneli_Settings_Page {
             .maneli-frontend-settings .button-primary { font-size: 16px !important; padding: 8px 20px !important; height: auto !important; }
             .maneli-frontend-settings h3 { margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
             .maneli-frontend-settings .expert-list-table { width: 100%; }
+            .maneli-frontend-settings .user-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;}
+            .maneli-frontend-settings .user-list-header a.button { font-size: 14px !important; padding: 4px 15px !important; height: auto !important; }
+            .maneli-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+            .maneli-switch input { opacity: 0; width: 0; height: 0; }
+            .maneli-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+            .maneli-slider.round { border-radius: 28px; }
+            .maneli-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+            input:checked + .maneli-slider { background-color: #2D89BE; }
+            input:checked + .maneli-slider:before { transform: translateX(22px); }
         </style>
         <?php
         return ob_get_clean();
@@ -233,7 +237,7 @@ class Maneli_Settings_Page {
                 'maneli_finotex_cheque_section' => [
                     'title' => 'سرویس استعلام رنگ چک', 'desc' => '',
                     'fields' => [
-                        ['name' => 'finotex_enabled', 'label' => 'فعال‌سازی استعلام فینوتک', 'type' => 'checkbox', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.'],
+                        ['name' => 'finotex_enabled', 'label' => 'فعال‌سازی استعلام فینوتک', 'type' => 'switch', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.'],
                         ['name' => 'finotex_client_id', 'label' => 'شناسه کلاینت (Client ID)', 'type' => 'text'],
                         ['name' => 'finotex_api_key', 'label' => 'توکن دسترسی (Access Token)', 'type' => 'textarea'],
                     ]
@@ -243,9 +247,9 @@ class Maneli_Settings_Page {
                 'maneli_payment_general_section' => [
                     'title' => 'تنظیمات عمومی پرداخت', 'desc' => '',
                     'fields' => [
+                        ['name' => 'payment_enabled', 'label' => 'فعال‌سازی درگاه پرداخت', 'type' => 'switch', 'desc' => 'با فعال‌سازی این گزینه، مرحله پرداخت هزینه استعلام برای کاربران نمایش داده می‌شود.'],
                         ['name' => 'inquiry_fee', 'label' => 'هزینه استعلام (تومان)', 'type' => 'number', 'desc' => 'مبلغ را به تومان وارد کنید. برای رایگان بودن، عدد 0 را وارد کنید.'],
                         ['name' => 'zero_fee_message', 'label' => 'پیام در صورت رایگان بودن استعلام', 'type' => 'textarea', 'desc' => 'این پیام زمانی نمایش داده می‌شود که هزینه استعلام 0 باشد.'],
-                        ['name' => 'active_gateway', 'label' => 'درگاه پرداخت فعال', 'type' => 'radio', 'options' => ['zarinpal' => 'زرین‌پال', 'sadad' => 'پرداخت سداد (بانک ملی)']],
                     ]
                 ],
                  'maneli_discount_section' => [
@@ -258,14 +262,14 @@ class Maneli_Settings_Page {
                 'maneli_zarinpal_section' => [
                     'title' => 'تنظیمات زرین‌پال', 'desc' => '',
                     'fields' => [
-                         ['name' => 'zarinpal_enabled', 'label' => 'فعال‌سازی درگاه زرین‌پال', 'type' => 'checkbox'],
+                         ['name' => 'zarinpal_enabled', 'label' => 'فعال‌سازی درگاه زرین‌پال', 'type' => 'switch'],
                          ['name' => 'zarinpal_merchant_code', 'label' => 'مرچنت کد زرین‌پال', 'type' => 'text'],
                     ]
                 ],
                 'maneli_sadad_section' => [
                     'title' => 'تنظیمات درگاه پرداخت سداد (بانک ملی)', 'desc' => '',
                     'fields' => [
-                        ['name' => 'sadad_enabled', 'label' => 'فعال‌سازی درگاه سداد', 'type' => 'checkbox'],
+                        ['name' => 'sadad_enabled', 'label' => 'فعال‌سازی درگاه سداد', 'type' => 'switch'],
                         ['name' => 'sadad_merchant_id', 'label' => 'شناسه مرچنت (Merchant ID)', 'type' => 'text'],
                         ['name' => 'sadad_terminal_id', 'label' => 'شناسه ترمینال (Terminal ID)', 'type' => 'text'],
                         ['name' => 'sadad_key', 'label' => 'کلید ترمینال (Terminal Key)', 'type' => 'textarea', 'desc' => 'این کلید به صورت base64 توسط بانک ارائه می‌شود.'],

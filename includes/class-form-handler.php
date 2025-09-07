@@ -133,7 +133,9 @@ class Maneli_Form_Handler {
         update_user_meta($user_id, 'maneli_temp_inquiry_data', $temp_data);
         $options = get_option('maneli_inquiry_all_options', []);
         $inquiry_fee = (int)($options['inquiry_fee'] ?? 0);
-        if ($inquiry_fee > 0) {
+        $payment_enabled = isset($options['payment_enabled']) && $options['payment_enabled'] == '1';
+
+        if ($payment_enabled && $inquiry_fee > 0) {
             update_user_meta($user_id, 'maneli_inquiry_step', 'payment_pending');
         } else {
             $this->finalize_inquiry($user_id, true);
@@ -163,16 +165,27 @@ class Maneli_Form_Handler {
             exit;
         }
 
-        $active_gateway = $options['active_gateway'] ?? 'zarinpal';
+        $zarinpal_enabled = isset($options['zarinpal_enabled']) && $options['zarinpal_enabled'] == '1';
+        $sadad_enabled = isset($options['sadad_enabled']) && $options['sadad_enabled'] == '1';
+        $active_gateway = $options['active_gateway'] ?? 'zarinpal'; // Default to zarinpal if not set
         $order_id = time() . $user_id;
 
         update_user_meta($user_id, 'maneli_payment_order_id', $order_id);
         update_user_meta($user_id, 'maneli_payment_amount', $amount_toman);
 
-        if ($active_gateway === 'sadad') {
+        if ($active_gateway === 'sadad' && $sadad_enabled) {
             $this->process_sadad_payment($user_id, $order_id, $amount_toman, $options);
-        } else {
+        } elseif ($active_gateway === 'zarinpal' && $zarinpal_enabled) {
             $this->process_zarinpal_payment($user_id, $order_id, $amount_toman, $options);
+        } else {
+            // Fallback if the selected gateway is disabled, try the other one
+            if ($zarinpal_enabled) {
+                 $this->process_zarinpal_payment($user_id, $order_id, $amount_toman, $options);
+            } elseif ($sadad_enabled) {
+                 $this->process_sadad_payment($user_id, $order_id, $amount_toman, $options);
+            } else {
+                wp_die('در حال حاضر هیچ درگاه پرداخت فعالی در تنظیمات وجود ندارد.');
+            }
         }
     }
     
