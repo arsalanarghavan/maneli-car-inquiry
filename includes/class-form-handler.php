@@ -578,11 +578,13 @@ class Maneli_Form_Handler {
             wp_die('شناسه کاربر مشخص نشده است.');
         }
         
-        // Prevent admin from changing their own role
+        // Prevent admin from changing their own role to a lower one
         if ($user_id_to_update === get_current_user_id() && isset($_POST['user_role'])) {
             $user_obj = get_userdata($user_id_to_update);
             if (!in_array($_POST['user_role'], $user_obj->roles)) {
-                 wp_die('شما نمی‌توانید نقش کاربری خود را تغییر دهید.');
+                 if ($_POST['user_role'] !== 'maneli_admin' && $_POST['user_role'] !== 'administrator') {
+                    wp_die('شما نمی‌توانید نقش کاربری مدیریتی خود را به یک نقش پایین‌تر تغییر دهید.');
+                 }
             }
         }
         

@@ -202,12 +202,8 @@ class Maneli_Settings_Page {
                 <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url(wp_unslash($_SERVER['REQUEST_URI'])); ?>">
 
                 <?php
-                // CRITICAL FIX: Ensure settings sections are always registered before rendering on frontend.
-                $this->register_all_settings_sections();
-                $page = 'maneli-' . $tab . '-settings-section';
-                
-                // Manually render sections and fields to avoid fatal errors
-                $this->manually_render_settings($page);
+                // CRITICAL FIX: Manually render the form fields for the specified tab.
+                $this->manually_render_settings_tab($tab);
                 ?>
                  <p class="submit">
                     <input type="submit" name="submit" id="submit" class="button button-primary" value="ذخیره تغییرات">
@@ -226,35 +222,88 @@ class Maneli_Settings_Page {
         return ob_get_clean();
     }
     
-    private function manually_render_settings($page) {
-        global $wp_settings_sections, $wp_settings_fields;
+    private function manually_render_settings_tab($tab) {
+        $all_settings = $this->get_all_settings();
 
-        if (!isset($wp_settings_sections[$page])) {
+        if (!isset($all_settings[$tab])) {
             echo '<div class="error-box"><p>بخش تنظیمات مورد نظر یافت نشد.</p></div>';
             return;
         }
 
-        foreach ((array) $wp_settings_sections[$page] as $section) {
-            echo "<h3>" . esc_html($section['title']) . "</h3>\n";
-            if ($section['callback']) {
-                call_user_func($section['callback'], $section);
+        $sections = $all_settings[$tab];
+        foreach ($sections as $section_id => $section) {
+            echo "<h3>" . esc_html($section['title']) . "</h3>";
+            if (!empty($section['desc'])) {
+                echo '<p>' . esc_html($section['desc']) . '</p>';
             }
-
-            if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) {
-                continue;
-            }
-            
             echo '<table class="form-table">';
-            foreach ((array) $wp_settings_fields[$page][$section['id']] as $field) {
+            foreach ($section['fields'] as $field) {
                 echo '<tr>';
-                echo '<th scope="row">' . $field['title'] . '</th>';
+                echo '<th scope="row"><label for="' . esc_attr($field['name']) . '">' . esc_html($field['label']) . '</label></th>';
                 echo '<td>';
-                call_user_func($field['callback'], $field['args']);
+                $this->render_field($field);
                 echo '</td>';
                 echo '</tr>';
             }
             echo '</table>';
         }
+    }
+
+    private function get_all_settings() {
+        return [
+            'finotex' => [
+                'main' => [
+                    'title' => 'سرویس استعلام رنگ چک',
+                    'fields' => [
+                        ['name' => 'finotex_enabled', 'label' => 'فعال‌سازی استعلام فینوتک', 'type' => 'checkbox', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.'],
+                        ['name' => 'finotex_client_id', 'label' => 'شناسه کلاینت (Client ID)', 'type' => 'text'],
+                        ['name' => 'finotex_api_key', 'label' => 'توکن دسترسی (Access Token)', 'type' => 'textarea'],
+                    ]
+                ]
+            ],
+            'gateways' => [
+                'general' => [
+                    'title' => 'تنظیمات عمومی پرداخت',
+                    'fields' => [
+                        ['name' => 'inquiry_fee', 'label' => 'هزینه استعلام (تومان)', 'type' => 'number', 'desc' => 'مبلغ را به تومان وارد کنید. برای رایگان بودن، عدد 0 را وارد کنید.'],
+                        ['name' => 'active_gateway', 'label' => 'درگاه پرداخت فعال', 'type' => 'radio', 'options' => ['zarinpal' => 'زرین‌پال', 'sadad' => 'پرداخت سداد (بانک ملی)']],
+                        ['name' => 'zero_fee_message', 'label' => 'پیام در صورت رایگان بودن استعلام', 'type' => 'textarea', 'desc' => 'این پیام زمانی نمایش داده می‌شود که هزینه استعلام 0 باشد.'],
+                    ]
+                ],
+                'zarinpal' => [
+                    'title' => 'تنظیمات زرین‌پال',
+                    'fields' => [
+                        ['name' => 'zarinpal_merchant_code', 'label' => 'مرچنت کد زرین‌پال', 'type' => 'text'],
+                    ]
+                ],
+                // ... other gateways and sections here ...
+            ],
+            'sms' => [
+                'api' => [
+                    'title' => 'اطلاعات پنل ملی پیامک',
+                    'fields' => [
+                        ['name' => 'sms_username', 'label' => 'نام کاربری', 'type' => 'text'],
+                        ['name' => 'sms_password', 'label' => 'رمز عبور', 'type' => 'password'],
+                    ]
+                ],
+                'patterns' => [
+                    'title' => 'کدهای پترن پیامک (Body ID)',
+                    'desc' => 'در این بخش، فقط کد پترن (Body ID) را وارد کنید.',
+                    'fields' => [
+                        ['name' => 'sms_pattern_pending', 'label' => 'پترن «در انتظار بررسی»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
+                        ['name' => 'sms_pattern_approved', 'label' => 'پترن «تایید شده»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
+                        // ... more sms fields
+                    ]
+                ]
+            ],
+            'experts' => [
+                'main' => [
+                    'title' => 'مدیریت چرخشی کارشناسان',
+                    'desc' => 'سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها «کارشناس مانلی» باشد را به عنوان کارشناس فروش شناسایی می‌کند و استعلام‌ها به صورت گردشی به آن‌ها ارجاع داده خواهد شد.',
+                    'fields' => [] // No fields, just description
+                ]
+            ]
+        ];
     }
     
     public function handle_frontend_settings_save() {
