@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.11.20
+ * Version:           0.11.22
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -46,6 +46,7 @@ function maneli_setup_roles_and_caps() {
     $maneli_admin_caps = array_merge($product_caps, [
         'read' => true,
         'manage_maneli_inquiries' => true,
+        'edit_posts' => true, // <-- FIX: This capability was missing for the admin role
     ]);
 
     // Create or update Maneli Admin role

@@ -19,9 +19,10 @@ class Maneli_Expert_Panel {
             wp_send_json_error(['message' => 'خطای امنیتی.']);
         }
 
-        // 2. User Authentication Check - Essential
-        if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => 'لطفاً ابتدا وارد شوید.']);
+        // 2. User Authentication & Authorization Check
+        // We ensure the user has the basic capability to edit posts, which both our roles have.
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(['message' => 'شما دسترسی لازم برای این کار را ندارید.']);
         }
 
         // 3. Get search term
