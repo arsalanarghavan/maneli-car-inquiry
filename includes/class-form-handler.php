@@ -462,8 +462,18 @@ class Maneli_Form_Handler {
 
         if ($new_status_request === 'approved') {
             $final_status = 'user_confirmed';
-            if (!get_post_meta($post_id, 'assigned_expert_id', true)) {
-                $this->assign_expert_round_robin($post_id);
+            $selected_expert_id = isset($_POST['assigned_expert_id']) ? sanitize_text_field($_POST['assigned_expert_id']) : 'auto';
+
+            if ($selected_expert_id !== 'auto' && !empty($selected_expert_id)) {
+                $expert_user = get_userdata(intval($selected_expert_id));
+                if ($expert_user && in_array('maneli_expert', $expert_user->roles)) {
+                    update_post_meta($post_id, 'assigned_expert_id', $expert_user->ID);
+                    update_post_meta($post_id, 'assigned_expert_name', $expert_user->display_name);
+                }
+            } else {
+                 if (!get_post_meta($post_id, 'assigned_expert_id', true)) {
+                    $this->assign_expert_round_robin($post_id);
+                }
             }
         } elseif ($final_status === 'rejected' && !empty($_POST['rejection_reason'])) {
             $reason = sanitize_textarea_field($_POST['rejection_reason']);
@@ -499,7 +509,9 @@ class Maneli_Form_Handler {
             $sms_handler->send_pattern($pattern_id, $mobile_number, $params);
         }
         
-        wp_redirect(admin_url('edit.php?post_type=inquiry'));
+        // Redirect back to the report page instead of the admin list
+        $redirect_url = home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id);
+        wp_redirect($redirect_url);
         exit;
     }
 

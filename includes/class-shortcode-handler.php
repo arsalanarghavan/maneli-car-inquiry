@@ -27,7 +27,7 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.7');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.8');
             
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
@@ -40,7 +40,6 @@ class Maneli_Shortcode_Handler {
                 }
             }
             
-            // Simplified enqueue for admin/expert pages - only for user list now
             if (is_user_logged_in() && (current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
                 global $post;
                  if ($post && has_shortcode($post->post_content, 'maneli_user_list')) {
@@ -439,10 +438,9 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای استفاده از این فرم را ندارید.</p></div>';
         }
 
-        // *** SCRIPT ENQUEUEING IS MOVED HERE - THIS IS THE FIX ***
         wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
         wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.5.0', true); // Version bump
+        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.5.0', true);
         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce')
@@ -628,28 +626,42 @@ class Maneli_Shortcode_Handler {
         $inquiry_author_id = (int)$inquiry->post_author;
         $assigned_expert_id = (int)get_post_meta($inquiry_id, 'assigned_expert_id', true);
         
-        $can_view = false;
-        if (current_user_can('manage_maneli_inquiries')) {
-            $can_view = true;
-        } elseif (in_array('maneli_expert', $current_user->roles) && $assigned_expert_id === $current_user->ID) {
-            $can_view = true;
-        } elseif ($inquiry_author_id === $current_user->ID) {
-            return $this->render_customer_report_html($inquiry_id);
-        }
+        $can_view_as_admin = current_user_can('manage_maneli_inquiries');
+        $can_view_as_expert = in_array('maneli_expert', $current_user->roles) && $assigned_expert_id === $current_user->ID;
+        $can_view_as_customer = $inquiry_author_id === $current_user->ID;
 
-        if (!$can_view) {
+        if (!$can_view_as_admin && !$can_view_as_expert && !$can_view_as_customer) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما اجازه مشاهده این گزارش را ندارید.</p></div>';
+        }
+        
+        // If the user is a customer and not an admin/expert, show the simplified view.
+        if ($can_view_as_customer && !$can_view_as_admin && !$can_view_as_expert) {
+             return $this->render_customer_report_html($inquiry_id);
         }
 
         $post_meta = get_post_meta($inquiry_id);
         $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
         $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
         $product_id = $post_meta['product_id'][0] ?? 0;
+        $status = $post_meta['inquiry_status'][0] ?? 'pending';
+
+        $status_map = [
+            'user_confirmed' => ['label' => 'تایید و ارجاع شده', 'class' => 'status-bg-approved'],
+            'rejected'       => ['label' => 'رد شده', 'class' => 'status-bg-rejected'],
+            'more_docs'      => ['label' => 'نیازمند مدارک', 'class' => 'status-bg-pending'],
+            'pending'        => ['label' => 'در حال بررسی', 'class' => 'status-bg-pending'],
+            'failed'         => ['label' => 'استعلام ناموفق', 'class' => 'status-bg-rejected'],
+        ];
+        $status_info = $status_map[$status] ?? ['label' => 'نامشخص', 'class' => ''];
 
         ob_start();
         ?>
         <div class="maneli-inquiry-wrapper frontend-expert-report">
             <h2 class="report-main-title">گزارش کامل اعتبار <small>(برای استعلام #<?php echo esc_html($inquiry_id); ?>)</small></h2>
+
+            <div class="report-status-box <?php echo esc_attr($status_info['class']); ?>">
+                <strong>وضعیت فعلی:</strong> <?php echo esc_html($status_info['label']); ?>
+            </div>
             
             <div class="report-box">
                 <h3 class="report-box-title">خودروی درخواستی</h3>
@@ -737,10 +749,132 @@ class Maneli_Shortcode_Handler {
                 </table>
             </div>
 
+            <?php if ($can_view_as_admin): ?>
+            <div class="admin-actions-box">
+                <h3 class="report-box-title">تصمیم نهایی</h3>
+                <p>پس از بررسی اطلاعات بالا، وضعیت نهایی این درخواست را مشخص کنید.</p>
+                <form id="admin-action-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                    <input type="hidden" name="action" value="maneli_admin_update_status">
+                    <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
+                    <input type="hidden" id="final-status-input" name="new_status" value="">
+                    <input type="hidden" id="rejection-reason-input" name="rejection_reason" value="">
+                    <?php wp_nonce_field('maneli_admin_update_status_nonce'); ?>
+
+                    <div class="action-button-group">
+                        <div class="approve-section">
+                            <label for="assigned_expert_id_frontend">ارجاع به کارشناس:</label>
+                             <?php
+                                $experts = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
+                                if (!empty($experts)):
+                            ?>
+                            <select name="assigned_expert_id" id="assigned_expert_id_frontend">
+                                <option value="auto">-- انتساب خودکار (گردشی) --</option>
+                                <?php foreach ($experts as $expert) : ?>
+                                    <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <?php endif; ?>
+                            <button type="button" id="approve-btn" class="action-btn approve">
+                                &#10004; تایید و ارجاع
+                            </button>
+                        </div>
+                        <button type="button" id="reject-btn" class="action-btn reject">
+                            &#10006; رد نهایی درخواست
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <?php endif; ?>
+
             <div class="report-back-button-wrapper">
                 <a href="<?php echo esc_url(home_url('/dashboard/?endp=inf_menu_3')); ?>" class="loan-action-btn">بازگشت به لیست استعلام‌ها</a>
             </div>
         </div>
+        
+        <?php if ($can_view_as_admin): ?>
+        <div id="rejection-modal" class="maneli-modal-frontend" style="display:none;">
+            <div class="modal-content">
+                <span class="modal-close">&times;</span><h3>دلیل رد درخواست</h3>
+                <p>لطفاً دلیل رد این درخواست را مشخص کنید. این دلیل به کاربر پیامک خواهد شد.</p>
+                <div class="form-group"><label for="rejection-reason-select">انتخاب دلیل:</label><select id="rejection-reason-select" style="width: 100%;"><option value="">-- یک دلیل انتخاب کنید --</option><option value="متاسفانه در حال حاضر امکان خرید با این مبلغ پیش‌پرداخت وجود ندارد.">مبلغ پیش‌پرداخت کافی نیست.</option><option value="متاسفانه سابقه اعتباری شما برای خرید این خودرو مورد تایید قرار نگرفت.">سابقه اعتباری مورد تایید نیست.</option><option value="مدارک ارسالی شما ناقص یا نامعتبر است. لطفاً با پشتیبانی تماس بگیرید.">مدارک ناقص یا نامعتبر.</option><option value="custom">دلیل دیگر (در کادر زیر بنویسید)</option></select></div>
+                <div class="form-group" id="custom-reason-wrapper" style="display:none;"><label for="rejection-reason-custom">متن سفارشی:</label><textarea id="rejection-reason-custom" rows="3" style="width: 100%;"></textarea></div>
+                <button type="button" id="confirm-rejection-btn" class="button button-primary">ثبت دلیل و رد کردن درخواست</button>
+            </div>
+        </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminActionForm = document.getElementById('admin-action-form');
+            if (!adminActionForm) return;
+
+            const finalStatusInput = document.getElementById('final-status-input');
+            const approveBtn = document.getElementById('approve-btn');
+            
+            if (approveBtn) {
+                approveBtn.addEventListener('click', function() {
+                    finalStatusInput.value = 'approved';
+                    adminActionForm.submit();
+                });
+            }
+
+            const modal = document.getElementById('rejection-modal');
+            const rejectBtn = document.getElementById('reject-btn');
+            const closeModalBtn = document.querySelector('.modal-close');
+            const confirmRejectionBtn = document.getElementById('confirm-rejection-btn');
+            const reasonSelect = document.getElementById('rejection-reason-select');
+            const customReasonWrapper = document.getElementById('custom-reason-wrapper');
+            const customReasonText = document.getElementById('rejection-reason-custom');
+            const finalReasonInput = document.getElementById('rejection-reason-input');
+
+            if (rejectBtn) {
+                rejectBtn.addEventListener('click', function() {
+                    modal.style.display = 'block';
+                });
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            }
+            
+            window.addEventListener('click', function(e) {
+                if (e.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            if (reasonSelect) {
+                reasonSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customReasonWrapper.style.display = 'block';
+                    } else {
+                        customReasonWrapper.style.display = 'none';
+                    }
+                });
+            }
+
+            if (confirmRejectionBtn) {
+                confirmRejectionBtn.addEventListener('click', function() {
+                    let reason = reasonSelect.value;
+                    if (reason === 'custom') {
+                        reason = customReasonText.value;
+                    }
+
+                    if (!reason) {
+                        alert('لطفاً یک دلیل برای رد درخواست انتخاب یا وارد کنید.');
+                        return;
+                    }
+
+                    finalReasonInput.value = reason;
+                    finalStatusInput.value = 'rejected';
+                    adminActionForm.submit();
+                });
+            }
+        });
+        </script>
+        <?php endif; ?>
+
         <?php
         return ob_get_clean();
     }
