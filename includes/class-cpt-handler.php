@@ -82,7 +82,9 @@ class Maneli_CPT_Handler {
                 echo '<span class="status-indicator status-' . esc_attr($status) . '">' . esc_html(self::get_status_label($status)) . '</span>';
                 break;
             case 'inquiry_date':
-                echo get_the_date('Y/m/d H:i', $post_id);
+                $gregorian_date = get_the_date('Y-m-d', $post_id);
+                list($y, $m, $d) = explode('-', $gregorian_date);
+                echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d'));
                 break;
             case 'actions':
                 $report_url = admin_url('admin.php?page=maneli-credit-report&inquiry_id=' . $post_id);

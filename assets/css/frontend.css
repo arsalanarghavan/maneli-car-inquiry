@@ -646,3 +646,8 @@
     border-radius: 4px;
     color: #856404;
 }
+
+/* Datepicker RTL Styles */
+div.kamadatepicker-container {
+    font-family: inherit !important;
+}

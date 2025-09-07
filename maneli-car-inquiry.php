@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.11.30
+ * Version:           0.11.40
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -20,8 +20,29 @@ define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 /**
+ * Helper function to convert Gregorian date to Jalali (Shamsi).
+ */
+function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d') {
+    $g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    $jy = ($gy <= 1600) ? 0 : 979;
+    $gy -= ($gy <= 1600) ? 621 : 1600;
+    $gy2 = ($gm > 2) ? ($gy + 1) : $gy;
+    $days = (365 * $gy) + (int)(($gy2 + 3) / 4) - (int)(($gy2 + 99) / 100) + (int)(($gy2 + 399) / 400) - 80 + $gd + $g_d_m[$gm - 1];
+    $jy += 33 * (int)($days / 12053);
+    $days %= 12053;
+    $jy += 4 * (int)($days / 1461);
+    $days %= 1461;
+    $jy += (int)(($days - 1) / 365);
+    if ($days > 365) $days = ($days - 1) % 365;
+    $jm = ($days < 186) ? 1 + (int)($days / 31) : 7 + (int)(($days - 186) / 30);
+    $jd = 1 + (($days < 186) ? ($days % 31) : (($days - 186) % 30));
+    
+    $formatted_date = str_replace(['Y', 'm', 'd'], [$jy, sprintf('%02d', $jm), sprintf('%02d', $jd)], $format);
+    return $formatted_date;
+}
+
+/**
  * Ensures the custom user roles and capabilities for the plugin exist.
- * This is the critical fix for the product search issue.
  */
 function maneli_setup_roles_and_caps() {
     // Grant management capability to Administrator
@@ -30,36 +51,31 @@ function maneli_setup_roles_and_caps() {
         $admin_role->add_cap('manage_maneli_inquiries');
     }
 
-    // --- CRITICAL FIX: Add ALL necessary WooCommerce Product capabilities to Maneli roles ---
     $product_caps = [
         'edit_product'          => true,
         'read_product'          => true,
         'delete_product'        => false,
         'edit_products'         => true,
-        'edit_others_products'  => true, // <-- THE DEFINITIVE FIX IS HERE
+        'edit_others_products'  => true,
         'publish_products'      => false,
         'read_private_products' => false,
         'delete_products'       => false,
     ];
 
-    // Define capabilities for Maneli Admin
     $maneli_admin_caps = array_merge($product_caps, [
         'read' => true,
         'manage_maneli_inquiries' => true,
         'edit_posts' => true, 
     ]);
 
-    // Create or update Maneli Admin role
     remove_role('maneli_admin'); 
     add_role('maneli_admin', 'مدیریت مانلی', $maneli_admin_caps);
 
-    // Define capabilities for Maneli Expert
     $maneli_expert_caps = array_merge($product_caps, [
         'read' => true,
         'edit_posts' => true,
     ]);
     
-    // Create or update Maneli Expert role
     remove_role('maneli_expert');
     add_role('maneli_expert', 'کارشناس مانلی', $maneli_expert_caps);
 }
