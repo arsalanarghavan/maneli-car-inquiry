@@ -1,6 +1,6 @@
 /* General Styles */
 :root {
-    --theme-blue: #2D89BE;
+    --theme-blue: #3989BE;
     --value-percent: 0%;
 }
 
@@ -199,6 +199,8 @@
 }
 .maneli-inquiry-wrapper form select, 
 .maneli-inquiry-wrapper form input[type="text"], 
+.maneli-inquiry-wrapper form input[type="email"],
+.maneli-inquiry-wrapper form input[type="password"],
 .maneli-inquiry-wrapper form button {
     font-family: inherit;
     width: 100%;
@@ -210,7 +212,7 @@
     background-color: #f9f9f9;
 }
 .maneli-inquiry-wrapper form button {
-    background-color: #0073aa;
+    background-color: var(--theme-blue);
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -299,7 +301,6 @@
     color: #555;
     width: 30%;
 }
-/* THIS IS THE FIX: Removed 'direction: ltr' and set text-align to right */
 .summary-table td {
     text-align: right;
 }
@@ -530,3 +531,17 @@
     text-align: center;
 }
 /* === END: Expert Frontend Report Styles === */
+
+/* === User List Styles === */
+.user-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.button.delete-user-btn {
+    background-color: #dc3545 !important;
+    color: white !important;
+    border-color: #dc3545 !important;
+    margin-right: 5px;
+}

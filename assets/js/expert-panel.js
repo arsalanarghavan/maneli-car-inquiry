@@ -33,14 +33,21 @@
                 data: function(params) {
                     return {
                         action: 'maneli_search_cars',
-                        security_nonce: maneli_expert_ajax.security_nonce, // Corrected nonce key
+                        nonce: maneli_expert_ajax.nonce, // Using the corrected nonce from wp_localize_script
                         search: params.term,
                     };
                 },
-                processResults: function(data) {
-                    return {
-                        results: data.results
-                    };
+                processResults: function(data, params) {
+                    // Check for success property from wp_send_json_success
+                    if (data.success) {
+                        return {
+                            results: data.data.results // Results are nested under data property
+                        };
+                    } else {
+                        // Handle server-side errors if necessary
+                        console.error('Server error:', data.data.message);
+                        return { results: [] };
+                    }
                 }
             }
         });

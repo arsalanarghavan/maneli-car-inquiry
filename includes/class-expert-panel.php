@@ -14,8 +14,8 @@ class Maneli_Expert_Panel {
      */
     public function handle_car_search_ajax() {
         // Use the new, unique nonce for verification
-        if (!isset($_POST['security_nonce']) || !wp_verify_nonce($_POST['security_nonce'], 'maneli_expert_search_nonce')) {
-            wp_send_json_error(['message' => 'خطای امنیتی (Nonce نامعتبر). لطفاً صفحه را رفرش کرده و دوباره تلاش کنید.']);
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'maneli_expert_car_search_nonce')) {
+            wp_send_json_error(['message' => 'خطای امنیتی.']);
         }
 
         // Allow experts, maneli admins, and full admins to search for cars.
@@ -43,6 +43,7 @@ class Maneli_Expert_Panel {
             }
         }
         
-        wp_send_json(['results' => $results]);
+        // Always wrap the results in a success response for consistency
+        wp_send_json_success(['results' => $results]);
     }
 }

@@ -20,11 +20,14 @@ class Maneli_Shortcode_Handler {
 
         // Backward compatibility for old shortcode
         add_shortcode('maneli_expert_inquiry_list', [$this, 'render_inquiry_list']);
+
+        // AJAX handler for user deletion
+        add_action('wp_ajax_maneli_delete_user_ajax', [$this, 'handle_delete_user_ajax']);
     }
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.4');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.5');
             
             // Enqueue scripts for the product page calculator
             if (is_product()) {
@@ -38,17 +41,26 @@ class Maneli_Shortcode_Handler {
                 }
             }
             
-            // Enqueue scripts for the expert/admin new inquiry form
+            // Enqueue scripts for expert/admin pages
             if (is_user_logged_in() && (current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
                 global $post;
-                if ($post && has_shortcode($post->post_content, 'car_inquiry_form')) {
+                if ($post && (has_shortcode($post->post_content, 'car_inquiry_form') || has_shortcode($post->post_content, 'maneli_user_list'))) {
                     wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-                    wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.8', true);
-                    wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
-                        'ajax_url' => admin_url('admin-ajax.php'),
-                        'security_nonce'    => wp_create_nonce('maneli_expert_search_nonce')
-                    ]);
+                    
+                    if (has_shortcode($post->post_content, 'car_inquiry_form')) {
+                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.9', true);
+                        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+                            'ajax_url' => admin_url('admin-ajax.php'),
+                            'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce')
+                        ]);
+                    }
+                     if (has_shortcode($post->post_content, 'maneli_user_list')) {
+                        wp_localize_script('jquery-core', 'maneli_user_ajax', [
+                            'ajax_url' => admin_url('admin-ajax.php'),
+                            'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce')
+                        ]);
+                    }
                 }
             }
         }
@@ -149,6 +161,11 @@ class Maneli_Shortcode_Handler {
     
     private function render_progress_tracker($active_step) {
         $steps = [1 => 'انتخاب خودرو', 2 => 'تکمیل اطلاعات', 3 => 'پرداخت هزینه', 4 => 'در انتظار بررسی', 5 => 'نتیجه نهایی'];
+        $options = get_option('maneli_inquiry_all_options', []);
+        $payment_enabled = isset($options['payment_enabled']) && $options['payment_enabled'] == '1';
+        if (!$payment_enabled) {
+            unset($steps[3]);
+        }
         ?>
         <div class="progress-tracker">
             <?php foreach ($steps as $number => $title) : ?>
@@ -158,8 +175,8 @@ class Maneli_Shortcode_Handler {
                 elseif ($number == $active_step) { $step_class = 'active'; }
                 ?>
                 <div class="step <?php echo $step_class; ?>">
-                    <div class="circle"><?php echo number_format_i18n($number); ?></div>
-                    <div class="label"><span class="step-title">مرحله <?php echo number_format_i18n($number); ?></span><span class="step-name"><?php echo esc_html($title); ?></span></div>
+                    <div class="circle"><?php echo number_format_i18n(array_search($number, array_keys($steps)) + 1); ?></div>
+                    <div class="label"><span class="step-title">مرحله <?php echo number_format_i18n(array_search($number, array_keys($steps)) + 1); ?></span><span class="step-name"><?php echo esc_html($title); ?></span></div>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -171,7 +188,7 @@ class Maneli_Shortcode_Handler {
         $amount = (int)($options['inquiry_fee'] ?? 0);
         $payment_enabled = isset($options['payment_enabled']) && $options['payment_enabled'] == '1';
 
-        if (!$payment_enabled) { return; }
+        if (!$payment_enabled) { return ''; }
 
         $discount_code_exists = !empty($options['discount_code']);
         $discount_text = $options['discount_code_text'] ?? 'تخفیف ۱۰۰٪ با موفقیت اعمال شد.';
@@ -288,7 +305,7 @@ class Maneli_Shortcode_Handler {
                     <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده چک:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده چک:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
                 </div>
             </div>
-            <button type="submit" id="submit-identity-btn" style="display:none;">ادامه و رفتن به مرحله پرداخت</button>
+            <button type="submit" id="submit-identity-btn" style="display:none;">ادامه و رفتن به مرحله بعد</button>
         </form>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -748,26 +765,38 @@ class Maneli_Shortcode_Handler {
         if (!current_user_can('manage_maneli_inquiries')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
         }
-
+    
+        if (isset($_GET['add_user'])) {
+            return $this->render_user_add_form();
+        }
+    
         if (isset($_GET['edit_user'])) {
             $user_id_to_edit = intval($_GET['edit_user']);
             return $this->render_user_edit_form($user_id_to_edit);
         }
-
+    
         if (isset($_GET['user-updated']) && $_GET['user-updated'] == 'true') {
             echo '<div class="status-box status-approved"><p>اطلاعات کاربر با موفقیت به‌روزرسانی شد.</p></div>';
         }
-
+        if (isset($_GET['user-created']) && $_GET['user-created'] == 'true') {
+            echo '<div class="status-box status-approved"><p>کاربر جدید با موفقیت ایجاد شد.</p></div>';
+        }
+        if (isset($_GET['user-deleted']) && $_GET['user-deleted'] == 'true') {
+            echo '<div class="status-box status-approved"><p>کاربر با موفقیت حذف شد.</p></div>';
+        }
+        if (isset($_GET['error'])) {
+            echo '<div class="status-box status-failed"><p>خطا: ' . esc_html(urldecode($_GET['error'])) . '</p></div>';
+        }
+    
         $all_users = get_users(['orderby' => 'display_name']);
-        
-        $current_url = remove_query_arg(['edit_user', 'user-updated'], $_SERVER['REQUEST_URI']);
-
+        $current_url = remove_query_arg(['edit_user', 'user-updated', 'add_user', 'user-created', 'user-deleted', 'error'], $_SERVER['REQUEST_URI']);
+    
         ob_start();
         ?>
         <div class="maneli-inquiry-wrapper">
-            <div class="user-list-header">
+             <div class="user-list-header">
                 <h3>لیست کامل کاربران</h3>
-                <a href="<?php echo esc_url(admin_url('user-new.php')); ?>" target="_blank" class="button button-primary">افزودن کاربر جدید</a>
+                <a href="<?php echo esc_url(add_query_arg('add_user', 'true', $current_url)); ?>" class="button button-primary">افزودن کاربر جدید</a>
             </div>
             <table class="shop_table shop_table_responsive">
                 <thead>
@@ -781,6 +810,7 @@ class Maneli_Shortcode_Handler {
                 </thead>
                 <tbody>
                     <?php foreach ($all_users as $user): 
+                        if ($user->ID === get_current_user_id()) continue;
                         $role_names = array_map(
                             function($role) {
                                 global $wp_roles;
@@ -797,11 +827,86 @@ class Maneli_Shortcode_Handler {
                         <td data-title="نقش"><?php echo esc_html(implode(', ', $role_names)); ?></td>
                         <td data-title="عملیات">
                             <a href="<?php echo esc_url($edit_link); ?>" class="button view">ویرایش</a>
+                            <button class="button delete-user-btn" data-user-id="<?php echo esc_attr($user->ID); ?>">حذف</button>
                         </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+        </div>
+        <script>
+        jQuery(document).ready(function($) {
+            $('.delete-user-btn').on('click', function(e) {
+                e.preventDefault();
+                if (confirm('آیا از حذف این کاربر اطمینان دارید؟ این عمل غیرقابل بازگشت است.')) {
+                    var userId = $(this).data('user-id');
+                    $.ajax({
+                        url: maneli_user_ajax.ajax_url,
+                        type: 'POST',
+                        data: {
+                            action: 'maneli_delete_user_ajax',
+                            user_id: userId,
+                            _ajax_nonce: maneli_user_ajax.delete_nonce
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                window.location.href = "<?php echo esc_url(add_query_arg('user-deleted', 'true', $current_url)); ?>";
+                            } else {
+                                alert('خطا در حذف کاربر: ' + response.data.message);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        </script>
+        <style>.button.delete-user-btn { background-color: #dc3545 !important; color: white !important; border-color: #dc3545 !important; margin-right: 5px; } .user-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }</style>
+        <?php
+        return ob_get_clean();
+    }
+
+    private function render_user_add_form() {
+        $back_link = remove_query_arg('add_user', $_SERVER['REQUEST_URI']);
+        ob_start();
+        ?>
+         <div class="maneli-inquiry-wrapper">
+            <h3>افزودن کاربر جدید</h3>
+            <form id="admin-add-user-form" class="maneli-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="maneli_admin_create_user">
+                <?php wp_nonce_field('maneli_admin_create_user_nonce'); ?>
+                <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($back_link); ?>">
+                
+                <div class="form-grid">
+                    <div class="form-row">
+                        <div class="form-group"><label>نام کاربری (الزامی):</label><input type="text" name="user_login" required></div>
+                        <div class="form-group"><label>ایمیل (الزامی):</label><input type="email" name="email" required></div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group"><label>رمز عبور (الزامی):</label><input type="password" name="password" required></div>
+                         <div class="form-group">
+                            <label>نقش کاربری:</label>
+                            <select name="user_role" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                                <option value="subscriber">مشترک</option>
+                                <option value="maneli_expert" selected>کارشناس مانلی</option>
+                                <option value="maneli_admin">مدیریت مانلی</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="form-section-title">اطلاعات تکمیلی (اختیاری)</p>
+                     <div class="form-row">
+                        <div class="form-group"><label>نام:</label><input type="text" name="first_name"></div>
+                        <div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name"></div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group"><label>تلفن همراه:</label><input type="text" name="mobile_number"></div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <button type="submit" class="loan-action-btn">ایجاد کاربر</button>
+                    <a href="<?php echo esc_url($back_link); ?>" style="margin-right: 15px;">انصراف</a>
+                </div>
+            </form>
         </div>
         <?php
         return ob_get_clean();
@@ -859,5 +964,29 @@ class Maneli_Shortcode_Handler {
         </div>
         <?php
         return ob_get_clean();
+    }
+    
+    public function handle_delete_user_ajax() {
+        check_ajax_referer('maneli_delete_user_nonce');
+    
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'شما دسترسی لازم برای این کار را ندارید.']);
+        }
+    
+        $user_id_to_delete = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        if (!$user_id_to_delete) {
+            wp_send_json_error(['message' => 'شناسه کاربر مشخص نشده است.']);
+        }
+        
+        if ($user_id_to_delete === get_current_user_id()) {
+            wp_send_json_error(['message' => 'شما نمی‌توانید حساب کاربری خود را حذف کنید.']);
+        }
+    
+        require_once(ABSPATH.'wp-admin/includes/user.php');
+        if (wp_delete_user($user_id_to_delete)) {
+            wp_send_json_success();
+        } else {
+            wp_send_json_error(['message' => 'خطایی در هنگام حذف کاربر رخ داد.']);
+        }
     }
 }

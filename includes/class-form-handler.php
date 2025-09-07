@@ -18,6 +18,7 @@ class Maneli_Form_Handler {
         // Admin Workflow Hooks
         add_action('admin_post_maneli_admin_update_status', [$this, 'handle_admin_update_status']);
         add_action('admin_post_maneli_admin_update_user', [$this, 'handle_admin_update_user_profile']);
+        add_action('admin_post_maneli_admin_create_user', [$this, 'handle_admin_create_user']);
 
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
@@ -131,6 +132,7 @@ class Maneli_Form_Handler {
         }
         $temp_data = ['buyer_data' => $buyer_data, 'issuer_data' => $issuer_data, 'issuer_type' => $issuer_type];
         update_user_meta($user_id, 'maneli_temp_inquiry_data', $temp_data);
+        
         $options = get_option('maneli_inquiry_all_options', []);
         $inquiry_fee = (int)($options['inquiry_fee'] ?? 0);
         $payment_enabled = isset($options['payment_enabled']) && $options['payment_enabled'] == '1';
@@ -167,7 +169,7 @@ class Maneli_Form_Handler {
 
         $zarinpal_enabled = isset($options['zarinpal_enabled']) && $options['zarinpal_enabled'] == '1';
         $sadad_enabled = isset($options['sadad_enabled']) && $options['sadad_enabled'] == '1';
-        $active_gateway = $options['active_gateway'] ?? 'zarinpal'; // Default to zarinpal if not set
+        $active_gateway = $options['active_gateway'] ?? 'zarinpal';
         $order_id = time() . $user_id;
 
         update_user_meta($user_id, 'maneli_payment_order_id', $order_id);
@@ -178,7 +180,6 @@ class Maneli_Form_Handler {
         } elseif ($active_gateway === 'zarinpal' && $zarinpal_enabled) {
             $this->process_zarinpal_payment($user_id, $order_id, $amount_toman, $options);
         } else {
-            // Fallback if the selected gateway is disabled, try the other one
             if ($zarinpal_enabled) {
                  $this->process_zarinpal_payment($user_id, $order_id, $amount_toman, $options);
             } elseif ($sadad_enabled) {
@@ -591,7 +592,6 @@ class Maneli_Form_Handler {
             wp_die('شناسه کاربر مشخص نشده است.');
         }
         
-        // Prevent admin from changing their own role to a lower one
         if ($user_id_to_update === get_current_user_id() && isset($_POST['user_role'])) {
             $user_obj = get_userdata($user_id_to_update);
             if (!in_array($_POST['user_role'], $user_obj->roles)) {
@@ -633,6 +633,59 @@ class Maneli_Form_Handler {
         $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
         $redirect_url = remove_query_arg('edit_user', $redirect_url);
         wp_redirect(add_query_arg('user-updated', 'true', $redirect_url));
+        exit;
+    }
+
+    public function handle_admin_create_user() {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_admin_create_user_nonce')) {
+            wp_die('خطای امنیتی!');
+        }
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_die('شما دسترسی لازم برای این کار را ندارید.');
+        }
+
+        $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
+
+        $user_login = sanitize_user($_POST['user_login']);
+        $email = sanitize_email($_POST['email']);
+        $password = $_POST['password'];
+
+        if (empty($user_login) || empty($email) || empty($password)) {
+            wp_redirect(add_query_arg('error', urlencode('نام کاربری، ایمیل و رمز عبور الزامی هستند.'), $redirect_url));
+            exit;
+        }
+        if (username_exists($user_login)) {
+            wp_redirect(add_query_arg('error', urlencode('این نام کاربری قبلاً استفاده شده است.'), $redirect_url));
+            exit;
+        }
+        if (email_exists($email)) {
+             wp_redirect(add_query_arg('error', urlencode('این ایمیل قبلاً استفاده شده است.'), $redirect_url));
+            exit;
+        }
+
+        $user_id = wp_create_user($user_login, $password, $email);
+
+        if (is_wp_error($user_id)) {
+            wp_redirect(add_query_arg('error', urlencode($user_id->get_error_message()), $redirect_url));
+            exit;
+        }
+
+        $user_data = ['ID' => $user_id];
+        if (isset($_POST['first_name'])) $user_data['first_name'] = sanitize_text_field($_POST['first_name']);
+        if (isset($_POST['last_name'])) $user_data['last_name'] = sanitize_text_field($_POST['last_name']);
+        if (isset($_POST['user_role'])) {
+            $new_role = sanitize_key($_POST['user_role']);
+            if (in_array($new_role, ['subscriber', 'maneli_expert', 'maneli_admin'])) {
+                $user_data['role'] = $new_role;
+            }
+        }
+        wp_update_user($user_data);
+
+        if (isset($_POST['mobile_number'])) {
+            update_user_meta($user_id, 'mobile_number', sanitize_text_field($_POST['mobile_number']));
+        }
+        
+        wp_redirect(add_query_arg('user-created', 'true', $redirect_url));
         exit;
     }
 }
