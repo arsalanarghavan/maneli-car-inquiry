@@ -75,7 +75,7 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای ثبت و پیگیری استعلام، لطفاً ابتدا <a href="' . esc_url($login_url) . '">وارد شوید</a>.</p></div>'; 
         }
 
-        // If the logged-in user is an expert, show them the expert's new inquiry form instead.
+        // If the logged-in user is an expert or admin, show them the expert's new inquiry form instead.
         if (current_user_can('maneli_expert')) {
             return $this->render_maneli_expert_new_inquiry_form();
         }
@@ -430,12 +430,30 @@ class Maneli_Shortcode_Handler {
                 <input type="hidden" name="action" value="maneli_expert_create_inquiry">
                 <?php wp_nonce_field('maneli_expert_create_nonce'); ?>
 
-                <h3>۱. انتخاب خودرو و محاسبه اقساط</h3>
+                <h3>۱. انتخاب خودرو و شرایط</h3>
                 <div class="form-group">
                     <label for="product_id_expert"><strong>جستجوی خودرو</strong></label>
                     <select id="product_id_expert" name="product_id" style="width: 100%;" required></select>
                 </div>
                 
+                <?php if (current_user_can('manage_options')):
+                    $experts = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
+                    if (!empty($experts)):
+                ?>
+                    <div class="form-group" style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+                        <label for="assigned_expert_id"><strong>انتخاب کارشناس مسئول</strong></label>
+                        <select id="assigned_expert_id" name="assigned_expert_id" style="width: 100%;">
+                            <option value="auto">-- انتساب خودکار (گردشی) --</option>
+                            <?php foreach ($experts as $expert) : ?>
+                                <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="description">در صورت عدم انتخاب، سیستم به صورت خودکار یک کارشناس را انتخاب می‌کند.</p>
+                    </div>
+                <?php 
+                    endif;
+                endif; ?>
+
                 <div id="loan-calculator-wrapper"></div>
 
                 <div id="expert-form-details" style="display: none; margin-top: 20px;">

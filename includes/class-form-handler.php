@@ -68,6 +68,38 @@ class Maneli_Form_Handler {
 
         return $result;
     }
+    
+    private function assign_expert_round_robin($post_id) {
+        $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'ID', 'order' => 'ASC']);
+        if (empty($expert_users)) {
+            return false;
+        }
+    
+        $last_index = get_option('maneli_expert_last_assigned_index', -1);
+        $next_index = ($last_index + 1) % count($expert_users);
+        $assigned_expert = $expert_users[$next_index];
+        
+        update_post_meta($post_id, 'assigned_expert_id', $assigned_expert->ID);
+        update_post_meta($post_id, 'assigned_expert_name', $assigned_expert->display_name);
+        update_option('maneli_expert_last_assigned_index', $next_index);
+    
+        $options = get_option('maneli_inquiry_all_options', []);
+        $expert_phone = get_user_meta($assigned_expert->ID, 'mobile_number', true);
+        $pattern_id = $options['sms_pattern_expert_referral'] ?? 0;
+    
+        if ($pattern_id > 0 && !empty($expert_phone)) {
+            $user_id = get_post_field('post_author', $post_id);
+            $customer_info = get_userdata($user_id);
+            $customer_name = ($customer_info->first_name ?? '') . ' ' . ($customer_info->last_name ?? '');
+            $customer_mobile = get_post_meta($post_id, 'mobile_number', true) ?? '';
+            $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
+            $params = [(string)$assigned_expert->display_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
+            $sms_handler = new Maneli_SMS_Handler();
+            $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
+        }
+        
+        return $assigned_expert->ID;
+    }
 
     public function handle_car_selection_ajax() {
         check_ajax_referer('maneli_ajax_nonce', 'nonce');
@@ -418,27 +450,7 @@ class Maneli_Form_Handler {
         if ($new_status_request === 'approved') {
             $final_status = 'user_confirmed';
             if (!get_post_meta($post_id, 'assigned_expert_id', true)) {
-                $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'ID', 'order' => 'ASC']);
-                if (!empty($expert_users)) {
-                    $last_index = get_option('maneli_expert_last_assigned_index', -1);
-                    $next_index = ($last_index + 1) % count($expert_users);
-                    $assigned_expert = $expert_users[$next_index];
-                    update_post_meta($post_id, 'assigned_expert_id', $assigned_expert->ID);
-                    update_post_meta($post_id, 'assigned_expert_name', $assigned_expert->display_name);
-                    update_option('maneli_expert_last_assigned_index', $next_index);
-                    
-                    $expert_phone = get_user_meta($assigned_expert->ID, 'mobile_number', true);
-                    $pattern_id = $options['sms_pattern_expert_referral'] ?? 0;
-                    if ($pattern_id > 0 && !empty($expert_phone)) {
-                        $customer_info = get_userdata($user_id);
-                        $customer_name = ($customer_info->first_name ?? '') . ' ' . ($customer_info->last_name ?? '');
-                        $customer_mobile = get_post_meta($post_id, 'mobile_number', true) ?? '';
-                        $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
-                        $params = [(string)$assigned_expert->display_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
-                        $sms_handler = new Maneli_SMS_Handler();
-                        $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
-                    }
-                }
+                $this->assign_expert_round_robin($post_id);
             }
         } elseif ($final_status === 'rejected' && !empty($_POST['rejection_reason'])) {
             $reason = sanitize_textarea_field($_POST['rejection_reason']);
@@ -482,7 +494,7 @@ class Maneli_Form_Handler {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_expert_create_nonce')) wp_die('خطای امنیتی!');
         if (!is_user_logged_in() || !current_user_can('maneli_expert')) { wp_die('شما اجازه دسترسی به این قابلیت را ندارید.'); }
         
-        $expert_user = wp_get_current_user();
+        $submitter = wp_get_current_user();
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
         if (empty($product_id)) wp_die('لطفاً یک خودرو انتخاب کنید.');
     
@@ -512,7 +524,7 @@ class Maneli_Form_Handler {
         
         $finotex_result = $this->execute_finotex_inquiry($national_code_for_api);
         
-        $post_title = 'استعلام برای ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'] . ' (توسط ' . $expert_user->display_name . ')';
+        $post_title = 'استعلام برای ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'] . ' (توسط ' . $submitter->display_name . ')';
         $post_content = "گزارش استعلام از فینوتک:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>";
         
         $post_id = wp_insert_post([
@@ -531,8 +543,24 @@ class Maneli_Form_Handler {
             }
             update_post_meta($post_id, 'inquiry_status', $initial_status);
             
-            update_post_meta($post_id, 'assigned_expert_id', $expert_user->ID);
-            update_post_meta($post_id, 'assigned_expert_name', $expert_user->display_name);
+            // Handle expert assignment based on the role of the person submitting the form.
+            if (current_user_can('manage_options')) { // Admin is creating the inquiry
+                $selected_expert_id = isset($_POST['assigned_expert_id']) ? sanitize_text_field($_POST['assigned_expert_id']) : 'auto';
+                
+                if ($selected_expert_id !== 'auto' && !empty($selected_expert_id)) {
+                    $expert_user = get_userdata(intval($selected_expert_id));
+                    if ($expert_user && in_array('maneli_expert', $expert_user->roles)) {
+                        update_post_meta($post_id, 'assigned_expert_id', $expert_user->ID);
+                        update_post_meta($post_id, 'assigned_expert_name', $expert_user->display_name);
+                    }
+                } else {
+                    $this->assign_expert_round_robin($post_id);
+                }
+            } else { // Expert is creating the inquiry
+                update_post_meta($post_id, 'created_by_expert_id', $submitter->ID);
+                update_post_meta($post_id, 'assigned_expert_id', $submitter->ID);
+                update_post_meta($post_id, 'assigned_expert_name', $submitter->display_name);
+            }
     
             update_post_meta($post_id, 'product_id', $product_id);
             update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
