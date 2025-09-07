@@ -202,32 +202,12 @@ class Maneli_Settings_Page {
                 <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url(wp_unslash($_SERVER['REQUEST_URI'])); ?>">
 
                 <?php
-                global $wp_settings_sections, $wp_settings_fields;
-                
-                // CRITICAL FIX: Ensure settings are always registered before rendering on frontend.
+                // CRITICAL FIX: Ensure settings sections are always registered before rendering on frontend.
                 $this->register_all_settings_sections();
-
                 $page = 'maneli-' . $tab . '-settings-section';
-
-                if (!isset($wp_settings_sections[$page])) {
-                    echo '<div class="error-box"><p>بخش تنظیمات مورد نظر یافت نشد.</p></div>';
-                    return ob_get_clean();
-                }
-
-                foreach ((array) $wp_settings_sections[$page] as $section) {
-                    echo "<h3>" . esc_html($section['title']) . "</h3>\n";
-                    if ($section['callback']) {
-                        call_user_func($section['callback'], $section);
-                    }
-
-                    if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) {
-                        continue;
-                    }
-                    echo '<table class="form-table">';
-                    do_settings_fields($page, $section['id']);
-                    echo '</table>';
-                }
                 
+                // Manually render sections and fields to avoid fatal errors
+                $this->manually_render_settings($page);
                 ?>
                  <p class="submit">
                     <input type="submit" name="submit" id="submit" class="button button-primary" value="ذخیره تغییرات">
@@ -244,6 +224,37 @@ class Maneli_Settings_Page {
         </style>
         <?php
         return ob_get_clean();
+    }
+    
+    private function manually_render_settings($page) {
+        global $wp_settings_sections, $wp_settings_fields;
+
+        if (!isset($wp_settings_sections[$page])) {
+            echo '<div class="error-box"><p>بخش تنظیمات مورد نظر یافت نشد.</p></div>';
+            return;
+        }
+
+        foreach ((array) $wp_settings_sections[$page] as $section) {
+            echo "<h3>" . esc_html($section['title']) . "</h3>\n";
+            if ($section['callback']) {
+                call_user_func($section['callback'], $section);
+            }
+
+            if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) {
+                continue;
+            }
+            
+            echo '<table class="form-table">';
+            foreach ((array) $wp_settings_fields[$page][$section['id']] as $field) {
+                echo '<tr>';
+                echo '<th scope="row">' . $field['title'] . '</th>';
+                echo '<td>';
+                call_user_func($field['callback'], $field['args']);
+                echo '</td>';
+                echo '</tr>';
+            }
+            echo '</table>';
+        }
     }
     
     public function handle_frontend_settings_save() {
