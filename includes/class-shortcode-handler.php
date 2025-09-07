@@ -27,7 +27,7 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.5');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.6');
             
             // Enqueue scripts for the product page calculator
             if (is_product()) {
@@ -49,7 +49,7 @@ class Maneli_Shortcode_Handler {
                     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
                     
                     if (has_shortcode($post->post_content, 'car_inquiry_form')) {
-                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.9', true);
+                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.4.0', true);
                         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
                             'ajax_url' => admin_url('admin-ajax.php'),
                             'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce')
@@ -814,6 +814,7 @@ class Maneli_Shortcode_Handler {
                         $role_names = array_map(
                             function($role) {
                                 global $wp_roles;
+                                if ($role === 'customer') return 'مشتری';
                                 return $wp_roles->roles[$role]['name'] ?? $role;
                             },
                             $user->roles
@@ -860,7 +861,25 @@ class Maneli_Shortcode_Handler {
             });
         });
         </script>
-        <style>.button.delete-user-btn { background-color: #dc3545 !important; color: white !important; border-color: #dc3545 !important; margin-right: 5px; } .user-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }</style>
+        <style>
+            .user-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+            td[data-title="عملیات"] .button { 
+                box-sizing: border-box;
+                display: inline-block;
+                text-align: center;
+                padding: 5px 10px !important;
+                font-size: 13px !important;
+                line-height: 1.5 !important;
+                min-width: 60px;
+                height: auto !important;
+            }
+            .button.delete-user-btn { 
+                background-color: #dc3545 !important; 
+                color: white !important; 
+                border-color: #dc3545 !important; 
+                margin-right: 5px; 
+            }
+        </style>
         <?php
         return ob_get_clean();
     }
@@ -871,34 +890,21 @@ class Maneli_Shortcode_Handler {
         ?>
          <div class="maneli-inquiry-wrapper">
             <h3>افزودن کاربر جدید</h3>
+            <p>کاربر جدید با نقش پیش‌فرض «مشتری» ساخته می‌شود. نام کاربری و ایمیل به صورت خودکار بر اساس شماره موبایل ایجاد می‌گردند.</p>
             <form id="admin-add-user-form" class="maneli-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <input type="hidden" name="action" value="maneli_admin_create_user">
                 <?php wp_nonce_field('maneli_admin_create_user_nonce'); ?>
                 <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($back_link); ?>">
                 
                 <div class="form-grid">
-                    <div class="form-row">
-                        <div class="form-group"><label>نام کاربری (الزامی):</label><input type="text" name="user_login" required></div>
-                        <div class="form-group"><label>ایمیل (الزامی):</label><input type="email" name="email" required></div>
-                    </div>
                      <div class="form-row">
+                        <div class="form-group"><label>شماره موبایل (الزامی):</label><input type="text" name="mobile_number" required></div>
                         <div class="form-group"><label>رمز عبور (الزامی):</label><input type="password" name="password" required></div>
-                         <div class="form-group">
-                            <label>نقش کاربری:</label>
-                            <select name="user_role" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                <option value="subscriber">مشترک</option>
-                                <option value="maneli_expert" selected>کارشناس مانلی</option>
-                                <option value="maneli_admin">مدیریت مانلی</option>
-                            </select>
-                        </div>
                     </div>
-                    <p class="form-section-title">اطلاعات تکمیلی (اختیاری)</p>
+                    <p class="form-section-title">اطلاعات تکمیلی</p>
                      <div class="form-row">
                         <div class="form-group"><label>نام:</label><input type="text" name="first_name"></div>
                         <div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name"></div>
-                    </div>
-                     <div class="form-row">
-                        <div class="form-group"><label>تلفن همراه:</label><input type="text" name="mobile_number"></div>
                     </div>
                 </div>
 
@@ -947,8 +953,8 @@ class Maneli_Shortcode_Handler {
                         <div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی"></div>
                         <div class="form-group">
                             <label>نقش کاربری:</label>
-                            <select name="user_role" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                                <option value="subscriber" <?php selected(in_array('subscriber', $user->roles)); ?>>مشتری</option>
+                            <select name="user_role" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9;">
+                                <option value="customer" <?php selected(in_array('customer', $user->roles)); ?>>مشتری</option>
                                 <option value="maneli_expert" <?php selected(in_array('maneli_expert', $user->roles)); ?>>کارشناس مانلی</option>
                                 <option value="maneli_admin" <?php selected(in_array('maneli_admin', $user->roles)); ?>>مدیریت مانلی</option>
                             </select>

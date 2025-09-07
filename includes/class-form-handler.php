@@ -530,7 +530,7 @@ class Maneli_Form_Handler {
             $random_password = wp_generate_password(12, false);
             $customer_id = wp_create_user($buyer_data['mobile_number'], $random_password, $dummy_email);
             if (is_wp_error($customer_id)) { wp_die('خطا در ساخت کاربر جدید: ' . $customer_id->get_error_message()); }
-            wp_update_user(['ID' => $customer_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name'], 'role' => 'subscriber', 'user_email' => $dummy_email]);
+            wp_update_user(['ID' => $customer_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name'], 'role' => 'customer', 'user_email' => $dummy_email]);
         } else {
             wp_update_user(['ID' => $customer_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name']]);
         }
@@ -613,7 +613,7 @@ class Maneli_Form_Handler {
 
         if (isset($_POST['user_role'])) {
             $new_role = sanitize_key($_POST['user_role']);
-            if (in_array($new_role, ['subscriber', 'maneli_expert', 'maneli_admin'])) {
+            if (in_array($new_role, ['customer', 'maneli_expert', 'maneli_admin'])) {
                 $user_data['role'] = $new_role;
             }
         }
@@ -646,20 +646,23 @@ class Maneli_Form_Handler {
 
         $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
 
-        $user_login = sanitize_user($_POST['user_login']);
-        $email = sanitize_email($_POST['email']);
+        $mobile = sanitize_text_field($_POST['mobile_number']);
         $password = $_POST['password'];
 
-        if (empty($user_login) || empty($email) || empty($password)) {
-            wp_redirect(add_query_arg('error', urlencode('نام کاربری، ایمیل و رمز عبور الزامی هستند.'), $redirect_url));
+        if (empty($mobile) || empty($password)) {
+            wp_redirect(add_query_arg('error', urlencode('شماره موبایل و رمز عبور الزامی هستند.'), $redirect_url));
             exit;
         }
+
+        $user_login = $mobile;
+        $email = $mobile . '@manelikhodro.com';
+
         if (username_exists($user_login)) {
-            wp_redirect(add_query_arg('error', urlencode('این نام کاربری قبلاً استفاده شده است.'), $redirect_url));
+            wp_redirect(add_query_arg('error', urlencode('کاربری با این شماره موبایل قبلاً ثبت شده است.'), $redirect_url));
             exit;
         }
         if (email_exists($email)) {
-             wp_redirect(add_query_arg('error', urlencode('این ایمیل قبلاً استفاده شده است.'), $redirect_url));
+             wp_redirect(add_query_arg('error', urlencode('ایمیلی مرتبط با این شماره موبایل قبلاً ثبت شده است.'), $redirect_url));
             exit;
         }
 
@@ -670,20 +673,20 @@ class Maneli_Form_Handler {
             exit;
         }
 
-        $user_data = ['ID' => $user_id];
-        if (isset($_POST['first_name'])) $user_data['first_name'] = sanitize_text_field($_POST['first_name']);
-        if (isset($_POST['last_name'])) $user_data['last_name'] = sanitize_text_field($_POST['last_name']);
-        if (isset($_POST['user_role'])) {
-            $new_role = sanitize_key($_POST['user_role']);
-            if (in_array($new_role, ['subscriber', 'maneli_expert', 'maneli_admin'])) {
-                $user_data['role'] = $new_role;
-            }
-        }
-        wp_update_user($user_data);
+        $first_name = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
+        $last_name = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+        $display_name = trim($first_name . ' ' . $last_name);
 
-        if (isset($_POST['mobile_number'])) {
-            update_user_meta($user_id, 'mobile_number', sanitize_text_field($_POST['mobile_number']));
-        }
+        $user_data = [
+            'ID' => $user_id,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'display_name' => !empty($display_name) ? $display_name : $user_login,
+            'role' => 'customer'
+        ];
+        
+        wp_update_user($user_data);
+        update_user_meta($user_id, 'mobile_number', $mobile);
         
         wp_redirect(add_query_arg('user-created', 'true', $redirect_url));
         exit;
