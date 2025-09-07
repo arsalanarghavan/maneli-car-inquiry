@@ -9,15 +9,19 @@ class Maneli_Settings_Page {
     private $options_name = 'maneli_inquiry_all_options';
 
     public function __construct() {
+        // Backend settings page for Administrators
         add_action('admin_menu', [$this, 'add_plugin_menu']);
         add_action('admin_init', [$this, 'register_settings']);
+
+        // Handler for frontend settings form submission
+        add_action('admin_post_maneli_save_frontend_settings', [$this, 'handle_frontend_settings_save']);
     }
 
     public function add_plugin_menu() {
         add_options_page(
             'تنظیمات استعلام خودرو',
             'تنظیمات استعلام خودرو',
-            'manage_options',
+            'manage_options', // Only for full administrators
             'maneli-inquiry-settings',
             [$this, 'render_settings_page']
         );
@@ -62,6 +66,11 @@ class Maneli_Settings_Page {
             [$this, 'sanitize_and_merge_options']
         );
 
+        // Define all sections and fields
+        $this->add_settings_fields();
+    }
+
+    private function add_settings_fields() {
         // Finotex Section
         add_settings_section('maneli_finotex_cheque_section', 'سرویس استعلام رنگ چک', null, 'maneli-finotex-settings-section');
         add_settings_field('finotex_enabled', 'فعال‌سازی استعلام فینوتک', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_enabled', 'type' => 'checkbox', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.']);
@@ -110,7 +119,6 @@ class Maneli_Settings_Page {
     public function sanitize_and_merge_options($input) {
         $old_options = get_option($this->options_name, []);
 
-        // Handle checkbox for finotex_enabled
         if (!isset($input['finotex_enabled'])) {
             $input['finotex_enabled'] = '0';
         }
@@ -118,7 +126,9 @@ class Maneli_Settings_Page {
         $merged_options = array_merge($old_options, $input);
         $sanitized_options = [];
         foreach ($merged_options as $key => $value) {
-            if (is_string($value)) {
+            if (is_array($value)) {
+                $sanitized_options[$key] = $value;
+            } elseif (is_string($value)) {
                  if ($key === 'sadad_key' || $key === 'finotex_api_key' || $key === 'zero_fee_message') {
                      $sanitized_options[$key] = sanitize_textarea_field($value);
                  } else {
@@ -180,5 +190,73 @@ class Maneli_Settings_Page {
         echo '<p>سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.</p>';
         echo '<p>استعلام‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.</p>';
         echo '<p>برای افزودن کارشناس جدید، کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.</p>';
+    }
+
+    public function render_frontend_settings_form($tab) {
+        ob_start();
+        ?>
+        <div class="maneli-inquiry-wrapper maneli-frontend-settings">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="maneli_save_frontend_settings">
+                <?php wp_nonce_field('maneli_save_frontend_settings_nonce'); ?>
+                <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url(wp_unslash($_SERVER['REQUEST_URI'])); ?>">
+
+                <?php
+                global $wp_settings_sections, $wp_settings_fields;
+                $page = 'maneli-' . $tab . '-settings-section';
+
+                if (!isset($wp_settings_sections[$page])) {
+                    echo '<div class="error-box"><p>بخش تنظیمات مورد نظر یافت نشد.</p></div>';
+                    return;
+                }
+
+                foreach ((array) $wp_settings_sections[$page] as $section) {
+                    echo "<h3>" . esc_html($section['title']) . "</h3>\n";
+                    if ($section['callback']) {
+                        call_user_func($section['callback'], $section);
+                    }
+
+                    if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) {
+                        continue;
+                    }
+                    echo '<table class="form-table">';
+                    do_settings_fields($page, $section['id']);
+                    echo '</table>';
+                }
+                
+                ?>
+                 <p class="submit">
+                    <input type="submit" name="submit" id="submit" class="button button-primary" value="ذخیره تغییرات">
+                </p>
+            </form>
+        </div>
+        <style>
+            .maneli-frontend-settings .form-table { width: 100%; }
+            .maneli-frontend-settings .form-table th { width: 200px; padding: 15px 10px; text-align: right; }
+            .maneli-frontend-settings .form-table td { padding: 10px; }
+            .maneli-frontend-settings input[type="text"], .maneli-frontend-settings input[type="number"], .maneli-frontend-settings input[type="password"], .maneli-frontend-settings textarea { width: 100%; max-width: 400px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; }
+            .maneli-frontend-settings .description { font-size: 13px; color: #666; }
+        </style>
+        <?php
+        return ob_get_clean();
+    }
+    
+    public function handle_frontend_settings_save() {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_save_frontend_settings_nonce')) {
+            wp_die('خطای امنیتی!');
+        }
+
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_die('شما اجازه‌ی انجام این کار را ندارید.');
+        }
+        
+        $options = isset($_POST[$this->options_name]) ? (array) $_POST[$this->options_name] : [];
+        $sanitized_options = $this->sanitize_and_merge_options($options);
+        
+        update_option($this->options_name, $sanitized_options);
+        
+        $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
+        wp_redirect(add_query_arg('settings-updated', 'true', $redirect_url));
+        exit;
     }
 }

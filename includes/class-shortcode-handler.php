@@ -7,29 +7,36 @@ class Maneli_Shortcode_Handler {
 
     public function __construct() {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
+        
+        // Main Shortcodes
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
-        add_shortcode('maneli_expert_inquiry_list', [$this, 'render_maneli_expert_inquiry_list']);
-        add_shortcode('maneli_expert_new_inquiry_form', [$this, 'render_maneli_expert_new_inquiry_form']);
-        // New shortcode for the frontend report view
+        add_shortcode('maneli_inquiry_list', [$this, 'render_inquiry_list']);
         add_shortcode('maneli_frontend_credit_report', [$this, 'render_frontend_credit_report']);
+
+        // Admin Panel Shortcodes
+        add_shortcode('maneli_user_list', [$this, 'render_user_list_shortcode']);
+        add_shortcode('maneli_settings', [$this, 'render_settings_shortcode']);
     }
 
     public function enqueue_assets() {
-        // Always load the main frontend CSS on all frontend pages.
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.7');
-        }
-
-        // Load scripts for the product page calculator
-        if (is_product()) {
-            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.1.0', true);
-            if (is_user_logged_in()) {
-                wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
-                    'ajax_url'         => admin_url('admin-ajax.php'),
-                    'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
-                    'nonce'            => wp_create_nonce('maneli_ajax_nonce')
-                ]);
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.9');
+            
+            // Scripts needed for the expert/admin new inquiry form
+            if (is_singular()) { 
+                global $post;
+                if ($post && has_shortcode($post->post_content, 'car_inquiry_form')) {
+                     if (current_user_can('maneli_expert')) { // This capability is also on maneli_admin & administrator
+                        wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+                        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.4', true);
+                        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+                            'ajax_url' => admin_url('admin-ajax.php'),
+                            'nonce'    => wp_create_nonce('maneli_expert_nonce')
+                        ]);
+                     }
+                }
             }
         }
     }
@@ -75,7 +82,6 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای ثبت و پیگیری استعلام، لطفاً ابتدا <a href="' . esc_url($login_url) . '">وارد شوید</a>.</p></div>'; 
         }
 
-        // If the logged-in user is an expert or admin, show them the expert's new inquiry form instead.
         if (current_user_can('maneli_expert')) {
             return $this->render_maneli_expert_new_inquiry_form();
         }
@@ -410,15 +416,6 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما برای استفاده از این فرم باید با نقش کارشناس وارد شده باشید.</p></div>';
         }
         
-        // --- Enqueue scripts directly here to ensure they are loaded ---
-        wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.2', true); // Version bump
-        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('maneli_expert_nonce')
-        ]);
-
         ob_start();
 
         if (isset($_GET['inquiry_created']) && $_GET['inquiry_created'] == '1') {
@@ -436,7 +433,7 @@ class Maneli_Shortcode_Handler {
                     <select id="product_id_expert" name="product_id" style="width: 100%;" required></select>
                 </div>
                 
-                <?php if (current_user_can('manage_options')):
+                <?php if (current_user_can('manage_maneli_inquiries')):
                     $experts = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
                     if (!empty($experts)):
                 ?>
@@ -493,60 +490,77 @@ class Maneli_Shortcode_Handler {
         return ob_get_clean();
     }
 
-    public function render_maneli_expert_inquiry_list() {
-        if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
+    public function render_inquiry_list() {
+        if (!is_user_logged_in()) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده لیست استعلام‌ها، لطفاً ابتدا وارد شوید.</p></div>';
         }
     
-        $expert_id = get_current_user_id();
-        $inquiries = get_posts([
+        $current_user = wp_get_current_user();
+        $user_id = $current_user->ID;
+        $args = [
             'post_type'      => 'inquiry',
             'posts_per_page' => -1,
-            'meta_query' => [
-                'relation' => 'OR',
-                [
-                    'key'   => 'assigned_expert_id',
-                    'value' => $expert_id,
-                ],
-                [
-                    'key'   => 'created_by_expert_id',
-                    'value' => $expert_id,
-                ]
-            ],
             'orderby'        => 'date',
             'order'          => 'DESC',
-        ]);
+        ];
+    
+        $is_admin_view = current_user_can('manage_maneli_inquiries');
+    
+        if ($is_admin_view) {
+            // No changes to args, fetch all.
+        } 
+        elseif (in_array('maneli_expert', $current_user->roles)) {
+            $args['meta_query'] = [
+                'relation' => 'OR',
+                ['key' => 'assigned_expert_id', 'value' => $user_id],
+                ['key' => 'created_by_expert_id', 'value' => $user_id]
+            ];
+        } 
+        else { // Customers
+            $args['author'] = $user_id;
+        }
+    
+        $inquiries = get_posts($args);
     
         ob_start();
-    
         echo '<div class="maneli-inquiry-wrapper">';
+    
         if (empty($inquiries)) {
-            echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی به شما ارجاع داده نشده یا توسط شما ثبت نشده است.</p></div>';
+            echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی برای شما ثبت نشده است.</p></div>';
         } else {
-            $report_page_url = home_url('/expert-report/'); 
-
+            $report_page_url = home_url('/dashboard/?endp=inf_menu_4');
+    
             echo '<h3>لیست استعلام‌های شما</h3>';
             echo '<table class="shop_table shop_table_responsive my_account_orders">';
             echo '<thead><tr>';
-            echo '<th class="woocommerce-orders-table__header"><span class="nobr">شناسه</span></th>';
-            echo '<th class="woocommerce-orders-table__header"><span class="nobr">مشتری</span></th>';
-            echo '<th class="woocommerce-orders-table__header"><span class="nobr">خودرو</span></th>';
-            echo '<th class="woocommerce-orders-table__header"><span class="nobr">وضعیت</span></th>';
-            echo '<th class="woocommerce-orders-table__header"><span class="nobr">تاریخ ثبت</span></th>';
-            echo '<th class="woocommerce-orders-table__header"></th>';
+            echo '<th><span class="nobr">شناسه</span></th>';
+            if ($is_admin_view) {
+                echo '<th><span class="nobr">مشتری</span></th>';
+                echo '<th><span class="nobr">ثبت توسط</span></th>';
+            }
+            echo '<th><span class="nobr">خودرو</span></th>';
+            echo '<th><span class="nobr">وضعیت</span></th>';
+            echo '<th><span class="nobr">تاریخ ثبت</span></th>';
+            echo '<th></th>';
             echo '</tr></thead>';
             echo '<tbody>';
+    
             foreach ($inquiries as $inquiry) {
                 $inquiry_id = $inquiry->ID;
-                $customer_id = get_post_field('post_author', $inquiry_id);
-                $customer = get_userdata($customer_id);
                 $product_id = get_post_meta($inquiry_id, 'product_id', true);
                 $status = get_post_meta($inquiry_id, 'inquiry_status', true);
                 $report_url = add_query_arg('inquiry_id', $inquiry_id, $report_page_url);
                 
-                echo '<tr class="woocommerce-orders-table__row">';
+                echo '<tr>';
                 echo '<td data-title="شناسه">#' . esc_html($inquiry_id) . '</td>';
-                echo '<td data-title="مشتری">' . esc_html($customer->display_name) . '</td>';
+    
+                if ($is_admin_view) {
+                    $customer = get_userdata($inquiry->post_author);
+                    echo '<td data-title="مشتری">' . esc_html($customer->display_name) . '</td>';
+                    $creator_name = get_post_meta($inquiry_id, 'assigned_expert_name', true) ?: 'مشتری';
+                    echo '<td data-title="ثبت توسط">' . esc_html($creator_name) . '</td>';
+                }
+    
                 echo '<td data-title="خودرو">' . esc_html(get_the_title($product_id)) . '</td>';
                 echo '<td data-title="وضعیت">' . esc_html(Maneli_CPT_Handler::get_status_label($status)) . '</td>';
                 echo '<td data-title="تاریخ">' . get_the_date('Y/m/d', $inquiry_id) . '</td>';
@@ -562,7 +576,7 @@ class Maneli_Shortcode_Handler {
     }
     
     public function render_frontend_credit_report() {
-        if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
+        if (!is_user_logged_in()) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
         }
         if (!isset($_GET['inquiry_id'])) {
@@ -576,11 +590,20 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>استعلام یافت نشد.</p></div>';
         }
 
-        $expert_id = get_current_user_id();
-        $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
-        $created_by_expert_id = get_post_meta($inquiry_id, 'created_by_expert_id', true);
+        $current_user = wp_get_current_user();
+        $inquiry_author_id = (int)$inquiry->post_author;
+        $assigned_expert_id = (int)get_post_meta($inquiry_id, 'assigned_expert_id', true);
+        
+        $can_view = false;
+        if (current_user_can('manage_maneli_inquiries')) {
+            $can_view = true;
+        } elseif (current_user_can('maneli_expert') && $assigned_expert_id === $current_user->ID) {
+            $can_view = true;
+        } elseif ($inquiry_author_id === $current_user->ID) {
+            return $this->render_customer_report_html($inquiry_id);
+        }
 
-        if ((int)$assigned_expert_id !== $expert_id && (int)$created_by_expert_id !== $expert_id) {
+        if (!$can_view) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما اجازه مشاهده این گزارش را ندارید.</p></div>';
         }
 
@@ -628,7 +651,7 @@ class Maneli_Shortcode_Handler {
                             $value = $post_meta[$key][0] ?? '';
                             echo '<div class="form-group"><label>' . esc_html($label) . '</label><div class="detail-value-box">' . esc_html($value) . '</div></div>';
                         }
-                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; } // Placeholder for alignment
+                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; }
                         echo '</div>';
                     }
                     ?>
@@ -648,7 +671,7 @@ class Maneli_Shortcode_Handler {
                             $value = $post_meta[$key][0] ?? '';
                             echo '<div class="form-group"><label>' . esc_html($label) . '</label><div class="detail-value-box">' . esc_html($value) . '</div></div>';
                         }
-                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; } // Placeholder for alignment
+                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; }
                         echo '</div>';
                     }
                     ?>
@@ -683,6 +706,66 @@ class Maneli_Shortcode_Handler {
             <div class="report-back-button-wrapper">
                 <a href="<?php echo esc_url(home_url('/dashboard/?endp=inf_menu_3')); ?>" class="loan-action-btn">بازگشت به لیست استعلام‌ها</a>
             </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    public function render_settings_shortcode($atts) {
+        if (!current_user_can('manage_maneli_inquiries')) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
+        }
+
+        $atts = shortcode_atts(['tab' => 'gateways'], $atts, 'maneli_settings');
+        $tab = sanitize_key($atts['tab']);
+        
+        if(isset($_GET['settings-updated']) && $_GET['settings-updated'] == 'true') {
+            echo '<div class="status-box status-approved"><p>تنظیمات با موفقیت ذخیره شد.</p></div>';
+        }
+
+        $settings_page = new Maneli_Settings_Page();
+        return $settings_page->render_frontend_settings_form($tab);
+    }
+
+    public function render_user_list_shortcode() {
+        if (!current_user_can('manage_maneli_inquiries')) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
+        }
+
+        $all_users = get_users(['orderby' => 'display_name']);
+
+        ob_start();
+        ?>
+        <div class="maneli-inquiry-wrapper">
+            <h3>لیست کامل کاربران</h3>
+            <table class="shop_table shop_table_responsive">
+                <thead>
+                    <tr>
+                        <th>نام نمایشی</th>
+                        <th>نام کاربری</th>
+                        <th>ایمیل</th>
+                        <th>نقش</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($all_users as $user): 
+                        $role_names = array_map(
+                            function($role) {
+                                global $wp_roles;
+                                return $wp_roles->roles[$role]['name'] ?? $role;
+                            },
+                            $user->roles
+                        );
+                    ?>
+                    <tr>
+                        <td data-title="نام نمایشی"><?php echo esc_html($user->display_name); ?></td>
+                        <td data-title="نام کاربری"><?php echo esc_html($user->user_login); ?></td>
+                        <td data-title="ایمیل"><?php echo esc_html($user->user_email); ?></td>
+                        <td data-title="نقش"><?php echo esc_html(implode(', ', $role_names)); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
         <?php
         return ob_get_clean();
