@@ -19,6 +19,7 @@ class Maneli_Form_Handler {
         add_action('admin_post_maneli_admin_update_status', [$this, 'handle_admin_update_status']);
         add_action('admin_post_maneli_admin_update_user', [$this, 'handle_admin_update_user_profile']);
         add_action('admin_post_maneli_admin_create_user', [$this, 'handle_admin_create_user']);
+        add_action('admin_post_maneli_admin_retry_finotex', [$this, 'handle_admin_retry_finotex']); // New Hook
 
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
@@ -450,8 +451,6 @@ class Maneli_Form_Handler {
     public function handle_admin_update_status() {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_admin_update_status_nonce')) wp_die('خطای امنیتی!');
         
-        // ** THE FIX IS HERE **
-        // Changed `manage_options` to `manage_maneli_inquiries`
         if (!current_user_can('manage_maneli_inquiries') || empty($_POST['inquiry_id']) || empty($_POST['new_status'])) { 
             wp_die('درخواست نامعتبر یا دسترسی غیرمجاز.'); 
         }
@@ -514,7 +513,6 @@ class Maneli_Form_Handler {
             $sms_handler->send_pattern($pattern_id, $mobile_number, $params);
         }
         
-        // Redirect back to the report page instead of the admin list
         $redirect_url = home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id);
         wp_redirect($redirect_url);
         exit;
@@ -706,6 +704,41 @@ class Maneli_Form_Handler {
         update_user_meta($user_id, 'mobile_number', $mobile);
         
         wp_redirect(add_query_arg('user-created', 'true', $redirect_url));
+        exit;
+    }
+
+    /**
+     * New method to handle Finotex retry by admin.
+     */
+    public function handle_admin_retry_finotex() {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_retry_finotex_nonce')) wp_die('خطای امنیتی!');
+        if (!current_user_can('manage_maneli_inquiries') || empty($_POST['inquiry_id'])) { 
+            wp_die('درخواست نامعتبر یا دسترسی غیرمجاز.'); 
+        }
+
+        $post_id = intval($_POST['inquiry_id']);
+        $post_meta = get_post_meta($post_id);
+        $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
+        $national_code_for_api = ($issuer_type === 'other' && !empty($post_meta['issuer_national_code'][0])) ? $post_meta['issuer_national_code'][0] : $post_meta['national_code'][0];
+        
+        $finotex_result = $this->execute_finotex_inquiry($national_code_for_api);
+
+        $post_content = "گزارش استعلام از فینوتک (تلاش مجدد توسط مدیر):\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>";
+        wp_update_post([
+            'ID' => $post_id,
+            'post_content' => $post_content,
+        ]);
+
+        update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
+
+        if ($finotex_result['status'] !== 'DONE' && $finotex_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, 'inquiry_status', 'failed');
+        } else {
+             update_post_meta($post_id, 'inquiry_status', 'pending');
+        }
+
+        $redirect_url = home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id);
+        wp_redirect($redirect_url);
         exit;
     }
 }

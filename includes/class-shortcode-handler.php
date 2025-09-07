@@ -382,35 +382,48 @@ class Maneli_Shortcode_Handler {
 
             <div class="report-section">
                 <h4>نتیجه اعتبارسنجی</h4>
-                <div class="maneli-status-bar">
-                    <?php
-                    $colors = [
-                        1 => ['name' => 'سفید', 'class' => 'white'], 2 => ['name' => 'زرد', 'class' => 'yellow'],
-                        3 => ['name' => 'نارنجی', 'class' => 'orange'], 4 => ['name' => 'قهوه‌ای', 'class' => 'brown'],
-                        5 => ['name' => 'قرمز', 'class' => 'red']
-                    ];
-                    foreach ($colors as $code => $color) {
-                        $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
-                        echo "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>" . esc_html($color['name']) . "</span></div>";
-                    }
-                    ?>
-                </div>
-                <table class="summary-table" style="margin-top:20px;">
-                    <?php
-                    $cheque_color_map = [
-                        '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],'2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر مبلغ 50 میلیون ریال تعهد برگشتی.'],'3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر مبلغ 200 میلیون ریال تعهد برگشتی.'],'4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر مبلغ 500 میلیون ریال تعهد برگشتی.'],'5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از مبلغ 500 میلیون ریال تعهد برگشتی.'], 0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد.']
-                    ];
-                    $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
-                    ?>
-                    <tr>
-                        <td><strong>وضعیت چک صیادی:</strong></td>
-                        <td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td>
-                    </tr>
-                    <tr>
-                        <td><strong>توضیح وضعیت:</strong></td>
-                        <td><?php echo esc_html($color_info['desc']); ?></td>
-                    </tr>
-                </table>
+                <?php if (isset($finotex_data['status']) && $finotex_data['status'] === 'SKIPPED'): ?>
+                     <table class="summary-table" style="margin-top:20px;">
+                        <tr>
+                            <td><strong>وضعیت چک صیادی:</strong></td>
+                            <td>نامشخص</td>
+                        </tr>
+                        <tr>
+                            <td><strong>توضیح وضعیت:</strong></td>
+                            <td>استعلام بانکی انجام نشده است.</td>
+                        </tr>
+                    </table>
+                <?php else: ?>
+                    <div class="maneli-status-bar">
+                        <?php
+                        $colors = [
+                            1 => ['name' => 'سفید', 'class' => 'white'], 2 => ['name' => 'زرد', 'class' => 'yellow'],
+                            3 => ['name' => 'نارنجی', 'class' => 'orange'], 4 => ['name' => 'قهوه‌ای', 'class' => 'brown'],
+                            5 => ['name' => 'قرمز', 'class' => 'red']
+                        ];
+                        foreach ($colors as $code => $color) {
+                            $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
+                            echo "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>" . esc_html($color['name']) . "</span></div>";
+                        }
+                        ?>
+                    </div>
+                    <table class="summary-table" style="margin-top:20px;">
+                        <?php
+                        $cheque_color_map = [
+                            '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],'2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر مبلغ 50 میلیون ریال تعهد برگشتی.'],'3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر مبلغ 200 میلیون ریال تعهد برگشتی.'],'4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر مبلغ 500 میلیون ریال تعهد برگشتی.'],'5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از مبلغ 500 میلیون ریال تعهد برگشتی.'], 0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد.']
+                        ];
+                        $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
+                        ?>
+                        <tr>
+                            <td><strong>وضعیت چک صیادی:</strong></td>
+                            <td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td><strong>توضیح وضعیت:</strong></td>
+                            <td><?php echo esc_html($color_info['desc']); ?></td>
+                        </tr>
+                    </table>
+                <?php endif; ?>
             </div>
         </div>
         <?php
@@ -634,7 +647,6 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما اجازه مشاهده این گزارش را ندارید.</p></div>';
         }
         
-        // If the user is a customer and not an admin/expert, show the simplified view.
         if ($can_view_as_customer && !$can_view_as_admin && !$can_view_as_expert) {
              return $this->render_customer_report_html($inquiry_id);
         }
@@ -727,26 +739,39 @@ class Maneli_Shortcode_Handler {
 
             <div class="report-box">
                 <h3 class="report-box-title">نتیجه استعلام وضعیت چک (صیادی)</h3>
-                <div class="maneli-status-bar">
-                    <?php
-                    $colors = [ 1 => ['name' => 'سفید', 'class' => 'white'], 2 => ['name' => 'زرد', 'class' => 'yellow'], 3 => ['name' => 'نارنجی', 'class' => 'orange'], 4 => ['name' => 'قهوه‌ای', 'class' => 'brown'], 5 => ['name' => 'قرمز', 'class' => 'red'] ];
-                    foreach ($colors as $code => $color) {
-                        $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
-                        echo "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>" . esc_html($color['name']) . "</span></div>";
-                    }
-                    ?>
-                </div>
-                 <table class="summary-table right-aligned-table" style="margin-top: 20px;">
-                    <tbody>
+
+                <?php if ($can_view_as_admin && isset($finotex_data['status']) && $finotex_data['status'] === 'SKIPPED'): ?>
+                    <div class="admin-notice">
+                        <p><strong>توجه:</strong> استعلام فینوتک برای این درخواست انجام نشده است، زیرا در زمان ثبت، این سرویس در تنظیمات غیرفعال بوده است.</p>
+                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                             <input type="hidden" name="action" value="maneli_admin_retry_finotex">
+                             <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
+                             <?php wp_nonce_field('maneli_retry_finotex_nonce'); ?>
+                             <button type="submit" class="action-btn approve">انجام مجدد استعلام فینوتک</button>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <div class="maneli-status-bar">
                         <?php
-                        $cheque_color_map = [
-                            '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],'2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر مبلغ 50 میلیون ریال تعهد برگشتی.'],'3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر مبلغ 200 میلیون ریال تعهد برگشتی.'],'4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر مبلغ 500 میلیون ریال تعهد برگشتی.'],'5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از مبلغ 500 میلیون ریال تعهد برگشتی.'], 0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد یا استعلام ناموفق بود.']];
-                        $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
+                        $colors = [ 1 => ['name' => 'سفید', 'class' => 'white'], 2 => ['name' => 'زرد', 'class' => 'yellow'], 3 => ['name' => 'نارنجی', 'class' => 'orange'], 4 => ['name' => 'قهوه‌ای', 'class' => 'brown'], 5 => ['name' => 'قرمز', 'class' => 'red'] ];
+                        foreach ($colors as $code => $color) {
+                            $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
+                            echo "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>" . esc_html($color['name']) . "</span></div>";
+                        }
                         ?>
-                        <tr><th>وضعیت اعتباری</th><td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td></tr>
-                        <tr><th>توضیح</th><td><?php echo esc_html($color_info['desc']); ?></td></tr>
-                    </tbody>
-                </table>
+                    </div>
+                    <table class="summary-table right-aligned-table" style="margin-top: 20px;">
+                        <tbody>
+                            <?php
+                            $cheque_color_map = [
+                                '1' => ['text' => 'سفید', 'desc' => 'فاقد هرگونه سابقه چک برگشتی.'],'2' => ['text' => 'زرد', 'desc' => 'یک فقره چک برگشتی یا حداکثر مبلغ 50 میلیون ریال تعهد برگشتی.'],'3' => ['text' => 'نارنجی', 'desc' => 'دو الی چهار فقره چک برگشتی یا حداکثر مبلغ 200 میلیون ریال تعهد برگشتی.'],'4' => ['text' => 'قهوه‌ای', 'desc' => 'پنج تا ده فقره چک برگشتی یا حداکثر مبلغ 500 میلیون ریال تعهد برگشتی.'],'5' => ['text' => 'قرمز', 'desc' => 'بیش از ده فقره چک برگشتی یا بیش از مبلغ 500 میلیون ریال تعهد برگشتی.'], 0  => ['text' => 'نامشخص', 'desc' => 'اطلاعاتی از فینوتک دریافت نشد یا استعلام ناموفق بود.']];
+                            $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
+                            ?>
+                            <tr><th>وضعیت اعتباری</th><td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td></tr>
+                            <tr><th>توضیح</th><td><?php echo esc_html($color_info['desc']); ?></td></tr>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
             </div>
 
             <?php if ($can_view_as_admin): ?>
