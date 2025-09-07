@@ -17,13 +17,11 @@ class Maneli_Form_Handler {
         
         // Admin Workflow Hooks
         add_action('admin_post_maneli_admin_update_status', [$this, 'handle_admin_update_status']);
+        add_action('admin_post_maneli_admin_update_user', [$this, 'handle_admin_update_user_profile']);
 
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
-
-        // New hook for admin updating a user profile from the frontend
-        add_action('admin_post_maneli_admin_update_user', [$this, 'handle_admin_update_user_profile']);
     }
 
     private function execute_finotex_inquiry($national_code) {
@@ -580,6 +578,14 @@ class Maneli_Form_Handler {
             wp_die('شناسه کاربر مشخص نشده است.');
         }
         
+        // Prevent admin from changing their own role
+        if ($user_id_to_update === get_current_user_id() && isset($_POST['user_role'])) {
+            $user_obj = get_userdata($user_id_to_update);
+            if (!in_array($_POST['user_role'], $user_obj->roles)) {
+                 wp_die('شما نمی‌توانید نقش کاربری خود را تغییر دهید.');
+            }
+        }
+        
         $user_data = [];
         if (isset($_POST['first_name'])) $user_data['first_name'] = sanitize_text_field($_POST['first_name']);
         if (isset($_POST['last_name'])) $user_data['last_name'] = sanitize_text_field($_POST['last_name']);
@@ -588,6 +594,13 @@ class Maneli_Form_Handler {
              if (is_email($email)) {
                  $user_data['user_email'] = $email;
              }
+        }
+
+        if (isset($_POST['user_role'])) {
+            $new_role = sanitize_key($_POST['user_role']);
+            if (in_array($new_role, ['subscriber', 'maneli_expert', 'maneli_admin'])) {
+                $user_data['role'] = $new_role;
+            }
         }
 
         if (!empty($user_data)) {

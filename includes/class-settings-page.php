@@ -6,6 +6,7 @@ if (!defined('ABSPATH')) {
 class Maneli_Settings_Page {
 
     private $options_name = 'maneli_inquiry_all_options';
+    private $settings_registered = false;
 
     public function __construct() {
         add_action('admin_menu', [$this, 'add_plugin_menu']);
@@ -64,6 +65,10 @@ class Maneli_Settings_Page {
     }
 
     public function register_all_settings_sections() {
+        if ($this->settings_registered) {
+            return;
+        }
+
         // Finotex Section
         add_settings_section('maneli_finotex_cheque_section', 'سرویس استعلام رنگ چک', null, 'maneli-finotex-settings-section');
         add_settings_field('finotex_enabled', 'فعال‌سازی استعلام فینوتک', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_enabled', 'type' => 'checkbox', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.']);
@@ -107,6 +112,8 @@ class Maneli_Settings_Page {
 
         // Experts Section
         add_settings_section('maneli_experts_list_section', 'مدیریت چرخشی کارشناسان', [$this, 'render_experts_description'], 'maneli-experts-settings-section');
+
+        $this->settings_registered = true;
     }
     
     public function sanitize_and_merge_options($input) {
@@ -197,9 +204,8 @@ class Maneli_Settings_Page {
                 <?php
                 global $wp_settings_sections, $wp_settings_fields;
                 
-                if (!did_action('admin_init')) {
-                    $this->register_all_settings_sections();
-                }
+                // CRITICAL FIX: Ensure settings are always registered before rendering on frontend.
+                $this->register_all_settings_sections();
 
                 $page = 'maneli-' . $tab . '-settings-section';
 
