@@ -39,15 +39,7 @@ class Maneli_Settings_Page {
             <form method="post" action="options.php">
                 <?php
                 settings_fields('maneli_inquiry_settings_group');
-                if ($active_tab == 'finotex') {
-                    do_settings_sections('maneli-finotex-settings-section');
-                } elseif ($active_tab == 'gateways') {
-                    do_settings_sections('maneli-payment-settings-section');
-                } elseif ($active_tab == 'experts') {
-                    do_settings_sections('maneli-experts-settings-section');
-                } else {
-                    do_settings_sections('maneli-sms-settings-section');
-                }
+                do_settings_sections('maneli-' . $active_tab . '-settings-section');
                 submit_button('ذخیره تنظیمات');
                 ?>
             </form>
@@ -61,66 +53,52 @@ class Maneli_Settings_Page {
             $this->options_name,
             [$this, 'sanitize_and_merge_options']
         );
-        $this->register_all_settings_sections();
+
+        foreach (array_keys($this->get_all_settings()) as $tab) {
+            $this->register_tab_settings($tab);
+        }
     }
 
-    public function register_all_settings_sections() {
-        if ($this->settings_registered) {
-            return;
+    private function register_tab_settings($tab) {
+        $settings = $this->get_all_settings();
+        if (!isset($settings[$tab])) return;
+
+        foreach ($settings[$tab] as $section_id => $section) {
+            add_settings_section(
+                $section_id,
+                $section['title'],
+                function() use ($section) {
+                    if (!empty($section['desc'])) {
+                        echo '<p>' . wp_kses_post($section['desc']) . '</p>';
+                    }
+                },
+                'maneli-' . $tab . '-settings-section'
+            );
+
+            if (empty($section['fields'])) continue;
+
+            foreach ($section['fields'] as $field) {
+                add_settings_field(
+                    $field['name'],
+                    $field['label'],
+                    [$this, 'render_field'],
+                    'maneli-' . $tab . '-settings-section',
+                    $section_id,
+                    $field
+                );
+            }
         }
-
-        // Finotex Section
-        add_settings_section('maneli_finotex_cheque_section', 'سرویس استعلام رنگ چک', null, 'maneli-finotex-settings-section');
-        add_settings_field('finotex_enabled', 'فعال‌سازی استعلام فینوتک', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_enabled', 'type' => 'checkbox', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.']);
-        add_settings_field('finotex_client_id', 'شناسه کلاینت (Client ID)', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_client_id']);
-        add_settings_field('finotex_api_key', 'توکن دسترسی (Access Token)', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_api_key', 'type' => 'textarea']);
-        
-        // Payment Settings Section (Gateways)
-        add_settings_section('maneli_payment_general_section', 'تنظیمات عمومی پرداخت', null, 'maneli-payment-settings-section');
-        add_settings_field('inquiry_fee', 'هزینه استعلام (تومان)', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_payment_general_section', ['name' => 'inquiry_fee', 'type' => 'number', 'desc' => 'مبلغ را به تومان وارد کنید. برای رایگان بودن، عدد 0 را وارد کنید.']);
-        add_settings_field('active_gateway', 'درگاه پرداخت فعال', [$this, 'render_gateway_choice_field'], 'maneli-payment-settings-section', 'maneli_payment_general_section');
-        add_settings_field('zero_fee_message', 'پیام در صورت رایگان بودن استعلام', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_payment_general_section', ['name' => 'zero_fee_message', 'type' => 'textarea', 'desc' => 'این پیام زمانی نمایش داده می‌شود که هزینه استعلام 0 باشد.']);
-        
-        // ZarinPal Section
-        add_settings_section('maneli_zarinpal_section', 'تنظیمات زرین‌پال', null, 'maneli-payment-settings-section');
-        add_settings_field('zarinpal_merchant_code', 'مرچنت کد زرین‌پال', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_zarinpal_section', ['name' => 'zarinpal_merchant_code']);
-        
-        // Sadad Section
-        add_settings_section('maneli_sadad_section', 'تنظیمات درگاه پرداخت سداد (بانک ملی)', null, 'maneli-payment-settings-section');
-        add_settings_field('sadad_merchant_id', 'شناسه مرچنت (Merchant ID)', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_sadad_section', ['name' => 'sadad_merchant_id']);
-        add_settings_field('sadad_terminal_id', 'شناسه ترمینال (Terminal ID)', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_sadad_section', ['name' => 'sadad_terminal_id']);
-        add_settings_field('sadad_key', 'کلید ترمینال (Terminal Key)', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_sadad_section', ['name' => 'sadad_key', 'type' => 'textarea', 'desc' => 'این کلید به صورت base64 توسط بانک ارائه می‌شود.']);
-
-        // Discount Code Section
-        add_settings_section('maneli_discount_section', 'تنظیمات کد تخفیف', null, 'maneli-payment-settings-section');
-        add_settings_field('discount_code', 'کد تخفیف', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_discount_section', ['name' => 'discount_code', 'desc' => 'یک کد تخفیف برای ۱۰۰٪ تخفیف در هزینه استعلام وارد کنید.']);
-        add_settings_field('discount_code_text', 'متن پیام کد تخفیف', [$this, 'render_field'], 'maneli-payment-settings-section', 'maneli_discount_section', ['name' => 'discount_code_text', 'type' => 'text', 'desc' => 'این پیام پس از اعمال کد تخفیف موفق به کاربر نمایش داده می‌شود.']);
-
-        // SMS Section
-        add_settings_section('maneli_sms_api_section', 'اطلاعات پنل ملی پیامک', null, 'maneli-sms-settings-section');
-        add_settings_field('sms_username', 'نام کاربری', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_username']);
-        add_settings_field('sms_password', 'رمز عبور', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_api_section', ['name' => 'sms_password', 'type' => 'password']);
-
-        add_settings_section('maneli_sms_patterns_section', 'کدهای پترن پیامک (Body ID)', [$this, 'render_sms_patterns_description'], 'maneli-sms-settings-section');
-        add_settings_field('sms_pattern_pending', 'پترن «در انتظار بررسی» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_pending', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
-        add_settings_field('sms_pattern_approved', 'پترن «تایید شده» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_approved', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
-        add_settings_field('sms_pattern_rejected', 'پترن «رد شده» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_rejected', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد']);
-        add_settings_field('sms_pattern_more_docs', 'پترن «نیازمند مدارک» (به مشتری)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_more_docs', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
-        add_settings_field('admin_notification_mobile', 'شماره موبایل مدیر', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'admin_notification_mobile', 'desc' => 'شماره موبایل برای دریافت پیام ثبت استعلام جدید.']);
-        add_settings_field('sms_pattern_new_inquiry', 'پترن «استعلام جدید» (به مدیر)', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_new_inquiry', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو']);
-        add_settings_field('sms_pattern_expert_referral', 'پترن «ارجاع به کارشناس»', [$this, 'render_field'], 'maneli-sms-settings-section', 'maneli_sms_patterns_section', ['name' => 'sms_pattern_expert_referral', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو']);
-
-        // Experts Section
-        add_settings_section('maneli_experts_list_section', 'مدیریت چرخشی کارشناسان', [$this, 'render_experts_description'], 'maneli-experts-settings-section');
-
-        $this->settings_registered = true;
     }
     
     public function sanitize_and_merge_options($input) {
         $old_options = get_option($this->options_name, []);
-
-        if (!isset($input['finotex_enabled'])) {
-            $input['finotex_enabled'] = '0';
+        
+        // Ensure checkboxes are saved correctly
+        $checkboxes = ['finotex_enabled', 'zarinpal_enabled', 'sadad_enabled'];
+        foreach ($checkboxes as $cb) {
+            if (!isset($input[$cb])) {
+                $input[$cb] = '0';
+            }
         }
 
         $merged_options = array_merge($old_options, $input);
@@ -128,14 +106,10 @@ class Maneli_Settings_Page {
         foreach ($merged_options as $key => $value) {
             if (is_array($value)) {
                 $sanitized_options[$key] = $value;
-            } elseif (is_string($value)) {
-                 if ($key === 'sadad_key' || $key === 'finotex_api_key' || $key === 'zero_fee_message') {
-                     $sanitized_options[$key] = sanitize_textarea_field($value);
-                 } else {
-                     $sanitized_options[$key] = sanitize_text_field($value);
-                 }
+            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message'])) {
+                $sanitized_options[$key] = sanitize_textarea_field($value);
             } else {
-                $sanitized_options[$key] = $value;
+                $sanitized_options[$key] = sanitize_text_field($value);
             }
         }
         return $sanitized_options;
@@ -146,7 +120,7 @@ class Maneli_Settings_Page {
         $name = $args['name'];
         $type = $args['type'] ?? 'text';
         $desc = $args['desc'] ?? '';
-        $value = isset($options[$name]) ? $options[$name] : '';
+        $value = $options[$name] ?? '';
         $field_name = "{$this->options_name}[{$name}]";
         
         switch ($type) {
@@ -154,8 +128,14 @@ class Maneli_Settings_Page {
                 echo "<textarea name='{$field_name}' rows='3' class='large-text' dir='ltr'>" . esc_textarea($value) . "</textarea>";
                 break;
             case 'checkbox':
-                $checked = checked('1', $value, false);
-                echo "<label><input type='checkbox' name='{$field_name}' value='1' {$checked}></label>";
+                echo "<label><input type='checkbox' name='{$field_name}' value='1' " . checked('1', $value, false) . "></label>";
+                break;
+            case 'radio':
+                 if (!empty($args['options'])) {
+                    foreach ($args['options'] as $key => $label) {
+                        echo "<label style='margin-left: 15px;'><input type='radio' name='{$field_name}' value='{$key}' " . checked($key, $value, false) . "> " . esc_html($label) . "</label>";
+                    }
+                 }
                 break;
             default:
                 echo "<input type='{$type}' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
@@ -163,33 +143,8 @@ class Maneli_Settings_Page {
         }
 
         if ($desc) {
-            echo "<p class='description'>" . esc_html($desc) . "</p>";
+            echo "<p class='description'>" . wp_kses_post($desc) . "</p>";
         }
-    }
-
-    public function render_gateway_choice_field() {
-        $options = get_option($this->options_name, []);
-        $active_gateway = $options['active_gateway'] ?? 'zarinpal';
-        ?>
-        <label style="margin-right: 20px;">
-            <input type="radio" name="<?php echo $this->options_name; ?>[active_gateway]" value="zarinpal" <?php checked($active_gateway, 'zarinpal'); ?>>
-            زرین‌پال
-        </label>
-        <label>
-            <input type="radio" name="<?php echo $this->options_name; ?>[active_gateway]" value="sadad" <?php checked($active_gateway, 'sadad'); ?>>
-            پرداخت سداد (بانک ملی)
-        </label>
-        <?php
-    }
-
-    public function render_sms_patterns_description() {
-        echo '<p>در این بخش، به جای متن کامل پیامک، فقط **کد پترن (Body ID)** که در پنل ملی پیامک شما تایید شده است را وارد کنید.</p><p>ترتیب متغیرها باید دقیقاً مطابق توضیحات هر فیلد باشد.</p>';
-    }
-
-    public function render_experts_description() {
-        echo '<p>سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.</p>';
-        echo '<p>استعلام‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.</p>';
-        echo '<p>برای افزودن کارشناس جدید، کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.</p>';
     }
 
     public function render_frontend_settings_form($tab) {
@@ -201,22 +156,22 @@ class Maneli_Settings_Page {
                 <?php wp_nonce_field('maneli_save_frontend_settings_nonce'); ?>
                 <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url(wp_unslash($_SERVER['REQUEST_URI'])); ?>">
 
-                <?php
-                // CRITICAL FIX: Manually render the form fields for the specified tab.
-                $this->manually_render_settings_tab($tab);
-                ?>
+                <?php $this->manually_render_settings_tab($tab); ?>
+                
                  <p class="submit">
                     <input type="submit" name="submit" id="submit" class="button button-primary" value="ذخیره تغییرات">
                 </p>
             </form>
         </div>
         <style>
-            .maneli-frontend-settings .form-table { width: 100%; }
-            .maneli-frontend-settings .form-table th { width: 200px; padding: 15px 10px; text-align: right; }
-            .maneli-frontend-settings .form-table td { padding: 10px; }
-            .maneli-frontend-settings input[type="text"], .maneli-frontend-settings input[type="number"], .maneli-frontend-settings input[type="password"], .maneli-frontend-settings textarea { width: 100%; max-width: 400px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; }
+            .maneli-frontend-settings .form-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+            .maneli-frontend-settings .form-table th, .maneli-frontend-settings .form-table td { padding: 15px 10px; text-align: right; border-bottom: 1px solid #eee; }
+            .maneli-frontend-settings .form-table th { width: 220px; font-weight: bold; }
+            .maneli-frontend-settings input[type="text"], .maneli-frontend-settings input[type="number"], .maneli-frontend-settings input[type="password"], .maneli-frontend-settings textarea { width: 100%; max-width: 450px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; }
             .maneli-frontend-settings .description { font-size: 13px; color: #666; }
             .maneli-frontend-settings .button-primary { font-size: 16px !important; padding: 8px 20px !important; height: auto !important; }
+            .maneli-frontend-settings h3 { margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+            .maneli-frontend-settings .expert-list-table { width: 100%; }
         </style>
         <?php
         return ob_get_clean();
@@ -225,21 +180,44 @@ class Maneli_Settings_Page {
     private function manually_render_settings_tab($tab) {
         $all_settings = $this->get_all_settings();
 
+        if ($tab === 'experts') {
+            $section = $all_settings['experts']['maneli_experts_list_section'];
+            echo "<h3>" . esc_html($section['title']) . "</h3>";
+            echo '<p>' . wp_kses_post($section['desc']) . '</p>';
+            $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name']);
+            if (!empty($expert_users)) {
+                echo '<table class="shop_table shop_table_responsive expert-list-table">';
+                echo '<thead><tr><th>نام کارشناس</th><th>ایمیل</th><th>شماره موبایل</th></tr></thead>';
+                echo '<tbody>';
+                foreach ($expert_users as $expert) {
+                    echo '<tr>';
+                    echo '<td data-title="نام">' . esc_html($expert->display_name) . '</td>';
+                    echo '<td data-title="ایمیل">' . esc_html($expert->user_email) . '</td>';
+                    echo '<td data-title="موبایل">' . esc_html(get_user_meta($expert->ID, 'mobile_number', true) ?: ' ثبت نشده') . '</td>';
+                    echo '</tr>';
+                }
+                echo '</tbody></table>';
+            } else {
+                echo '<p>در حال حاضر هیچ کارشناسی ثبت نشده است.</p>';
+            }
+            return;
+        }
+
         if (!isset($all_settings[$tab])) {
             echo '<div class="error-box"><p>بخش تنظیمات مورد نظر یافت نشد.</p></div>';
             return;
         }
 
-        $sections = $all_settings[$tab];
-        foreach ($sections as $section_id => $section) {
+        foreach ($all_settings[$tab] as $section_id => $section) {
             echo "<h3>" . esc_html($section['title']) . "</h3>";
-            if (!empty($section['desc'])) {
-                echo '<p>' . esc_html($section['desc']) . '</p>';
-            }
+            if (!empty($section['desc'])) echo '<p>' . wp_kses_post($section['desc']) . '</p>';
+            
+            if (empty($section['fields'])) continue;
+
             echo '<table class="form-table">';
             foreach ($section['fields'] as $field) {
                 echo '<tr>';
-                echo '<th scope="row"><label for="' . esc_attr($field['name']) . '">' . esc_html($field['label']) . '</label></th>';
+                echo '<th scope="row"><label for="' . esc_attr($this->options_name . '_' . $field['name']) . '">' . esc_html($field['label']) . '</label></th>';
                 echo '<td>';
                 $this->render_field($field);
                 echo '</td>';
@@ -252,8 +230,8 @@ class Maneli_Settings_Page {
     private function get_all_settings() {
         return [
             'finotex' => [
-                'main' => [
-                    'title' => 'سرویس استعلام رنگ چک',
+                'maneli_finotex_cheque_section' => [
+                    'title' => 'سرویس استعلام رنگ چک', 'desc' => '',
                     'fields' => [
                         ['name' => 'finotex_enabled', 'label' => 'فعال‌سازی استعلام فینوتک', 'type' => 'checkbox', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.'],
                         ['name' => 'finotex_client_id', 'label' => 'شناسه کلاینت (Client ID)', 'type' => 'text'],
@@ -262,45 +240,65 @@ class Maneli_Settings_Page {
                 ]
             ],
             'gateways' => [
-                'general' => [
-                    'title' => 'تنظیمات عمومی پرداخت',
+                'maneli_payment_general_section' => [
+                    'title' => 'تنظیمات عمومی پرداخت', 'desc' => '',
                     'fields' => [
                         ['name' => 'inquiry_fee', 'label' => 'هزینه استعلام (تومان)', 'type' => 'number', 'desc' => 'مبلغ را به تومان وارد کنید. برای رایگان بودن، عدد 0 را وارد کنید.'],
-                        ['name' => 'active_gateway', 'label' => 'درگاه پرداخت فعال', 'type' => 'radio', 'options' => ['zarinpal' => 'زرین‌پال', 'sadad' => 'پرداخت سداد (بانک ملی)']],
                         ['name' => 'zero_fee_message', 'label' => 'پیام در صورت رایگان بودن استعلام', 'type' => 'textarea', 'desc' => 'این پیام زمانی نمایش داده می‌شود که هزینه استعلام 0 باشد.'],
+                        ['name' => 'active_gateway', 'label' => 'درگاه پرداخت فعال', 'type' => 'radio', 'options' => ['zarinpal' => 'زرین‌پال', 'sadad' => 'پرداخت سداد (بانک ملی)']],
                     ]
                 ],
-                'zarinpal' => [
-                    'title' => 'تنظیمات زرین‌پال',
+                 'maneli_discount_section' => [
+                    'title' => 'تنظیمات کد تخفیف', 'desc' => '',
                     'fields' => [
-                        ['name' => 'zarinpal_merchant_code', 'label' => 'مرچنت کد زرین‌پال', 'type' => 'text'],
+                        ['name' => 'discount_code', 'label' => 'کد تخفیف', 'type' => 'text', 'desc' => 'یک کد تخفیف برای ۱۰۰٪ تخفیف در هزینه استعلام وارد کنید.'],
+                        ['name' => 'discount_code_text', 'label' => 'متن پیام کد تخفیف', 'type' => 'text', 'desc' => 'این پیام پس از اعمال کد تخفیف موفق به کاربر نمایش داده می‌شود.'],
                     ]
                 ],
-                // ... other gateways and sections here ...
+                'maneli_zarinpal_section' => [
+                    'title' => 'تنظیمات زرین‌پال', 'desc' => '',
+                    'fields' => [
+                         ['name' => 'zarinpal_enabled', 'label' => 'فعال‌سازی درگاه زرین‌پال', 'type' => 'checkbox'],
+                         ['name' => 'zarinpal_merchant_code', 'label' => 'مرچنت کد زرین‌پال', 'type' => 'text'],
+                    ]
+                ],
+                'maneli_sadad_section' => [
+                    'title' => 'تنظیمات درگاه پرداخت سداد (بانک ملی)', 'desc' => '',
+                    'fields' => [
+                        ['name' => 'sadad_enabled', 'label' => 'فعال‌سازی درگاه سداد', 'type' => 'checkbox'],
+                        ['name' => 'sadad_merchant_id', 'label' => 'شناسه مرچنت (Merchant ID)', 'type' => 'text'],
+                        ['name' => 'sadad_terminal_id', 'label' => 'شناسه ترمینال (Terminal ID)', 'type' => 'text'],
+                        ['name' => 'sadad_key', 'label' => 'کلید ترمینال (Terminal Key)', 'type' => 'textarea', 'desc' => 'این کلید به صورت base64 توسط بانک ارائه می‌شود.'],
+                    ]
+                ]
             ],
             'sms' => [
-                'api' => [
-                    'title' => 'اطلاعات پنل ملی پیامک',
+                'maneli_sms_api_section' => [
+                    'title' => 'اطلاعات پنل ملی پیامک', 'desc' => '',
                     'fields' => [
                         ['name' => 'sms_username', 'label' => 'نام کاربری', 'type' => 'text'],
                         ['name' => 'sms_password', 'label' => 'رمز عبور', 'type' => 'password'],
                     ]
                 ],
-                'patterns' => [
+                'maneli_sms_patterns_section' => [
                     'title' => 'کدهای پترن پیامک (Body ID)',
-                    'desc' => 'در این بخش، فقط کد پترن (Body ID) را وارد کنید.',
+                    'desc' => 'در این بخش، به جای متن کامل پیامک، فقط <strong>کد پترن (Body ID)</strong> که در پنل ملی پیامک شما تایید شده است را وارد کنید.<br>ترتیب متغیرها باید دقیقاً مطابق توضیحات هر فیلد باشد.',
                     'fields' => [
-                        ['name' => 'sms_pattern_pending', 'label' => 'پترن «در انتظار بررسی»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
-                        ['name' => 'sms_pattern_approved', 'label' => 'پترن «تایید شده»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
-                        // ... more sms fields
+                        ['name' => 'sms_pattern_pending', 'label' => 'پترن «در انتظار بررسی» (به مشتری)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
+                        ['name' => 'sms_pattern_approved', 'label' => 'پترن «تایید شده» (به مشتری)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
+                        ['name' => 'sms_pattern_rejected', 'label' => 'پترن «رد شده» (به مشتری)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد'],
+                        ['name' => 'sms_pattern_more_docs', 'label' => 'پترن «نیازمند مدارک» (به مشتری)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
+                        ['name' => 'admin_notification_mobile', 'label' => 'شماره موبایل مدیر', 'type' => 'text', 'desc' => 'شماره موبایل برای دریافت پیام ثبت استعلام جدید.'],
+                        ['name' => 'sms_pattern_new_inquiry', 'label' => 'پترن «استعلام جدید» (به مدیر)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
+                        ['name' => 'sms_pattern_expert_referral', 'label' => 'پترن «ارجاع به کارشناس»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو'],
                     ]
                 ]
             ],
             'experts' => [
-                'main' => [
-                    'title' => 'مدیریت چرخشی کارشناسان',
-                    'desc' => 'سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها «کارشناس مانلی» باشد را به عنوان کارشناس فروش شناسایی می‌کند و استعلام‌ها به صورت گردشی به آن‌ها ارجاع داده خواهد شد.',
-                    'fields' => [] // No fields, just description
+                'maneli_experts_list_section' => [
+                    'title' => 'مدیریت کارشناسان',
+                    'desc' => 'سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.<br>استعلام‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.<br>برای افزودن کارشناس جدید، کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.',
+                    'fields' => []
                 ]
             ]
         ];

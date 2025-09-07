@@ -13,7 +13,10 @@ class Maneli_Expert_Panel {
      * AJAX handler for the Select2 car search in the expert panel.
      */
     public function handle_car_search_ajax() {
-        check_ajax_referer('maneli_expert_nonce', 'nonce');
+        // More specific nonce check with a clear error message
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'maneli_expert_nonce')) {
+            wp_send_json_error(['message' => 'خطای امنیتی (Nonce نامعتبر). لطفاً صفحه را رفرش کرده و دوباره تلاش کنید.']);
+        }
 
         // Allow experts, maneli admins, and full admins to search for cars.
         if (!current_user_can('edit_posts') && !current_user_can('manage_maneli_inquiries')) {
