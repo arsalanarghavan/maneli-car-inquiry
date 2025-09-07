@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.11.05
+ * Version:           0.11.06
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -95,7 +95,6 @@ function maneli_change_user_email_on_registration($user_id) {
     $user = get_user_by('id', $user_id);
     if ($user) {
         $new_email = $user->user_login . '@manelikhodro.com';
-        // Check if the email is already in the correct format to avoid loops
         if ($user->user_email !== $new_email) {
             wp_update_user([
                 'ID'         => $user_id,

@@ -11,21 +11,34 @@ class Maneli_Shortcode_Handler {
         // Main Shortcodes
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
-        add_shortcode('maneli_inquiry_list', [$this, 'render_inquiry_list']); // Corrected name
+        add_shortcode('maneli_inquiry_list', [$this, 'render_inquiry_list']);
         add_shortcode('maneli_frontend_credit_report', [$this, 'render_frontend_credit_report']);
 
         // Admin Panel Shortcodes
         add_shortcode('maneli_user_list', [$this, 'render_user_list_shortcode']);
         add_shortcode('maneli_settings', [$this, 'render_settings_shortcode']);
 
-        // --- Backward compatibility for old shortcode ---
+        // Backward compatibility for old shortcode
         add_shortcode('maneli_expert_inquiry_list', [$this, 'render_inquiry_list']);
     }
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.0');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.1');
             
+            // Enqueue scripts for the product page calculator
+            if (is_product()) {
+                wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.0', true);
+                if (is_user_logged_in()) {
+                    wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
+                        'ajax_url'         => admin_url('admin-ajax.php'),
+                        'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
+                        'nonce'            => wp_create_nonce('maneli_ajax_nonce')
+                    ]);
+                }
+            }
+            
+            // Enqueue scripts for the expert/admin new inquiry form
             if (is_singular()) { 
                 global $post;
                 if ($post && has_shortcode($post->post_content, 'car_inquiry_form')) {
@@ -744,7 +757,8 @@ class Maneli_Shortcode_Handler {
         }
 
         $all_users = get_users(['orderby' => 'display_name']);
-        $current_url = get_permalink();
+        
+        $current_url = remove_query_arg(['edit_user', 'user-updated'], $_SERVER['REQUEST_URI']);
 
         ob_start();
         ?>
