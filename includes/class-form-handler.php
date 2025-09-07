@@ -25,6 +25,13 @@ class Maneli_Form_Handler {
 
     private function execute_finotex_inquiry($national_code) {
         $all_options = get_option('maneli_inquiry_all_options', []);
+        $finotex_enabled = isset($all_options['finotex_enabled']) && $all_options['finotex_enabled'] == '1';
+        
+        // Return immediately if Finotex is disabled in settings
+        if (!$finotex_enabled) {
+            return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'استعلام فینوتک در تنظیمات غیرفعال است.'];
+        }
+
         $client_id = $all_options['finotex_client_id'] ?? '';
         $api_key = $all_options['finotex_api_key'] ?? '';
         $result = ['status' => 'FAILED', 'data' => null, 'raw_response' => ''];
@@ -346,6 +353,10 @@ class Maneli_Form_Handler {
 
         if ($post_id && !is_wp_error($post_id)) {
             $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
+            // If Finotex was skipped, the status is 'pending' by default.
+            if ($finotex_result['status'] === 'SKIPPED') {
+                $initial_status = 'pending';
+            }
             update_post_meta($post_id, 'inquiry_status', $initial_status);
 
             update_post_meta($post_id, 'issuer_type', $issuer_type);
@@ -514,6 +525,10 @@ class Maneli_Form_Handler {
         
         if ($post_id && !is_wp_error($post_id)) {
             $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
+             // If Finotex was skipped, the status is 'pending' by default.
+            if ($finotex_result['status'] === 'SKIPPED') {
+                $initial_status = 'pending';
+            }
             update_post_meta($post_id, 'inquiry_status', $initial_status);
             
             update_post_meta($post_id, 'assigned_expert_id', $expert_user->ID);

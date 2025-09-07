@@ -64,6 +64,7 @@ class Maneli_Settings_Page {
 
         // Finotex Section
         add_settings_section('maneli_finotex_cheque_section', 'سرویس استعلام رنگ چک', null, 'maneli-finotex-settings-section');
+        add_settings_field('finotex_enabled', 'فعال‌سازی استعلام فینوتک', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_enabled', 'type' => 'checkbox', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.']);
         add_settings_field('finotex_client_id', 'شناسه کلاینت (Client ID)', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_client_id']);
         add_settings_field('finotex_api_key', 'توکن دسترسی (Access Token)', [$this, 'render_field'], 'maneli-finotex-settings-section', 'maneli_finotex_cheque_section', ['name' => 'finotex_api_key', 'type' => 'textarea']);
 
@@ -108,6 +109,12 @@ class Maneli_Settings_Page {
     
     public function sanitize_and_merge_options($input) {
         $old_options = get_option($this->options_name, []);
+
+        // Handle checkbox for finotex_enabled
+        if (!isset($input['finotex_enabled'])) {
+            $input['finotex_enabled'] = '0';
+        }
+
         $merged_options = array_merge($old_options, $input);
         $sanitized_options = [];
         foreach ($merged_options as $key => $value) {
@@ -131,14 +138,20 @@ class Maneli_Settings_Page {
         $desc = $args['desc'] ?? '';
         $value = isset($options[$name]) ? $options[$name] : '';
         $field_name = "{$this->options_name}[{$name}]";
+        
         switch ($type) {
             case 'textarea':
                 echo "<textarea name='{$field_name}' rows='3' class='large-text' dir='ltr'>" . esc_textarea($value) . "</textarea>";
+                break;
+            case 'checkbox':
+                $checked = checked('1', $value, false);
+                echo "<label><input type='checkbox' name='{$field_name}' value='1' {$checked}></label>";
                 break;
             default:
                 echo "<input type='{$type}' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
                 break;
         }
+
         if ($desc) {
             echo "<p class='description'>" . esc_html($desc) . "</p>";
         }
