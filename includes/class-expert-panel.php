@@ -10,39 +10,54 @@ class Maneli_Expert_Panel {
     }
 
     /**
-     * AJAX handler for the Select2 car search in the expert panel.
-     * This version uses a direct WP_Query to bypass any capability or context issues.
+     * Final AJAX handler for car search.
+     * This version uses a direct DB query for reliability and includes robust checks.
      */
     public function handle_car_search_ajax() {
-        // 1. Security Check - Essential
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'maneli_expert_car_search_nonce')) {
-            wp_send_json_error(['message' => 'خطای امنیتی.']);
+        // Check 1: Verify the AJAX request nonce for security.
+        if (!check_ajax_referer('maneli_expert_car_search_nonce', 'nonce', false)) {
+            wp_send_json_error(
+                ['message' => 'خطای امنیتی (Nonce نامعتبر). لطفاً صفحه را رفرش کنید.'],
+                403
+            );
+            return;
         }
 
-        // 2. User Authentication & Authorization Check
-        // We ensure the user has the basic capability to edit posts, which both our roles have.
-        if (!current_user_can('edit_posts')) {
-            wp_send_json_error(['message' => 'شما دسترسی لازم برای این کار را ندارید.']);
+        // Check 2: Verify user is logged in and has a basic capability.
+        if (!is_user_logged_in() || !current_user_can('edit_posts')) {
+            wp_send_json_error(
+                ['message' => 'شما دسترسی لازم برای این کار را ندارید.'],
+                403
+            );
+            return;
         }
 
-        // 3. Get search term
-        $search_term = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        // Check 3: Ensure a search term is provided.
+        if (!isset($_POST['search']) || empty(trim($_POST['search']))) {
+            wp_send_json_success(['results' => []]); // Return empty if search is empty
+            return;
+        }
 
-        // 4. Use a direct WP_Query - This is the definitive fix
-        $args = [
-            'post_type'      => 'product',
-            'post_status'    => 'publish',
-            'posts_per_page' => 20,
-            's'              => $search_term,
-        ];
+        global $wpdb;
+        $search_term = sanitize_text_field($_POST['search']);
+        $like_term = '%' . $wpdb->esc_like($search_term) . '%';
 
-        $query = new WP_Query($args);
-        
+        // Direct database query to bypass any and all permission layers.
+        $product_ids = $wpdb->get_col($wpdb->prepare(
+            "SELECT ID FROM {$wpdb->posts} 
+             WHERE post_type = 'product' 
+             AND post_status = 'publish' 
+             AND post_title LIKE %s 
+             ORDER BY post_title ASC
+             LIMIT 20",
+            $like_term
+        ));
+
         $results = [];
-        if ($query->have_posts()) {
-            while ($query->have_posts()) {
-                $query->the_post();
-                $product = wc_get_product(get_the_ID());
+        if (!empty($product_ids)) {
+            foreach ($product_ids as $product_id) {
+                // Using wc_get_product is safe as we already have the ID.
+                $product = wc_get_product($product_id);
                 if ($product) {
                     $results[] = [
                         'id'   => $product->get_id(),
@@ -54,10 +69,7 @@ class Maneli_Expert_Panel {
             }
         }
         
-        // Restore original post data
-        wp_reset_postdata();
-        
-        // 5. Send the results back
+        // Always send a success response, even if the results are empty.
         wp_send_json_success(['results' => $results]);
     }
 }

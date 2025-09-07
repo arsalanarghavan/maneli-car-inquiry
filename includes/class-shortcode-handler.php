@@ -27,9 +27,8 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.6');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.7');
             
-            // Enqueue scripts for the product page calculator
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
                 if (is_user_logged_in()) {
@@ -41,26 +40,16 @@ class Maneli_Shortcode_Handler {
                 }
             }
             
-            // Enqueue scripts for expert/admin pages
+            // Simplified enqueue for admin/expert pages - only for user list now
             if (is_user_logged_in() && (current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
                 global $post;
-                if ($post && (has_shortcode($post->post_content, 'car_inquiry_form') || has_shortcode($post->post_content, 'maneli_user_list'))) {
+                 if ($post && has_shortcode($post->post_content, 'maneli_user_list')) {
                     wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-                    
-                    if (has_shortcode($post->post_content, 'car_inquiry_form')) {
-                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.4.0', true);
-                        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
-                            'ajax_url' => admin_url('admin-ajax.php'),
-                            'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce')
-                        ]);
-                    }
-                     if (has_shortcode($post->post_content, 'maneli_user_list')) {
-                        wp_localize_script('jquery-core', 'maneli_user_ajax', [
-                            'ajax_url' => admin_url('admin-ajax.php'),
-                            'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce')
-                        ]);
-                    }
+                    wp_localize_script('jquery-core', 'maneli_user_ajax', [
+                        'ajax_url' => admin_url('admin-ajax.php'),
+                        'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce')
+                    ]);
                 }
             }
         }
@@ -449,6 +438,15 @@ class Maneli_Shortcode_Handler {
         if (!is_user_logged_in() || !(current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای استفاده از این فرم را ندارید.</p></div>';
         }
+
+        // *** SCRIPT ENQUEUEING IS MOVED HERE - THIS IS THE FIX ***
+        wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.5.0', true); // Version bump
+        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce')
+        ]);
         
         ob_start();
 
@@ -464,7 +462,9 @@ class Maneli_Shortcode_Handler {
                 <h3>۱. انتخاب خودرو و شرایط</h3>
                 <div class="form-group">
                     <label for="product_id_expert"><strong>جستجوی خودرو</strong></label>
-                    <select id="product_id_expert" name="product_id" style="width: 100%;" required></select>
+                    <select id="product_id_expert" name="product_id" style="width: 100%;" required>
+                        <option value="">یک خودرو را جستجو کنید</option>
+                    </select>
                 </div>
                 
                 <?php if (current_user_can('manage_maneli_inquiries')):
