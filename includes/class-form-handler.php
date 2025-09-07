@@ -449,7 +449,12 @@ class Maneli_Form_Handler {
     
     public function handle_admin_update_status() {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_admin_update_status_nonce')) wp_die('خطای امنیتی!');
-        if (!current_user_can('manage_options') || empty($_POST['inquiry_id']) || empty($_POST['new_status'])) { wp_die('درخواست نامعتبر.'); }
+        
+        // ** THE FIX IS HERE **
+        // Changed `manage_options` to `manage_maneli_inquiries`
+        if (!current_user_can('manage_maneli_inquiries') || empty($_POST['inquiry_id']) || empty($_POST['new_status'])) { 
+            wp_die('درخواست نامعتبر یا دسترسی غیرمجاز.'); 
+        }
         
         $post_id = intval($_POST['inquiry_id']);
         $new_status_request = sanitize_text_field($_POST['new_status']);
