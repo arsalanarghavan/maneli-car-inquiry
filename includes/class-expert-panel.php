@@ -6,20 +6,17 @@ if (!defined('ABSPATH')) {
 class Maneli_Expert_Panel {
 
     public function __construct() {
-        // This class now only handles the backend logic for the AJAX car search.
         add_action('wp_ajax_maneli_search_cars', [$this, 'handle_car_search_ajax']);
     }
 
     /**
      * AJAX handler for the Select2 car search in the expert panel.
-     * Responds to search queries and returns product data in JSON format.
      */
     public function handle_car_search_ajax() {
-        // Security check
         check_ajax_referer('maneli_expert_nonce', 'nonce');
 
-        // Permission check - Experts need 'edit_posts' capability to search products via admin-ajax.
-        if (!current_user_can('edit_posts')) {
+        // Allow experts, maneli admins, and full admins to search for cars.
+        if (!current_user_can('edit_posts') && !current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => 'دسترسی غیر مجاز.']);
         }
 

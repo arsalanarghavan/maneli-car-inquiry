@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.11.04
+ * Version:           0.11.05
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -23,13 +23,11 @@ define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
  * Ensures the custom user roles and capabilities for the plugin exist.
  */
 function maneli_setup_roles_and_caps() {
-    // Add the custom capability to the administrator role so they can also manage settings
     $admin_role = get_role('administrator');
     if ($admin_role && !$admin_role->has_cap('manage_maneli_inquiries')) {
         $admin_role->add_cap('manage_maneli_inquiries');
     }
 
-    // Role: Maneli Admin (Frontend only)
     $maneli_admin_role = get_role('maneli_admin');
     if (!$maneli_admin_role) {
         add_role(
@@ -37,12 +35,11 @@ function maneli_setup_roles_and_caps() {
             'مدیریت مانلی',
             [
                 'read' => true,
-                'manage_maneli_inquiries' => true, // Custom capability for frontend management
+                'manage_maneli_inquiries' => true,
             ]
         );
     }
 
-    // Role: Maneli Expert
     $expert_role = get_role('maneli_expert');
     if (!$expert_role) {
         add_role(
@@ -50,7 +47,7 @@ function maneli_setup_roles_and_caps() {
             'کارشناس مانلی',
             [
                 'read' => true,
-                'edit_posts' => true, // For AJAX access
+                'edit_posts' => true,
             ]
         );
     } elseif (!$expert_role->has_cap('edit_posts')) {
@@ -64,7 +61,6 @@ add_action('init', 'maneli_setup_roles_and_caps');
  */
 register_deactivation_hook(__FILE__, 'maneli_remove_custom_roles');
 function maneli_remove_custom_roles() {
-    // Remove custom capability from administrator
     $admin_role = get_role('administrator');
     if ($admin_role && $admin_role->has_cap('manage_maneli_inquiries')) {
         $admin_role->remove_cap('manage_maneli_inquiries');
@@ -82,15 +78,8 @@ function maneli_translate_roles() {
         $wp_roles = new WP_Roles();
     }
     
-    // Translate our custom roles
-    if(isset($wp_roles->roles['maneli_admin'])) {
-        $wp_roles->roles['maneli_admin']['name'] = 'مدیریت مانلی';
-    }
-    if(isset($wp_roles->roles['maneli_expert'])) {
-        $wp_roles->roles['maneli_expert']['name'] = 'کارشناس مانلی';
-    }
-    
-    // Translate default WordPress roles for consistency
+    if(isset($wp_roles->roles['maneli_admin'])) { $wp_roles->roles['maneli_admin']['name'] = 'مدیریت مانلی'; }
+    if(isset($wp_roles->roles['maneli_expert'])) { $wp_roles->roles['maneli_expert']['name'] = 'کارشناس مانلی'; }
     if(isset($wp_roles->roles['administrator'])) { $wp_roles->roles['administrator']['name'] = 'مدیر کل'; }
     if(isset($wp_roles->roles['editor'])) { $wp_roles->roles['editor']['name'] = 'ویرایشگر'; }
     if(isset($wp_roles->roles['author'])) { $wp_roles->roles['author']['name'] = 'نویسنده'; }
@@ -98,6 +87,25 @@ function maneli_translate_roles() {
     if(isset($wp_roles->roles['subscriber'])) { $wp_roles->roles['subscriber']['name'] = 'مشترک'; }
 }
 add_action('init', 'maneli_translate_roles');
+
+/**
+ * Standardizes user email on registration.
+ */
+function maneli_change_user_email_on_registration($user_id) {
+    $user = get_user_by('id', $user_id);
+    if ($user) {
+        $new_email = $user->user_login . '@manelikhodro.com';
+        // Check if the email is already in the correct format to avoid loops
+        if ($user->user_email !== $new_email) {
+            wp_update_user([
+                'ID'         => $user_id,
+                'user_email' => $new_email
+            ]);
+        }
+    }
+}
+add_action('user_register', 'maneli_change_user_email_on_registration');
+
 
 /**
  * Redirects users with 'maneli_expert' or 'maneli_admin' roles away from the backend dashboard.
@@ -108,9 +116,7 @@ function maneli_redirect_non_admins_from_backend() {
         return;
     }
     
-    // Redirect Maneli Admins and Experts from all admin pages to the homepage
     if (current_user_can('maneli_admin') || (current_user_can('maneli_expert') && !current_user_can('manage_options'))) {
-        // Allow access to admin-post.php for form submissions
         if (basename($_SERVER['PHP_SELF']) === 'admin-post.php') {
             return;
         }

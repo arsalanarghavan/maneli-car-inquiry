@@ -11,26 +11,28 @@ class Maneli_Shortcode_Handler {
         // Main Shortcodes
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
-        add_shortcode('maneli_inquiry_list', [$this, 'render_inquiry_list']);
+        add_shortcode('maneli_inquiry_list', [$this, 'render_inquiry_list']); // Corrected name
         add_shortcode('maneli_frontend_credit_report', [$this, 'render_frontend_credit_report']);
 
         // Admin Panel Shortcodes
         add_shortcode('maneli_user_list', [$this, 'render_user_list_shortcode']);
         add_shortcode('maneli_settings', [$this, 'render_settings_shortcode']);
+
+        // --- Backward compatibility for old shortcode ---
+        add_shortcode('maneli_expert_inquiry_list', [$this, 'render_inquiry_list']);
     }
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.1.9');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.0');
             
-            // Scripts needed for the expert/admin new inquiry form
             if (is_singular()) { 
                 global $post;
                 if ($post && has_shortcode($post->post_content, 'car_inquiry_form')) {
-                     if (current_user_can('maneli_expert')) { // This capability is also on maneli_admin & administrator
+                     if (current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries')) {
                         wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                         wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.4', true);
+                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.5', true);
                         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
                             'ajax_url' => admin_url('admin-ajax.php'),
                             'nonce'    => wp_create_nonce('maneli_expert_nonce')
@@ -82,7 +84,7 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای ثبت و پیگیری استعلام، لطفاً ابتدا <a href="' . esc_url($login_url) . '">وارد شوید</a>.</p></div>'; 
         }
 
-        if (current_user_can('maneli_expert')) {
+        if (current_user_can('manage_maneli_inquiries') || current_user_can('maneli_expert')) {
             return $this->render_maneli_expert_new_inquiry_form();
         }
         
@@ -412,8 +414,8 @@ class Maneli_Shortcode_Handler {
     }
 
     public function render_maneli_expert_new_inquiry_form() {
-        if (!is_user_logged_in() || !current_user_can('maneli_expert')) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>شما برای استفاده از این فرم باید با نقش کارشناس وارد شده باشید.</p></div>';
+        if (!is_user_logged_in() || !(current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای استفاده از این فرم را ندارید.</p></div>';
         }
         
         ob_start();
@@ -507,7 +509,7 @@ class Maneli_Shortcode_Handler {
         $is_admin_view = current_user_can('manage_maneli_inquiries');
     
         if ($is_admin_view) {
-            // No changes to args, fetch all.
+            // Admin can see all, no changes to args.
         } 
         elseif (in_array('maneli_expert', $current_user->roles)) {
             $args['meta_query'] = [
@@ -597,7 +599,7 @@ class Maneli_Shortcode_Handler {
         $can_view = false;
         if (current_user_can('manage_maneli_inquiries')) {
             $can_view = true;
-        } elseif (current_user_can('maneli_expert') && $assigned_expert_id === $current_user->ID) {
+        } elseif (in_array('maneli_expert', $current_user->roles) && $assigned_expert_id === $current_user->ID) {
             $can_view = true;
         } elseif ($inquiry_author_id === $current_user->ID) {
             return $this->render_customer_report_html($inquiry_id);
@@ -732,7 +734,17 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
         }
 
+        if (isset($_GET['edit_user'])) {
+            $user_id_to_edit = intval($_GET['edit_user']);
+            return $this->render_user_edit_form($user_id_to_edit);
+        }
+
+        if (isset($_GET['user-updated']) && $_GET['user-updated'] == 'true') {
+            echo '<div class="status-box status-approved"><p>اطلاعات کاربر با موفقیت به‌روزرسانی شد.</p></div>';
+        }
+
         $all_users = get_users(['orderby' => 'display_name']);
+        $current_url = get_permalink();
 
         ob_start();
         ?>
@@ -745,6 +757,7 @@ class Maneli_Shortcode_Handler {
                         <th>نام کاربری</th>
                         <th>ایمیل</th>
                         <th>نقش</th>
+                        <th>عملیات</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -756,16 +769,67 @@ class Maneli_Shortcode_Handler {
                             },
                             $user->roles
                         );
+                        $edit_link = add_query_arg('edit_user', $user->ID, $current_url);
                     ?>
                     <tr>
                         <td data-title="نام نمایشی"><?php echo esc_html($user->display_name); ?></td>
                         <td data-title="نام کاربری"><?php echo esc_html($user->user_login); ?></td>
                         <td data-title="ایمیل"><?php echo esc_html($user->user_email); ?></td>
                         <td data-title="نقش"><?php echo esc_html(implode(', ', $role_names)); ?></td>
+                        <td data-title="عملیات">
+                            <a href="<?php echo esc_url($edit_link); ?>" class="button view">ویرایش</a>
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    private function render_user_edit_form($user_id) {
+        $user = get_userdata($user_id);
+        if (!$user) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>کاربر مورد نظر یافت نشد.</p></div>';
+        }
+        
+        $back_link = remove_query_arg('edit_user', $_SERVER['REQUEST_URI']);
+
+        ob_start();
+        ?>
+        <div class="maneli-inquiry-wrapper">
+            <h3>ویرایش کاربر: <?php echo esc_html($user->display_name); ?></h3>
+            <form id="admin-edit-user-form" class="maneli-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="maneli_admin_update_user">
+                <input type="hidden" name="user_id" value="<?php echo esc_attr($user->ID); ?>">
+                <?php wp_nonce_field('maneli_admin_update_user', 'maneli_update_user_nonce'); ?>
+                <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($back_link); ?>">
+
+                <div class="form-grid">
+                    <div class="form-row">
+                        <div class="form-group"><label>نام:</label><input type="text" name="first_name" value="<?php echo esc_attr($user->first_name); ?>"></div>
+                        <div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" value="<?php echo esc_attr($user->last_name); ?>"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>ایمیل:</label><input type="email" name="email" value="<?php echo esc_attr($user->user_email); ?>"></div>
+                        <div class="form-group"><label>تلفن همراه:</label><input type="text" name="mobile_number" value="<?php echo esc_attr(get_user_meta($user->ID, 'mobile_number', true)); ?>"></div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'father_name', true)); ?>"></div>
+                        <div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" placeholder="مثال: ۱۳۶۵/۰۴/۱۵"></div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی"></div>
+                        <div class="form-group"></div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <button type="submit" class="loan-action-btn">ذخیره تغییرات</button>
+                    <a href="<?php echo esc_url($back_link); ?>" style="margin-right: 15px;">انصراف</a>
+                </div>
+            </form>
         </div>
         <?php
         return ob_get_clean();

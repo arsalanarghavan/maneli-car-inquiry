@@ -21,13 +21,15 @@ class Maneli_Form_Handler {
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
+
+        // New hook for admin updating a user profile from the frontend
+        add_action('admin_post_maneli_admin_update_user', [$this, 'handle_admin_update_user_profile']);
     }
 
     private function execute_finotex_inquiry($national_code) {
         $all_options = get_option('maneli_inquiry_all_options', []);
         $finotex_enabled = isset($all_options['finotex_enabled']) && $all_options['finotex_enabled'] == '1';
         
-        // Return immediately if Finotex is disabled in settings
         if (!$finotex_enabled) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'استعلام فینوتک در تنظیمات غیرفعال است.'];
         }
@@ -385,7 +387,6 @@ class Maneli_Form_Handler {
 
         if ($post_id && !is_wp_error($post_id)) {
             $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
-            // If Finotex was skipped, the status is 'pending' by default.
             if ($finotex_result['status'] === 'SKIPPED') {
                 $initial_status = 'pending';
             }
@@ -492,7 +493,7 @@ class Maneli_Form_Handler {
 
     public function handle_expert_create_inquiry() {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_expert_create_nonce')) wp_die('خطای امنیتی!');
-        if (!is_user_logged_in() || !current_user_can('maneli_expert')) { wp_die('شما اجازه دسترسی به این قابلیت را ندارید.'); }
+        if (!is_user_logged_in() || !(current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) { wp_die('شما اجازه دسترسی به این قابلیت را ندارید.'); }
         
         $submitter = wp_get_current_user();
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
@@ -510,53 +511,40 @@ class Maneli_Form_Handler {
         }
         
         $customer_id = username_exists($buyer_data['mobile_number']);
-        $dummy_email = $buyer_data['mobile_number'] . '@maneli-auto.local';
+        $dummy_email = $buyer_data['mobile_number'] . '@manelikhodro.com';
+
         if (!$customer_id) { $customer_id = email_exists($dummy_email); }
         if (!$customer_id) {
             $random_password = wp_generate_password(12, false);
             $customer_id = wp_create_user($buyer_data['mobile_number'], $random_password, $dummy_email);
             if (is_wp_error($customer_id)) { wp_die('خطا در ساخت کاربر جدید: ' . $customer_id->get_error_message()); }
-            wp_update_user(['ID' => $customer_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name'], 'role' => 'subscriber']);
+            wp_update_user(['ID' => $customer_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name'], 'role' => 'subscriber', 'user_email' => $dummy_email]);
+        } else {
+            wp_update_user(['ID' => $customer_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name']]);
         }
         foreach ($buyer_data as $key => $value) { update_user_meta($customer_id, $key, $value); }
     
         $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code'])) ? $issuer_data['issuer_national_code'] : $buyer_data['national_code'];
-        
         $finotex_result = $this->execute_finotex_inquiry($national_code_for_api);
-        
         $post_title = 'استعلام برای ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'] . ' (توسط ' . $submitter->display_name . ')';
         $post_content = "گزارش استعلام از فینوتک:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>";
-        
-        $post_id = wp_insert_post([
-            'post_title'   => $post_title,
-            'post_author'  => $customer_id,
-            'post_status'  => 'publish',
-            'post_type'    => 'inquiry',
-            'post_content' => $post_content
-        ]);
+        $post_id = wp_insert_post(['post_title' => $post_title, 'post_author' => $customer_id, 'post_status' => 'publish', 'post_type' => 'inquiry', 'post_content' => $post_content]);
         
         if ($post_id && !is_wp_error($post_id)) {
             $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
-             // If Finotex was skipped, the status is 'pending' by default.
-            if ($finotex_result['status'] === 'SKIPPED') {
-                $initial_status = 'pending';
-            }
+            if ($finotex_result['status'] === 'SKIPPED') { $initial_status = 'pending'; }
             update_post_meta($post_id, 'inquiry_status', $initial_status);
             
-            // Handle expert assignment based on the role of the person submitting the form.
-            if (current_user_can('manage_options')) { // Admin is creating the inquiry
+            if (current_user_can('manage_maneli_inquiries')) {
                 $selected_expert_id = isset($_POST['assigned_expert_id']) ? sanitize_text_field($_POST['assigned_expert_id']) : 'auto';
-                
                 if ($selected_expert_id !== 'auto' && !empty($selected_expert_id)) {
                     $expert_user = get_userdata(intval($selected_expert_id));
                     if ($expert_user && in_array('maneli_expert', $expert_user->roles)) {
                         update_post_meta($post_id, 'assigned_expert_id', $expert_user->ID);
                         update_post_meta($post_id, 'assigned_expert_name', $expert_user->display_name);
                     }
-                } else {
-                    $this->assign_expert_round_robin($post_id);
-                }
-            } else { // Expert is creating the inquiry
+                } else { $this->assign_expert_round_robin($post_id); }
+            } else {
                 update_post_meta($post_id, 'created_by_expert_id', $submitter->ID);
                 update_post_meta($post_id, 'assigned_expert_id', $submitter->ID);
                 update_post_meta($post_id, 'assigned_expert_name', $submitter->display_name);
@@ -576,6 +564,47 @@ class Maneli_Form_Handler {
         
         $redirect_url = add_query_arg('inquiry_created', '1', wp_get_referer());
         wp_redirect($redirect_url);
+        exit;
+    }
+
+    public function handle_admin_update_user_profile() {
+        if (!isset($_POST['maneli_update_user_nonce']) || !wp_verify_nonce($_POST['maneli_update_user_nonce'], 'maneli_admin_update_user')) {
+            wp_die('خطای امنیتی!');
+        }
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_die('شما دسترسی لازم برای این کار را ندارید.');
+        }
+
+        $user_id_to_update = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        if (!$user_id_to_update) {
+            wp_die('شناسه کاربر مشخص نشده است.');
+        }
+        
+        $user_data = [];
+        if (isset($_POST['first_name'])) $user_data['first_name'] = sanitize_text_field($_POST['first_name']);
+        if (isset($_POST['last_name'])) $user_data['last_name'] = sanitize_text_field($_POST['last_name']);
+        if (isset($_POST['email'])) {
+             $email = sanitize_email($_POST['email']);
+             if (is_email($email)) {
+                 $user_data['user_email'] = $email;
+             }
+        }
+
+        if (!empty($user_data)) {
+            $user_data['ID'] = $user_id_to_update;
+            wp_update_user($user_data);
+        }
+
+        $meta_fields = ['national_code', 'father_name', 'birth_date', 'mobile_number'];
+        foreach ($meta_fields as $field) {
+            if (isset($_POST[$field])) {
+                update_user_meta($user_id_to_update, $field, sanitize_text_field($_POST[$field]));
+            }
+        }
+        
+        $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
+        $redirect_url = remove_query_arg('edit_user', $redirect_url);
+        wp_redirect(add_query_arg('user-updated', 'true', $redirect_url));
         exit;
     }
 }
