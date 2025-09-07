@@ -74,6 +74,11 @@ class Maneli_Shortcode_Handler {
             $login_url = home_url('/login/');
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای ثبت و پیگیری استعلام، لطفاً ابتدا <a href="' . esc_url($login_url) . '">وارد شوید</a>.</p></div>'; 
         }
+
+        // If the logged-in user is an expert, show them the expert's new inquiry form instead.
+        if (current_user_can('maneli_expert')) {
+            return $this->render_maneli_expert_new_inquiry_form();
+        }
         
         $user_id = get_current_user_id();
         $latest_inquiry = get_posts(['author' => $user_id, 'post_type' => 'inquiry', 'posts_per_page' => 1, 'orderby' => 'date', 'order' => 'DESC', 'post_status' => ['publish', 'private']]);
