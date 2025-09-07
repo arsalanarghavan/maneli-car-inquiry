@@ -24,7 +24,7 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.1');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.2');
             
             // Enqueue scripts for the product page calculator
             if (is_product()) {
@@ -45,7 +45,7 @@ class Maneli_Shortcode_Handler {
                      if (current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries')) {
                         wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                         wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.5', true);
+                        wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.3.6', true);
                         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
                             'ajax_url' => admin_url('admin-ajax.php'),
                             'nonce'    => wp_create_nonce('maneli_expert_nonce')
@@ -835,7 +835,14 @@ class Maneli_Shortcode_Handler {
                     </div>
                      <div class="form-row">
                         <div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی"></div>
-                        <div class="form-group"></div>
+                        <div class="form-group">
+                            <label>نقش کاربری:</label>
+                            <select name="user_role">
+                                <option value="subscriber" <?php selected(in_array('subscriber', $user->roles)); ?>>مشتری</option>
+                                <option value="maneli_expert" <?php selected(in_array('maneli_expert', $user->roles)); ?>>کارشناس مانلی</option>
+                                <option value="maneli_admin" <?php selected(in_array('maneli_admin', $user->roles)); ?>>مدیریت مانلی</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
