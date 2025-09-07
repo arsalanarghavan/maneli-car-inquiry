@@ -33,19 +33,17 @@
                 data: function(params) {
                     return {
                         action: 'maneli_search_cars',
-                        nonce: maneli_expert_ajax.nonce, // Using the corrected nonce from wp_localize_script
+                        nonce: maneli_expert_ajax.nonce,
                         search: params.term,
                     };
                 },
                 processResults: function(data, params) {
-                    // Check for success property from wp_send_json_success
                     if (data.success) {
                         return {
-                            results: data.data.results // Results are nested under data property
+                            results: data.data.results
                         };
                     } else {
-                        // Handle server-side errors if necessary
-                        console.error('Server error:', data.data.message);
+                        console.error('Server error:', data.data ? data.data.message : 'Unknown error');
                         return { results: [] };
                     }
                 }
@@ -88,7 +86,7 @@
                             </div>
                              <div class="form-group">
                                 <label>مبلغ تقریبی هر قسط</label>
-                                <div class="result-display" style="color: #2D89BE; font-size: 1.3em;"><span id="expert-installment-amount">-</span> <span>تومان</span></div>
+                                <div class="result-display" style="color: #3989BE; font-size: 1.3em;"><span id="expert-installment-amount">-</span> <span>تومان</span></div>
                             </div>
                         </div>
                     </div>`;

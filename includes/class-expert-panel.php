@@ -9,18 +9,13 @@ class Maneli_Expert_Panel {
         add_action('wp_ajax_maneli_search_cars', [$this, 'handle_car_search_ajax']);
     }
 
-    /**
-     * AJAX handler for the Select2 car search in the expert panel.
-     */
     public function handle_car_search_ajax() {
-        // Use the new, unique nonce for verification
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'maneli_expert_car_search_nonce')) {
             wp_send_json_error(['message' => 'خطای امنیتی.']);
         }
 
-        // Allow experts, maneli admins, and full admins to search for cars.
-        if (!current_user_can('edit_posts') && !current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => 'دسترسی غیر مجاز.']);
+        if (!current_user_can('read_product')) {
+            wp_send_json_error(['message' => 'شما دسترسی لازم برای مشاهده محصولات را ندارید.']);
         }
 
         $search_term = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
@@ -43,7 +38,6 @@ class Maneli_Expert_Panel {
             }
         }
         
-        // Always wrap the results in a success response for consistency
         wp_send_json_success(['results' => $results]);
     }
 }
