@@ -27,7 +27,7 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.8');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.2.9');
             
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
@@ -382,7 +382,7 @@ class Maneli_Shortcode_Handler {
 
             <div class="report-section">
                 <h4>نتیجه اعتبارسنجی</h4>
-                <?php if (isset($finotex_data['status']) && $finotex_data['status'] === 'SKIPPED'): ?>
+                 <?php if (empty($finotex_data) || (isset($finotex_data['status']) && $finotex_data['status'] === 'SKIPPED')): ?>
                      <table class="summary-table" style="margin-top:20px;">
                         <tr>
                             <td><strong>وضعیت چک صیادی:</strong></td>
@@ -717,7 +717,7 @@ class Maneli_Shortcode_Handler {
                 <?php
                 $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 if ($issuer_type === 'other'):
-                    $issuer_fields = ['issuer_first_name' => 'نام (صادر کننده)','issuer_last_name' => 'نام خانوادگی (صادر کننده)','issuer_national_code' => 'کد ملی (صادر کننده)','issuer_father_name' => 'نام پدر (صادر کننده)','issuer_birth_date' => 'تاریخ تولد (صادر کننده)','issuer_mobile_number' => 'شماره موبایل (صادر کننده)'];
+                    $issuer_fields = ['issuer_first_name' => 'نام (صادر کننده)','issuer_last_name' => 'نام خانوادگی (صادر کننده)','issuer_national_code' => 'کد ملی (صادر کننده)','issuer_father_name'   => 'نام پدر (صادر کننده)','issuer_birth_date'    => 'تاریخ تولد (صادر کننده)','issuer_mobile_number' => 'شماره موبایل (صادر کننده)'];
                     $issuer_field_pairs = array_chunk($issuer_fields, 2, true);
                 ?>
                     <h4 class="report-section-divider">اطلاعات صادر کننده چک</h4>
@@ -740,16 +740,38 @@ class Maneli_Shortcode_Handler {
             <div class="report-box">
                 <h3 class="report-box-title">نتیجه استعلام وضعیت چک (صیادی)</h3>
 
-                <?php if ($can_view_as_admin && isset($finotex_data['status']) && $finotex_data['status'] === 'SKIPPED'): ?>
-                    <div class="admin-notice">
-                        <p><strong>توجه:</strong> استعلام فینوتک برای این درخواست انجام نشده است، زیرا در زمان ثبت، این سرویس در تنظیمات غیرفعال بوده است.</p>
-                        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                             <input type="hidden" name="action" value="maneli_admin_retry_finotex">
-                             <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
-                             <?php wp_nonce_field('maneli_retry_finotex_nonce'); ?>
-                             <button type="submit" class="action-btn approve">انجام مجدد استعلام فینوتک</button>
-                        </form>
-                    </div>
+                <?php 
+                $finotex_skipped = (empty($finotex_data) || (isset($finotex_data['status']) && $finotex_data['status'] === 'SKIPPED'));
+                if ($finotex_skipped): 
+                ?>
+                     <table class="summary-table right-aligned-table" style="margin-top: 20px;">
+                        <tbody>
+                             <tr>
+                                <th>وضعیت اعتباری</th>
+                                <td>نامشخص</td>
+                            </tr>
+                            <tr>
+                                <th>توضیح</th>
+                                <td>
+                                    <?php if ($can_view_as_admin): ?>
+                                        استعلام فینوتک در تنظیمات غیرفعال است.
+                                    <?php else: ?>
+                                        استعلام بانکی انجام نشده است.
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <?php if ($can_view_as_admin): ?>
+                        <div class="admin-notice" style="margin-top: 20px;">
+                            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                                 <input type="hidden" name="action" value="maneli_admin_retry_finotex">
+                                 <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
+                                 <?php wp_nonce_field('maneli_retry_finotex_nonce'); ?>
+                                 <button type="submit" class="action-btn approve">انجام مجدد استعلام فینوتک</button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
                 <?php else: ?>
                     <div class="maneli-status-bar">
                         <?php

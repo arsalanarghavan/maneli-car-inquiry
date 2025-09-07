@@ -586,7 +586,7 @@
     display: flex;
     flex-grow: 1;
     gap: 10px;
-    align-items: center;
+    align-items: center; /* This will vertically align label, select, and button */
 }
 .approve-section label {
     white-space: nowrap;
@@ -597,6 +597,8 @@
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    height: 47px; /* Explicitly set height */
+    box-sizing: border-box;
 }
 .action-btn {
     padding: 12px 20px;
@@ -608,6 +610,8 @@
     cursor: pointer;
     transition: opacity 0.2s;
     font-family: inherit;
+    height: 47px; /* Explicitly set height */
+    box-sizing: border-box;
 }
 .action-btn:hover {
     opacity: 0.85;
@@ -634,4 +638,11 @@
     margin-top: 10px;
     width: auto;
     padding: 10px 20px;
+}
+.admin-notice {
+    padding: 15px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 4px;
+    color: #856404;
 }
