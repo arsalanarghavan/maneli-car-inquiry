@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.11.14
+ * Version:           0.11.15
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -21,6 +21,7 @@ define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 /**
  * Ensures the custom user roles and capabilities for the plugin exist.
+ * This is the critical fix for the product search issue.
  */
 function maneli_setup_roles_and_caps() {
     // Grant management capability to Administrator
@@ -29,30 +30,36 @@ function maneli_setup_roles_and_caps() {
         $admin_role->add_cap('manage_maneli_inquiries');
     }
 
-    // Define capabilities for Maneli Admin
-    $maneli_admin_caps = [
-        'read' => true,
-        'manage_maneli_inquiries' => true,
-        'edit_products' => true,
-        'read_product' => true,
-        'edit_published_products' => true,
+    // --- CRITICAL FIX: Add WooCommerce Product capabilities to Maneli roles ---
+    $product_caps = [
+        'edit_product'          => true,
+        'read_product'          => true,
+        'delete_product'        => false,
+        'edit_products'         => true,
+        'edit_others_products'  => false,
+        'publish_products'      => false,
+        'read_private_products' => false,
+        'delete_products'       => false,
     ];
 
+    // Define capabilities for Maneli Admin
+    $maneli_admin_caps = array_merge($product_caps, [
+        'read' => true,
+        'manage_maneli_inquiries' => true,
+    ]);
+
     // Create or update Maneli Admin role
-    remove_role('maneli_admin'); // Remove old role to ensure caps are updated
+    remove_role('maneli_admin'); 
     add_role('maneli_admin', 'مدیریت مانلی', $maneli_admin_caps);
 
     // Define capabilities for Maneli Expert
-    $maneli_expert_caps = [
+    $maneli_expert_caps = array_merge($product_caps, [
         'read' => true,
         'edit_posts' => true,
-        'edit_products' => true,
-        'read_product' => true,
-        'edit_published_products' => true,
-    ];
+    ]);
     
     // Create or update Maneli Expert role
-    remove_role('maneli_expert'); // Remove old role to ensure caps are updated
+    remove_role('maneli_expert');
     add_role('maneli_expert', 'کارشناس مانلی', $maneli_expert_caps);
 }
 add_action('init', 'maneli_setup_roles_and_caps');
@@ -82,6 +89,7 @@ function maneli_translate_roles() {
     
     if(isset($wp_roles->roles['maneli_admin'])) { $wp_roles->roles['maneli_admin']['name'] = 'مدیریت مانلی'; }
     if(isset($wp_roles->roles['maneli_expert'])) { $wp_roles->roles['maneli_expert']['name'] = 'کارشناس مانلی'; }
+    if(isset($wp_roles->roles['customer'])) { $wp_roles->roles['customer']['name'] = 'مشتری'; }
     if(isset($wp_roles->roles['administrator'])) { $wp_roles->roles['administrator']['name'] = 'مدیر کل'; }
     if(isset($wp_roles->roles['editor'])) { $wp_roles->roles['editor']['name'] = 'ویرایشگر'; }
     if(isset($wp_roles->roles['author'])) { $wp_roles->roles['author']['name'] = 'نویسنده'; }
@@ -95,12 +103,13 @@ add_action('init', 'maneli_translate_roles');
  */
 function maneli_update_display_name($user_id) {
     $user = get_userdata($user_id);
+    if (!$user) return;
     $first_name = $user->first_name;
     $last_name = $user->last_name;
 
-    if (!empty($first_name) && !empty($last_name)) {
+    if (!empty($first_name) || !empty($last_name)) {
         $display_name = trim($first_name . ' ' . $last_name);
-        if ($user->display_name !== $display_name) {
+        if ($user->display_name !== $display_name && !empty($display_name)) {
             wp_update_user([
                 'ID' => $user_id,
                 'display_name' => $display_name
@@ -108,19 +117,19 @@ function maneli_update_display_name($user_id) {
         }
     }
 }
-add_action('user_register', 'maneli_update_display_name');
-add_action('profile_update', 'maneli_update_display_name');
+add_action('user_register', 'maneli_update_display_name', 20, 1);
+add_action('profile_update', 'maneli_update_display_name', 20, 1);
 
 /**
  * One-time function to update display names for all existing users.
  */
 function maneli_run_once_update_display_names() {
-    if (get_option('maneli_display_names_updated_v1') !== 'yes') {
+    if (get_option('maneli_display_names_updated_v2') !== 'yes') {
         $users = get_users();
         foreach ($users as $user) {
             maneli_update_display_name($user->ID);
         }
-        update_option('maneli_display_names_updated_v1', 'yes');
+        update_option('maneli_display_names_updated_v2', 'yes');
     }
 }
 add_action('init', 'maneli_run_once_update_display_names');
@@ -135,13 +144,16 @@ function maneli_redirect_non_admins_from_backend() {
         return;
     }
     
-    // Allow access to admin-post.php for form submissions
     if (basename($_SERVER['PHP_SELF']) === 'admin-post.php') {
         return;
     }
     
-    if (current_user_can('maneli_admin') || (current_user_can('maneli_expert') && !current_user_can('manage_options'))) {
-        wp_redirect(home_url('/dashboard/')); // Redirect to a frontend dashboard
+    if (current_user_can('manage_maneli_inquiries') && !current_user_can('manage_options')) {
+         wp_redirect(home_url('/dashboard/'));
+         exit;
+    }
+     if (current_user_can('maneli_expert') && !current_user_can('manage_options')) {
+        wp_redirect(home_url('/dashboard/'));
         exit;
     }
 }
