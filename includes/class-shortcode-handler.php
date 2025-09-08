@@ -31,30 +31,39 @@ class Maneli_Shortcode_Handler {
         if ($this->datepicker_loaded) {
             return;
         }
-        wp_enqueue_style('kamadatepicker-style', 'https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css');
-        wp_enqueue_script('kamadatepicker-script', 'https://unpkg.com/kamadatepicker', [], null, true);
-        
-        // Add footer script to initialize datepicker
-        add_action('wp_footer', function() {
-            ?>
-            <script type="text/javascript">
-                document.addEventListener('DOMContentLoaded', function() {
-                    // A small delay to ensure the library has loaded, especially on complex pages
-                    setTimeout(function() {
-                        if (typeof kamaDatepicker === "function") {
-                            var options = {
-                                buttonsColor: "blue",
-                                forceFarsiDigits: true,
-                                gotoToday: true,
-                                zIndex: 10001
-                            };
-                            kamaDatepicker('input.maneli-date-picker', options);
-                        }
-                    }, 100);
-                });
-            </script>
-            <?php
-        }, 99);
+
+        // 1. Enqueue jQuery UI Datepicker (core WordPress library) and a default theme
+        wp_enqueue_style('jquery-ui-css', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css');
+        wp_enqueue_script('jquery-ui-datepicker');
+
+        // 2. Enqueue our new local Jalali converter script, and make it dependent on jquery-ui-datepicker
+        wp_enqueue_script(
+            'maneli-jalali-datepicker',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/jquery-ui-datepicker-fa.js',
+            ['jquery-ui-datepicker'], // Dependency
+            '1.0.0',
+            true
+        );
+
+        // 3. Create the initialization script
+        $init_script = '
+            jQuery(document).ready(function($) {
+                // Use a try-catch block for extra safety
+                try {
+                    $("input.maneli-date-picker").datepicker({
+                        dateFormat: "yy/mm/dd",
+                        isRTL: true,
+                        changeMonth: true,
+                        changeYear: true
+                    });
+                } catch(e) {
+                    console.error("Maneli Datepicker Error:", e);
+                }
+            });
+        ';
+
+        // 4. Add the initialization script inline, ensuring it runs AFTER our Jalali script is loaded
+        wp_add_inline_script('maneli-jalali-datepicker', $init_script);
 
         $this->datepicker_loaded = true;
     }

@@ -22,6 +22,20 @@ class Maneli_User_Profile {
     }
 
     public function add_custom_user_fields($user) {
+        // کد فعال‌سازی تقویم را به اسکریپت اصلی آن ضمیمه می‌کنیم
+        $init_script = '
+            jQuery(document).ready(function($) {
+                if (typeof kamaDatepicker === "function") {
+                    var options = {
+                        buttonsColor: "blue",
+                        forceFarsiDigits: true,
+                        gotoToday: true,
+                    };
+                    kamaDatepicker("input.maneli-date-picker", options);
+                }
+            });
+        ';
+        wp_add_inline_script('kamadatepicker-script', $init_script);
         ?>
         <h3>اطلاعات تکمیلی استعلام</h3>
         <table class="form-table">
@@ -51,18 +65,6 @@ class Maneli_User_Profile {
                 </td>
             </tr>
         </table>
-        <script type="text/javascript">
-            jQuery(document).ready(function($) {
-                if (typeof kamaDatepicker === "function") {
-                    var options = {
-                        buttonsColor: "blue",
-                        forceFarsiDigits: true,
-                        gotoToday: true,
-                    };
-                    kamaDatepicker('input.maneli-date-picker', options);
-                }
-            });
-        </script>
         <?php
     }
 
