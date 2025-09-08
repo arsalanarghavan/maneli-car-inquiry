@@ -1,0 +1,152 @@
+/* Maneli Custom jQuery UI Datepicker Theme */
+/* General container */
+.ui-datepicker {
+    width: 290px;
+    padding: 15px;
+    font-family: inherit !important;
+    display: none;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10002 !important; /* Higher z-index */
+}
+
+/* Header */
+.ui-datepicker-header {
+    background: #3989BE; /* Plugin's theme blue */
+    color: #fff;
+    border-radius: 6px 6px 0 0;
+    padding: 10px 0;
+    position: relative;
+    border: none;
+}
+.ui-datepicker .ui-datepicker-title {
+    margin: 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 30px;
+}
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    position: absolute;
+    top: 50%;
+    margin-top: -15px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+}
+.ui-datepicker .ui-datepicker-prev {
+    left: 10px;
+}
+.ui-datepicker .ui-datepicker-next {
+    right: 10px;
+}
+.ui-datepicker .ui-datepicker-prev span,
+.ui-datepicker .ui-datepicker-next span {
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.ui-datepicker .ui-datepicker-prev span {
+    transform: rotate(180deg);
+}
+
+/* Year and Month Selects */
+.ui-datepicker-title select {
+    font-family: inherit !important;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 14px;
+    margin: 0 3px;
+}
+
+/* Calendar Table */
+.ui-datepicker-calendar {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 5px;
+    margin-top: 10px;
+}
+.ui-datepicker-calendar th,
+.ui-datepicker-calendar td {
+    text-align: center;
+    padding: 0;
+    line-height: 35px; /* Control height and vertical alignment */
+}
+.ui-datepicker-calendar th {
+    font-weight: bold;
+    color: #555;
+    font-size: 13px;
+}
+.ui-datepicker-calendar td {
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+}
+.ui-datepicker-calendar td a,
+.ui-datepicker-calendar td span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    box-sizing: border-box;
+}
+
+/* Day states */
+.ui-datepicker-calendar td a:hover {
+    background-color: #e9f3f9;
+    border-color: #d0e6f5;
+}
+.ui-state-highlight, /* Today */
+.ui-datepicker-current-day a {
+    background-color: #f0f8ff;
+    border-color: #3989BE !important;
+    color: #3989BE !important;
+}
+.ui-datepicker-current-day a {
+    font-weight: bold;
+}
+.ui-state-active, /* Selected day */
+.ui-datepicker-calendar td a.ui-state-active {
+    background-color: #3989BE !important;
+    color: #fff !important;
+    border-color: #3989BE !important;
+}
+
+/* Button pane */
+.ui-datepicker-buttonpane {
+    text-align: center;
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+}
+.ui-datepicker-buttonpane button {
+    font-family: inherit !important;
+    background: #3989BE;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.ui-datepicker-buttonpane button:hover {
+    background: #2d7aab;
+}

@@ -16,26 +16,55 @@ class Maneli_User_Profile {
 
     public function enqueue_admin_datepicker_assets($hook) {
         if ($hook == 'profile.php' || $hook == 'user-edit.php') {
-            wp_enqueue_style('kamadatepicker-style', 'https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css');
-            wp_enqueue_script('kamadatepicker-script', 'https://unpkg.com/kamadatepicker', [], null, true);
+            // 1. Enqueue our new custom theme
+            wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
+            wp_enqueue_script('jquery-ui-datepicker');
+            
+            // 2. Enqueue our local Jalali converter script
+            wp_enqueue_script(
+                'maneli-jalali-datepicker',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/jquery-ui-datepicker-fa.js',
+                ['jquery-ui-datepicker'],
+                '1.0.0',
+                true
+            );
         }
     }
 
     public function add_custom_user_fields($user) {
-        // کد فعال‌سازی تقویم را به اسکریپت اصلی آن ضمیمه می‌کنیم
+        // Create and add the initialization script
         $init_script = '
             jQuery(document).ready(function($) {
-                if (typeof kamaDatepicker === "function") {
-                    var options = {
-                        buttonsColor: "blue",
-                        forceFarsiDigits: true,
-                        gotoToday: true,
-                    };
-                    kamaDatepicker("input.maneli-date-picker", options);
-                }
+                 var toPersianDigits = function(str) {
+                    var persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+                    return String(str).replace(/[0-9]/g, function(w) {
+                        return persianDigits[+w];
+                    });
+                };
+                
+                $("input.maneli-date-picker").datepicker({
+                    dateFormat: "yy/mm/dd",
+                    isRTL: true,
+                    changeMonth: true,
+                    changeYear: true,
+                     onChangeMonthYear: function(year, month, inst) {
+                        setTimeout(function() {
+                            $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                        }, 0);
+                    },
+                     beforeShow: function(input, inst) {
+                         setTimeout(function() {
+                            $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                         },0);
+                     }
+                });
             });
         ';
-        wp_add_inline_script('kamadatepicker-script', $init_script);
+        wp_add_inline_script('maneli-jalali-datepicker', $init_script);
         ?>
         <h3>اطلاعات تکمیلی استعلام</h3>
         <table class="form-table">

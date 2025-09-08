@@ -32,37 +32,58 @@ class Maneli_Shortcode_Handler {
             return;
         }
 
-        // 1. Enqueue jQuery UI Datepicker (core WordPress library) and a default theme
-        wp_enqueue_style('jquery-ui-css', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css');
+        // 1. Enqueue our new custom theme
+        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
         wp_enqueue_script('jquery-ui-datepicker');
 
-        // 2. Enqueue our new local Jalali converter script, and make it dependent on jquery-ui-datepicker
+        // 2. Enqueue our local Jalali converter script
         wp_enqueue_script(
             'maneli-jalali-datepicker',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/jquery-ui-datepicker-fa.js',
-            ['jquery-ui-datepicker'], // Dependency
+            ['jquery-ui-datepicker'],
             '1.0.0',
             true
         );
-
-        // 3. Create the initialization script
+        
+        // 3. Create the initialization and Persian numbers script
         $init_script = '
             jQuery(document).ready(function($) {
-                // Use a try-catch block for extra safety
-                try {
-                    $("input.maneli-date-picker").datepicker({
-                        dateFormat: "yy/mm/dd",
-                        isRTL: true,
-                        changeMonth: true,
-                        changeYear: true
+                // Function to convert English digits to Persian
+                var toPersianDigits = function(str) {
+                    var persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+                    return String(str).replace(/[0-9]/g, function(w) {
+                        return persianDigits[+w];
                     });
-                } catch(e) {
-                    console.error("Maneli Datepicker Error:", e);
-                }
+                };
+
+                // Initialize the datepicker
+                $("input.maneli-date-picker").datepicker({
+                    dateFormat: "yy/mm/dd",
+                    isRTL: true,
+                    changeMonth: true,
+                    changeYear: true,
+                    // This function runs every time the datepicker is updated/drawn
+                    onChangeMonthYear: function(year, month, inst) {
+                        // Use a timeout to ensure the DOM is updated before we modify it
+                        setTimeout(function() {
+                            // Convert year dropdown numbers to Persian
+                            $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                        }, 0);
+                    },
+                     beforeShow: function(input, inst) {
+                         setTimeout(function() {
+                            $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                         },0);
+                     }
+                });
             });
         ';
 
-        // 4. Add the initialization script inline, ensuring it runs AFTER our Jalali script is loaded
+        // 4. Add the script inline
         wp_add_inline_script('maneli-jalali-datepicker', $init_script);
 
         $this->datepicker_loaded = true;
@@ -94,6 +115,10 @@ class Maneli_Shortcode_Handler {
             }
         }
     }
+
+    // ... The rest of the functions in this file remain exactly the same ...
+    // render_loan_calculator, render_inquiry_form, etc.
+    // I am including the full file as you requested.
 
     public function render_loan_calculator() {
         if (!function_exists('is_product') || !is_product() || !function_exists('WC')) return '';
