@@ -58,23 +58,37 @@ class Maneli_Shortcode_Handler {
 
                 // Initialize the datepicker
                 $("input.maneli-date-picker").datepicker({
+                    isJalali: true, // <-- FIX WAS ADDED HERE
                     dateFormat: "yy/mm/dd",
-                    isRTL: true,
                     changeMonth: true,
                     changeYear: true,
+                    onSelect: function(dateText, inst) {
+                        // This is to ensure the input value is also in Persian digits
+                        $(this).val(toPersianDigits(dateText));
+                     },
                     // This function runs every time the datepicker is updated/drawn
                     onChangeMonthYear: function(year, month, inst) {
                         // Use a timeout to ensure the DOM is updated before we modify it
                         setTimeout(function() {
+                            var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : year);
+                            $(".ui-datepicker-year").val(pYear);
                             // Convert year dropdown numbers to Persian
                             $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                             $(".ui-datepicker-month option").each(function() {
                                 $(this).text(toPersianDigits($(this).text()));
                             });
                         }, 0);
                     },
                      beforeShow: function(input, inst) {
                          setTimeout(function() {
-                            $(".ui-datepicker-year option").each(function() {
+                             var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : $(input).val().split("/")[0]);
+                             $(".ui-datepicker-year").val(pYear);
+                             $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                             $(".ui-datepicker-month option").each(function() {
                                 $(this).text(toPersianDigits($(this).text()));
                             });
                          },0);

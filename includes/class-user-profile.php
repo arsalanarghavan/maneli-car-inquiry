@@ -43,20 +43,34 @@ class Maneli_User_Profile {
                 };
                 
                 $("input.maneli-date-picker").datepicker({
+                    isJalali: true, // <-- FIX WAS ADDED HERE
                     dateFormat: "yy/mm/dd",
-                    isRTL: true,
                     changeMonth: true,
                     changeYear: true,
+                     onSelect: function(dateText, inst) {
+                        // This is to ensure the input value is also in Persian digits
+                        $(this).val(toPersianDigits(dateText));
+                     },
                      onChangeMonthYear: function(year, month, inst) {
                         setTimeout(function() {
+                            var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : year);
+                            $(".ui-datepicker-year").val(pYear);
                             $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                             $(".ui-datepicker-month option").each(function() {
                                 $(this).text(toPersianDigits($(this).text()));
                             });
                         }, 0);
                     },
                      beforeShow: function(input, inst) {
                          setTimeout(function() {
-                            $(".ui-datepicker-year option").each(function() {
+                             var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : $(input).val().split("/")[0]);
+                             $(".ui-datepicker-year").val(pYear);
+                             $(".ui-datepicker-year option").each(function() {
+                                $(this).text(toPersianDigits($(this).text()));
+                            });
+                             $(".ui-datepicker-month option").each(function() {
                                 $(this).text(toPersianDigits($(this).text()));
                             });
                          },0);
@@ -83,7 +97,7 @@ class Maneli_User_Profile {
             <tr>
                 <th><label for="birth_date">تاریخ تولد</label></th>
                 <td>
-                    <input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text maneli-date-picker" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" />
+                    <input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text maneli-date-picker" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" autocomplete="off" />
                 </td>
             </tr>
             <tr>
