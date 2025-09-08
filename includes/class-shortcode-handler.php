@@ -5,9 +5,10 @@ if (!defined('ABSPATH')) {
 
 class Maneli_Shortcode_Handler {
 
+    private $datepicker_loaded = false;
+
     public function __construct() {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
-        add_action('wp_footer', [$this, 'add_datepicker_init_script']);
         
         // Main Shortcodes
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
@@ -26,14 +27,42 @@ class Maneli_Shortcode_Handler {
         add_action('wp_ajax_maneli_delete_user_ajax', [$this, 'handle_delete_user_ajax']);
     }
 
+    private function load_datepicker_assets() {
+        if ($this->datepicker_loaded) {
+            return;
+        }
+        wp_enqueue_style('kamadatepicker-style', 'https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css');
+        wp_enqueue_script('kamadatepicker-script', 'https://unpkg.com/kamadatepicker', [], null, true);
+        
+        // Add footer script to initialize datepicker
+        add_action('wp_footer', function() {
+            ?>
+            <script type="text/javascript">
+                document.addEventListener('DOMContentLoaded', function() {
+                    // A small delay to ensure the library has loaded, especially on complex pages
+                    setTimeout(function() {
+                        if (typeof kamaDatepicker === "function") {
+                            var options = {
+                                buttonsColor: "blue",
+                                forceFarsiDigits: true,
+                                gotoToday: true,
+                                zIndex: 10001
+                            };
+                            kamaDatepicker('input.maneli-date-picker', options);
+                        }
+                    }, 100);
+                });
+            </script>
+            <?php
+        }, 99);
+
+        $this->datepicker_loaded = true;
+    }
+
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.3.0');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.3.1');
             
-            // Enqueue Datepicker Assets
-            wp_enqueue_style('kamadatepicker-style', 'https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css');
-            wp_enqueue_script('kamadatepicker-script', 'https://unpkg.com/kamadatepicker', [], null, true);
-
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
                 if (is_user_logged_in()) {
@@ -45,35 +74,15 @@ class Maneli_Shortcode_Handler {
                 }
             }
             
-            if (is_user_logged_in() && (current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
-                global $post;
-                 if ($post && has_shortcode($post->post_content, 'maneli_user_list')) {
-                    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-                    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-                    wp_localize_script('jquery-core', 'maneli_user_ajax', [
-                        'ajax_url' => admin_url('admin-ajax.php'),
-                        'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce')
-                    ]);
-                }
+            global $post;
+            if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_user_list')) {
+                wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+                wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+                wp_localize_script('jquery-core', 'maneli_user_ajax', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce')
+                ]);
             }
-        }
-    }
-
-     public function add_datepicker_init_script() {
-        global $post;
-        if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'car_inquiry_form')) {
-            ?>
-            <script type="text/javascript">
-                document.addEventListener('DOMContentLoaded', function() {
-                    var options = {
-                        buttonsColor: "blue",
-                        forceFarsiDigits: true,
-                        gotoToday: true,
-                    };
-                    kamaDatepicker('input.maneli-date-picker', options);
-                });
-            </script>
-            <?php
         }
     }
 
@@ -161,9 +170,15 @@ class Maneli_Shortcode_Handler {
             }
         } else {
             switch ($inquiry_step_meta) {
-                case 'form_pending': $this->render_step2_identity_form($user_id); break;
-                case 'payment_pending': $this->render_step_payment($user_id); break;
-                default: $this->render_step1_car_selection(); break;
+                case 'form_pending': 
+                    echo $this->render_step2_identity_form($user_id); 
+                    break;
+                case 'payment_pending': 
+                    echo $this->render_step_payment($user_id); 
+                    break;
+                default: 
+                    echo $this->render_step1_car_selection(); 
+                    break;
             }
         }
         echo '</div>';
@@ -271,6 +286,7 @@ class Maneli_Shortcode_Handler {
     }
 
     private function render_step2_identity_form($user_id) {
+        $this->load_datepicker_assets(); // Load datepicker scripts
         $car_id = get_user_meta($user_id, 'maneli_selected_car_id', true);
         $car_name = get_the_title($car_id);
         $user_info = get_userdata($user_id);
@@ -278,6 +294,7 @@ class Maneli_Shortcode_Handler {
         $term_months = get_user_meta($user_id, 'maneli_inquiry_term_months', true);
         $total_price = get_user_meta($user_id, 'maneli_inquiry_total_price', true);
         $installment_amount = get_user_meta($user_id, 'maneli_inquiry_installment', true);
+        ob_start();
         ?>
         <div class="inquiry-car-image">
             <?php if ($car_id && has_post_thumbnail($car_id)) { echo get_the_post_thumbnail($car_id, 'medium'); } ?>
@@ -304,7 +321,7 @@ class Maneli_Shortcode_Handler {
                 <p class="form-section-title">فرم اطلاعات خریدار</p>
                 <div class="form-grid">
                     <div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" value="<?php echo esc_attr($user_info->first_name); ?>" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" value="<?php echo esc_attr($user_info->last_name); ?>" required></div></div>
-                    <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user_id, 'father_name', true)); ?>" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" class="maneli-date-picker" name="birth_date" value="<?php echo esc_attr(get_user_meta($user_id, 'birth_date', true)); ?>" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required></div></div>
+                    <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user_id, 'father_name', true)); ?>" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" class="maneli-date-picker" name="birth_date" value="<?php echo esc_attr(get_user_meta($user_id, 'birth_date', true)); ?>" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required autocomplete="off"></div></div>
                     <div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user_id, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه:</label><input type="text" name="mobile_number" value="<?php echo esc_attr(get_user_meta($user_id, 'mobile_number', true)); ?>" placeholder="مثال: 09123456789" required></div></div>
                 </div>
             </div>
@@ -312,7 +329,7 @@ class Maneli_Shortcode_Handler {
                 <p class="form-section-title">فرم اطلاعات صادر کننده چک</p>
                 <div class="form-grid">
                     <div class="form-row"><div class="form-group"><label>نام صادرکننده چک:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده چک:</label><input type="text" name="issuer_last_name"></div></div>
-                    <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده چک:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده چک:</label><input type="text" class="maneli-date-picker" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱"></div></div>
+                    <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده چک:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده چک:</label><input type="text" class="maneli-date-picker" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱" autocomplete="off"></div></div>
                     <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده چک:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده چک:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
                 </div>
             </div>
@@ -325,7 +342,6 @@ class Maneli_Shortcode_Handler {
             const buyerForm = document.getElementById('buyer-form-wrapper');
             const issuerForm = document.getElementById('issuer-form-wrapper');
             const submitBtn = document.getElementById('submit-identity-btn');
-            const issuerInputs = issuerForm.querySelectorAll('input');
             function toggleForms() {
                 const checkedRadio = document.querySelector('input[name="issuer_type"]:checked');
                 if (!checkedRadio) {
@@ -339,17 +355,16 @@ class Maneli_Shortcode_Handler {
                 if (selectedValue === 'self') {
                     buyerForm.style.display = 'block';
                     issuerForm.style.display = 'none';
-                    issuerInputs.forEach(input => input.required = false);
                 } else {
                     buyerForm.style.display = 'block';
                     issuerForm.style.display = 'block';
-                    issuerInputs.forEach(input => input.required = true);
                 }
             }
             radios.forEach(radio => radio.addEventListener('change', toggleForms));
         });
         </script>
         <?php
+        return ob_get_clean();
     }
     
     private function render_step_final_wait_message($status = 'pending') {
@@ -474,6 +489,7 @@ class Maneli_Shortcode_Handler {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای استفاده از این فرم را ندارید.</p></div>';
         }
 
+        $this->load_datepicker_assets(); // Load datepicker scripts
         wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
         wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
         wp_enqueue_script('maneli-expert-panel-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js', ['jquery', 'select2'], '2.5.0', true);
@@ -534,7 +550,7 @@ class Maneli_Shortcode_Handler {
                         <p class="form-section-title">فرم اطلاعات خریدار</p>
                         <div class="form-grid">
                             <div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" required></div></div>
-                            <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" class="maneli-date-picker" name="birth_date" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required></div></div>
+                            <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" class="maneli-date-picker" name="birth_date" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required autocomplete="off"></div></div>
                             <div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه (نام کاربری):</label><input type="text" name="mobile_number" placeholder="مثال: 09123456789" required></div></div>
                         </div>
                     </div>
@@ -543,7 +559,7 @@ class Maneli_Shortcode_Handler {
                         <p class="form-section-title">فرم اطلاعات صادر کننده چک</p>
                         <div class="form-grid">
                             <div class="form-row"><div class="form-group"><label>نام صادرکننده:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده:</label><input type="text" name="issuer_last_name"></div></div>
-                            <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده:</label><input type="text" class="maneli-date-picker" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱"></div></div>
+                            <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده:</label><input type="text" class="maneli-date-picker" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱" autocomplete="off"></div></div>
                             <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
                         </div>
                     </div>
@@ -1091,6 +1107,7 @@ class Maneli_Shortcode_Handler {
     }
 
     private function render_user_add_form() {
+        $this->load_datepicker_assets(); // Load datepicker assets
         $back_link = remove_query_arg('add_user', $_SERVER['REQUEST_URI']);
         ob_start();
         ?>
@@ -1125,6 +1142,7 @@ class Maneli_Shortcode_Handler {
     }
 
     private function render_user_edit_form($user_id) {
+        $this->load_datepicker_assets(); // Load datepicker assets
         $user = get_userdata($user_id);
         if (!$user) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>کاربر مورد نظر یافت نشد.</p></div>';
@@ -1153,7 +1171,7 @@ class Maneli_Shortcode_Handler {
                     </div>
                      <div class="form-row">
                         <div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'father_name', true)); ?>"></div>
-                        <div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" placeholder="مثال: ۱۳۶۵/۰۴/۱۵"></div>
+                        <div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" class="maneli-date-picker" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" autocomplete="off"></div>
                     </div>
                      <div class="form-row">
                         <div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی"></div>

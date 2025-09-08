@@ -10,13 +10,17 @@ class Maneli_User_Profile {
         add_action('edit_user_profile', [$this, 'add_custom_user_fields']);
         add_action('personal_options_update', [$this, 'save_custom_user_fields']);
         add_action('edit_user_profile_update', [$this, 'save_custom_user_fields']);
+
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_datepicker_assets']);
     }
 
-    /**
-     * Renders the custom fields on the user profile page.
-     *
-     * @param WP_User $user The user object.
-     */
+    public function enqueue_admin_datepicker_assets($hook) {
+        if ($hook == 'profile.php' || $hook == 'user-edit.php') {
+            wp_enqueue_style('kamadatepicker-style', 'https://unpkg.com/kamadatepicker/dist/kamadatepicker.min.css');
+            wp_enqueue_script('kamadatepicker-script', 'https://unpkg.com/kamadatepicker', [], null, true);
+        }
+    }
+
     public function add_custom_user_fields($user) {
         ?>
         <h3>اطلاعات تکمیلی استعلام</h3>
@@ -36,7 +40,7 @@ class Maneli_User_Profile {
             <tr>
                 <th><label for="birth_date">تاریخ تولد</label></th>
                 <td>
-                    <input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" />
+                    <input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text maneli-date-picker" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" />
                 </td>
             </tr>
             <tr>
@@ -47,15 +51,21 @@ class Maneli_User_Profile {
                 </td>
             </tr>
         </table>
+        <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                if (typeof kamaDatepicker === "function") {
+                    var options = {
+                        buttonsColor: "blue",
+                        forceFarsiDigits: true,
+                        gotoToday: true,
+                    };
+                    kamaDatepicker('input.maneli-date-picker', options);
+                }
+            });
+        </script>
         <?php
     }
 
-    /**
-     * Saves the custom user profile fields.
-     *
-     * @param int $user_id The ID of the user being updated.
-     * @return bool|void
-     */
     public function save_custom_user_fields($user_id) {
         if (!current_user_can('edit_user', $user_id)) {
             return false;

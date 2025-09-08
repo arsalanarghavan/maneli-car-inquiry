@@ -19,7 +19,7 @@ class Maneli_Form_Handler {
         add_action('admin_post_maneli_admin_update_status', [$this, 'handle_admin_update_status']);
         add_action('admin_post_maneli_admin_update_user', [$this, 'handle_admin_update_user_profile']);
         add_action('admin_post_maneli_admin_create_user', [$this, 'handle_admin_create_user']);
-        add_action('admin_post_maneli_admin_retry_finotex', [$this, 'handle_admin_retry_finotex']); // New Hook
+        add_action('admin_post_maneli_admin_retry_finotex', [$this, 'handle_admin_retry_finotex']);
 
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
@@ -121,16 +121,32 @@ class Maneli_Form_Handler {
     public function handle_identity_submission() {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_submit_identity_nonce')) wp_die('خطای امنیتی!');
         if (!is_user_logged_in()) { wp_redirect(wp_get_referer()); exit; }
+        
         $user_id = get_current_user_id();
         $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
+        
+        // Validate Buyer Fields
         $buyer_fields = ['first_name', 'last_name', 'national_code', 'father_name', 'birth_date', 'mobile_number'];
         $buyer_data = [];
-        foreach ($buyer_fields as $key) { if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای خریدار را پر کنید."); $buyer_data[$key] = sanitize_text_field($_POST[$key]); }
+        foreach ($buyer_fields as $key) {
+            if (empty($_POST[$key])) {
+                wp_die("خطا: لطفاً تمام فیلدهای اطلاعات خریدار را پر کنید.");
+            }
+            $buyer_data[$key] = sanitize_text_field($_POST[$key]);
+        }
+        
+        // Validate Issuer Fields ONLY if type is 'other'
         $issuer_data = [];
         if ($issuer_type === 'other') {
             $issuer_fields = ['issuer_first_name', 'issuer_last_name', 'issuer_national_code', 'issuer_father_name', 'issuer_birth_date', 'issuer_mobile_number'];
-            foreach ($issuer_fields as $key) { if (empty($_POST[$key])) wp_die("لطفا تمام فیلدهای صادرکننده چک را پر کنید."); $issuer_data[$key] = sanitize_text_field($_POST[$key]); }
+            foreach ($issuer_fields as $key) {
+                if (empty($_POST[$key])) {
+                    wp_die("خطا: لطفاً تمام فیلدهای اطلاعات صادرکننده چک را پر کنید.");
+                }
+                $issuer_data[$key] = sanitize_text_field($_POST[$key]);
+            }
         }
+
         $temp_data = ['buyer_data' => $buyer_data, 'issuer_data' => $issuer_data, 'issuer_type' => $issuer_type];
         update_user_meta($user_id, 'maneli_temp_inquiry_data', $temp_data);
         
@@ -707,9 +723,6 @@ class Maneli_Form_Handler {
         exit;
     }
 
-    /**
-     * New method to handle Finotex retry by admin.
-     */
     public function handle_admin_retry_finotex() {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_retry_finotex_nonce')) wp_die('خطای امنیتی!');
         if (!current_user_can('manage_maneli_inquiries') || empty($_POST['inquiry_id'])) { 
