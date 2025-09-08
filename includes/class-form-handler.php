@@ -500,6 +500,26 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'rejection_reason', $reason);
         }
         
+        // START: Added code to send SMS to manually assigned expert
+        $options = get_option('maneli_inquiry_all_options', []);
+        $pattern_id = $options['sms_pattern_expert_referral'] ?? 0;
+        $assigned_expert_id_for_sms = get_post_meta($post_id, 'assigned_expert_id', true);
+
+        if ($pattern_id > 0 && $assigned_expert_id_for_sms) {
+            $expert_phone = get_user_meta($assigned_expert_id_for_sms, 'mobile_number', true);
+            if (!empty($expert_phone)) {
+                $expert_info = get_userdata($assigned_expert_id_for_sms);
+                $customer_info = get_userdata($user_id);
+                $customer_name = ($customer_info->first_name ?? '') . ' ' . ($customer_info->last_name ?? '');
+                $customer_mobile = get_post_meta($post_id, 'mobile_number', true) ?? '';
+                $car_name = get_the_title(get_post_meta($post_id, 'product_id', true)) ?? '';
+                $params = [(string)$expert_info->display_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
+                $sms_handler = new Maneli_SMS_Handler();
+                $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
+            }
+        }
+        // END: Added code
+        
         update_post_meta($post_id, 'inquiry_status', $final_status);
         
         $user_info = get_userdata($user_id);

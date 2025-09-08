@@ -93,26 +93,60 @@ class Maneli_Settings_Page {
     
     public function sanitize_and_merge_options($input) {
         $old_options = get_option($this->options_name, []);
-        
-        $checkboxes = ['payment_enabled', 'finotex_enabled', 'zarinpal_enabled', 'sadad_enabled'];
-        foreach ($checkboxes as $cb) {
-            if (!isset($input[$cb])) {
-                $input[$cb] = '0';
+
+        // Sanitize new input first
+        $sanitized_input = [];
+        foreach ($input as $key => $value) {
+             if (is_array($value)) {
+                $sanitized_input[$key] = $value;
+            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message'])) {
+                $sanitized_input[$key] = sanitize_textarea_field($value);
+            } else {
+                $sanitized_input[$key] = sanitize_text_field($value);
             }
         }
 
-        $merged_options = array_merge($old_options, $input);
-        $sanitized_options = [];
-        foreach ($merged_options as $key => $value) {
-            if (is_array($value)) {
-                $sanitized_options[$key] = $value;
-            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message'])) {
-                $sanitized_options[$key] = sanitize_textarea_field($value);
-            } else {
-                $sanitized_options[$key] = sanitize_text_field($value);
+        // Merge sanitized new input over old options
+        $merged_options = array_merge($old_options, $sanitized_input);
+
+        // Handle checkboxes that might be unchecked
+        // This logic ensures that only checkboxes on the CURRENTLY submitted tab are affected if they are not present in the input.
+        $all_settings = $this->get_all_settings();
+        $all_checkboxes = [];
+        $active_tab_checkboxes = [];
+
+        // Determine which tab is being saved based on the referer URL
+        $active_tab_key = 'gateways'; // Default tab
+        if (isset($_POST['_wp_http_referer'])) {
+            parse_str(parse_url(wp_unslash($_POST['_wp_http_referer']), PHP_URL_QUERY), $query_params);
+            if (!empty($query_params['tab'])) {
+                $active_tab_key = $query_params['tab'];
             }
         }
-        return $sanitized_options;
+        
+        // Get all checkboxes from the settings structure
+        foreach ($all_settings as $tab_key => $tab_data) {
+            foreach ($tab_data as $section) {
+                if(isset($section['fields'])) {
+                    foreach($section['fields'] as $field) {
+                        if(isset($field['type']) && $field['type'] === 'switch') {
+                           if ($tab_key === $active_tab_key) {
+                               $active_tab_checkboxes[] = $field['name'];
+                           }
+                        }
+                    }
+                }
+            }
+        }
+
+        // If a checkbox from the active tab is not in the submitted data, it means it was unchecked.
+        foreach($active_tab_checkboxes as $cb) {
+            if (!isset($input[$cb])) {
+               $merged_options[$cb] = '0';
+            }
+        }
+        
+        return $merged_options;
     }
 
     public function render_field($args) {
