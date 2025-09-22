@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.12.0
+ * Version:           0.12.2
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -176,36 +176,7 @@ function maneli_redirect_non_admins_from_backend() {
 }
 
 /**
- * Add custom product status field to the product general options.
- */
-function maneli_add_car_status_field() {
-    echo '<div class="options_group">';
-    woocommerce_wp_select([
-        'id' => '_maneli_car_status',
-        'label' => 'وضعیت فروش خودرو',
-        'options' => [
-            'special_sale' => 'فروش ویژه (فعال)',
-            'unavailable' => 'ناموجود (نمایش در سایت)',
-            'disabled' => 'غیرفعال (مخفی از سایت)',
-        ],
-        'desc_tip' => true,
-        'description' => 'وضعیت نمایش و فروش این خودرو را مشخص کنید.',
-    ]);
-    echo '</div>';
-}
-add_action('woocommerce_product_options_general_product_data', 'maneli_add_car_status_field');
-
-/**
- * Save the custom product status field.
- */
-function maneli_save_car_status_field($post_id) {
-    $status = isset($_POST['_maneli_car_status']) ? sanitize_text_field($_POST['_maneli_car_status']) : '';
-    update_post_meta($post_id, '_maneli_car_status', $status);
-}
-add_action('woocommerce_process_product_meta', 'maneli_save_car_status_field');
-
-/**
- * Modify the main query to hide disabled products.
+ * Modify the main query to hide disabled products from the frontend.
  */
 function maneli_pre_get_posts_query($query) {
     if (!is_admin() && $query->is_main_query() && ($query->is_post_type_archive('product') || $query->is_tax(get_object_taxonomies('product')))) {
@@ -215,10 +186,65 @@ function maneli_pre_get_posts_query($query) {
             'value' => 'disabled',
             'compare' => '!=',
         ];
+        $meta_query['relation'] = 'OR';
+        $meta_query[] = array(
+            'key' => '_maneli_car_status',
+            'compare' => 'NOT EXISTS',
+        );
         $query->set('meta_query', $meta_query);
     }
 }
 add_action('pre_get_posts', 'maneli_pre_get_posts_query');
+
+
+/**
+ * AJAX handler for updating product data from the custom editor page.
+ */
+function maneli_update_product_data_callback() {
+    check_ajax_referer('maneli_product_data_nonce', 'nonce');
+
+    if (!current_user_can('manage_woocommerce')) {
+        wp_send_json_error('شما دسترسی لازم را ندارید.');
+        return;
+    }
+
+    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+    $field_type = isset($_POST['field_type']) ? sanitize_key($_POST['field_type']) : '';
+    $field_value = isset($_POST['field_value']) ? sanitize_text_field(wp_unslash($_POST['field_value'])) : '';
+
+    if ($product_id > 0 && !empty($field_type)) {
+        $product = wc_get_product($product_id);
+        if (!$product) {
+            wp_send_json_error('محصول یافت نشد.');
+            return;
+        }
+
+        switch ($field_type) {
+            case 'regular_price':
+                $product->set_regular_price($field_value);
+                $product->set_price($field_value);
+                $product->save();
+                break;
+            case 'min_downpayment':
+                update_post_meta($product_id, 'min_downpayment', $field_value);
+                break;
+            case 'car_status':
+                update_post_meta($product_id, '_maneli_car_status', $field_value);
+                break;
+            default:
+                wp_send_json_error('نوع فیلد نامعتبر است.');
+                return;
+        }
+        
+        wc_delete_product_transients($product_id);
+        wp_send_json_success('اطلاعات با موفقیت به‌روزرسانی شد.');
+    } else {
+        wp_send_json_error('اطلاعات ارسالی نامعتبر است.');
+    }
+    
+    wp_die();
+}
+add_action('wp_ajax_maneli_update_product_data', 'maneli_update_product_data_callback');
 
 
 /**
@@ -248,6 +274,7 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-product-editor-page.php';
     }
 
     private function init_classes() {
@@ -258,6 +285,7 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Expert_Panel();
         new Maneli_Credit_Report_Page();
         new Maneli_User_Profile();
+        new Maneli_Product_Editor_Page();
     }
 
     public function woocommerce_not_active_notice() {
