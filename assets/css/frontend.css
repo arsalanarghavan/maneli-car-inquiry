@@ -426,7 +426,7 @@
 .maneli-expert-panel .select2-container .select2-selection--single { height: 42px !important; padding: 5px; }
 .maneli-expert-panel .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 30px; }
 .maneli-expert-panel .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px; }
-.maneli-table { font-family: inherit; }
+.maneli-expert-panel .maneli-table { font-family: inherit; }
 
 /* === START: Button Hover Fix === */
 .loan-action-btn {
@@ -651,4 +651,35 @@
 div.kamadatepicker-container {
     font-family: inherit !important;
     z-index: 10000 !important;
+}
+
+/* Styles for Unavailable Products */
+.maneli-calculator-container.unavailable {
+    position: relative;
+}
+.maneli-calculator-container.unavailable .loan-calculator-form {
+    filter: blur(5px);
+    pointer-events: none;
+    user-select: none;
+}
+.unavailable-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+.unavailable-overlay p {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #c62828;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }

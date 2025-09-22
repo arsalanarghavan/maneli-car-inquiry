@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.11.63
+ * Version:           0.12.0
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -174,6 +174,51 @@ function maneli_redirect_non_admins_from_backend() {
         exit;
     }
 }
+
+/**
+ * Add custom product status field to the product general options.
+ */
+function maneli_add_car_status_field() {
+    echo '<div class="options_group">';
+    woocommerce_wp_select([
+        'id' => '_maneli_car_status',
+        'label' => 'وضعیت فروش خودرو',
+        'options' => [
+            'special_sale' => 'فروش ویژه (فعال)',
+            'unavailable' => 'ناموجود (نمایش در سایت)',
+            'disabled' => 'غیرفعال (مخفی از سایت)',
+        ],
+        'desc_tip' => true,
+        'description' => 'وضعیت نمایش و فروش این خودرو را مشخص کنید.',
+    ]);
+    echo '</div>';
+}
+add_action('woocommerce_product_options_general_product_data', 'maneli_add_car_status_field');
+
+/**
+ * Save the custom product status field.
+ */
+function maneli_save_car_status_field($post_id) {
+    $status = isset($_POST['_maneli_car_status']) ? sanitize_text_field($_POST['_maneli_car_status']) : '';
+    update_post_meta($post_id, '_maneli_car_status', $status);
+}
+add_action('woocommerce_process_product_meta', 'maneli_save_car_status_field');
+
+/**
+ * Modify the main query to hide disabled products.
+ */
+function maneli_pre_get_posts_query($query) {
+    if (!is_admin() && $query->is_main_query() && ($query->is_post_type_archive('product') || $query->is_tax(get_object_taxonomies('product')))) {
+        $meta_query = $query->get('meta_query') ?: [];
+        $meta_query[] = [
+            'key' => '_maneli_car_status',
+            'value' => 'disabled',
+            'compare' => '!=',
+        ];
+        $query->set('meta_query', $meta_query);
+    }
+}
+add_action('pre_get_posts', 'maneli_pre_get_posts_query');
 
 
 /**
