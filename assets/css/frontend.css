@@ -519,7 +519,12 @@
 }
 /* === END: Expert Frontend Report Styles === */
 
-/* === User List Styles & Filters (FINAL - v5) === */
+/* === Full Width Container & User List Styles === */
+.maneli-full-width-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
 .user-list-header {
     display: flex;
     justify-content: space-between;
@@ -527,15 +532,21 @@
     margin-bottom: 20px;
 }
 .user-list-filters {
-    margin: 25px 0;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
 }
 .user-list-filters .filter-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 20px;
     width: 100%;
+    align-items: flex-end;
 }
 .user-list-filters .search-row {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 .user-list-filters .search-input {
     width: 100%;
@@ -546,7 +557,7 @@
     box-sizing: border-box;
 }
 .user-list-filters .filter-group {
-    flex: 1;
+    flex: 1 1 200px;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -554,7 +565,7 @@
 .user-list-filters label {
     font-weight: 500;
     font-size: 14px;
-    color: #555;
+    color: #495057;
 }
 .user-list-filters select {
     width: 100%;
@@ -562,7 +573,16 @@
     border-radius: 4px;
     border: 1px solid #ced4da;
     background-color: #fff;
+    height: 45px;
 }
+.user-list-filters .select2-container .select2-selection--single {
+    height: 45px !important;
+    padding-top: 5px;
+}
+.maneli-table-wrapper {
+    overflow-x: auto;
+}
+
 /* Spinner for AJAX loading */
 .spinner.is-active {
     display: inline-block;

@@ -20,7 +20,7 @@ class Maneli_Shortcode_Handler {
     public function enqueue_global_assets() {
         if (!is_admin()) {
             // Enqueue main frontend stylesheet and Font Awesome icons
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.5.7');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.6.0');
             wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
 
             // Enqueue calculator script only on single product pages
@@ -36,10 +36,17 @@ class Maneli_Shortcode_Handler {
             }
             
             global $post;
-            // Enqueue assets for the user list page only when the shortcode is present
-            if (is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_user_list')) {
-                wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-                wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+            $has_user_list = is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_user_list');
+            $has_inquiry_list = is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_inquiry_list');
+            $has_product_editor = is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_product_editor');
+
+            // Enqueue Select2 for any page that needs it
+            if ($has_user_list || $has_inquiry_list || $has_product_editor) {
+                 wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+                 wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+            }
+
+            if ($has_user_list) {
                 wp_localize_script('jquery', 'maneli_user_ajax', [
                     'ajax_url' => admin_url('admin-ajax.php'),
                     'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce'),
@@ -58,13 +65,13 @@ class Maneli_Shortcode_Handler {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-user-management-shortcodes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-admin-shortcodes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-system-report-shortcode.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-product-editor-shortcode.php'; // New line
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-product-editor-shortcode.php';
 
         // Instantiate each class to register its shortcodes
         new Maneli_Inquiry_Shortcodes();
         new Maneli_User_Management_Shortcodes();
         new Maneli_Admin_Shortcodes();
         new Maneli_System_Report_Shortcode();
-        new Maneli_Product_Editor_Shortcode(); // New line
+        new Maneli_Product_Editor_Shortcode();
     }
 }
