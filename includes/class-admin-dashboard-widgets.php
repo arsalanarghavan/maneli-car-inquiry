@@ -3,6 +3,10 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Manages the rendering of statistical dashboard widgets for the Maneli Car Inquiry plugin.
+ * This class provides static methods to display user and inquiry-related statistics.
+ */
 class Maneli_Admin_Dashboard_Widgets {
 
     /**
@@ -36,7 +40,10 @@ class Maneli_Admin_Dashboard_Widgets {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: #ffffff !important; /* Icon color set to white */
+            }
+            /* === FIX: Targeting the icon element directly for color change === */
+            .maneli-stat-box .icon .fas {
+                color: #ffffff !important;
             }
             .maneli-stat-box .icon.total-users { background-color: #2D89BE; }
             .maneli-stat-box .icon.customers { background-color: #5cb85c; }

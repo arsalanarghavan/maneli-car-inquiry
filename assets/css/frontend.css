@@ -440,7 +440,6 @@
 }
 /* === END: Button Hover Fix === */
 
-
 /* === START: Expert Frontend Report Styles === */
 .frontend-expert-report {
     max-width: 800px;
@@ -544,6 +543,29 @@
     color: white !important;
     border-color: #dc3545 !important;
     margin-right: 5px;
+}
+
+/* === Primary Button & General Button Styles === */
+/* General style for default buttons like 'View' and 'Edit' */
+.maneli-inquiry-wrapper .button,
+.maneli-inquiry-wrapper a.button,
+.maneli-inquiry-wrapper button.button {
+    background-color: var(--theme-blue) !important;
+    border-color: var(--theme-blue) !important;
+    color: #fff !important;
+    transition: opacity 0.2s ease-in-out;
+}
+.maneli-inquiry-wrapper .button:hover,
+.maneli-inquiry-wrapper a.button:hover,
+.maneli-inquiry-wrapper button.button:hover {
+    opacity: 0.85;
+}
+
+/* Style for explicitly primary buttons */
+.maneli-inquiry-wrapper .button.button-primary {
+    background-color: var(--theme-blue) !important;
+    border-color: var(--theme-blue) !important;
+    color: #fff !important;
 }
 
 /* === NEW STYLES FOR REPORT PAGE === */
@@ -668,7 +690,6 @@ div.kamadatepicker-container {
     align-items: center;
     justify-content: center;
     z-index: 10;
-    /* The blur effect is on the form itself, not the overlay */
 }
 
 .unavailable-overlay p {
@@ -709,7 +730,7 @@ div.kamadatepicker-container {
 .maneli-settings-tabs li a {
     display: flex;
     align-items: center;
-    gap: 12px; /* Increased gap for better spacing */
+    gap: 12px;
     padding: 12px 15px;
     text-decoration: none;
     color: #444;
@@ -720,7 +741,7 @@ div.kamadatepicker-container {
     border: 1px solid transparent;
 }
 
-.maneli-settings-tabs li a .fas { /* Style for Font Awesome icons */
+.maneli-settings-tabs li a .fas {
     font-size: 18px;
     width: 20px;
     text-align: center;
@@ -737,10 +758,10 @@ div.kamadatepicker-container {
     background-color: var(--theme-blue);
     color: #fff;
     font-weight: bold;
-    box-shadow: 0 4px 10px rgba(57, 137, 190, 0.3);
+    box-shadow: 0 4px 10px rgba(45, 137, 190, 0.3);
 }
 
-.maneli-settings-tabs li a.active .fas { /* Icon color for active tab */
+.maneli-settings-tabs li a.active .fas {
     color: #fff;
 }
 
@@ -803,10 +824,10 @@ div.kamadatepicker-container {
 
 .maneli-settings-save-btn:hover {
     opacity: 0.9;
-    box-shadow: 0 4px 12px rgba(57, 137, 190, 0.4);
+    box-shadow: 0 4px 12px rgba(45, 137, 190, 0.4);
 }
 
-.maneli-settings-save-btn .fas { /* Style for save icon */
+.maneli-settings-save-btn .fas {
     font-size: 16px;
 }
 /* === END: Modern Settings Panel Styles === */
