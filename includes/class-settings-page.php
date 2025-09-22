@@ -107,7 +107,6 @@ class Maneli_Settings_Page {
         }
         $merged_options = array_merge($old_options, $sanitized_input);
         
-        // This part needs to check all checkboxes from all tabs since the frontend saves all at once
         $all_settings = $this->get_all_settings_public();
         $all_checkboxes = [];
         foreach ($all_settings as $tab_data) {
@@ -169,7 +168,7 @@ class Maneli_Settings_Page {
     
         if ($tab === 'experts') {
             $section = $all_settings['experts']['sections']['maneli_experts_list_section'];
-            echo "<h3>" . esc_html($section['title']) . "</h3>";
+            echo "<h3 class='maneli-settings-section-title'>" . esc_html($section['title']) . "</h3>";
             echo '<p>' . wp_kses_post($section['desc']) . '</p>';
             $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name']);
             if (!empty($expert_users)) {
@@ -213,7 +212,7 @@ class Maneli_Settings_Page {
         return [
             'gateways' => [
                 'title' => 'درگاه پرداخت',
-                'icon' => 'dashicons-money-alt',
+                'icon' => 'fas fa-money-bill-wave',
                 'sections' => [
                     'maneli_payment_general_section' => [
                         'title' => 'تنظیمات عمومی پرداخت', 'desc' => '',
@@ -234,7 +233,7 @@ class Maneli_Settings_Page {
             ],
             'sms' => [
                 'title' => 'پیامک',
-                'icon' => 'dashicons-smartphone',
+                'icon' => 'fas fa-mobile-alt',
                 'sections' => [
                     'maneli_sms_api_section' => [
                         'title' => 'اطلاعات پنل ملی پیامک', 'desc' => '',
@@ -259,7 +258,7 @@ class Maneli_Settings_Page {
             ],
             'experts' => [
                 'title' => 'کارشناسان',
-                'icon' => 'dashicons-groups',
+                'icon' => 'fas fa-users',
                 'sections' => [
                     'maneli_experts_list_section' => [
                         'title' => 'مدیریت کارشناسان',
@@ -270,7 +269,7 @@ class Maneli_Settings_Page {
             ],
             'finotex' => [
                 'title' => 'فینوتک',
-                'icon' => 'dashicons-bank',
+                'icon' => 'fas fa-university',
                 'sections' => [
                     'maneli_finotex_cheque_section' => [
                         'title' => 'سرویس استعلام رنگ چک', 'desc' => '',
@@ -284,7 +283,7 @@ class Maneli_Settings_Page {
             ],
             'display' => [
                 'title' => 'تنظیمات نمایش',
-                'icon' => 'dashicons-admin-appearance',
+                'icon' => 'fas fa-paint-brush',
                 'sections' => [
                     'maneli_display_main_section' => [
                         'title' => 'تنظیمات عمومی نمایش',

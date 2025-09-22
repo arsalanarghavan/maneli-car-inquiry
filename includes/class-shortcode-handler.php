@@ -77,8 +77,11 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.4.0');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.4.2');
             
+            // Enqueue Font Awesome
+            wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
+
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
                 if (is_user_logged_in()) {
@@ -123,11 +126,11 @@ class Maneli_Shortcode_Handler {
                     <?php foreach ($all_settings as $tab_key => $tab_data) : ?>
                         <?php
                         $tab_title = $tab_data['title'] ?? ucfirst($tab_key);
-                        $tab_icon = $tab_data['icon'] ?? 'dashicons-admin-generic';
+                        $tab_icon = $tab_data['icon'] ?? 'fas fa-cog'; // Default Font Awesome icon
                         ?>
                         <li>
                             <a href="#<?php echo esc_attr($tab_key); ?>" class="maneli-tab-link <?php echo ($tab_key === $first_tab) ? 'active' : ''; ?>">
-                                <span class="dashicons <?php echo esc_attr($tab_icon); ?>"></span>
+                                <i class="<?php echo esc_attr($tab_icon); ?>"></i>
                                 <?php echo esc_html($tab_title); ?>
                             </a>
                         </li>
@@ -148,7 +151,7 @@ class Maneli_Shortcode_Handler {
 
                     <p class="submit">
                         <button type="submit" name="submit" id="submit" class="maneli-settings-save-btn">
-                            <span class="dashicons dashicons-saved"></span> ذخیره تغییرات
+                            <i class="fas fa-save"></i> ذخیره تغییرات
                         </button>
                     </p>
                 </form>

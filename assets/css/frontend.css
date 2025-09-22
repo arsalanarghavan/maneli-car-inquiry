@@ -709,7 +709,7 @@ div.kamadatepicker-container {
 .maneli-settings-tabs li a {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px; /* Increased gap for better spacing */
     padding: 12px 15px;
     text-decoration: none;
     color: #444;
@@ -720,8 +720,12 @@ div.kamadatepicker-container {
     border: 1px solid transparent;
 }
 
-.maneli-settings-tabs li a .dashicons {
-    font-size: 20px;
+.maneli-settings-tabs li a .fas { /* Style for Font Awesome icons */
+    font-size: 18px;
+    width: 20px;
+    text-align: center;
+    color: #888;
+    transition: color 0.2s ease-in-out;
 }
 
 .maneli-settings-tabs li a:hover {
@@ -735,6 +739,11 @@ div.kamadatepicker-container {
     font-weight: bold;
     box-shadow: 0 4px 10px rgba(57, 137, 190, 0.3);
 }
+
+.maneli-settings-tabs li a.active .fas { /* Icon color for active tab */
+    color: #fff;
+}
+
 
 .maneli-settings-content {
     flex-grow: 1;
@@ -795,5 +804,9 @@ div.kamadatepicker-container {
 .maneli-settings-save-btn:hover {
     opacity: 0.9;
     box-shadow: 0 4px 12px rgba(57, 137, 190, 0.4);
+}
+
+.maneli-settings-save-btn .fas { /* Style for save icon */
+    font-size: 16px;
 }
 /* === END: Modern Settings Panel Styles === */
