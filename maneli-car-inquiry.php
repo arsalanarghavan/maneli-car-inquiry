@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name:       Maneli Car Inquiry
+ * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.12.3
+ * Version:           0.12.4
  * Author:            ArsalanArghavan
- * Author URI:        https://puzzlinco.com
+ * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       maneli-car-inquiry
@@ -36,7 +36,6 @@ function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d') {
     if ($days > 365) $days = ($days - 1) % 365;
     $jm = ($days < 186) ? 1 + (int)($days / 31) : 7 + (int)(($days - 186) / 30);
     $jd = 1 + (($days < 186) ? ($days % 31) : (($days - 186) % 30));
-    
     $formatted_date = str_replace(['Y', 'm', 'd'], [$jy, sprintf('%02d', $jm), sprintf('%02d', $jd)], $format);
     return $formatted_date;
 }
@@ -281,6 +280,7 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-product-editor-page.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
     }
 
     private function init_classes() {
@@ -292,6 +292,12 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Credit_Report_Page();
         new Maneli_User_Profile();
         new Maneli_Product_Editor_Page();
+        
+        // Conditionally load the grouped attributes feature
+        $options = get_option('maneli_inquiry_all_options', []);
+        if (isset($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
+            new Maneli_Grouped_Attributes();
+        }
     }
 
     public function woocommerce_not_active_notice() {

@@ -261,16 +261,6 @@ class Maneli_Settings_Page {
 
     private function get_all_settings() {
         return [
-            'finotex' => [
-                'maneli_finotex_cheque_section' => [
-                    'title' => 'سرویس استعلام رنگ چک', 'desc' => '',
-                    'fields' => [
-                        ['name' => 'finotex_enabled', 'label' => 'فعال‌سازی استعلام فینوتک', 'type' => 'switch', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.'],
-                        ['name' => 'finotex_client_id', 'label' => 'شناسه کلاینت (Client ID)', 'type' => 'text'],
-                        ['name' => 'finotex_api_key', 'label' => 'توکن دسترسی (Access Token)', 'type' => 'textarea'],
-                    ]
-                ]
-            ],
             'gateways' => [
                 'maneli_payment_general_section' => [
                     'title' => 'تنظیمات عمومی پرداخت', 'desc' => '',
@@ -333,12 +323,29 @@ class Maneli_Settings_Page {
                     'fields' => []
                 ]
             ],
+            'finotex' => [
+                'maneli_finotex_cheque_section' => [
+                    'title' => 'سرویس استعلام رنگ چک', 'desc' => '',
+                    'fields' => [
+                        ['name' => 'finotex_enabled', 'label' => 'فعال‌سازی استعلام فینوتک', 'type' => 'switch', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.'],
+                        ['name' => 'finotex_client_id', 'label' => 'شناسه کلاینت (Client ID)', 'type' => 'text'],
+                        ['name' => 'finotex_api_key', 'label' => 'توکن دسترسی (Access Token)', 'type' => 'textarea'],
+                    ]
+                ]
+            ],
             'display' => [
                 'maneli_display_price_section' => [
                     'title' => 'تنظیمات نمایش قیمت',
                     'desc' => 'در این بخش می‌توانید نحوه نمایش قیمت‌ها را در سایت برای کاربران عادی (مشتریان) کنترل کنید.',
                     'fields' => [
                         ['name' => 'hide_prices_for_customers', 'label' => 'مخفی کردن قیمت برای مشتریان', 'type' => 'switch', 'desc' => 'با فعال کردن این گزینه، قیمت‌ها در تمام بخش‌های فروشگاه برای کاربرانی که مدیر نیستند، مخفی می‌شود.'],
+                    ]
+                ],
+                'maneli_display_attributes_section' => [
+                    'title' => 'تنظیمات نمایش ویژگی‌ها',
+                    'desc' => 'قالب‌بندی نمایش جدول ویژگی‌های محصول را کنترل کنید.',
+                    'fields' => [
+                        ['name' => 'enable_grouped_attributes', 'label' => 'فعال‌سازی نمایش گروهی ویژگی‌ها', 'type' => 'switch', 'desc' => 'با فعال کردن این گزینه، جدول ویژگی‌ها بر اساس گروه (مثال: فنی - ابعاد) دسته‌بندی و نمایش داده می‌شود.'],
                     ]
                 ]
             ]
@@ -349,16 +356,12 @@ class Maneli_Settings_Page {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_save_frontend_settings_nonce')) {
             wp_die('خطای امنیتی!');
         }
-
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_die('شما اجازه‌ی انجام این کار را ندارید.');
         }
-        
         $options = isset($_POST[$this->options_name]) ? (array) $_POST[$this->options_name] : [];
         $sanitized_options = $this->sanitize_and_merge_options($options);
-        
         update_option($this->options_name, $sanitized_options);
-        
         $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
         wp_redirect(add_query_arg('settings-updated', 'true', $redirect_url));
         exit;
