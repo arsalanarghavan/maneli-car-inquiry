@@ -47,7 +47,7 @@ class Maneli_Product_Editor_Shortcode {
                 self::render_product_row($product);
             }
         } else {
-            echo '<tr><td colspan="4" style="text-align:center;">هیچ محصولی با این مشخصات یافت نشد.</td></tr>';
+            echo '<tr><td colspan="5" style="text-align:center;">هیچ محصولی با این مشخصات یافت نشد.</td></tr>';
         }
         $html = ob_get_clean();
 
@@ -103,10 +103,11 @@ class Maneli_Product_Editor_Shortcode {
             <table class="shop_table shop_table_responsive">
                 <thead>
                     <tr>
-                        <th style="width:35%;"><strong>نام خودرو</strong></th>
-                        <th style="width:20%;"><strong>قیمت کامل (تومان)</strong></th>
-                        <th style="width:20%;"><strong>حداقل پیش‌پرداخت (تومان)</strong></th>
-                        <th style="width:25%;"><strong>وضعیت فروش</strong></th>
+                        <th style="width:30%;"><strong>نام خودرو</strong></th>
+                        <th style="width:20%;"><strong>قیمت نقدی (تومان)</strong></th>
+                        <th style="width:20%;"><strong>قیمت اقساطی (تومان)</strong></th>
+                        <th style="width:15%;"><strong>حداقل پیش‌پرداخت (تومان)</strong></th>
+                        <th style="width:15%;"><strong>وضعیت فروش</strong></th>
                     </tr>
                 </thead>
                 <tbody id="maneli-product-list-tbody">
@@ -116,7 +117,7 @@ class Maneli_Product_Editor_Shortcode {
                             self::render_product_row($product);
                         }
                     } else {
-                        echo '<tr><td colspan="4" style="text-align:center;">هیچ محصولی یافت نشد.</td></tr>';
+                        echo '<tr><td colspan="5" style="text-align:center;">هیچ محصولی یافت نشد.</td></tr>';
                     }
                     ?>
                 </tbody>
@@ -281,6 +282,7 @@ class Maneli_Product_Editor_Shortcode {
     private static function render_product_row($product) {
         $product_id = $product->get_id();
         $regular_price = $product->get_regular_price();
+        $installment_price = get_post_meta($product_id, 'installment_price', true);
         $min_downpayment = get_post_meta($product_id, 'min_downpayment', true);
         $current_status = get_post_meta($product_id, '_maneli_car_status', true);
         ?>
@@ -288,14 +290,23 @@ class Maneli_Product_Editor_Shortcode {
             <td data-title="نام خودرو">
                 <strong><a href="<?php echo get_edit_post_link($product_id); ?>" target="_blank" rel="noopener"><?php echo esc_html($product->get_name()); ?></a></strong>
             </td>
-            <td data-title="قیمت کامل (تومان)">
+            <td data-title="قیمت نقدی (تومان)">
                 <input type="text"
                        class="manli-data-input manli-price-input"
                        style="width: 100%;"
                        data-product-id="<?php echo esc_attr($product_id); ?>"
                        data-field-type="regular_price"
                        value="<?php echo esc_attr($regular_price); ?>"
-                       placeholder="قیمت کامل">
+                       placeholder="قیمت نقدی">
+            </td>
+            <td data-title="قیمت اقساطی (تومان)">
+                <input type="text"
+                       class="manli-data-input manli-price-input"
+                       style="width: 100%;"
+                       data-product-id="<?php echo esc_attr($product_id); ?>"
+                       data-field-type="installment_price"
+                       value="<?php echo esc_attr($installment_price); ?>"
+                       placeholder="قیمت اقساطی">
             </td>
             <td data-title="حداقل پیش‌پرداخت (تومان)">
                 <input type="text"

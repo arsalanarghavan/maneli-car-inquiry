@@ -1,42 +1,49 @@
 document.addEventListener("DOMContentLoaded", function () {
+    const calcContainer = document.querySelector(".maneli-calculator-container");
+    if (!calcContainer) return;
+
     // --- TAB SWITCHING LOGIC ---
-    const tabButtons = document.querySelectorAll(".sale-type-tab-btn");
-    const tabContents = document.querySelectorAll(".sale-type-content");
+    const tabs = calcContainer.querySelectorAll('.calculator-tabs .tab-link');
+    const contents = calcContainer.querySelectorAll('.tab-content');
 
-    tabButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            tabButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-
-            const targetId = this.dataset.target;
-            tabContents.forEach(content => {
-                if (content.id === targetId) {
-                    content.classList.add("active");
-                } else {
-                    content.classList.remove("active");
-                }
-            });
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active classes from all tabs and content
+            tabs.forEach(item => item.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to the clicked tab and its corresponding content
+            this.classList.add('active');
+            const activeContent = calcContainer.querySelector('#' + this.dataset.tab);
+            if(activeContent) {
+                activeContent.classList.add('active');
+            }
         });
     });
-    
-    // --- CALCULATOR LOGIC (existing code) ---
-    const calcForm = document.querySelector("form.loan-calculator-form");
-    if (!calcForm) return;
 
+    // --- HELPER FUNCTIONS ---
     const formatMoney = (num) => Number(num).toLocaleString('fa-IR');
     const parseMoney = (str) => parseInt(String(str).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9]/g, '')) || 0;
     const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
+    // --- AJAX LOGIC FOR THE SUBMIT BUTTON ---
+    const calcForm = calcContainer.querySelector("form.loan-calculator-form");
     const actionBtn = calcForm.querySelector(".loan-action-btn");
+
     if (actionBtn && typeof maneli_ajax_object !== 'undefined') {
         actionBtn.addEventListener("click", function (e) {
             e.preventDefault();
+
             const productIdInput = calcForm.querySelector('input[name="product_id"]');
             const nonceInput = calcForm.querySelector('input[name="_wpnonce"]');
+
             if (!productIdInput || !nonceInput) {
                 alert("خطایی رخ داده است (کد ۱). لطفاً صفحه را رفرش کنید.");
                 return;
             }
+            
             actionBtn.disabled = true;
             actionBtn.textContent = "در حال ارسال اطلاعات...";
 
@@ -77,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
+    // --- CALCULATOR DISPLAY AND CALCULATION LOGIC ---
     const calc = document.getElementById("loan-calculator");
     if (!calc) return;
     

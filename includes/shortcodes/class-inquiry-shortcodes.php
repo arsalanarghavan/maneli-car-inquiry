@@ -85,46 +85,64 @@ class Maneli_Inquiry_Shortcodes {
                 <div class="unavailable-overlay">
                     <p><?php echo esc_html($message); ?></p>
                 </div>
-                <form class="loan-calculator-form" method="post" style="filter: blur(5px); pointer-events: none; user-select: none;">
-                     <div id="loan-calculator">
-                        <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
-                        <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" disabled></div><input type="range" id="downPaymentSlider" disabled><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span>- تومان</span></div></div>
-                        <div class="loan-section"><h4 class="loan-subtitle">شرایط مورد نیاز</h4><ul class="loan-requirements"><li>۱. شناسنامه - کارت ملی</li><li>۲. دسته چک</li><li>۳. پرینت سه ماه آخر حساب (صاحب چک)</li><li>۴. فیش حقوق یا جواز کسب (متقاضی و صاحب چک)</li></ul></div>
-                        <div class="loan-section"><label class="loan-label">مدت زمان باز پرداخت:</label><div class="loan-buttons"><button type="button" class="term-btn" disabled>۱۲ ماهه</button><button type="button" class="term-btn" disabled>۱۸ ماهه</button><button type="button" class="term-btn" disabled>۲۴ ماهه</button><button type="button" class="term-btn" disabled>۳۶ ماهه</button></div></div>
-                        <div class="loan-section result-section"><strong>مبلغ تقریبی هر قسط:</strong><span id="installmentAmount">0</span><span> تومان</span></div>
-                        <div class="loan-section loan-action-wrapper">
-                             <button type="button" class="loan-action-btn" disabled>استعلام سنجی بانکی جهت خرید خودرو</button>
-                        </div>
+                 <div class="loan-calculator-form" style="filter: blur(5px); pointer-events: none; user-select: none;">
+                    <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
+                    <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" disabled></div><input type="range" id="downPaymentSlider" disabled><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span>- تومان</span></div></div>
+                    <div class="loan-section"><h4 class="loan-subtitle">شرایط مورد نیاز</h4><ul class="loan-requirements"><li>۱. شناسنامه - کارت ملی</li><li>۲. دسته چک</li><li>۳. پرینت سه ماه آخر حساب (صاحب چک)</li><li>۴. فیش حقوق یا جواز کسب (متقاضی و صاحب چک)</li></ul></div>
+                    <div class="loan-section"><label class="loan-label">مدت زمان باز پرداخت:</label><div class="loan-buttons"><button type="button" class="term-btn" disabled>۱۲ ماهه</button><button type="button" class="term-btn" disabled>۱۸ ماهه</button><button type="button" class="term-btn" disabled>۲۴ ماهه</button><button type="button" class="term-btn" disabled>۳۶ ماهه</button></div></div>
+                    <div class="loan-section result-section"><strong>مبلغ تقریبی هر قسط:</strong><span id="installmentAmount">0</span><span> تومان</span></div>
+                    <div class="loan-section loan-action-wrapper">
+                         <button type="button" class="loan-action-btn" disabled>استعلام سنجی بانکی جهت خرید خودرو</button>
                     </div>
-                </form>
+                </div>
             </div>
             <?php
             return ob_get_clean();
         }
 
-        $price = (int)$product->get_price();
+        $cash_price = (int)$product->get_regular_price();
+        $installment_price = (int)get_post_meta($product->get_id(), 'installment_price', true);
+        if (empty($installment_price)) {
+            $installment_price = $cash_price;
+        }
         $min_down_payment = (int)get_post_meta($product->get_id(), 'min_downpayment', true);
-        $max_down_payment = (int)($price * 0.8);
+        $max_down_payment = (int)($installment_price * 0.8);
         ob_start();
         ?>
         <div class="maneli-calculator-container">
             <form class="loan-calculator-form" method="post">
                 <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                 <?php wp_nonce_field('maneli_ajax_nonce'); ?>
-                <div id="loan-calculator" data-price="<?php echo esc_attr($price); ?>" data-min-down="<?php echo esc_attr($min_down_payment); ?>" data-max-down="<?php echo esc_attr($max_down_payment); ?>">
-                    <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
-                    <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" step="1000000"></div><input type="range" id="downPaymentSlider" step="1000000"><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span><span id="minDownDisplay"></span> تومان</span></div></div>
-                    <div class="loan-section"><h4 class="loan-subtitle">شرایط مورد نیاز</h4><ul class="loan-requirements"><li>۱. شناسنامه - کارت ملی</li><li>۲. دسته چک</li><li>۳. پرینت سه ماه آخر حساب (صاحب چک)</li><li>۴. فیش حقوق یا جواز کسب (متقاضی و صاحب چک)</li></ul></div>
-                    <div class="loan-section"><label class="loan-label">مدت زمان باز پرداخت:</label><div class="loan-buttons"><button type="button" class="term-btn active" data-months="12">۱۲ ماهه</button><button type="button" class="term-btn" data-months="18">۱۸ ماهه</button><button type="button" class="term-btn" data-months="24">۲۴ ماهه</button><button type="button" class="term-btn" data-months="36">۳۶ ماهه</button></div></div>
-                    <div class="loan-section result-section"><strong>مبلغ تقریبی هر قسط:</strong><span id="installmentAmount">0</span><span> تومان</span></div>
-                    <div class="loan-section loan-action-wrapper">
-                        <?php if (is_user_logged_in()): ?>
-                            <button type="button" class="loan-action-btn">استعلام سنجی بانکی جهت خرید خودرو</button>
-                        <?php else:
-                            $login_url = home_url('/login/?redirect_to=' . urlencode(get_permalink()));
-                            ?>
-                            <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn">برای استعلام ابتدا وارد شوید</a>
-                        <?php endif; ?>
+
+                <div class="calculator-tabs">
+                    <a href="#" class="tab-link active" data-tab="installment-tab">فروش اقساطی</a>
+                    <a href="#" class="tab-link" data-tab="cash-tab">فروش نقدی</a>
+                </div>
+
+                <div id="cash-tab" class="tab-content">
+                    <div class="cash-price-section">
+                        <h4>قیمت فروش نقدی</h4>
+                        <p class="cash-price-value"><?php echo number_format_i18n($cash_price); ?> <span>تومان</span></p>
+                        <p>برای اطلاعات بیشتر و خرید نقدی با کارشناسان ما تماس بگیرید.</p>
+                    </div>
+                </div>
+
+                <div id="installment-tab" class="tab-content active">
+                    <div id="loan-calculator" data-price="<?php echo esc_attr($installment_price); ?>" data-min-down="<?php echo esc_attr($min_down_payment); ?>" data-max-down="<?php echo esc_attr($max_down_payment); ?>">
+                        <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
+                        <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" step="1000000"></div><input type="range" id="downPaymentSlider" step="1000000"><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span><span id="minDownDisplay"></span> تومان</span></div></div>
+                        <div class="loan-section"><h4 class="loan-subtitle">شرایط مورد نیاز</h4><ul class="loan-requirements"><li>۱. شناسنامه - کارت ملی</li><li>۲. دسته چک</li><li>۳. پرینت سه ماه آخر حساب (صاحب چک)</li><li>۴. فیش حقوق یا جواز کسب (متقاضی و صاحب چک)</li></ul></div>
+                        <div class="loan-section"><label class="loan-label">مدت زمان باز پرداخت:</label><div class="loan-buttons"><button type="button" class="term-btn active" data-months="12">۱۲ ماهه</button><button type="button" class="term-btn" data-months="18">۱۸ ماهه</button><button type="button" class="term-btn" data-months="24">۲۴ ماهه</button><button type="button" class="term-btn" data-months="36">۳۶ ماهه</button></div></div>
+                        <div class="loan-section result-section"><strong>مبلغ تقریبی هر قسط:</strong><span id="installmentAmount">0</span><span> تومان</span></div>
+                        <div class="loan-section loan-action-wrapper">
+                            <?php if (is_user_logged_in()): ?>
+                                <button type="button" class="loan-action-btn">استعلام سنجی بانکی جهت خرید خودرو</button>
+                            <?php else:
+                                $login_url = home_url('/login/?redirect_to=' . urlencode(get_permalink()));
+                                ?>
+                                <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn">برای استعلام ابتدا وارد شوید</a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -132,6 +150,7 @@ class Maneli_Inquiry_Shortcodes {
         <?php
         return ob_get_clean();
     }
+
 
     public function render_inquiry_form() {
         if (!is_user_logged_in()) { 
