@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.12.5
+ * Version:           0.12.6
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -167,18 +167,39 @@ function maneli_redirect_non_admins_from_backend() {
 }
 
 /**
- * Modify the main query to hide disabled products from the frontend.
+ * Modify queries to hide disabled products.
+ * This version is less restrictive to also catch Elementor and other custom queries.
  */
 function maneli_pre_get_posts_query($query) {
-    if (!is_admin() && $query->is_main_query() && ($query->is_post_type_archive('product') || $query->is_tax(get_object_taxonomies('product')))) {
+    // Only apply on the frontend, and only for queries fetching products.
+    if (!is_admin() && $query->get('post_type') === 'product') {
         $meta_query = $query->get('meta_query') ?: [];
+        
+        // Ensure meta_query is an array
+        if (!is_array($meta_query)) {
+            $meta_query = [];
+        }
+
+        // Add our condition to the meta query
+        $meta_query[] = [
+            'key' => '_maneli_car_status',
+            'value' => 'disabled',
+            'compare' => '!=',
+        ];
+        
+        // Also handle cases where the meta key might not exist yet, treating them as visible.
+        // This is a common requirement for backward compatibility.
         $meta_query['relation'] = 'OR';
-        $meta_query[] = ['key' => '_maneli_car_status', 'value' => 'disabled', 'compare' => '!='];
-        $meta_query[] = ['key' => '_maneli_car_status', 'compare' => 'NOT EXISTS'];
+        $meta_query[] = [
+            'key' => '_maneli_car_status',
+            'compare' => 'NOT EXISTS',
+        ];
+        
         $query->set('meta_query', $meta_query);
     }
 }
 add_action('pre_get_posts', 'maneli_pre_get_posts_query');
+
 
 /**
  * AJAX handler for updating product data from the custom editor page.
