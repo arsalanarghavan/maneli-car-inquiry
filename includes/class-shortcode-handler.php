@@ -105,7 +105,7 @@ class Maneli_Shortcode_Handler {
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.3.1');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.3.2');
             
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
@@ -130,10 +130,6 @@ class Maneli_Shortcode_Handler {
         }
     }
 
-    // ... The rest of the functions in this file remain exactly the same ...
-    // render_loan_calculator, render_inquiry_form, etc.
-    // I am including the full file as you requested.
-
     public function render_loan_calculator() {
         if (!function_exists('is_product') || !is_product() || !function_exists('WC')) return '';
         global $product;
@@ -149,7 +145,7 @@ class Maneli_Shortcode_Handler {
                 <div class="unavailable-overlay">
                     <p>در حال حاضر امکان خرید این خودرو میسر نمی‌باشد.</p>
                 </div>
-                <form class="loan-calculator-form" method="post">
+                <form class="loan-calculator-form" method="post" style="filter: blur(5px); pointer-events: none; user-select: none;">
                      <div id="loan-calculator">
                         <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
                         <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" disabled></div><input type="range" id="downPaymentSlider" disabled><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span>- تومان</span></div></div>

@@ -653,15 +653,11 @@ div.kamadatepicker-container {
     z-index: 10000 !important;
 }
 
-/* Styles for Unavailable Products */
+/* === START: Styles for Unavailable Products (Corrected) === */
 .maneli-calculator-container.unavailable {
     position: relative;
 }
-.maneli-calculator-container.unavailable .loan-calculator-form {
-    filter: blur(5px);
-    pointer-events: none;
-    user-select: none;
-}
+
 .unavailable-overlay {
     position: absolute;
     top: 0;
@@ -672,9 +668,11 @@ div.kamadatepicker-container {
     align-items: center;
     justify-content: center;
     z-index: 10;
+    /* The blur effect is on the form itself, not the overlay */
 }
+
 .unavailable-overlay p {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.85);
     padding: 15px 25px;
     border-radius: 8px;
     font-size: 16px;
@@ -682,4 +680,6 @@ div.kamadatepicker-container {
     color: #c62828;
     border: 1px solid #e0e0e0;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
 }
+/* === END: Styles for Unavailable Products === */
