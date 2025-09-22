@@ -519,7 +519,7 @@
 }
 /* === END: Expert Frontend Report Styles === */
 
-/* === User List Styles & Filters (FINAL - v3) === */
+/* === User List Styles & Filters (FINAL - v5) === */
 .user-list-header {
     display: flex;
     justify-content: space-between;
@@ -527,14 +527,10 @@
     margin-bottom: 20px;
 }
 .user-list-filters {
-    padding: 0;
     margin: 25px 0;
-    border: none;
-    background: none;
 }
 .user-list-filters .filter-row {
     display: flex;
-    flex-wrap: wrap;
     gap: 20px;
     width: 100%;
 }
@@ -550,10 +546,10 @@
     box-sizing: border-box;
 }
 .user-list-filters .filter-group {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 5px;
-    flex: 1 1 30%; /* Grow and shrink, basis 30% */
 }
 .user-list-filters label {
     font-weight: 500;
@@ -567,6 +563,22 @@
     border: 1px solid #ced4da;
     background-color: #fff;
 }
+/* Spinner for AJAX loading */
+.spinner.is-active {
+    display: inline-block;
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg%20width%3D'20'%20height%3D'20'%20viewBox%3D'0%200%2020%2020'%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%3E%3Cpath%20d%3D'M10%2C20%20C4.477%2C20%200%2C15.523%200%2C10%20C0%2C4.477%204.477%2C0%2010%2C0%20C15.523%2C0%2020%2C4.477%2020%2C10%20L17%2C10%20C17%2C6.134%2013.866%2C3%2010%2C3%20C6.134%2C3%203%2C6.134%203%2C10%20C3%2C13.866%206.134%2C17%2010%2C17%20L10%2C20%20Z'%20fill%3D'%23888888'%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 
 
 /* === DEFINITIVE FIX FOR ALL BUTTONS === */

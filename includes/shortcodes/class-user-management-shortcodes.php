@@ -195,7 +195,7 @@ class Maneli_User_Management_Shortcodes {
                     <?php endif; ?>
                 </tbody>
             </table>
-             <div id="user-list-loader" style="display:none; text-align:center; padding: 40px;"><p>در حال بارگذاری...</p></div>
+             <div id="user-list-loader" style="display:none; text-align:center; padding: 40px;"><div class="spinner is-active" style="float:none;"></div></div>
         </div>
         <script>
         jQuery(document).ready(function($) {
@@ -207,8 +207,9 @@ class Maneli_User_Management_Shortcodes {
                     xhr.abort();
                 }
 
-                $('#maneli-user-list-tbody').css('opacity', 0.5);
                 $('#user-list-loader').show();
+                // Clear the table body only after a successful request to avoid flicker
+                // $('#maneli-user-list-tbody').html('');
 
                 var formData = {
                     action: 'maneli_filter_users_ajax',
@@ -237,7 +238,6 @@ class Maneli_User_Management_Shortcodes {
                         }
                     },
                     complete: function() {
-                        $('#maneli-user-list-tbody').css('opacity', 1);
                         $('#user-list-loader').hide();
                     }
                 });
@@ -254,6 +254,7 @@ class Maneli_User_Management_Shortcodes {
                 fetch_users();
             });
             
+            // Using event delegation for delete button clicks
             $('#maneli-user-list-tbody').on('click', '.delete-user-btn', function(e) {
                 e.preventDefault();
                 if (confirm('آیا از حذف این کاربر اطمینان دارید؟ این عمل غیرقابل بازگشت است.')) {
