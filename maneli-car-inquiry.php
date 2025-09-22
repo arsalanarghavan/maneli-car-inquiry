@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.13.13
+ * Version:           0.13.14
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -167,10 +167,11 @@ function maneli_redirect_non_admins_from_backend() {
 }
 
 /**
- * Modify queries to hide disabled products.
+ * Modify queries to hide disabled products for non-admin users on the frontend.
  */
 function maneli_pre_get_posts_query($query) {
-    if (!is_admin() && $query->get('post_type') === 'product') {
+    // This should only run on frontend queries for non-admin users
+    if (!is_admin() && !current_user_can('manage_woocommerce') && $query->get('post_type') === 'product') {
         $meta_query = $query->get('meta_query') ?: [];
         
         if (!is_array($meta_query)) {
