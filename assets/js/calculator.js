@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- TAB SWITCHING LOGIC ---
     const tabs = calcContainer.querySelectorAll('.calculator-tabs .tab-link');
-    const contents = calcContainer.querySelectorAll('.tab-content');
+    const contents = calcContainer.querySelectorAll('.tabs-content-wrapper .tab-content');
 
     tabs.forEach(tab => {
         tab.addEventListener('click', function(e) {
