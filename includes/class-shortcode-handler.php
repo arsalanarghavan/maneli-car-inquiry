@@ -48,49 +48,32 @@ class Maneli_Shortcode_Handler {
         // 3. Create the initialization and Persian numbers script
         $init_script = '
             jQuery(document).ready(function($) {
-                // Function to convert English digits to Persian
                 var toPersianDigits = function(str) {
                     var persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
-                    return String(str).replace(/[0-9]/g, function(w) {
-                        return persianDigits[+w];
-                    });
+                    return String(str).replace(/[0-9]/g, function(w) { return persianDigits[+w]; });
                 };
-
-                // Initialize the datepicker
                 $("input.maneli-date-picker").datepicker({
-                    isJalali: true, // <-- FIX WAS ADDED HERE
+                    isJalali: true, 
                     dateFormat: "yy/mm/dd",
                     changeMonth: true,
                     changeYear: true,
                     onSelect: function(dateText, inst) {
-                        // This is to ensure the input value is also in Persian digits
                         $(this).val(toPersianDigits(dateText));
                      },
-                    // This function runs every time the datepicker is updated/drawn
                     onChangeMonthYear: function(year, month, inst) {
-                        // Use a timeout to ensure the DOM is updated before we modify it
                         setTimeout(function() {
                             var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : year);
                             $(".ui-datepicker-year").val(pYear);
-                            // Convert year dropdown numbers to Persian
-                            $(".ui-datepicker-year option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
-                             $(".ui-datepicker-month option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
+                            $(".ui-datepicker-year option").each(function() { $(this).text(toPersianDigits($(this).text())); });
+                             $(".ui-datepicker-month option").each(function() { $(this).text(toPersianDigits($(this).text())); });
                         }, 0);
                     },
                      beforeShow: function(input, inst) {
                          setTimeout(function() {
                              var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : $(input).val().split("/")[0]);
                              $(".ui-datepicker-year").val(pYear);
-                             $(".ui-datepicker-year option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
-                             $(".ui-datepicker-month option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
+                             $(".ui-datepicker-year option").each(function() { $(this).text(toPersianDigits($(this).text())); });
+                             $(".ui-datepicker-month option").each(function() { $(this).text(toPersianDigits($(this).text())); });
                          },0);
                      }
                 });
@@ -137,13 +120,15 @@ class Maneli_Shortcode_Handler {
 
         $car_status = get_post_meta($product->get_id(), '_maneli_car_status', true);
 
-        // If status is 'unavailable', show a message and a blurred form.
         if ($car_status === 'unavailable') {
+            $options = get_option('maneli_inquiry_all_options', []);
+            $message = $options['unavailable_product_message'] ?? 'در حال حاضر امکان خرید این خودرو میسر نمی‌باشد.';
+
             ob_start();
             ?>
             <div class="maneli-calculator-container unavailable">
                 <div class="unavailable-overlay">
-                    <p>در حال حاضر امکان خرید این خودرو میسر نمی‌باشد.</p>
+                    <p><?php echo esc_html($message); ?></p>
                 </div>
                 <form class="loan-calculator-form" method="post" style="filter: blur(5px); pointer-events: none; user-select: none;">
                      <div id="loan-calculator">
@@ -192,7 +177,9 @@ class Maneli_Shortcode_Handler {
         <?php
         return ob_get_clean();
     }
-
+    
+    // ... (The rest of the file remains unchanged) ...
+    
     public function render_inquiry_form() {
         if (!is_user_logged_in()) { 
             $login_url = home_url('/login/');

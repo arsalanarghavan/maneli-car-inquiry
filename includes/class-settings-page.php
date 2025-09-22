@@ -100,8 +100,8 @@ class Maneli_Settings_Page {
         foreach ($input as $key => $value) {
              if (is_array($value)) {
                 $sanitized_input[$key] = $value;
-            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message'])) {
-                $sanitized_input[$key] = sanitize_textarea_field($value);
+            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message', 'unavailable_product_message'])) {
+                $sanitized_input[$key] = sanitize_text_field($value);
             } else {
                 $sanitized_input[$key] = sanitize_text_field($value);
             }
@@ -153,8 +153,11 @@ class Maneli_Settings_Page {
         
         switch ($type) {
             case 'textarea':
-                echo "<textarea name='{$field_name}' rows='3' class='large-text' dir='ltr'>" . esc_textarea($value) . "</textarea>";
+                echo "<textarea name='{$field_name}' rows='3' class='large-text'>" . esc_textarea($value) . "</textarea>";
                 break;
+            case 'text':
+                 echo "<input type='text' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text'>";
+                 break;
             case 'switch':
                 echo '<label class="maneli-switch">';
                 echo "<input type='checkbox' name='{$field_name}' value='1' " . checked('1', $value, false) . '>';
@@ -334,18 +337,13 @@ class Maneli_Settings_Page {
                 ]
             ],
             'display' => [
-                'maneli_display_price_section' => [
-                    'title' => 'تنظیمات نمایش قیمت',
-                    'desc' => 'در این بخش می‌توانید نحوه نمایش قیمت‌ها را در سایت برای کاربران عادی (مشتریان) کنترل کنید.',
+                'maneli_display_main_section' => [
+                    'title' => 'تنظیمات عمومی نمایش',
+                    'desc' => 'در این بخش می‌توانید نحوه نمایش بخش‌های مختلف در سایت را برای کاربران کنترل کنید.',
                     'fields' => [
                         ['name' => 'hide_prices_for_customers', 'label' => 'مخفی کردن قیمت برای مشتریان', 'type' => 'switch', 'desc' => 'با فعال کردن این گزینه، قیمت‌ها در تمام بخش‌های فروشگاه برای کاربرانی که مدیر نیستند، مخفی می‌شود.'],
-                    ]
-                ],
-                'maneli_display_attributes_section' => [
-                    'title' => 'تنظیمات نمایش ویژگی‌ها',
-                    'desc' => 'قالب‌بندی نمایش جدول ویژگی‌های محصول را کنترل کنید.',
-                    'fields' => [
                         ['name' => 'enable_grouped_attributes', 'label' => 'فعال‌سازی نمایش گروهی ویژگی‌ها', 'type' => 'switch', 'desc' => 'با فعال کردن این گزینه، جدول ویژگی‌ها بر اساس گروه (مثال: فنی - ابعاد) دسته‌بندی و نمایش داده می‌شود.'],
+                        ['name' => 'unavailable_product_message', 'label' => 'پیام محصول ناموجود', 'type' => 'text', 'desc' => 'این پیام روی فرم محاسبه اقساط برای محصولاتی که وضعیت "ناموجود" دارند، نمایش داده می‌شود.'],
                     ]
                 ]
             ]
