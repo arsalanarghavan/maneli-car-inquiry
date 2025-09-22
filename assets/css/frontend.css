@@ -527,41 +527,42 @@
     margin-bottom: 20px;
 }
 
-/* === FIX FOR ALL BUTTONS === */
+/* === DEFINITIVE FIX FOR ALL BUTTONS === */
+.maneli-inquiry-wrapper .shop_table .button,
 .maneli-inquiry-wrapper a.button,
 .maneli-inquiry-wrapper button.button,
-.maneli-inquiry-wrapper input.button,
-.maneli-inquiry-wrapper .button {
+.maneli-inquiry-wrapper input.button {
     background-color: var(--theme-blue) !important;
     border-color: var(--theme-blue) !important;
     color: #fff !important;
-    transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out !important;
+    transition: background-color 0.2s ease-in-out !important;
     border-radius: 4px !important;
     padding: 8px 16px !important;
     font-size: 14px !important;
     height: auto !important;
     line-height: normal !important;
 }
+
+.maneli-inquiry-wrapper .shop_table .button:hover,
 .maneli-inquiry-wrapper a.button:hover,
 .maneli-inquiry-wrapper button.button:hover,
-.maneli-inquiry-wrapper input.button:hover,
-.maneli-inquiry-wrapper .button:hover {
-    background-color: #277ab0 !important; /* A slightly darker blue on hover */
+.maneli-inquiry-wrapper input.button:hover {
+    background-color: #277ab0 !important;
     border-color: #277ab0 !important;
     color: #fff !important;
-    opacity: 1;
 }
 
 /* Specific button overrides */
-.button.delete-user-btn { 
+.maneli-inquiry-wrapper .shop_table .button.delete-user-btn { 
     background-color: #dc3545 !important; 
     border-color: #dc3545 !important; 
     margin-right: 5px; 
 }
-.button.delete-user-btn:hover { 
+.maneli-inquiry-wrapper .shop_table .button.delete-user-btn:hover { 
     background-color: #c82333 !important; 
     border-color: #bd2130 !important;
 }
+
 
 /* === NEW STYLES FOR REPORT PAGE === */
 .report-status-box {

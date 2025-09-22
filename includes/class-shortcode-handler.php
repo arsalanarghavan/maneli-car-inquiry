@@ -20,7 +20,7 @@ class Maneli_Shortcode_Handler {
     public function enqueue_global_assets() {
         if (!is_admin()) {
             // Enqueue main frontend stylesheet and Font Awesome icons
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.5.1');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.5.2');
             wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
 
             // Enqueue calculator script only on single product pages
