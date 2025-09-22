@@ -20,7 +20,7 @@ class Maneli_Shortcode_Handler {
     public function enqueue_global_assets() {
         if (!is_admin()) {
             // Enqueue main frontend stylesheet and Font Awesome icons
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.5.6');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.5.7');
             wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
 
             // Enqueue calculator script only on single product pages
@@ -58,11 +58,13 @@ class Maneli_Shortcode_Handler {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-user-management-shortcodes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-admin-shortcodes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-system-report-shortcode.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-product-editor-shortcode.php'; // New line
 
         // Instantiate each class to register its shortcodes
         new Maneli_Inquiry_Shortcodes();
         new Maneli_User_Management_Shortcodes();
         new Maneli_Admin_Shortcodes();
         new Maneli_System_Report_Shortcode();
+        new Maneli_Product_Editor_Shortcode(); // New line
     }
 }

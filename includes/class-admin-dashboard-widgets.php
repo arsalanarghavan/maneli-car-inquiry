@@ -45,14 +45,14 @@ class Maneli_Admin_Dashboard_Widgets {
             .maneli-stat-box .icon .fas {
                 color: #ffffff !important;
             }
-            .maneli-stat-box .icon.total-users { background-color: #2D89BE; }
+            .maneli-stat-box .icon.total-users, .maneli-stat-box .icon.total-products { background-color: #2D89BE; }
             .maneli-stat-box .icon.customers { background-color: #5cb85c; }
             .maneli-stat-box .icon.experts { background-color: #f0ad4e; }
-
             .maneli-stat-box .icon.total-inquiries { background-color: #2D89BE; }
             .maneli-stat-box .icon.pending { background-color: #f0ad4e; }
-            .maneli-stat-box .icon.approved { background-color: #5cb85c; }
-            .maneli-stat-box .icon.rejected { background-color: #d9534f; }
+            .maneli-stat-box .icon.approved, .maneli-stat-box .icon.special-sale { background-color: #5cb85c; }
+            .maneli-stat-box .icon.rejected, .maneli-stat-box .icon.disabled-products { background-color: #d9534f; }
+            .maneli-stat-box .icon.unavailable-products { background-color: #777777; }
 
             .maneli-stat-box .info .value {
                 font-size: 24px;
@@ -147,6 +147,52 @@ class Maneli_Admin_Dashboard_Widgets {
                 <div class="info">
                     <div class="value"><?php echo number_format_i18n($rejected_inquiries->found_posts); ?></div>
                     <div class="label">رد شده</div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Renders the product-related statistics widgets.
+     */
+    public static function render_product_statistics_widgets() {
+        $total_products = count(wc_get_products(['limit' => -1]));
+        $special_sale_products = count(wc_get_products(['limit' => -1, 'meta_key' => '_maneli_car_status', 'meta_value' => 'special_sale']));
+        $unavailable_products = count(wc_get_products(['limit' => -1, 'meta_key' => '_maneli_car_status', 'meta_value' => 'unavailable']));
+        $disabled_products = count(wc_get_products(['limit' => -1, 'meta_key' => '_maneli_car_status', 'meta_value' => 'disabled']));
+        
+        ob_start();
+        echo self::render_widget_styles();
+        ?>
+        <div class="maneli-stats-container">
+            <div class="maneli-stat-box">
+                <div class="icon total-products"><i class="fas fa-car"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($total_products); ?></div>
+                    <div class="label">کل خودروها</div>
+                </div>
+            </div>
+            <div class="maneli-stat-box">
+                <div class="icon special-sale"><i class="fas fa-tag"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($special_sale_products); ?></div>
+                    <div class="label">فروش ویژه (فعال)</div>
+                </div>
+            </div>
+            <div class="maneli-stat-box">
+                <div class="icon unavailable-products"><i class="fas fa-clock"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($unavailable_products); ?></div>
+                    <div class="label">ناموجود</div>
+                </div>
+            </div>
+            <div class="maneli-stat-box">
+                <div class="icon disabled-products"><i class="fas fa-eye-slash"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($disabled_products); ?></div>
+                    <div class="label">غیرفعال (مخفی)</div>
                 </div>
             </div>
         </div>
