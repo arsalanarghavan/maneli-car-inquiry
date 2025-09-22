@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.12.2
+ * Version:           0.12.3
  * Author:            ArsalanArghavan
  * Author URI:        https://puzzlinco.com
  * License:           GPL v2 or later
@@ -157,21 +157,13 @@ add_action('init', 'maneli_run_once_update_display_names');
  */
 add_action('admin_init', 'maneli_redirect_non_admins_from_backend');
 function maneli_redirect_non_admins_from_backend() {
-    if (wp_doing_ajax() || wp_doing_cron()) {
+    if (wp_doing_ajax() || wp_doing_cron() || basename($_SERVER['PHP_SELF']) === 'admin-post.php') {
         return;
     }
     
-    if (basename($_SERVER['PHP_SELF']) === 'admin-post.php') {
-        return;
-    }
-    
-    if (current_user_can('manage_maneli_inquiries') && !current_user_can('manage_options')) {
+    if ((current_user_can('manage_maneli_inquiries') || current_user_can('maneli_expert')) && !current_user_can('manage_options')) {
          wp_redirect(home_url('/dashboard/'));
          exit;
-    }
-     if (current_user_can('maneli_expert') && !current_user_can('manage_options')) {
-        wp_redirect(home_url('/dashboard/'));
-        exit;
     }
 }
 
@@ -181,21 +173,13 @@ function maneli_redirect_non_admins_from_backend() {
 function maneli_pre_get_posts_query($query) {
     if (!is_admin() && $query->is_main_query() && ($query->is_post_type_archive('product') || $query->is_tax(get_object_taxonomies('product')))) {
         $meta_query = $query->get('meta_query') ?: [];
-        $meta_query[] = [
-            'key' => '_maneli_car_status',
-            'value' => 'disabled',
-            'compare' => '!=',
-        ];
         $meta_query['relation'] = 'OR';
-        $meta_query[] = array(
-            'key' => '_maneli_car_status',
-            'compare' => 'NOT EXISTS',
-        );
+        $meta_query[] = ['key' => '_maneli_car_status', 'value' => 'disabled', 'compare' => '!='];
+        $meta_query[] = ['key' => '_maneli_car_status', 'compare' => 'NOT EXISTS'];
         $query->set('meta_query', $meta_query);
     }
 }
 add_action('pre_get_posts', 'maneli_pre_get_posts_query');
-
 
 /**
  * AJAX handler for updating product data from the custom editor page.
@@ -245,6 +229,28 @@ function maneli_update_product_data_callback() {
     wp_die();
 }
 add_action('wp_ajax_maneli_update_product_data', 'maneli_update_product_data_callback');
+
+
+/**
+ * Logic to hide prices based on the plugin setting.
+ */
+function maneli_maybe_hide_prices() {
+    $options = get_option('maneli_inquiry_all_options', []);
+    $is_price_hidden = isset($options['hide_prices_for_customers']) && $options['hide_prices_for_customers'] == '1';
+
+    // Only hide for non-admins
+    if ($is_price_hidden && !current_user_can('manage_woocommerce')) {
+        // Hide prices in loops (shop, category pages)
+        remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10);
+        
+        // Hide price on single product page
+        remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
+
+        // A more aggressive filter to remove price HTML everywhere
+        add_filter('woocommerce_get_price_html', '__return_empty_string', 100, 2);
+    }
+}
+add_action('wp', 'maneli_maybe_hide_prices');
 
 
 /**

@@ -36,6 +36,7 @@ class Maneli_Settings_Page {
                 <a href="?page=maneli-inquiry-settings&tab=sms" class="nav-tab <?php echo $active_tab == 'sms' ? 'nav-tab-active' : ''; ?>">تنظیمات پیامک</a>
                 <a href="?page=maneli-inquiry-settings&tab=experts" class="nav-tab <?php echo $active_tab == 'experts' ? 'nav-tab-active' : ''; ?>">مدیریت کارشناسان</a>
                 <a href="?page=maneli-inquiry-settings&tab=finotex" class="nav-tab <?php echo $active_tab == 'finotex' ? 'nav-tab-active' : ''; ?>">تنظیمات فینوتک</a>
+                <a href="?page=maneli-inquiry-settings&tab=display" class="nav-tab <?php echo $active_tab == 'display' ? 'nav-tab-active' : ''; ?>">تنظیمات نمایش</a>
             </h2>
             <form method="post" action="options.php">
                 <?php
@@ -110,12 +111,9 @@ class Maneli_Settings_Page {
         $merged_options = array_merge($old_options, $sanitized_input);
 
         // Handle checkboxes that might be unchecked
-        // This logic ensures that only checkboxes on the CURRENTLY submitted tab are affected if they are not present in the input.
         $all_settings = $this->get_all_settings();
-        $all_checkboxes = [];
         $active_tab_checkboxes = [];
 
-        // Determine which tab is being saved based on the referer URL
         $active_tab_key = 'gateways'; // Default tab
         if (isset($_POST['_wp_http_referer'])) {
             parse_str(parse_url(wp_unslash($_POST['_wp_http_referer']), PHP_URL_QUERY), $query_params);
@@ -124,22 +122,18 @@ class Maneli_Settings_Page {
             }
         }
         
-        // Get all checkboxes from the settings structure
-        foreach ($all_settings as $tab_key => $tab_data) {
-            foreach ($tab_data as $section) {
+        if (isset($all_settings[$active_tab_key])) {
+            foreach ($all_settings[$active_tab_key] as $section) {
                 if(isset($section['fields'])) {
                     foreach($section['fields'] as $field) {
                         if(isset($field['type']) && $field['type'] === 'switch') {
-                           if ($tab_key === $active_tab_key) {
-                               $active_tab_checkboxes[] = $field['name'];
-                           }
+                           $active_tab_checkboxes[] = $field['name'];
                         }
                     }
                 }
             }
         }
-
-        // If a checkbox from the active tab is not in the submitted data, it means it was unchecked.
+        
         foreach($active_tab_checkboxes as $cb) {
             if (!isset($input[$cb])) {
                $merged_options[$cb] = '0';
@@ -337,6 +331,15 @@ class Maneli_Settings_Page {
                     'title' => 'مدیریت کارشناسان',
                     'desc' => 'سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.<br>استعلام‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.<br>برای افزودن کارشناس جدید، کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.',
                     'fields' => []
+                ]
+            ],
+            'display' => [
+                'maneli_display_price_section' => [
+                    'title' => 'تنظیمات نمایش قیمت',
+                    'desc' => 'در این بخش می‌توانید نحوه نمایش قیمت‌ها را در سایت برای کاربران عادی (مشتریان) کنترل کنید.',
+                    'fields' => [
+                        ['name' => 'hide_prices_for_customers', 'label' => 'مخفی کردن قیمت برای مشتریان', 'type' => 'switch', 'desc' => 'با فعال کردن این گزینه، قیمت‌ها در تمام بخش‌های فروشگاه برای کاربرانی که مدیر نیستند، مخفی می‌شود.'],
+                    ]
                 ]
             ]
         ];
