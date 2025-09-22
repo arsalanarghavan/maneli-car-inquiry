@@ -617,6 +617,11 @@ class Maneli_Inquiry_Shortcodes {
     
         ob_start();
         echo '<div class="maneli-inquiry-wrapper">';
+
+        // Display statistics widgets for admins and experts
+        if ($is_admin_view || in_array('maneli_expert', $current_user->roles)) {
+            echo Maneli_Admin_Dashboard_Widgets::render_inquiry_statistics_widgets();
+        }
     
         if (empty($inquiries)) {
             echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی برای شما ثبت نشده است.</p></div>';

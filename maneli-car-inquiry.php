@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.12.13
+ * Version:           0.13.0
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -168,26 +168,21 @@ function maneli_redirect_non_admins_from_backend() {
 
 /**
  * Modify queries to hide disabled products.
- * This version is less restrictive to also catch Elementor and other custom queries.
  */
 function maneli_pre_get_posts_query($query) {
-    // Only apply on the frontend, and only for queries fetching products.
     if (!is_admin() && $query->get('post_type') === 'product') {
         $meta_query = $query->get('meta_query') ?: [];
         
-        // Ensure meta_query is an array
         if (!is_array($meta_query)) {
             $meta_query = [];
         }
 
-        // Add our condition to the meta query
         $meta_query[] = [
             'key' => '_maneli_car_status',
             'value' => 'disabled',
             'compare' => '!=',
         ];
         
-        // Also handle cases where the meta key might not exist yet, treating them as visible.
         $meta_query['relation'] = 'OR';
         $meta_query[] = [
             'key' => '_maneli_car_status',
@@ -257,15 +252,9 @@ function maneli_maybe_hide_prices() {
     $options = get_option('maneli_inquiry_all_options', []);
     $is_price_hidden = isset($options['hide_prices_for_customers']) && $options['hide_prices_for_customers'] == '1';
 
-    // Only hide for non-admins
     if ($is_price_hidden && !current_user_can('manage_woocommerce')) {
-        // Hide prices in loops (shop, category pages)
         remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10);
-        
-        // Hide price on single product page
         remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
-
-        // A more aggressive filter to remove price HTML everywhere
         add_filter('woocommerce_get_price_html', '__return_empty_string', 100, 2);
     }
 }
@@ -314,7 +303,6 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_User_Profile();
         new Maneli_Product_Editor_Page();
         
-        // Conditionally load the grouped attributes feature
         $options = get_option('maneli_inquiry_all_options', []);
         if (isset($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
             new Maneli_Grouped_Attributes();

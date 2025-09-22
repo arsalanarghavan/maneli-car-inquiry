@@ -26,8 +26,8 @@ class Maneli_User_Management_Shortcodes {
         
         ob_start();
 
-        // Display statistics widgets at the top
-        echo Maneli_Admin_Dashboard_Widgets::render_statistics_widgets();
+        // Display user-related statistics widgets at the top
+        echo Maneli_Admin_Dashboard_Widgets::render_user_statistics_widgets();
 
         if (isset($_GET['user-updated']) && $_GET['user-updated'] == 'true') {
             echo '<div class="status-box status-approved"><p>اطلاعات کاربر با موفقیت به‌روزرسانی شد.</p></div>';
