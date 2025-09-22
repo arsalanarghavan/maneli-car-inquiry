@@ -519,13 +519,55 @@
 }
 /* === END: Expert Frontend Report Styles === */
 
-/* === User List Styles === */
+/* === User List Styles & Filters (FINAL - v3) === */
 .user-list-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 }
+.user-list-filters {
+    padding: 0;
+    margin: 25px 0;
+    border: none;
+    background: none;
+}
+.user-list-filters .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+}
+.user-list-filters .search-row {
+    margin-bottom: 20px;
+}
+.user-list-filters .search-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+.user-list-filters .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1 1 30%; /* Grow and shrink, basis 30% */
+}
+.user-list-filters label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #555;
+}
+.user-list-filters select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+}
+
 
 /* === DEFINITIVE FIX FOR ALL BUTTONS === */
 .maneli-inquiry-wrapper .shop_table .button,

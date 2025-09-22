@@ -8,7 +8,84 @@ class Maneli_User_Management_Shortcodes {
     public function __construct() {
         add_shortcode('maneli_user_list', [$this, 'render_user_list_shortcode']);
         add_action('wp_ajax_maneli_delete_user_ajax', [$this, 'handle_delete_user_ajax']);
+        add_action('wp_ajax_maneli_filter_users_ajax', [$this, 'handle_filter_users_ajax']);
     }
+
+    public function handle_filter_users_ajax() {
+        check_ajax_referer('maneli_user_filter_nonce');
+
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'شما دسترسی لازم را ندارید.']);
+        }
+
+        $search_term = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+        $filter_role = isset($_POST['role']) ? sanitize_text_field($_POST['role']) : '';
+        $orderby = isset($_POST['orderby']) ? sanitize_text_field($_POST['orderby']) : 'display_name';
+        $order = isset($_POST['order']) ? sanitize_text_field($_POST['order']) : 'ASC';
+
+        $query_args = [
+            'orderby' => $orderby,
+            'order'   => $order,
+        ];
+
+        if (!empty($filter_role)) {
+            $query_args['role'] = $filter_role;
+        }
+
+        if (!empty($search_term)) {
+            $query_args['search'] = '*' . esc_attr($search_term) . '*';
+            $query_args['search_columns'] = ['user_login', 'user_email', 'display_name'];
+            $query_args['meta_query'] = [
+                'relation' => 'OR',
+                ['key' => 'first_name', 'value' => $search_term, 'compare' => 'LIKE'],
+                ['key' => 'last_name', 'value' => $search_term, 'compare' => 'LIKE'],
+                ['key' => 'mobile_number', 'value' => $search_term, 'compare' => 'LIKE'],
+                ['key' => 'national_code', 'value' => $search_term, 'compare' => 'LIKE'],
+            ];
+        }
+
+        $all_users = get_users($query_args);
+        
+        $current_user_id = get_current_user_id();
+        $filtered_users = array_filter($all_users, function($user) use ($current_user_id) {
+            return $user->ID !== $current_user_id;
+        });
+
+        ob_start();
+        if (!empty($filtered_users)) {
+            foreach ($filtered_users as $user) {
+                $role_names = array_map(
+                    function($role) {
+                        global $wp_roles;
+                        return $wp_roles->roles[$role]['name'] ?? $role;
+                    },
+                    $user->roles
+                );
+                $edit_link = add_query_arg('edit_user', $user->ID, $_POST['current_url']);
+                ?>
+                <tr>
+                    <td data-title="نام نمایشی"><?php echo esc_html($user->display_name); ?></td>
+                    <td data-title="نام کاربری"><?php echo esc_html($user->user_login); ?></td>
+                    <td data-title="ایمیل"><?php echo esc_html($user->user_email); ?></td>
+                    <td data-title="نقش"><?php echo esc_html(implode(', ', $role_names)); ?></td>
+                    <td data-title="عملیات">
+                        <a href="<?php echo esc_url($edit_link); ?>" class="button view">ویرایش</a>
+                        <button class="button delete-user-btn" data-user-id="<?php echo esc_attr($user->ID); ?>">حذف</button>
+                    </td>
+                </tr>
+                <?php
+            }
+        } else {
+            ?>
+            <tr>
+                <td colspan="5" style="text-align:center;">هیچ کاربری با معیارهای جستجوی شما یافت نشد.</td>
+            </tr>
+            <?php
+        }
+        $html = ob_get_clean();
+        wp_send_json_success(['html' => $html]);
+    }
+
 
     public function render_user_list_shortcode() {
         if (!current_user_can('manage_maneli_inquiries')) {
@@ -26,7 +103,6 @@ class Maneli_User_Management_Shortcodes {
         
         ob_start();
 
-        // Display user-related statistics widgets at the top
         echo Maneli_Admin_Dashboard_Widgets::render_user_statistics_widgets();
 
         if (isset($_GET['user-updated']) && $_GET['user-updated'] == 'true') {
@@ -41,16 +117,51 @@ class Maneli_User_Management_Shortcodes {
         if (isset($_GET['error'])) {
             echo '<div class="status-box status-failed"><p>خطا: ' . esc_html(urldecode($_GET['error'])) . '</p></div>';
         }
-    
-        $all_users = get_users(['orderby' => 'display_name']);
+        
         $current_url = remove_query_arg(['edit_user', 'user-updated', 'add_user', 'user-created', 'user-deleted', 'error'], $_SERVER['REQUEST_URI']);
-    
+        $all_users = get_users(['orderby' => 'display_name', 'order' => 'ASC']);
         ?>
         <div class="maneli-inquiry-wrapper">
              <div class="user-list-header">
                 <h3>لیست کامل کاربران</h3>
                 <a href="<?php echo esc_url(add_query_arg('add_user', 'true', $current_url)); ?>" class="button button-primary">افزودن کاربر جدید</a>
             </div>
+            
+            <div class="user-list-filters">
+                <form id="maneli-user-filter-form" onsubmit="return false;">
+                    <div class="filter-row search-row">
+                        <input type="search" id="user-search-input" name="s" class="search-input" placeholder="جستجو بر اساس نام، ایمیل، موبایل یا کد ملی...">
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="role-filter">نقش کاربری:</label>
+                            <select name="role" id="role-filter">
+                                <option value="">همه نقش‌ها</option>
+                                <option value="customer">مشتری</option>
+                                <option value="maneli_expert">کارشناس مانلی</option>
+                                <option value="maneli_admin">مدیریت مانلی</option>
+                                <option value="administrator">مدیر کل</option>
+                            </select>
+                        </div>
+                         <div class="filter-group">
+                            <label for="orderby-filter">مرتب‌سازی بر اساس:</label>
+                            <select name="orderby" id="orderby-filter">
+                                <option value="display_name">نام نمایشی</option>
+                                <option value="user_registered">تاریخ ثبت‌نام</option>
+                                <option value="user_login">نام کاربری</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                             <label for="order-filter">ترتیب:</label>
+                            <select name="order" id="order-filter">
+                                <option value="ASC">صعودی</option>
+                                <option value="DESC">نزولی</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             <table class="shop_table shop_table_responsive">
                 <thead>
                     <tr>
@@ -61,39 +172,95 @@ class Maneli_User_Management_Shortcodes {
                         <th>عملیات</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php foreach ($all_users as $user): 
-                        if ($user->ID === get_current_user_id()) continue;
-                        $role_names = array_map(
-                            function($role) {
-                                global $wp_roles;
-                                if ($role === 'customer') return 'مشتری';
-                                return $wp_roles->roles[$role]['name'] ?? $role;
-                            },
-                            $user->roles
-                        );
-                        $edit_link = add_query_arg('edit_user', $user->ID, $current_url);
-                    ?>
-                    <tr>
-                        <td data-title="نام نمایشی"><?php echo esc_html($user->display_name); ?></td>
-                        <td data-title="نام کاربری"><?php echo esc_html($user->user_login); ?></td>
-                        <td data-title="ایمیل"><?php echo esc_html($user->user_email); ?></td>
-                        <td data-title="نقش"><?php echo esc_html(implode(', ', $role_names)); ?></td>
-                        <td data-title="عملیات">
-                            <a href="<?php echo esc_url($edit_link); ?>" class="button view">ویرایش</a>
-                            <button class="button delete-user-btn" data-user-id="<?php echo esc_attr($user->ID); ?>">حذف</button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
+                <tbody id="maneli-user-list-tbody">
+                    <?php if (!empty($all_users)): ?>
+                        <?php foreach ($all_users as $user): 
+                            if ($user->ID === get_current_user_id()) continue;
+                            $role_names = array_map(function($role) { global $wp_roles; return $wp_roles->roles[$role]['name'] ?? $role; }, $user->roles);
+                            $edit_link = add_query_arg('edit_user', $user->ID, $current_url);
+                        ?>
+                        <tr>
+                            <td data-title="نام نمایشی"><?php echo esc_html($user->display_name); ?></td>
+                            <td data-title="نام کاربری"><?php echo esc_html($user->user_login); ?></td>
+                            <td data-title="ایمیل"><?php echo esc_html($user->user_email); ?></td>
+                            <td data-title="نقش"><?php echo esc_html(implode(', ', $role_names)); ?></td>
+                            <td data-title="عملیات">
+                                <a href="<?php echo esc_url($edit_link); ?>" class="button view">ویرایش</a>
+                                <button class="button delete-user-btn" data-user-id="<?php echo esc_attr($user->ID); ?>">حذف</button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr><td colspan="5" style="text-align:center;">هیچ کاربری یافت نشد.</td></tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
+             <div id="user-list-loader" style="display:none; text-align:center; padding: 40px;"><p>در حال بارگذاری...</p></div>
         </div>
         <script>
         jQuery(document).ready(function($) {
-            $('.delete-user-btn').on('click', function(e) {
+            var xhr;
+            var searchTimeout;
+
+            function fetch_users() {
+                if (xhr && xhr.readyState !== 4) {
+                    xhr.abort();
+                }
+
+                $('#maneli-user-list-tbody').css('opacity', 0.5);
+                $('#user-list-loader').show();
+
+                var formData = {
+                    action: 'maneli_filter_users_ajax',
+                    _ajax_nonce: maneli_user_ajax.filter_nonce,
+                    search: $('#user-search-input').val(),
+                    role: $('#role-filter').val(),
+                    orderby: $('#orderby-filter').val(),
+                    order: $('#order-filter').val(),
+                    current_url: '<?php echo esc_url($current_url); ?>'
+                };
+
+                xhr = $.ajax({
+                    url: maneli_user_ajax.ajax_url,
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#maneli-user-list-tbody').html(response.data.html);
+                        } else {
+                             $('#maneli-user-list-tbody').html('<tr><td colspan="5" style="text-align:center;">خطایی رخ داد.</td></tr>');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        if (textStatus !== 'abort') {
+                             $('#maneli-user-list-tbody').html('<tr><td colspan="5" style="text-align:center;">خطای ارتباط با سرور.</td></tr>');
+                        }
+                    },
+                    complete: function() {
+                        $('#maneli-user-list-tbody').css('opacity', 1);
+                        $('#user-list-loader').hide();
+                    }
+                });
+            }
+            
+            $('#user-search-input').on('keyup', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    fetch_users();
+                }, 500);
+            });
+
+            $('#role-filter, #orderby-filter, #order-filter').on('change', function() {
+                fetch_users();
+            });
+            
+            $('#maneli-user-list-tbody').on('click', '.delete-user-btn', function(e) {
                 e.preventDefault();
                 if (confirm('آیا از حذف این کاربر اطمینان دارید؟ این عمل غیرقابل بازگشت است.')) {
                     var userId = $(this).data('user-id');
+                    var button = $(this);
+                    button.text('در حال حذف...');
+
                     $.ajax({
                         url: maneli_user_ajax.ajax_url,
                         type: 'POST',
@@ -104,35 +271,21 @@ class Maneli_User_Management_Shortcodes {
                         },
                         success: function(response) {
                             if (response.success) {
-                                window.location.href = "<?php echo esc_url(add_query_arg('user-deleted', 'true', $current_url)); ?>";
+                                button.closest('tr').fadeOut(300, function() { $(this).remove(); });
                             } else {
                                 alert('خطا در حذف کاربر: ' + response.data.message);
+                                button.text('حذف');
                             }
+                        },
+                        error: function() {
+                            alert('خطای ارتباط با سرور.');
+                            button.text('حذف');
                         }
                     });
                 }
             });
         });
         </script>
-        <style>
-            .user-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-            td[data-title="عملیات"] .button { 
-                box-sizing: border-box;
-                display: inline-block;
-                text-align: center;
-                padding: 5px 10px !important;
-                font-size: 13px !important;
-                line-height: 1.5 !important;
-                min-width: 60px;
-                height: auto !important;
-            }
-            .button.delete-user-btn { 
-                background-color: #dc3545 !important; 
-                color: white !important; 
-                border-color: #dc3545 !important; 
-                margin-right: 5px; 
-            }
-        </style>
         <?php
         return ob_get_clean();
     }
