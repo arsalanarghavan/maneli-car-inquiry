@@ -32,20 +32,14 @@ class Maneli_Shortcode_Handler {
             return;
         }
 
-        // 1. Enqueue our new custom theme
         wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
         wp_enqueue_script('jquery-ui-datepicker');
-
-        // 2. Enqueue our local Jalali converter script
         wp_enqueue_script(
             'maneli-jalali-datepicker',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/jquery-ui-datepicker-fa.js',
-            ['jquery-ui-datepicker'],
-            '1.0.0',
-            true
+            ['jquery-ui-datepicker'], '1.0.0', true
         );
         
-        // 3. Create the initialization and Persian numbers script
         $init_script = '
             jQuery(document).ready(function($) {
                 var toPersianDigits = function(str) {
@@ -57,38 +51,33 @@ class Maneli_Shortcode_Handler {
                     dateFormat: "yy/mm/dd",
                     changeMonth: true,
                     changeYear: true,
-                    onSelect: function(dateText, inst) {
-                        $(this).val(toPersianDigits(dateText));
-                     },
+                    onSelect: function(dateText, inst) { $(this).val(toPersianDigits(dateText)); },
                     onChangeMonthYear: function(year, month, inst) {
                         setTimeout(function() {
                             var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : year);
                             $(".ui-datepicker-year").val(pYear);
                             $(".ui-datepicker-year option").each(function() { $(this).text(toPersianDigits($(this).text())); });
-                             $(".ui-datepicker-month option").each(function() { $(this).text(toPersianDigits($(this).text())); });
+                            $(".ui-datepicker-month option").each(function() { $(this).text(toPersianDigits($(this).text())); });
                         }, 0);
                     },
-                     beforeShow: function(input, inst) {
+                    beforeShow: function(input, inst) {
                          setTimeout(function() {
                              var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : $(input).val().split("/")[0]);
                              $(".ui-datepicker-year").val(pYear);
                              $(".ui-datepicker-year option").each(function() { $(this).text(toPersianDigits($(this).text())); });
                              $(".ui-datepicker-month option").each(function() { $(this).text(toPersianDigits($(this).text())); });
                          },0);
-                     }
+                    }
                 });
             });
         ';
-
-        // 4. Add the script inline
         wp_add_inline_script('maneli-jalali-datepicker', $init_script);
-
         $this->datepicker_loaded = true;
     }
 
     public function enqueue_assets() {
         if (!is_admin()) {
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.3.2');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.4.0');
             
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
@@ -177,9 +166,7 @@ class Maneli_Shortcode_Handler {
         <?php
         return ob_get_clean();
     }
-    
-    // ... (The rest of the file remains unchanged) ...
-    
+
     public function render_inquiry_form() {
         if (!is_user_logged_in()) { 
             $login_url = home_url('/login/');
@@ -1025,23 +1012,7 @@ class Maneli_Shortcode_Handler {
         <?php
         return ob_get_clean();
     }
-
-    public function render_settings_shortcode($atts) {
-        if (!current_user_can('manage_maneli_inquiries')) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
-        }
-
-        $atts = shortcode_atts(['tab' => 'gateways'], $atts, 'maneli_settings');
-        $tab = sanitize_key($atts['tab']);
-        
-        if(isset($_GET['settings-updated']) && $_GET['settings-updated'] == 'true') {
-            echo '<div class="status-box status-approved"><p>تنظیمات با موفقیت ذخیره شد.</p></div>';
-        }
-
-        $settings_page = new Maneli_Settings_Page();
-        return $settings_page->render_frontend_settings_form($tab);
-    }
-
+    
     public function render_user_list_shortcode() {
         if (!current_user_can('manage_maneli_inquiries')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
