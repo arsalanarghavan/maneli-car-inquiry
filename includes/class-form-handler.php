@@ -31,12 +31,99 @@ class Maneli_Form_Handler {
         add_action('wp_ajax_maneli_update_cash_inquiry', [$this, 'ajax_update_cash_inquiry']);
         add_action('wp_ajax_maneli_delete_cash_inquiry', [$this, 'ajax_delete_cash_inquiry']);
         add_action('wp_ajax_maneli_set_down_payment', [$this, 'ajax_set_down_payment']);
+		add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
+
 
 
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
     }
+	
+	public function ajax_get_inquiry_details() {
+        check_ajax_referer('maneli_inquiry_details_nonce', 'nonce');
+
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز'], 403);
+        }
+
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        if (!$inquiry_id) {
+            wp_send_json_error(['message' => 'شناسه استعلام نامعتبر است.']);
+        }
+
+        $inquiry = get_post($inquiry_id);
+        if (!$inquiry || $inquiry->post_type !== 'inquiry') {
+            wp_send_json_error(['message' => 'استعلام یافت نشد.']);
+        }
+
+        // Security check: Ensure the current user can view this inquiry
+        $current_user = wp_get_current_user();
+        $can_view = false;
+        if (current_user_can('manage_maneli_inquiries') || (int)$inquiry->post_author === $current_user->ID) {
+            $can_view = true;
+        } elseif (in_array('maneli_expert', $current_user->roles)) {
+            $assigned_expert_id = (int)get_post_meta($inquiry_id, 'assigned_expert_id', true);
+            if ($assigned_expert_id === $current_user->ID) {
+                $can_view = true;
+            }
+        }
+
+        if (!$can_view) {
+            wp_send_json_error(['message' => 'شما اجازه مشاهده این گزارش را ندارید.'], 403);
+        }
+
+        // Gather all data
+        $post_meta = get_post_meta($inquiry_id);
+        $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
+        $product_id = $post_meta['product_id'][0] ?? 0;
+        $status = $post_meta['inquiry_status'][0] ?? 'pending';
+
+        $status_map = Maneli_CPT_Handler::get_all_statuses();
+
+        $data = [
+            'id' => $inquiry_id,
+            'status_label' => $status_map[$status] ?? 'نامشخص',
+            'status_key' => $status,
+            'rejection_reason' => get_post_meta($inquiry_id, 'rejection_reason', true),
+            'car' => [
+                'name' => get_the_title($product_id),
+                'image' => get_the_post_thumbnail_url($product_id, 'medium'),
+                'total_price' => number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)),
+                'down_payment' => number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)),
+                'term' => $post_meta['maneli_inquiry_term_months'][0] ?? 0,
+                'installment' => number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)),
+            ],
+            'buyer' => [
+                'first_name' => $post_meta['first_name'][0] ?? '',
+                'last_name' => $post_meta['last_name'][0] ?? '',
+                'national_code' => $post_meta['national_code'][0] ?? '',
+                'father_name' => $post_meta['father_name'][0] ?? '',
+                'birth_date' => $post_meta['birth_date'][0] ?? '',
+                'mobile' => $post_meta['mobile_number'][0] ?? '',
+            ],
+            'issuer_type' => $post_meta['issuer_type'][0] ?? 'self',
+            'issuer' => null,
+            'finotex' => [
+                'skipped' => (empty($finotex_data) || (isset($finotex_data['status']) && $finotex_data['status'] === 'SKIPPED')),
+                'color_code' => $finotex_data['result']['chequeColor'] ?? 0,
+            ],
+        ];
+
+        if ($data['issuer_type'] === 'other') {
+            $data['issuer'] = [
+                'first_name' => $post_meta['issuer_first_name'][0] ?? '',
+                'last_name' => $post_meta['issuer_last_name'][0] ?? '',
+                'national_code' => $post_meta['issuer_national_code'][0] ?? '',
+                'father_name' => $post_meta['issuer_father_name'][0] ?? '',
+                'birth_date' => $post_meta['issuer_birth_date'][0] ?? '',
+                'mobile' => $post_meta['issuer_mobile_number'][0] ?? '',
+            ];
+        }
+
+        wp_send_json_success($data);
+    }
+
 
     private function execute_finotex_inquiry($national_code) {
         $all_options = get_option('maneli_inquiry_all_options', []);
@@ -367,18 +454,16 @@ class Maneli_Form_Handler {
     private function verify_zarinpal_payment() {
         if (empty($_GET['Authority']) || empty($_GET['Status']) || empty($_GET['uid'])) return;
 
-        $authority = $_GET['Authority'];
-        $status = $_GET['Status'];
+        $authority = sanitize_text_field($_GET['Authority']);
+        $status = sanitize_text_field($_GET['Status']);
         $user_id = intval($_GET['uid']);
 
         $options = get_option('maneli_inquiry_all_options', []);
         $merchant_id = $options['zarinpal_merchant_code'] ?? '';
         $amount = get_user_meta($user_id, 'maneli_payment_amount', true);
         $saved_authority = get_user_meta($user_id, 'maneli_payment_authority', true);
+        $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
         $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
-		
-		$payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
-
 
         if ($authority !== $saved_authority) { 
             wp_redirect(add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('اطلاعات تراکنش مغایرت دارد.')], $redirect_url)); 
@@ -393,14 +478,14 @@ class Maneli_Form_Handler {
             if (!is_wp_error($response)) {
                 $result = json_decode(wp_remote_retrieve_body($response), true);
                 if (!empty($result['data']) && in_array($result['data']['code'], [100, 101])) {
-					if ($payment_type === 'cash_down_payment') {
+                    if ($payment_type === 'cash_down_payment') {
                         $inquiry_id = get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true);
                         update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
-                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/cash-inquiries/')); 
+                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/cash-inquiries/'));
                     } else {
-						$this->finalize_inquiry($user_id, true);
-						$redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
-					}
+                        $this->finalize_inquiry($user_id, true);
+                        $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
+                    }
                 } else {
                     $error_message = $result['errors']['message'] ?? 'تراکنش توسط درگاه تایید نشد.';
                     $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
@@ -412,10 +497,11 @@ class Maneli_Form_Handler {
             $redirect_url = add_query_arg('payment_status', 'cancelled', $redirect_url);
         }
 
+        // Clear all payment-related user meta
         delete_user_meta($user_id, 'maneli_payment_authority');
         delete_user_meta($user_id, 'maneli_payment_amount');
         delete_user_meta($user_id, 'maneli_payment_order_id');
-		delete_user_meta($user_id, 'maneli_payment_type');
+        delete_user_meta($user_id, 'maneli_payment_type');
         delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
         wp_redirect($redirect_url);
         exit;
@@ -424,19 +510,17 @@ class Maneli_Form_Handler {
     private function verify_sadad_payment() {
         if (empty($_POST["OrderId"]) || !isset($_POST["ResCode"])) return;
 
-        $order_id = $_POST["OrderId"];
-        $res_code = $_POST["ResCode"];
+        $order_id = sanitize_text_field($_POST["OrderId"]);
+        $res_code = sanitize_text_field($_POST["ResCode"]);
         $user_id = intval(substr($order_id, 10));
+        $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
         $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
-		
-		$payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
-
 
         if ($res_code == 0) {
             if (empty($_POST["token"])) {
                 $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('توکن بازگشتی از بانک نامعتبر است.')], $redirect_url);
             } else {
-                $token = $_POST["token"];
+                $token = sanitize_text_field($_POST["token"]);
                 $options = get_option('maneli_inquiry_all_options', []);
                 $terminal_key = $options['sadad_key'] ?? '';
                 $verify_data = [
@@ -460,14 +544,15 @@ class Maneli_Form_Handler {
                 }
             }
         } else {
-            $error_message = $_POST['Description'] ?? 'تراکنش توسط بانک لغو شد.';
+            $error_message = isset($_POST['Description']) ? sanitize_text_field($_POST['Description']) : 'تراکنش توسط بانک لغو شد.';
             $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
         }
 
+        // Clear all payment-related user meta
         delete_user_meta($user_id, 'maneli_payment_order_id');
         delete_user_meta($user_id, 'maneli_payment_amount');
         delete_user_meta($user_id, 'maneli_payment_token');
-		delete_user_meta($user_id, 'maneli_payment_type');
+        delete_user_meta($user_id, 'maneli_payment_type');
         delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
         wp_redirect($redirect_url);
         exit;

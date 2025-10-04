@@ -19,19 +19,13 @@ class Maneli_Shortcode_Handler {
      */
     public function enqueue_global_assets() {
         if (!is_admin()) {
-            // FIX: Use filemtime for versioning to prevent caching issues.
             $css_version = filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css');
             $js_version = filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/calculator.js');
 
-            // Enqueue main frontend stylesheet and Font Awesome icons
             wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
             wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
-			
-			// Enqueue SweetAlert2
             wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', [], null, true);
 
-
-            // Enqueue calculator script only on single product pages
             if (is_product()) {
                 wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], $js_version, true);
                 if (is_user_logged_in()) {
@@ -44,22 +38,32 @@ class Maneli_Shortcode_Handler {
             }
             
             global $post;
-            $has_user_list = is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_user_list');
-            $has_inquiry_list = is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_inquiry_list');
-            $has_product_editor = is_a($post, 'WP_Post') && has_shortcode($post->post_content, 'maneli_product_editor');
+            if (is_a($post, 'WP_Post')) {
+                $has_user_list = has_shortcode($post->post_content, 'maneli_user_list');
+                $has_inquiry_list = has_shortcode($post->post_content, 'maneli_inquiry_list') || has_shortcode($post->post_content, 'maneli_expert_inquiry_list');
+                $has_cash_inquiry_list = has_shortcode($post->post_content, 'maneli_cash_inquiry_list');
+                $has_product_editor = has_shortcode($post->post_content, 'maneli_product_editor');
 
-            // Enqueue Select2 for any page that needs it
-            if ($has_user_list || $has_inquiry_list || $has_product_editor) {
-                 wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-                 wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-            }
+                if ($has_user_list || $has_inquiry_list || $has_product_editor || $has_cash_inquiry_list) {
+                     wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+                     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+                }
 
-            if ($has_user_list) {
-                wp_localize_script('jquery', 'maneli_user_ajax', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce'),
-                    'filter_nonce' => wp_create_nonce('maneli_user_filter_nonce')
-                ]);
+                if ($has_user_list) {
+                    wp_localize_script('jquery', 'maneli_user_ajax', [
+                        'ajax_url' => admin_url('admin-ajax.php'),
+                        'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce'),
+                        'filter_nonce' => wp_create_nonce('maneli_user_filter_nonce')
+                    ]);
+                }
+				
+				if ($has_inquiry_list) {
+                    wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js'), true);
+                    wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
+                        'ajax_url' => admin_url('admin-ajax.php'),
+                        'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce')
+                    ]);
+                }
             }
         }
     }
@@ -68,14 +72,12 @@ class Maneli_Shortcode_Handler {
      * Loads and initializes all the separate shortcode handler classes from the 'shortcodes' directory.
      */
     private function load_shortcode_classes() {
-        // Require all the refactored shortcode class files
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-inquiry-shortcodes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-user-management-shortcodes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-admin-shortcodes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-system-report-shortcode.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/class-product-editor-shortcode.php';
 
-        // Instantiate each class to register its shortcodes
         new Maneli_Inquiry_Shortcodes();
         new Maneli_User_Management_Shortcodes();
         new Maneli_Admin_Shortcodes();

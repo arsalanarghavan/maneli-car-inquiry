@@ -989,3 +989,80 @@ div.kamadatepicker-container {
     font-size: 16px;
 }
 /* === END: Modern Settings Panel Styles === */
+
+/* === START: SweetAlert Modal Styles for Inquiry Details === */
+.swal2-popup .swal-content-container {
+    text-align: right;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 0 15px;
+}
+.swal2-popup .report-box {
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.swal2-popup .report-box-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.swal2-popup .swal-car-image {
+    max-width: 200px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 20px auto;
+}
+.swal2-popup .summary-table {
+    width: 100%;
+    font-size: 0.9em;
+}
+.swal2-popup .swal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 0.9em;
+}
+.swal2-popup .swal-grid .full-width {
+    grid-column: 1 / -1;
+}
+.swal2-popup .report-section-divider {
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #ddd;
+}
+.swal2-popup .status-box {
+    margin: 0 0 20px 0;
+    padding: 10px 15px;
+    text-align: center;
+    color: #fff;
+    border-radius: 5px;
+}
+.swal2-popup .status-box p { margin: 0; }
+.swal2-popup .status-box.status-bg-user_confirmed,
+.swal2-popup .status-box.status-bg-approved { background-color: #28a745; }
+.swal2-popup .status-box.status-bg-rejected,
+.swal2-popup .status-box.status-bg-failed { background-color: #dc3545; }
+.swal2-popup .status-box.status-bg-pending,
+.swal2-popup .status-box.status-bg-more_docs { background-color: #ffc107; color: #212529; }
+.swal2-popup .cheque-color-1 { color: #2e7d32; }
+.swal2-popup .cheque-color-2, .swal2-popup .cheque-color-3 { color: #e65100; }
+.swal2-popup .cheque-color-4 { color: #4e342e; }
+.swal2-popup .cheque-color-5 { color: #c62828; }
+/* === END: SweetAlert Modal Styles === */
+
+/* === START: Cash Inquiry Action Buttons === */
+.cash-inquiry-actions .button {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+.cash-inquiry-actions .button.view-cash-inquiry { background-color: #007bff !important; border-color: #007bff !important; }
+.cash-inquiry-actions .button.edit-cash-inquiry { background-color: #ffc107 !important; border-color: #ffc107 !important; color: #212529 !important; }
+.cash-inquiry-actions .button.delete-cash-inquiry { background-color: #dc3545 !important; border-color: #dc3545 !important; }
+.cash-inquiry-actions .button.set-downpayment { background-color: #28a745 !important; border-color: #28a745 !important; }
+/* === END: Cash Inquiry Action Buttons === */
