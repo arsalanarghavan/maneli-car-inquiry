@@ -832,25 +832,33 @@ class Maneli_Inquiry_Shortcodes {
     }
 	
 	public function render_cash_inquiry_list() {
-        if (!is_user_logged_in()) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده لیست، لطفاً ابتدا وارد شوید.</p></div>';
+        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
         }
-    
-        $current_user = wp_get_current_user();
-        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', $current_user->roles)) {
-             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
-        }
-        
+
         ob_start();
         ?>
         <div class="maneli-full-width-container">
             <div class="maneli-inquiry-wrapper">
-				<?php echo Maneli_Admin_Dashboard_Widgets::render_cash_inquiry_statistics_widgets(); ?>
+                <?php echo Maneli_Admin_Dashboard_Widgets::render_cash_inquiry_statistics_widgets(); ?>
                 <h3 style="margin-top:40px;">لیست درخواست‌های خرید نقدی</h3>
                 <div class="user-list-filters">
                     <form id="maneli-cash-inquiry-filter-form" onsubmit="return false;">
                         <div class="filter-row search-row">
                             <input type="search" id="cash-inquiry-search-input" class="search-input" placeholder="جستجو بر اساس نام مشتری، نام خودرو یا شماره موبایل...">
+                        </div>
+						<div class="filter-row">
+                            <div class="filter-group">
+                                <label for="cash-inquiry-status-filter">وضعیت:</label>
+                                <select id="cash-inquiry-status-filter">
+                                    <option value="">همه وضعیت‌ها</option>
+                                    <option value="pending">در حال پیگیری</option>
+                                    <option value="approved">تایید شده</option>
+                                    <option value="rejected">رد شده</option>
+                                    <option value="awaiting_payment">در انتظار پرداخت</option>
+                                    <option value="completed">تکمیل شده</option>
+                                </select>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -865,12 +873,10 @@ class Maneli_Inquiry_Shortcodes {
                                 <th>خودرو</th>
                                 <th>وضعیت</th>
                                 <th>تاریخ ثبت</th>
-								<th>عملیات</th>
+                                <th>عملیات</th>
                             </tr>
                         </thead>
-                        <tbody id="maneli-cash-inquiry-list-tbody">
-                           <?php // Initial load is handled by JS ?>
-                        </tbody>
+                        <tbody id="maneli-cash-inquiry-list-tbody"></tbody>
                     </table>
                 </div>
                 <div id="cash-inquiry-list-loader" style="display: none; text-align:center; padding: 40px;"><div class="spinner is-active" style="float:none;"></div></div>
@@ -884,31 +890,27 @@ class Maneli_Inquiry_Shortcodes {
             var searchTimeout;
 
             function fetch_cash_inquiries(page = 1) {
-                if (xhr && xhr.readyState !== 4) {
-                    xhr.abort();
-                }
-
+                if (xhr && xhr.readyState !== 4) xhr.abort();
                 $('#cash-inquiry-list-loader').show();
                 $('#maneli-cash-inquiry-list-tbody').css('opacity', 0.5);
                 
-                var filters = {
-                    action: 'maneli_filter_cash_inquiries_ajax',
-                    _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_filter_nonce"); ?>',
-                    page: page,
-                    search: $('#cash-inquiry-search-input').val()
-                };
-
-                xhr = $.ajax({
+                $.ajax({
                     url: '<?php echo admin_url("admin-ajax.php"); ?>',
                     type: 'POST',
-                    data: filters,
+                    data: {
+                        action: 'maneli_filter_cash_inquiries_ajax',
+                        _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_filter_nonce"); ?>',
+                        page: page,
+                        search: $('#cash-inquiry-search-input').val(),
+                        status: $('#cash-inquiry-status-filter').val()
+                    },
                     success: function(response) {
                         if (response.success) {
                             $('#maneli-cash-inquiry-list-tbody').html(response.data.html);
-                             $('.maneli-cash-pagination-wrapper').html(response.data.pagination_html);
+                            $('.maneli-cash-pagination-wrapper').html(response.data.pagination_html);
                         } else {
                             $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="7" style="text-align:center;">' + (response.data.message || 'خطایی رخ داد.') + '</td></tr>');
-                             $('.maneli-cash-pagination-wrapper').html('');
+                            $('.maneli-cash-pagination-wrapper').html('');
                         }
                     },
                     error: function() {
@@ -925,34 +927,59 @@ class Maneli_Inquiry_Shortcodes {
 
             $('#cash-inquiry-search-input').on('keyup', function() {
                 clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(function() {
-                    fetch_cash_inquiries(1);
-                }, 500);
+                searchTimeout = setTimeout(() => fetch_cash_inquiries(1), 500);
+            });
+			
+			$('#cash-inquiry-status-filter').on('change', function() {
+                fetch_cash_inquiries(1);
             });
 
             $('.maneli-cash-pagination-wrapper').on('click', 'a.page-numbers', function(e) {
                 e.preventDefault();
                 var pageUrl = $(this).attr('href');
                 let pageNum = 1;
-                const regex = /paged=(\d+)/;
-                const matches = pageUrl.match(regex);
-                if (matches) {
-                    pageNum = parseInt(matches[1]);
-                } else if (!$(this).hasClass('prev') && !$(this).hasClass('next')) {
-                    pageNum = parseInt($(this).text());
-                } else {
-                    let currentPage = parseInt($('.maneli-cash-pagination-wrapper .page-numbers.current').text());
-                    currentPage = isNaN(currentPage) ? 1 : currentPage;
-                    pageNum = $(this).hasClass('prev') ? Math.max(1, currentPage - 1) : currentPage + 1;
-                }
+                const matches = pageUrl.match(/paged=(\d+)/);
+                if (matches) pageNum = parseInt(matches[1]);
                 fetch_cash_inquiries(pageNum);
             });
+			
+			// Action buttons handlers
+            $('#maneli-cash-inquiry-list-tbody').on('click', '.delete-cash-inquiry', function() {
+                const inquiryId = $(this).data('id');
+                Swal.fire({
+                    title: 'آیا از حذف این درخواست اطمینان دارید؟',
+                    text: "این عمل غیرقابل بازگشت است!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'بله، حذف کن!',
+                    cancelButtonText: 'انصراف'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post('<?php echo admin_url("admin-ajax.php"); ?>', {
+                            action: 'maneli_delete_cash_inquiry',
+                            _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_delete_nonce"); ?>',
+                            inquiry_id: inquiryId
+                        }, function(response) {
+                            if (response.success) {
+                                Swal.fire('حذف شد!', 'درخواست با موفقیت حذف شد.', 'success');
+                                fetch_cash_inquiries();
+                            } else {
+                                Swal.fire('خطا!', response.data.message || 'خطایی در حذف رخ داد.', 'error');
+                            }
+                        });
+                    }
+                });
+            });
+			
+			// More action handlers here...
+			
         });
         </script>
         <?php
         return ob_get_clean();
     }
-
     
     private function render_customer_inquiry_list($user_id) {
         $args = [
@@ -1127,7 +1154,8 @@ class Maneli_Inquiry_Shortcodes {
 
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $search_query = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
-        
+        $status_query = isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : '';
+
         $args = [
             'post_type'      => 'cash_inquiry',
             'posts_per_page' => 20,
@@ -1136,11 +1164,14 @@ class Maneli_Inquiry_Shortcodes {
             'order'          => 'DESC',
             'post_status'    => 'publish',
         ];
+		
+		$meta_query = ['relation' => 'AND'];
+
 
         if (!empty($search_query)) {
             $product_ids = wc_get_products(['s' => $search_query, 'limit' => -1, 'return' => 'ids']);
             
-            $meta_query = [
+            $search_meta_query = [
                 'relation' => 'OR',
                 ['key' => 'cash_first_name', 'value' => $search_query, 'compare' => 'LIKE'],
                 ['key' => 'cash_last_name', 'value' => $search_query, 'compare' => 'LIKE'],
@@ -1148,10 +1179,23 @@ class Maneli_Inquiry_Shortcodes {
             ];
 
             if(!empty($product_ids)){
-                $meta_query[] = ['key' => 'product_id', 'value' => $product_ids, 'compare' => 'IN'];
+                $search_meta_query[] = ['key' => 'product_id', 'value' => $product_ids, 'compare' => 'IN'];
             }
+            $meta_query[] = $search_meta_query;
+        }
+		
+		if (!empty($status_query)) {
+            $meta_query[] = [
+                'key' => 'cash_inquiry_status',
+                'value' => $status_query,
+                'compare' => '=',
+            ];
+        }
+
+        if (count($meta_query) > 1) {
             $args['meta_query'] = $meta_query;
         }
+
 
         $inquiry_query = new WP_Query($args);
 
