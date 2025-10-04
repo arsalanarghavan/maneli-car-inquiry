@@ -120,7 +120,7 @@ class Maneli_Inquiry_Shortcodes {
             
             <div class="tabs-content-wrapper">
                 <div id="cash-tab" class="tab-content">
-                     <form class="loan-calculator-form maneli-inquiry-form cash-request-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                     <form class="loan-calculator-form cash-request-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                         <input type="hidden" name="action" value="maneli_submit_cash_inquiry">
                         <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                         <?php wp_nonce_field('maneli_cash_inquiry_nonce'); ?>

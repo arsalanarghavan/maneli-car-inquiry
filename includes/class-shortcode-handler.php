@@ -19,13 +19,17 @@ class Maneli_Shortcode_Handler {
      */
     public function enqueue_global_assets() {
         if (!is_admin()) {
+            // FIX: Use filemtime for versioning to prevent caching issues.
+            $css_version = filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css');
+            $js_version = filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/calculator.js');
+
             // Enqueue main frontend stylesheet and Font Awesome icons
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], '7.6.0');
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
             wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
 
             // Enqueue calculator script only on single product pages
             if (is_product()) {
-                wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '7.2.1', true);
+                wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], $js_version, true);
                 if (is_user_logged_in()) {
                     wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
                         'ajax_url'         => admin_url('admin-ajax.php'),
