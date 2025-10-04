@@ -997,7 +997,6 @@ class Maneli_Inquiry_Shortcodes {
         if (empty($inquiries)) {
             echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی برای شما ثبت نشده است.</p></div>';
         } else {
-            $report_page_url = home_url('/dashboard/?endp=inf_menu_4');
     
             echo '<h3>لیست استعلام‌های شما</h3>';
             echo '<table class="shop_table shop_table_responsive my_account_orders">';
@@ -1014,7 +1013,6 @@ class Maneli_Inquiry_Shortcodes {
                 $inquiry_id = $inquiry->ID;
                 $product_id = get_post_meta($inquiry_id, 'product_id', true);
                 $status = get_post_meta($inquiry_id, 'inquiry_status', true);
-                $report_url = add_query_arg('inquiry_id', $inquiry_id, $report_page_url);
                 $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
                 list($y, $m, $d) = explode('-', $gregorian_date);
                 
@@ -1023,7 +1021,7 @@ class Maneli_Inquiry_Shortcodes {
                 echo '<td data-title="خودرو">' . esc_html(get_the_title($product_id)) . '</td>';
                 echo '<td data-title="وضعیت">' . esc_html(Maneli_CPT_Handler::get_status_label($status)) . '</td>';
                 echo '<td data-title="تاریخ">' . esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')) . '</td>';
-                echo '<td class="woocommerce-orders-table__cell-order-actions"><a href="' . esc_url($report_url) . '" class="button view">مشاهده جزئیات</a></td>';
+                echo '<td class="woocommerce-orders-table__cell-order-actions"><a href="#" class="button view view-inquiry-details" data-id="' . esc_attr($inquiry_id) . '">مشاهده جزئیات</a></td>';
                 echo '</tr>';
             }
             echo '</tbody>';
@@ -1231,8 +1229,6 @@ class Maneli_Inquiry_Shortcodes {
     private function render_inquiry_row($inquiry_id) {
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $status = get_post_meta($inquiry_id, 'inquiry_status', true);
-        $report_page_url = home_url('/dashboard/?endp=inf_menu_4');
-        $report_url = add_query_arg('inquiry_id', $inquiry_id, $report_page_url);
         $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
         list($y, $m, $d) = explode('-', $gregorian_date);
         $customer = get_userdata(get_post_field('post_author', $inquiry_id));
@@ -1249,7 +1245,7 @@ class Maneli_Inquiry_Shortcodes {
             <td data-title="وضعیت"><?php echo esc_html(Maneli_CPT_Handler::get_status_label($status)); ?></td>
             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
             <td class="woocommerce-orders-table__cell-order-actions">
-                <a href="<?php echo esc_url($report_url); ?>" class="button view">مشاهده جزئیات</a>
+                <a href="#" class="button view view-inquiry-details" data-id="<?php echo esc_attr($inquiry_id); ?>">مشاهده جزئیات</a>
             </td>
         </tr>
         <?php

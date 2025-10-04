@@ -1,5 +1,6 @@
 jQuery(document).ready(function($) {
-    $('body').on('click', '.view-inquiry-details', function() {
+    $('body').on('click', '.view-inquiry-details', function(e) {
+        e.preventDefault(); // <-- این خط اضافه شد
         const inquiryId = $(this).data('id');
         const button = $(this);
         button.prop('disabled', true).html('<span class="spinner is-active" style="float:none; margin: 0;"></span>');
