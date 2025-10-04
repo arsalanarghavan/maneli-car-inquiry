@@ -53,6 +53,8 @@ class Maneli_Admin_Dashboard_Widgets {
             .maneli-stat-box .icon.approved, .maneli-stat-box .icon.special-sale { background-color: #5cb85c; }
             .maneli-stat-box .icon.rejected, .maneli-stat-box .icon.disabled-products { background-color: #d9534f; }
             .maneli-stat-box .icon.unavailable-products { background-color: #777777; }
+			.maneli-stat-box .icon.awaiting-payment { background-color: #17a2b8; }
+
 
             .maneli-stat-box .info .value {
                 font-size: 24px;
@@ -107,6 +109,17 @@ class Maneli_Admin_Dashboard_Widgets {
         <?php
         return ob_get_clean();
     }
+	
+	public static function get_cash_inquiry_status_label($status_key) {
+        $statuses = [
+            'pending' => 'در حال پیگیری',
+            'approved' => 'تایید شده',
+            'rejected' => 'رد شده',
+            'awaiting_payment' => 'در انتظار پرداخت',
+            'completed' => 'تکمیل شده',
+        ];
+        return $statuses[$status_key] ?? 'نامشخص';
+    }
 
     /**
      * Renders the inquiry-related statistics widgets.
@@ -153,6 +166,58 @@ class Maneli_Admin_Dashboard_Widgets {
         <?php
         return ob_get_clean();
     }
+	
+	public static function render_cash_inquiry_statistics_widgets() {
+        $total = wp_count_posts('cash_inquiry')->publish;
+        $pending = new WP_Query(['post_type' => 'cash_inquiry', 'post_status' => 'publish', 'meta_key' => 'cash_inquiry_status', 'meta_value' => 'pending']);
+        $approved = new WP_Query(['post_type' => 'cash_inquiry', 'post_status' => 'publish', 'meta_key' => 'cash_inquiry_status', 'meta_value' => 'approved']);
+        $rejected = new WP_Query(['post_type' => 'cash_inquiry', 'post_status' => 'publish', 'meta_key' => 'cash_inquiry_status', 'meta_value' => 'rejected']);
+        $awaiting_payment = new WP_Query(['post_type' => 'cash_inquiry', 'post_status' => 'publish', 'meta_key' => 'cash_inquiry_status', 'meta_value' => 'awaiting_payment']);
+
+        ob_start();
+        echo self::render_widget_styles();
+        ?>
+        <div class="maneli-stats-container">
+            <div class="maneli-stat-box">
+                <div class="icon total-inquiries"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($total); ?></div>
+                    <div class="label">کل درخواست‌های نقدی</div>
+                </div>
+            </div>
+            <div class="maneli-stat-box">
+                <div class="icon pending"><i class="fas fa-hourglass-half"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($pending->found_posts); ?></div>
+                    <div class="label">در حال پیگیری</div>
+                </div>
+            </div>
+			<div class="maneli-stat-box">
+                <div class="icon awaiting-payment"><i class="fas fa-credit-card"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($awaiting_payment->found_posts); ?></div>
+                    <div class="label">در انتظار پرداخت</div>
+                </div>
+            </div>
+            <div class="maneli-stat-box">
+                <div class="icon approved"><i class="fas fa-check-circle"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($approved->found_posts); ?></div>
+                    <div class="label">تایید شده</div>
+                </div>
+            </div>
+            <div class="maneli-stat-box">
+                <div class="icon rejected"><i class="fas fa-times-circle"></i></div>
+                <div class="info">
+                    <div class="value"><?php echo number_format_i18n($rejected->found_posts); ?></div>
+                    <div class="label">رد شده</div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
     
     /**
      * Renders the product-related statistics widgets.

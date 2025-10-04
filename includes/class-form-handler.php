@@ -16,6 +16,8 @@ class Maneli_Form_Handler {
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
 		add_action('admin_post_nopriv_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
         add_action('admin_post_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
+        add_action('admin_post_maneli_start_cash_payment', [$this, 'handle_start_cash_payment']);
+
 
         
         // Admin Workflow Hooks
@@ -23,6 +25,13 @@ class Maneli_Form_Handler {
         add_action('admin_post_maneli_admin_update_user', [$this, 'handle_admin_update_user_profile']);
         add_action('admin_post_maneli_admin_create_user', [$this, 'handle_admin_create_user']);
         add_action('admin_post_maneli_admin_retry_finotex', [$this, 'handle_admin_retry_finotex']);
+		
+		// AJAX hooks for cash inquiry management
+        add_action('wp_ajax_maneli_get_cash_inquiry_details', [$this, 'ajax_get_cash_inquiry_details']);
+        add_action('wp_ajax_maneli_update_cash_inquiry', [$this, 'ajax_update_cash_inquiry']);
+        add_action('wp_ajax_maneli_delete_cash_inquiry', [$this, 'ajax_delete_cash_inquiry']);
+        add_action('wp_ajax_maneli_set_down_payment', [$this, 'ajax_set_down_payment']);
+
 
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
@@ -162,6 +171,7 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'cash_last_name', $last_name);
             update_post_meta($post_id, 'mobile_number', $mobile);
             update_post_meta($post_id, 'cash_car_color', sanitize_text_field($_POST['cash_car_color']));
+			update_post_meta($post_id, 'cash_inquiry_status', 'pending');
 			
 			// Send SMS to admin
 			$all_options = get_option('maneli_inquiry_all_options', []);
@@ -366,6 +376,9 @@ class Maneli_Form_Handler {
         $amount = get_user_meta($user_id, 'maneli_payment_amount', true);
         $saved_authority = get_user_meta($user_id, 'maneli_payment_authority', true);
         $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
+		
+		$payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
+
 
         if ($authority !== $saved_authority) { 
             wp_redirect(add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('اطلاعات تراکنش مغایرت دارد.')], $redirect_url)); 
@@ -380,8 +393,14 @@ class Maneli_Form_Handler {
             if (!is_wp_error($response)) {
                 $result = json_decode(wp_remote_retrieve_body($response), true);
                 if (!empty($result['data']) && in_array($result['data']['code'], [100, 101])) {
-                    $this->finalize_inquiry($user_id, true);
-                    $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
+					if ($payment_type === 'cash_down_payment') {
+                        $inquiry_id = get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true);
+                        update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
+                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/cash-inquiries/')); 
+                    } else {
+						$this->finalize_inquiry($user_id, true);
+						$redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
+					}
                 } else {
                     $error_message = $result['errors']['message'] ?? 'تراکنش توسط درگاه تایید نشد.';
                     $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
@@ -396,6 +415,8 @@ class Maneli_Form_Handler {
         delete_user_meta($user_id, 'maneli_payment_authority');
         delete_user_meta($user_id, 'maneli_payment_amount');
         delete_user_meta($user_id, 'maneli_payment_order_id');
+		delete_user_meta($user_id, 'maneli_payment_type');
+        delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
         wp_redirect($redirect_url);
         exit;
     }
@@ -407,6 +428,9 @@ class Maneli_Form_Handler {
         $res_code = $_POST["ResCode"];
         $user_id = intval(substr($order_id, 10));
         $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
+		
+		$payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
+
 
         if ($res_code == 0) {
             if (empty($_POST["token"])) {
@@ -422,8 +446,14 @@ class Maneli_Form_Handler {
                 $result = $this->sadad_call_api('https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify', $verify_data);
 
                 if ($result && isset($result->ResCode) && $result->ResCode == 0) {
-                    $this->finalize_inquiry($user_id, true);
-                    $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
+                    if ($payment_type === 'cash_down_payment') {
+                        $inquiry_id = get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true);
+                        update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
+                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/cash-inquiries/'));
+                    } else {
+                        $this->finalize_inquiry($user_id, true);
+                        $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
+                    }
                 } else {
                     $error_message = $result->Description ?? 'تراکنش در مرحله تایید نهایی ناموفق بود.';
                     $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
@@ -437,6 +467,8 @@ class Maneli_Form_Handler {
         delete_user_meta($user_id, 'maneli_payment_order_id');
         delete_user_meta($user_id, 'maneli_payment_amount');
         delete_user_meta($user_id, 'maneli_payment_token');
+		delete_user_meta($user_id, 'maneli_payment_type');
+        delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
         wp_redirect($redirect_url);
         exit;
     }

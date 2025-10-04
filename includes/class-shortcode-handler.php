@@ -26,6 +26,10 @@ class Maneli_Shortcode_Handler {
             // Enqueue main frontend stylesheet and Font Awesome icons
             wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
             wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
+			
+			// Enqueue SweetAlert2
+            wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', [], null, true);
+
 
             // Enqueue calculator script only on single product pages
             if (is_product()) {

@@ -845,7 +845,8 @@ class Maneli_Inquiry_Shortcodes {
         ?>
         <div class="maneli-full-width-container">
             <div class="maneli-inquiry-wrapper">
-                <h3>لیست درخواست‌های خرید نقدی</h3>
+				<?php echo Maneli_Admin_Dashboard_Widgets::render_cash_inquiry_statistics_widgets(); ?>
+                <h3 style="margin-top:40px;">لیست درخواست‌های خرید نقدی</h3>
                 <div class="user-list-filters">
                     <form id="maneli-cash-inquiry-filter-form" onsubmit="return false;">
                         <div class="filter-row search-row">
@@ -862,8 +863,9 @@ class Maneli_Inquiry_Shortcodes {
                                 <th>مشتری</th>
                                 <th>موبایل</th>
                                 <th>خودرو</th>
-                                <th>رنگ</th>
+                                <th>وضعیت</th>
                                 <th>تاریخ ثبت</th>
+								<th>عملیات</th>
                             </tr>
                         </thead>
                         <tbody id="maneli-cash-inquiry-list-tbody">
@@ -905,12 +907,12 @@ class Maneli_Inquiry_Shortcodes {
                             $('#maneli-cash-inquiry-list-tbody').html(response.data.html);
                              $('.maneli-cash-pagination-wrapper').html(response.data.pagination_html);
                         } else {
-                            $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="6" style="text-align:center;">' + (response.data.message || 'خطایی رخ داد.') + '</td></tr>');
+                            $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="7" style="text-align:center;">' + (response.data.message || 'خطایی رخ داد.') + '</td></tr>');
                              $('.maneli-cash-pagination-wrapper').html('');
                         }
                     },
                     error: function() {
-                        $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="6" style="text-align:center;">خطای ارتباط با سرور.</td></tr>');
+                        $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="7" style="text-align:center;">خطای ارتباط با سرور.</td></tr>');
                     },
                     complete: function() {
                         $('#cash-inquiry-list-loader').hide();
@@ -1160,7 +1162,7 @@ class Maneli_Inquiry_Shortcodes {
                 $this->render_cash_inquiry_row(get_the_ID());
             }
         } else {
-            echo '<tr><td colspan="6" style="text-align:center;">هیچ درخواستی یافت نشد.</td></tr>';
+            echo '<tr><td colspan="7" style="text-align:center;">هیچ درخواستی یافت نشد.</td></tr>';
         }
         $html = ob_get_clean();
         wp_reset_postdata();
@@ -1214,14 +1216,22 @@ class Maneli_Inquiry_Shortcodes {
         $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
         list($y, $m, $d) = explode('-', $gregorian_date);
         $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
+		$status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        $status_label = Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status);
         ?>
         <tr>
             <td data-title="شناسه">#<?php echo esc_html($inquiry_id); ?></td>
             <td data-title="مشتری"><?php echo esc_html($customer_name); ?></td>
             <td data-title="موبایل"><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td>
             <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
-            <td data-title="رنگ"><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td>
+            <td data-title="وضعیت"><?php echo esc_html($status_label); ?></td>
             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
+			<td data-title="عملیات" class="cash-inquiry-actions">
+				<button class="button view-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">نمایش</button>
+				<button class="button edit-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">ویرایش</button>
+				<button class="button delete-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">حذف</button>
+				<button class="button set-downpayment" data-id="<?php echo esc_attr($inquiry_id); ?>">تعیین پیش‌پرداخت</button>
+			</td>
         </tr>
         <?php
     }
