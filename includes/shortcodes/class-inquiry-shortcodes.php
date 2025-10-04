@@ -102,6 +102,9 @@ class Maneli_Inquiry_Shortcodes {
 
         $cash_price = (int)$product->get_regular_price();
         $installment_price = (int)get_post_meta($product->get_id(), 'installment_price', true);
+        $car_colors_str = get_post_meta($product->get_id(), '_maneli_car_colors', true);
+        $car_colors = !empty($car_colors_str) ? array_map('trim', explode(',', $car_colors_str)) : [];
+
         if (empty($installment_price)) {
             $installment_price = $cash_price;
         }
@@ -110,25 +113,57 @@ class Maneli_Inquiry_Shortcodes {
         ob_start();
         ?>
         <div class="maneli-calculator-container">
-            <form class="loan-calculator-form" method="post">
-                 <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
-                <?php wp_nonce_field('maneli_ajax_nonce'); ?>
-                
-                <div class="calculator-tabs">
-                    <a href="#" class="tab-link active" data-tab="installment-tab">فروش اقساطی</a>
-                    <a href="#" class="tab-link" data-tab="cash-tab">فروش نقدی</a>
-                </div>
-                
-                <div class="tabs-content-wrapper">
-                    <div id="cash-tab" class="tab-content">
-                        <div class="cash-price-section">
-                            <h4>قیمت فروش نقدی</h4>
-                            <p class="cash-price-value"><?php echo number_format_i18n($cash_price); ?> <span>تومان</span></p>
-                            <p>برای اطلاعات بیشتر و خرید نقدی با کارشناسان ما تماس بگیرید.</p>
-                        </div>
-                    </div>
+            <div class="calculator-tabs">
+                <a href="#" class="tab-link active" data-tab="installment-tab">فروش اقساطی</a>
+                <a href="#" class="tab-link" data-tab="cash-tab">فروش نقدی</a>
+            </div>
+            
+            <div class="tabs-content-wrapper">
+                <div id="cash-tab" class="tab-content">
+                    <form class="loan-calculator-form maneli-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                         <input type="hidden" name="action" value="maneli_submit_cash_inquiry">
+                         <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
+                        <?php wp_nonce_field('maneli_cash_inquiry_nonce'); ?>
+                        
+                        <h2 class="loan-title">درخواست خرید نقدی</h2>
 
-                    <div id="installment-tab" class="tab-content active">
+                        <div class="form-grid">
+                            <div class="form-row">
+                                <div class="form-group"><label>نام:</label><input type="text" name="cash_first_name" required></div>
+                                <div class="form-group"><label>نام خانوادگی:</label><input type="text" name="cash_last_name" required></div>
+                            </div>
+                             <div class="form-row">
+                                <div class="form-group"><label>شماره تماس:</label><input type="text" name="cash_mobile_number" required></div>
+                                <div class="form-group">
+                                    <label>رنگ خودرو:</label>
+                                    <?php if (!empty($car_colors)): ?>
+                                        <select name="cash_car_color">
+                                            <?php foreach ($car_colors as $color): ?>
+                                                <option value="<?php echo esc_attr($color); ?>"><?php echo esc_html($color); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    <?php else: ?>
+                                        <input type="text" name="cash_car_color" placeholder="رنگ مورد نظر را وارد کنید">
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                             <div class="form-row">
+                                <div class="form-group" style="flex-basis: 100%;">
+                                    <label>قیمت تقریبی:</label>
+                                    <div class="result-display" style="padding: 12px; background-color: #f9f9f9; border-radius: 4px; border: 1px solid #ccc; text-align: right; font-weight: bold; font-size: 1.2em; color: var(--theme-blue);"><?php echo number_format_i18n($cash_price); ?> <span>تومان</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="loan-action-wrapper" style="margin-top: 20px;">
+                            <button type="submit" class="loan-action-btn" style="width: 100%;">ثبت درخواست استعلام قیمت</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="installment-tab" class="tab-content active">
+                     <form class="loan-calculator-form" method="post">
+                        <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
+                        <?php wp_nonce_field('maneli_ajax_nonce'); ?>
                         <div id="loan-calculator" data-price="<?php echo esc_attr($installment_price); ?>" data-min-down="<?php echo esc_attr($min_down_payment); ?>" data-max-down="<?php echo esc_attr($max_down_payment); ?>">
                             <h2 class="loan-title">تعیین بودجه و محاسبه اقساط</h2>
                             <div class="loan-section"><div class="loan-row"><label class="loan-label">مقدار پیش‌پرداخت:</label><input type="text" id="downPaymentInput" step="1000000"></div><input type="range" id="downPaymentSlider" step="1000000"><div class="loan-note"><span>حداقل پیش‌پرداخت:</span><span><span id="minDownDisplay"></span> تومان</span></div></div>
@@ -145,9 +180,9 @@ class Maneli_Inquiry_Shortcodes {
                                 <?php endif; ?>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
         <?php
         return ob_get_clean();

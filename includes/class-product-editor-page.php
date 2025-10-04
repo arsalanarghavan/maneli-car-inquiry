@@ -33,11 +33,12 @@ class Maneli_Product_Editor_Page {
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
-                        <th style="width:30%;"><strong>نام خودرو</strong></th>
-                        <th style="width:18%;"><strong>قیمت نقدی (تومان)</strong></th>
-                        <th style="width:18%;"><strong>قیمت اقساطی (تومان)</strong></th>
-                        <th style="width:18%;"><strong>حداقل پیش‌پرداخت (تومان)</strong></th>
-                        <th style="width:16%;"><strong>وضعیت فروش</strong></th>
+                        <th style="width:25%;"><strong>نام خودرو</strong></th>
+                        <th style="width:15%;"><strong>قیمت نقدی (تومان)</strong></th>
+                        <th style="width:15%;"><strong>قیمت اقساطی (تومان)</strong></th>
+                        <th style="width:15%;"><strong>حداقل پیش‌پرداخت (تومان)</strong></th>
+                        <th style="width:15%;"><strong>رنگ‌های موجود (با ویرگول جدا کنید)</strong></th>
+                        <th style="width:15%;"><strong>وضعیت فروش</strong></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -49,6 +50,7 @@ class Maneli_Product_Editor_Page {
                             $regular_price = $product->get_regular_price();
                             $installment_price = get_post_meta($product_id, 'installment_price', true);
                             $min_downpayment = get_post_meta($product_id, 'min_downpayment', true);
+                            $car_colors = get_post_meta($product_id, '_maneli_car_colors', true);
                             $current_status = get_post_meta($product_id, '_maneli_car_status', true);
                             ?>
                             <tr>
@@ -78,6 +80,15 @@ class Maneli_Product_Editor_Page {
                                            placeholder="مبلغ پیش‌پرداخت">
                                 </td>
                                 <td>
+                                     <input type="text"
+                                           class="manli-data-input"
+                                           style="width:100%;"
+                                           data-product-id="<?php echo esc_attr($product_id); ?>"
+                                           data-field-type="car_colors"
+                                           value="<?php echo esc_attr($car_colors); ?>"
+                                           placeholder="مثال: سفید, مشکی, نقره‌ای">
+                                </td>
+                                <td>
                                     <select class="manli-data-input"
                                             data-product-id="<?php echo esc_attr($product_id); ?>"
                                             data-field-type="car_status">
@@ -91,7 +102,7 @@ class Maneli_Product_Editor_Page {
                             <?php
                         }
                     } else {
-                        echo '<tr><td colspan="5">هیچ محصولی یافت نشد.</td></tr>';
+                        echo '<tr><td colspan="6">هیچ محصولی یافت نشد.</td></tr>';
                     }
                     ?>
                 </tbody>
