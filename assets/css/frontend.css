@@ -4,14 +4,15 @@
     --value-percent: 0%;
 }
 
-/* === START: LOAN CALCULATOR STYLE FIX === */
+/* === LOAN CALCULATOR STYLE FIX === */
 .loan-calculator-form {
     max-width: 600px;
-    margin: 0 auto; /* No top/bottom margin */
+    margin: 0 auto;
     border: 1px solid #e0e0e0;
     border-top: none;
     padding: 25px;
     border-radius: 0 0 12px 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08); /* Added shadow for consistency */
 }
 .loan-calculator-form .loan-section {
     border-top: 1px solid #eee;

@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const calcContainer = document.querySelector(".maneli-calculator-container");
     if (!calcContainer) return;
 
-    // --- TAB SWITCHING LOGIC (This part is correct and remains) ---
+    // --- TAB SWITCHING LOGIC ---
     const tabs = calcContainer.querySelectorAll('.calculator-tabs .tab-link');
     const contents = calcContainer.querySelectorAll('.tabs-content-wrapper .tab-content');
 
@@ -25,6 +25,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const formatMoney = (num) => Number(num).toLocaleString('fa-IR');
     const parseMoney = (str) => parseInt(String(str).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9]/g, '')) || 0;
     const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+    // --- CASH TAB LOGIC ---
+    const cashTab = document.getElementById("cash-tab");
+    if (cashTab) {
+        const cashPriceEl = document.getElementById('cashPriceAmount');
+        if (cashPriceEl) {
+            const priceValue = parseMoney(cashPriceEl.innerText);
+            cashPriceEl.innerText = formatMoney(priceValue);
+        }
+    }
 
     // --- INSTALLMENT CALCULATOR LOGIC (Scoped to its specific container) ---
     const installmentTab = document.getElementById("installment-tab");
