@@ -120,42 +120,45 @@ class Maneli_Inquiry_Shortcodes {
             
             <div class="tabs-content-wrapper">
                 <div id="cash-tab" class="tab-content">
-                    <form class="loan-calculator-form maneli-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                         <input type="hidden" name="action" value="maneli_submit_cash_inquiry">
-                         <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
+                     <form class="loan-calculator-form maneli-inquiry-form cash-request-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                        <input type="hidden" name="action" value="maneli_submit_cash_inquiry">
+                        <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                         <?php wp_nonce_field('maneli_cash_inquiry_nonce'); ?>
-                        
-                        <h2 class="loan-title">درخواست خرید نقدی</h2>
 
-                        <div class="form-grid">
-                            <div class="form-row">
-                                <div class="form-group"><label>نام:</label><input type="text" name="cash_first_name" required></div>
-                                <div class="form-group"><label>نام خانوادگی:</label><input type="text" name="cash_last_name" required></div>
-                            </div>
-                             <div class="form-row">
-                                <div class="form-group"><label>شماره تماس:</label><input type="text" name="cash_mobile_number" required></div>
-                                <div class="form-group">
-                                    <label>رنگ خودرو:</label>
-                                    <?php if (!empty($car_colors)): ?>
-                                        <select name="cash_car_color">
-                                            <?php foreach ($car_colors as $color): ?>
-                                                <option value="<?php echo esc_attr($color); ?>"><?php echo esc_html($color); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    <?php else: ?>
-                                        <input type="text" name="cash_car_color" placeholder="رنگ مورد نظر را وارد کنید">
-                                    <?php endif; ?>
+                        <h2 class="loan-title">درخواست خرید نقدی</h2>
+                        
+                        <div class="loan-section">
+                            <div class="form-grid">
+                                <div class="form-row">
+                                    <div class="form-group"><label>نام:</label><input type="text" name="cash_first_name" required></div>
+                                    <div class="form-group"><label>نام خانوادگی:</label><input type="text" name="cash_last_name" required></div>
                                 </div>
-                            </div>
-                             <div class="form-row">
-                                <div class="form-group" style="flex-basis: 100%;">
-                                    <label>قیمت تقریبی:</label>
-                                    <div class="result-display" style="padding: 12px; background-color: #f9f9f9; border-radius: 4px; border: 1px solid #ccc; text-align: right; font-weight: bold; font-size: 1.2em; color: var(--theme-blue);"><?php echo number_format_i18n($cash_price); ?> <span>تومان</span></div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>شماره تماس:</label><input type="text" name="cash_mobile_number" required></div>
+                                    <div class="form-group">
+                                        <label>رنگ خودرو:</label>
+                                        <?php if (!empty($car_colors)): ?>
+                                            <select name="cash_car_color">
+                                                <?php foreach ($car_colors as $color): ?>
+                                                    <option value="<?php echo esc_attr($color); ?>"><?php echo esc_html($color); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php else: ?>
+                                            <input type="text" name="cash_car_color" placeholder="رنگ مورد نظر را وارد کنید">
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="loan-action-wrapper" style="margin-top: 20px;">
-                            <button type="submit" class="loan-action-btn" style="width: 100%;">ثبت درخواست استعلام قیمت</button>
+
+                        <div class="loan-section result-section">
+                            <strong>قیمت تقریبی:</strong>
+                            <span id="cashPriceAmount"><?php echo number_format_i18n($cash_price); ?></span>
+                            <span> تومان</span>
+                        </div>
+
+                        <div class="loan-section loan-action-wrapper">
+                            <button type="submit" class="loan-action-btn">ثبت درخواست استعلام قیمت</button>
                         </div>
                     </form>
                 </div>
