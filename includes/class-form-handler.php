@@ -14,6 +14,9 @@ class Maneli_Form_Handler {
         add_action('admin_post_nopriv_maneli_start_payment', '__return_false');
         add_action('admin_post_maneli_start_payment', [$this, 'handle_payment_submission']);
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
+		add_action('admin_post_nopriv_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
+        add_action('admin_post_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
+
         
         // Admin Workflow Hooks
         add_action('admin_post_maneli_admin_update_status', [$this, 'handle_admin_update_status']);
@@ -102,6 +105,78 @@ class Maneli_Form_Handler {
         
         return $assigned_expert->ID;
     }
+	
+	public function handle_cash_inquiry_submission() {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_cash_inquiry_nonce')) {
+            wp_die('خطای امنیتی!');
+        }
+
+        $fields = ['product_id', 'cash_first_name', 'cash_last_name', 'cash_mobile_number', 'cash_car_color'];
+        foreach ($fields as $field) {
+            if (empty($_POST[$field])) {
+                wp_die('لطفاً تمام فیلدها را پر کنید.');
+            }
+        }
+
+        $first_name = sanitize_text_field($_POST['cash_first_name']);
+        $last_name = sanitize_text_field($_POST['cash_last_name']);
+        $mobile = sanitize_text_field($_POST['cash_mobile_number']);
+        $product_id = intval($_POST['product_id']);
+		$car_name = get_the_title($product_id);
+
+
+        $customer_id = username_exists($mobile);
+        if (!$customer_id) {
+            $dummy_email = $mobile . '@manelikhodro.com';
+            if (email_exists($dummy_email)) {
+                $customer_id = email_exists($dummy_email);
+            } else {
+                $random_password = wp_generate_password(12, false);
+                $customer_id = wp_create_user($mobile, $random_password, $dummy_email);
+                if (is_wp_error($customer_id)) {
+                    wp_die('خطا در ساخت کاربر جدید: ' . $customer_id->get_error_message());
+                }
+            }
+        }
+		
+		wp_update_user([
+			'ID' => $customer_id,
+			'first_name' => $first_name,
+			'last_name' => $last_name,
+			'role' => 'customer'
+		]);
+		update_user_meta($customer_id, 'mobile_number', $mobile);
+
+
+        $post_title = 'درخواست نقدی: ' . $first_name . ' ' . $last_name . ' برای ' . get_the_title($product_id);
+        $post_id = wp_insert_post([
+            'post_title'   => $post_title,
+            'post_status'  => 'publish',
+            'post_author'  => $customer_id,
+            'post_type'    => 'cash_inquiry'
+        ]);
+
+        if ($post_id && !is_wp_error($post_id)) {
+            update_post_meta($post_id, 'product_id', $product_id);
+            update_post_meta($post_id, 'cash_first_name', $first_name);
+            update_post_meta($post_id, 'cash_last_name', $last_name);
+            update_post_meta($post_id, 'mobile_number', $mobile);
+            update_post_meta($post_id, 'cash_car_color', sanitize_text_field($_POST['cash_car_color']));
+			
+			// Send SMS to admin
+			$all_options = get_option('maneli_inquiry_all_options', []);
+			$admin_mobile = $all_options['admin_notification_mobile'] ?? '';
+			$pattern_admin = $all_options['sms_pattern_new_inquiry'] ?? 0;
+			if (!empty($admin_mobile) && $pattern_admin > 0) {
+				$sms_handler = new Maneli_SMS_Handler();
+				$sms_handler->send_pattern($pattern_admin, $admin_mobile, [$first_name . ' ' . $last_name, $car_name . ' (نقدی)']);
+			}
+        }
+
+        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', wp_get_referer()));
+        exit;
+    }
+
 
     public function handle_car_selection_ajax() {
         check_ajax_referer('maneli_ajax_nonce', 'nonce');

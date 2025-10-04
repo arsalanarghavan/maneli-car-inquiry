@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.14.11
+ * Version:           0.14.12
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -293,9 +293,9 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-shortcode-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
+        // require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php'; // Removed Admin Page
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-product-editor-page.php';
+        // require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-product-editor-page.php'; // Removed Admin Page
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-admin-dashboard-widgets.php';
     }
@@ -306,9 +306,9 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Form_Handler();
         new Maneli_Shortcode_Handler();
         new Maneli_Expert_Panel();
-        new Maneli_Credit_Report_Page();
+        // new Maneli_Credit_Report_Page(); // Removed Admin Page
         new Maneli_User_Profile();
-        new Maneli_Product_Editor_Page();
+        // new Maneli_Product_Editor_Page(); // Removed Admin Page
         
         $options = get_option('maneli_inquiry_all_options', []);
         if (isset($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {

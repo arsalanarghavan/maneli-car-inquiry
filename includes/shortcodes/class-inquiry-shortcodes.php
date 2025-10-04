@@ -11,10 +11,13 @@ class Maneli_Inquiry_Shortcodes {
         add_shortcode('car_inquiry_form', [$this, 'render_inquiry_form']);
         add_shortcode('loan_calculator', [$this, 'render_loan_calculator']);
         add_shortcode('maneli_inquiry_list', [$this, 'render_inquiry_list']);
+        add_shortcode('maneli_cash_inquiry_list', [$this, 'render_cash_inquiry_list']);
         add_shortcode('maneli_frontend_credit_report', [$this, 'render_frontend_credit_report']);
 
         // AJAX handler for filtering inquiries
         add_action('wp_ajax_maneli_filter_inquiries_ajax', [$this, 'handle_filter_inquiries_ajax']);
+        add_action('wp_ajax_maneli_filter_cash_inquiries_ajax', [$this, 'handle_filter_cash_inquiries_ajax']);
+
 
         // Backward compatibility for old shortcode
         add_shortcode('maneli_expert_inquiry_list', [$this, 'render_inquiry_list']);
@@ -73,6 +76,10 @@ class Maneli_Inquiry_Shortcodes {
         global $product;
         if (!$product instanceof WC_Product) return '';
 
+		if (isset($_GET['cash_inquiry_sent']) && $_GET['cash_inquiry_sent'] == 'true') {
+            echo '<div class="status-box status-approved" style="margin-bottom:20px; text-align:center;"><p>درخواست شما با موفقیت ثبت شد. به زودی با شما تماس خواهیم گرفت.</p></div>';
+        }
+		
         $car_status = get_post_meta($product->get_id(), '_maneli_car_status', true);
 
         if ($car_status === 'unavailable') {
@@ -823,6 +830,127 @@ class Maneli_Inquiry_Shortcodes {
         <?php
         return ob_get_clean();
     }
+	
+	public function render_cash_inquiry_list() {
+        if (!is_user_logged_in()) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده لیست، لطفاً ابتدا وارد شوید.</p></div>';
+        }
+    
+        $current_user = wp_get_current_user();
+        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', $current_user->roles)) {
+             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
+        }
+        
+        ob_start();
+        ?>
+        <div class="maneli-full-width-container">
+            <div class="maneli-inquiry-wrapper">
+                <h3>لیست درخواست‌های خرید نقدی</h3>
+                <div class="user-list-filters">
+                    <form id="maneli-cash-inquiry-filter-form" onsubmit="return false;">
+                        <div class="filter-row search-row">
+                            <input type="search" id="cash-inquiry-search-input" class="search-input" placeholder="جستجو بر اساس نام مشتری، نام خودرو یا شماره موبایل...">
+                        </div>
+                    </form>
+                </div>
+
+                <div class="maneli-table-wrapper">
+                    <table class="shop_table shop_table_responsive">
+                        <thead>
+                            <tr>
+                                <th>شناسه</th>
+                                <th>مشتری</th>
+                                <th>موبایل</th>
+                                <th>خودرو</th>
+                                <th>رنگ</th>
+                                <th>تاریخ ثبت</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maneli-cash-inquiry-list-tbody">
+                           <?php // Initial load is handled by JS ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="cash-inquiry-list-loader" style="display: none; text-align:center; padding: 40px;"><div class="spinner is-active" style="float:none;"></div></div>
+                <div class="maneli-cash-pagination-wrapper" style="margin-top: 20px; text-align: center;"></div>
+            </div>
+        </div>
+
+        <script>
+        jQuery(document).ready(function($) {
+            var xhr;
+            var searchTimeout;
+
+            function fetch_cash_inquiries(page = 1) {
+                if (xhr && xhr.readyState !== 4) {
+                    xhr.abort();
+                }
+
+                $('#cash-inquiry-list-loader').show();
+                $('#maneli-cash-inquiry-list-tbody').css('opacity', 0.5);
+                
+                var filters = {
+                    action: 'maneli_filter_cash_inquiries_ajax',
+                    _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_filter_nonce"); ?>',
+                    page: page,
+                    search: $('#cash-inquiry-search-input').val()
+                };
+
+                xhr = $.ajax({
+                    url: '<?php echo admin_url("admin-ajax.php"); ?>',
+                    type: 'POST',
+                    data: filters,
+                    success: function(response) {
+                        if (response.success) {
+                            $('#maneli-cash-inquiry-list-tbody').html(response.data.html);
+                             $('.maneli-cash-pagination-wrapper').html(response.data.pagination_html);
+                        } else {
+                            $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="6" style="text-align:center;">' + (response.data.message || 'خطایی رخ داد.') + '</td></tr>');
+                             $('.maneli-cash-pagination-wrapper').html('');
+                        }
+                    },
+                    error: function() {
+                        $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="6" style="text-align:center;">خطای ارتباط با سرور.</td></tr>');
+                    },
+                    complete: function() {
+                        $('#cash-inquiry-list-loader').hide();
+                        $('#maneli-cash-inquiry-list-tbody').css('opacity', 1);
+                    }
+                });
+            }
+
+            fetch_cash_inquiries(1);
+
+            $('#cash-inquiry-search-input').on('keyup', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    fetch_cash_inquiries(1);
+                }, 500);
+            });
+
+            $('.maneli-cash-pagination-wrapper').on('click', 'a.page-numbers', function(e) {
+                e.preventDefault();
+                var pageUrl = $(this).attr('href');
+                let pageNum = 1;
+                const regex = /paged=(\d+)/;
+                const matches = pageUrl.match(regex);
+                if (matches) {
+                    pageNum = parseInt(matches[1]);
+                } else if (!$(this).hasClass('prev') && !$(this).hasClass('next')) {
+                    pageNum = parseInt($(this).text());
+                } else {
+                    let currentPage = parseInt($('.maneli-cash-pagination-wrapper .page-numbers.current').text());
+                    currentPage = isNaN(currentPage) ? 1 : currentPage;
+                    pageNum = $(this).hasClass('prev') ? Math.max(1, currentPage - 1) : currentPage + 1;
+                }
+                fetch_cash_inquiries(pageNum);
+            });
+        });
+        </script>
+        <?php
+        return ob_get_clean();
+    }
+
     
     private function render_customer_inquiry_list($user_id) {
         $args = [
@@ -985,6 +1113,71 @@ class Maneli_Inquiry_Shortcodes {
 
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
+	
+	public function handle_filter_cash_inquiries_ajax() {
+        if ( !isset($_POST['_ajax_nonce']) || !wp_verify_nonce($_POST['_ajax_nonce'], 'maneli_cash_inquiry_filter_nonce') ) {
+            wp_send_json_error(['message' => 'خطای امنیتی.']);
+        }
+
+        if (!is_user_logged_in() || !(current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
+            wp_send_json_error(['message' => 'شما دسترسی لازم را ندارید.']);
+        }
+
+        $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
+        $search_query = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+        
+        $args = [
+            'post_type'      => 'cash_inquiry',
+            'posts_per_page' => 20,
+            'paged'          => $paged,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'post_status'    => 'publish',
+        ];
+
+        if (!empty($search_query)) {
+            $product_ids = wc_get_products(['s' => $search_query, 'limit' => -1, 'return' => 'ids']);
+            
+            $meta_query = [
+                'relation' => 'OR',
+                ['key' => 'cash_first_name', 'value' => $search_query, 'compare' => 'LIKE'],
+                ['key' => 'cash_last_name', 'value' => $search_query, 'compare' => 'LIKE'],
+                ['key' => 'mobile_number', 'value' => $search_query, 'compare' => 'LIKE'],
+            ];
+
+            if(!empty($product_ids)){
+                $meta_query[] = ['key' => 'product_id', 'value' => $product_ids, 'compare' => 'IN'];
+            }
+            $args['meta_query'] = $meta_query;
+        }
+
+        $inquiry_query = new WP_Query($args);
+
+        ob_start();
+        if ($inquiry_query->have_posts()) {
+            while ($inquiry_query->have_posts()) {
+                $inquiry_query->the_post();
+                $this->render_cash_inquiry_row(get_the_ID());
+            }
+        } else {
+            echo '<tr><td colspan="6" style="text-align:center;">هیچ درخواستی یافت نشد.</td></tr>';
+        }
+        $html = ob_get_clean();
+        wp_reset_postdata();
+        
+        $pagination_html = paginate_links([
+            'base' => add_query_arg('paged', '%#%'),
+            'format' => '?paged=%#%',
+            'current' => $paged,
+            'total' => $inquiry_query->max_num_pages,
+            'prev_text' => '« قبلی',
+            'next_text' => 'بعدی »',
+            'type'  => 'plain'
+        ]);
+
+        wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
+    }
+
 
     /**
      * Renders a single row in the inquiry list table.
@@ -1015,6 +1208,24 @@ class Maneli_Inquiry_Shortcodes {
         </tr>
         <?php
     }
+	
+	private function render_cash_inquiry_row($inquiry_id) {
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
+        list($y, $m, $d) = explode('-', $gregorian_date);
+        $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
+        ?>
+        <tr>
+            <td data-title="شناسه">#<?php echo esc_html($inquiry_id); ?></td>
+            <td data-title="مشتری"><?php echo esc_html($customer_name); ?></td>
+            <td data-title="موبایل"><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td>
+            <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
+            <td data-title="رنگ"><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td>
+            <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
+        </tr>
+        <?php
+    }
+
 
     public function render_frontend_credit_report() {
         if (!is_user_logged_in()) {
