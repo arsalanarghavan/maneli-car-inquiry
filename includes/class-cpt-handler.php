@@ -7,16 +7,22 @@ class Maneli_CPT_Handler {
 
     public function __construct() {
         add_action('init', [$this, 'register_inquiry_post_type']);
-        add_filter('manage_inquiry_posts_columns', [$this, 'set_custom_columns']);
-        add_action('manage_inquiry_posts_custom_column', [$this, 'render_custom_columns'], 10, 2);
+        add_action('init', [$this, 'register_cash_inquiry_post_type']);
+
+        add_filter('manage_inquiry_posts_columns', [$this, 'set_custom_inquiry_columns']);
+        add_action('manage_inquiry_posts_custom_column', [$this, 'render_custom_inquiry_columns'], 10, 2);
+        
+        add_filter('manage_cash_inquiry_posts_columns', [$this, 'set_custom_cash_inquiry_columns']);
+        add_action('manage_cash_inquiry_posts_custom_column', [$this, 'render_custom_cash_inquiry_columns'], 10, 2);
+
         add_action('add_meta_boxes', [$this, 'add_meta_boxes']);
         add_action('save_post_inquiry', [$this, 'save_meta_data']);
     }
 
     public function register_inquiry_post_type() {
         $labels = [
-            'name'               => 'استعلام‌ها',
-            'singular_name'      => 'استعلام',
+            'name'               => 'استعلام‌های اقساطی',
+            'singular_name'      => 'استعلام اقساطی',
             'menu_name'          => 'استعلامات بانکی',
             'name_admin_bar'     => 'استعلام',
             'all_items'          => 'همه استعلام‌ها',
@@ -45,8 +51,33 @@ class Maneli_CPT_Handler {
         ];
         register_post_type('inquiry', $args);
     }
+    
+    public function register_cash_inquiry_post_type() {
+        $labels = [
+            'name'               => 'درخواست‌های نقدی',
+            'singular_name'      => 'درخواست نقدی',
+            'menu_name'          => 'درخواست‌های نقدی',
+            'all_items'          => 'همه درخواست‌های نقدی',
+            'edit_item'          => 'ویرایش درخواست',
+            'view_item'          => 'مشاهده درخواست',
+            'search_items'       => 'جستجوی درخواست‌ها',
+        ];
+        $args = [
+            'labels'             => $labels,
+            'supports'           => ['title', 'author'],
+            'public'             => false,
+            'show_ui'            => true,
+            'show_in_menu'       => 'edit.php?post_type=inquiry',
+            'capability_type'    => 'post',
+            'capabilities'       => ['create_posts' => 'do_not_allow'],
+            'map_meta_cap'       => true,
+            'rewrite'            => false,
+        ];
+        register_post_type('cash_inquiry', $args);
+    }
 
-    public function set_custom_columns($columns) {
+
+    public function set_custom_inquiry_columns($columns) {
         unset($columns['author'], $columns['date'], $columns['title']);
         $new_columns = [];
         $new_columns['cb'] = $columns['cb'];
@@ -59,7 +90,7 @@ class Maneli_CPT_Handler {
         return $new_columns;
     }
 
-    public function render_custom_columns($column, $post_id) {
+    public function render_custom_inquiry_columns($column, $post_id) {
         switch ($column) {
             case 'inquiry_user':
                 $user_id = get_post_field('post_author', $post_id);
@@ -87,11 +118,44 @@ class Maneli_CPT_Handler {
                 echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d'));
                 break;
             case 'actions':
-                $report_url = admin_url('admin.php?page=maneli-credit-report&inquiry_id=' . $post_id);
-                printf('<a href="%s" class="button button-primary">مشاهده گزارش</a>', esc_url($report_url));
+                $report_url = home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id);
+                printf('<a href="%s" class="button button-primary" target="_blank">مشاهده گزارش</a>', esc_url($report_url));
                 break;
         }
     }
+    
+    public function set_custom_cash_inquiry_columns($columns) {
+        unset($columns['author'], $columns['date'], $columns['title']);
+        return [
+            'cb' => $columns['cb'],
+            'title' => 'موضوع درخواست',
+            'customer' => 'مشتری',
+            'mobile' => 'شماره موبایل',
+            'car' => 'خودرو',
+            'status' => 'وضعیت',
+            'date' => 'تاریخ',
+        ];
+    }
+    
+    public function render_custom_cash_inquiry_columns($column, $post_id) {
+        switch ($column) {
+            case 'customer':
+                echo esc_html(get_post_meta($post_id, 'cash_first_name', true) . ' ' . get_post_meta($post_id, 'cash_last_name', true));
+                break;
+            case 'mobile':
+                echo esc_html(get_post_meta($post_id, 'mobile_number', true));
+                break;
+            case 'car':
+                $product_id = get_post_meta($post_id, 'product_id', true);
+                echo $product_id ? get_the_title($product_id) : '—';
+                break;
+            case 'status':
+                $status_key = get_post_meta($post_id, 'cash_inquiry_status', true);
+                echo esc_html(Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status_key));
+                break;
+        }
+    }
+
 
     public function add_meta_boxes() {
         add_meta_box('inquiry_status_box', 'مدیریت وضعیت استعلام', [$this, 'render_status_meta_box'], 'inquiry', 'side', 'high');

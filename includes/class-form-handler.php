@@ -270,7 +270,8 @@ class Maneli_Form_Handler {
 			}
         }
 
-        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', wp_get_referer()));
+        // Redirect to the cash inquiries dashboard page with a success message
+        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/cash-inquiries/')));
         exit;
     }
 
@@ -966,4 +967,159 @@ class Maneli_Form_Handler {
         wp_redirect($redirect_url);
         exit;
     }
+    
+    // ===================================================================
+    // == NEW METHODS FOR CASH INQUIRY MANAGEMENT
+    // ===================================================================
+
+    public function ajax_get_cash_inquiry_details() {
+        check_ajax_referer('maneli_cash_inquiry_details_nonce', 'nonce');
+
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز.'], 403);
+        }
+
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            wp_send_json_error(['message' => 'شناسه درخواست نامعتبر است.']);
+        }
+
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+
+        $data = [
+            'id' => $inquiry_id,
+            'status_label' => Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status),
+            'status_key' => $status,
+            'car' => [
+                'name' => get_the_title($product_id),
+                'color' => get_post_meta($inquiry_id, 'cash_car_color', true),
+            ],
+            'customer' => [
+                'first_name' => get_post_meta($inquiry_id, 'cash_first_name', true),
+                'last_name' => get_post_meta($inquiry_id, 'cash_last_name', true),
+                'mobile' => get_post_meta($inquiry_id, 'mobile_number', true),
+            ],
+            'payment' => [
+                'down_payment' => get_post_meta($inquiry_id, 'cash_down_payment', true),
+                'rejection_reason' => get_post_meta($inquiry_id, 'cash_rejection_reason', true),
+            ]
+        ];
+
+        wp_send_json_success($data);
+    }
+    
+    public function ajax_update_cash_inquiry() {
+        check_ajax_referer('maneli_cash_inquiry_update_nonce', 'nonce');
+    
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز.'], 403);
+        }
+    
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $first_name = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
+        $last_name = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+        $mobile = isset($_POST['mobile']) ? sanitize_text_field($_POST['mobile']) : '';
+        $color = isset($_POST['color']) ? sanitize_text_field($_POST['color']) : '';
+    
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            wp_send_json_error(['message' => 'شناسه درخواست نامعتبر است.']);
+        }
+    
+        update_post_meta($inquiry_id, 'cash_first_name', $first_name);
+        update_post_meta($inquiry_id, 'cash_last_name', $last_name);
+        update_post_meta($inquiry_id, 'mobile_number', $mobile);
+        update_post_meta($inquiry_id, 'cash_car_color', $color);
+    
+        wp_send_json_success(['message' => 'درخواست با موفقیت به‌روزرسانی شد.']);
+    }
+    
+    public function ajax_delete_cash_inquiry() {
+        check_ajax_referer('maneli_cash_inquiry_delete_nonce', 'nonce');
+    
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز.'], 403);
+        }
+    
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+    
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            wp_send_json_error(['message' => 'شناسه درخواست نامعتبر است.']);
+        }
+    
+        if (wp_delete_post($inquiry_id, true)) {
+            wp_send_json_success(['message' => 'درخواست با موفقیت حذف شد.']);
+        } else {
+            wp_send_json_error(['message' => 'خطا در حذف درخواست.']);
+        }
+    }
+    
+    public function ajax_set_down_payment() {
+        check_ajax_referer('maneli_cash_set_downpayment_nonce', 'nonce');
+    
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز.'], 403);
+        }
+    
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $amount = isset($_POST['amount']) ? preg_replace('/[^0-9]/', '', $_POST['amount']) : 0;
+        $new_status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
+        $reason = isset($_POST['reason']) ? sanitize_textarea_field($_POST['reason']) : '';
+    
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            wp_send_json_error(['message' => 'شناسه درخواست نامعتبر است.']);
+        }
+        
+        if ($new_status === 'awaiting_payment' && $amount > 0) {
+            update_post_meta($inquiry_id, 'cash_down_payment', $amount);
+            update_post_meta($inquiry_id, 'cash_inquiry_status', 'awaiting_payment');
+        } elseif ($new_status === 'rejected') {
+            update_post_meta($inquiry_id, 'cash_rejection_reason', $reason);
+            update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
+        } else {
+            wp_send_json_error(['message' => 'اطلاعات ارسالی نامعتبر است.']);
+        }
+    
+        wp_send_json_success(['message' => 'وضعیت با موفقیت تغییر کرد.']);
+    }
+    
+    public function handle_start_cash_payment() {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_start_cash_payment_nonce')) wp_die('خطای امنیتی!');
+        if (!is_user_logged_in()) wp_redirect(home_url());
+
+        $user_id = get_current_user_id();
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        
+        if (get_post_field('post_author', $inquiry_id) != $user_id) wp_die('خطای دسترسی!');
+
+        $amount_toman = (int)get_post_meta($inquiry_id, 'cash_down_payment', true);
+        if ($amount_toman <= 0) wp_die('مبلغ پیش‌پرداخت مشخص نشده است.');
+
+        update_user_meta($user_id, 'maneli_payment_type', 'cash_down_payment');
+        update_user_meta($user_id, 'maneli_payment_cash_inquiry_id', $inquiry_id);
+
+        $options = get_option('maneli_inquiry_all_options', []);
+        $zarinpal_enabled = isset($options['zarinpal_enabled']) && $options['zarinpal_enabled'] == '1';
+        $sadad_enabled = isset($options['sadad_enabled']) && $options['sadad_enabled'] == '1';
+        $active_gateway = $options['active_gateway'] ?? 'zarinpal';
+        $order_id = time() . $user_id;
+
+        update_user_meta($user_id, 'maneli_payment_order_id', $order_id);
+        update_user_meta($user_id, 'maneli_payment_amount', $amount_toman);
+
+        if ($active_gateway === 'sadad' && $sadad_enabled) {
+            $this->process_sadad_payment($user_id, $order_id, $amount_toman, $options);
+        } elseif ($active_gateway === 'zarinpal' && $zarinpal_enabled) {
+            $this->process_zarinpal_payment($user_id, $order_id, $amount_toman, $options);
+        } else {
+            if ($zarinpal_enabled) {
+                 $this->process_zarinpal_payment($user_id, $order_id, $amount_toman, $options);
+            } elseif ($sadad_enabled) {
+                 $this->process_sadad_payment($user_id, $order_id, $amount_toman, $options);
+            } else {
+                wp_die('در حال حاضر هیچ درگاه پرداخت فعالی در تنظیمات وجود ندارد.');
+            }
+        }
+    }
+
 }

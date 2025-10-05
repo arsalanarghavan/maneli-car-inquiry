@@ -832,10 +832,18 @@ class Maneli_Inquiry_Shortcodes {
     }
 	
 	public function render_cash_inquiry_list() {
-        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
+        if (!is_user_logged_in()) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده این بخش، لطفاً ابتدا وارد شوید.</p></div>';
         }
 
+        if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles)) {
+            return $this->render_admin_cash_inquiry_list();
+        } else {
+            return $this->render_customer_cash_inquiry_list(get_current_user_id());
+        }
+    }
+
+    private function render_admin_cash_inquiry_list() {
         ob_start();
         ?>
         <div class="maneli-full-width-container">
@@ -923,8 +931,10 @@ class Maneli_Inquiry_Shortcodes {
                 });
             }
 
+            // Initial Load
             fetch_cash_inquiries(1);
 
+            // Event Handlers
             $('#cash-inquiry-search-input').on('keyup', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => fetch_cash_inquiries(1), 500);
@@ -942,41 +952,77 @@ class Maneli_Inquiry_Shortcodes {
                 if (matches) pageNum = parseInt(matches[1]);
                 fetch_cash_inquiries(pageNum);
             });
-			
-			// Action buttons handlers
-            $('#maneli-cash-inquiry-list-tbody').on('click', '.delete-cash-inquiry', function() {
-                const inquiryId = $(this).data('id');
-                Swal.fire({
-                    title: 'آیا از حذف این درخواست اطمینان دارید؟',
-                    text: "این عمل غیرقابل بازگشت است!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'بله، حذف کن!',
-                    cancelButtonText: 'انصراف'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.post('<?php echo admin_url("admin-ajax.php"); ?>', {
-                            action: 'maneli_delete_cash_inquiry',
-                            _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_delete_nonce"); ?>',
-                            inquiry_id: inquiryId
-                        }, function(response) {
-                            if (response.success) {
-                                Swal.fire('حذف شد!', 'درخواست با موفقیت حذف شد.', 'success');
-                                fetch_cash_inquiries();
-                            } else {
-                                Swal.fire('خطا!', response.data.message || 'خطایی در حذف رخ داد.', 'error');
-                            }
-                        });
-                    }
-                });
-            });
-			
-			// More action handlers here...
-			
         });
         </script>
+        <?php
+        return ob_get_clean();
+    }
+
+    private function render_customer_cash_inquiry_list($user_id) {
+        if (isset($_GET['payment_status'])) {
+            $this->display_payment_message(sanitize_text_field($_GET['payment_status']));
+        }
+        
+        $args = [
+            'post_type'      => 'cash_inquiry',
+            'posts_per_page' => -1,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            'author'         => $user_id
+        ];
+        $inquiries = get_posts($args);
+
+        ob_start();
+        ?>
+        <div class="maneli-inquiry-wrapper">
+            <h3>لیست درخواست‌های خرید نقدی شما</h3>
+            <?php if (empty($inquiries)): ?>
+                <div class="status-box status-pending"><p>تاکنون هیچ درخواست خرید نقدی برای شما ثبت نشده است.</p></div>
+            <?php else: ?>
+                <table class="shop_table shop_table_responsive my_account_orders">
+                    <thead>
+                        <tr>
+                            <th>شناسه</th>
+                            <th>خودرو</th>
+                            <th>وضعیت</th>
+                            <th>پیش‌پرداخت</th>
+                            <th>تاریخ ثبت</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($inquiries as $inquiry):
+                            $inquiry_id = $inquiry->ID;
+                            $product_id = get_post_meta($inquiry_id, 'product_id', true);
+                            $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+                            $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                            $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
+                            list($y, $m, $d) = explode('-', $gregorian_date);
+                        ?>
+                        <tr>
+                            <td data-title="شناسه">#<?php echo esc_html($inquiry_id); ?></td>
+                            <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
+                            <td data-title="وضعیت"><?php echo esc_html(Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status)); ?></td>
+                            <td data-title="پیش‌پرداخت"><?php echo !empty($down_payment) ? number_format_i18n($down_payment) . ' تومان' : '—'; ?></td>
+                            <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
+                            <td class="woocommerce-orders-table__cell-order-actions">
+                                <?php if ($status === 'awaiting_payment'): ?>
+                                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                                        <input type="hidden" name="action" value="maneli_start_cash_payment">
+                                        <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
+                                        <?php wp_nonce_field('maneli_start_cash_payment_nonce'); ?>
+                                        <button type="submit" class="button">ورود به درگاه پرداخت</button>
+                                    </form>
+                                <?php else: ?>
+                                    —
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php endif; ?>
+        </div>
         <?php
         return ob_get_clean();
     }
@@ -1267,7 +1313,6 @@ class Maneli_Inquiry_Shortcodes {
 				<button class="button view-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">نمایش</button>
 				<button class="button edit-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">ویرایش</button>
 				<button class="button delete-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">حذف</button>
-				<button class="button set-downpayment" data-id="<?php echo esc_attr($inquiry_id); ?>">تعیین پیش‌پرداخت</button>
 			</td>
         </tr>
         <?php
