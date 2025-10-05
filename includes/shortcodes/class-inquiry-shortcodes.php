@@ -31,36 +31,27 @@ class Maneli_Inquiry_Shortcodes {
         wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
         wp_enqueue_script(
             'maneli-jalali-datepicker',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', // *** CHANGED ***
-            [], '2.0.0', true
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js',
+            [], '2.1.0', true
         );
         
+        // *** FIX: Added specific initializations for all datepicker instances ***
         $init_script = "
             document.addEventListener('DOMContentLoaded', function() {
                 if (typeof kamadatepicker !== 'undefined') {
-                    // Initialize for buyer
-                    kamadatepicker('buyer_birth_date', { 
-                        bidi: true, 
-                        placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
-                        format: 'YYYY/MM/DD' 
-                    });
-                    // Initialize for issuer
-                    kamadatepicker('issuer_birth_date', { 
-                        bidi: true, 
-                        placeholder: 'مثال: ۱۳۶۰/۰۱/۰۱',
-                        format: 'YYYY/MM/DD' 
-                    });
-                     // Initialize for expert panel
-                    kamadatepicker('expert_buyer_birth_date', { 
-                        bidi: true, 
-                        placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
-                        format: 'YYYY/MM/DD' 
-                    });
-                    kamadatepicker('expert_issuer_birth_date', { 
-                        bidi: true, 
-                        placeholder: 'مثال: ۱۳۶۰/۰۱/۰۱',
-                        format: 'YYYY/MM/DD' 
-                    });
+                    // Standard inquiry form
+                    var buyer_birth_date_elem = document.getElementById('buyer_birth_date');
+                    if(buyer_birth_date_elem) kamadatepicker('buyer_birth_date', { bidi: true, placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵', format: 'YYYY/MM/DD' });
+
+                    var issuer_birth_date_elem = document.getElementById('issuer_birth_date');
+                    if(issuer_birth_date_elem) kamadatepicker('issuer_birth_date', { bidi: true, placeholder: 'مثال: ۱۳۶۰/۰۱/۰۱', format: 'YYYY/MM/DD' });
+                    
+                    // Expert panel form
+                    var expert_buyer_birth_date_elem = document.getElementById('expert_buyer_birth_date');
+                    if(expert_buyer_birth_date_elem) kamadatepicker('expert_buyer_birth_date', { bidi: true, placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵', format: 'YYYY/MM/DD' });
+
+                    var expert_issuer_birth_date_elem = document.getElementById('expert_issuer_birth_date');
+                    if(expert_issuer_birth_date_elem) kamadatepicker('expert_issuer_birth_date', { bidi: true, placeholder: 'مثال: ۱۳۶۰/۰۱/۰۱', format: 'YYYY/MM/DD' });
                 }
             });
         ";

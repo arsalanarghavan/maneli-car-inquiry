@@ -399,6 +399,26 @@ class Maneli_User_Management_Shortcodes {
             return '<div class="maneli-inquiry-wrapper error-box"><p>کاربر مورد نظر یافت نشد.</p></div>';
         }
         
+        // *** FIX: Enqueue scripts specifically for this form rendering ***
+        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
+        wp_enqueue_script(
+            'maneli-jalali-datepicker-user-edit',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js',
+            [], '2.1.0', true
+        );
+        $init_script = "
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof kamadatepicker !== 'undefined') {
+                    kamadatepicker('user_birth_date', { 
+                        bidi: true, 
+                        placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
+                        format: 'YYYY/MM/DD' 
+                    });
+                }
+            });
+        ";
+        wp_add_inline_script('maneli-jalali-datepicker-user-edit', $init_script);
+
         $back_link = remove_query_arg('edit_user', $_SERVER['REQUEST_URI']);
 
         ob_start();
@@ -422,7 +442,7 @@ class Maneli_User_Management_Shortcodes {
                     </div>
                      <div class="form-row">
                         <div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'father_name', true)); ?>"></div>
-                        <div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" class="maneli-date-picker" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" autocomplete="off"></div>
+                        <div class="form-group"><label>تاریخ تولد:</label><input type="text" name="birth_date" id="user_birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>"></div>
                     </div>
                      <div class="form-row">
                         <div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی"></div>
