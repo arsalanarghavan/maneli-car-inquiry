@@ -7,7 +7,8 @@ class Maneli_Form_Handler {
 
     public function __construct() {
         // Customer Workflow Hooks
-        add_action('init', [$this, 'handle_payment_verification']);
+        add_action('template_redirect', [$this, 'handle_payment_verification']);
+        
         add_action('wp_ajax_maneli_select_car_ajax', [$this, 'handle_car_selection_ajax']);
         add_action('admin_post_nopriv_maneli_submit_identity', '__return_false');
         add_action('admin_post_maneli_submit_identity', [$this, 'handle_identity_submission']);
@@ -56,7 +57,6 @@ class Maneli_Form_Handler {
             wp_send_json_error(['message' => 'استعلام یافت نشد.']);
         }
 
-        // Security check: Ensure the current user can view this inquiry
         $current_user = wp_get_current_user();
         $can_view = false;
         if (current_user_can('manage_maneli_inquiries') || (int)$inquiry->post_author === $current_user->ID) {
@@ -72,7 +72,6 @@ class Maneli_Form_Handler {
             wp_send_json_error(['message' => 'شما اجازه مشاهده این گزارش را ندارید.'], 403);
         }
 
-        // Gather all data
         $post_meta = get_post_meta($inquiry_id);
         $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
         $product_id = $post_meta['product_id'][0] ?? 0;
@@ -213,7 +212,6 @@ class Maneli_Form_Handler {
             }
         }
     
-        // Sanitize all input data
         $inquiry_data = [
             'product_id'       => intval($_POST['product_id']),
             'cash_first_name'  => sanitize_text_field($_POST['cash_first_name']),
@@ -223,13 +221,14 @@ class Maneli_Form_Handler {
         ];
     
         if (is_user_logged_in()) {
-            // If user is logged in, create the inquiry post immediately
             $user_id = get_current_user_id();
             self::create_cash_inquiry_post($inquiry_data, $user_id);
             wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/?endp=inf_menu_5')));
             exit;
         } else {
-            // If user is a guest, store data in session and redirect to login
+            if (!session_id()) {
+                session_start();
+            }
             $_SESSION['maneli_pending_cash_inquiry'] = $inquiry_data;
             $login_url = wp_login_url(home_url('/dashboard/?endp=inf_menu_5'));
             wp_redirect($login_url);
@@ -237,14 +236,6 @@ class Maneli_Form_Handler {
         }
     }
 
-    /**
-     * Centralized function to create a cash inquiry post.
-     * Can be called for both logged-in users and after a guest logs in.
-     *
-     * @param array $inquiry_data Sanitized data from the form.
-     * @param int $user_id The ID of the user to associate the post with.
-     * @return int|WP_Error The new post ID or a WP_Error object on failure.
-     */
     public static function create_cash_inquiry_post($inquiry_data, $user_id) {
         $first_name = $inquiry_data['cash_first_name'];
         $last_name = $inquiry_data['cash_last_name'];
@@ -252,7 +243,6 @@ class Maneli_Form_Handler {
         $product_id = $inquiry_data['product_id'];
         $car_name = get_the_title($product_id);
     
-        // Update user's profile with the name from the form
         wp_update_user([
             'ID'         => $user_id,
             'first_name' => $first_name,
@@ -260,7 +250,6 @@ class Maneli_Form_Handler {
         ]);
         update_user_meta($user_id, 'mobile_number', $mobile);
     
-        // Create the cash_inquiry post
         $post_title = 'درخواست نقدی: ' . $first_name . ' ' . $last_name . ' برای ' . $car_name;
         $post_id = wp_insert_post([
             'post_title'   => $post_title,
@@ -277,7 +266,6 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'cash_car_color', $inquiry_data['cash_car_color']);
             update_post_meta($post_id, 'cash_inquiry_status', 'pending');
             
-            // Send SMS to admin
             $all_options = get_option('maneli_inquiry_all_options', []);
             $admin_mobile = $all_options['admin_notification_mobile'] ?? '';
             $pattern_admin = $all_options['sms_pattern_new_inquiry'] ?? 0;
@@ -286,7 +274,9 @@ class Maneli_Form_Handler {
                 $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$first_name . ' ' . $last_name, $car_name . ' (نقدی)']);
             }
     
-            // Set a flag to indicate that a pending inquiry was just processed
+            if (!session_id()) {
+                session_start();
+            }
             $_SESSION['maneli_pending_cash_inquiry_processed'] = true;
         }
         
@@ -316,7 +306,6 @@ class Maneli_Form_Handler {
         $user_id = get_current_user_id();
         $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
         
-        // Validate Buyer Fields
         $buyer_fields = ['first_name', 'last_name', 'national_code', 'father_name', 'birth_date', 'mobile_number'];
         $buyer_data = [];
         foreach ($buyer_fields as $key) {
@@ -326,7 +315,6 @@ class Maneli_Form_Handler {
             $buyer_data[$key] = sanitize_text_field($_POST[$key]);
         }
         
-        // Validate Issuer Fields ONLY if type is 'other'
         $issuer_data = [];
         if ($issuer_type === 'other') {
             $issuer_fields = ['issuer_first_name', 'issuer_last_name', 'issuer_national_code', 'issuer_father_name', 'issuer_birth_date', 'issuer_mobile_number'];
@@ -459,7 +447,9 @@ class Maneli_Form_Handler {
     }
     
     public function handle_payment_verification() {
-        if (!isset($_GET['maneli_payment_verify'])) return;
+        if (!isset($_GET['maneli_payment_verify'])) {
+            return;
+        }
 
         $gateway = $_GET['maneli_payment_verify'];
         
@@ -471,7 +461,9 @@ class Maneli_Form_Handler {
     }
 
     private function verify_zarinpal_payment() {
-        if (empty($_GET['Authority']) || empty($_GET['Status']) || empty($_GET['uid'])) return;
+        if (empty($_GET['Authority']) || empty($_GET['Status']) || empty($_GET['uid'])) {
+            return;
+        }
     
         $authority = sanitize_text_field($_GET['Authority']);
         $status = sanitize_text_field($_GET['Status']);
@@ -483,7 +475,6 @@ class Maneli_Form_Handler {
         $saved_authority = get_user_meta($user_id, 'maneli_payment_authority', true);
         $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
     
-        // **CORRECTED LOGIC**: Initialize redirect URL based on payment type
         if ($payment_type === 'cash_down_payment') {
             $redirect_url = home_url('/dashboard/?endp=inf_menu_5');
         } else {
@@ -491,7 +482,7 @@ class Maneli_Form_Handler {
         }
     
         if ($authority !== $saved_authority) { 
-            $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('اطلاعات تراکنش مغایرت دارد.')], $redirect_url);
+            $redirect_url = add_query_arg('payment_status', 'failed', 'اطلاعات تراکنش مغایرت دارد.', $redirect_url);
         } elseif ($status == 'OK') {
             $data = ['merchant_id' => $merchant_id, 'authority' => $authority, 'amount' => (int)$amount * 10];
             $jsonData = json_encode($data);
@@ -509,34 +500,37 @@ class Maneli_Form_Handler {
                     $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
                 } else {
                     $error_message = $result['errors']['message'] ?? 'تراکنش توسط درگاه تایید نشد.';
-                    $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
+                    $redirect_url = add_query_arg('payment_status', 'failed', urlencode($error_message), $redirect_url);
                 }
             } else {
-                $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('خطا در برقراری ارتباط با درگاه پرداخت.')], $redirect_url);
+                $redirect_url = add_query_arg('payment_status', 'failed', urlencode('خطا در برقراری ارتباط با درگاه پرداخت.'), $redirect_url);
             }
         } else {
-            $redirect_url = add_query_arg('payment_status' => 'cancelled', $redirect_url);
+            $redirect_url = add_query_arg('payment_status', 'cancelled', $redirect_url);
         }
     
-        // Clear all payment-related user meta and redirect
         delete_user_meta($user_id, 'maneli_payment_authority');
         delete_user_meta($user_id, 'maneli_payment_amount');
         delete_user_meta($user_id, 'maneli_payment_order_id');
         delete_user_meta($user_id, 'maneli_payment_type');
         delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
-        wp_redirect($redirect_url);
-        exit;
+        
+        if (!headers_sent()) {
+            wp_redirect($redirect_url);
+            exit;
+        }
     }
     
     private function verify_sadad_payment() {
-        if (empty($_POST["OrderId"]) || !isset($_POST["ResCode"])) return;
+        if (empty($_POST["OrderId"]) || !isset($_POST["ResCode"])) {
+            return;
+        }
     
         $order_id = sanitize_text_field($_POST["OrderId"]);
         $res_code = sanitize_text_field($_POST["ResCode"]);
         $user_id = intval(substr($order_id, 10));
         $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
     
-        // **CORRECTED LOGIC**: Initialize redirect URL based on payment type
         if ($payment_type === 'cash_down_payment') {
             $redirect_url = home_url('/dashboard/?endp=inf_menu_5');
         } else {
@@ -545,7 +539,7 @@ class Maneli_Form_Handler {
     
         if ($res_code == 0) {
             if (empty($_POST["token"])) {
-                $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('توکن بازگشتی از بانک نامعتبر است.')], $redirect_url);
+                $redirect_url = add_query_arg('payment_status', 'failed', urlencode('توکن بازگشتی از بانک نامعتبر است.'), $redirect_url);
             } else {
                 $token = sanitize_text_field($_POST["token"]);
                 $options = get_option('maneli_inquiry_all_options', []);
@@ -566,22 +560,24 @@ class Maneli_Form_Handler {
                     $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
                 } else {
                     $error_message = $result->Description ?? 'تراکنش در مرحله تایید نهایی ناموفق بود.';
-                    $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
+                    $redirect_url = add_query_arg('payment_status', 'failed', urlencode($error_message), $redirect_url);
                 }
             }
         } else {
             $error_message = isset($_POST['Description']) ? sanitize_text_field($_POST['Description']) : 'تراکنش توسط بانک لغو شد.';
-            $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
+            $redirect_url = add_query_arg('payment_status', 'failed', urlencode($error_message), $redirect_url);
         }
     
-        // Clear all payment-related user meta and redirect
         delete_user_meta($user_id, 'maneli_payment_order_id');
         delete_user_meta($user_id, 'maneli_payment_amount');
         delete_user_meta($user_id, 'maneli_payment_token');
         delete_user_meta($user_id, 'maneli_payment_type');
         delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
-        wp_redirect($redirect_url);
-        exit;
+
+        if (!headers_sent()) {
+            wp_redirect($redirect_url);
+            exit;
+        }
     }
     
     private function sadad_encrypt_pkcs7($str, $key) {
@@ -718,7 +714,6 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'rejection_reason', $reason);
         }
         
-        // START: Added code to send SMS to manually assigned expert
         $options = get_option('maneli_inquiry_all_options', []);
         $pattern_id = $options['sms_pattern_expert_referral'] ?? 0;
         $assigned_expert_id_for_sms = get_post_meta($post_id, 'assigned_expert_id', true);
@@ -736,7 +731,6 @@ class Maneli_Form_Handler {
                 $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
             }
         }
-        // END: Added code
         
         update_post_meta($post_id, 'inquiry_status', $final_status);
         
@@ -993,10 +987,6 @@ class Maneli_Form_Handler {
         exit;
     }
     
-    // ===================================================================
-    // == NEW METHODS FOR CASH INQUIRY MANAGEMENT
-    // ===================================================================
-
     public function ajax_get_cash_inquiry_details() {
         check_ajax_referer('maneli_cash_inquiry_details_nonce', 'nonce');
 
@@ -1146,5 +1136,4 @@ class Maneli_Form_Handler {
             }
         }
     }
-
 }

@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.14.32
+ * Version:           0.14.34
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -18,19 +18,6 @@ if (!defined('ABSPATH')) {
 
 define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
-
-
-/**
- * Starts a session if one is not already active.
- * This is required for storing pending inquiry data for guest users.
- */
-function maneli_start_session_if_not_started() {
-    if (!session_id() && !headers_sent()) {
-        session_start();
-    }
-}
-add_action('init', 'maneli_start_session_if_not_started', 1);
-
 
 /**
  * Helper function to convert Gregorian date to Jalali (Shamsi).
@@ -57,18 +44,18 @@ function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d') {
  * After a user logs in, check for and process any pending cash inquiries stored in the session.
  */
 function maneli_process_pending_inquiry_on_login($user_login, $user) {
+    if (!session_id() && !headers_sent()) {
+        session_start();
+    }
+
     if (isset($_SESSION['maneli_pending_cash_inquiry'])) {
         $inquiry_data = $_SESSION['maneli_pending_cash_inquiry'];
 
-        // Ensure the form handler class is available
         if (!class_exists('Maneli_Form_Handler')) {
              require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
         }
         
-        // Use the centralized method to create the post
         Maneli_Form_Handler::create_cash_inquiry_post($inquiry_data, $user->ID);
-
-        // Clean up the session
         unset($_SESSION['maneli_pending_cash_inquiry']);
     }
 }
@@ -78,59 +65,45 @@ add_action('wp_login', 'maneli_process_pending_inquiry_on_login', 10, 2);
  * Redirects the user to the cash inquiry list after logging in, if they just submitted an inquiry.
  */
 function maneli_custom_login_redirect($redirect_to, $request, $user) {
-    // Check if there was a pending inquiry processed
-    if (isset($_SESSION['maneli_pending_cash_inquiry_processed']) && $_SESSION['maneli_pending_cash_inquiry_processed']) {
-        unset($_SESSION['maneli_pending_cash_inquiry_processed']); // Clean up flag
-        return home_url('/dashboard/?endp=inf_menu_5&cash_inquiry_sent=true'); // Redirect to cash inquiries list
+    if (!session_id() && !headers_sent()) {
+        session_start();
     }
-    return $redirect_to; // Otherwise, default redirect
+    
+    if (isset($_SESSION['maneli_pending_cash_inquiry_processed']) && $_SESSION['maneli_pending_cash_inquiry_processed']) {
+        unset($_SESSION['maneli_pending_cash_inquiry_processed']);
+        return home_url('/dashboard/?endp=inf_menu_5&cash_inquiry_sent=true');
+    }
+    return $redirect_to;
 }
 add_filter('login_redirect', 'maneli_custom_login_redirect', 10, 3);
-
 
 /**
  * Ensures the custom user roles and capabilities for the plugin exist.
  */
 function maneli_setup_roles_and_caps() {
-    // Grant management capability to Administrator
     $admin_role = get_role('administrator');
     if ($admin_role && !$admin_role->has_cap('manage_maneli_inquiries')) {
         $admin_role->add_cap('manage_maneli_inquiries');
     }
 
     $product_caps = [
-        'edit_product'          => true,
-        'read_product'          => true,
-        'delete_product'        => false,
-        'edit_products'         => true,
-        'edit_others_products'  => true,
-        'publish_products'      => false,
-        'read_private_products' => false,
-        'delete_products'       => false,
+        'edit_product'          => true, 'read_product'          => true, 'delete_product'        => false,
+        'edit_products'         => true, 'edit_others_products'  => true, 'publish_products'      => false,
+        'read_private_products' => false, 'delete_products'       => false,
     ];
 
-    $maneli_admin_caps = array_merge($product_caps, [
-        'read' => true,
-        'manage_maneli_inquiries' => true,
-        'edit_posts' => true,
-    ]);
-
+    $maneli_admin_caps = array_merge($product_caps, ['read' => true, 'manage_maneli_inquiries' => true, 'edit_posts' => true]);
     remove_role('maneli_admin');
     add_role('maneli_admin', 'مدیریت مانلی', $maneli_admin_caps);
 
-    $maneli_expert_caps = array_merge($product_caps, [
-        'read' => true,
-        'edit_posts' => true,
-    ]);
-
+    $maneli_expert_caps = array_merge($product_caps, ['read' => true, 'edit_posts' => true]);
     remove_role('maneli_expert');
     add_role('maneli_expert', 'کارشناس مانلی', $maneli_expert_caps);
 }
 add_action('init', 'maneli_setup_roles_and_caps');
 
-
 /**
- * Removes the custom user roles on plugin deactivation for cleanup.
+ * Removes the custom user roles on plugin deactivation.
  */
 register_deactivation_hook(__FILE__, 'maneli_remove_custom_roles');
 function maneli_remove_custom_roles() {
@@ -147,23 +120,16 @@ function maneli_remove_custom_roles() {
  */
 function maneli_translate_roles() {
     global $wp_roles;
-    if ( ! isset( $wp_roles ) ) {
-        $wp_roles = new WP_Roles();
-    }
-
+    if ( ! isset( $wp_roles ) ) { $wp_roles = new WP_Roles(); }
     if(isset($wp_roles->roles['maneli_admin'])) { $wp_roles->roles['maneli_admin']['name'] = 'مدیریت مانلی'; }
     if(isset($wp_roles->roles['maneli_expert'])) { $wp_roles->roles['maneli_expert']['name'] = 'کارشناس مانلی'; }
     if(isset($wp_roles->roles['customer'])) { $wp_roles->roles['customer']['name'] = 'مشتری'; }
     if(isset($wp_roles->roles['administrator'])) { $wp_roles->roles['administrator']['name'] = 'مدیر کل'; }
-    if(isset($wp_roles->roles['editor'])) { $wp_roles->roles['editor']['name'] = 'ویرایشگر'; }
-    if(isset($wp_roles->roles['author'])) { $wp_roles->roles['author']['name'] = 'نویسنده'; }
-    if(isset($wp_roles->roles['contributor'])) { $wp_roles->roles['contributor']['name'] = 'مشارکت‌کننده'; }
-    if(isset($wp_roles->roles['subscriber'])) { $wp_roles->roles['subscriber']['name'] = 'مشترک'; }
 }
 add_action('init', 'maneli_translate_roles');
 
 /**
- * Updates user's display name based on first and last name upon creation or update.
+ * Updates user's display name based on first and last name.
  */
 function maneli_update_display_name($user_id) {
     $user = get_userdata($user_id);
@@ -174,10 +140,7 @@ function maneli_update_display_name($user_id) {
     if (!empty($first_name) || !empty($last_name)) {
         $display_name = trim($first_name . ' ' . $last_name);
         if ($user->display_name !== $display_name && !empty($display_name)) {
-            wp_update_user([
-                'ID' => $user_id,
-                'display_name' => $display_name
-            ]);
+            wp_update_user(['ID' => $user_id, 'display_name' => $display_name]);
         }
     }
 }
@@ -198,66 +161,44 @@ function maneli_run_once_update_display_names() {
 }
 add_action('init', 'maneli_run_once_update_display_names');
 
-
 /**
  * Redirects non-administrator users away from the backend dashboard.
  */
 add_action('admin_init', 'maneli_redirect_non_admins_from_backend');
 function maneli_redirect_non_admins_from_backend() {
-    // Do not redirect for AJAX, cron, or admin-post.php requests.
     if (wp_doing_ajax() || wp_doing_cron() || basename($_SERVER['PHP_SELF']) === 'admin-post.php') {
         return;
     }
-
-    // Redirect any user who cannot 'manage_options' (i.e., is not an Administrator).
     if (!current_user_can('manage_options')) {
          wp_redirect(home_url('/dashboard/'));
          exit;
     }
 }
 
-
 /**
  * Modify queries to hide disabled products for non-admin users on the frontend.
  */
 function maneli_pre_get_posts_query($query) {
-    // This should only run on frontend queries for non-admin users
     if (!is_admin() && !current_user_can('manage_maneli_inquiries') && $query->get('post_type') === 'product') {
         $meta_query = $query->get('meta_query') ?: [];
-
-        if (!is_array($meta_query)) {
-            $meta_query = [];
-        }
-
-        $meta_query[] = [
-            'key' => '_maneli_car_status',
-            'value' => 'disabled',
-            'compare' => '!=',
-        ];
-
+        if (!is_array($meta_query)) { $meta_query = []; }
         $meta_query['relation'] = 'OR';
-        $meta_query[] = [
-            'key' => '_maneli_car_status',
-            'compare' => 'NOT EXISTS',
-        ];
-
+        $meta_query[] = ['key' => '_maneli_car_status', 'value' => 'disabled', 'compare' => '!=',];
+        $meta_query[] = ['key' => '_maneli_car_status', 'compare' => 'NOT EXISTS',];
         $query->set('meta_query', $meta_query);
     }
 }
 add_action('pre_get_posts', 'maneli_pre_get_posts_query');
 
-
 /**
- * AJAX handler for updating product data from the custom editor page.
+ * AJAX handler for updating product data.
  */
 function maneli_update_product_data_callback() {
     check_ajax_referer('maneli_product_data_nonce', 'nonce');
-
     if (!current_user_can('manage_maneli_inquiries')) {
         wp_send_json_error('شما دسترسی لازم را ندارید.');
         return;
     }
-
     $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
     $field_type = isset($_POST['field_type']) ? sanitize_key($_POST['field_type']) : '';
     $field_value = isset($_POST['field_value']) ? sanitize_text_field(wp_unslash($_POST['field_value'])) : '';
@@ -268,40 +209,26 @@ function maneli_update_product_data_callback() {
             wp_send_json_error('محصول یافت نشد.');
             return;
         }
-
         switch ($field_type) {
             case 'regular_price':
                 $product->set_regular_price($field_value);
                 $product->set_price($field_value);
                 $product->save();
                 break;
-            case 'installment_price':
-                update_post_meta($product_id, 'installment_price', $field_value);
-                break;
-            case 'min_downpayment':
-                update_post_meta($product_id, 'min_downpayment', $field_value);
-                break;
-            case 'car_colors':
-                update_post_meta($product_id, '_maneli_car_colors', $field_value);
-                break;
-            case 'car_status':
-                update_post_meta($product_id, '_maneli_car_status', $field_value);
-                break;
-            default:
-                wp_send_json_error('نوع فیلد نامعتبر است.');
-                return;
+            case 'installment_price': update_post_meta($product_id, 'installment_price', $field_value); break;
+            case 'min_downpayment': update_post_meta($product_id, 'min_downpayment', $field_value); break;
+            case 'car_colors': update_post_meta($product_id, '_maneli_car_colors', $field_value); break;
+            case 'car_status': update_post_meta($product_id, '_maneli_car_status', $field_value); break;
+            default: wp_send_json_error('نوع فیلد نامعتبر است.'); return;
         }
-
         wc_delete_product_transients($product_id);
         wp_send_json_success('اطلاعات با موفقیت به‌روزرسانی شد.');
     } else {
         wp_send_json_error('اطلاعات ارسالی نامعتبر است.');
     }
-
     wp_die();
 }
 add_action('wp_ajax_maneli_update_product_data', 'maneli_update_product_data_callback');
-
 
 /**
  * Logic to hide prices based on the plugin setting.
@@ -309,7 +236,6 @@ add_action('wp_ajax_maneli_update_product_data', 'maneli_update_product_data_cal
 function maneli_maybe_hide_prices() {
     $options = get_option('maneli_inquiry_all_options', []);
     $is_price_hidden = isset($options['hide_prices_for_customers']) && $options['hide_prices_for_customers'] == '1';
-
     if ($is_price_hidden && !current_user_can('manage_maneli_inquiries')) {
         remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10);
         remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
@@ -323,11 +249,9 @@ add_action('wp', 'maneli_maybe_hide_prices');
  * Main plugin class.
  */
 final class Maneli_Car_Inquiry_Plugin {
-
     public function __construct() {
         add_action('plugins_loaded', [$this, 'initialize']);
     }
-
     public function initialize() {
         if (!class_exists('WooCommerce')) {
             add_action('admin_notices', [$this, 'woocommerce_not_active_notice']);
@@ -336,7 +260,6 @@ final class Maneli_Car_Inquiry_Plugin {
         $this->includes();
         $this->init_classes();
     }
-
     public function includes() {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
@@ -344,29 +267,22 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-shortcode-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
-        // require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php'; // Removed Admin Page
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
-        // require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-product-editor-page.php'; // Removed Admin Page
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-admin-dashboard-widgets.php';
     }
-
     private function init_classes() {
         new Maneli_CPT_Handler();
         new Maneli_Settings_Page();
         new Maneli_Form_Handler();
         new Maneli_Shortcode_Handler();
         new Maneli_Expert_Panel();
-        // new Maneli_Credit_Report_Page(); // Removed Admin Page
         new Maneli_User_Profile();
-        // new Maneli_Product_Editor_Page(); // Removed Admin Page
-
         $options = get_option('maneli_inquiry_all_options', []);
         if (isset($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
             new Maneli_Grouped_Attributes();
         }
     }
-
     public function woocommerce_not_active_notice() {
         ?>
         <div class="error"><p>پلاگین استعلام خودرو برای کار کردن به ووکامرس نیاز دارد. لطفاً ووکامرس را نصب و فعال کنید.</p></div>
