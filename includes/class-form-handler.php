@@ -31,7 +31,7 @@ class Maneli_Form_Handler {
         add_action('wp_ajax_maneli_update_cash_inquiry', [$this, 'ajax_update_cash_inquiry']);
         add_action('wp_ajax_maneli_delete_cash_inquiry', [$this, 'ajax_delete_cash_inquiry']);
         add_action('wp_ajax_maneli_set_down_payment', [$this, 'ajax_set_down_payment']);
-        add_action('wp_ajax_maneli_assign_expert_to_cash_inquiry', [$this, 'ajax_assign_expert_to_cash_inquiry']); // New Hook
+        add_action('wp_ajax_maneli_assign_expert_to_cash_inquiry', [$this, 'ajax_assign_expert_to_cash_inquiry']);
 		add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
 
 
@@ -1209,8 +1209,23 @@ class Maneli_Form_Handler {
     
         update_post_meta($inquiry_id, 'assigned_expert_id', $assigned_expert_id);
         update_post_meta($inquiry_id, 'assigned_expert_name', $assigned_expert_name);
-        // Optionally change status to 'approved' or a similar status upon assignment
         update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
+
+        // Send SMS to the assigned expert
+        $options = get_option('maneli_inquiry_all_options', []);
+        $pattern_id = $options['cash_inquiry_expert_referral_pattern'] ?? 0;
+        $expert_phone = get_user_meta($assigned_expert_id, 'mobile_number', true);
+
+        if ($pattern_id > 0 && !empty($expert_phone)) {
+            $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
+            $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+            $product_id = get_post_meta($inquiry_id, 'product_id', true);
+            $car_name = get_the_title($product_id);
+            
+            $params = [(string)$assigned_expert_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
+            $sms_handler = new Maneli_SMS_Handler();
+            $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
+        }
     
         wp_send_json_success(['message' => 'درخواست با موفقیت به ' . $assigned_expert_name . ' ارجاع داده شد.', 'expert_name' => $assigned_expert_name]);
     }
