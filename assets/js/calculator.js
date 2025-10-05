@@ -34,6 +34,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const priceValue = parseMoney(cashPriceEl.innerText);
             cashPriceEl.innerText = formatMoney(priceValue);
         }
+        // Note: The form submission is now a standard, non-AJAX POST request.
+        // The backend (class-form-handler.php) handles the logic for guests vs. logged-in users.
     }
 
     // --- INSTALLMENT CALCULATOR LOGIC (Scoped to its specific container) ---
@@ -41,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (installmentTab) {
         const actionBtn = installmentTab.querySelector(".loan-action-btn");
 
-        // AJAX submission for installment form
+        // AJAX submission for installment form (for logged-in users only)
         if (actionBtn && typeof maneli_ajax_object !== 'undefined') {
             actionBtn.addEventListener("click", function (e) {
                 e.preventDefault();

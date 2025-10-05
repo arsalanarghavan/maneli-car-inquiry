@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.14.31
+ * Version:           0.14.32
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -18,6 +18,19 @@ if (!defined('ABSPATH')) {
 
 define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+
+/**
+ * Starts a session if one is not already active.
+ * This is required for storing pending inquiry data for guest users.
+ */
+function maneli_start_session_if_not_started() {
+    if (!session_id() && !headers_sent()) {
+        session_start();
+    }
+}
+add_action('init', 'maneli_start_session_if_not_started', 1);
+
 
 /**
  * Helper function to convert Gregorian date to Jalali (Shamsi).
@@ -39,6 +52,41 @@ function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d') {
     $formatted_date = str_replace(['Y', 'm', 'd'], [$jy, sprintf('%02d', $jm), sprintf('%02d', $jd)], $format);
     return $formatted_date;
 }
+
+/**
+ * After a user logs in, check for and process any pending cash inquiries stored in the session.
+ */
+function maneli_process_pending_inquiry_on_login($user_login, $user) {
+    if (isset($_SESSION['maneli_pending_cash_inquiry'])) {
+        $inquiry_data = $_SESSION['maneli_pending_cash_inquiry'];
+
+        // Ensure the form handler class is available
+        if (!class_exists('Maneli_Form_Handler')) {
+             require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
+        }
+        
+        // Use the centralized method to create the post
+        Maneli_Form_Handler::create_cash_inquiry_post($inquiry_data, $user->ID);
+
+        // Clean up the session
+        unset($_SESSION['maneli_pending_cash_inquiry']);
+    }
+}
+add_action('wp_login', 'maneli_process_pending_inquiry_on_login', 10, 2);
+
+/**
+ * Redirects the user to the cash inquiry list after logging in, if they just submitted an inquiry.
+ */
+function maneli_custom_login_redirect($redirect_to, $request, $user) {
+    // Check if there was a pending inquiry processed
+    if (isset($_SESSION['maneli_pending_cash_inquiry_processed']) && $_SESSION['maneli_pending_cash_inquiry_processed']) {
+        unset($_SESSION['maneli_pending_cash_inquiry_processed']); // Clean up flag
+        return home_url('/dashboard/?endp=inf_menu_5&cash_inquiry_sent=true'); // Redirect to cash inquiries list
+    }
+    return $redirect_to; // Otherwise, default redirect
+}
+add_filter('login_redirect', 'maneli_custom_login_redirect', 10, 3);
+
 
 /**
  * Ensures the custom user roles and capabilities for the plugin exist.
