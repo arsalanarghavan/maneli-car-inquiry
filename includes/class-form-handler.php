@@ -220,17 +220,21 @@ class Maneli_Form_Handler {
         $product_id = intval($_POST['product_id']);
 		$car_name = get_the_title($product_id);
 
-
-        $customer_id = username_exists($mobile);
-        if (!$customer_id) {
-            $dummy_email = $mobile . '@manelikhodro.com';
-            if (email_exists($dummy_email)) {
-                $customer_id = email_exists($dummy_email);
-            } else {
-                $random_password = wp_generate_password(12, false);
-                $customer_id = wp_create_user($mobile, $random_password, $dummy_email);
-                if (is_wp_error($customer_id)) {
-                    wp_die('خطا در ساخت کاربر جدید: ' . $customer_id->get_error_message());
+        $customer_id = 0;
+        if (is_user_logged_in()) {
+            $customer_id = get_current_user_id();
+        } else {
+            $customer_id = username_exists($mobile);
+            if (!$customer_id) {
+                $dummy_email = $mobile . '@manelikhodro.com';
+                if (email_exists($dummy_email)) {
+                    $customer_id = email_exists($dummy_email);
+                } else {
+                    $random_password = wp_generate_password(12, false);
+                    $customer_id = wp_create_user($mobile, $random_password, $dummy_email);
+                    if (is_wp_error($customer_id)) {
+                        wp_die('خطا در ساخت کاربر جدید: ' . $customer_id->get_error_message());
+                    }
                 }
             }
         }
@@ -269,9 +273,15 @@ class Maneli_Form_Handler {
 				$sms_handler->send_pattern($pattern_admin, $admin_mobile, [$first_name . ' ' . $last_name, $car_name . ' (نقدی)']);
 			}
         }
+        
+        // If user was not logged in, log them in.
+        if (!is_user_logged_in() && $customer_id) {
+            wp_set_current_user($customer_id, $mobile);
+            wp_set_auth_cookie($customer_id);
+        }
 
         // Redirect to the cash inquiries dashboard page with a success message
-        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/cash-inquiries/')));
+        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/?endp=inf_menu_4')));
         exit;
     }
 
@@ -482,7 +492,7 @@ class Maneli_Form_Handler {
                     if ($payment_type === 'cash_down_payment') {
                         $inquiry_id = get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true);
                         update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
-                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/cash-inquiries/'));
+                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/?endp=inf_menu_4'));
                     } else {
                         $this->finalize_inquiry($user_id, true);
                         $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
@@ -534,7 +544,7 @@ class Maneli_Form_Handler {
                     if ($payment_type === 'cash_down_payment') {
                         $inquiry_id = get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true);
                         update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
-                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/cash-inquiries/'));
+                        $redirect_url = add_query_arg('payment_status', 'success', home_url('/dashboard/?endp=inf_menu_4'));
                     } else {
                         $this->finalize_inquiry($user_id, true);
                         $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
