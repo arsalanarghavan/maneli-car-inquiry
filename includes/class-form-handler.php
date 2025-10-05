@@ -15,7 +15,6 @@ class Maneli_Form_Handler {
         add_action('admin_post_nopriv_maneli_start_payment', '__return_false');
         add_action('admin_post_maneli_start_payment', [$this, 'handle_payment_submission']);
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
-		add_action('admin_post_nopriv_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
         add_action('admin_post_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
         add_action('admin_post_maneli_start_cash_payment', [$this, 'handle_start_cash_payment']);
 
@@ -206,6 +205,10 @@ class Maneli_Form_Handler {
             wp_die('خطای امنیتی!');
         }
     
+        if (!is_user_logged_in()) {
+            wp_die('برای ثبت درخواست، لطفاً ابتدا وارد شوید.');
+        }
+    
         $fields = ['product_id', 'cash_first_name', 'cash_last_name', 'cash_mobile_number', 'cash_car_color'];
         foreach ($fields as $field) {
             if (empty($_POST[$field])) {
@@ -213,7 +216,6 @@ class Maneli_Form_Handler {
             }
         }
     
-        // *** FIX: Correctly read POST data from form fields ***
         $inquiry_data = [
             'product_id'       => intval($_POST['product_id']),
             'cash_first_name'  => sanitize_text_field($_POST['cash_first_name']),
@@ -222,24 +224,10 @@ class Maneli_Form_Handler {
             'cash_car_color'   => sanitize_text_field($_POST['cash_car_color']),
         ];
     
-        if (is_user_logged_in()) {
-            $user_id = get_current_user_id();
-            self::create_cash_inquiry_post($inquiry_data, $user_id);
-            wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/?endp=inf_menu_5')));
-            exit;
-        } else {
-            if (!session_id()) {
-                session_start();
-            }
-            $_SESSION['maneli_pending_cash_inquiry'] = $inquiry_data;
-            
-            // *** FIX: Point to the custom login/dashboard page and set correct redirect after login ***
-            $redirect_after_login = home_url('/dashboard/?endp=inf_menu_4');
-            $login_url = add_query_arg('redirect_to', urlencode($redirect_after_login), home_url('/dashboard/'));
-            
-            wp_redirect($login_url);
-            exit;
-        }
+        $user_id = get_current_user_id();
+        self::create_cash_inquiry_post($inquiry_data, $user_id);
+        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/?endp=inf_menu_5')));
+        exit;
     }
 
     public static function create_cash_inquiry_post($inquiry_data, $user_id) {
@@ -249,7 +237,6 @@ class Maneli_Form_Handler {
         $product_id = $inquiry_data['product_id'];
         $car_name = get_the_title($product_id);
     
-        // *** FIX: Do NOT update user meta for mobile. Only update name if it's empty. ***
         $user_obj = get_userdata($user_id);
         if(empty($user_obj->first_name) && empty($user_obj->last_name)) {
             wp_update_user([
@@ -282,11 +269,6 @@ class Maneli_Form_Handler {
                 $sms_handler = new Maneli_SMS_Handler();
                 $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$first_name . ' ' . $last_name, $car_name . ' (نقدی)']);
             }
-    
-            if (!session_id()) {
-                session_start();
-            }
-            $_SESSION['maneli_pending_cash_inquiry_processed'] = true;
         }
         
         return $post_id;

@@ -186,9 +186,13 @@ class Maneli_Inquiry_Shortcodes {
                             <span> تومان</span>
                         </div>
                         <div class="loan-section loan-action-wrapper">
-                            <button type="submit" class="loan-action-btn">
-                                <?php echo $is_logged_in ? 'ثبت درخواست استعلام قیمت' : 'ثبت درخواست و ادامه'; ?>
-                            </button>
+                            <?php if (is_user_logged_in()): ?>
+                                <button type="submit" class="loan-action-btn">ثبت درخواست استعلام قیمت</button>
+                            <?php else:
+                                $login_url = home_url('/login/?redirect_to=' . urlencode(get_permalink()));
+                                ?>
+                                <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn">برای ثبت درخواست ابتدا وارد شوید</a>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>
