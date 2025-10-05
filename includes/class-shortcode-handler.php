@@ -48,23 +48,6 @@ class Maneli_Shortcode_Handler {
                      wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                      wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
                 }
-				
-				if ($has_inquiry_list || $has_cash_inquiry_list) {
-                    $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
-                    $js_url = MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js';
-                    // Use a static version number for reliability, and check if the file exists.
-                    if (file_exists($js_path)) {
-                        wp_enqueue_script('maneli-inquiry-actions', $js_url, ['jquery', 'sweetalert2'], '1.0.3', true); // Version updated
-                        wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
-                            'ajax_url' => admin_url('admin-ajax.php'),
-                            'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
-                            'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
-                            'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
-                            'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
-                            'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce')
-                        ]);
-                    }
-                }
             }
         }
     }
