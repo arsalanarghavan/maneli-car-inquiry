@@ -19,14 +19,14 @@ class Maneli_Product_Editor_Shortcode {
     public function handle_filter_products_ajax() {
         check_ajax_referer('maneli_product_filter_nonce');
 
-        if (!current_user_can('manage_woocommerce')) {
+        if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => 'شما دسترسی لازم را ندارید.']);
         }
 
         $search_term = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $products_per_page = 20;
-        
+
         $args = [
             'limit' => $products_per_page,
             'page' => $paged,
@@ -68,15 +68,15 @@ class Maneli_Product_Editor_Shortcode {
      * Renders the HTML for the shortcode.
      */
     public function render_shortcode() {
-        if (!current_user_can('manage_woocommerce')) {
+        if (!current_user_can('manage_maneli_inquiries')) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
         }
 
         ob_start();
-        
+
         $products_per_page = 20;
         $paged = get_query_var('paged') ? get_query_var('paged') : 1;
-        
+
         $initial_products_query = wc_get_products([
             'limit' => $products_per_page,
             'page' => $paged,
@@ -84,10 +84,10 @@ class Maneli_Product_Editor_Shortcode {
             'order' => 'ASC',
             'paginate' => true,
         ]);
-        
+
         ?>
         <div class="maneli-inquiry-wrapper">
-            
+
             <?php echo Maneli_Admin_Dashboard_Widgets::render_product_statistics_widgets(); ?>
 
             <div class="user-list-header" style="margin-top: 40px;">
@@ -124,7 +124,7 @@ class Maneli_Product_Editor_Shortcode {
                 </tbody>
             </table>
             <div id="product-list-loader" style="display:none; text-align:center; padding: 40px;"><div class="spinner is-active" style="float:none;"></div></div>
-            
+
             <div class="maneli-pagination-wrapper" style="margin-top: 20px; text-align: center;">
                  <?php
                     echo paginate_links([
@@ -141,7 +141,7 @@ class Maneli_Product_Editor_Shortcode {
 
         <script type="text/javascript">
         jQuery(document).ready(function($) {
-            
+
             function formatNumber(n) {
                 let numStr = String(n).replace(/[^0-9]/g, '');
                 return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -155,7 +155,7 @@ class Maneli_Product_Editor_Shortcode {
                     }
                 });
             }
-            
+
             initializePriceInputs(document);
 
             // --- Event Delegation for Dynamic Elements ---
@@ -168,7 +168,7 @@ class Maneli_Product_Editor_Shortcode {
                 const productId = inputField.data('product-id');
                 const fieldType = inputField.data('field-type');
                 let fieldValue = inputField.val();
-                
+
                 if (inputField.hasClass('manli-price-input')) {
                     fieldValue = fieldValue.replace(/,/g, '');
                 }
@@ -176,7 +176,7 @@ class Maneli_Product_Editor_Shortcode {
                 if (!inputField.next('.spinner').length) {
                      inputField.after('<span class="spinner" style="vertical-align: middle; margin-right: 5px;"></span>');
                 }
-                
+
                 const spinner = inputField.next('.spinner');
                 spinner.addClass('is-active');
                 inputField.css('border-color', '#007cba');
@@ -202,7 +202,7 @@ class Maneli_Product_Editor_Shortcode {
             // --- AJAX Search and Pagination ---
             var xhr;
             var searchTimeout;
-            
+
             function fetch_products(page = 1, search = '') {
                 if (xhr && xhr.readyState !== 4) {
                     xhr.abort();
@@ -249,7 +249,7 @@ class Maneli_Product_Editor_Shortcode {
                 e.preventDefault();
                 var pageUrl = $(this).attr('href');
                 var pageNum = 1;
-                
+
                 // Extract page number from href (e.g., ?paged=2)
                 var matches = pageUrl.match(/paged=(\d+)/);
                 if (matches) {

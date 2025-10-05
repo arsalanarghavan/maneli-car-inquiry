@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.14.21
+ * Version:           0.14.22
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -64,17 +64,17 @@ function maneli_setup_roles_and_caps() {
     $maneli_admin_caps = array_merge($product_caps, [
         'read' => true,
         'manage_maneli_inquiries' => true,
-        'edit_posts' => true, 
+        'edit_posts' => true,
     ]);
 
-    remove_role('maneli_admin'); 
+    remove_role('maneli_admin');
     add_role('maneli_admin', 'مدیریت مانلی', $maneli_admin_caps);
 
     $maneli_expert_caps = array_merge($product_caps, [
         'read' => true,
         'edit_posts' => true,
     ]);
-    
+
     remove_role('maneli_expert');
     add_role('maneli_expert', 'کارشناس مانلی', $maneli_expert_caps);
 }
@@ -102,7 +102,7 @@ function maneli_translate_roles() {
     if ( ! isset( $wp_roles ) ) {
         $wp_roles = new WP_Roles();
     }
-    
+
     if(isset($wp_roles->roles['maneli_admin'])) { $wp_roles->roles['maneli_admin']['name'] = 'مدیریت مانلی'; }
     if(isset($wp_roles->roles['maneli_expert'])) { $wp_roles->roles['maneli_expert']['name'] = 'کارشناس مانلی'; }
     if(isset($wp_roles->roles['customer'])) { $wp_roles->roles['customer']['name'] = 'مشتری'; }
@@ -159,7 +159,7 @@ function maneli_redirect_non_admins_from_backend() {
     if (wp_doing_ajax() || wp_doing_cron() || basename($_SERVER['PHP_SELF']) === 'admin-post.php') {
         return;
     }
-    
+
     if ((current_user_can('manage_maneli_inquiries') || current_user_can('maneli_expert')) && !current_user_can('manage_options')) {
          wp_redirect(home_url('/dashboard/'));
          exit;
@@ -171,9 +171,9 @@ function maneli_redirect_non_admins_from_backend() {
  */
 function maneli_pre_get_posts_query($query) {
     // This should only run on frontend queries for non-admin users
-    if (!is_admin() && !current_user_can('manage_woocommerce') && $query->get('post_type') === 'product') {
+    if (!is_admin() && !current_user_can('manage_maneli_inquiries') && $query->get('post_type') === 'product') {
         $meta_query = $query->get('meta_query') ?: [];
-        
+
         if (!is_array($meta_query)) {
             $meta_query = [];
         }
@@ -183,13 +183,13 @@ function maneli_pre_get_posts_query($query) {
             'value' => 'disabled',
             'compare' => '!=',
         ];
-        
+
         $meta_query['relation'] = 'OR';
         $meta_query[] = [
             'key' => '_maneli_car_status',
             'compare' => 'NOT EXISTS',
         ];
-        
+
         $query->set('meta_query', $meta_query);
     }
 }
@@ -202,7 +202,7 @@ add_action('pre_get_posts', 'maneli_pre_get_posts_query');
 function maneli_update_product_data_callback() {
     check_ajax_referer('maneli_product_data_nonce', 'nonce');
 
-    if (!current_user_can('manage_woocommerce')) {
+    if (!current_user_can('manage_maneli_inquiries')) {
         wp_send_json_error('شما دسترسی لازم را ندارید.');
         return;
     }
@@ -240,13 +240,13 @@ function maneli_update_product_data_callback() {
                 wp_send_json_error('نوع فیلد نامعتبر است.');
                 return;
         }
-        
+
         wc_delete_product_transients($product_id);
         wp_send_json_success('اطلاعات با موفقیت به‌روزرسانی شد.');
     } else {
         wp_send_json_error('اطلاعات ارسالی نامعتبر است.');
     }
-    
+
     wp_die();
 }
 add_action('wp_ajax_maneli_update_product_data', 'maneli_update_product_data_callback');
@@ -259,7 +259,7 @@ function maneli_maybe_hide_prices() {
     $options = get_option('maneli_inquiry_all_options', []);
     $is_price_hidden = isset($options['hide_prices_for_customers']) && $options['hide_prices_for_customers'] == '1';
 
-    if ($is_price_hidden && !current_user_can('manage_woocommerce')) {
+    if ($is_price_hidden && !current_user_can('manage_maneli_inquiries')) {
         remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10);
         remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
         add_filter('woocommerce_get_price_html', '__return_empty_string', 100, 2);
@@ -309,7 +309,7 @@ final class Maneli_Car_Inquiry_Plugin {
         // new Maneli_Credit_Report_Page(); // Removed Admin Page
         new Maneli_User_Profile();
         // new Maneli_Product_Editor_Page(); // Removed Admin Page
-        
+
         $options = get_option('maneli_inquiry_all_options', []);
         if (isset($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
             new Maneli_Grouped_Attributes();
