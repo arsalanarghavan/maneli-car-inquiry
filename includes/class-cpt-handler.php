@@ -132,6 +132,7 @@ class Maneli_CPT_Handler {
             'customer' => 'مشتری',
             'mobile' => 'شماره موبایل',
             'car' => 'خودرو',
+            'assigned_expert' => 'کارشناس مسئول',
             'status' => 'وضعیت',
             'date' => 'تاریخ',
         ];
@@ -148,6 +149,10 @@ class Maneli_CPT_Handler {
             case 'car':
                 $product_id = get_post_meta($post_id, 'product_id', true);
                 echo $product_id ? get_the_title($product_id) : '—';
+                break;
+            case 'assigned_expert':
+                $expert_name = get_post_meta($post_id, 'assigned_expert_name', true);
+                echo $expert_name ? esc_html($expert_name) : '—';
                 break;
             case 'status':
                 $status_key = get_post_meta($post_id, 'cash_inquiry_status', true);

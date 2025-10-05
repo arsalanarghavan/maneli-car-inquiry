@@ -858,14 +858,15 @@ class Maneli_Inquiry_Shortcodes {
         // START: ADDED THIS CODE BLOCK
         $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
         if (file_exists($js_path)) {
-            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.4', true);
+            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.5', true);
             wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
                 'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
                 'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
                 'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
-                'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce')
+                'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
+                'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce')
             ]);
         }
         // END: ADDED THIS CODE BLOCK
@@ -903,12 +904,25 @@ class Maneli_Inquiry_Shortcodes {
                                 <select id="cash-inquiry-status-filter">
                                     <option value="">همه وضعیت‌ها</option>
                                     <option value="pending">در حال پیگیری</option>
-                                    <option value="approved">تایید شده</option>
+                                    <option value="approved">ارجاع شده</option>
                                     <option value="rejected">رد شده</option>
                                     <option value="awaiting_payment">در انتظار پرداخت</option>
                                     <option value="completed">تکمیل شده</option>
                                 </select>
                             </div>
+                            <?php if (current_user_can('manage_maneli_inquiries')): 
+                                $experts = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
+                            ?>
+                             <div class="filter-group">
+                                <label for="cash-expert-filter">کارشناس مسئول:</label>
+                                <select id="cash-expert-filter" class="maneli-select2">
+                                    <option value="">همه کارشناسان</option>
+                                    <?php foreach ($experts as $expert) : ?>
+                                        <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </form>
                 </div>
@@ -922,6 +936,7 @@ class Maneli_Inquiry_Shortcodes {
                                 <th>موبایل</th>
                                 <th>خودرو</th>
                                 <th>وضعیت</th>
+                                <th>ارجاع</th>
                                 <th>تاریخ ثبت</th>
                                 <th>عملیات</th>
                             </tr>
@@ -936,6 +951,14 @@ class Maneli_Inquiry_Shortcodes {
 
         <script>
         jQuery(document).ready(function($) {
+            if (typeof $.fn.select2 === 'function' && $('.maneli-select2').length) {
+                $('.maneli-select2').select2({
+                     placeholder: "یک کارشناس انتخاب کنید",
+                     allowClear: true,
+                     width: '100%'
+                });
+            }
+
             var xhr;
             var searchTimeout;
 
@@ -944,28 +967,34 @@ class Maneli_Inquiry_Shortcodes {
                 $('#cash-inquiry-list-loader').show();
                 $('#maneli-cash-inquiry-list-tbody').css('opacity', 0.5);
                 
+                var ajaxData = {
+                    action: 'maneli_filter_cash_inquiries_ajax',
+                    _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_filter_nonce"); ?>',
+                    page: page,
+                    search: $('#cash-inquiry-search-input').val(),
+                    status: $('#cash-inquiry-status-filter').val(),
+                    base_url: '<?php echo esc_url(remove_query_arg("cash_inquiry_id")); ?>'
+                };
+
+                if ($('#cash-expert-filter').length) {
+                    ajaxData.expert = $('#cash-expert-filter').val();
+                }
+
                 $.ajax({
                     url: '<?php echo admin_url("admin-ajax.php"); ?>',
                     type: 'POST',
-                    data: {
-                        action: 'maneli_filter_cash_inquiries_ajax',
-                        _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_filter_nonce"); ?>',
-                        page: page,
-                        search: $('#cash-inquiry-search-input').val(),
-                        status: $('#cash-inquiry-status-filter').val(),
-                        base_url: '<?php echo esc_url(remove_query_arg("cash_inquiry_id")); ?>'
-                    },
+                    data: ajaxData,
                     success: function(response) {
                         if (response.success) {
                             $('#maneli-cash-inquiry-list-tbody').html(response.data.html);
                             $('.maneli-cash-pagination-wrapper').html(response.data.pagination_html);
                         } else {
-                            $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="7" style="text-align:center;">' + (response.data.message || 'خطایی رخ داد.') + '</td></tr>');
+                            $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" style="text-align:center;">' + (response.data.message || 'خطایی رخ داد.') + '</td></tr>');
                             $('.maneli-cash-pagination-wrapper').html('');
                         }
                     },
                     error: function() {
-                        $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="7" style="text-align:center;">خطای ارتباط با سرور.</td></tr>');
+                        $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" style="text-align:center;">خطای ارتباط با سرور.</td></tr>');
                     },
                     complete: function() {
                         $('#cash-inquiry-list-loader').hide();
@@ -983,7 +1012,7 @@ class Maneli_Inquiry_Shortcodes {
                 searchTimeout = setTimeout(() => fetch_cash_inquiries(1), 500);
             });
 			
-			$('#cash-inquiry-status-filter').on('change', function() {
+			$('#cash-inquiry-status-filter, #cash-expert-filter').on('change', function() {
                 fetch_cash_inquiries(1);
             });
 
@@ -1284,6 +1313,18 @@ class Maneli_Inquiry_Shortcodes {
 		
 		$meta_query = ['relation' => 'AND'];
 
+        if (!current_user_can('manage_maneli_inquiries')) {
+            $meta_query[] = [
+                'key' => 'assigned_expert_id',
+                'value' => get_current_user_id()
+            ];
+        } elseif (!empty($_POST['expert'])) {
+            $meta_query[] = [
+                'key' => 'assigned_expert_id',
+                'value' => absint($_POST['expert'])
+            ];
+        }
+
 
         if (!empty($search_query)) {
             $product_ids = wc_get_products(['s' => $search_query, 'limit' => -1, 'return' => 'ids']);
@@ -1323,7 +1364,7 @@ class Maneli_Inquiry_Shortcodes {
                 $this->render_cash_inquiry_row(get_the_ID(), $base_url);
             }
         } else {
-            echo '<tr><td colspan="7" style="text-align:center;">هیچ درخواستی یافت نشد.</td></tr>';
+            echo '<tr><td colspan="8" style="text-align:center;">هیچ درخواستی یافت نشد.</td></tr>';
         }
         $html = ob_get_clean();
         wp_reset_postdata();
@@ -1376,6 +1417,7 @@ class Maneli_Inquiry_Shortcodes {
 		$status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
         $status_label = Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status);
         $report_url = add_query_arg('cash_inquiry_id', $inquiry_id, $base_url);
+        $expert_name = get_post_meta($inquiry_id, 'assigned_expert_name', true);
         ?>
         <tr>
             <td data-title="شناسه">#<?php echo esc_html($inquiry_id); ?></td>
@@ -1383,6 +1425,13 @@ class Maneli_Inquiry_Shortcodes {
             <td data-title="موبایل"><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td>
             <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
             <td data-title="وضعیت"><?php echo esc_html($status_label); ?></td>
+            <td data-title="ارجاع">
+                <?php if ($expert_name): ?>
+                    <?php echo esc_html($expert_name); ?>
+                <?php else: ?>
+                    <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">ارجاع</button>
+                <?php endif; ?>
+            </td>
             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
 			<td data-title="عملیات" class="cash-inquiry-actions">
 				<a href="<?php echo esc_url($report_url); ?>" class="button view">مشاهده جزئیات</a>

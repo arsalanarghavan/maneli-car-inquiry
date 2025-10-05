@@ -31,6 +31,7 @@ class Maneli_Form_Handler {
         add_action('wp_ajax_maneli_update_cash_inquiry', [$this, 'ajax_update_cash_inquiry']);
         add_action('wp_ajax_maneli_delete_cash_inquiry', [$this, 'ajax_delete_cash_inquiry']);
         add_action('wp_ajax_maneli_set_down_payment', [$this, 'ajax_set_down_payment']);
+        add_action('wp_ajax_maneli_assign_expert_to_cash_inquiry', [$this, 'ajax_assign_expert_to_cash_inquiry']); // New Hook
 		add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
 
 
@@ -1166,5 +1167,51 @@ class Maneli_Form_Handler {
                 wp_die('در حال حاضر هیچ درگاه پرداخت فعالی در تنظیمات وجود ندارد.');
             }
         }
+    }
+
+    public function ajax_assign_expert_to_cash_inquiry() {
+        check_ajax_referer('maneli_cash_inquiry_assign_expert_nonce', 'nonce');
+    
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز.'], 403);
+        }
+    
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $expert_id = isset($_POST['expert_id']) ? sanitize_text_field($_POST['expert_id']) : 'auto';
+    
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            wp_send_json_error(['message' => 'شناسه درخواست نامعتبر است.']);
+        }
+    
+        $assigned_expert_id = 0;
+        $assigned_expert_name = '';
+    
+        if ($expert_id === 'auto') {
+            $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'ID', 'order' => 'ASC']);
+            if (empty($expert_users)) {
+                wp_send_json_error(['message' => 'هیچ کارشناسی برای ارجاع خودکار یافت نشد.']);
+            }
+            $last_index = get_option('maneli_cash_expert_last_assigned_index', -1);
+            $next_index = ($last_index + 1) % count($expert_users);
+            $assigned_expert = $expert_users[$next_index];
+            $assigned_expert_id = $assigned_expert->ID;
+            $assigned_expert_name = $assigned_expert->display_name;
+            update_option('maneli_cash_expert_last_assigned_index', $next_index);
+        } else {
+            $expert_user = get_userdata(intval($expert_id));
+            if ($expert_user && in_array('maneli_expert', $expert_user->roles)) {
+                $assigned_expert_id = $expert_user->ID;
+                $assigned_expert_name = $expert_user->display_name;
+            } else {
+                wp_send_json_error(['message' => 'کارشناس انتخاب شده معتبر نیست.']);
+            }
+        }
+    
+        update_post_meta($inquiry_id, 'assigned_expert_id', $assigned_expert_id);
+        update_post_meta($inquiry_id, 'assigned_expert_name', $assigned_expert_name);
+        // Optionally change status to 'approved' or a similar status upon assignment
+        update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
+    
+        wp_send_json_success(['message' => 'درخواست با موفقیت به ' . $assigned_expert_name . ' ارجاع داده شد.', 'expert_name' => $assigned_expert_name]);
     }
 }

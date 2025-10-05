@@ -165,4 +165,53 @@ jQuery(document).ready(function($) {
         });
     });
 
+    // --- NEW: Event Delegation for Assign Expert Button ---
+    $(document.body).on('click', '.assign-expert-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        const expertOptions = $('#cash-expert-filter').clone().prop('id', 'swal-expert-filter').prepend('<option value="auto">-- انتساب خودکار (گردشی) --</option>').val('auto').get(0).outerHTML;
+
+        Swal.fire({
+            title: `ارجاع درخواست #${inquiryId}`,
+            html: `
+                <div style="text-align: right; font-family: inherit;">
+                    <label for="swal-expert-filter" style="display: block; margin-bottom: 10px;">یک کارشناس را برای این درخواست انتخاب کنید:</label>
+                    ${expertOptions}
+                </div>
+            `,
+            confirmButtonText: 'ارجاع بده',
+            showCancelButton: true,
+            cancelButtonText: 'انصراف',
+            didOpen: () => {
+                 $('#swal-expert-filter').select2({
+                     placeholder: "انتخاب کارشناس",
+                     allowClear: false,
+                     width: '100%'
+                });
+            },
+            preConfirm: () => {
+                return $('#swal-expert-filter').val();
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                button.prop('disabled', true).text('...');
+                $.post(maneli_inquiry_ajax.ajax_url, {
+                    action: 'maneli_assign_expert_to_cash_inquiry',
+                    nonce: maneli_inquiry_ajax.cash_assign_expert_nonce,
+                    inquiry_id: inquiryId,
+                    expert_id: result.value
+                }, function(response) {
+                    if (response.success) {
+                        Swal.fire('موفق', response.data.message, 'success');
+                        // Replace button with expert name
+                        button.closest('td').text(response.data.expert_name);
+                    } else {
+                        Swal.fire('خطا', response.data.message, 'error');
+                        button.prop('disabled', false).text('ارجاع');
+                    }
+                });
+            }
+        });
+    });
+
 });
