@@ -653,6 +653,11 @@ class Maneli_Inquiry_Shortcodes {
     }
 
     public function render_inquiry_list() {
+        // ** NEW LOGIC **: Check if we need to show a single report instead of the list
+        if (isset($_GET['inquiry_id']) && !empty($_GET['inquiry_id'])) {
+            return $this->render_frontend_credit_report();
+        }
+
         if (!is_user_logged_in()) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده لیست استعلام‌ها، لطفاً ابتدا وارد شوید.</p></div>';
         }
@@ -661,7 +666,6 @@ class Maneli_Inquiry_Shortcodes {
         $is_admin_or_expert = current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', $current_user->roles);
 
         if (!$is_admin_or_expert) {
-            // Original simple list for customers
             return $this->render_customer_inquiry_list($current_user->ID);
         }
         
@@ -732,7 +736,6 @@ class Maneli_Inquiry_Shortcodes {
 
         <script>
         jQuery(document).ready(function($) {
-            // Make sure the function exists before calling
             if (typeof $.fn.select2 === 'function' && $('.maneli-select2').length) {
                 $('.maneli-select2').select2({
                      placeholder: "یک کارشناس انتخاب کنید",
@@ -758,7 +761,8 @@ class Maneli_Inquiry_Shortcodes {
                     page: page,
                     search: $('#inquiry-search-input').val(),
                     status: $('#status-filter').val(),
-                    expert: $('#expert-filter').length ? $('#expert-filter').val() : ''
+                    expert: $('#expert-filter').length ? $('#expert-filter').val() : '',
+                    base_url: '<?php echo esc_url(remove_query_arg("inquiry_id")); ?>' // Pass current URL
                 };
 
                 xhr = $.ajax({
@@ -784,10 +788,8 @@ class Maneli_Inquiry_Shortcodes {
                 });
             }
 
-            // Initial fetch
             fetch_inquiries(1);
 
-            // Event Handlers
             $('#inquiry-search-input').on('keyup', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(function() {
@@ -799,13 +801,11 @@ class Maneli_Inquiry_Shortcodes {
                 fetch_inquiries(1);
             });
 
-            // Pagination click handler
             $('.maneli-pagination-wrapper').on('click', 'a.page-numbers', function(e) {
                 e.preventDefault();
                 var pageUrl = $(this).attr('href');
                 let pageNum = 1;
                 
-                // This regex is more robust for extracting the paged number
                 const regex = /paged=(\d+)/;
                 const matches = pageUrl.match(regex);
 
@@ -990,13 +990,14 @@ class Maneli_Inquiry_Shortcodes {
             'author'         => $user_id
         ];
         $inquiries = get_posts($args);
-
+    
         ob_start();
         echo '<div class="maneli-inquiry-wrapper">';
-
+    
         if (empty($inquiries)) {
             echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی برای شما ثبت نشده است.</p></div>';
         } else {
+            $current_url = remove_query_arg(['inquiry_id']); // Get current URL without the param
     
             echo '<h3>لیست استعلام‌های شما</h3>';
             echo '<table class="shop_table shop_table_responsive my_account_orders">';
@@ -1013,6 +1014,7 @@ class Maneli_Inquiry_Shortcodes {
                 $inquiry_id = $inquiry->ID;
                 $product_id = get_post_meta($inquiry_id, 'product_id', true);
                 $status = get_post_meta($inquiry_id, 'inquiry_status', true);
+                $report_url = add_query_arg('inquiry_id', $inquiry_id, $current_url); // Use current URL
                 $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
                 list($y, $m, $d) = explode('-', $gregorian_date);
                 
@@ -1021,7 +1023,7 @@ class Maneli_Inquiry_Shortcodes {
                 echo '<td data-title="خودرو">' . esc_html(get_the_title($product_id)) . '</td>';
                 echo '<td data-title="وضعیت">' . esc_html(Maneli_CPT_Handler::get_status_label($status)) . '</td>';
                 echo '<td data-title="تاریخ">' . esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')) . '</td>';
-                echo '<td class="woocommerce-orders-table__cell-order-actions"><a href="#" class="button view view-inquiry-details" data-id="' . esc_attr($inquiry_id) . '">مشاهده جزئیات</a></td>';
+                echo '<td class="woocommerce-orders-table__cell-order-actions"><a href="' . esc_url($report_url) . '" class="button view">مشاهده جزئیات</a></td>';
                 echo '</tr>';
             }
             echo '</tbody>';
@@ -1032,20 +1034,18 @@ class Maneli_Inquiry_Shortcodes {
         return ob_get_clean();
     }
     
-    /**
-     * AJAX handler for filtering inquiries.
-     */
     public function handle_filter_inquiries_ajax() {
         if ( !isset($_POST['_ajax_nonce']) || !wp_verify_nonce($_POST['_ajax_nonce'], 'maneli_inquiry_filter_nonce') ) {
             wp_send_json_error(['message' => 'خطای امنیتی. لطفاً صفحه را رفرش کنید.']);
         }
-
+    
         if (!is_user_logged_in() || !(current_user_can('maneli_expert') || current_user_can('manage_maneli_inquiries'))) {
             wp_send_json_error(['message' => 'شما دسترسی لازم را ندارید.']);
         }
-
+    
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $search_query = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+        $base_url = isset($_POST['base_url']) ? esc_url_raw($_POST['base_url']) : home_url();
         
         $args = [
             'post_type'      => 'inquiry',
@@ -1055,10 +1055,9 @@ class Maneli_Inquiry_Shortcodes {
             'order'          => 'DESC',
             'post_status'    => 'publish',
         ];
-
-        // This is the main query for filters
+    
         $meta_query = ['relation' => 'AND'];
-
+    
         if (!empty($search_query)) {
             $user_ids_from_meta = get_users([
                 'fields' => 'ID',
@@ -1074,7 +1073,7 @@ class Maneli_Inquiry_Shortcodes {
             $all_user_ids = array_unique(array_merge($user_ids_from_meta, $users_by_display_name));
             
             $product_ids = wc_get_products(['s' => $search_query, 'limit' => -1, 'return' => 'ids']);
-
+    
             $search_related_inquiry_ids = [];
             if (!empty($all_user_ids)) {
                 $user_inquiries = get_posts(['post_type' => 'inquiry', 'posts_per_page' => -1, 'author__in' => $all_user_ids, 'fields' => 'ids']);
@@ -1084,9 +1083,9 @@ class Maneli_Inquiry_Shortcodes {
                 $product_inquiries = get_posts(['post_type' => 'inquiry', 'posts_per_page' => -1, 'fields' => 'ids', 'meta_key' => 'product_id', 'meta_value' => $product_ids, 'meta_compare' => 'IN']);
                 $search_related_inquiry_ids = array_merge($search_related_inquiry_ids, $product_inquiries);
             }
-
+    
             if(empty($search_related_inquiry_ids)){
-                 $args['post__in'] = [0]; // Force no results
+                 $args['post__in'] = [0];
             } else {
                  $args['post__in'] = array_unique($search_related_inquiry_ids);
             }
@@ -1095,12 +1094,12 @@ class Maneli_Inquiry_Shortcodes {
         if (!empty($_POST['status'])) {
             $meta_query[] = ['key' => 'inquiry_status', 'value' => sanitize_text_field($_POST['status'])];
         }
-
+    
         if (current_user_can('manage_maneli_inquiries')) {
             if (!empty($_POST['expert'])) {
                 $meta_query[] = ['key' => 'assigned_expert_id', 'value' => absint($_POST['expert'])];
             }
-        } else { // It's an expert
+        } else {
             $user_id = get_current_user_id();
             $meta_query[] = [
                 'relation' => 'OR',
@@ -1112,14 +1111,14 @@ class Maneli_Inquiry_Shortcodes {
         if (count($meta_query) > 1) {
             $args['meta_query'] = $meta_query;
         }
-
+    
         $inquiry_query = new WP_Query($args);
-
+    
         ob_start();
         if ($inquiry_query->have_posts()) {
             while ($inquiry_query->have_posts()) {
                 $inquiry_query->the_post();
-                $this->render_inquiry_row(get_the_ID());
+                $this->render_inquiry_row(get_the_ID(), $base_url);
             }
         } else {
             $columns = current_user_can('manage_maneli_inquiries') ? 7 : 6;
@@ -1137,7 +1136,7 @@ class Maneli_Inquiry_Shortcodes {
             'next_text' => 'بعدی »',
             'type'  => 'plain'
         ]);
-
+    
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 	
@@ -1223,12 +1222,10 @@ class Maneli_Inquiry_Shortcodes {
     }
 
 
-    /**
-     * Renders a single row in the inquiry list table.
-     */
-    private function render_inquiry_row($inquiry_id) {
+    private function render_inquiry_row($inquiry_id, $base_url) {
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $status = get_post_meta($inquiry_id, 'inquiry_status', true);
+        $report_url = add_query_arg('inquiry_id', $inquiry_id, $base_url);
         $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
         list($y, $m, $d) = explode('-', $gregorian_date);
         $customer = get_userdata(get_post_field('post_author', $inquiry_id));
@@ -1245,7 +1242,7 @@ class Maneli_Inquiry_Shortcodes {
             <td data-title="وضعیت"><?php echo esc_html(Maneli_CPT_Handler::get_status_label($status)); ?></td>
             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
             <td class="woocommerce-orders-table__cell-order-actions">
-                <a href="#" class="button view view-inquiry-details" data-id="<?php echo esc_attr($inquiry_id); ?>">مشاهده جزئیات</a>
+                <a href="<?php echo esc_url($report_url); ?>" class="button view">مشاهده جزئیات</a>
             </td>
         </tr>
         <?php
@@ -1282,6 +1279,7 @@ class Maneli_Inquiry_Shortcodes {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
         }
         if (!isset($_GET['inquiry_id'])) {
+            // This case should not be reached if called from render_inquiry_list, but good to have as a fallback.
             return '<div class="maneli-inquiry-wrapper error-box"><p>شناسه استعلام مشخص نشده است.</p></div>';
         }
         
@@ -1313,6 +1311,8 @@ class Maneli_Inquiry_Shortcodes {
         $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
         $product_id = $post_meta['product_id'][0] ?? 0;
         $status = $post_meta['inquiry_status'][0] ?? 'pending';
+        $back_link = remove_query_arg('inquiry_id');
+
 
         $status_map = [
             'user_confirmed' => ['label' => 'تایید و ارجاع شده', 'class' => 'status-bg-approved'],
@@ -1491,7 +1491,7 @@ class Maneli_Inquiry_Shortcodes {
             <?php endif; ?>
 
             <div class="report-back-button-wrapper">
-                <a href="<?php echo esc_url(home_url('/dashboard/?endp=inf_menu_3')); ?>" class="loan-action-btn">بازگشت به لیست استعلام‌ها</a>
+                <a href="<?php echo esc_url($back_link); ?>" class="loan-action-btn">بازگشت به لیست استعلام‌ها</a>
             </div>
         </div>
         
