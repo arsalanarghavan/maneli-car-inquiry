@@ -99,8 +99,8 @@ class Maneli_Settings_Page {
         foreach ($input as $key => $value) {
              if (is_array($value)) {
                 $sanitized_input[$key] = $value;
-            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message', 'unavailable_product_message'])) {
-                $sanitized_input[$key] = sanitize_text_field($value);
+            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message', 'unavailable_product_message', 'cash_inquiry_rejection_reasons'])) {
+                $sanitized_input[$key] = sanitize_textarea_field($value);
             } else {
                 $sanitized_input[$key] = sanitize_text_field($value);
             }
@@ -142,7 +142,7 @@ class Maneli_Settings_Page {
         
         switch ($type) {
             case 'textarea':
-                echo "<textarea name='{$field_name}' rows='3' class='large-text'>" . esc_textarea($value) . "</textarea>";
+                echo "<textarea name='{$field_name}' rows='5' class='large-text'>" . esc_textarea($value) . "</textarea>";
                 break;
             case 'text':
                  echo "<input type='text' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text'>";
@@ -243,7 +243,7 @@ class Maneli_Settings_Page {
                         ]
                     ],
                     'maneli_sms_patterns_section' => [
-                        'title' => 'کدهای پترن پیامک (Body ID)',
+                        'title' => 'کدهای پترن پیامک (Body ID) - استعلام اقساطی',
                         'desc' => 'در این بخش، به جای متن کامل پیامک، فقط <strong>کد پترن (Body ID)</strong> که در پنل ملی پیامک شما تایید شده است را وارد کنید.<br>ترتیب متغیرها باید دقیقاً مطابق توضیحات هر فیلد باشد.',
                         'fields' => [
                             ['name' => 'sms_pattern_pending', 'label' => 'پترن «در انتظار بررسی»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
@@ -255,11 +255,13 @@ class Maneli_Settings_Page {
                         ]
                     ],
                     'maneli_cash_inquiry_sms_section' => [
-                        'title' => 'کدهای پترن پیامک‌ درخواست نقدی',
+                        'title' => 'کدهای پترن پیامک - درخواست نقدی',
                         'desc' => 'در این بخش کدهای پترن مربوط به فرآیند خرید نقدی را مدیریت کنید.',
                         'fields' => [
                             ['name' => 'cash_inquiry_approved_pattern', 'label' => 'پترن «تایید درخواست نقدی»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. مبلغ پیش‌پرداخت'],
                             ['name' => 'cash_inquiry_rejected_pattern', 'label' => 'پترن «رد درخواست نقدی»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد'],
+                            ['name' => 'cash_inquiry_rejection_reasons', 'label' => 'دلایل آماده رد درخواست نقدی', 'type' => 'textarea', 'desc' => 'هر دلیل را در یک خط جداگانه وارد کنید. این دلایل در هنگام رد درخواست به صورت یک لیست نمایش داده می‌شوند.'],
+                            ['name' => 'cash_inquiry_expert_referral_pattern', 'label' => 'پترن «ارجاع درخواست نقدی به کارشناس»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو'],
                         ]
                     ]
                 ]
@@ -270,7 +272,7 @@ class Maneli_Settings_Page {
                 'sections' => [
                     'maneli_experts_list_section' => [
                         'title' => 'مدیریت کارشناسان',
-                        'desc' => 'سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.<br>استعلام‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.<br>برای افزودن کارشناس جدید، کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.',
+                        'desc' => 'سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.<br>استعلام‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.<br>برای افزودن کارشناس جدید, کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.',
                         'fields' => []
                     ]
                 ]

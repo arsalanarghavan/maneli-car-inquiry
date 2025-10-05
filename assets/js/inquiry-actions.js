@@ -133,15 +133,40 @@ jQuery(document).ready(function($) {
     $(document.body).on('click', '#reject-cash-inquiry-btn', function() {
         const button = $(this);
         const inquiryId = button.closest('#cash-inquiry-details').data('inquiry-id');
+        
+        let reasonOptions = '<option value="">-- یک دلیل انتخاب کنید --</option>';
+        if(maneli_inquiry_ajax.cash_rejection_reasons && maneli_inquiry_ajax.cash_rejection_reasons.length > 0) {
+            maneli_inquiry_ajax.cash_rejection_reasons.forEach(reason => {
+                reasonOptions += `<option value="${reason}">${reason}</option>`;
+            });
+        }
+        reasonOptions += '<option value="custom">دلیل دیگر (دلخواه)</option>';
 
         Swal.fire({
             title: `رد درخواست #${inquiryId}`,
-            html: `<textarea id="swal-rejection-reason" class="swal2-textarea" placeholder="دلیل رد درخواست را اینجا بنویسید..."></textarea>`,
+            html: `
+                <div style="text-align: right; font-family: inherit;">
+                    <label for="swal-rejection-reason-select" style="display: block; margin-bottom: 10px;">لطفا دلیل رد درخواست را انتخاب کنید:</label>
+                    <select id="swal-rejection-reason-select" class="swal2-select" style="width: 100%;">${reasonOptions}</select>
+                    <textarea id="swal-rejection-reason-custom" class="swal2-textarea" placeholder="دلیل دلخواه را اینجا بنویسید..." style="display: none; margin-top: 10px;"></textarea>
+                </div>
+            `,
             confirmButtonText: 'ثبت رد درخواست',
             showCancelButton: true,
             cancelButtonText: 'انصراف',
+            didOpen: () => {
+                const select = document.getElementById('swal-rejection-reason-select');
+                const customText = document.getElementById('swal-rejection-reason-custom');
+                select.addEventListener('change', () => {
+                    customText.style.display = select.value === 'custom' ? 'block' : 'none';
+                });
+            },
             preConfirm: () => {
-                return document.getElementById('swal-rejection-reason').value;
+                const select = document.getElementById('swal-rejection-reason-select');
+                if (select.value === 'custom') {
+                    return document.getElementById('swal-rejection-reason-custom').value;
+                }
+                return select.value;
             }
         }).then((result) => {
             if (result.isConfirmed && result.value) {
@@ -165,7 +190,7 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // --- NEW: Event Delegation for Assign Expert Button ---
+    // --- Assign Expert Button (Works for both list and single page) ---
     $(document.body).on('click', '.assign-expert-btn', function() {
         const button = $(this);
         const inquiryId = button.data('inquiry-id');
@@ -202,9 +227,14 @@ jQuery(document).ready(function($) {
                     expert_id: result.value
                 }, function(response) {
                     if (response.success) {
-                        Swal.fire('موفق', response.data.message, 'success');
-                        // Replace button with expert name
-                        button.closest('td').text(response.data.expert_name);
+                        Swal.fire('موفق', response.data.message, 'success').then(() => {
+                           // If on single page, just reload to show the expert name
+                           if (button.closest('#cash-inquiry-details').length > 0) {
+                               location.reload();
+                           } else { // If on list page, update the cell
+                               button.closest('td').text(response.data.expert_name);
+                           }
+                        });
                     } else {
                         Swal.fire('خطا', response.data.message, 'error');
                         button.prop('disabled', false).text('ارجاع');

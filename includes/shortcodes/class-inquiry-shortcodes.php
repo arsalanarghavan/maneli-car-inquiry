@@ -855,10 +855,13 @@ class Maneli_Inquiry_Shortcodes {
     }
 	
 	public function render_cash_inquiry_list() {
-        // START: ADDED THIS CODE BLOCK
+        $options = get_option('maneli_inquiry_all_options', []);
+        $rejection_reasons_raw = $options['cash_inquiry_rejection_reasons'] ?? '';
+        $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_reasons_raw)));
+
         $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
         if (file_exists($js_path)) {
-            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.5', true);
+            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.6', true);
             wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
@@ -866,11 +869,11 @@ class Maneli_Inquiry_Shortcodes {
                 'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
                 'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
                 'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
-                'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce')
+                'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
+                'cash_rejection_reasons' => $rejection_reasons,
             ]);
         }
-        // END: ADDED THIS CODE BLOCK
-
+        
         if (isset($_GET['cash_inquiry_id']) && !empty($_GET['cash_inquiry_id'])) {
             return $this->render_single_cash_inquiry_page();
         }
@@ -1765,6 +1768,7 @@ class Maneli_Inquiry_Shortcodes {
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
         $status_label = Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status);
+        $expert_name = get_post_meta($inquiry_id, 'assigned_expert_name', true);
         $back_link = remove_query_arg('cash_inquiry_id');
 
         ob_start();
@@ -1774,6 +1778,9 @@ class Maneli_Inquiry_Shortcodes {
             
             <div class="report-status-box status-bg-pending">
                 <strong>وضعیت فعلی:</strong> <?php echo esc_html($status_label); ?>
+                <?php if ($expert_name): ?>
+                    <br><strong>کارشناس مسئول:</strong> <?php echo esc_html($expert_name); ?>
+                <?php endif; ?>
             </div>
 
             <div class="report-box">
@@ -1801,6 +1808,9 @@ class Maneli_Inquiry_Shortcodes {
             <div class="admin-actions-box">
                 <h3 class="report-box-title">عملیات</h3>
                 <div class="action-button-group" style="justify-content: center;">
+                    <?php if (!$expert_name): ?>
+                        <button type="button" class="action-btn assign-expert-btn" style="background-color: #17a2b8;" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">ارجاع به کارشناس</button>
+                    <?php endif; ?>
                     <button type="button" class="action-btn" id="edit-cash-inquiry-btn" style="background-color: #ffc107; color: #212529;">ویرایش اطلاعات</button>
                     <button type="button" class="action-btn" id="delete-cash-inquiry-btn" style="background-color: #dc3545;">حذف درخواست</button>
 
