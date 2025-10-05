@@ -25,7 +25,7 @@ class Maneli_Product_Editor_Shortcode {
 
         $search_term = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
-        $products_per_page = 20;
+        $products_per_page = 50;
 
         $args = [
             'limit' => $products_per_page,
@@ -74,7 +74,7 @@ class Maneli_Product_Editor_Shortcode {
 
         ob_start();
 
-        $products_per_page = 20;
+        $products_per_page = 50;
         $paged = get_query_var('paged') ? get_query_var('paged') : 1;
 
         $initial_products_query = wc_get_products([

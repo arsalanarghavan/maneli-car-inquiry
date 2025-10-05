@@ -973,15 +973,17 @@ class Maneli_Inquiry_Shortcodes {
         if (isset($_GET['payment_status'])) {
             $this->display_payment_message(sanitize_text_field($_GET['payment_status']));
         }
-        
+        $paged = get_query_var('paged') ? get_query_var('paged') : 1;
         $args = [
             'post_type'      => 'cash_inquiry',
-            'posts_per_page' => -1,
+            'posts_per_page' => 50,
+            'paged'          => $paged,
             'orderby'        => 'date',
             'order'          => 'DESC',
             'author'         => $user_id
         ];
-        $inquiries = get_posts($args);
+        $inquiries_query = new WP_Query($args);
+        $inquiries = $inquiries_query->get_posts();
 
         ob_start();
         ?>
@@ -1032,6 +1034,19 @@ class Maneli_Inquiry_Shortcodes {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                 <div class="maneli-pagination-wrapper" style="margin-top: 20px; text-align: center;">
+                    <?php
+                    echo paginate_links([
+                        'base' => get_permalink() . '%_%',
+                        'format' => '?paged=%#%',
+                        'current' => $paged,
+                        'total' => $inquiries_query->max_num_pages,
+                        'prev_text' => '« قبلی',
+                        'next_text' => 'بعدی »',
+                        'type'  => 'plain'
+                    ]);
+                    ?>
+                </div>
             <?php endif; ?>
         </div>
         <?php
@@ -1039,14 +1054,17 @@ class Maneli_Inquiry_Shortcodes {
     }
     
     private function render_customer_inquiry_list($user_id) {
+        $paged = get_query_var('paged') ? get_query_var('paged') : 1;
         $args = [
             'post_type'      => 'inquiry',
-            'posts_per_page' => -1,
+            'posts_per_page' => 50,
+            'paged'          => $paged,
             'orderby'        => 'date',
             'order'          => 'DESC',
             'author'         => $user_id
         ];
-        $inquiries = get_posts($args);
+        $inquiries_query = new WP_Query($args);
+        $inquiries = $inquiries_query->get_posts();
     
         ob_start();
         echo '<div class="maneli-inquiry-wrapper">';
@@ -1085,6 +1103,18 @@ class Maneli_Inquiry_Shortcodes {
             }
             echo '</tbody>';
             echo '</table>';
+
+            echo '<div class="maneli-pagination-wrapper" style="margin-top: 20px; text-align: center;">';
+            echo paginate_links([
+                'base' => get_permalink() . '%_%',
+                'format' => '?paged=%#%',
+                'current' => $paged,
+                'total' => $inquiries_query->max_num_pages,
+                'prev_text' => '« قبلی',
+                'next_text' => 'بعدی »',
+                'type'  => 'plain'
+            ]);
+            echo '</div>';
         }
         echo '</div>';
     
@@ -1106,7 +1136,7 @@ class Maneli_Inquiry_Shortcodes {
         
         $args = [
             'post_type'      => 'inquiry',
-            'posts_per_page' => 20,
+            'posts_per_page' => 50,
             'paged'          => $paged,
             'orderby'        => 'date',
             'order'          => 'DESC',
@@ -1213,7 +1243,7 @@ class Maneli_Inquiry_Shortcodes {
 
         $args = [
             'post_type'      => 'cash_inquiry',
-            'posts_per_page' => 20,
+            'posts_per_page' => 50,
             'paged'          => $paged,
             'orderby'        => 'date',
             'order'          => 'DESC',

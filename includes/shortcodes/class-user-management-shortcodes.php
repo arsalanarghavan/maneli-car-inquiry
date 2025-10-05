@@ -22,10 +22,13 @@ class Maneli_User_Management_Shortcodes {
         $filter_role = isset($_POST['role']) ? sanitize_text_field($_POST['role']) : '';
         $orderby = isset($_POST['orderby']) ? sanitize_text_field($_POST['orderby']) : 'display_name';
         $order = isset($_POST['order']) ? sanitize_text_field($_POST['order']) : 'ASC';
+        $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
 
         $query_args = [
             'orderby' => $orderby,
             'order'   => $order,
+            'number'  => 50,
+            'paged'   => $paged,
         ];
 
         if (!empty($filter_role)) {
@@ -44,7 +47,8 @@ class Maneli_User_Management_Shortcodes {
             ];
         }
 
-        $all_users = get_users($query_args);
+        $user_query = new WP_User_Query($query_args);
+        $all_users = $user_query->get_results();
         
         $current_user_id = get_current_user_id();
         $filtered_users = array_filter($all_users, function($user) use ($current_user_id) {
@@ -83,7 +87,21 @@ class Maneli_User_Management_Shortcodes {
             <?php
         }
         $html = ob_get_clean();
-        wp_send_json_success(['html' => $html]);
+
+        $total_users = $user_query->get_total();
+        $total_pages = ceil($total_users / 50);
+
+        $pagination_html = paginate_links([
+            'base' => '#',
+            'format' => '?paged=%#%',
+            'current' => $paged,
+            'total' => $total_pages,
+            'prev_text' => '« قبلی',
+            'next_text' => 'بعدی »',
+            'type'  => 'plain'
+        ]);
+
+        wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 
 
@@ -119,7 +137,14 @@ class Maneli_User_Management_Shortcodes {
         }
         
         $current_url = remove_query_arg(['edit_user', 'user-updated', 'add_user', 'user-created', 'user-deleted', 'error'], $_SERVER['REQUEST_URI']);
-        $all_users = get_users(['orderby' => 'display_name', 'order' => 'ASC']);
+        $paged = get_query_var('paged') ? get_query_var('paged') : 1;
+        $user_query = new WP_User_Query([
+            'orderby' => 'display_name',
+            'order'   => 'ASC',
+            'number'  => 50,
+            'paged'   => $paged
+        ]);
+        $all_users = $user_query->get_results();
         ?>
         <div class="maneli-inquiry-wrapper">
              <div class="user-list-header">
@@ -196,20 +221,33 @@ class Maneli_User_Management_Shortcodes {
                 </tbody>
             </table>
              <div id="user-list-loader" style="display:none; text-align:center; padding: 40px;"><div class="spinner is-active" style="float:none;"></div></div>
+             <div class="maneli-pagination-wrapper" style="margin-top: 20px; text-align: center;">
+                <?php
+                $total_users = $user_query->get_total();
+                $total_pages = ceil($total_users / 50);
+                echo paginate_links([
+                    'base' => add_query_arg('paged', '%#%'),
+                    'format' => '?paged=%#%',
+                    'current' => $paged,
+                    'total' => $total_pages,
+                    'prev_text' => '« قبلی',
+                    'next_text' => 'بعدی »',
+                ]);
+                ?>
+             </div>
         </div>
         <script>
         jQuery(document).ready(function($) {
             var xhr;
             var searchTimeout;
 
-            function fetch_users() {
+            function fetch_users(page = 1) {
                 if (xhr && xhr.readyState !== 4) {
                     xhr.abort();
                 }
 
                 $('#user-list-loader').show();
-                // Clear the table body only after a successful request to avoid flicker
-                // $('#maneli-user-list-tbody').html('');
+                $('#maneli-user-list-tbody').css('opacity', 0.5);
 
                 var formData = {
                     action: 'maneli_filter_users_ajax',
@@ -218,6 +256,7 @@ class Maneli_User_Management_Shortcodes {
                     role: $('#role-filter').val(),
                     orderby: $('#orderby-filter').val(),
                     order: $('#order-filter').val(),
+                    page: page,
                     current_url: '<?php echo esc_url($current_url); ?>'
                 };
 
@@ -228,8 +267,10 @@ class Maneli_User_Management_Shortcodes {
                     success: function(response) {
                         if (response.success) {
                             $('#maneli-user-list-tbody').html(response.data.html);
+                            $('.maneli-pagination-wrapper').html(response.data.pagination_html);
                         } else {
                              $('#maneli-user-list-tbody').html('<tr><td colspan="5" style="text-align:center;">خطایی رخ داد.</td></tr>');
+                             $('.maneli-pagination-wrapper').html('');
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
@@ -239,6 +280,7 @@ class Maneli_User_Management_Shortcodes {
                     },
                     complete: function() {
                         $('#user-list-loader').hide();
+                        $('#maneli-user-list-tbody').css('opacity', 1);
                     }
                 });
             }
@@ -246,15 +288,38 @@ class Maneli_User_Management_Shortcodes {
             $('#user-search-input').on('keyup', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(function() {
-                    fetch_users();
+                    fetch_users(1);
                 }, 500);
             });
 
             $('#role-filter, #orderby-filter, #order-filter').on('change', function() {
-                fetch_users();
+                fetch_users(1);
             });
             
-            // Using event delegation for delete button clicks
+            $('.maneli-pagination-wrapper').on('click', 'a.page-numbers', function(e) {
+                e.preventDefault();
+                var pageUrl = $(this).attr('href');
+                let pageNum = 1;
+                
+                const regex = /paged=(\d+)/;
+                const matches = pageUrl.match(regex);
+
+                if (matches) {
+                    pageNum = parseInt(matches[1]);
+                } else if (!$(this).hasClass('prev') && !$(this).hasClass('next')) {
+                    pageNum = parseInt($(this).text());
+                } else {
+                    let currentPage = parseInt($('.maneli-pagination-wrapper .page-numbers.current').text());
+                    currentPage = isNaN(currentPage) ? 1 : currentPage;
+                    if ($(this).hasClass('prev')) {
+                        pageNum = Math.max(1, currentPage - 1);
+                    } else {
+                        pageNum = currentPage + 1;
+                    }
+                }
+                fetch_users(pageNum);
+            });
+
             $('#maneli-user-list-tbody').on('click', '.delete-user-btn', function(e) {
                 e.preventDefault();
                 if (confirm('آیا از حذف این کاربر اطمینان دارید؟ این عمل غیرقابل بازگشت است.')) {
