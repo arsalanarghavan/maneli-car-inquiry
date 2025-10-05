@@ -29,44 +29,41 @@ class Maneli_Inquiry_Shortcodes {
         }
 
         wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
-        wp_enqueue_script('jquery-ui-datepicker');
         wp_enqueue_script(
             'maneli-jalali-datepicker',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/jquery-ui-datepicker-fa.js',
-            ['jquery-ui-datepicker'], '1.0.0', true
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', // *** CHANGED ***
+            [], '2.0.0', true
         );
         
-        $init_script = '
-            jQuery(document).ready(function($) {
-                var toPersianDigits = function(str) {
-                    var persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
-                    return String(str).replace(/[0-9]/g, function(w) { return persianDigits[+w]; });
-                };
-                $("input.maneli-date-picker").datepicker({
-                    isJalali: true, 
-                    dateFormat: "yy/mm/dd",
-                    changeMonth: true,
-                    changeYear: true,
-                    onSelect: function(dateText, inst) { $(this).val(toPersianDigits(dateText)); },
-                    onChangeMonthYear: function(year, month, inst) {
-                        setTimeout(function() {
-                            var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : year);
-                            $(".ui-datepicker-year").val(pYear);
-                            $(".ui-datepicker-year option").each(function() { $(this).text(toPersianDigits($(this).text())); });
-                            $(".ui-datepicker-month option").each(function() { $(this).text(toPersianDigits($(this).text())); });
-                        }, 0);
-                    },
-                    beforeShow: function(input, inst) {
-                         setTimeout(function() {
-                             var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : $(input).val().split("/")[0]);
-                             $(".ui-datepicker-year").val(pYear);
-                             $(".ui-datepicker-year option").each(function() { $(this).text(toPersianDigits($(this).text())); });
-                             $(".ui-datepicker-month option").each(function() { $(this).text(toPersianDigits($(this).text())); });
-                         },0);
-                    }
-                });
+        $init_script = "
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof kamadatepicker !== 'undefined') {
+                    // Initialize for buyer
+                    kamadatepicker('buyer_birth_date', { 
+                        bidi: true, 
+                        placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
+                        format: 'YYYY/MM/DD' 
+                    });
+                    // Initialize for issuer
+                    kamadatepicker('issuer_birth_date', { 
+                        bidi: true, 
+                        placeholder: 'مثال: ۱۳۶۰/۰۱/۰۱',
+                        format: 'YYYY/MM/DD' 
+                    });
+                     // Initialize for expert panel
+                    kamadatepicker('expert_buyer_birth_date', { 
+                        bidi: true, 
+                        placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
+                        format: 'YYYY/MM/DD' 
+                    });
+                    kamadatepicker('expert_issuer_birth_date', { 
+                        bidi: true, 
+                        placeholder: 'مثال: ۱۳۶۰/۰۱/۰۱',
+                        format: 'YYYY/MM/DD' 
+                    });
+                }
             });
-        ';
+        ";
         wp_add_inline_script('maneli-jalali-datepicker', $init_script);
         $this->datepicker_loaded = true;
     }
@@ -134,17 +131,11 @@ class Maneli_Inquiry_Shortcodes {
 
                         <h2 class="loan-title">درخواست خرید نقدی</h2>
                         
-                        <?php 
-                        $first_name = '';
-                        $last_name = '';
-                        $mobile = '';
-                        $is_logged_in = is_user_logged_in();
-                        if ($is_logged_in) {
+                        <?php if (is_user_logged_in()): 
                             $current_user = wp_get_current_user();
                             $first_name = $current_user->first_name;
                             $last_name = $current_user->last_name;
                             $mobile = get_user_meta($current_user->ID, 'mobile_number', true);
-                        }
                         ?>
                         
                         <div class="loan-section">
@@ -152,17 +143,17 @@ class Maneli_Inquiry_Shortcodes {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label>نام:</label>
-                                        <input type="text" name="cash_first_name" value="<?php echo esc_attr($first_name); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> required>
+                                        <input type="text" name="cash_first_name" value="<?php echo esc_attr($first_name); ?>" readonly required>
                                     </div>
                                     <div class="form-group">
                                         <label>نام خانوادگی:</label>
-                                        <input type="text" name="cash_last_name" value="<?php echo esc_attr($last_name); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> required>
+                                        <input type="text" name="cash_last_name" value="<?php echo esc_attr($last_name); ?>" readonly required>
                                     </div>
                                 </div>
                                 <div class="form-row">
                                      <div class="form-group">
                                         <label>شماره موبایل:</label>
-                                        <input type="text" name="cash_mobile_number" value="<?php echo esc_attr($mobile); ?>" <?php echo $is_logged_in ? 'readonly' : ''; ?> required>
+                                        <input type="text" name="cash_mobile_number" value="<?php echo esc_attr($mobile); ?>" readonly required>
                                     </div>
                                     <div class="form-group">
                                         <label>رنگ خودرو:</label>
@@ -186,14 +177,14 @@ class Maneli_Inquiry_Shortcodes {
                             <span> تومان</span>
                         </div>
                         <div class="loan-section loan-action-wrapper">
-                            <?php if (is_user_logged_in()): ?>
-                                <button type="submit" class="loan-action-btn">ثبت درخواست استعلام قیمت</button>
-                            <?php else:
-                                $login_url = home_url('/login/?redirect_to=' . urlencode(get_permalink()));
-                                ?>
-                                <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn">برای ثبت درخواست ابتدا وارد شوید</a>
-                            <?php endif; ?>
+                            <button type="submit" class="loan-action-btn">ثبت درخواست استعلام قیمت</button>
                         </div>
+                        <?php else: // User is not logged in ?>
+                            <div class="loan-section" style="text-align: center;">
+                                <p>برای ثبت درخواست خرید نقدی، لطفاً ابتدا وارد حساب کاربری خود شوید.</p>
+                                <a href="<?php echo esc_url(home_url('/login/?redirect_to=' . urlencode(get_permalink()))); ?>" class="loan-action-btn">ورود و ثبت درخواست</a>
+                            </div>
+                        <?php endif; ?>
                     </form>
                 </div>
 
@@ -426,7 +417,7 @@ class Maneli_Inquiry_Shortcodes {
                 <p class="form-section-title">فرم اطلاعات خریدار</p>
                 <div class="form-grid">
                     <div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" value="<?php echo esc_attr($user_info->first_name); ?>" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" value="<?php echo esc_attr($user_info->last_name); ?>" required></div></div>
-                    <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user_id, 'father_name', true)); ?>" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" class="maneli-date-picker" name="birth_date" value="<?php echo esc_attr(get_user_meta($user_id, 'birth_date', true)); ?>" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required autocomplete="off"></div></div>
+                    <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user_id, 'father_name', true)); ?>" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" id="buyer_birth_date" name="birth_date" value="<?php echo esc_attr(get_user_meta($user_id, 'birth_date', true)); ?>" required></div></div>
                     <div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user_id, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه:</label><input type="text" name="mobile_number" value="<?php echo esc_attr(get_user_meta($user_id, 'mobile_number', true)); ?>" placeholder="مثال: 09123456789" required></div></div>
                 </div>
             </div>
@@ -434,7 +425,7 @@ class Maneli_Inquiry_Shortcodes {
                 <p class="form-section-title">فرم اطلاعات صادر کننده چک</p>
                 <div class="form-grid">
                     <div class="form-row"><div class="form-group"><label>نام صادرکننده چک:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده چک:</label><input type="text" name="issuer_last_name"></div></div>
-                    <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده چک:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده چک:</label><input type="text" class="maneli-date-picker" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱" autocomplete="off"></div></div>
+                    <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده چک:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده چک:</label><input type="text" id="issuer_birth_date" name="issuer_birth_date"></div></div>
                     <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده چک:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده چک:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
                 </div>
             </div>
@@ -655,7 +646,7 @@ class Maneli_Inquiry_Shortcodes {
                         <p class="form-section-title">فرم اطلاعات خریدار</p>
                         <div class="form-grid">
                             <div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" required></div></div>
-                            <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" class="maneli-date-picker" name="birth_date" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" required autocomplete="off"></div></div>
+                            <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" id="expert_buyer_birth_date" name="birth_date" required></div></div>
                             <div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه (نام کاربری):</label><input type="text" name="mobile_number" placeholder="مثال: 09123456789" required></div></div>
                         </div>
                     </div>
@@ -664,7 +655,7 @@ class Maneli_Inquiry_Shortcodes {
                         <p class="form-section-title">فرم اطلاعات صادر کننده چک</p>
                         <div class="form-grid">
                             <div class="form-row"><div class="form-group"><label>نام صادرکننده:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده:</label><input type="text" name="issuer_last_name"></div></div>
-                            <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده:</label><input type="text" class="maneli-date-picker" name="issuer_birth_date" placeholder="مثال: ۱۳۶۰/۰۱/۰۱" autocomplete="off"></div></div>
+                            <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده:</label><input type="text" id="expert_issuer_birth_date" name="issuer_birth_date"></div></div>
                             <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
                         </div>
                     </div>

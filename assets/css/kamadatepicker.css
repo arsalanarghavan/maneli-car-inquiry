@@ -1,0 +1,70 @@
+/* KAMA Datepicker Styles */
+div.kamadatepicker-container {
+    font-family: inherit !important;
+    z-index: 10000 !important;
+    position: absolute;
+    border: 1px solid #ccc;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 290px;
+}
+div.kamadatepicker-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+div.kamadatepicker-container table tr td,
+div.kamadatepicker-container table tr th {
+    text-align: center;
+    padding: 8px;
+    font-size: 14px;
+}
+div.kamadatepicker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+div.kamadatepicker-header .kamadatepicker-month-name {
+    font-weight: bold;
+    font-size: 16px;
+}
+div.kamadatepicker-header button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #3989BE;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+div.kamadatepicker-header button:hover {
+    background-color: #f0f8ff;
+}
+div.kamadatepicker-body .kamadatepicker-day-name {
+    color: #555;
+    font-weight: bold;
+}
+div.kamadatepicker-body .kamadatepicker-day {
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+div.kamadatepicker-body .kamadatepicker-day.today {
+    border: 1px solid #3989BE;
+}
+div.kamadatepicker-body .kamadatepicker-day.selected {
+    background-color: #3989BE;
+    color: #fff;
+}
+div.kamadatepicker-body .kamadatepicker-day:hover:not(.selected) {
+    background-color: #e9f3f9;
+}
+div.kamadatepicker-body .kamadatepicker-day.disabled {
+    color: #ccc;
+    cursor: default;
+}
+div.kamadatepicker-body .kamadatepicker-day.disabled:hover {
+    background-color: transparent;
+}
