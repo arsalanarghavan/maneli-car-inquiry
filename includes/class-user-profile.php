@@ -16,68 +16,33 @@ class Maneli_User_Profile {
 
     public function enqueue_admin_datepicker_assets($hook) {
         if ($hook == 'profile.php' || $hook == 'user-edit.php') {
-            // 1. Enqueue our new custom theme
+            // ۱. فایل CSS جدید تقویم را فراخوانی می‌کنیم
             wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
-            wp_enqueue_script('jquery-ui-datepicker');
             
-            // 2. Enqueue our local Jalali converter script
+            // ۲. فایل JavaScript جدید و مستقل تقوim را فراخوانی می‌کنیم
             wp_enqueue_script(
                 'maneli-jalali-datepicker',
-                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/jquery-ui-datepicker-fa.js',
-                ['jquery-ui-datepicker'],
-                '1.0.0',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', // *** تغییر کرده ***
+                [], // بدون وابستگی
+                '2.0.0',
                 true
             );
         }
     }
 
     public function add_custom_user_fields($user) {
-        // Create and add the initialization script
-        $init_script = '
-            jQuery(document).ready(function($) {
-                 var toPersianDigits = function(str) {
-                    var persianDigits = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
-                    return String(str).replace(/[0-9]/g, function(w) {
-                        return persianDigits[+w];
+        // اسکریپت راه‌اندازی تقویم جدید
+        $init_script = "
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof kamadatepicker !== 'undefined') {
+                    kamadatepicker('birth_date', {
+                        bidi: true,
+                        placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
+                        format: 'YYYY/MM/DD'
                     });
-                };
-                
-                $("input.maneli-date-picker").datepicker({
-                    isJalali: true, // <-- FIX WAS ADDED HERE
-                    dateFormat: "yy/mm/dd",
-                    changeMonth: true,
-                    changeYear: true,
-                     onSelect: function(dateText, inst) {
-                        // This is to ensure the input value is also in Persian digits
-                        $(this).val(toPersianDigits(dateText));
-                     },
-                     onChangeMonthYear: function(year, month, inst) {
-                        setTimeout(function() {
-                            var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : year);
-                            $(".ui-datepicker-year").val(pYear);
-                            $(".ui-datepicker-year option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
-                             $(".ui-datepicker-month option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
-                        }, 0);
-                    },
-                     beforeShow: function(input, inst) {
-                         setTimeout(function() {
-                             var pYear = toPersianDigits(inst.selectedYear > 0 ? inst.selectedYear : $(input).val().split("/")[0]);
-                             $(".ui-datepicker-year").val(pYear);
-                             $(".ui-datepicker-year option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
-                             $(".ui-datepicker-month option").each(function() {
-                                $(this).text(toPersianDigits($(this).text()));
-                            });
-                         },0);
-                     }
-                });
+                }
             });
-        ';
+        ";
         wp_add_inline_script('maneli-jalali-datepicker', $init_script);
         ?>
         <h3>اطلاعات تکمیلی استعلام</h3>
@@ -97,7 +62,7 @@ class Maneli_User_Profile {
             <tr>
                 <th><label for="birth_date">تاریخ تولد</label></th>
                 <td>
-                    <input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text maneli-date-picker" placeholder="مثال: ۱۳۶۵/۰۴/۱۵" autocomplete="off" />
+                    <input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text" />
                 </td>
             </tr>
             <tr>
