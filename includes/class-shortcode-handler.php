@@ -48,14 +48,6 @@ class Maneli_Shortcode_Handler {
                      wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                      wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
                 }
-
-                if ($has_user_list) {
-                    wp_localize_script('jquery', 'maneli_user_ajax', [
-                        'ajax_url' => admin_url('admin-ajax.php'),
-                        'delete_nonce' => wp_create_nonce('maneli_delete_user_nonce'),
-                        'filter_nonce' => wp_create_nonce('maneli_user_filter_nonce')
-                    ]);
-                }
 				
 				if ($has_inquiry_list || $has_cash_inquiry_list) {
                     $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';

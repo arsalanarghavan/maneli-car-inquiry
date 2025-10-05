@@ -240,6 +240,9 @@ class Maneli_User_Management_Shortcodes {
         jQuery(document).ready(function($) {
             var xhr;
             var searchTimeout;
+            var ajax_url = '<?php echo admin_url("admin-ajax.php"); ?>';
+            var filter_nonce = '<?php echo wp_create_nonce("maneli_user_filter_nonce"); ?>';
+            var delete_nonce = '<?php echo wp_create_nonce("maneli_delete_user_nonce"); ?>';
 
             function fetch_users(page = 1) {
                 if (xhr && xhr.readyState !== 4) {
@@ -251,7 +254,7 @@ class Maneli_User_Management_Shortcodes {
 
                 var formData = {
                     action: 'maneli_filter_users_ajax',
-                    _ajax_nonce: maneli_user_ajax.filter_nonce,
+                    _ajax_nonce: filter_nonce,
                     search: $('#user-search-input').val(),
                     role: $('#role-filter').val(),
                     orderby: $('#orderby-filter').val(),
@@ -261,7 +264,7 @@ class Maneli_User_Management_Shortcodes {
                 };
 
                 xhr = $.ajax({
-                    url: maneli_user_ajax.ajax_url,
+                    url: ajax_url,
                     type: 'POST',
                     data: formData,
                     success: function(response) {
@@ -328,12 +331,12 @@ class Maneli_User_Management_Shortcodes {
                     button.text('در حال حذف...');
 
                     $.ajax({
-                        url: maneli_user_ajax.ajax_url,
+                        url: ajax_url,
                         type: 'POST',
                         data: {
                             action: 'maneli_delete_user_ajax',
                             user_id: userId,
-                            _ajax_nonce: maneli_user_ajax.delete_nonce
+                            _ajax_nonce: delete_nonce
                         },
                         success: function(response) {
                             if (response.success) {
