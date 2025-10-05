@@ -838,6 +838,10 @@ class Maneli_Inquiry_Shortcodes {
     }
 	
 	public function render_cash_inquiry_list() {
+        if (isset($_GET['cash_inquiry_id']) && !empty($_GET['cash_inquiry_id'])) {
+            return $this->render_single_cash_inquiry_page();
+        }
+
         if (!is_user_logged_in()) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده این بخش، لطفاً ابتدا وارد شوید.</p></div>';
         }
@@ -916,7 +920,8 @@ class Maneli_Inquiry_Shortcodes {
                         _ajax_nonce: '<?php echo wp_create_nonce("maneli_cash_inquiry_filter_nonce"); ?>',
                         page: page,
                         search: $('#cash-inquiry-search-input').val(),
-                        status: $('#cash-inquiry-status-filter').val()
+                        status: $('#cash-inquiry-status-filter').val(),
+                        base_url: '<?php echo esc_url(remove_query_arg("cash_inquiry_id")); ?>'
                     },
                     success: function(response) {
                         if (response.success) {
@@ -1204,6 +1209,7 @@ class Maneli_Inquiry_Shortcodes {
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $search_query = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
         $status_query = isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : '';
+        $base_url = isset($_POST['base_url']) ? esc_url_raw($_POST['base_url']) : home_url();
 
         $args = [
             'post_type'      => 'cash_inquiry',
@@ -1252,7 +1258,7 @@ class Maneli_Inquiry_Shortcodes {
         if ($inquiry_query->have_posts()) {
             while ($inquiry_query->have_posts()) {
                 $inquiry_query->the_post();
-                $this->render_cash_inquiry_row(get_the_ID());
+                $this->render_cash_inquiry_row(get_the_ID(), $base_url);
             }
         } else {
             echo '<tr><td colspan="7" style="text-align:center;">هیچ درخواستی یافت نشد.</td></tr>';
@@ -1300,13 +1306,14 @@ class Maneli_Inquiry_Shortcodes {
         <?php
     }
 	
-	private function render_cash_inquiry_row($inquiry_id) {
+	private function render_cash_inquiry_row($inquiry_id, $base_url) {
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
         list($y, $m, $d) = explode('-', $gregorian_date);
         $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
 		$status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
         $status_label = Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status);
+        $report_url = add_query_arg('cash_inquiry_id', $inquiry_id, $base_url);
         ?>
         <tr>
             <td data-title="شناسه">#<?php echo esc_html($inquiry_id); ?></td>
@@ -1316,9 +1323,7 @@ class Maneli_Inquiry_Shortcodes {
             <td data-title="وضعیت"><?php echo esc_html($status_label); ?></td>
             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
 			<td data-title="عملیات" class="cash-inquiry-actions">
-				<button class="button view-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">نمایش</button>
-				<button class="button edit-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">ویرایش</button>
-				<button class="button delete-cash-inquiry" data-id="<?php echo esc_attr($inquiry_id); ?>">حذف</button>
+				<a href="<?php echo esc_url($report_url); ?>" class="button view">مشاهده جزئیات</a>
 			</td>
         </tr>
         <?php
@@ -1630,6 +1635,75 @@ class Maneli_Inquiry_Shortcodes {
         </script>
         <?php endif; ?>
 
+        <?php
+        return ob_get_clean();
+    }
+    
+    private function render_single_cash_inquiry_page() {
+        if (!current_user_can('manage_maneli_inquiries')) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این بخش را ندارید.</p></div>';
+        }
+
+        $inquiry_id = intval($_GET['cash_inquiry_id']);
+        $inquiry = get_post($inquiry_id);
+
+        if (!$inquiry || $inquiry->post_type !== 'cash_inquiry') {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>درخواست مورد نظر یافت نشد.</p></div>';
+        }
+
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        $status_label = Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status);
+        $back_link = remove_query_arg('cash_inquiry_id');
+
+        ob_start();
+        ?>
+        <div class="maneli-inquiry-wrapper frontend-expert-report" id="cash-inquiry-details" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
+            <h2 class="report-main-title">جزئیات درخواست خرید نقدی <small>(#<?php echo esc_html($inquiry_id); ?>)</small></h2>
+            
+            <div class="report-status-box status-bg-pending">
+                <strong>وضعیت فعلی:</strong> <?php echo esc_html($status_label); ?>
+            </div>
+
+            <div class="report-box">
+                <h3 class="report-box-title">اطلاعات درخواست</h3>
+                <table class="summary-table">
+                    <tbody>
+                        <tr><th>مشتری</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true)); ?></td></tr>
+                        <tr><th>شماره موبایل</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td></tr>
+                        <tr><th>خودرو</th><td><?php echo esc_html(get_the_title($product_id)); ?></td></tr>
+                        <tr><th>رنگ درخواستی</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
+                        <?php 
+                        $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                        if (!empty($down_payment)): ?>
+                            <tr><th>مبلغ پیش‌پرداخت</th><td><?php echo number_format_i18n($down_payment) . ' تومان'; ?></td></tr>
+                        <?php endif; ?>
+                         <?php 
+                        $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
+                        if (!empty($rejection_reason)): ?>
+                            <tr><th>دلیل رد</th><td><?php echo esc_html($rejection_reason); ?></td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="admin-actions-box">
+                <h3 class="report-box-title">عملیات</h3>
+                <div class="action-button-group" style="justify-content: center;">
+                    <button type="button" class="action-btn" id="edit-cash-inquiry-btn" style="background-color: #ffc107; color: #212529;">ویرایش اطلاعات</button>
+                    <button type="button" class="action-btn" id="delete-cash-inquiry-btn" style="background-color: #dc3545;">حذف درخواست</button>
+
+                    <?php if ($status === 'pending'): ?>
+                        <button type="button" class="action-btn approve" id="set-downpayment-btn">تعیین پیش‌پرداخت</button>
+                        <button type="button" class="action-btn reject" id="reject-cash-inquiry-btn">رد کردن درخواست</button>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="report-back-button-wrapper">
+                <a href="<?php echo esc_url($back_link); ?>" class="loan-action-btn">بازگشت به لیست</a>
+            </div>
+        </div>
         <?php
         return ob_get_clean();
     }

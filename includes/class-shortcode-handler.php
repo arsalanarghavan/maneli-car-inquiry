@@ -58,15 +58,20 @@ class Maneli_Shortcode_Handler {
                 }
 				
 				if ($has_inquiry_list || $has_cash_inquiry_list) {
-                    wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js'), true);
-                    wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
-                        'ajax_url' => admin_url('admin-ajax.php'),
-                        'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
-                        'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
-                        'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
-                        'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
-                        'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce')
-                    ]);
+                    $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
+                    $js_url = MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js';
+                    // Use a static version number for reliability, and check if the file exists.
+                    if (file_exists($js_path)) {
+                        wp_enqueue_script('maneli-inquiry-actions', $js_url, ['jquery', 'sweetalert2'], '1.0.3', true); // Version updated
+                        wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
+                            'ajax_url' => admin_url('admin-ajax.php'),
+                            'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
+                            'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
+                            'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
+                            'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
+                            'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce')
+                        ]);
+                    }
                 }
             }
         }
