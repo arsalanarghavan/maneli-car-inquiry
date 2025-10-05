@@ -212,6 +212,7 @@ class Maneli_Form_Handler {
             }
         }
     
+        // *** FIX: Correctly read POST data from form fields ***
         $inquiry_data = [
             'product_id'       => intval($_POST['product_id']),
             'cash_first_name'  => sanitize_text_field($_POST['cash_first_name']),
@@ -231,8 +232,9 @@ class Maneli_Form_Handler {
             }
             $_SESSION['maneli_pending_cash_inquiry'] = $inquiry_data;
             
-            // *** FIX: Point to the custom login/dashboard page instead of wp_login_url ***
-            $login_url = home_url('/dashboard/'); 
+            // *** FIX: Point to the custom login/dashboard page and set correct redirect after login ***
+            $redirect_after_login = home_url('/dashboard/?endp=inf_menu_4');
+            $login_url = add_query_arg('redirect_to', urlencode($redirect_after_login), home_url('/dashboard/'));
             
             wp_redirect($login_url);
             exit;
@@ -246,12 +248,15 @@ class Maneli_Form_Handler {
         $product_id = $inquiry_data['product_id'];
         $car_name = get_the_title($product_id);
     
-        wp_update_user([
-            'ID'         => $user_id,
-            'first_name' => $first_name,
-            'last_name'  => $last_name,
-        ]);
-        update_user_meta($user_id, 'mobile_number', $mobile);
+        // *** FIX: Do NOT update user meta for mobile. Only update name if it's empty. ***
+        $user_obj = get_userdata($user_id);
+        if(empty($user_obj->first_name) && empty($user_obj->last_name)) {
+            wp_update_user([
+                'ID'         => $user_id,
+                'first_name' => $first_name,
+                'last_name'  => $last_name,
+            ]);
+        }
     
         $post_title = 'درخواست نقدی: ' . $first_name . ' ' . $last_name . ' برای ' . $car_name;
         $post_id = wp_insert_post([
