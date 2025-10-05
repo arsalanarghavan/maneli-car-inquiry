@@ -230,7 +230,10 @@ class Maneli_Form_Handler {
                 session_start();
             }
             $_SESSION['maneli_pending_cash_inquiry'] = $inquiry_data;
-            $login_url = wp_login_url(home_url('/dashboard/?endp=inf_menu_5'));
+            
+            // *** FIX: Point to the custom login/dashboard page instead of wp_login_url ***
+            $login_url = home_url('/dashboard/'); 
+            
             wp_redirect($login_url);
             exit;
         }
@@ -482,7 +485,7 @@ class Maneli_Form_Handler {
         }
     
         if ($authority !== $saved_authority) { 
-            $redirect_url = add_query_arg('payment_status', 'failed', 'اطلاعات تراکنش مغایرت دارد.', $redirect_url);
+            $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('اطلاعات تراکنش مغایرت دارد.')], $redirect_url);
         } elseif ($status == 'OK') {
             $data = ['merchant_id' => $merchant_id, 'authority' => $authority, 'amount' => (int)$amount * 10];
             $jsonData = json_encode($data);
@@ -500,10 +503,10 @@ class Maneli_Form_Handler {
                     $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
                 } else {
                     $error_message = $result['errors']['message'] ?? 'تراکنش توسط درگاه تایید نشد.';
-                    $redirect_url = add_query_arg('payment_status', 'failed', urlencode($error_message), $redirect_url);
+                    $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
                 }
             } else {
-                $redirect_url = add_query_arg('payment_status', 'failed', urlencode('خطا در برقراری ارتباط با درگاه پرداخت.'), $redirect_url);
+                $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('خطا در برقراری ارتباط با درگاه پرداخت.')], $redirect_url);
             }
         } else {
             $redirect_url = add_query_arg('payment_status', 'cancelled', $redirect_url);
@@ -539,7 +542,7 @@ class Maneli_Form_Handler {
     
         if ($res_code == 0) {
             if (empty($_POST["token"])) {
-                $redirect_url = add_query_arg('payment_status', 'failed', urlencode('توکن بازگشتی از بانک نامعتبر است.'), $redirect_url);
+                $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode('توکن بازگشتی از بانک نامعتبر است.')], $redirect_url);
             } else {
                 $token = sanitize_text_field($_POST["token"]);
                 $options = get_option('maneli_inquiry_all_options', []);
@@ -560,12 +563,12 @@ class Maneli_Form_Handler {
                     $redirect_url = add_query_arg('payment_status', 'success', $redirect_url);
                 } else {
                     $error_message = $result->Description ?? 'تراکنش در مرحله تایید نهایی ناموفق بود.';
-                    $redirect_url = add_query_arg('payment_status', 'failed', urlencode($error_message), $redirect_url);
+                    $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
                 }
             }
         } else {
             $error_message = isset($_POST['Description']) ? sanitize_text_field($_POST['Description']) : 'تراکنش توسط بانک لغو شد.';
-            $redirect_url = add_query_arg('payment_status', 'failed', urlencode($error_message), $redirect_url);
+            $redirect_url = add_query_arg(['payment_status' => 'failed', 'reason' => urlencode($error_message)], $redirect_url);
         }
     
         delete_user_meta($user_id, 'maneli_payment_order_id');
