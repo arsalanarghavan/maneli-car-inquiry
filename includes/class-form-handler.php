@@ -1085,7 +1085,8 @@ class Maneli_Form_Handler {
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
-        $amount = isset($_POST['amount']) ? preg_replace('/[^0-9]/', '', $_POST['amount']) : 0;
+        $amount_raw = isset($_POST['amount']) ? $_POST['amount'] : 0;
+        $amount = preg_replace('/[^0-9]/', '', $amount_raw);
         $new_status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
         $reason = isset($_POST['reason']) ? sanitize_textarea_field($_POST['reason']) : '';
     
@@ -1093,12 +1094,34 @@ class Maneli_Form_Handler {
             wp_send_json_error(['message' => 'شناسه درخواست نامعتبر است.']);
         }
         
+        $options = get_option('maneli_inquiry_all_options', []);
+        $sms_handler = new Maneli_SMS_Handler();
+        
+        $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
+        $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $car_name = get_the_title($product_id);
+
         if ($new_status === 'awaiting_payment' && $amount > 0) {
             update_post_meta($inquiry_id, 'cash_down_payment', $amount);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'awaiting_payment');
+            
+            $pattern_id = $options['cash_inquiry_approved_pattern'] ?? 0;
+            if ($pattern_id > 0 && !empty($customer_mobile)) {
+                $params = [(string)$customer_name, (string)$car_name, (string)number_format_i18n($amount)];
+                $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
+            }
+            
         } elseif ($new_status === 'rejected') {
             update_post_meta($inquiry_id, 'cash_rejection_reason', $reason);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
+            
+            $pattern_id = $options['cash_inquiry_rejected_pattern'] ?? 0;
+            if ($pattern_id > 0 && !empty($customer_mobile)) {
+                $params = [(string)$customer_name, (string)$car_name, (string)$reason];
+                $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
+            }
+
         } else {
             wp_send_json_error(['message' => 'اطلاعات ارسالی نامعتبر است.']);
         }

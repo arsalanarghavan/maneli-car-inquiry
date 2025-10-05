@@ -255,11 +255,11 @@ class Maneli_Settings_Page {
                         ]
                     ],
                     'maneli_cash_inquiry_sms_section' => [
-                        'title' => 'پیامک‌های درخواست نقدی',
-                        'desc' => 'در این بخش پیام‌های مربوط به فرآیند خرید نقدی را مدیریت کنید.',
+                        'title' => 'کدهای پترن پیامک‌ درخواست نقدی',
+                        'desc' => 'در این بخش کدهای پترن مربوط به فرآیند خرید نقدی را مدیریت کنید.',
                         'fields' => [
-                            ['name' => 'cash_inquiry_approved_msg', 'label' => 'پیام تایید درخواست نقدی', 'type' => 'textarea', 'default' => 'مشتری گرامی {customer_name}، درخواست خرید نقدی شما برای خودروی {car_name} تایید شد. مبلغ پیش‌پرداخت {down_payment} تومان می‌باشد. لطفاً جهت پرداخت به پنل کاربری خود مراجعه کنید.', 'desc' => 'متغیرها: {customer_name}, {car_name}, {down_payment}'],
-                            ['name' => 'cash_inquiry_rejected_msg', 'label' => 'پیام رد درخواست نقدی', 'type' => 'textarea', 'default' => 'مشتری گرامی {customer_name}، متاسفانه درخواست خرید نقدی شما برای خودروی {car_name} در حال حاضر مورد تایید قرار نگرفت. دلیل: {reason}', 'desc' => 'متغیرها: {customer_name}, {car_name}, {reason}'],
+                            ['name' => 'cash_inquiry_approved_pattern', 'label' => 'پترن «تایید درخواست نقدی»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. مبلغ پیش‌پرداخت'],
+                            ['name' => 'cash_inquiry_rejected_pattern', 'label' => 'پترن «رد درخواست نقدی»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد'],
                         ]
                     ]
                 ]
