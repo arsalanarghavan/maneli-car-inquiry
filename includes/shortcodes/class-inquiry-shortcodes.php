@@ -162,6 +162,9 @@ class Maneli_Inquiry_Shortcodes {
                                 </div>
                             </div>
                         </div>
+                        <div style="text-align: center; font-size: 14px; color: #777; padding: 10px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin-bottom: 20px;">
+                            قیمت درج‌شده حدودی است و به دلیل نوسانات بازار، قیمت قطعی پس از واریز پیش‌پرداخت مشخص و نهایی می‌شود.
+                        </div>
                         <div class="loan-section result-section">
                             <strong>قیمت تقریبی:</strong>
                             <span id="cashPriceAmount"><?php echo number_format_i18n($cash_price); ?></span>
@@ -1051,6 +1054,7 @@ class Maneli_Inquiry_Shortcodes {
         ?>
         <div class="maneli-inquiry-wrapper">
             <h3>لیست درخواست‌های خرید نقدی شما</h3>
+            <div class="status-box status-pending" style="margin-bottom:20px;"><p>قیمت‌ اعلام شده تقریبی بوده و با توجه به نوسانات بازار، تا پیش از نهایی شدن خرید، قابل تغییر است.</p></div>
             <?php if (empty($inquiries)): ?>
                 <div class="status-box status-pending"><p>تاکنون هیچ درخواست خرید نقدی برای شما ثبت نشده است.</p></div>
             <?php else: ?>
@@ -1837,6 +1841,8 @@ class Maneli_Inquiry_Shortcodes {
         <div class="maneli-inquiry-wrapper customer-cash-report">
             <h2 class="report-main-title">جزئیات درخواست خرید نقدی <small>(#<?php echo esc_html($inquiry_id); ?>)</small></h2>
             
+            <div class="status-box status-pending" style="margin-bottom:20px;"><p>قیمت درج‌شده حدودی است و به دلیل نوسانات بازار، قیمت قطعی پس از واریز پیش‌پرداخت مشخص و نهایی می‌شود.</p></div>
+
             <div class="report-status-box <?php echo esc_attr($status_class); ?>">
                 <strong>وضعیت فعلی:</strong> <?php echo esc_html($status_label); ?>
             </div>
@@ -1869,6 +1875,7 @@ class Maneli_Inquiry_Shortcodes {
             <?php if ($status_key === 'awaiting_payment'): ?>
             <div class="admin-actions-box">
                 <h3 class="report-box-title">اقدام مورد نیاز</h3>
+                 <p style="font-weight: bold;">لطفا توجه فرمایید: قیمت‌ها به صورت تقریبی اعلام شده‌اند و قیمت نهایی خودرو بر اساس نرخ روز در زمان پرداخت پیش‌پرداخت مشخص خواهد شد.</p>
                  <p>پیش پرداخت شما تعیین شده است. برای نهایی کردن خرید خود، لطفاً از طریق دکمه زیر وارد درگاه پرداخت شوید.</p>
                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="text-align:center;">
                     <input type="hidden" name="action" value="maneli_start_cash_payment">
