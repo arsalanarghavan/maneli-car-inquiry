@@ -278,8 +278,8 @@
     margin-bottom: 5px;
     color: #444;
 }
-.maneli-inquiry-wrapper form select, 
-.maneli-inquiry-wrapper form input[type="text"], 
+.maneli-inquiry-wrapper form select,
+.maneli-inquiry-wrapper form input[type="text"],
 .maneli-inquiry-wrapper form input[type="email"],
 .maneli-inquiry-wrapper form input[type="password"],
 .maneli-inquiry-wrapper form button {
@@ -347,13 +347,13 @@
     box-shadow: none;
     border: none;
 }
-.inquiry-summary-box { 
-    max-width: 700px; 
-    margin: 0 auto 30px auto; 
+.inquiry-summary-box {
+    max-width: 700px;
+    margin: 0 auto 30px auto;
     background-color: transparent;
     border: none;
     border-bottom: 1px solid #eee;
-    padding: 0 0 20px 0; 
+    padding: 0 0 20px 0;
 }
 .inquiry-summary-box h4 {
     margin-top: 0;
@@ -521,8 +521,8 @@
 }
 /* === END: Button Hover Fix === */
 
-/* === START: Expert Frontend Report Styles === */
-.frontend-expert-report {
+/* === START: Expert & Customer Frontend Report Styles === */
+.frontend-expert-report, .frontend-customer-report {
     max-width: 800px;
     margin: 40px auto;
     background-color: #fff;
@@ -531,49 +531,58 @@
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
-.frontend-expert-report .report-main-title {
+.frontend-expert-report .report-main-title,
+.frontend-customer-report .report-main-title {
     text-align: center;
     margin-bottom: 20px;
     font-size: 24px;
 }
-.frontend-expert-report .report-main-title small {
+.frontend-expert-report .report-main-title small,
+.frontend-customer-report .report-main-title small {
     font-size: 16px;
     color: #777;
     display: block;
     margin-top: 5px;
 }
-.frontend-expert-report .report-box {
+.frontend-expert-report .report-box,
+.frontend-customer-report .report-box {
     margin-bottom: 25px;
     padding-bottom: 25px;
     border-bottom: 1px solid #eee;
 }
-.frontend-expert-report .report-box:last-of-type {
+.frontend-expert-report .report-box:last-of-type,
+.frontend-customer-report .report-box:last-of-type {
     border-bottom: none;
     padding-bottom: 0;
 }
-.frontend-expert-report .report-box-title {
+.frontend-expert-report .report-box-title,
+.frontend-customer-report .report-box-title {
     font-size: 18px;
     margin-top: 0;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 1px solid #f0f0f0;
 }
-.frontend-expert-report .report-car-image {
+.frontend-expert-report .report-car-image,
+.frontend-customer-report .report-car-image {
     text-align: center;
     margin-bottom: 25px;
 }
-.frontend-expert-report .report-car-image img {
+.frontend-expert-report .report-car-image img,
+.frontend-customer-report .report-car-image img {
     max-width: 300px;
     width: 100%;
     height: auto;
     border-radius: 8px;
 }
-.frontend-expert-report .form-grid .form-group label {
+.frontend-expert-report .form-grid .form-group label,
+.frontend-customer-report .form-grid .form-group label {
     font-weight: bold;
     color: #555;
     margin-bottom: 8px;
 }
-.frontend-expert-report .form-grid .form-group .detail-value-box {
+.frontend-expert-report .form-grid .form-group .detail-value-box,
+.frontend-customer-report .form-grid .form-group .detail-value-box {
     background-color: #f8f9fa;
     padding: 10px;
     border-radius: 4px;
@@ -583,7 +592,8 @@
     width: 100%;
     box-sizing: border-box;
 }
-.frontend-expert-report .report-section-divider {
+.frontend-expert-report .report-section-divider,
+.frontend-customer-report .report-section-divider {
     font-size: 16px;
     font-weight: bold;
     color: #333;
@@ -592,17 +602,21 @@
     border-top: 1px solid #eee;
 }
 .frontend-expert-report .right-aligned-table th,
-.frontend-expert-report .right-aligned-table td {
+.frontend-expert-report .right-aligned-table td,
+.frontend-customer-report .right-aligned-table th,
+.frontend-customer-report .right-aligned-table td {
     text-align: right;
 }
-.frontend-expert-report .right-aligned-table th {
+.frontend-expert-report .right-aligned-table th,
+.frontend-customer-report .right-aligned-table th {
     width: 30%;
 }
-.frontend-expert-report .report-back-button-wrapper {
+.frontend-expert-report .report-back-button-wrapper,
+.frontend-customer-report .report-back-button-wrapper {
     margin-top: 30px;
     text-align: center;
 }
-/* === END: Expert Frontend Report Styles === */
+/* === END: Frontend Report Styles === */
 
 /* === Full Width Container & User List Styles === */
 .maneli-full-width-container {
@@ -712,13 +726,13 @@
 }
 
 /* Specific button overrides */
-.maneli-inquiry-wrapper .shop_table .button.delete-user-btn { 
-    background-color: #dc3545 !important; 
-    border-color: #dc3545 !important; 
-    margin-right: 5px; 
+.maneli-inquiry-wrapper .shop_table .button.delete-user-btn {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+    margin-right: 5px;
 }
-.maneli-inquiry-wrapper .shop_table .button.delete-user-btn:hover { 
-    background-color: #c82333 !important; 
+.maneli-inquiry-wrapper .shop_table .button.delete-user-btn:hover {
+    background-color: #c82333 !important;
     border-color: #bd2130 !important;
 }
 
@@ -732,7 +746,7 @@
     text-align: center;
     color: #fff;
 }
-.report-status-box.status-bg-approved {
+.report-status-box.status-bg-approved, .report-status-box.status-bg-completed {
     background-color: #28a745;
 }
 .report-status-box.status-bg-rejected {
@@ -741,6 +755,9 @@
 .report-status-box.status-bg-pending {
     background-color: #ffc107;
     color: #212529;
+}
+.report-status-box.status-bg-awaiting_payment {
+    background-color: #17a2b8;
 }
 
 .admin-actions-box {

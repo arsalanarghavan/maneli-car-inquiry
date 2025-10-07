@@ -226,7 +226,7 @@ class Maneli_Form_Handler {
     
         $user_id = get_current_user_id();
         self::create_cash_inquiry_post($inquiry_data, $user_id);
-        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/?endp=inf_menu_5')));
+        wp_redirect(add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/?endp=inf_menu_4')));
         exit;
     }
 
@@ -467,7 +467,7 @@ class Maneli_Form_Handler {
         $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
     
         if ($payment_type === 'cash_down_payment') {
-            $redirect_url = home_url('/dashboard/?endp=inf_menu_5');
+            $redirect_url = home_url('/dashboard/?endp=inf_menu_4');
         } else {
             $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
         }
@@ -523,7 +523,7 @@ class Maneli_Form_Handler {
         $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
     
         if ($payment_type === 'cash_down_payment') {
-            $redirect_url = home_url('/dashboard/?endp=inf_menu_5');
+            $redirect_url = home_url('/dashboard/?endp=inf_menu_4');
         } else {
             $redirect_url = home_url('/dashboard/?endp=inf_menu_1');
         }

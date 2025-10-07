@@ -841,13 +841,28 @@ class Maneli_Inquiry_Shortcodes {
     }
 	
 	public function render_cash_inquiry_list() {
+        if (isset($_GET['cash_inquiry_id']) && !empty($_GET['cash_inquiry_id'])) {
+            $user_id = get_current_user_id();
+            $inquiry_id = intval($_GET['cash_inquiry_id']);
+            $inquiry_author_id = get_post_field('post_author', $inquiry_id);
+
+            // Allow admins and experts to view any cash inquiry detail page
+            if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles)) {
+                 return $this->render_single_cash_inquiry_page();
+            }
+            // Ensure the user is the owner of the inquiry
+            if ($user_id == $inquiry_author_id) {
+                return $this->render_single_customer_cash_inquiry($inquiry_id);
+            }
+        }
+
         $options = get_option('maneli_inquiry_all_options', []);
         $rejection_reasons_raw = $options['cash_inquiry_rejection_reasons'] ?? '';
         $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_reasons_raw)));
 
         $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
         if (file_exists($js_path)) {
-            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.6', true);
+            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.7', true);
             wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
@@ -860,10 +875,6 @@ class Maneli_Inquiry_Shortcodes {
             ]);
         }
         
-        if (isset($_GET['cash_inquiry_id']) && !empty($_GET['cash_inquiry_id'])) {
-            return $this->render_single_cash_inquiry_page();
-        }
-
         if (!is_user_logged_in()) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده این بخش، لطفاً ابتدا وارد شوید.</p></div>';
         }
@@ -1034,6 +1045,7 @@ class Maneli_Inquiry_Shortcodes {
         ];
         $inquiries_query = new WP_Query($args);
         $inquiries = $inquiries_query->get_posts();
+        $current_url = remove_query_arg('cash_inquiry_id');
 
         ob_start();
         ?>
@@ -1048,7 +1060,6 @@ class Maneli_Inquiry_Shortcodes {
                             <th>شناسه</th>
                             <th>خودرو</th>
                             <th>وضعیت</th>
-                            <th>پیش‌پرداخت</th>
                             <th>تاریخ ثبت</th>
                             <th></th>
                         </tr>
@@ -1058,7 +1069,7 @@ class Maneli_Inquiry_Shortcodes {
                             $inquiry_id = $inquiry->ID;
                             $product_id = get_post_meta($inquiry_id, 'product_id', true);
                             $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
-                            $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                            $report_url = add_query_arg('cash_inquiry_id', $inquiry_id, $current_url);
                             $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
                             list($y, $m, $d) = explode('-', $gregorian_date);
                         ?>
@@ -1066,19 +1077,9 @@ class Maneli_Inquiry_Shortcodes {
                             <td data-title="شناسه">#<?php echo esc_html($inquiry_id); ?></td>
                             <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
                             <td data-title="وضعیت"><?php echo esc_html(Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status)); ?></td>
-                            <td data-title="پیش‌پرداخت"><?php echo !empty($down_payment) ? number_format_i18n($down_payment) . ' تومان' : '—'; ?></td>
                             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
                             <td class="woocommerce-orders-table__cell-order-actions">
-                                <?php if ($status === 'awaiting_payment'): ?>
-                                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                                        <input type="hidden" name="action" value="maneli_start_cash_payment">
-                                        <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
-                                        <?php wp_nonce_field('maneli_start_cash_payment_nonce'); ?>
-                                        <button type="submit" class="button">ورود به درگاه پرداخت</button>
-                                    </form>
-                                <?php else: ?>
-                                    —
-                                <?php endif; ?>
+                                <a href="<?php echo esc_url($report_url); ?>" class="button view">مشاهده جزئیات</a>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -1809,6 +1810,77 @@ class Maneli_Inquiry_Shortcodes {
 
             <div class="report-back-button-wrapper">
                 <a href="<?php echo esc_url($back_link); ?>" class="loan-action-btn">بازگشت به لیست</a>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    private function render_single_customer_cash_inquiry($inquiry_id) {
+        $inquiry = get_post($inquiry_id);
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $status_key = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        $status_label = Maneli_Admin_Dashboard_Widgets::get_cash_inquiry_status_label($status_key);
+        $back_link = remove_query_arg('cash_inquiry_id');
+        
+        $status_classes = [
+            'pending' => 'status-bg-pending',
+            'approved' => 'status-bg-approved',
+            'rejected' => 'status-bg-rejected',
+            'awaiting_payment' => 'status-bg-awaiting-payment',
+            'completed' => 'status-bg-completed',
+        ];
+        $status_class = $status_classes[$status_key] ?? 'status-bg-pending';
+
+        ob_start();
+        ?>
+        <div class="maneli-inquiry-wrapper customer-cash-report">
+            <h2 class="report-main-title">جزئیات درخواست خرید نقدی <small>(#<?php echo esc_html($inquiry_id); ?>)</small></h2>
+            
+            <div class="report-status-box <?php echo esc_attr($status_class); ?>">
+                <strong>وضعیت فعلی:</strong> <?php echo esc_html($status_label); ?>
+            </div>
+
+            <div class="report-box">
+                <h3 class="report-box-title">اطلاعات درخواست</h3>
+                 <div class="report-car-image">
+                    <?php if ($product_id && has_post_thumbnail($product_id)): ?>
+                        <?php echo get_the_post_thumbnail($product_id, 'medium'); ?>
+                    <?php endif; ?>
+                </div>
+                <table class="summary-table">
+                    <tbody>
+                        <tr><th>خودرو</th><td><?php echo esc_html(get_the_title($product_id)); ?></td></tr>
+                        <tr><th>رنگ درخواستی</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
+                        <?php 
+                        $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                        if (!empty($down_payment)): ?>
+                            <tr><th>مبلغ پیش‌پرداخت</th><td><?php echo number_format_i18n($down_payment) . ' تومان'; ?></td></tr>
+                        <?php endif; ?>
+                         <?php 
+                        $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
+                        if (!empty($rejection_reason)): ?>
+                            <tr><th>توضیحات</th><td><?php echo esc_html($rejection_reason); ?></td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php if ($status_key === 'awaiting_payment'): ?>
+            <div class="admin-actions-box">
+                <h3 class="report-box-title">اقدام مورد نیاز</h3>
+                 <p>پیش پرداخت شما تعیین شده است. برای نهایی کردن خرید خود، لطفاً از طریق دکمه زیر وارد درگاه پرداخت شوید.</p>
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="text-align:center;">
+                    <input type="hidden" name="action" value="maneli_start_cash_payment">
+                    <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
+                    <?php wp_nonce_field('maneli_start_cash_payment_nonce'); ?>
+                    <button type="submit" class="loan-action-btn">ورود به درگاه پرداخت</button>
+                </form>
+            </div>
+            <?php endif; ?>
+
+            <div class="report-back-button-wrapper">
+                <a href="<?php echo esc_url($back_link); ?>" class="loan-action-btn">بازگشت به لیست درخواست‌ها</a>
             </div>
         </div>
         <?php
