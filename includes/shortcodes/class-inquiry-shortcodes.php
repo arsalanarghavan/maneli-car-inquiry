@@ -761,6 +761,25 @@ class Maneli_Inquiry_Shortcodes {
         $current_user = wp_get_current_user();
         $is_admin_or_expert = current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', $current_user->roles);
 
+        // Load JS and Nonces for Admin/Expert view
+        if ($is_admin_or_expert) {
+            $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
+            if (file_exists($js_path)) {
+                wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.8', true);
+                wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'inquiry_assign_expert_nonce' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
+                    // Keep other nonces for other functionalities on the same page
+                    'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
+                    'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
+                    'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
+                    'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
+                    'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
+                ]);
+            }
+        }
+
+
         if (!$is_admin_or_expert) {
             return $this->render_customer_inquiry_list($current_user->ID);
         }
@@ -1469,7 +1488,13 @@ class Maneli_Inquiry_Shortcodes {
             <?php if (current_user_can('manage_maneli_inquiries')): 
                 $expert_name = get_post_meta($inquiry_id, 'assigned_expert_name', true);
             ?>
-                <td data-title="کارشناس"><?php echo $expert_name ? esc_html($expert_name) : '—'; ?></td>
+                <td data-title="کارشناس">
+                    <?php if ($expert_name): ?>
+                        <?php echo esc_html($expert_name); ?>
+                    <?php else: ?>
+                        <button class="button assign-inquiry-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">ارجاع</button>
+                    <?php endif; ?>
+                </td>
             <?php endif; ?>
             <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
             <td data-title="وضعیت"><?php echo esc_html(Maneli_CPT_Handler::get_status_label($status)); ?></td>

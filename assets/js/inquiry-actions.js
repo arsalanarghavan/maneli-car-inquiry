@@ -190,14 +190,14 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // --- Assign Expert Button (Works for both list and single page) ---
+    // --- Assign Expert Button (Cash Inquiry) ---
     $(document.body).on('click', '.assign-expert-btn', function() {
         const button = $(this);
         const inquiryId = button.data('inquiry-id');
         const expertOptions = $('#cash-expert-filter').clone().prop('id', 'swal-expert-filter').prepend('<option value="auto">-- انتساب خودکار (گردشی) --</option>').val('auto').get(0).outerHTML;
 
         Swal.fire({
-            title: `ارجاع درخواست #${inquiryId}`,
+            title: `ارجاع درخواست نقدی #${inquiryId}`,
             html: `
                 <div style="text-align: right; font-family: inherit;">
                     <label for="swal-expert-filter" style="display: block; margin-bottom: 10px;">یک کارشناس را برای این درخواست انتخاب کنید:</label>
@@ -228,12 +228,63 @@ jQuery(document).ready(function($) {
                 }, function(response) {
                     if (response.success) {
                         Swal.fire('موفق', response.data.message, 'success').then(() => {
-                           // If on single page, just reload to show the expert name
                            if (button.closest('#cash-inquiry-details').length > 0) {
                                location.reload();
-                           } else { // If on list page, update the cell
+                           } else { 
                                button.closest('td').text(response.data.expert_name);
                            }
+                        });
+                    } else {
+                        Swal.fire('خطا', response.data.message, 'error');
+                        button.prop('disabled', false).text('ارجاع');
+                    }
+                });
+            }
+        });
+    });
+
+    // --- Assign Expert Button (Installment Inquiry) ---
+    $(document.body).on('click', '.assign-expert-inquiry-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        // Clone the expert filter from the main inquiry list filters
+        const expertOptions = $('#expert-filter').clone().prop('id', 'swal-expert-filter').prepend('<option value="auto">-- انتساب خودکار (گردشی) --</option>').val('auto').get(0).outerHTML;
+
+        Swal.fire({
+            title: `ارجاع استعلام #${inquiryId}`,
+            html: `
+                <div style="text-align: right; font-family: inherit;">
+                    <label for="swal-expert-filter" style="display: block; margin-bottom: 10px;">یک کارشناس را برای این استعلام انتخاب کنید:</label>
+                    ${expertOptions}
+                </div>
+            `,
+            confirmButtonText: 'ارجاع بده',
+            showCancelButton: true,
+            cancelButtonText: 'انصراف',
+            didOpen: () => {
+                 $('#swal-expert-filter').select2({
+                     placeholder: "انتخاب کارشناس",
+                     allowClear: false,
+                     width: '100%'
+                });
+            },
+            preConfirm: () => {
+                return $('#swal-expert-filter').val();
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                button.prop('disabled', true).text('...');
+                $.post(maneli_inquiry_ajax.ajax_url, {
+                    action: 'maneli_assign_expert_to_inquiry',
+                    nonce: maneli_inquiry_ajax.inquiry_assign_expert_nonce, // Make sure this nonce is available
+                    inquiry_id: inquiryId,
+                    expert_id: result.value
+                }, function(response) {
+                    if (response.success) {
+                        Swal.fire('موفق', response.data.message, 'success').then(() => {
+                            const row = button.closest('tr');
+                            row.find('.expert-cell').text(response.data.expert_name);
+                            row.find('.status-cell').text(response.data.new_status);
                         });
                     } else {
                         Swal.fire('خطا', response.data.message, 'error');
