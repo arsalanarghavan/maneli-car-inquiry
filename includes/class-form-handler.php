@@ -295,29 +295,47 @@ class Maneli_Form_Handler {
         if (!is_user_logged_in()) { wp_redirect(wp_get_referer()); exit; }
         
         $user_id = get_current_user_id();
-        $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
         
-        $buyer_fields = ['first_name', 'last_name', 'national_code', 'father_name', 'birth_date', 'mobile_number'];
+        // Sanitize all buyer fields
+        $buyer_fields = [
+            'first_name', 'last_name', 'father_name', 'national_code', 'occupation', 
+            'income_level', 'mobile_number', 'phone_number', 'residency_status', 
+            'workplace_status', 'address', 'birth_date', 'bank_name', 'account_number',
+            'branch_code', 'branch_name'
+        ];
         $buyer_data = [];
         foreach ($buyer_fields as $key) {
-            if (empty($_POST[$key])) {
-                wp_die("خطا: لطفاً تمام فیلدهای اطلاعات خریدار را پر کنید.");
+             if (empty($_POST[$key]) && in_array($key, ['first_name', 'last_name', 'national_code', 'mobile_number'])) {
+                wp_die("خطا: لطفاً فیلدهای الزامی خریدار را پر کنید: نام، نام خانوادگی، کد ملی و شماره همراه.");
             }
-            $buyer_data[$key] = sanitize_text_field($_POST[$key]);
+            $buyer_data[$key] = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
         }
         
+        // Sanitize all issuer fields if applicable
+        $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
         $issuer_data = [];
         if ($issuer_type === 'other') {
-            $issuer_fields = ['issuer_first_name', 'issuer_last_name', 'issuer_national_code', 'issuer_father_name', 'issuer_birth_date', 'issuer_mobile_number'];
+            $issuer_fields = [
+                'issuer_full_name', 'issuer_national_code', 'issuer_bank_name', 'issuer_account_number',
+                'issuer_branch_code', 'issuer_branch_name', 'issuer_residency_status', 
+                'issuer_workplace_status', 'issuer_address', 'issuer_phone_number', 'issuer_father_name',
+                'issuer_occupation'
+            ];
             foreach ($issuer_fields as $key) {
-                if (empty($_POST[$key])) {
-                    wp_die("خطا: لطفاً تمام فیلدهای اطلاعات صادرکننده چک را پر کنید.");
+                // Use appropriate sanitization based on field type
+                if ($key === 'issuer_address') {
+                    $issuer_data[$key] = sanitize_textarea_field($_POST[$key] ?? '');
+                } else {
+                    $issuer_data[$key] = sanitize_text_field($_POST[$key] ?? '');
                 }
-                $issuer_data[$key] = sanitize_text_field($_POST[$key]);
             }
         }
 
-        $temp_data = ['buyer_data' => $buyer_data, 'issuer_data' => $issuer_data, 'issuer_type' => $issuer_type];
+        $temp_data = [
+            'buyer_data' => $buyer_data, 
+            'issuer_data' => $issuer_data, 
+            'issuer_type' => $issuer_type
+        ];
         update_user_meta($user_id, 'maneli_temp_inquiry_data', $temp_data);
         
         $options = get_option('maneli_inquiry_all_options', []);
@@ -600,8 +618,11 @@ class Maneli_Form_Handler {
         $issuer_data = $temp_data['issuer_data'];
         $issuer_type = $temp_data['issuer_type'];
 
+        // Update user profile with new data
         wp_update_user(['ID' => $user_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name']]);
-        foreach ($buyer_data as $key => $value) { update_user_meta($user_id, $key, $value); }
+        foreach ($buyer_data as $key => $value) { 
+            update_user_meta($user_id, $key, $value); 
+        }
         
         $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code'])) ? $issuer_data['issuer_national_code'] : $buyer_data['national_code'];
         
@@ -627,6 +648,8 @@ class Maneli_Form_Handler {
             update_post_meta($post_id, 'inquiry_status', $initial_status);
 
             update_post_meta($post_id, 'issuer_type', $issuer_type);
+            
+            // Save all buyer and issuer data as post meta
             foreach ($buyer_data as $key => $value) { update_post_meta($post_id, $key, $value); }
             if (!empty($issuer_data)) { foreach ($issuer_data as $key => $value) { update_post_meta($post_id, $key, $value); } }
             

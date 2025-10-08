@@ -35,7 +35,6 @@ class Maneli_Inquiry_Shortcodes {
             [], '2.1.0', true
         );
         
-        // *** FIX: Added specific initializations for all datepicker instances ***
         $init_script = "
             document.addEventListener('DOMContentLoaded', function() {
                 if (typeof kamadatepicker !== 'undefined') {
@@ -384,6 +383,15 @@ class Maneli_Inquiry_Shortcodes {
         $term_months = get_user_meta($user_id, 'maneli_inquiry_term_months', true);
         $total_price = get_user_meta($user_id, 'maneli_inquiry_total_price', true);
         $installment_amount = get_user_meta($user_id, 'maneli_inquiry_installment', true);
+        
+        $loan_amount = (int)$total_price - (int)$down_payment;
+        $product = $car_id ? wc_get_product($car_id) : null;
+        $car_model = '';
+        if ($product) {
+            // This is a generic way to get an attribute. Replace 'pa_model' with the actual attribute slug if different.
+            $car_model = $product->get_attribute('pa_model'); 
+        }
+
         ob_start();
         ?>
         <div class="inquiry-car-image">
@@ -393,8 +401,10 @@ class Maneli_Inquiry_Shortcodes {
             <h4>خلاصه درخواست شما</h4>
             <table class="summary-table">
                 <tr><td><strong>خودروی انتخابی:</strong></td><td><?php echo esc_html($car_name); ?></td></tr>
-                <tr><td><strong>مبلغ حدودی کل خودرو:</strong></td><td><?php echo esc_html(number_format_i18n((int)$total_price)); ?> <span>تومان</span></td></tr>
+                <tr><td><strong>مدل خودرو:</strong></td><td><?php echo esc_html($car_model); ?></td></tr>
+                <tr><td><strong>قیمت کل خودرو:</strong></td><td><?php echo esc_html(number_format_i18n((int)$total_price)); ?> <span>تومان</span></td></tr>
                 <tr><td><strong>مبلغ پیش پرداخت:</strong></td><td><?php echo esc_html(number_format_i18n((int)$down_payment)); ?> <span>تومان</span></td></tr>
+                <tr><td><strong>میزان وام:</strong></td><td><?php echo esc_html(number_format_i18n($loan_amount)); ?> <span>تومان</span></td></tr>
                 <tr><td><strong>تعداد اقساط:</strong></td><td><?php echo esc_html($term_months); ?> <span>ماهه</span></td></tr>
                 <tr><td><strong>مبلغ هر قسط (تقریبی):</strong></td><td><?php echo esc_html(number_format_i18n((int)$installment_amount)); ?> <span>تومان</span></td></tr>
             </table>
@@ -402,55 +412,132 @@ class Maneli_Inquiry_Shortcodes {
         <form id="identity-form" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" method="post">
             <input type="hidden" name="action" value="maneli_submit_identity">
             <?php wp_nonce_field('maneli_submit_identity_nonce'); ?>
-            <div class="issuer-choice-wrapper">
-                <h4>اطلاعات صادر کننده چک</h4>
-                <div class="form-group-radio"><label><input type="radio" name="issuer_type" value="self"> خریدار و صادرکننده چک خودم هستم.</label></div>
-                <div class="form-group-radio"><label><input type="radio" name="issuer_type" value="other"> صادرکننده چک شخص دیگری است.</label></div>
-            </div>
-            <div id="buyer-form-wrapper" style="display: none;">
-                <p class="form-section-title">فرم اطلاعات خریدار</p>
-                <div class="form-grid">
-                    <div class="form-row"><div class="form-group"><label>نام:</label><input type="text" name="first_name" value="<?php echo esc_attr($user_info->first_name); ?>" required></div><div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" value="<?php echo esc_attr($user_info->last_name); ?>" required></div></div>
-                    <div class="form-row"><div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user_id, 'father_name', true)); ?>" required></div><div class="form-group"><label>تاریخ تولد:</label><input type="text" id="buyer_birth_date" name="birth_date" value="<?php echo esc_attr(get_user_meta($user_id, 'birth_date', true)); ?>" required></div></div>
-                    <div class="form-row"><div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user_id, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه:</label><input type="text" name="mobile_number" value="<?php echo esc_attr(get_user_meta($user_id, 'mobile_number', true)); ?>" placeholder="مثال: 09123456789" required></div></div>
+            
+            <p class="form-section-title">مشخصات مراجعه کننده</p>
+            <div class="form-grid">
+                 <div class="form-row">
+                    <div class="form-group"><label>نام:</label><input type="text" name="first_name" value="<?php echo esc_attr($user_info->first_name); ?>" required></div>
+                    <div class="form-group"><label>نام خانوادگی:</label><input type="text" name="last_name" value="<?php echo esc_attr($user_info->last_name); ?>" required></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>نام پدر:</label><input type="text" name="father_name" value="<?php echo esc_attr(get_user_meta($user_id, 'father_name', true)); ?>" required></div>
+                    <div class="form-group"><label>کد ملی:</label><input type="text" name="national_code" value="<?php echo esc_attr(get_user_meta($user_id, 'national_code', true)); ?>" placeholder="کد ملی ۱۰ رقمی" required pattern="\d{10}"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>شغل:</label><input type="text" name="occupation" value="<?php echo esc_attr(get_user_meta($user_id, 'occupation', true)); ?>"></div>
+                    <div class="form-group"><label>میزان درآمد (تومان):</label><input type="text" name="income_level" value="<?php echo esc_attr(get_user_meta($user_id, 'income_level', true)); ?>"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>شماره همراه:</label><input type="text" name="mobile_number" value="<?php echo esc_attr(get_user_meta($user_id, 'mobile_number', true)); ?>" placeholder="مثال: 09123456789" required></div>
+                    <div class="form-group"><label>شماره تماس ثابت:</label><input type="text" name="phone_number" value="<?php echo esc_attr(get_user_meta($user_id, 'phone_number', true)); ?>"></div>
+                </div>
+                 <div class="form-row">
+                    <div class="form-group">
+                        <label>وضعیت محل سکونت:</label>
+                        <select name="residency_status">
+                            <option value="">-- انتخاب کنید --</option>
+                            <option value="owner" <?php selected(get_user_meta($user_id, 'residency_status', true), 'owner'); ?>>مالک</option>
+                            <option value="tenant" <?php selected(get_user_meta($user_id, 'residency_status', true), 'tenant'); ?>>مستاجر</option>
+                        </select>
+                    </div>
+                     <div class="form-group">
+                        <label>وضعیت محل کار:</label>
+                        <select name="workplace_status">
+                            <option value="">-- انتخاب کنید --</option>
+                            <option value="permanent" <?php selected(get_user_meta($user_id, 'workplace_status', true), 'permanent'); ?>>رسمی</option>
+                            <option value="contract" <?php selected(get_user_meta($user_id, 'workplace_status', true), 'contract'); ?>>قراردادی</option>
+                             <option value="freelance" <?php selected(get_user_meta($user_id, 'workplace_status', true), 'freelance'); ?>>آزاد</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>آدرس منزل:</label><textarea name="address" rows="3"><?php echo esc_textarea(get_user_meta($user_id, 'address', true)); ?></textarea></div>
+                </div>
+                 <div class="form-row">
+                    <div class="form-group"><label>نام بانک:</label><input type="text" name="bank_name" value="<?php echo esc_attr(get_user_meta($user_id, 'bank_name', true)); ?>"></div>
+                    <div class="form-group"><label>شماره حساب:</label><input type="text" name="account_number" value="<?php echo esc_attr(get_user_meta($user_id, 'account_number', true)); ?>"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>کد شعبه:</label><input type="text" name="branch_code" value="<?php echo esc_attr(get_user_meta($user_id, 'branch_code', true)); ?>"></div>
+                    <div class="form-group"><label>نام شعبه:</label><input type="text" name="branch_name" value="<?php echo esc_attr(get_user_meta($user_id, 'branch_name', true)); ?>"></div>
                 </div>
             </div>
+
+            <div class="issuer-choice-wrapper">
+                <h4>اطلاعات صادر کننده چک</h4>
+                <div class="form-group-radio"><label><input type="radio" name="issuer_type" value="self" checked> خریدار و صادرکننده چک خودم هستم.</label></div>
+                <div class="form-group-radio"><label><input type="radio" name="issuer_type" value="other"> صادرکننده چک شخص دیگری است.</label></div>
+            </div>
+
             <div id="issuer-form-wrapper" style="display: none;">
                 <p class="form-section-title">فرم اطلاعات صادر کننده چک</p>
                 <div class="form-grid">
-                    <div class="form-row"><div class="form-group"><label>نام صادرکننده چک:</label><input type="text" name="issuer_first_name"></div><div class="form-group"><label>نام خانوادگی صادرکننده چک:</label><input type="text" name="issuer_last_name"></div></div>
-                    <div class="form-row"><div class="form-group"><label>نام پدر صادرکننده چک:</label><input type="text" name="issuer_father_name"></div><div class="form-group"><label>تاریخ تولد صادرکننده چک:</label><input type="text" id="issuer_birth_date" name="issuer_birth_date"></div></div>
-                    <div class="form-row"><div class="form-group"><label>کد ملی صادرکننده چک:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div><div class="form-group"><label>تلفن همراه صادرکننده چک:</label><input type="text" name="issuer_mobile_number" placeholder="مثال: 09129876543"></div></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>نام صادرکننده چک:</label><input type="text" name="issuer_full_name"></div>
+                        <div class="form-group"><label>کد ملی صادرکننده:</label><input type="text" name="issuer_national_code" placeholder="کد ملی ۱۰ رقمی" pattern="\d{10}"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>نام بانک:</label><input type="text" name="issuer_bank_name"></div>
+                        <div class="form-group"><label>شماره حساب:</label><input type="text" name="issuer_account_number"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>کد شعبه:</label><input type="text" name="issuer_branch_code"></div>
+                        <div class="form-group"><label>نام شعبه:</label><input type="text" name="issuer_branch_name"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>وضعیت سکونت صادرکننده:</label>
+                            <select name="issuer_residency_status">
+                               <option value="">-- انتخاب کنید --</option>
+                                <option value="owner">مالک</option>
+                                <option value="tenant">مستاجر</option>
+                            </select>
+                        </div>
+                         <div class="form-group">
+                            <label>وضعیت محل کار صادرکننده:</label>
+                            <select name="issuer_workplace_status">
+                                <option value="">-- انتخاب کنید --</option>
+                                <option value="permanent">رسمی</option>
+                                <option value="contract">قراردادی</option>
+                                <option value="freelance">آزاد</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>نام پدر صادرکننده:</label><input type="text" name="issuer_father_name"></div>
+                        <div class="form-group"><label>شغل صادرکننده:</label><input type="text" name="issuer_occupation"></div>
+                    </div>
+                     <div class="form-row">
+                        <div class="form-group"><label>آدرس صادرکننده:</label><textarea name="issuer_address" rows="3"></textarea></div>
+                        <div class="form-group"><label>شماره تماس صادرکننده:</label><input type="text" name="issuer_phone_number"></div>
+                    </div>
                 </div>
             </div>
-            <button type="submit" id="submit-identity-btn" style="display:none;">ادامه و رفتن به مرحله بعد</button>
+            
+            <button type="submit" id="submit-identity-btn">ادامه و رفتن به مرحله بعد</button>
         </form>
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             const radios = document.querySelectorAll('input[name="issuer_type"]');
             if (!radios.length) return;
-            const buyerForm = document.getElementById('buyer-form-wrapper');
             const issuerForm = document.getElementById('issuer-form-wrapper');
-            const submitBtn = document.getElementById('submit-identity-btn');
+
             function toggleForms() {
                 const checkedRadio = document.querySelector('input[name="issuer_type"]:checked');
                 if (!checkedRadio) {
-                    buyerForm.style.display = 'none';
                     issuerForm.style.display = 'none';
-                    submitBtn.style.display = 'none';
                     return;
                 }
                 const selectedValue = checkedRadio.value;
-                submitBtn.style.display = 'block';
                 if (selectedValue === 'self') {
-                    buyerForm.style.display = 'block';
                     issuerForm.style.display = 'none';
                 } else {
-                    buyerForm.style.display = 'block';
                     issuerForm.style.display = 'block';
                 }
             }
             radios.forEach(radio => radio.addEventListener('change', toggleForms));
+            // Initial check in case the page is reloaded
+            toggleForms();
         });
         </script>
         <?php

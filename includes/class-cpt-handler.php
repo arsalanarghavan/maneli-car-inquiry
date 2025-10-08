@@ -164,46 +164,88 @@ class Maneli_CPT_Handler {
 
     public function add_meta_boxes() {
         add_meta_box('inquiry_status_box', 'مدیریت وضعیت استعلام', [$this, 'render_status_meta_box'], 'inquiry', 'side', 'high');
-        add_meta_box('inquiry_personal_info_box', 'اطلاعات فردی ثبت شده', [$this, 'render_personal_info_box'], 'inquiry', 'normal', 'high');
+        add_meta_box('inquiry_personal_info_box', 'اطلاعات کامل استعلام', [$this, 'render_personal_info_box'], 'inquiry', 'normal', 'high');
     }
 
     public function render_personal_info_box($post) {
         $post_meta = get_post_meta($post->ID);
-        echo '<h4>اطلاعات خریدار</h4>';
-        $buyer_fields = ['first_name' => 'نام','last_name' => 'نام خانوادگی','national_code' => 'کد ملی','father_name' => 'نام پدر','birth_date' => 'تاریخ تولد','mobile_number' => 'شماره موبایل'];
-        $field_pairs = array_chunk($buyer_fields, 2, true);
-        echo '<table class="form-table"><tbody>';
-        foreach ($field_pairs as $pair) {
-            echo '<tr>'; $i = 0;
-            foreach($pair as $key => $label) {
-                $value = $post_meta[$key][0] ?? '';
-                echo '<th scope="row" style="width: 15%;"><label>' . esc_html($label) . '</label></th>';
-                echo '<td style="width: 35%;">' . esc_html($value) . '</td>';
-                $i++;
+    
+        // Helper function to render table rows from an array of fields
+        $render_fields_table = function($fields, $post_meta) {
+            $field_pairs = array_chunk($fields, 2, true);
+            echo '<table class="form-table"><tbody>';
+            foreach ($field_pairs as $pair) {
+                echo '<tr>';
+                $i = 0;
+                foreach ($pair as $key => $label) {
+                    $value = $post_meta[$key][0] ?? '';
+                    // Handle status fields for better display
+                    if (strpos($key, 'residency_status') !== false) {
+                        $value = ($value === 'owner') ? 'مالک' : (($value === 'tenant') ? 'مستاجر' : $value);
+                    }
+                    if (strpos($key, 'workplace_status') !== false) {
+                        $statuses = ['permanent' => 'رسمی', 'contract' => 'قراردادی', 'freelance' => 'آزاد'];
+                        $value = $statuses[$value] ?? $value;
+                    }
+
+                    echo '<th scope="row" style="width: 15%;"><label>' . esc_html($label) . '</label></th>';
+                    echo '<td style="width: 35%;">' . esc_html($value) . '</td>';
+                    $i++;
+                }
+                if ($i == 1) {
+                    echo '<th></th><td></td>';
+                }
+                echo '</tr>';
             }
-            if ($i == 1) { echo '<th></th><td></td>'; } echo '</tr>';
-        }
-        echo '</tbody></table>';
+            echo '</tbody></table>';
+        };
+    
+        echo '<h4>مشخصات مراجعه کننده</h4>';
+        $buyer_fields = [
+            'first_name' => 'نام', 'last_name' => 'نام خانوادگی', 'father_name' => 'نام پدر', 'national_code' => 'کد ملی',
+            'occupation' => 'شغل', 'income_level' => 'میزان درآمد', 'mobile_number' => 'شماره همراه', 'phone_number' => 'تلفن ثابت',
+            'residency_status' => 'وضعیت محل سکونت', 'workplace_status' => 'وضعیت محل کار', 'address' => 'آدرس', 'birth_date' => 'تاریخ تولد',
+            'bank_name' => 'نام بانک', 'account_number' => 'شماره حساب', 'branch_code' => 'کد شعبه', 'branch_name' => 'نام شعبه'
+        ];
+        $render_fields_table($buyer_fields, $post_meta);
+    
         $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
         if ($issuer_type === 'other') {
             echo '<h3 style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px;">اطلاعات صادر کننده چک</h3>';
-            $issuer_fields = ['issuer_first_name' => 'نام','issuer_last_name' => 'نام خانوادگی','issuer_national_code' => 'کد ملی','issuer_father_name'   => 'نام پدر','issuer_birth_date'    => 'تاریخ تولد','issuer_mobile_number' => 'شماره موبایل'];
-            $issuer_pairs = array_chunk($issuer_fields, 2, true);
-            echo '<table class="form-table"><tbody>';
-            foreach ($issuer_pairs as $pair) {
-                 echo '<tr>'; $i = 0;
-                 foreach($pair as $key => $label) {
-                     $value = $post_meta[$key][0] ?? '';
-                     echo '<th scope="row" style="width: 15%;"><label>' . esc_html($label) . '</label></th>';
-                     echo '<td style="width: 35%;">' . esc_html($value) . '</td>';
-                     $i++;
-                 }
-                 if ($i == 1) { echo '<th></th><td></td>'; } echo '</tr>';
-            }
-            echo '</tbody></table>';
+            $issuer_fields = [
+                'issuer_full_name' => 'نام صادر کننده', 'issuer_national_code' => 'کد ملی صادر کننده', 'issuer_bank_name' => 'نام بانک',
+                'issuer_account_number' => 'شماره حساب', 'issuer_branch_code' => 'کد شعبه', 'issuer_branch_name' => 'نام شعبه',
+                'issuer_residency_status' => 'وضعیت سکونت', 'issuer_workplace_status' => 'وضعیت شغلی',
+                'issuer_father_name' => 'نام پدر', 'issuer_occupation' => 'شغل', 'issuer_phone_number' => 'شماره تماس', 'issuer_address' => 'آدرس'
+            ];
+            $render_fields_table($issuer_fields, $post_meta);
         }
-        echo '<hr><p><strong>خودروی درخواستی:</strong> ' . esc_html(get_the_title($post_meta['product_id'][0] ?? '')) . '</p>';
+    
+        echo '<h3 style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px;">اطلاعات خودرو</h3>';
+        $product_id = $post_meta['product_id'][0] ?? 0;
+        $product = $product_id ? wc_get_product($product_id) : null;
+        $car_model = $product ? $product->get_attribute('pa_model') : '—';
+        $loan_amount = (int)($post_meta['maneli_inquiry_total_price'][0] ?? 0) - (int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0);
+        
+        $car_fields = [
+            'product_name' => 'نام خودرو', 'car_model' => 'مدل خودرو', 'maneli_inquiry_total_price' => 'قیمت',
+            'maneli_inquiry_down_payment' => 'پیش پرداخت', 'loan_amount' => 'میزان وام', 'maneli_inquiry_term_months' => 'تعداد اقساط',
+            'maneli_inquiry_installment' => 'اقساط ماهیانه'
+        ];
+        
+        $car_meta_values = [
+            'product_name' => [get_the_title($product_id)],
+            'car_model' => [$car_model],
+            'loan_amount' => [number_format_i18n($loan_amount) . ' تومان'],
+            'maneli_inquiry_total_price' => [number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)) . ' تومان'],
+            'maneli_inquiry_down_payment' => [number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)) . ' تومان'],
+            'maneli_inquiry_term_months' => [($post_meta['maneli_inquiry_term_months'][0] ?? '') . ' ماه'],
+            'maneli_inquiry_installment' => [number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)) . ' تومان'],
+        ];
+        
+        $render_fields_table($car_fields, $car_meta_values);
     }
+    
 
     public function render_status_meta_box($post) {
         wp_nonce_field('save_inquiry_status_nonce', 'inquiry_status_nonce');
