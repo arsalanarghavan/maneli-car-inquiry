@@ -171,14 +171,14 @@ class Maneli_CPT_Handler {
         $post_meta = get_post_meta($post->ID);
     
         // Helper function to render table rows from an array of fields
-        $render_fields_table = function($fields, $post_meta) {
+        $render_fields_table = function($fields, $meta_source) {
             $field_pairs = array_chunk($fields, 2, true);
             echo '<table class="form-table"><tbody>';
             foreach ($field_pairs as $pair) {
                 echo '<tr>';
                 $i = 0;
                 foreach ($pair as $key => $label) {
-                    $value = $post_meta[$key][0] ?? '';
+                    $value = $meta_source[$key][0] ?? '';
                     // Handle status fields for better display
                     if (strpos($key, 'residency_status') !== false) {
                         $value = ($value === 'owner') ? 'مالک' : (($value === 'tenant') ? 'مستاجر' : $value);
@@ -221,7 +221,7 @@ class Maneli_CPT_Handler {
             $render_fields_table($issuer_fields, $post_meta);
         }
     
-        echo '<h3 style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px;">اطلاعات خودرو</h3>';
+        echo '<h3 style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px;">اطلاعات خودرو و شرایط اقساط</h3>';
         $product_id = $post_meta['product_id'][0] ?? 0;
         $product = $product_id ? wc_get_product($product_id) : null;
         $car_model = $product ? $product->get_attribute('pa_model') : '—';

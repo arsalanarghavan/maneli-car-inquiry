@@ -388,7 +388,6 @@ class Maneli_Inquiry_Shortcodes {
         $product = $car_id ? wc_get_product($car_id) : null;
         $car_model = '';
         if ($product) {
-            // This is a generic way to get an attribute. Replace 'pa_model' with the actual attribute slug if different.
             $car_model = $product->get_attribute('pa_model'); 
         }
 
@@ -536,7 +535,6 @@ class Maneli_Inquiry_Shortcodes {
                 }
             }
             radios.forEach(radio => radio.addEventListener('change', toggleForms));
-            // Initial check in case the page is reloaded
             toggleForms();
         });
         </script>
@@ -752,7 +750,6 @@ class Maneli_Inquiry_Shortcodes {
     }
 
     public function render_inquiry_list() {
-        // ** NEW LOGIC **: Check if we need to show a single report instead of the list
         if (isset($_GET['inquiry_id']) && !empty($_GET['inquiry_id'])) {
             return $this->render_frontend_credit_report();
         }
@@ -768,7 +765,6 @@ class Maneli_Inquiry_Shortcodes {
             return $this->render_customer_inquiry_list($current_user->ID);
         }
         
-        // Advanced list for Admins and Experts
         ob_start();
         ?>
         <div class="maneli-full-width-container">
@@ -824,7 +820,6 @@ class Maneli_Inquiry_Shortcodes {
                             </tr>
                         </thead>
                         <tbody id="maneli-inquiry-list-tbody">
-                           <?php // Initial load is handled by JS ?>
                         </tbody>
                     </table>
                 </div>
@@ -861,7 +856,7 @@ class Maneli_Inquiry_Shortcodes {
                     search: $('#inquiry-search-input').val(),
                     status: $('#status-filter').val(),
                     expert: $('#expert-filter').length ? $('#expert-filter').val() : '',
-                    base_url: '<?php echo esc_url(remove_query_arg("inquiry_id")); ?>' // Pass current URL
+                    base_url: '<?php echo esc_url(remove_query_arg("inquiry_id")); ?>'
                 };
 
                 xhr = $.ajax({
@@ -936,11 +931,9 @@ class Maneli_Inquiry_Shortcodes {
             $inquiry_id = intval($_GET['cash_inquiry_id']);
             $inquiry_author_id = get_post_field('post_author', $inquiry_id);
 
-            // Allow admins and experts to view any cash inquiry detail page
             if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles)) {
                  return $this->render_single_cash_inquiry_page();
             }
-            // Ensure the user is the owner of the inquiry
             if ($user_id == $inquiry_author_id) {
                 return $this->render_single_customer_cash_inquiry($inquiry_id);
             }
@@ -1093,10 +1086,8 @@ class Maneli_Inquiry_Shortcodes {
                 });
             }
 
-            // Initial Load
             fetch_cash_inquiries(1);
 
-            // Event Handlers
             $('#cash-inquiry-search-input').on('keyup', function() {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => fetch_cash_inquiries(1), 500);
@@ -1214,7 +1205,7 @@ class Maneli_Inquiry_Shortcodes {
         if (empty($inquiries)) {
             echo '<div class="status-box status-pending"><p>تاکنون هیچ استعلامی برای شما ثبت نشده است.</p></div>';
         } else {
-            $current_url = remove_query_arg(['inquiry_id']); // Get current URL without the param
+            $current_url = remove_query_arg(['inquiry_id']); 
     
             echo '<h3>لیست استعلام‌های شما</h3>';
             echo '<table class="shop_table shop_table_responsive my_account_orders">';
@@ -1231,7 +1222,7 @@ class Maneli_Inquiry_Shortcodes {
                 $inquiry_id = $inquiry->ID;
                 $product_id = get_post_meta($inquiry_id, 'product_id', true);
                 $status = get_post_meta($inquiry_id, 'inquiry_status', true);
-                $report_url = add_query_arg('inquiry_id', $inquiry_id, $current_url); // Use current URL
+                $report_url = add_query_arg('inquiry_id', $inquiry_id, $current_url); 
                 $gregorian_date = get_the_date('Y-m-d', $inquiry_id);
                 list($y, $m, $d) = explode('-', $gregorian_date);
                 
@@ -1527,7 +1518,6 @@ class Maneli_Inquiry_Shortcodes {
             return '<div class="maneli-inquiry-wrapper error-box"><p>شما دسترسی لازم برای مشاهده این محتوا را ندارید.</p></div>';
         }
         if (!isset($_GET['inquiry_id'])) {
-            // This case should not be reached if called from render_inquiry_list, but good to have as a fallback.
             return '<div class="maneli-inquiry-wrapper error-box"><p>شناسه استعلام مشخص نشده است.</p></div>';
         }
         
@@ -1571,6 +1561,29 @@ class Maneli_Inquiry_Shortcodes {
         ];
         $status_info = $status_map[$status] ?? ['label' => 'نامشخص', 'class' => ''];
 
+        // Helper function for rendering fields in the frontend report
+        $render_fields_grid = function($fields, $post_meta) {
+            echo '<div class="form-grid">';
+            $field_pairs = array_chunk($fields, 2, true);
+            foreach ($field_pairs as $pair) {
+                echo '<div class="form-row">';
+                foreach($pair as $key => $label) {
+                    $value = $post_meta[$key][0] ?? '—';
+                    if (strpos($key, 'residency_status') !== false) {
+                        $value = ($value === 'owner') ? 'مالک' : (($value === 'tenant') ? 'مستاجر' : $value);
+                    }
+                    if (strpos($key, 'workplace_status') !== false) {
+                        $statuses = ['permanent' => 'رسمی', 'contract' => 'قراردادی', 'freelance' => 'آزاد'];
+                        $value = $statuses[$value] ?? $value;
+                    }
+                    echo '<div class="form-group"><label>' . esc_html($label) . '</label><div class="detail-value-box">' . esc_html($value) . '</div></div>';
+                }
+                if (count($pair) < 2) { echo '<div class="form-group"></div>'; }
+                echo '</div>';
+            }
+            echo '</div>';
+        };
+
         ob_start();
         ?>
         <div class="maneli-inquiry-wrapper frontend-expert-report">
@@ -1581,13 +1594,11 @@ class Maneli_Inquiry_Shortcodes {
             </div>
             
             <div class="report-box">
-                <h3 class="report-box-title">خودروی درخواستی</h3>
+                <h3 class="report-box-title">اطلاعات خودرو و شرایط اقساط</h3>
                 <div class="report-car-image">
                     <?php
                     if ($product_id && has_post_thumbnail($product_id)) {
                         echo get_the_post_thumbnail($product_id, 'medium');
-                    } else {
-                        echo '<div class="no-image">تصویری برای این محصول ثبت نشده است.</div>';
                     }
                     ?>
                 </div>
@@ -1603,44 +1614,35 @@ class Maneli_Inquiry_Shortcodes {
             </div>
 
             <div class="report-box">
-                <h3 class="report-box-title">اطلاعات فردی</h3>
-                <div class="form-grid">
-                    <?php
-                    $buyer_fields = ['first_name' => 'نام (خریدار)','last_name' => 'نام خانوادگی (خریدار)','national_code' => 'کد ملی (خریدار)','father_name' => 'نام پدر (خریدار)','birth_date' => 'تاریخ تولد (خریدار)','mobile_number' => 'شماره موبایل (خریدار)'];
-                    $buyer_field_pairs = array_chunk($buyer_fields, 2, true);
-                    foreach ($buyer_field_pairs as $pair) {
-                        echo '<div class="form-row">';
-                        foreach($pair as $key => $label) {
-                            $value = $post_meta[$key][0] ?? '';
-                            echo '<div class="form-group"><label>' . esc_html($label) . '</label><div class="detail-value-box">' . esc_html($value) . '</div></div>';
-                        }
-                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; }
-                        echo '</div>';
-                    }
-                    ?>
-                </div>
-                <?php
-                $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
-                if ($issuer_type === 'other'):
-                    $issuer_fields = ['issuer_first_name' => 'نام (صادر کننده)','issuer_last_name' => 'نام خانوادگی (صادر کننده)','issuer_national_code' => 'کد ملی (صادر کننده)','issuer_father_name'   => 'نام پدر (صادر کننده)','issuer_birth_date'    => 'تاریخ تولد (صادر کننده)','issuer_mobile_number' => 'شماره موبایل (صادر کننده)'];
-                    $issuer_field_pairs = array_chunk($issuer_fields, 2, true);
+                <h3 class="report-box-title">مشخصات مراجعه کننده</h3>
+                 <?php
+                $buyer_fields = [
+                    'first_name' => 'نام', 'last_name' => 'نام خانوادگی', 'father_name' => 'نام پدر', 'national_code' => 'کد ملی',
+                    'occupation' => 'شغل', 'income_level' => 'میزان درآمد', 'mobile_number' => 'شماره همراه', 'phone_number' => 'تلفن ثابت',
+                    'residency_status' => 'وضعیت محل سکونت', 'workplace_status' => 'وضعیت محل کار', 'address' => 'آدرس', 'birth_date' => 'تاریخ تولد',
+                    'bank_name' => 'نام بانک', 'account_number' => 'شماره حساب', 'branch_code' => 'کد شعبه', 'branch_name' => 'نام شعبه'
+                ];
+                $render_fields_grid($buyer_fields, $post_meta);
                 ?>
-                    <h4 class="report-section-divider">اطلاعات صادر کننده چک</h4>
-                    <div class="form-grid">
-                    <?php
-                    foreach ($issuer_field_pairs as $pair) {
-                        echo '<div class="form-row">';
-                        foreach($pair as $key => $label) {
-                            $value = $post_meta[$key][0] ?? '';
-                            echo '<div class="form-group"><label>' . esc_html($label) . '</label><div class="detail-value-box">' . esc_html($value) . '</div></div>';
-                        }
-                        if (count($pair) < 2) { echo '<div class="form-group"></div>'; }
-                        echo '</div>';
-                    }
-                    ?>
-                    </div>
-                <?php endif; ?>
             </div>
+            
+            <?php
+            $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
+            if ($issuer_type === 'other'):
+            ?>
+            <div class="report-box">
+                <h3 class="report-box-title">اطلاعات صادر کننده چک</h3>
+                <?php
+                $issuer_fields = [
+                    'issuer_full_name' => 'نام صادر کننده', 'issuer_national_code' => 'کد ملی صادر کننده', 'issuer_bank_name' => 'نام بانک',
+                    'issuer_account_number' => 'شماره حساب', 'issuer_branch_code' => 'کد شعبه', 'issuer_branch_name' => 'نام شعبه',
+                    'issuer_residency_status' => 'وضعیت سکونت', 'issuer_workplace_status' => 'وضعیت شغلی',
+                    'issuer_father_name' => 'نام پدر', 'issuer_occupation' => 'شغل', 'issuer_phone_number' => 'شماره تماس', 'issuer_address' => 'آدرس'
+                ];
+                $render_fields_grid($issuer_fields, $post_meta);
+                ?>
+            </div>
+            <?php endif; ?>
 
             <div class="report-box">
                 <h3 class="report-box-title">نتیجه استعلام وضعیت چک (صیادی)</h3>
