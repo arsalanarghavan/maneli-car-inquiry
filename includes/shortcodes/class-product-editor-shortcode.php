@@ -1,81 +1,41 @@
 <?php
 /**
- * Handles the [maneli_product_editor] shortcode, which provides a frontend interface
- * for administrators to quickly edit product prices, colors, and sales status.
+ * Creates and manages the custom admin page for quick product editing.
+ * This class has been neutralized to prevent the creation of the backend admin page,
+ * ensuring all product editing functionality is handled by the shortcode on the frontend.
  *
- * @package Maneli_Car_Inquiry/Includes/Shortcodes
+ * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.1.0 (Neutralized for frontend-only mode)
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Product_Editor_Shortcode {
+class Maneli_Product_Editor_Page {
+
+    /**
+     * The hook suffix for the custom admin page.
+     * @var string
+     */
+    private $page_hook_suffix;
 
     public function __construct() {
-        add_shortcode('maneli_product_editor', [$this, 'render_shortcode']);
+        // تمامی هوک‌های مربوط به افزودن صفحه به منوی ادمین و بارگذاری اسکریپت‌ها
+        // از محیط ادمین حذف شدند تا عملیات فقط در فرانت‌اند انجام شود.
     }
 
     /**
-     * Renders the product editor shortcode.
-     * It checks for user capabilities, enqueues necessary assets, and then delegates rendering to a template file.
-     *
-     * @return string The HTML output for the shortcode.
+     * این متد دیگر از طریق هیچ هوکی فراخوانی نمی‌شود و تنها برای
+     * حفظ ساختار فایل اصلی باقی مانده است. نمایش واقعی توسط شورت‌کد انجام می‌شود.
      */
-    public function render_shortcode() {
-        // 1. Security Check: Ensure only users with the master capability can view this editor.
-        if (!current_user_can('manage_maneli_inquiries')) {
-            return '<div class="maneli-inquiry-wrapper error-box"><p>' . esc_html__('You do not have sufficient permissions to access this page.', 'maneli-car-inquiry') . '</p></div>';
+    public function render_page_html() {
+        if (!class_exists('WooCommerce')) {
+            echo '<div class="notice notice-error"><p>' . esc_html__('To use this plugin, please install and activate WooCommerce first.', 'maneli-car-inquiry') . '</p></div>';
+            return;
         }
-
-        // 2. Enqueue the dedicated JavaScript for this component.
-        $this->enqueue_scripts();
-
-        // 3. Prepare initial data for the template.
-        $products_per_page = 50;
-        $paged = get_query_var('paged') ? get_query_var('paged') : 1;
-
-        $initial_products_query = wc_get_products([
-            'limit'    => $products_per_page,
-            'page'     => $paged,
-            'orderby'  => 'title',
-            'order'    => 'ASC',
-            'paginate' => true, // Needed to get total pages for pagination
-        ]);
         
-        $template_args = [
-            'product_stats_widgets_html' => Maneli_Admin_Dashboard_Widgets::render_product_statistics_widgets(),
-            'initial_products_query'     => $initial_products_query,
-            'paged'                      => $paged,
-        ];
-        
-        // 4. Render the template file.
-        // The `false` argument tells the function to return the output as a string.
-        return maneli_get_template_part('shortcodes/product-editor', $template_args, false);
-    }
-    
-    /**
-     * Enqueues and localizes the necessary JavaScript for the product editor interface.
-     */
-    private function enqueue_scripts() {
-        wp_enqueue_script(
-            'maneli-product-editor-js',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/product-editor.js',
-            ['jquery'],
-            '1.0.0', // Use filemtime for cache busting in production
-            true
-        );
-
-        // Pass PHP data to the JavaScript file
-        wp_localize_script('maneli-product-editor-js', 'maneliProductEditor', [
-            'ajax_url'          => admin_url('admin-ajax.php'),
-            'filter_nonce'      => wp_create_nonce('maneli_product_filter_nonce'),
-            'update_data_nonce' => wp_create_nonce('maneli_product_data_nonce'),
-            'text' => [
-                'error' => esc_html__('Error:', 'maneli-car-inquiry'),
-            ]
-        ]);
+        // محتوای واقعی این صفحه به کلاس Maneli_Product_Editor_Shortcode منتقل شده است.
     }
 }

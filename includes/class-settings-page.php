@@ -1,11 +1,13 @@
 <?php
 /**
- * Creates and manages the plugin's settings page in the WordPress admin area.
- * This class defines all settings tabs, sections, and fields.
+ * Creates and manages the plugin's settings, providing core encryption/decryption utilities
+ * and handling settings updates exclusively from the frontend shortcode.
+ *
+ * All backend WordPress Admin UI elements for settings have been removed.
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.3 (Security Fix: Encrypted storage of Finotex and Sadad keys, fixed syntax errors in HTML rendering)
+ * @version 1.1.0 (Frontend-Only Settings Management)
  */
 
 if (!defined('ABSPATH')) {
@@ -21,8 +23,7 @@ class Maneli_Settings_Page {
     private $options_name = 'maneli_inquiry_all_options';
 
     public function __construct() {
-        add_action('admin_menu', [$this, 'add_plugin_admin_menu']);
-        add_action('admin_init', [$this, 'register_and_build_fields']);
+        // تنها هوک لازم برای ذخیره تنظیمات از طریق فرم فرانت‌اند (شورت‌کد) نگهداری شده است.
         add_action('admin_post_maneli_save_frontend_settings', [$this, 'handle_frontend_settings_save']);
     }
 
@@ -95,93 +96,9 @@ class Maneli_Settings_Page {
     }
 
     /**
-     * Adds the settings page to the WordPress admin menu under the "Settings" section.
-     */
-    public function add_plugin_admin_menu() {
-        add_options_page(
-            esc_html__('Car Inquiry Settings', 'maneli-car-inquiry'),
-            esc_html__('Car Inquiry Settings', 'maneli-car-inquiry'),
-            'manage_options',
-            'maneli-inquiry-settings',
-            [$this, 'render_settings_page_html']
-        );
-    }
-
-    /**
-     * Renders the main HTML structure for the backend settings page.
-     */
-    public function render_settings_page_html() {
-        $active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'finance'; // Default to new tab
-        ?>
-        <div class="wrap">
-            <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
-            <?php settings_errors(); ?>
-            
-            <nav class="nav-tab-wrapper">
-                <?php
-                $all_settings = $this->get_all_settings_fields();
-                foreach ($all_settings as $tab_key => $tab_data) {
-                    $class = ($active_tab === $tab_key) ? 'nav-tab-active' : '';
-                    $url = '?page=maneli-inquiry-settings&tab=' . esc_attr($tab_key);
-                    echo '<a href="' . esc_url($url) . '" class="nav-tab ' . esc_attr($class) . '">' . esc_html($tab_data['title']) . '</a>';
-                }
-                ?>
-            </nav>
-
-            <form method="post" action="options.php">
-                <?php
-                settings_fields('maneli_inquiry_settings_group');
-                do_settings_sections('maneli-' . $active_tab . '-settings-section');
-                submit_button(esc_html__('Save Settings', 'maneli-car-inquiry'));
-                ?>
-            </form>
-        </div>
-        <?php
-    }
-
-    /**
-     * Registers the main setting group and dynamically builds sections and fields for each tab.
-     */
-    public function register_and_build_fields() {
-        register_setting(
-            'maneli_inquiry_settings_group',
-            $this->options_name,
-            [$this, 'sanitize_and_merge_options']
-        );
-
-        foreach ($this->get_all_settings_fields() as $tab_key => $tab_data) {
-            if (empty($tab_data['sections'])) continue;
-
-            foreach ($tab_data['sections'] as $section_id => $section) {
-                add_settings_section(
-                    $section_id,
-                    $section['title'],
-                    function() use ($section) {
-                        if (!empty($section['desc'])) {
-                            echo '<p>' . wp_kses_post($section['desc']) . '</p>';
-                        }
-                    },
-                    'maneli-' . $tab_key . '-settings-section'
-                );
-
-                if (empty($section['fields'])) continue;
-
-                foreach ($section['fields'] as $field) {
-                    add_settings_field(
-                        $field['name'],
-                        $field['label'],
-                        [$this, 'render_field_html'],
-                        'maneli-' . $tab_key . '-settings-section',
-                        $section_id,
-                        $field
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * Renders the HTML for a given settings field based on its type.
+     * Renders the HTML برای یک فیلد تنظیمات مشخص بر اساس نوع آن.
+     * این متد توسط تمپلیت تنظیمات فرانت‌اند فراخوانی می‌شود.
+     * * @param array $args آرگومان‌های فیلد.
      */
     public function render_field_html($args) {
         $options = get_option($this->options_name, []);
@@ -190,17 +107,17 @@ class Maneli_Settings_Page {
         $value = $options[$name] ?? ($args['default'] ?? '');
         $field_name = "{$this->options_name}[{$name}]";
         
-        // Check if the field is sensitive and contains encrypted data
+        // بررسی کلیدهای حساس و رمزگشایی آنها قبل از نمایش در فیلد ورودی
         $is_sensitive = in_array($name, ['finotex_username', 'finotex_password', 'sadad_key'], true);
 
         if ($is_sensitive && !empty($value)) {
             $value = $this->decrypt_data($value);
-            // If decryption fails, the input will be empty, forcing the user to re-enter.
+            // اگر رمزگشایی ناموفق باشد، فیلد خالی نمایش داده می‌شود تا کاربر مجدداً وارد کند.
         }
 
         switch ($type) {
             case 'textarea':
-                echo "<textarea name='" . esc_attr($field_name) . "' rows='5' class='large-text'>" . esc_textarea($value) . "</textarea>";
+                echo "<textarea name='" . esc_attr($field_name) . "' id='" . esc_attr($this->options_name . '_' . $name) . "' rows='5' class='large-text'>" . esc_textarea($value) . "</textarea>";
                 break;
             case 'switch':
                 echo '<label class="maneli-switch">';
@@ -208,20 +125,18 @@ class Maneli_Settings_Page {
                 echo '<span class="maneli-slider round"></span></label>';
                 break;
             case 'html':
-                 // For 'html' type, the content is in the 'desc' key, nothing to render for the field itself.
+                 // برای نوع 'html'، محتوا در کلید 'desc' است.
                  break;
-            default: // Catches text, number, password, etc.
-                // FIX: Corrected PHP string concatenation error here
-                echo "<input type='" . esc_attr($type) . "' name='" . esc_attr($field_name) . "' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
+            default: // شامل text, number, password و غیره
+                echo "<input type='" . esc_attr($type) . "' name='" . esc_attr($field_name) . "' id='" . esc_attr($this->options_name . '_' . $name) . "' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
                 break;
         }
 
-        // Output description AFTER the field (for default fields) or AS the field (for html type)
+        // نمایش توضیحات بعد از فیلد
         if (!empty($args['desc'])) {
             if ($type === 'html') {
                  echo wp_kses_post($args['desc']);
             } else {
-                 // FIX: Corrected PHP string concatenation error here
                  echo "<p class='description'>" . wp_kses_post($args['desc']) . "</p>";
             }
         }
@@ -229,6 +144,7 @@ class Maneli_Settings_Page {
 
     /**
      * Sanitizes and merges new options with old options, handling unchecked checkboxes and encryption.
+     * این منطق برای ذخیره داده از فرم فرانت‌اند ضروری است.
      */
     public function sanitize_and_merge_options($input) {
         $old_options = get_option($this->options_name, []);
@@ -243,15 +159,14 @@ class Maneli_Settings_Page {
                 foreach ($section['fields'] as $field) {
                     $key = $field['name'];
                     
-                    // Skip custom display fields (html type)
+                    // فیلدهای نمایشی را نادیده بگیر
                     if ($field['type'] === 'html') continue;
                     
                     if (isset($input[$key])) {
                         $value = $input[$key];
                         
-                        // Encrypt sensitive fields if a value is provided
+                        // رمزنگاری فیلدهای حساس
                         if (in_array($key, $sensitive_keys, true)) {
-                            // Only encrypt non-empty values. If empty, save as empty string (which decrypts to empty).
                             if (!empty($value)) {
                                 $value = $this->encrypt_data(sanitize_text_field($value));
                             } else {
@@ -267,7 +182,7 @@ class Maneli_Settings_Page {
 
                     }
                     
-                    // Handle switch fields that might be missing (unchecked)
+                    // مدیریت فیلدهای Switch که در صورت Uncheck بودن در POST وجود ندارند.
                     if ($field['type'] === 'switch' && !isset($input[$key])) {
                         $sanitized_input[$key] = '0';
                     }
@@ -275,6 +190,7 @@ class Maneli_Settings_Page {
             }
         }
         
+        // ادغام تنظیمات جدید با تنظیمات قبلی برای جلوگیری از حذف تنظیمات دیگر تب‌ها
         return array_merge($old_options, $sanitized_input);
     }
     
@@ -283,21 +199,28 @@ class Maneli_Settings_Page {
      */
     public function handle_frontend_settings_save() {
         check_admin_referer('maneli_save_frontend_settings_nonce');
+        // اطمینان از دسترسی کاربر به مدیریت پلاگین
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_die(esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry'));
         }
 
+        // ورودی‌ها در کلید options_name در POST قرار دارند
         $options = isset($_POST[$this->options_name]) ? (array) $_POST[$this->options_name] : [];
         $sanitized_options = $this->sanitize_and_merge_options($options);
+        
+        // ذخیره تنظیمات
         update_option($this->options_name, $sanitized_options);
         
+        // ریدایرکت به صفحه تنظیمات فرانت‌اند با پیام موفقیت
         $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
         wp_redirect(add_query_arg('settings-updated', 'true', $redirect_url));
         exit;
     }
 
     /**
-     * Public method to get the settings fields structure for use in other classes.
+     * Public method to get the settings fields structure for use in the shortcode class.
+     *
+     * @return array ساختار کامل تنظیمات.
      */
     public function get_all_settings_public() {
         return $this->get_all_settings_fields();
