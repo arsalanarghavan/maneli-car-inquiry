@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Helpers
  * @author  Gemini
- * @version 1.0.0
+ * @version 1.0.1 (Added Cheque Status Renderer)
  */
 
 if (!defined('ABSPATH')) {
@@ -143,5 +143,55 @@ class Maneli_Render_Helpers {
 			</td>
         </tr>
         <?php
+    }
+    
+    /**
+     * Renders the cheque status bar and a summary table for credit inquiry results.
+     * این تابع کد تکراری نوار وضعیت و توضیحات اعتبارسنجی را تجمیع می‌کند.
+     *
+     * @param int|string $cheque_color_code The color code from Finotex (0-5).
+     * @return string The HTML output.
+     */
+    public static function render_cheque_status_info($cheque_color_code) {
+        if (!defined('ABSPATH')) {
+            exit;
+        }
+        
+        // Define map locally to ensure all strings are translatable
+        $cheque_color_map = [
+            '1' => ['text' => esc_html__('White', 'maneli-car-inquiry'), 'desc' => esc_html__('No history of bounced cheques.', 'maneli-car-inquiry')],
+            '2' => ['text' => esc_html__('Yellow', 'maneli-car-inquiry'), 'desc' => esc_html__('One bounced cheque or a maximum of 50 million Rials in returned commitments.', 'maneli-car-inquiry')],
+            '3' => ['text' => esc_html__('Orange', 'maneli-car-inquiry'), 'desc' => esc_html__('Two to four bounced cheques or a maximum of 200 million Rials in returned commitments.', 'maneli-car-inquiry')],
+            '4' => ['text' => esc_html__('Brown', 'maneli-car-inquiry'), 'desc' => esc_html__('Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
+            '5' => ['text' => esc_html__('Red', 'maneli-car-inquiry'), 'desc' => esc_html__('More than ten bounced cheques or more than 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
+             0  => ['text' => esc_html__('Undetermined', 'maneli-car-inquiry'), 'desc' => esc_html__('Information was not received from the bank.', 'maneli-car-inquiry')]
+        ];
+        $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
+
+        ob_start();
+        ?>
+        <div class="maneli-status-bar">
+            <?php
+            $colors = [ 1 => 'white', 2 => 'yellow', 3 => 'orange', 4 => 'brown', 5 => 'red' ];
+            foreach ($colors as $code => $class) {
+                $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
+                // Ensure text is correctly pulled from the localized map
+                $text_to_display = $cheque_color_map[$code]['text'] ?? '';
+                echo "<div class='bar-segment segment-{$class} {$active_class}'><span>" . esc_html($text_to_display) . "</span></div>";
+            }
+            ?>
+        </div>
+        <table class="summary-table" style="margin-top:20px;">
+            <tr>
+                <td><strong><?php esc_html_e('Sayad Cheque Status:', 'maneli-car-inquiry'); ?></strong></td>
+                <td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td>
+            </tr>
+            <tr>
+                <td><strong><?php esc_html_e('Status Explanation:', 'maneli-car-inquiry'); ?></strong></td>
+                <td><?php echo esc_html($color_info['desc']); ?></td>
+            </tr>
+        </table>
+        <?php
+        return ob_get_clean();
     }
 }

@@ -2,9 +2,11 @@
 /**
  * Handles all payment-related logic, including submission to gateways and verification of callbacks.
  *
+ * تابع sadad_call_api برای استفاده از wp_remote_post به جای cURL خام بازنویسی شده است.
+ *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.3 (Sadad API Refactored to wp_remote_post)
  */
 
 if (!defined('ABSPATH')) {
@@ -172,7 +174,9 @@ class Maneli_Payment_Handler {
             ],
         ];
 
-        $response = wp_remote_post('https://api.zarinpal.com/pg/v4/payment/request.json', [
+        // Using MANELI_ZARINPAL_REQUEST_URL constant
+        $request_url = defined('MANELI_ZARINPAL_REQUEST_URL') ? MANELI_ZARINPAL_REQUEST_URL : 'https://api.zarinpal.com/pg/v4/payment/request.json';
+        $response = wp_remote_post($request_url, [
             'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json'],
             'body'    => json_encode($data),
             'timeout' => 30,
@@ -186,7 +190,10 @@ class Maneli_Payment_Handler {
 
         if (!empty($result['data']) && !empty($result['data']['authority']) && $result['data']['code'] == 100) {
             update_user_meta($user_id, 'maneli_payment_authority', $result['data']['authority']);
-            wp_redirect('https://www.zarinpal.com/pg/StartPay/' . $result['data']['authority']);
+            
+            // Using MANELI_ZARINPAL_STARTPAY_URL constant
+            $startpay_url = defined('MANELI_ZARINPAL_STARTPAY_URL') ? MANELI_ZARINPAL_STARTPAY_URL : 'https://www.zarinpal.com/pg/StartPay/';
+            wp_redirect($startpay_url . $result['data']['authority']);
             exit;
         } else {
             $error_message = $result['errors']['message'] ?? esc_html__('An unknown error occurred.', 'maneli-car-inquiry');
@@ -228,7 +235,9 @@ class Maneli_Payment_Handler {
                 'amount'      => (int)$amount * 10,
             ];
 
-            $response = wp_remote_post('https://api.zarinpal.com/pg/v4/payment/verify.json', [
+            // Using MANELI_ZARINPAL_VERIFY_URL constant
+            $verify_url = defined('MANELI_ZARINPAL_VERIFY_URL') ? MANELI_ZARINPAL_VERIFY_URL : 'https://api.zarinpal.com/pg/v4/payment/verify.json';
+            $response = wp_remote_post($verify_url, [
                 'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json'],
                 'body'    => json_encode($data),
                 'timeout' => 30,
@@ -261,7 +270,9 @@ class Maneli_Payment_Handler {
         }
     }
 
-    // ... [Sadad payment methods would follow] ...
+    /**
+     * Processes payment request via Sadad.
+     */
     private function process_sadad_payment($user_id, $order_id, $amount_toman, $options) {
         $merchant_id = $options['sadad_merchant_id'] ?? '';
         $terminal_id = $options['sadad_terminal_id'] ?? '';
@@ -287,11 +298,16 @@ class Maneli_Payment_Handler {
             'OrderId'       => $order_id
         ];
 
-        $result = $this->sadad_call_api('https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest', $data);
+        // Using MANELI_SADAD_REQUEST_URL constant
+        $request_url = defined('MANELI_SADAD_REQUEST_URL') ? MANELI_SADAD_REQUEST_URL : 'https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest';
+        $result = $this->sadad_call_api($request_url, $data);
 
         if ($result && isset($result->ResCode) && $result->ResCode == 0) {
             update_user_meta($user_id, 'maneli_payment_token', $result->Token);
-            wp_redirect("https://sadad.shaparak.ir/VPG/Purchase?Token={$result->Token}");
+            
+            // Using MANELI_SADAD_PURCHASE_URL constant
+            $purchase_url = defined('MANELI_SADAD_PURCHASE_URL') ? MANELI_SADAD_PURCHASE_URL : 'https://sadad.shaparak.ir/VPG/Purchase?Token=';
+            wp_redirect($purchase_url . $result->Token);
             exit;
         } else {
             $error_message = $result->Description ?? esc_html__('Unknown error during token generation.', 'maneli-car-inquiry');
@@ -325,7 +341,10 @@ class Maneli_Payment_Handler {
                     'Token'    => $token,
                     'SignData' => $this->sadad_encrypt_pkcs7($token, $terminal_key)
                 ];
-                $result = $this->sadad_call_api('https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify', $verify_data);
+                
+                // Using MANELI_SADAD_VERIFY_URL constant
+                $verify_url = defined('MANELI_SADAD_VERIFY_URL') ? MANELI_SADAD_VERIFY_URL : 'https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify';
+                $result = $this->sadad_call_api($verify_url, $verify_data);
     
                 if ($result && isset($result->ResCode) && $result->ResCode == 0) {
                     if ($payment_type === 'cash_down_payment') {
@@ -350,11 +369,6 @@ class Maneli_Payment_Handler {
     
     /**
      * Cleans up user meta, builds the redirect URL, and performs the redirect.
-     *
-     * @param int    $user_id      User ID.
-     * @param string $redirect_url Base URL for redirection.
-     * @param string $status       'success', 'failed', or 'cancelled'.
-     * @param string $reason       Optional reason for failure.
      */
     private function finalize_and_redirect($user_id, $redirect_url, $status, $reason = '') {
         // Clean up all temporary payment-related user meta
@@ -383,26 +397,34 @@ class Maneli_Payment_Handler {
      */
     private function sadad_encrypt_pkcs7($str, $key) {
         $key = base64_decode($key);
-        // The third parameter for DES-EDE3 is the IV, which should be empty for this implementation.
         $ciphertext = openssl_encrypt($str, "DES-EDE3", $key, OPENSSL_RAW_DATA);
         return base64_encode($ciphertext);
     }
 
     /**
-     * Sadad API helper: Makes a cURL call to the API.
+     * FIX: Sadad API helper: Makes a request to the API using wp_remote_post.
+     * This replaces the use of cURL with the standard WordPress HTTP API.
      */
     private function sadad_call_api($url, $data = false) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type:application/json; charset=utf-8']);
-        curl_setopt($ch, CURLOPT_POST, 1);
+        $args = [
+            'headers' => ['Content-Type' => 'application/json; charset=utf-8'],
+            'timeout' => 30,
+        ];
+        
         if ($data) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            $args['body'] = json_encode($data);
+            $response = wp_remote_post($url, $args);
+        } else {
+             // In Sadad's case, all calls are POST, but maintaining a robust structure.
+             $response = wp_remote_post($url, $args);
         }
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1); // Should be true in production
-        $result = curl_exec($ch);
-        curl_close($ch);
+
+        if (is_wp_error($response)) {
+             error_log('Maneli Sadad API Error: ' . $response->get_error_message());
+             return false;
+        }
+        
+        $result = wp_remote_retrieve_body($response);
         return !empty($result) ? json_decode($result) : false;
     }
 }

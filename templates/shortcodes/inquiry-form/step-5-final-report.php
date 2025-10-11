@@ -2,13 +2,11 @@
 /**
  * Template for Step 5 of the inquiry form (Final Result).
  *
- * This template is shown to the customer after their inquiry has been processed,
- * displaying the final status (approved or rejected) and a summary of their request.
- * This is also used as the "details" view for customers in the inquiry list.
+ * این تمپلیت برای جایگزینی کدهای تکراری نوار وضعیت اعتبارسنجی با تابع کمکی Maneli_Render_Helpers::render_cheque_status_info به روز شده است.
  *
  * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryForm
  * @author  Gemini
- * @version 1.0.0
+ * @version 1.0.1 (Refactored Cheque Status Display)
  *
  * @var int $inquiry_id The ID of the inquiry post.
  */
@@ -68,35 +66,8 @@ $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
                 </tr>
             </table>
         <?php else:
-            $cheque_color_map = [
-                '1' => ['text' => __('White', 'maneli-car-inquiry'), 'desc' => __('No history of bounced cheques.', 'maneli-car-inquiry')],
-                '2' => ['text' => __('Yellow', 'maneli-car-inquiry'), 'desc' => __('One bounced cheque or a maximum of 50 million Rials in returned commitments.', 'maneli-car-inquiry')],
-                '3' => ['text' => __('Orange', 'maneli-car-inquiry'), 'desc' => __('Two to four bounced cheques or a maximum of 200 million Rials in returned commitments.', 'maneli-car-inquiry')],
-                '4' => ['text' => __('Brown', 'maneli-car-inquiry'), 'desc' => __('Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
-                '5' => ['text' => __('Red', 'maneli-car-inquiry'), 'desc' => __('More than ten bounced cheques or more than 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
-                 0  => ['text' => __('Undetermined', 'maneli-car-inquiry'), 'desc' => __('Information was not received from Finotex.', 'maneli-car-inquiry')]
-            ];
-            $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
-        ?>
-            <div class="maneli-status-bar">
-                <?php
-                $colors = [ 1 => 'white', 2 => 'yellow', 3 => 'orange', 4 => 'brown', 5 => 'red' ];
-                foreach ($colors as $code => $class) {
-                    $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
-                    echo "<div class='bar-segment segment-{$class} {$active_class}'><span>" . esc_html($cheque_color_map[$code]['text']) . "</span></div>";
-                }
-                ?>
-            </div>
-            <table class="summary-table" style="margin-top:20px;">
-                <tr>
-                    <td><strong><?php esc_html_e('Sayad Cheque Status:', 'maneli-car-inquiry'); ?></strong></td>
-                    <td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td>
-                </tr>
-                <tr>
-                    <td><strong><?php esc_html_e('Status Explanation:', 'maneli-car-inquiry'); ?></strong></td>
-                    <td><?php echo esc_html($color_info['desc']); ?></td>
-                </tr>
-            </table>
-        <?php endif; ?>
+            // FIX: فراخوانی تابع کمکی برای نمایش نوار وضعیت
+            echo Maneli_Render_Helpers::render_cheque_status_info($cheque_color_code);
+        endif; ?>
     </div>
 </div>

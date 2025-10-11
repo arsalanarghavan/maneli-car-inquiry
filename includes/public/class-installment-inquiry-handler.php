@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (API URL Fixed)
  */
 
 if (!defined('ABSPATH')) {
@@ -233,11 +233,11 @@ class Maneli_Installment_Inquiry_Handler {
      * @param string $national_code The national ID code to check.
      * @return array An array containing the status, data, and raw response.
      */
-    private function execute_finotex_inquiry($national_code) {
+    public function execute_finotex_inquiry($national_code) {
         $options = get_option('maneli_inquiry_all_options', []);
         
-        if (empty($options['finotex_enabled']) || $options['finotex_enabled'] !== '1') {
-            return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Finotex inquiry is disabled in settings.'];
+        if (empty($options['finotex_enabled']) || $options['finotex_enabled'] !== '1' || !defined('MANELI_FINOTEX_API_URL')) {
+            return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Finotex inquiry is disabled in settings or API constant is missing.'];
         }
 
         $client_id = $options['finotex_client_id'] ?? '';
@@ -249,7 +249,9 @@ class Maneli_Installment_Inquiry_Handler {
             return $result;
         }
 
-        $api_url = "https://api.finnotech.ir/credit/v2/clients/{$client_id}/chequeColorInquiry";
+        // FIX: Using MANELI_FINOTEX_API_URL constant
+        $api_url = sprintf(MANELI_FINOTEX_API_URL, $client_id);
+        
         $track_id = 'maneli_' . uniqid();
         $api_url_with_params = add_query_arg(['idCode' => $national_code, 'trackId' => $track_id], $api_url);
         

@@ -1,11 +1,11 @@
 <?php
 /**
  * Handles form submissions sent via admin-post.php for administrative and expert actions.
- * This includes status updates, user creation/updates, and inquiry creation by experts.
+ * این فایل شامل منطق کامل شده برای ایجاد استعلام توسط کارشناس است.
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Expert Inquiry Creation Logic Completed)
  */
 
 if (!defined('ABSPATH')) {
@@ -91,6 +91,7 @@ class Maneli_Admin_Actions_Handler {
 
     /**
      * Handles inquiry creation by an expert or admin from the frontend form.
+     * **FIXED:** Missing post creation and meta saving logic completed here.
      */
     public function handle_expert_create_inquiry() {
         check_admin_referer('maneli_expert_create_nonce');
@@ -103,7 +104,7 @@ class Maneli_Admin_Actions_Handler {
             wp_die(esc_html__('Please select a car.', 'maneli-car-inquiry'));
         }
     
-        $required_fields = ['first_name', 'last_name', 'national_code', 'mobile_number'];
+        $required_fields = ['first_name', 'last_name', 'national_code', 'mobile_number', 'father_name', 'birth_date'];
         foreach($required_fields as $field) {
             if (empty($_POST[$field])) {
                 wp_die(sprintf(esc_html__('Error: The field "%s" for the buyer is required.', 'maneli-car-inquiry'), $field));
@@ -131,24 +132,82 @@ class Maneli_Admin_Actions_Handler {
             'last_name'  => sanitize_text_field($_POST['last_name']),
             'role'       => 'customer'
         ]);
+
+        // Update customer meta with the provided data
+        $this->update_customer_meta($customer_id, $_POST);
         
-        // ... The rest of the logic to create the inquiry post ...
-        // This part is quite complex and involves logic from Maneli_Installment_Inquiry_Handler.
-        // For a true refactor, this logic should be centralized. For now, we replicate it.
+        // --- Inquiry Creation Logic START ---
         $inquiry_handler = new Maneli_Installment_Inquiry_Handler();
-        // We'll call the finotex inquiry method directly.
-        $national_code_for_api = sanitize_text_field($_POST['national_code']); // Simplified for this example
+        
+        $issuer_type = sanitize_key($_POST['issuer_type'] ?? 'self');
+        $national_code_for_api = ($issuer_type === 'other' && !empty($_POST['issuer_national_code']))
+            ? sanitize_text_field($_POST['issuer_national_code'])
+            : sanitize_text_field($_POST['national_code']);
+
+        // 1. Execute Finotex Inquiry
         $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
         
+        // 2. Calculate Loan Details (Replicating JS calculator logic)
+        $product = wc_get_product($product_id);
+        $total_price = (int)get_post_meta($product_id, 'installment_price', true);
+        if (empty($total_price)) $total_price = (int)$product->get_regular_price();
+
+        $down_payment = (int)preg_replace('/[^0-9]/', '', $_POST['down_payment'] ?? 0);
+        $term_months = (int)sanitize_text_field($_POST['term_months'] ?? 12);
+        
+        $loan_amount = $total_price - $down_payment;
+        $installment_amount = 0;
+        if ($loan_amount > 0) {
+            $monthly_interest_amount = $loan_amount * 0.035;
+            $total_interest = $monthly_interest_amount * ($term_months + 1);
+            $total_repayment = $loan_amount + $total_interest;
+            $installment_amount = (int)round($total_repayment / $term_months);
+        }
+        
+        // 3. Prepare All Data for Post Meta
+        $all_post_meta = $this->prepare_expert_inquiry_meta($_POST, $issuer_type, $product_id, $total_price, $down_payment, $term_months, $installment_amount);
+        
+        $post_title = sprintf(
+            '%s: %s - %s',
+            esc_html__('Inquiry for', 'maneli-car-inquiry'),
+            get_the_title($product_id),
+            $all_post_meta['first_name'] . ' ' . $all_post_meta['last_name']
+        );
+        
+        // 4. Create Inquiry Post
         $post_id = wp_insert_post([
-            // ... post data
-        ]);
+            'post_title'   => $post_title,
+            'post_content' => "Finotex API raw response:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>",
+            'post_status'  => 'publish',
+            'post_author'  => $customer_id,
+            'post_type'    => 'inquiry'
+        ], true);
 
         if (is_wp_error($post_id)) {
-             wp_die(esc_html__('Error creating inquiry post.', 'maneli-car-inquiry'));
+             wp_die(esc_html__('Error creating inquiry post.', 'maneli-car-inquiry') . $post_id->get_error_message());
         }
 
-        // ... save all meta fields ...
+        // 5. Save All Meta Data
+        $initial_status = ($finotex_result['status'] === 'DONE' || $finotex_result['status'] === 'SKIPPED') ? 'pending' : 'failed';
+        
+        // Save initial status
+        update_post_meta($post_id, 'inquiry_status', $initial_status);
+        update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
+        
+        // Save all form and calculated meta
+        foreach ($all_post_meta as $key => $value) {
+            update_post_meta($post_id, $key, $value);
+        }
+
+        // 6. Assign Expert if requested
+        $assigned_expert_id_str = sanitize_text_field($_POST['assigned_expert_id'] ?? 'auto');
+        $expert_data = $this->assign_expert_to_post($post_id, $assigned_expert_id_str, 'installment');
+        if (!is_wp_error($expert_data)) {
+            // Set status to approved if manually assigned
+            update_post_meta($post_id, 'inquiry_status', 'user_confirmed'); 
+        }
+        
+        // --- Inquiry Creation Logic END ---
 
         $redirect_url = add_query_arg('inquiry_created', '1', wp_get_referer());
         wp_redirect($redirect_url);
@@ -180,6 +239,15 @@ class Maneli_Admin_Actions_Handler {
         if (isset($_POST['first_name'])) $user_data['first_name'] = sanitize_text_field($_POST['first_name']);
         if (isset($_POST['last_name'])) $user_data['last_name'] = sanitize_text_field($_POST['last_name']);
         if (isset($_POST['email']) && is_email($_POST['email'])) $user_data['user_email'] = sanitize_email($_POST['email']);
+        
+        // Update display name based on first/last name
+        if (isset($user_data['first_name']) || isset($user_data['last_name'])) {
+            $current_user = get_userdata($user_id);
+            $first_name = $user_data['first_name'] ?? $current_user->first_name;
+            $last_name = $user_data['last_name'] ?? $current_user->last_name;
+            $user_data['display_name'] = trim($first_name . ' ' . $last_name);
+        }
+
         if (isset($_POST['user_role'])) {
             $new_role = sanitize_key($_POST['user_role']);
             if (in_array($new_role, ['customer', 'maneli_expert', 'maneli_admin'], true)) {
@@ -337,5 +405,77 @@ class Maneli_Admin_Actions_Handler {
             
             (new Maneli_SMS_Handler())->send_pattern($pattern_id, $expert_phone, $params);
         }
+    }
+
+    /**
+     * Helper method to update customer profile meta data from the expert form.
+     */
+    private function update_customer_meta($user_id, $post_data) {
+        $meta_fields = [
+            'national_code', 'father_name', 'birth_date', 'mobile_number',
+            'occupation', 'income_level', 'phone_number', 'residency_status',
+            'workplace_status', 'address', 'bank_name', 'account_number',
+            'branch_code', 'branch_name'
+        ];
+        foreach ($meta_fields as $field) {
+            if (isset($post_data[$field])) {
+                update_user_meta($user_id, $field, sanitize_text_field($post_data[$field]));
+            }
+        }
+    }
+    
+    /**
+     * Helper method to prepare all inquiry post meta from the expert form data.
+     */
+    private function prepare_expert_inquiry_meta($post_data, $issuer_type, $product_id, $total_price, $down_payment, $term_months, $installment_amount) {
+        // Default fields for both applicant and issuer (if self)
+        $meta_map = [
+            'product_id'                 => $product_id,
+            'issuer_type'                => $issuer_type,
+            'maneli_inquiry_total_price' => $total_price,
+            'maneli_inquiry_down_payment' => $down_payment,
+            'maneli_inquiry_term_months' => $term_months,
+            'maneli_inquiry_installment' => $installment_amount,
+
+            // Applicant Fields (Buyer)
+            'first_name'                 => sanitize_text_field($post_data['first_name'] ?? ''),
+            'last_name'                  => sanitize_text_field($post_data['last_name'] ?? ''),
+            'father_name'                => sanitize_text_field($post_data['father_name'] ?? ''),
+            'national_code'              => sanitize_text_field($post_data['national_code'] ?? ''),
+            'birth_date'                 => sanitize_text_field($post_data['birth_date'] ?? ''),
+            'mobile_number'              => sanitize_text_field($post_data['mobile_number'] ?? ''),
+            // Placeholder/Optional fields that exist in customer form but not always in expert form
+            'occupation'                 => sanitize_text_field($post_data['occupation'] ?? ''), 
+            'income_level'               => sanitize_text_field($post_data['income_level'] ?? ''), 
+            'phone_number'               => sanitize_text_field($post_data['phone_number'] ?? ''), 
+            'residency_status'           => sanitize_text_field($post_data['residency_status'] ?? ''), 
+            'workplace_status'           => sanitize_text_field($post_data['workplace_status'] ?? ''), 
+            'address'                    => sanitize_textarea_field($post_data['address'] ?? ''), 
+            'bank_name'                  => sanitize_text_field($post_data['bank_name'] ?? ''), 
+            'account_number'             => sanitize_text_field($post_data['account_number'] ?? ''), 
+            'branch_code'                => sanitize_text_field($post_data['branch_code'] ?? ''), 
+            'branch_name'                => sanitize_text_field($post_data['branch_name'] ?? ''),
+        ];
+
+        // Issuer Fields (if issuer_type is 'other')
+        if ($issuer_type === 'other') {
+             $meta_map['issuer_full_name']        = sanitize_text_field($post_data['issuer_first_name'] ?? '') . ' ' . sanitize_text_field($post_data['issuer_last_name'] ?? '');
+             $meta_map['issuer_national_code']    = sanitize_text_field($post_data['issuer_national_code'] ?? '');
+             $meta_map['issuer_father_name']      = sanitize_text_field($post_data['issuer_father_name'] ?? '');
+             $meta_map['issuer_birth_date']       = sanitize_text_field($post_data['issuer_birth_date'] ?? '');
+             $meta_map['issuer_mobile_number']    = sanitize_text_field($post_data['issuer_mobile_number'] ?? '');
+             // Placeholder/Optional fields for Issuer
+             $meta_map['issuer_occupation']       = sanitize_text_field($post_data['issuer_occupation'] ?? '');
+             $meta_map['issuer_phone_number']     = sanitize_text_field($post_data['issuer_phone_number'] ?? '');
+             $meta_map['issuer_address']          = sanitize_textarea_field($post_data['issuer_address'] ?? '');
+             $meta_map['issuer_residency_status'] = sanitize_text_field($post_data['issuer_residency_status'] ?? '');
+             $meta_map['issuer_workplace_status'] = sanitize_text_field($post_data['issuer_workplace_status'] ?? '');
+             $meta_map['issuer_bank_name']        = sanitize_text_field($post_data['issuer_bank_name'] ?? '');
+             $meta_map['issuer_account_number']   = sanitize_text_field($post_data['issuer_account_number'] ?? '');
+             $meta_map['issuer_branch_code']      = sanitize_text_field($post_data['issuer_branch_code'] ?? '');
+             $meta_map['issuer_branch_name']      = sanitize_text_field($post_data['issuer_branch_name'] ?? '');
+        }
+        
+        return $meta_map;
     }
 }

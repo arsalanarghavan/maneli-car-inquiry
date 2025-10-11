@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.1.0
+ * Version:           0.1.01
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -22,6 +22,26 @@ if (!defined('ABSPATH')) {
  */
 define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+// --- Security Fix: Centralized API URLs with HTTPS ---
+/**
+ * External API Endpoints (Centralized for Security and Maintenance)
+ */
+define('MANELI_FINOTEX_API_URL', 'https://api.finnotech.ir/credit/v2/clients/%s/chequeColorInquiry');
+define('MANELI_SMS_API_WSDL', 'https://api.payamak-panel.com/post/send.asmx?wsdl'); // Enforced HTTPS
+                                                                                 // پروتکل HTTP به HTTPS تغییر یافت.
+
+// Zarinpal Gateway
+define('MANELI_ZARINPAL_REQUEST_URL', 'https://api.zarinpal.com/pg/v4/payment/request.json');
+define('MANELI_ZARINPAL_VERIFY_URL', 'https://api.zarinpal.com/pg/v4/payment/verify.json');
+define('MANELI_ZARINPAL_STARTPAY_URL', 'https://www.zarinpal.com/pg/StartPay/');
+
+// Sadad Gateway
+define('MANELI_SADAD_REQUEST_URL', 'https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest');
+define('MANELI_SADAD_VERIFY_URL', 'https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify');
+define('MANELI_SADAD_PURCHASE_URL', 'https://sadad.shaparak.ir/VPG/Purchase?Token=');
+// --- End API URL Definitions ---
+
 
 /**
  * The main file that bootstraps the plugin.

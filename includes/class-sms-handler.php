@@ -4,7 +4,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.2 (API URL Fixed with Constant)
  */
 
 if (!defined('ABSPATH')) {
@@ -51,7 +51,8 @@ class Maneli_SMS_Handler {
             // Disable WSDL caching for development/reliability
             ini_set("soap.wsdl_cache_enabled", "0");
             
-            $sms_client = new SoapClient("http://api.payamak-panel.com/post/send.asmx?wsdl", ['encoding' => 'UTF-8']);
+            // FIX: Using MANELI_SMS_API_WSDL constant for secure connection
+            $sms_client = new SoapClient(MANELI_SMS_API_WSDL, ['encoding' => 'UTF-8']);
 
             $data = [
                 "username" => $username,
@@ -66,22 +67,17 @@ class Maneli_SMS_Handler {
             $send_Result_code = $result->SendByBaseNumberResult;
             
             // 4. Interpret the result code
-            // A successful send returns a long string (recId). Failures return small integers.
-            // A length check is a reliable way to determine success.
             if (is_string($send_Result_code) && strlen($send_Result_code) > 10) {
                 return true;
             } else {
-                // Log the specific error code from the API for debugging
                 error_log('Maneli SMS API Error: Failed to send SMS. API returned code: ' . $send_Result_code);
                 return false;
             }
 
         } catch (SoapFault $e) {
-            // Catch specific SOAP errors for more detailed logging
             error_log('Maneli SMS SOAP Fault: ' . $e->getMessage());
             return false;
         } catch (Exception $e) {
-            // Catch any other general exceptions
             error_log('Maneli SMS General Exception: ' . $e->getMessage());
             return false;
         }
