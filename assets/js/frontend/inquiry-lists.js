@@ -17,38 +17,6 @@ jQuery(document).ready(function($) {
     // Helper to get localized text, falling back to English/a default if missing (for robustness)
     const getText = (key, fallback = '...') => maneliInquiryLists.text[key] || fallback;
     
-    // Helper to get hardcoded Persian texts for dynamic content within SweetAlerts
-    const getHardcodedText = (key) => {
-        const texts = {
-            'assign_title': 'ارجاع درخواست',
-            'assign_label': 'یک کارشناس را برای این درخواست انتخاب کنید:',
-            'auto_assign': '-- انتساب خودکار (گردشی) --',
-            'assign_button': 'ارجاع بده',
-            'cancel_button': 'انصراف',
-            'edit_title': 'ویرایش درخواست',
-            'placeholder_name': 'نام',
-            'placeholder_last_name': 'نام خانوادگی',
-            'placeholder_mobile': 'موبایل',
-            'placeholder_color': 'رنگ خودرو',
-            'save_button': 'ذخیره تغییرات',
-            'delete_title': 'حذف شد!',
-            'delete_button_text': 'حذف درخواست',
-            'downpayment_title': 'تعیین پیش‌پرداخت',
-            'downpayment_placeholder': 'مبلغ پیش‌پرداخت به تومان',
-            'downpayment_button': 'تایید و ارسال برای مشتری',
-            'reject_title': 'رد درخواست',
-            'reject_label': 'لطفا دلیل رد درخواست را انتخاب کنید:',
-            'reject_option_default': '-- یک دلیل انتخاب کنید --',
-            'reject_option_custom': 'دلیل دیگر (دلخواه)',
-            'reject_placeholder_custom': 'دلیل دلخواه را اینجا بنویسید...',
-            'reject_submit_button': 'ثبت رد درخواست',
-            'unknown_error': 'خطای ناشناخته.',
-            'server_error': 'یک خطای سرور رخ داد.',
-        };
-        return texts[key] || key;
-    };
-
-
     //======================================================================
     //  EVENT DELEGATION FOR ADMIN/EXPERT ACTIONS
     //======================================================================
@@ -66,7 +34,7 @@ jQuery(document).ready(function($) {
         const expertOptionsHTML = $(expertFilterSelector)
             .clone()
             .prop('id', 'swal-expert-filter')
-            .prepend(`<option value="auto">${getHardcodedText('auto_assign')}</option>`)
+            .prepend(`<option value="auto">${getText('auto_assign')}</option>`)
             .val('auto')
             .get(0).outerHTML;
 
@@ -74,18 +42,18 @@ jQuery(document).ready(function($) {
         const nonce = (inquiryType === 'cash') ? maneliInquiryLists.nonces.cash_assign_expert : maneliInquiryLists.nonces.assign_expert;
 
         Swal.fire({
-            title: `${getHardcodedText('assign_title')} #${inquiryId}`,
+            title: `${getText('assign_title')} #${inquiryId}`,
             html: `<div style="text-align: right; font-family: inherit;">
-                     <label for="swal-expert-filter" style="display: block; margin-bottom: 10px;">${getHardcodedText('assign_label')}</label>
+                     <label for="swal-expert-filter" style="display: block; margin-bottom: 10px;">${getText('assign_label')}</label>
                      ${expertOptionsHTML}
                    </div>`,
-            confirmButtonText: getHardcodedText('assign_button'),
+            confirmButtonText: getText('assign_button'),
             showCancelButton: true,
-            cancelButtonText: getHardcodedText('cancel_button'),
+            cancelButtonText: getText('cancel_button'),
             didOpen: () => {
                  // Initialize Select2 in the modal
                  $('#swal-expert-filter').select2({
-                     placeholder: getText('select_expert_placeholder', 'انتخاب کارشناس'),
+                     placeholder: getText('select_expert_placeholder'),
                      allowClear: false,
                      width: '100%'
                 });
@@ -104,7 +72,7 @@ jQuery(document).ready(function($) {
                     expert_id: result.value
                 }, function(response) {
                     if (response.success) {
-                        Swal.fire(getText('success', 'Success'), response.data.message, 'success').then(() => {
+                        Swal.fire(getText('success'), response.data.message, 'success').then(() => {
                            // If the action was on a single report page, reload to show changes.
                            if (button.closest('.frontend-expert-report').length > 0) {
                                location.reload();
@@ -112,16 +80,17 @@ jQuery(document).ready(function($) {
                                // If on a list, update the table row directly.
                                button.closest('td').html(response.data.expert_name);
                                if (response.data.new_status_label) {
+                                   // Note: The data-title is still hardcoded in the template, but the content is now dynamically updated.
                                    button.closest('tr').find('td[data-title="وضعیت"]').text(response.data.new_status_label);
                                }
                            }
                         });
                     } else {
-                        Swal.fire(getText('error', 'Error'), response.data.message, 'error');
+                        Swal.fire(getText('error'), response.data.message, 'error');
                         button.prop('disabled', false).text(originalText);
                     }
                 }).fail(function() {
-                    Swal.fire(getText('error', 'Error'), getHardcodedText('server_error'), 'error');
+                    Swal.fire(getText('error'), getText('server_error'), 'error');
                     button.prop('disabled', false).text(originalText);
                 });
             }
@@ -145,15 +114,15 @@ jQuery(document).ready(function($) {
             if (response.success) {
                 const data = response.data;
                 Swal.fire({
-                    title: `${getHardcodedText('edit_title')} #${data.id}`,
+                    title: `${getText('edit_title')} #${data.id}`,
                     html: `
-                        <input type="text" id="swal-first-name" class="swal2-input" value="${data.customer.first_name}" placeholder="${getHardcodedText('placeholder_name')}">
-                        <input type="text" id="swal-last-name" class="swal2-input" value="${data.customer.last_name}" placeholder="${getHardcodedText('placeholder_last_name')}">
-                        <input type="text" id="swal-mobile" class="swal2-input" value="${data.customer.mobile}" placeholder="${getHardcodedText('placeholder_mobile')}">
-                        <input type="text" id="swal-color" class="swal2-input" value="${data.car.color}" placeholder="${getHardcodedText('placeholder_color')}">`,
-                    confirmButtonText: getHardcodedText('save_button'),
+                        <input type="text" id="swal-first-name" class="swal2-input" value="${data.customer.first_name}" placeholder="${getText('placeholder_name')}">
+                        <input type="text" id="swal-last-name" class="swal2-input" value="${data.customer.last_name}" placeholder="${getText('placeholder_last_name')}">
+                        <input type="text" id="swal-mobile" class="swal2-input" value="${data.customer.mobile}" placeholder="${getText('placeholder_mobile')}">
+                        <input type="text" id="swal-color" class="swal2-input" value="${data.car.color}" placeholder="${getText('placeholder_color')}">`,
+                    confirmButtonText: getText('save_button'),
                     showCancelButton: true,
-                    cancelButtonText: getHardcodedText('cancel_button'),
+                    cancelButtonText: getText('cancel_button'),
                     preConfirm: () => ({
                         first_name: $('#swal-first-name').val(),
                         last_name: $('#swal-last-name').val(),
@@ -169,17 +138,17 @@ jQuery(document).ready(function($) {
                             ...result.value
                         }, function(updateResponse) {
                             if (updateResponse.success) {
-                                Swal.fire(getText('success', 'Success'), updateResponse.data.message, 'success').then(() => location.reload());
+                                Swal.fire(getText('success'), updateResponse.data.message, 'success').then(() => location.reload());
                             } else {
-                                Swal.fire(getText('error', 'Error'), updateResponse.data.message, 'error');
+                                Swal.fire(getText('error'), updateResponse.data.message, 'error');
                             }
                         }).fail(function() {
-                            Swal.fire(getText('error', 'Error'), getHardcodedText('server_error'), 'error');
+                            Swal.fire(getText('error'), getText('server_error'), 'error');
                         });
                     }
                 });
             } else {
-                Swal.fire(getText('error', 'Error'), response.data.message, 'error');
+                Swal.fire(getText('error'), response.data.message, 'error');
             }
         }).always(() => button.prop('disabled', false).text(originalText));
     });
@@ -194,13 +163,13 @@ jQuery(document).ready(function($) {
         const originalText = button.text();
 
         Swal.fire({
-            title: getText('confirm_delete_title', 'Are you sure?'),
-            text: getText('confirm_delete_text', 'This action cannot be undone!'),
+            title: getText('confirm_delete_title'),
+            text: getText('confirm_delete_text'),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            confirmButtonText: getText('confirm_button', 'Yes, delete it!'),
-            cancelButtonText: getText('cancel_button', 'Cancel')
+            confirmButtonText: getText('confirm_button'),
+            cancelButtonText: getText('cancel_button')
         }).then((result) => {
             if (result.isConfirmed) {
                 button.prop('disabled', true).text('...');
@@ -210,15 +179,15 @@ jQuery(document).ready(function($) {
                     inquiry_id: inquiryId
                 }, function(response) {
                     if (response.success) {
-                        Swal.fire(getHardcodedText('delete_title'), response.data.message, 'success').then(() => {
+                        Swal.fire(getText('delete_title'), response.data.message, 'success').then(() => {
                             if (backUrl) window.location.href = backUrl;
                         });
                     } else {
-                        Swal.fire(getText('error', 'Error'), response.data.message, 'error');
+                        Swal.fire(getText('error'), response.data.message, 'error');
                         button.prop('disabled', false).text(originalText);
                     }
                 }).fail(function() {
-                    Swal.fire(getText('error', 'Error'), getHardcodedText('server_error'), 'error');
+                    Swal.fire(getText('error'), getText('server_error'), 'error');
                     button.prop('disabled', false).text(originalText);
                 });
             }
@@ -234,11 +203,11 @@ jQuery(document).ready(function($) {
         const originalText = button.text();
         
         Swal.fire({
-            title: `${getHardcodedText('downpayment_title')} #${inquiryId}`,
-            html: `<input type="text" id="swal-downpayment-amount" class="swal2-input" placeholder="${getHardcodedText('downpayment_placeholder')}">`,
-            confirmButtonText: getHardcodedText('downpayment_button'),
+            title: `${getText('downpayment_title')} #${inquiryId}`,
+            html: `<input type="text" id="swal-downpayment-amount" class="swal2-input" placeholder="${getText('downpayment_placeholder')}">`,
+            confirmButtonText: getText('downpayment_button'),
             showCancelButton: true,
-            cancelButtonText: getHardcodedText('cancel_button'),
+            cancelButtonText: getText('cancel_button'),
             preConfirm: () => $('#swal-downpayment-amount').val()
         }).then((result) => {
             if (result.isConfirmed && result.value) {
@@ -251,13 +220,13 @@ jQuery(document).ready(function($) {
                     amount: result.value
                 }, function(response) {
                     if (response.success) {
-                        Swal.fire(getText('success', 'Success'), response.data.message, 'success').then(() => location.reload());
+                        Swal.fire(getText('success'), response.data.message, 'success').then(() => location.reload());
                     } else {
-                        Swal.fire(getText('error', 'Error'), response.data.message, 'error');
+                        Swal.fire(getText('error'), response.data.message, 'error');
                         button.prop('disabled', false).text(originalText);
                     }
                 }).fail(function() {
-                    Swal.fire(getText('error', 'Error'), getHardcodedText('server_error'), 'error');
+                    Swal.fire(getText('error'), getText('server_error'), 'error');
                     button.prop('disabled', false).text(originalText);
                 });
             }
@@ -272,24 +241,25 @@ jQuery(document).ready(function($) {
         const inquiryId = button.closest('#cash-inquiry-details').data('inquiry-id');
         const originalText = button.text();
         
-        let reasonOptions = `<option value="">${getHardcodedText('reject_option_default')}</option>`;
+        // Use cash_rejection_reasons for cash inquiry rejection
+        let reasonOptions = `<option value="">${getText('reject_option_default')}</option>`;
         if(maneliInquiryLists.cash_rejection_reasons && maneliInquiryLists.cash_rejection_reasons.length > 0) {
             maneliInquiryLists.cash_rejection_reasons.forEach(reason => {
                 reasonOptions += `<option value="${reason}">${reason}</option>`;
             });
         }
-        reasonOptions += `<option value="custom">${getHardcodedText('reject_option_custom')}</option>`;
+        reasonOptions += `<option value="custom">${getText('reject_option_custom')}</option>`;
 
         Swal.fire({
-            title: `${getHardcodedText('reject_title')} #${inquiryId}`,
+            title: `${getText('reject_title')} #${inquiryId}`,
             html: `<div style="text-align: right; font-family: inherit;">
-                     <label for="swal-rejection-reason-select" style="display: block; margin-bottom: 10px;">${getHardcodedText('reject_label')}</label>
+                     <label for="swal-rejection-reason-select" style="display: block; margin-bottom: 10px;">${getText('reject_label')}</label>
                      <select id="swal-rejection-reason-select" class="swal2-select" style="width: 100%;">${reasonOptions}</select>
-                     <textarea id="swal-rejection-reason-custom" class="swal2-textarea" placeholder="${getHardcodedText('reject_placeholder_custom')}" style="display: none; margin-top: 10px;"></textarea>
+                     <textarea id="swal-rejection-reason-custom" class="swal2-textarea" placeholder="${getText('reject_placeholder_custom')}" style="display: none; margin-top: 10px;"></textarea>
                    </div>`,
-            confirmButtonText: getHardcodedText('reject_submit_button'),
+            confirmButtonText: getText('reject_submit_button'),
             showCancelButton: true,
-            cancelButtonText: getHardcodedText('cancel_button'),
+            cancelButtonText: getText('cancel_button'),
             didOpen: () => {
                 $('#swal-rejection-reason-select').on('change', function() {
                     $('#swal-rejection-reason-custom').toggle($(this).val() === 'custom');
@@ -299,7 +269,7 @@ jQuery(document).ready(function($) {
                 const select = $('#swal-rejection-reason-select');
                 let reason = select.val() === 'custom' ? $('#swal-rejection-reason-custom').val() : select.val();
                 if (!reason) {
-                    Swal.showValidationMessage(getText('rejection_reason_required', 'لطفاً یک دلیل برای رد درخواست انتخاب یا وارد کنید.'));
+                    Swal.showValidationMessage(getText('rejection_reason_required'));
                 }
                 return reason;
             }
@@ -314,13 +284,13 @@ jQuery(document).ready(function($) {
                     reason: result.value
                 }, function(response) {
                     if (response.success) {
-                        Swal.fire(getText('success', 'Success'), response.data.message, 'success').then(() => location.reload());
+                        Swal.fire(getText('success'), response.data.message, 'success').then(() => location.reload());
                     } else {
-                        Swal.fire(getText('error', 'Error'), response.data.message, 'error');
+                        Swal.fire(getText('error'), response.data.message, 'error');
                         button.prop('disabled', false).text(originalText);
                     }
                 }).fail(function() {
-                    Swal.fire(getText('error', 'Error'), getHardcodedText('server_error'), 'error');
+                    Swal.fire(getText('error'), getText('server_error'), 'error');
                     button.prop('disabled', false).text(originalText);
                 });
             }
@@ -393,13 +363,13 @@ jQuery(document).ready(function($) {
                         listBody.html(response.data.html);
                         paginationWrapper.html(response.data.pagination_html);
                     } else {
-                        listBody.html(`<tr><td colspan="${colspan}" style="text-align:center;">${getText('error', 'Error')}: ${response.data.message || getHardcodedText('unknown_error')}</td></tr>`);
+                        listBody.html(`<tr><td colspan="${colspan}" style="text-align:center;">${getText('error')}: ${response.data.message || getText('unknown_error')}</td></tr>`);
                         paginationWrapper.html('');
                     }
                 },
                 error: function(jqXHR, textStatus) {
                     if (textStatus !== 'abort') {
-                        listBody.html(`<tr><td colspan="${colspan}" style="text-align:center;">${getHardcodedText('server_error')}</td></tr>`);
+                        listBody.html(`<tr><td colspan="${colspan}" style="text-align:center;">${getText('server_error')}</td></tr>`);
                     }
                 },
                 complete: function() {

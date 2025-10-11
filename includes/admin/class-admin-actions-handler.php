@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Expert Inquiry Creation Logic Completed)
+ * @version 1.0.2 (Configurable loan interest rate implementation)
  */
 
 if (!defined('ABSPATH')) {
@@ -25,6 +25,32 @@ class Maneli_Admin_Actions_Handler {
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
     }
+    
+    /**
+     * Helper function to calculate monthly installment.
+     * This logic uses the configurable monthly interest rate from plugin settings.
+     * * @param float $loan_amount The loan amount (principal).
+     * @param int $term_months The number of months.
+     * @return int The calculated monthly installment amount (rounded).
+     */
+    private function calculate_installment_amount($loan_amount, $term_months) {
+        if ($loan_amount <= 0 || $term_months <= 0) {
+            return 0;
+        }
+
+        $options = get_option('maneli_inquiry_all_options', []);
+        // NEW: Get the rate from settings, fallback to hardcoded 0.035
+        $monthly_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
+        
+        // Replicating the simple calculation logic from the JS/Expert Panel (not standard PMT)
+        $monthly_interest_amount = $loan_amount * $monthly_rate;
+        $total_interest = $monthly_interest_amount * ($term_months + 1);
+        $total_repayment = $loan_amount + $total_interest;
+        $installment_amount = (int)round($total_repayment / $term_months);
+
+        return $installment_amount;
+    }
+
 
     /**
      * Handles the final status update for an installment inquiry by an admin from the frontend report page.
@@ -156,14 +182,10 @@ class Maneli_Admin_Actions_Handler {
         $term_months = (int)sanitize_text_field($_POST['term_months'] ?? 12);
         
         $loan_amount = $total_price - $down_payment;
-        $installment_amount = 0;
-        if ($loan_amount > 0) {
-            $monthly_interest_amount = $loan_amount * 0.035;
-            $total_interest = $monthly_interest_amount * ($term_months + 1);
-            $total_repayment = $loan_amount + $total_interest;
-            $installment_amount = (int)round($total_repayment / $term_months);
-        }
         
+        // NEW: Use the helper function with the configurable interest rate
+        $installment_amount = $this->calculate_installment_amount($loan_amount, $term_months);
+
         // 3. Prepare All Data for Post Meta
         $all_post_meta = $this->prepare_expert_inquiry_meta($_POST, $issuer_type, $product_id, $total_price, $down_payment, $term_months, $installment_amount);
         

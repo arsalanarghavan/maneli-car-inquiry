@@ -19,8 +19,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Get required data
+$options = get_option('maneli_inquiry_all_options', []);
 $product_id = $post_meta['product_id'][0] ?? 0;
 $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
+// Prepare rejection reasons from settings for the modal
+$rejection_reasons_raw = $options['installment_rejection_reasons'] ?? '';
+$rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_reasons_raw)));
+
 ?>
 
 <div class="wrap maneli-report-wrap">
@@ -159,9 +165,12 @@ $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
             <label for="rejection-reason-select"><?php esc_html_e('Select a reason:', 'maneli-car-inquiry'); ?></label>
             <select id="rejection-reason-select" style="width: 100%;">
                 <option value=""><?php esc_html_e('-- Select a reason --', 'maneli-car-inquiry'); ?></option>
-                <option value="<?php esc_attr_e('Unfortunately, purchasing with this down payment amount is not possible at the moment.', 'maneli-car-inquiry'); ?>"><?php esc_html_e('Down payment is not sufficient.', 'maneli-car-inquiry'); ?></option>
-                <option value="<?php esc_attr_e('Unfortunately, your credit history was not approved for the purchase of this vehicle.', 'maneli-car-inquiry'); ?>"><?php esc_html_e('Credit history not approved.', 'maneli-car-inquiry'); ?></option>
-                <option value="<?php esc_attr_e('Your submitted documents are incomplete or invalid. Please contact support.', 'maneli-car-inquiry'); ?>"><?php esc_html_e('Documents incomplete or invalid.', 'maneli-car-inquiry'); ?></option>
+                <?php 
+                // Loop through dynamic reasons from settings
+                foreach ($rejection_reasons as $reason): 
+                ?>
+                    <option value="<?php echo esc_attr($reason); ?>"><?php echo esc_html($reason); ?></option>
+                <?php endforeach; ?>
                 <option value="custom"><?php esc_html_e('Other reason (write in the box below)', 'maneli-car-inquiry'); ?></option>
             </select>
         </div>

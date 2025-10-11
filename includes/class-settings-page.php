@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Added Finance Tab and loan_interest_rate)
  */
 
 if (!defined('ABSPATH')) {
@@ -43,7 +43,7 @@ class Maneli_Settings_Page {
      * Renders the main HTML structure for the backend settings page.
      */
     public function render_settings_page_html() {
-        $active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'gateways';
+        $active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'finance'; // Default to new tab
         ?>
         <div class="wrap">
             <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
@@ -156,7 +156,12 @@ class Maneli_Settings_Page {
                 foreach ($section['fields'] as $field) {
                     $key = $field['name'];
                     if (isset($input[$key])) {
-                        $sanitized_input[$key] = ($field['type'] === 'textarea') ? sanitize_textarea_field($input[$key]) : sanitize_text_field($input[$key]);
+                        // Special handling for number type to allow floats (like 0.035)
+                        if ($field['type'] === 'number' && ($key === 'loan_interest_rate' || $key === 'inquiry_fee')) {
+                            $sanitized_input[$key] = sanitize_text_field($input[$key]);
+                        } else {
+                            $sanitized_input[$key] = ($field['type'] === 'textarea') ? sanitize_textarea_field($input[$key]) : sanitize_text_field($input[$key]);
+                        }
                     }
                     if ($field['type'] === 'switch' && !isset($input[$key])) {
                         $sanitized_input[$key] = '0';
@@ -198,6 +203,26 @@ class Maneli_Settings_Page {
      */
     private function get_all_settings_fields() {
         return [
+            // NEW TAB
+            'finance' => [
+                'title' => esc_html__('Finance & Calculator', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-hand-holding-usd',
+                'sections' => [
+                    'maneli_loan_interest_section' => [
+                        'title' => esc_html__('Installment Loan Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'loan_interest_rate', 
+                                'label' => esc_html__('Monthly Interest Rate (Decimal)', 'maneli-car-inquiry'), 
+                                'type' => 'text', // Use text to allow decimals better, will sanitize as text
+                                'default' => '0.035', 
+                                'desc' => esc_html__('Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in all installment calculations.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ]
+                ]
+            ],
+            // EXISTING TABS
             'gateways' => [
                 'title' => esc_html__('Payment Gateway', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-money-check-alt',
@@ -264,6 +289,18 @@ class Maneli_Settings_Page {
                     ]
                 ]
             ],
+            'installment' => [
+                'title' => esc_html__('Installment Request', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-car',
+                'sections' => [
+                    'maneli_installment_rejection_reasons_section' => [
+                        'title' => esc_html__('Installment Rejection Reasons', 'maneli-car-inquiry'),
+                        'fields' => [
+                             ['name' => 'installment_rejection_reasons', 'label' => esc_html__('Predefined Rejection Reasons', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request.', 'maneli-car-inquiry')],
+                        ]
+                    ]
+                ]
+            ],
             'experts' => [
                 'title' => esc_html__('Experts', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-users',
@@ -282,27 +319,13 @@ class Maneli_Settings_Page {
                     'maneli_finotex_cheque_section' => [
                         'title' => esc_html__('Cheque Color Inquiry Service', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'finotex_enabled', 'label' => esc_html__('Enable Finotex Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('If enabled, a bank inquiry will be performed via Finotex upon submission.', 'maneli-car-inquiry')],
-                            ['name' => 'finotex_client_id', 'label' => esc_html__('Client ID', 'maneli-car-inquiry'), 'type' => 'text'],
-                            ['name' => 'finotex_api_key', 'label' => esc_html__('Access Token', 'maneli-car-inquiry'), 'type' => 'textarea'],
+                            ['name' => 'finotex_enabled', 'label' => esc_html__('Enable Finotex Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable the cheque color inquiry via the Finotex service.', 'maneli-car-inquiry')],
+                            ['name' => 'finotex_username', 'label' => esc_html__('Finotex Username', 'maneli-car-inquiry'), 'type' => 'text'],
+                            ['name' => 'finotex_password', 'label' => esc_html__('Finotex Password', 'maneli-car-inquiry'), 'type' => 'password'],
                         ]
                     ]
                 ]
             ],
-            'display' => [
-                'title' => esc_html__('Display Settings', 'maneli-car-inquiry'),
-                'icon' => 'fas fa-paint-brush',
-                'sections' => [
-                    'maneli_display_main_section' => [
-                        'title' => esc_html__('General Display Settings', 'maneli-car-inquiry'),
-                        'fields' => [
-                            ['name' => 'hide_prices_for_customers', 'label' => esc_html__('Hide Prices for Customers', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('If enabled, prices will be hidden from non-admin users across the store.', 'maneli-car-inquiry')],
-                            ['name' => 'enable_grouped_attributes', 'label' => esc_html__('Enable Grouped Attributes Display', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('If enabled, the attributes table will be grouped by category (e.g., Technical, Dimensions).', 'maneli-car-inquiry')],
-                            ['name' => 'unavailable_product_message', 'label' => esc_html__('Unavailable Product Message', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('This message is shown on the calculator for "Unavailable" products.', 'maneli-car-inquiry'), 'default' => esc_html__('This car is currently unavailable for purchase.', 'maneli-car-inquiry')],
-                        ]
-                    ]
-                ]
-            ]
         ];
     }
 }

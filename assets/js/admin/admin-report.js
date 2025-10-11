@@ -31,6 +31,8 @@
         const reasonSelect = $('#rejection-reason-select');
         const customReasonWrapper = $('#custom-reason-wrapper');
         const customReasonText = $('#rejection-reason-custom');
+        
+        // توجه: maneliAdminReport توسط wp_localize_script در includes/class-credit-report-page.php تعریف می‌شود.
 
         // --- 2. Event Listeners ---
 
@@ -86,7 +88,13 @@
 
             // Basic validation
             if (!reason) {
-                alert('لطفاً یک دلیل برای رد درخواست انتخاب یا وارد کنید.'); // This text can be localized via wp_localize_script if needed
+                // FIX: استفاده از رشته محلی‌سازی شده برای اعتبارسنجی
+                if (typeof maneliAdminReport !== 'undefined' && maneliAdminReport.text.rejection_reason_required) {
+                    alert(maneliAdminReport.text.rejection_reason_required);
+                } else {
+                    // Fallback اگر محلی‌سازی به درستی کار نکرد
+                    alert('لطفاً یک دلیل برای رد درخواست انتخاب یا وارد کنید.');
+                }
                 return;
             }
 

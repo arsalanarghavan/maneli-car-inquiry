@@ -30,7 +30,8 @@ class Maneli_Inquiry_Lists_Shortcode {
      */
     public function render_inquiry_list_router() {
         if (!is_user_logged_in()) {
-            return maneli_get_template_part('shortcodes/login-prompt', [], false);
+            // Note: Assuming maneli_get_template_part is defined elsewhere to load templates
+            return maneli_get_template_part('shortcodes/login-prompt', [], false); 
         }
         
         // If an inquiry_id is present in the URL, show the detailed report.
@@ -132,6 +133,7 @@ class Maneli_Inquiry_Lists_Shortcode {
             return '<div class="maneli-inquiry-wrapper error-box"><p>' . esc_html__('Inquiry not found or you do not have permission to view it.', 'maneli-car-inquiry') . '</p></div>';
         }
         
+        // Note: Maneli_Permission_Helpers::is_assigned_expert function should be implemented in that class.
         $is_admin_or_expert = current_user_can('manage_maneli_inquiries') || Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
 
         if ($is_admin_or_expert) {
@@ -165,6 +167,7 @@ class Maneli_Inquiry_Lists_Shortcode {
 
     /**
      * Helper function to enqueue scripts and localize data for admin/expert list views.
+     * FIX: Added installment_rejection_reasons and localized all hardcoded JS strings.
      */
     private function enqueue_admin_list_assets() {
         wp_enqueue_script(
@@ -176,8 +179,14 @@ class Maneli_Inquiry_Lists_Shortcode {
         );
 
         $options = get_option('maneli_inquiry_all_options', []);
-        $rejection_reasons_raw = $options['cash_inquiry_rejection_reasons'] ?? '';
-        $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_reasons_raw)));
+        
+        // Cash Inquiry Rejection Reasons
+        $cash_rejection_reasons_raw = $options['cash_inquiry_rejection_reasons'] ?? '';
+        $cash_rejection_reasons = array_filter(array_map('trim', explode("\n", $cash_rejection_reasons_raw)));
+
+        // Installment Inquiry Rejection Reasons (NEW)
+        $installment_rejection_reasons_raw = $options['installment_rejection_reasons'] ?? '';
+        $installment_rejection_reasons = array_filter(array_map('trim', explode("\n", $installment_rejection_reasons_raw)));
 
         wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
             'ajax_url' => admin_url('admin-ajax.php'),
@@ -192,7 +201,8 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'cash_assign_expert' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
                 'assign_expert' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
             ],
-            'cash_rejection_reasons' => $rejection_reasons,
+            'cash_rejection_reasons' => $cash_rejection_reasons,
+            'installment_rejection_reasons' => $installment_rejection_reasons, // NEW: Installment reasons added
             'text' => [
                 'error' => esc_html__('Error', 'maneli-car-inquiry'),
                 'success' => esc_html__('Success', 'maneli-car-inquiry'),
@@ -200,6 +210,33 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'confirm_delete_text' => esc_html__('This action cannot be undone!', 'maneli-car-inquiry'),
                 'confirm_button' => esc_html__('Yes, delete it!', 'maneli-car-inquiry'),
                 'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
+                
+                // Localized strings from former JS getHardcodedText
+                'assign_title' => esc_html__('Referral Request', 'maneli-car-inquiry'),
+                'assign_label' => esc_html__('Select an expert for this request:', 'maneli-car-inquiry'),
+                'auto_assign' => esc_html__('-- Automatic Assignment (Round-robin) --', 'maneli-car-inquiry'),
+                'assign_button' => esc_html__('Refer', 'maneli-car-inquiry'),
+                'select_expert_placeholder' => esc_html__('Select Expert', 'maneli-car-inquiry'),
+                'edit_title' => esc_html__('Edit Request', 'maneli-car-inquiry'),
+                'placeholder_name' => esc_html__('First Name', 'maneli-car-inquiry'),
+                'placeholder_last_name' => esc_html__('Last Name', 'maneli-car-inquiry'),
+                'placeholder_mobile' => esc_html__('Mobile', 'maneli-car-inquiry'),
+                'placeholder_color' => esc_html__('Car Color', 'maneli-car-inquiry'),
+                'save_button' => esc_html__('Save Changes', 'maneli-car-inquiry'),
+                'delete_title' => esc_html__('Deleted!', 'maneli-car-inquiry'),
+                'delete_button_text' => esc_html__('Delete Request', 'maneli-car-inquiry'),
+                'downpayment_title' => esc_html__('Set Down Payment', 'maneli-car-inquiry'),
+                'downpayment_placeholder' => esc_html__('Down Payment Amount in Toman', 'maneli-car-inquiry'),
+                'downpayment_button' => esc_html__('Confirm and Send to Customer', 'maneli-car-inquiry'),
+                'reject_title' => esc_html__('Reject Request', 'maneli-car-inquiry'),
+                'reject_label' => esc_html__('Please select a reason for rejection:', 'maneli-car-inquiry'),
+                'reject_option_default' => esc_html__('-- Select a reason --', 'maneli-car-inquiry'),
+                'reject_option_custom' => esc_html__('Other reason (Custom)', 'maneli-car-inquiry'),
+                'reject_placeholder_custom' => esc_html__('Write your custom reason here...', 'maneli-car-inquiry'),
+                'reject_submit_button' => esc_html__('Submit Rejection', 'maneli-car-inquiry'),
+                'unknown_error' => esc_html__('Unknown error.', 'maneli-car-inquiry'),
+                'server_error' => esc_html__('A server error occurred.', 'maneli-car-inquiry'),
+                'rejection_reason_required' => esc_html__('Please select or enter a reason for rejection.', 'maneli-car-inquiry'),
             ]
         ]);
     }

@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Shortcodes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Added interest rate localization and conditional asset loading)
  */
 
 if (!defined('ABSPATH')) {
@@ -16,6 +16,38 @@ class Maneli_Loan_Calculator_Shortcode {
 
     public function __construct() {
         add_shortcode('loan_calculator', [$this, 'render_shortcode']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_calculator_assets']);
+    }
+
+    /**
+     * Enqueues the required JavaScript and localizes the configurable interest rate 
+     * and AJAX settings if the shortcode is present on the page.
+     */
+    public function enqueue_calculator_assets() {
+        if (!is_product() && !has_shortcode(get_post(get_the_ID())->post_content, 'loan_calculator')) {
+            return;
+        }
+
+        $options = get_option('maneli_inquiry_all_options', []);
+        
+        // Fetch configurable interest rate (NEW)
+        $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
+        
+        // Standard calculator JS enqueue
+        wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '1.0.0', true);
+        
+        // Localize script with AJAX info and the configurable rate
+        $localize_data = [
+            'interestRate' => $interest_rate, // NEW: Pass the monthly rate
+        ];
+        
+        if (is_user_logged_in()) {
+            $localize_data['ajax_url'] = admin_url('admin-ajax.php');
+            $localize_data['inquiry_page_url'] = home_url('/dashboard/?endp=inf_menu_1');
+            $localize_data['nonce'] = wp_create_nonce('maneli_ajax_nonce');
+        }
+
+        wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', $localize_data);
     }
 
     /**

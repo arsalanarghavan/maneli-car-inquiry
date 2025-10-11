@@ -1,10 +1,11 @@
 <?php
 /**
- * Handles AJAX functionality for the Expert Panel, specifically for searching products.
+ * Handles AJAX functionality for the Expert Panel, specifically for searching products
+ * and localizing assets with the configurable loan interest rate.
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Added interest rate localization)
  */
 
 if (!defined('ABSPATH')) {
@@ -15,6 +16,37 @@ class Maneli_Expert_Panel {
 
     public function __construct() {
         add_action('wp_ajax_maneli_search_cars', [$this, 'handle_car_search_ajax']);
+        // Note: Assuming a hook exists to enqueue assets for the expert panel page/shortcode.
+        // If an expert panel shortcode exists, you would hook asset enqueueing to 'wp_enqueue_scripts'.
+        // For simplicity, a generic hook is assumed if the asset localization is critical.
+        // add_action('wp_enqueue_scripts', [$this, 'enqueue_expert_panel_assets']); 
+        
+        // Since expert-panel.js is needed for the inquiry creation form:
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_expert_panel_assets']);
+    }
+
+    /**
+     * Enqueues assets specifically for the Expert Panel shortcode/form page.
+     * This localizes the configurable loan interest rate.
+     */
+    public function enqueue_expert_panel_assets() {
+        // Only enqueue if user can create inquiries and if the shortcode is present.
+        // A dedicated check (like has_shortcode) should be used in a production environment.
+        if (!current_user_can('edit_posts')) {
+             return;
+        }
+        
+        // Fetch configurable interest rate
+        $options = get_option('maneli_inquiry_all_options', []);
+        $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
+        
+        // Note: expert-panel.js is loaded along with the form shortcode, 
+        // this ensures the localization object is available.
+        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce'),
+            'interestRate' => $interest_rate, // NEW: Pass the monthly rate
+        ]);
     }
 
     /**

@@ -6,7 +6,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1
  */
 
 if (!defined('ABSPATH')) {
@@ -51,10 +51,18 @@ class Maneli_Credit_Report_Page {
             return;
         }
 
-        $version = '1.0.0'; // Or use filemtime for cache busting
+        $version = '1.0.1'; // Or use filemtime for cache busting
         wp_enqueue_style('maneli-admin-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/admin-styles.css', [], $version);
         
         wp_enqueue_script('maneli-admin-report-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/admin-report.js', ['jquery'], $version, true);
+        
+        // START: NEW CODE - Localize JS strings for admin report page
+        wp_localize_script('maneli-admin-report-js', 'maneliAdminReport', [
+             'text' => [
+                 'rejection_reason_required' => esc_html__('Please select or enter a reason for rejection.', 'maneli-car-inquiry'),
+             ]
+        ]);
+        // END: NEW CODE
     }
 
     /**
@@ -81,6 +89,7 @@ class Maneli_Credit_Report_Page {
         ];
         
         // Load the template file to render the page content
+        // Note: maneli_get_template_part function is assumed to be globally defined and available.
         maneli_get_template_part('admin/credit-report-page', $template_args);
     }
 }

@@ -2,7 +2,7 @@
  * Handles frontend logic for the loan calculator widget on the single product page.
  * This includes tab switching, live calculation for installments, and AJAX form submission.
  *
- * @version 1.0.0
+ * @version 1.0.1 (Configurable loan interest rate)
  */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -81,7 +81,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const minDisplay = document.getElementById("minDownDisplay");
         const installmentEl = document.getElementById("installmentAmount");
         const actionBtn = installmentTab.querySelector(".loan-action-btn");
-
+        
+        // NEW: Get the configurable interest rate from the localized object
+        const interestRate = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.interestRate) 
+                             ? parseFloat(maneli_ajax_object.interestRate) 
+                             : 0.035; 
+        
         /**
          * Updates the visual fill of the slider based on its current value.
          */
@@ -108,8 +113,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // Calculation logic (3.5% interest rate)
-            const monthlyInterestAmount = loanAmount * 0.035;
+            // Calculation logic (using configurable interest rate)
+            const monthlyInterestAmount = loanAmount * interestRate; // FIXED: Used configurable rate
             const totalInterest = monthlyInterestAmount * (selectedMonths + 1);
             const totalRepayment = loanAmount + totalInterest;
             const installment = totalRepayment / selectedMonths;
