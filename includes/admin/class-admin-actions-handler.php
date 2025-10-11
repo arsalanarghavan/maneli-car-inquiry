@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.3 (Configurable loan interest rate implementation & Expert meta cleanup)
+ * @version 1.0.4 (Fixed User Meta Save on Admin Create User)
  */
 
 if (!defined('ABSPATH')) {
@@ -297,7 +297,7 @@ class Maneli_Admin_Actions_Handler {
         }
         wp_update_user($user_data);
 
-        $meta_fields = ['national_code', 'father_name', 'birth_date', 'mobile_number'];
+        $meta_fields = ['national_code', 'father_name', 'birth_date', 'mobile_number', 'first_name', 'last_name'];
         foreach ($meta_fields as $field) {
             if (isset($_POST[$field])) {
                 update_user_meta($user_id, $field, sanitize_text_field($_POST[$field]));
@@ -357,6 +357,10 @@ class Maneli_Admin_Actions_Handler {
             'display_name' => trim($first_name . ' ' . $last_name),
             'role' => 'customer'
         ]);
+        
+        // FIX: Explicitly save first_name and last_name as user meta for compatibility
+        update_user_meta($user_id, 'first_name', $first_name);
+        update_user_meta($user_id, 'last_name', $last_name);
         update_user_meta($user_id, 'mobile_number', $mobile);
         
         wp_redirect(add_query_arg('user-created', 'true', $redirect_url));

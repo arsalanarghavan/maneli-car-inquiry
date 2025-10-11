@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Security fix for ajax_delete_user)
  */
 
 if (!defined('ABSPATH')) {
@@ -390,7 +390,8 @@ class Maneli_Ajax_Handler {
 
     public function ajax_delete_user() {
         check_ajax_referer('maneli_delete_user_nonce', '_ajax_nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
+        // FIX: Added 'delete_users' capability check for security
+        if (!current_user_can('manage_maneli_inquiries') || !current_user_can('delete_users')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
         }
         $user_id_to_delete = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;

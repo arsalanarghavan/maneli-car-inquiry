@@ -4,7 +4,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Added maneli_get_template_part)
  */
 
 if (!defined('ABSPATH')) {
@@ -55,5 +55,38 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
         );
 
         return $formatted_date;
+    }
+}
+
+if (!function_exists('maneli_get_template_part')) {
+    /**
+     * Includes a template file from the plugin's templates directory.
+     * * @param string $template_name The template file name (e.g., 'shortcodes/inquiry-form/step-1-car-selection').
+     * @param array $args Array of arguments to pass to the template file.
+     * @param bool $echo Whether to echo the template output or return it as a string.
+     * @return string|void
+     */
+    function maneli_get_template_part($template_name, $args = [], $echo = true) {
+        // فرض بر تعریف MANELI_INQUIRY_PLUGIN_PATH است
+        $template_file = MANELI_INQUIRY_PLUGIN_PATH . 'templates/' . $template_name . '.php';
+
+        if (!file_exists($template_file)) {
+            // گزارش خطا در صورت عدم وجود تمپلیت
+            error_log('Maneli Template Error: Template file not found: ' . $template_file);
+            return '';
+        }
+
+        // در دسترس قرار دادن آرگومان‌ها به عنوان متغیر در محدوده تمپلیت
+        if (is_array($args) && !empty($args)) {
+            extract($args, EXTR_SKIP);
+        }
+
+        if ($echo) {
+            include $template_file;
+        } else {
+            ob_start();
+            include $template_file;
+            return ob_get_clean();
+        }
     }
 }

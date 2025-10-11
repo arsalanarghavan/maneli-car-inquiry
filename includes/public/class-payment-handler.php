@@ -6,7 +6,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.5 (Sadad API fix - unnecessary conditional removed)
+ * @version 1.0.6 (Sadad API fix - Added OpenSSL check)
  */
 
 if (!defined('ABSPATH')) {
@@ -295,6 +295,11 @@ class Maneli_Payment_Handler {
         
         $sign_data = $this->sadad_encrypt_pkcs7("$terminal_id;$order_id;$amount_rial", $terminal_key);
         
+        // FIX: Handle OpenSSL check result before proceeding
+        if ($sign_data === 'OPENSSL_NOT_AVAILABLE') {
+            wp_die(esc_html__('OpenSSL PHP extension is not enabled. Sadad payment gateway requires this extension.', 'maneli-car-inquiry'));
+        }
+
         $data = [
             'TerminalId'    => $terminal_id,
             'MerchantId'    => $merchant_id,
@@ -410,6 +415,13 @@ class Maneli_Payment_Handler {
      * Sadad API helper: Encrypts data using DES-EDE3 for signing.
      */
     private function sadad_encrypt_pkcs7($str, $key) {
+        // FIX: Check for OpenSSL extension availability
+        if (!extension_loaded('openssl')) {
+            error_log('Maneli Sadad Error: The OpenSSL extension is required for Sadad payment gateway but is not enabled.');
+            // Return a distinct string to be handled in process_sadad_payment
+            return 'OPENSSL_NOT_AVAILABLE'; 
+        }
+
         $key = base64_decode($key);
         $ciphertext = openssl_encrypt($str, "DES-EDE3", $key, OPENSSL_RAW_DATA);
         return base64_encode($ciphertext);

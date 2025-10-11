@@ -4,7 +4,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Fixed Datepicker initialization dependency)
  */
 
 if (!defined('ABSPATH')) {
@@ -85,6 +85,7 @@ class Maneli_User_Profile {
 
     /**
      * Enqueues datepicker assets specifically on user profile pages.
+     * @param string $hook The hook suffix for the current admin page.
      */
     public function enqueue_admin_assets($hook) {
         if ($hook !== 'profile.php' && $hook !== 'user-edit.php') {
@@ -94,8 +95,21 @@ class Maneli_User_Profile {
         wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
         wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
         
-        // Enqueue a dedicated script to initialize the datepicker, avoiding inline scripts.
-        wp_enqueue_script('maneli-profile-datepicker-init', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/profile-datepicker.js', ['maneli-jalali-datepicker'], '1.0.0', true);
+        // FIX: Removed dependency on missing profile-datepicker-init.js and used inline script for robustness
+        wp_add_inline_script('maneli-jalali-datepicker', '
+            document.addEventListener("DOMContentLoaded", function() {
+                if (typeof kamadatepicker !== "undefined") {
+                    // Initialize all elements with class maneli-datepicker
+                    document.querySelectorAll(".maneli-datepicker").forEach(function(element) {
+                        kamadatepicker(element.id, {
+                            bidi: true,
+                            placeholder: "مثال: ۱۳۶۵/۰۴/۱۵",
+                            format: "YYYY/MM/DD"
+                        });
+                    });
+                }
+            });
+        ');
     }
 
     /**

@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Helpers
  * @author  Gemini
- * @version 1.0.1 (Added Cheque Status Renderer)
+ * @version 1.0.2 (Added format_money and maneli_gregorian_to_jalali helpers)
  */
 
 if (!defined('ABSPATH')) {
@@ -13,6 +13,34 @@ if (!defined('ABSPATH')) {
 }
 
 class Maneli_Render_Helpers {
+    
+    /**
+     * Formats a number with thousand separators (using WordPress's number_format_i18n).
+     *
+     * @param int|float $number The number to format.
+     * @return string The formatted number.
+     */
+    public static function format_money($number) {
+        return number_format_i18n((int)$number);
+    }
+    
+    /**
+     * Converts Gregorian date to Jalali using the global helper function.
+     *
+     * @param int $gy Gregorian year.
+     * @param int $gm Gregorian month.
+     * @param int $gd Gregorian day.
+     * @param string $format The desired output format.
+     * @return string The formatted Jalali date.
+     */
+    public static function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d') {
+        // فرض می‌کنیم تابع سراسری در functions.php تعریف شده است
+        if (function_exists('maneli_gregorian_to_jalali')) {
+            return maneli_gregorian_to_jalali($gy, $gm, $gd, $format);
+        }
+        // Fallback to Gregorian if the helper is somehow missing
+        return sprintf('%s/%s/%s', $gy, $gm, $gd);
+    }
 
     /**
      * Renders a single table row for the user list in the user management shortcode.
