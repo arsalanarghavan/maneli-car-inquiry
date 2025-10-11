@@ -32,8 +32,9 @@ class Maneli_Form_Handler {
         add_action('wp_ajax_maneli_set_down_payment', [$this, 'ajax_set_down_payment']);
         add_action('wp_ajax_maneli_assign_expert_to_cash_inquiry', [$this, 'ajax_assign_expert_to_cash_inquiry']);
 		add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
+        
+        // New AJAX hook for assigning expert to installment inquiries
         add_action('wp_ajax_maneli_assign_expert_to_inquiry', [$this, 'ajax_assign_expert_to_inquiry']);
-
 
 
         // Expert Workflow Hooks
@@ -1235,7 +1236,11 @@ class Maneli_Form_Handler {
     
         wp_send_json_success(['message' => 'درخواست با موفقیت به ' . $assigned_expert_name . ' ارجاع داده شد.', 'expert_name' => $assigned_expert_name]);
     }
-
+    
+    /**
+     * Handles AJAX request to assign an expert to an installment inquiry.
+     * This is the new function to fix the issue.
+     */
     public function ajax_assign_expert_to_inquiry() {
         check_ajax_referer('maneli_inquiry_assign_expert_nonce', 'nonce');
     
@@ -1254,54 +1259,46 @@ class Maneli_Form_Handler {
         $assigned_expert_name = '';
     
         if ($expert_id === 'auto') {
-            // Use the existing round-robin function
+            // Use the round-robin logic for installment inquiries
             $assigned_expert_id = $this->assign_expert_round_robin($inquiry_id);
-            if (!$assigned_expert_id) {
-                wp_send_json_error(['message' => 'هیچ کارشناسی برای ارجاع خودکار یافت نشد.']);
+            if ($assigned_expert_id) {
+                $expert_user = get_userdata($assigned_expert_id);
+                $assigned_expert_name = $expert_user->display_name;
+            } else {
+                 wp_send_json_error(['message' => 'هیچ کارشناسی برای ارجاع خودکار یافت نشد.']);
             }
-            $expert_user = get_userdata($assigned_expert_id);
-            $assigned_expert_name = $expert_user->display_name;
-
         } else {
             $expert_user = get_userdata(intval($expert_id));
             if ($expert_user && in_array('maneli_expert', $expert_user->roles)) {
                 $assigned_expert_id = $expert_user->ID;
                 $assigned_expert_name = $expert_user->display_name;
+
                 update_post_meta($inquiry_id, 'assigned_expert_id', $assigned_expert_id);
                 update_post_meta($inquiry_id, 'assigned_expert_name', $assigned_expert_name);
+                
+                // Manually trigger SMS for non-round-robin assignment
+                $options = get_option('maneli_inquiry_all_options', []);
+                $pattern_id = $options['sms_pattern_expert_referral'] ?? 0;
+                $expert_phone = get_user_meta($assigned_expert_id, 'mobile_number', true);
+
+                if ($pattern_id > 0 && !empty($expert_phone)) {
+                    $user_id = get_post_field('post_author', $inquiry_id);
+                    $customer_info = get_userdata($user_id);
+                    $customer_name = ($customer_info->first_name ?? '') . ' ' . ($customer_info->last_name ?? '');
+                    $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true) ?? '';
+                    $car_name = get_the_title(get_post_meta($inquiry_id, 'product_id', true)) ?? '';
+                    $params = [(string)$assigned_expert_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
+                    $sms_handler = new Maneli_SMS_Handler();
+                    $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
+                }
+
             } else {
                 wp_send_json_error(['message' => 'کارشناس انتخاب شده معتبر نیست.']);
             }
         }
     
-        // Update status and send SMS
+        // Update status to 'user_confirmed' which means approved and referred
         update_post_meta($inquiry_id, 'inquiry_status', 'user_confirmed');
-        
-        $options = get_option('maneli_inquiry_all_options', []);
-        $sms_handler = new Maneli_SMS_Handler();
-
-        // Notify customer
-        $user_id = get_post_field('post_author', $inquiry_id);
-        $user_info = get_userdata($user_id);
-        $user_name = $user_info->display_name ?? '';
-        $mobile_number = get_user_meta($user_id, 'mobile_number', true);
-        $car_name = get_the_title(get_post_meta($inquiry_id, 'product_id', true)) ?? '';
-        $pattern_id_customer = $options['sms_pattern_approved'] ?? 0;
-        if($pattern_id_customer > 0 && !empty($mobile_number)) {
-            $sms_handler->send_pattern($pattern_id_customer, $mobile_number, [(string)$user_name, (string)$car_name]);
-        }
-
-        // Notify expert (if not already done by round-robin)
-        if ($expert_id !== 'auto') {
-            $pattern_id_expert = $options['sms_pattern_expert_referral'] ?? 0;
-            $expert_phone = get_user_meta($assigned_expert_id, 'mobile_number', true);
-            if ($pattern_id_expert > 0 && !empty($expert_phone)) {
-                $customer_name = ($user_info->first_name ?? '') . ' ' . ($user_info->last_name ?? '');
-                $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true) ?? '';
-                $params = [(string)$assigned_expert_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
-                $sms_handler->send_pattern($pattern_id_expert, $expert_phone, $params);
-            }
-        }
     
         wp_send_json_success([
             'message' => 'استعلام با موفقیت به ' . $assigned_expert_name . ' ارجاع داده شد.',

@@ -761,29 +761,19 @@ class Maneli_Inquiry_Shortcodes {
         $current_user = wp_get_current_user();
         $is_admin_or_expert = current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', $current_user->roles);
 
-        // Load JS and Nonces for Admin/Expert view
-        if ($is_admin_or_expert) {
-            $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
-            if (file_exists($js_path)) {
-                wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.8', true);
-                wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'inquiry_assign_expert_nonce' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
-                    // Keep other nonces for other functionalities on the same page
-                    'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
-                    'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
-                    'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
-                    'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
-                    'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
-                ]);
-            }
-        }
-
-
         if (!$is_admin_or_expert) {
             return $this->render_customer_inquiry_list($current_user->ID);
         }
         
+        $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
+        if (file_exists($js_path)) {
+            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.8', true);
+            wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'assign_nonce' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
+            ]);
+        }
+
         ob_start();
         ?>
         <div class="maneli-full-width-container">
@@ -831,9 +821,9 @@ class Maneli_Inquiry_Shortcodes {
                             <tr>
                                 <th>شناسه</th>
                                 <th>مشتری</th>
-                                <?php if (current_user_can('manage_maneli_inquiries')) echo '<th>کارشناس مسئول</th>'; ?>
                                 <th>خودرو</th>
                                 <th>وضعیت</th>
+                                <?php if (current_user_can('manage_maneli_inquiries')) echo '<th>ارجاع</th>'; ?>
                                 <th>تاریخ ثبت</th>
                                 <th></th>
                             </tr>
@@ -964,7 +954,7 @@ class Maneli_Inquiry_Shortcodes {
 
         $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
         if (file_exists($js_path)) {
-            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.7', true);
+            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.8', true);
             wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
@@ -973,6 +963,7 @@ class Maneli_Inquiry_Shortcodes {
                 'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
                 'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
                 'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
+                'assign_nonce' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
                 'cash_rejection_reasons' => $rejection_reasons,
             ]);
         }
@@ -1485,19 +1476,19 @@ class Maneli_Inquiry_Shortcodes {
         <tr>
             <td data-title="شناسه">#<?php echo esc_html($inquiry_id); ?></td>
             <td data-title="مشتری"><?php echo esc_html($customer->display_name); ?></td>
+            <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
+            <td data-title="وضعیت"><?php echo esc_html(Maneli_CPT_Handler::get_status_label($status)); ?></td>
             <?php if (current_user_can('manage_maneli_inquiries')): 
                 $expert_name = get_post_meta($inquiry_id, 'assigned_expert_name', true);
             ?>
-                <td data-title="کارشناس">
+                <td data-title="ارجاع">
                     <?php if ($expert_name): ?>
                         <?php echo esc_html($expert_name); ?>
                     <?php else: ?>
-                        <button class="button assign-inquiry-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">ارجاع</button>
+                        <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">ارجاع</button>
                     <?php endif; ?>
                 </td>
             <?php endif; ?>
-            <td data-title="خودرو"><?php echo esc_html(get_the_title($product_id)); ?></td>
-            <td data-title="وضعیت"><?php echo esc_html(Maneli_CPT_Handler::get_status_label($status)); ?></td>
             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
             <td class="woocommerce-orders-table__cell-order-actions">
                 <a href="<?php echo esc_url($report_url); ?>" class="button view">مشاهده جزئیات</a>
@@ -1526,7 +1517,7 @@ class Maneli_Inquiry_Shortcodes {
                 <?php if ($expert_name): ?>
                     <?php echo esc_html($expert_name); ?>
                 <?php else: ?>
-                    <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">ارجاع</button>
+                    <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash">ارجاع</button>
                 <?php endif; ?>
             </td>
             <td data-title="تاریخ"><?php echo esc_html(maneli_gregorian_to_jalali($y, $m, $d, 'Y/m/d')); ?></td>
@@ -1914,7 +1905,7 @@ class Maneli_Inquiry_Shortcodes {
                 <h3 class="report-box-title">عملیات</h3>
                 <div class="action-button-group" style="justify-content: center;">
                     <?php if (!$expert_name): ?>
-                        <button type="button" class="action-btn assign-expert-btn" style="background-color: #17a2b8;" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">ارجاع به کارشناس</button>
+                        <button type="button" class="action-btn assign-expert-btn" style="background-color: #17a2b8;" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash">ارجاع به کارشناس</button>
                     <?php endif; ?>
                     <button type="button" class="action-btn" id="edit-cash-inquiry-btn" style="background-color: #ffc107; color: #212529;">ویرایش اطلاعات</button>
                     <button type="button" class="action-btn" id="delete-cash-inquiry-btn" style="background-color: #dc3545;">حذف درخواست</button>
