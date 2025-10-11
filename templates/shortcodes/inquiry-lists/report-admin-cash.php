@@ -7,7 +7,7 @@
  *
  * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryLists
  * @author  Gemini
- * @version 1.0.0
+ * @version 1.0.1 (Finalized actions and delete button logic)
  *
  * @var int $inquiry_id The ID of the cash inquiry post.
  */
@@ -59,8 +59,8 @@ $status_class = $status_classes[$status] ?? 'status-bg-pending';
                 <table class="summary-table">
                     <tbody>
                         <tr><th><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true)); ?></td></tr>
-                        <tr><th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></th><td><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td></tr>
-                        <tr><th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th><td><?php echo esc_html(get_the_title($product_id)); ?></td></tr>
+                        <tr><th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?>:</th><td><a href="tel:<?php echo esc_attr(get_post_meta($inquiry_id, 'mobile_number', true)); ?>"><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></a></td></tr>
+                        <tr><th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th><td><a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank"><?php echo esc_html(get_the_title($product_id)); ?></a></td></tr>
                         <tr><th><?php esc_html_e('Requested Color', 'maneli-car-inquiry'); ?></th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
                         <?php 
                         $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
@@ -81,16 +81,23 @@ $status_class = $status_classes[$status] ?? 'status-bg-pending';
     <div class="admin-actions-box">
         <h3 class="report-box-title"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></h3>
         <div class="action-button-group" style="justify-content: center;">
+            
             <?php if (!$expert_name): ?>
                 <button type="button" class="action-btn assign-expert-btn" style="background-color: #17a2b8;" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash"><?php esc_html_e('Assign to Expert', 'maneli-car-inquiry'); ?></button>
             <?php endif; ?>
             
             <button type="button" class="action-btn" id="edit-cash-inquiry-btn" style="background-color: var(--theme-yellow); color: var(--text-dark);"><?php esc_html_e('Edit Information', 'maneli-car-inquiry'); ?></button>
-            <button type="button" class="action-btn" id="delete-cash-inquiry-btn" style="background-color: var(--theme-red);"><?php esc_html_e('Delete Request', 'maneli-car-inquiry'); ?></button>
+            
+            <?php // Note: The Delete button now uses the general JS handler for report pages ?>
+            <button type="button" class="action-btn delete-inquiry-report-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" style="background-color: var(--theme-red);"><?php esc_html_e('Delete Request', 'maneli-car-inquiry'); ?></button>
 
-            <?php if ($status === 'pending'): ?>
+            <?php if ($status === 'pending' || $status === 'approved'): ?>
                 <button type="button" class="action-btn approve" id="set-downpayment-btn"><?php esc_html_e('Set Down Payment', 'maneli-car-inquiry'); ?></button>
                 <button type="button" class="action-btn reject" id="reject-cash-inquiry-btn"><?php esc_html_e('Reject Request', 'maneli-car-inquiry'); ?></button>
+            <?php endif; ?>
+            
+            <?php if ($status === 'awaiting_payment'): ?>
+                <a href="<?php echo esc_url(add_query_arg(['cash_inquiry_id' => $inquiry_id, 'payment_link' => 'true'], home_url('/dashboard/?endp=inf_menu_4'))); ?>" target="_blank" class="action-btn" style="background-color: var(--theme-cyan);"><?php esc_html_e('View Customer Payment Link', 'maneli-car-inquiry'); ?></a>
             <?php endif; ?>
         </div>
     </div>

@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryLists
  * @author  Gemini
- * @version 1.0.1 (Fixed and Completed)
+ * @version 1.0.2 (Added More Docs and Delete buttons)
  *
  * @var int $inquiry_id The ID of the inquiry post.
  */
@@ -16,10 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $post = get_post($inquiry_id);
 
-// 1. Permission Check
-// اگرچه این چک در Router اصلی انجام می‌شود، اما برای اطمینان مجدد در این سطح نیز توصیه می‌شود.
+// 1. Permission Check (Redundant check for security, router already handles it)
 if ( ! Maneli_Permission_Helpers::can_user_view_inquiry( $inquiry_id, get_current_user_id() ) ) {
-    // Assuming a helper for access denied message exists or rendering a simple box
     echo '<div class="maneli-inquiry-wrapper error-box"><p>' . esc_html__('Inquiry not found or you do not have permission to view it.', 'maneli-car-inquiry') . '</p></div>';
     return;
 }
@@ -36,7 +34,7 @@ $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
 
 $back_link = remove_query_arg('inquiry_id');
 $status_label = Maneli_CPT_Handler::get_status_label($inquiry_status);
-$is_admin_or_expert = current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles);
+$is_admin_or_expert = current_user_can('manage_maneli_inquiries') || Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
 
 // Loan Details
 $down_payment = (int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0);
@@ -86,6 +84,7 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
     <?php endif; ?>
 
     <div class="maneli-report-actions" style="display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 10px; margin: 20px 0;">
+        
         <?php if ($inquiry_status === 'pending' || $inquiry_status === 'more_docs' || $inquiry_status === 'failed') : ?>
             <button class="button button-primary confirm-inquiry-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment" data-next-status="user_confirmed">
                 <?php esc_html_e('Final Approval & Refer to Sales', 'maneli-car-inquiry'); ?>
@@ -108,6 +107,24 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
                 <?php wp_nonce_field('maneli_retry_finotex_nonce'); ?>
                 <button type="submit" class="button button-info"><?php esc_html_e('Retry Finotex Inquiry', 'maneli-car-inquiry'); ?></button>
             </form>
+        <?php endif; ?>
+
+        <?php if (current_user_can('manage_maneli_inquiries')): // Actions for Admin only ?>
+            
+            <?php if ($inquiry_status !== 'rejected' && $inquiry_status !== 'user_confirmed'): // Request More Docs Button (Admin Only) ?>
+                 <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display: inline-block;">
+                    <input type="hidden" name="action" value="maneli_admin_update_status">
+                    <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
+                    <input type="hidden" name="new_status" value="more_docs">
+                    <?php wp_nonce_field('maneli_admin_update_status_nonce'); ?>
+                    <button type="submit" class="button button-info"><?php esc_html_e('Request More Documents', 'maneli-car-inquiry'); ?></button>
+                </form>
+            <?php endif; ?>
+
+            <button class="button button-secondary delete-inquiry-report-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment" style="background-color: var(--theme-red); border-color: var(--theme-red); color: white;">
+                <?php esc_html_e('Delete Request', 'maneli-car-inquiry'); ?>
+            </button>
+
         <?php endif; ?>
     </div>
 

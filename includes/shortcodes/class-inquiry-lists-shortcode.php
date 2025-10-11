@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Shortcodes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Removed dependency on obsolete customer installment report template)
+ * @version 1.0.2 (Added delete nonce and localization strings for list deletion)
  */
 
 if (!defined('ABSPATH')) {
@@ -203,6 +203,7 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'cash_details' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
                 'cash_update' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
                 'cash_delete' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
+                'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'), // ADDED
                 'cash_set_downpayment' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
                 'cash_assign_expert' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
                 'assign_expert' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
@@ -214,6 +215,9 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'success' => esc_html__('Success', 'maneli-car-inquiry'),
                 'confirm_delete_title' => esc_html__('Are you sure you want to delete this request?', 'maneli-car-inquiry'),
                 'confirm_delete_text' => esc_html__('This action cannot be undone!', 'maneli-car-inquiry'),
+                // ADDED strings for list deletion (used in inquiry-lists.js for both types)
+                'delete_list_title' => esc_html__('Delete Request', 'maneli-car-inquiry'),
+                'delete_list_text' => esc_html__('Are you sure you want to permanently delete this request?', 'maneli-car-inquiry'),
                 'confirm_button' => esc_html__('Yes, delete it!', 'maneli-car-inquiry'),
                 'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
                 

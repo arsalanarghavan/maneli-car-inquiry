@@ -1,288 +1,335 @@
 <?php
 /**
- * A helper class with static methods for rendering reusable HTML components,
- * such as table rows, to avoid code duplication.
+ * Helper class for rendering various HTML elements and data in Maneli Car Inquiry plugin.
  *
- * @package Maneli_Car_Inquiry/Includes/Helpers
- * @author  Gemini
- * @version 1.1.0 (Added loan calculation and meta label helpers)
+ * @package ManeliCarInquiry
+ * @subpackage Helpers
  */
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+namespace ManeliCarInquiry\Helpers;
 
+use ManeliCarInquiry\Data\Maneli_Inquiry_Data;
+use ManeliCarInquiry\Data\Maneli_Cash_Inquiry_Data;
+
+/**
+ * Class Maneli_Render_Helpers
+ *
+ * Contains static methods to render common elements.
+ */
 class Maneli_Render_Helpers {
-    
-    /**
-     * Formats a number with thousand separators (using WordPress's number_format_i18n).
-     *
-     * @param int|float $number The number to format.
-     * @return string The formatted number.
-     */
-    public static function format_money($number) {
-        return number_format_i18n((int)$number);
-    }
-    
-    /**
-     * Converts Gregorian date to Jalali using the global helper function.
-     *
-     * @param int $gy Gregorian year.
-     * @param int $gm Gregorian month.
-     * @param int $gd Gregorian day.
-     * @param string $format The desired output format.
-     * @return string The formatted Jalali date.
-     */
-    public static function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d') {
-        // فرض می‌کنیم تابع سراسری در functions.php تعریف شده است
-        if (function_exists('maneli_gregorian_to_jalali')) {
-            return maneli_gregorian_to_jalali($gy, $gm, $gd, $format);
-        }
-        // Fallback to Gregorian if the helper is somehow missing
-        return sprintf('%s/%s/%s', $gy, $gm, $gd);
-    }
 
-    /**
-     * Calculates the monthly installment amount using the simplified loan formula 
-     * based on the configurable monthly interest rate from plugin settings.
-     * * This method centralizes the loan calculation logic.
-     *
-     * @param float $loan_amount The loan amount (principal).
-     * @param int $term_months The number of months.
-     * @return int The calculated monthly installment amount (rounded).
-     */
-    public static function calculate_installment_amount($loan_amount, $term_months) {
-        if ($loan_amount <= 0 || $term_months <= 0) {
-            return 0;
-        }
+	/**
+	 * Renders a standard WordPress style notice.
+	 *
+	 * @param string $message The message to display.
+	 * @param string $type    The type of notice (success, error, warning, info).
+	 * @param bool   $dismissible Whether the notice is dismissible.
+	 * @return string The HTML for the notice.
+	 */
+	public static function render_notice( $message, $type = 'info', $dismissible = true ) {
+		$class = 'notice notice-' . sanitize_html_class( $type );
+		if ( $dismissible ) {
+			$class .= ' is-dismissible';
+		}
 
-        $options = get_option('maneli_inquiry_all_options', []);
-        // Get the rate from settings, fallback to hardcoded 0.035
-        $monthly_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
-        
-        // Replicating the simple calculation logic from the JS/Expert Panel
-        $monthly_interest_amount = $loan_amount * $monthly_rate;
-        $total_interest = $monthly_interest_amount * ($term_months + 1);
-        $total_repayment = $loan_amount + $total_interest;
-        $installment_amount = (int)round($total_repayment / $term_months);
+		return sprintf(
+			'<div class="%s"><p>%s</p></div>',
+			esc_attr( $class ),
+			wp_kses_post( $message )
+		);
+	}
 
-        return $installment_amount;
-    }
+	/**
+	 * Returns the CSS class for the inquiry status.
+	 *
+	 * @param string $status The inquiry status slug.
+	 * @return string The CSS class.
+	 */
+	public static function get_inquiry_status_class( $status ) {
+		switch ( $status ) {
+			case 'pending':
+				return 'status-pending';
+			case 'rejected':
+			case 'failed':
+				return 'status-rejected';
+			case 'user_confirmed':
+				return 'status-confirmed';
+			case 'more_docs':
+				return 'status-more-docs';
+			case 'expert_assigned':
+				return 'status-expert-assigned';
+			case 'in_progress':
+				return 'status-in-progress';
+			default:
+				return 'status-info';
+		}
+	}
 
-    /**
-     * Converts a technical meta key value (e.g., residency_status) into its human-readable, 
-     * localized label. Used primarily in admin/report views and meta boxes.
-     *
-     * @param string $key The meta key (e.g., 'residency_status', 'workplace_status').
-     * @param string $value The raw meta value (e.g., 'owner', 'permanent').
-     * @return string The translated label or the original value if no translation exists.
-     */
-    public static function get_meta_label($key, $value) {
-        if (empty($value)) {
-            return '—';
-        }
-        
-        switch ($key) {
-            case 'residency_status':
-            case 'issuer_residency_status':
-                $labels = [
-                    'owner'  => esc_html__('Owner', 'maneli-car-inquiry'),
-                    'tenant' => esc_html__('Tenant', 'maneli-car-inquiry'),
-                ];
-                return $labels[$value] ?? $value;
+	/**
+	 * Returns the translated label for the inquiry status.
+	 *
+	 * @param string $status The inquiry status slug.
+	 * @return string The translated label.
+	 */
+	public static function get_inquiry_status_label( $status ) {
+		switch ( $status ) {
+			case 'pending':
+				return esc_html__( 'Pending', 'maneli-car-inquiry' );
+			case 'rejected':
+				return esc_html__( 'Rejected', 'maneli-car-inquiry' );
+			case 'user_confirmed':
+				return esc_html__( 'Confirmed by User', 'maneli-car-inquiry' );
+			case 'failed':
+				return esc_html__( 'Finotex Failed', 'maneli-car-inquiry' );
+			case 'more_docs':
+				return esc_html__( 'More Documents Requested', 'maneli-car-inquiry' );
+			case 'expert_assigned':
+				return esc_html__( 'Expert Assigned', 'maneli-car-inquiry' );
+			case 'in_progress':
+				return esc_html__( 'In Progress', 'maneli-car-inquiry' );
+			default:
+				return esc_html__( 'Unknown', 'maneli-car-inquiry' );
+		}
+	}
 
-            case 'workplace_status':
-            case 'issuer_workplace_status':
-                $labels = [
-                    'permanent' => esc_html__('Permanent', 'maneli-car-inquiry'),
-                    'contract'  => esc_html__('Contract', 'maneli-car-inquiry'),
-                    'freelance' => esc_html__('Freelance', 'maneli-car-inquiry'),
-                ];
-                return $labels[$value] ?? $value;
+	/**
+	 * Renders the HTML for the inquiry status badge.
+	 *
+	 * @param string $status The inquiry status slug.
+	 * @return string The HTML output.
+	 */
+	public static function render_inquiry_status_badge( $status ) {
+		$class = self::get_inquiry_status_class( $status );
+		$label = self::get_inquiry_status_label( $status );
 
-            default:
-                return $value;
-        }
-    }
+		return sprintf(
+			'<span class="maneli-inquiry-status %s">%s</span>',
+			esc_attr( $class ),
+			esc_html( $label )
+		);
+	}
 
-    /**
-     * Renders a single table row for the user list in the user management shortcode.
-     *
-     * @param WP_User $user        The user object to render.
-     * @param string  $current_url The base URL for generating the edit link.
-     */
-    public static function render_user_list_row($user, $current_url) {
-        $role_names = array_map(function($role) {
-            global $wp_roles;
-            return $wp_roles->roles[$role]['name'] ?? $role;
-        }, (array) $user->roles);
-        
-        $edit_link = add_query_arg('edit_user', $user->ID, $current_url);
-        ?>
-        <tr>
-            <td data-title="<?php esc_attr_e('Display Name', 'maneli-car-inquiry'); ?>"><?php echo esc_html($user->display_name); ?></td>
-            <td data-title="<?php esc_attr_e('Username', 'maneli-car-inquiry'); ?>"><?php echo esc_html($user->user_login); ?></td>
-            <td data-title="<?php esc_attr_e('Email', 'maneli-car-inquiry'); ?>"><?php echo esc_html($user->user_email); ?></td>
-            <td data-title="<?php esc_attr_e('Role', 'maneli-car-inquiry'); ?>"><?php echo esc_html(implode(', ', $role_names)); ?></td>
-            <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
-                <a href="<?php echo esc_url($edit_link); ?>" class="button view"><?php esc_html_e('Edit', 'maneli-car-inquiry'); ?></a>
-                <button class="button delete-user-btn" data-user-id="<?php echo esc_attr($user->ID); ?>"><?php esc_html_e('Delete', 'maneli-car-inquiry'); ?></button>
-            </td>
-        </tr>
-        <?php
-    }
+	/**
+	 * Renders a row for the Inquiry List table (Installment).
+	 *
+	 * @param \WP_Post $inquiry_post The inquiry post object.
+	 * @param int      $index The row index.
+	 */
+	public static function render_inquiry_row( $inquiry_post, $index ) {
+		$inquiry_id        = $inquiry_post->ID;
+		$inquiry_status    = $inquiry_post->post_status;
+		$meta_data         = get_post_meta( $inquiry_id );
+		$inquiry_data      = Maneli_Inquiry_Data::get_inquiry_data( $inquiry_id, $meta_data );
+		$car_name          = $inquiry_data['product_name'];
+		$full_name         = $inquiry_data['full_name'];
+		$report_url        = $inquiry_data['report_url'];
+		$expert_assigned   = $inquiry_data['expert_assigned'];
+		$expert_name       = $inquiry_data['expert_name'];
+		$is_expert_allowed = Maneli_Permission_Helpers::is_expert_allowed_to_view( $expert_assigned );
+		$is_admin          = current_user_can( 'manage_maneli_inquiries' );
 
-    /**
-     * Renders a single table row for the product editor interface.
-     *
-     * @param WC_Product $product The product object to render.
-     */
-    public static function render_product_editor_row($product) {
-        $product_id = $product->get_id();
-        ?>
-        <tr>
-            <td data-title="<?php esc_attr_e('Car Name', 'maneli-car-inquiry'); ?>">
-                <strong><a href="<?php echo get_edit_post_link($product_id); ?>" target="_blank" rel="noopener"><?php echo esc_html($product->get_name()); ?></a></strong>
-            </td>
-            <td data-title="<?php esc_attr_e('Cash Price (Toman)', 'maneli-car-inquiry'); ?>">
-                <input type="text" class="manli-data-input manli-price-input" style="width: 100%;" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="regular_price" value="<?php echo esc_attr($product->get_regular_price()); ?>" placeholder="<?php esc_attr_e('Cash Price', 'maneli-car-inquiry'); ?>">
-            </td>
-            <td data-title="<?php esc_attr_e('Installment Price (Toman)', 'maneli-car-inquiry'); ?>">
-                <input type="text" class="manli-data-input manli-price-input" style="width: 100%;" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="installment_price" value="<?php echo esc_attr(get_post_meta($product_id, 'installment_price', true)); ?>" placeholder="<?php esc_attr_e('Installment Price', 'maneli-car-inquiry'); ?>">
-            </td>
-            <td data-title="<?php esc_attr_e('Min. Down Payment (Toman)', 'maneli-car-inquiry'); ?>">
-                <input type="text" class="manli-data-input manli-price-input" style="width: 100%;" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="min_downpayment" value="<?php echo esc_attr(get_post_meta($product_id, 'min_downpayment', true)); ?>" placeholder="<?php esc_attr_e('Down Payment Amount', 'maneli-car-inquiry'); ?>">
-            </td>
-            <td data-title="<?php esc_attr_e('Available Colors', 'maneli-car-inquiry'); ?>">
-                 <input type="text" class="manli-data-input" style="width: 100%;" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="car_colors" value="<?php echo esc_attr(get_post_meta($product_id, '_maneli_car_colors', true)); ?>" placeholder="<?php esc_attr_e('e.g., White, Black', 'maneli-car-inquiry'); ?>">
-            </td>
-            <td data-title="<?php esc_attr_e('Sales Status', 'maneli-car-inquiry'); ?>">
-                <select class="manli-data-input" style="width: 100%;" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="car_status">
-                    <option value="special_sale" <?php selected(get_post_meta($product_id, '_maneli_car_status', true), 'special_sale'); ?>><?php esc_html_e('Special Sale (Active)', 'maneli-car-inquiry'); ?></option>
-                    <option value="unavailable" <?php selected(get_post_meta($product_id, '_maneli_car_status', true), 'unavailable'); ?>><?php esc_html_e('Unavailable (Show in site)', 'maneli-car-inquiry'); ?></option>
-                    <option value="disabled" <?php selected(get_post_meta($product_id, '_maneli_car_status', true), 'disabled'); ?>><?php esc_html_e('Disabled (Hide from site)', 'maneli-car-inquiry'); ?></option>
-                </select>
-            </td>
-        </tr>
-        <?php
-    }
+		if ( ! $is_admin && ! $is_expert_allowed ) {
+			return;
+		}
 
-    /**
-     * Renders a single table row for the installment inquiry list.
-     *
-     * @param int    $inquiry_id The ID of the inquiry post.
-     * @param string $base_url   The base URL for generating action links.
-     */
-    public static function render_inquiry_row($inquiry_id, $base_url) {
-        $customer = get_userdata(get_post_field('post_author', $inquiry_id));
-        $product_id = get_post_meta($inquiry_id, 'product_id', true);
-        $status = get_post_meta($inquiry_id, 'inquiry_status', true);
-        $expert_name = get_post_meta($inquiry_id, 'assigned_expert_name', true);
-        $report_url = add_query_arg('inquiry_id', $inquiry_id, $base_url);
-        ?>
-        <tr>
-            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
-            <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer->display_name ?? __('N/A', 'maneli-car-inquiry')); ?></td>
-            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
-            <td data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>"><?php echo esc_html(Maneli_CPT_Handler::get_status_label($status)); ?></td>
-            <?php if (current_user_can('manage_maneli_inquiries')) : ?>
-                <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
-                    <?php if ($expert_name) : ?>
-                        <?php echo esc_html($expert_name); ?>
-                    <?php else: ?>
-                        <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment"><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?></button>
-                    <?php endif; ?>
-                </td>
-            <?php endif; ?>
-            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_date('Y/m/d', $inquiry_id)); ?></td>
-            <td class="woocommerce-orders-table__cell-order-actions">
-                <a href="<?php echo esc_url($report_url); ?>" class="button view"><?php esc_html_e('View Details', 'maneli-car-inquiry'); ?></a>
-            </td>
-        </tr>
-        <?php
-    }
-
-    /**
-     * Renders a single table row for the cash inquiry list.
-     *
-     * @param int    $inquiry_id The ID of the cash inquiry post.
-     * @param string $base_url   The base URL for generating action links.
-     */
-    public static function render_cash_inquiry_row($inquiry_id, $base_url) {
-        $product_id = get_post_meta($inquiry_id, 'product_id', true);
-        $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
-		$status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
-        $expert_name = get_post_meta($inquiry_id, 'assigned_expert_name', true);
-        $report_url = add_query_arg('cash_inquiry_id', $inquiry_id, $base_url);
-        ?>
-        <tr>
-            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
-            <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer_name); ?></td>
-            <td data-title="<?php esc_attr_e('Mobile', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td>
-            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
-            <td data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>"><?php echo esc_html(Maneli_CPT_Handler::get_cash_inquiry_status_label($status)); ?></td>
-            <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
-                <?php if ($expert_name) : ?>
-                    <?php echo esc_html($expert_name); ?>
-                <?php else: ?>
-                    <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash"><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?></button>
-                <?php endif; ?>
-            </td>
-            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_date('Y/m/d', $inquiry_id)); ?></td>
-			<td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>" class="cash-inquiry-actions">
-				<a href="<?php echo esc_url($report_url); ?>" class="button view"><?php esc_html_e('View Details', 'maneli-car-inquiry'); ?></a>
+		?>
+		<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $inquiry_status ); ?>">
+			<td data-title="<?php esc_attr_e( 'Row', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $index ); ?>
 			</td>
-        </tr>
-        <?php
-    }
-    
-    /**
-     * Renders the cheque status bar and a summary table for credit inquiry results.
-     * این تابع کد تکراری نوار وضعیت و توضیحات اعتبارسنجی را تجمیع می‌کند.
-     *
-     * @param int|string $cheque_color_code The color code from Finotex (0-5).
-     * @return string The HTML output.
-     */
-    public static function render_cheque_status_info($cheque_color_code) {
-        if (!defined('ABSPATH')) {
-            exit;
-        }
-        
-        // Define map locally to ensure all strings are translatable
-        $cheque_color_map = [
-            '1' => ['text' => esc_html__('White', 'maneli-car-inquiry'), 'desc' => esc_html__('No history of bounced cheques.', 'maneli-car-inquiry')],
-            '2' => ['text' => esc_html__('Yellow', 'maneli-car-inquiry'), 'desc' => esc_html__('One bounced cheque or a maximum of 50 million Rials in returned commitments.', 'maneli-car-inquiry')],
-            '3' => ['text' => esc_html__('Orange', 'maneli-car-inquiry'), 'desc' => esc_html__('Two to four bounced cheques or a maximum of 200 million Rials in returned commitments.', 'maneli-car-inquiry')],
-            '4' => ['text' => esc_html__('Brown', 'maneli-car-inquiry'), 'desc' => esc_html__('Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
-            '5' => ['text' => esc_html__('Red', 'maneli-car-inquiry'), 'desc' => esc_html__('More than ten bounced cheques or more than 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
-             0  => ['text' => esc_html__('Undetermined', 'maneli-car-inquiry'), 'desc' => esc_html__('Information was not received from the bank.', 'maneli-car-inquiry')]
-        ];
-        $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
+			<td data-title="<?php esc_attr_e( 'Request ID', 'maneli-car-inquiry' ); ?>">
+				#<?php echo esc_html( $inquiry_id ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Date', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( maneli_convert_to_jalali( $inquiry_post->post_date ) ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Status', 'maneli-car-inquiry' ); ?>">
+				<?php echo self::render_inquiry_status_badge( $inquiry_status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Car', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $car_name ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Full Name', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $full_name ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Expert', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $expert_name ); ?>
+			</td>
+			<td class="woocommerce-orders-table__cell-order-actions">
+				<a href="<?php echo esc_url( $report_url ); ?>" class="button view"><?php esc_html_e( 'View Details', 'maneli-car-inquiry' ); ?></a>
+				<?php if ( current_user_can( 'manage_maneli_inquiries' ) ) : ?>
+					<button class="button delete-installment-list-btn" data-inquiry-id="<?php echo esc_attr( $inquiry_id ); ?>" style="background-color: var(--theme-red); border-color: var(--theme-red); margin-top: 5px;"><?php esc_html_e( 'Delete', 'maneli-car-inquiry' ); ?></button>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+	}
 
-        ob_start();
-        ?>
-        <div class="maneli-status-bar">
-            <?php
-            $colors = [ 1 => 'white', 2 => 'yellow', 3 => 'orange', 4 => 'brown', 5 => 'red' ];
-            foreach ($colors as $code => $class) {
-                $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
-                // Ensure text is correctly pulled from the localized map
-                $text_to_display = $cheque_color_map[$code]['text'] ?? '';
-                echo "<div class='bar-segment segment-{$class} {$active_class}'><span>" . esc_html($text_to_display) . "</span></div>";
-            }
-            ?>
-        </div>
-        <table class="summary-table" style="margin-top:20px;">
-            <tr>
-                <td><strong><?php esc_html_e('Sayad Cheque Status:', 'maneli-car-inquiry'); ?></strong></td>
-                <td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td>
-            </tr>
-            <tr>
-                <td><strong><?php esc_html_e('Status Explanation:', 'maneli-car-inquiry'); ?></strong></td>
-                <td><?php echo esc_html($color_info['desc']); ?></td>
-            </tr>
-        </table>
-        <?php
-        return ob_get_clean();
-    }
+	/**
+	 * Renders a row for the Cash Inquiry List table.
+	 *
+	 * @param \WP_Post $cash_post The cash inquiry post object.
+	 * @param int      $index The row index.
+	 */
+	public static function render_cash_inquiry_row( $cash_post, $index ) {
+		$inquiry_id      = $cash_post->ID;
+		$meta_data       = get_post_meta( $inquiry_id );
+		$inquiry_data    = Maneli_Cash_Inquiry_Data::get_inquiry_data( $inquiry_id, $meta_data );
+		$car_name        = $inquiry_data['product_name'];
+		$full_name       = $inquiry_data['full_name'];
+		$inquiry_status  = $inquiry_data['status'];
+		$down_payment    = $inquiry_data['down_payment'];
+		$expert_assigned = $inquiry_data['expert_assigned'];
+		$expert_name     = $inquiry_data['expert_name'];
+		$report_url      = $inquiry_data['report_url'];
+		$status_class    = self::get_inquiry_status_class( $inquiry_status );
+		$status_label    = self::get_inquiry_status_label( $inquiry_status );
+
+		$is_expert_allowed = Maneli_Permission_Helpers::is_expert_allowed_to_view( $expert_assigned );
+		$is_admin          = current_user_can( 'manage_maneli_inquiries' );
+
+		if ( ! $is_admin && ! $is_expert_allowed ) {
+			return;
+		}
+		?>
+		<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $inquiry_status ); ?>">
+			<td data-title="<?php esc_attr_e( 'Row', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $index ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Request ID', 'maneli-car-inquiry' ); ?>">
+				#<?php echo esc_html( $inquiry_id ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Date', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( maneli_convert_to_jalali( $cash_post->post_date ) ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Status', 'maneli-car-inquiry'); ?>" class="cash-status-column">
+				<span class="maneli-inquiry-status <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span>
+				<?php if ( $is_admin && $inquiry_status === 'pending' ) : ?>
+					<a href="#" class="set-down-payment-btn" data-inquiry-id="<?php echo esc_attr( $inquiry_id ); ?>" style="display: block; font-size: 11px; margin-top: 5px;"><?php esc_html_e( 'Set Down Payment', 'maneli-car-inquiry' ); ?></a>
+				<?php endif; ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Car', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $car_name ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Down Payment', 'maneli-car-inquiry' ); ?>">
+				<?php echo $down_payment ? esc_html( maneli_format_price( $down_payment ) ) : esc_html__( 'N/A', 'maneli-car-inquiry' ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Full Name', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $full_name ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Expert', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $expert_name ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Actions', 'maneli-car-inquiry' ); ?>" class="cash-inquiry-actions">
+				<a href="<?php echo esc_url( $report_url ); ?>" class="button view"><?php esc_html_e( 'View Details', 'maneli-car-inquiry' ); ?></a>
+				<?php if ( current_user_can( 'manage_maneli_inquiries' ) ) : ?>
+					<button class="button delete-cash-list-btn" data-inquiry-id="<?php echo esc_attr( $inquiry_id ); ?>" data-inquiry-type="cash" style="background-color: var(--theme-red); border-color: var(--theme-red); margin-top: 5px;"><?php esc_html_e( 'Delete', 'maneli-car-inquiry' ); ?></button>
+				<?php endif; ?>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Renders a row for the Customer Inquiry List table (Installment).
+	 *
+	 * @param \WP_Post $inquiry_post The inquiry post object.
+	 * @param int      $index The row index.
+	 */
+	public static function render_customer_inquiry_row( $inquiry_post, $index ) {
+		$inquiry_id     = $inquiry_post->ID;
+		$inquiry_status = $inquiry_post->post_status;
+		$meta_data      = get_post_meta( $inquiry_id );
+		$inquiry_data   = Maneli_Inquiry_Data::get_inquiry_data( $inquiry_id, $meta_data );
+		$car_name       = $inquiry_data['product_name'];
+		$report_url     = $inquiry_data['report_url'];
+
+		?>
+		<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $inquiry_status ); ?>">
+			<td data-title="<?php esc_attr_e( 'Row', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $index ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Request ID', 'maneli-car-inquiry' ); ?>">
+				#<?php echo esc_html( $inquiry_id ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Date', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( maneli_convert_to_jalali( $inquiry_post->post_date ) ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Status', 'maneli-car-inquiry' ); ?>">
+				<?php echo self::render_inquiry_status_badge( $inquiry_status ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Car', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $car_name ); ?>
+			</td>
+			<td class="woocommerce-orders-table__cell-order-actions">
+				<a href="<?php echo esc_url( $report_url ); ?>" class="button view"><?php esc_html_e( 'View Details', 'maneli-car-inquiry' ); ?></a>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Renders a row for the Customer Cash Inquiry List table.
+	 *
+	 * @param \WP_Post $cash_post The cash inquiry post object.
+	 * @param int      $index The row index.
+	 */
+	public static function render_customer_cash_inquiry_row( $cash_post, $index ) {
+		$inquiry_id     = $cash_post->ID;
+		$meta_data      = get_post_meta( $inquiry_id );
+		$inquiry_data   = Maneli_Cash_Inquiry_Data::get_inquiry_data( $inquiry_id, $meta_data );
+		$car_name       = $inquiry_data['product_name'];
+		$inquiry_status = $inquiry_data['status'];
+		$down_payment   = $inquiry_data['down_payment'];
+		$report_url     = $inquiry_data['report_url'];
+		$status_class   = self::get_inquiry_status_class( $inquiry_status );
+		$status_label   = self::get_inquiry_status_label( $inquiry_status );
+
+		?>
+		<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $inquiry_status ); ?>">
+			<td data-title="<?php esc_attr_e( 'Row', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $index ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Request ID', 'maneli-car-inquiry' ); ?>">
+				#<?php echo esc_html( $inquiry_id ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Date', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( maneli_convert_to_jalali( $cash_post->post_date ) ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Status', 'maneli-car-inquiry'); ?>">
+				<span class="maneli-inquiry-status <?php echo esc_attr( $status_class ); ?>"><?php echo esc_html( $status_label ); ?></span>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Car', 'maneli-car-inquiry' ); ?>">
+				<?php echo esc_html( $car_name ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Down Payment', 'maneli-car-inquiry' ); ?>">
+				<?php echo $down_payment ? esc_html( maneli_format_price( $down_payment ) ) : esc_html__( 'N/A', 'maneli-car-inquiry' ); ?>
+			</td>
+			<td data-title="<?php esc_attr_e( 'Actions', 'maneli-car-inquiry' ); ?>">
+				<a href="<?php echo esc_url( $report_url ); ?>" class="button view"><?php esc_html_e( 'View Details', 'maneli-car-inquiry' ); ?></a>
+			</td>
+		</tr>
+		<?php
+	}
+
+	/**
+	 * Renders the HTML for a single, formatted meta detail row.
+	 *
+	 * @param string $label The display label for the detail.
+	 * @param string $value The value of the detail.
+	 * @param string $data_key Optional data key for attributes.
+	 * @return string The HTML output.
+	 */
+	public static function render_meta_detail_row( $label, $value, $data_key = '' ) {
+		$data_attr = $data_key ? ' data-key="' . esc_attr( $data_key ) . '"' : '';
+		return sprintf(
+			'<div class="maneli-report-meta-item" %s>
+				<span class="maneli-report-meta-label">%s:</span>
+				<span class="maneli-report-meta-value">%s</span>
+			</div>',
+			$data_attr, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			esc_html( $label ),
+			wp_kses_post( $value )
+		);
+	}
 }

@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.2 (Complete implementation and security checks)
+ * @version 1.0.3 (Added ajax_delete_inquiry for installment requests)
  */
 
 if (!defined('ABSPATH')) {
@@ -15,9 +15,10 @@ if (!defined('ABSPATH')) {
 class Maneli_Ajax_Handler {
 
     public function __construct() {
-        // Inquiry Details & List Filtering
+        // Inquiry Details, List Filtering & Actions (Installment)
         add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
         add_action('wp_ajax_maneli_filter_inquiries_ajax', [$this, 'ajax_filter_inquiries']);
+        add_action('wp_ajax_maneli_delete_inquiry', [$this, 'ajax_delete_inquiry']); // ADDED: Installment Inquiry Delete
 
         // Cash Inquiry Actions & List Filtering
         add_action('wp_ajax_maneli_get_cash_inquiry_details', [$this, 'ajax_get_cash_inquiry_details']);
@@ -161,6 +162,29 @@ class Maneli_Ajax_Handler {
         ]);
     
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
+    }
+    
+    /**
+     * Handles deletion of an installment inquiry post via AJAX.
+     */
+    public function ajax_delete_inquiry() {
+        check_ajax_referer('maneli_inquiry_delete_nonce', 'nonce');
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        if (wp_delete_post($inquiry_id, true)) {
+            wp_send_json_success(['message' => esc_html__('Inquiry deleted successfully.', 'maneli-car-inquiry')]);
+        } else {
+            wp_send_json_error(['message' => esc_html__('Error deleting inquiry.', 'maneli-car-inquiry')]);
+        }
     }
 
     //======================================================================
@@ -543,7 +567,7 @@ class Maneli_Ajax_Handler {
     public function ajax_update_product_data() {
         check_ajax_referer('maneli_product_data_nonce', 'nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;

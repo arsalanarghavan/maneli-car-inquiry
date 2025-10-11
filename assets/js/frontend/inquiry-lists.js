@@ -5,7 +5,7 @@
  *
  * این فایل منطق فیلترینگ AJAX که در نسخه اصلی حذف شده بود را پیاده‌سازی می‌کند.
  *
- * @version 1.0.2 (Fixed AJAX Filtering & Added Localization for JS strings, Fixed data-title issue)
+ * @version 1.0.3 (Added list and report deletion logic for both inquiry types)
  */
 jQuery(document).ready(function($) {
     'use strict';
@@ -167,47 +167,6 @@ jQuery(document).ready(function($) {
     });
 
     /**
-     * Handles the 'Delete' button click for a cash inquiry.
-     */
-    $(document.body).on('click', '#delete-cash-inquiry-btn', function() {
-        const button = $(this);
-        const inquiryId = button.closest('#cash-inquiry-details').data('inquiry-id');
-        const backUrl = $('.report-back-button-wrapper a').attr('href');
-        const originalText = button.text();
-
-        Swal.fire({
-            title: getText('confirm_delete_title'),
-            text: getText('confirm_delete_text'),
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: getText('confirm_button'),
-            cancelButtonText: getText('cancel_button')
-        }).then((result) => {
-            if (result.isConfirmed) {
-                button.prop('disabled', true).text('...');
-                $.post(maneliInquiryLists.ajax_url, {
-                    action: 'maneli_delete_cash_inquiry',
-                    nonce: maneliInquiryLists.nonces.cash_delete,
-                    inquiry_id: inquiryId
-                }, function(response) {
-                    if (response.success) {
-                        Swal.fire(getText('delete_title'), response.data.message, 'success').then(() => {
-                            if (backUrl) window.location.href = backUrl;
-                        });
-                    } else {
-                        Swal.fire(getText('error'), response.data.message, 'error');
-                        button.prop('disabled', false).text(originalText);
-                    }
-                }).fail(function() {
-                    Swal.fire(getText('error'), getText('server_error'), 'error');
-                    button.prop('disabled', false).text(originalText);
-                });
-            }
-        });
-    });
-
-    /**
      * Handles the 'Set Down Payment' button click for a cash inquiry.
      */
     $(document.body).on('click', '#set-downpayment-btn', function() {
@@ -310,15 +269,113 @@ jQuery(document).ready(function($) {
         });
     });
     
+    // ----------------------------------------------------------------------
+    // UNIVERSAL DELETION LOGIC (LISTS AND REPORTS)
+    // ----------------------------------------------------------------------
+
+    /**
+     * Handles the 'Delete' button click for both cash and installment inquiries from the LIST PAGE.
+     * Selectors: .delete-cash-list-btn, .delete-installment-list-btn
+     */
+    $(document.body).on('click', '.delete-cash-list-btn, .delete-installment-list-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        // Determine type based on which class was clicked
+        const inquiryType = button.hasClass('delete-installment-list-btn') ? 'installment' : 'cash'; 
+        
+        const ajaxAction = (inquiryType === 'cash') ? 'maneli_delete_cash_inquiry' : 'maneli_delete_inquiry';
+        const nonce = (inquiryType === 'cash') ? maneliInquiryLists.nonces.cash_delete : maneliInquiryLists.nonces.inquiry_delete;
+        const originalText = button.text();
+
+        Swal.fire({
+            title: getText('delete_list_title'), 
+            text: getText('delete_list_text'),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: getText('confirm_button'),
+            cancelButtonText: getText('cancel_button')
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.prop('disabled', true).text('...');
+                $.post(maneliInquiryLists.ajax_url, {
+                    action: ajaxAction,
+                    nonce: nonce,
+                    inquiry_id: inquiryId
+                }, function(response) {
+                    if (response.success) {
+                        // Remove the row from the table
+                        button.closest('tr').fadeOut(400, function() {
+                            $(this).remove();
+                        });
+                        Swal.fire(getText('delete_title'), response.data.message || 'Request deleted.', 'success');
+                    } else {
+                        Swal.fire(getText('error'), response.data.message, 'error');
+                        button.prop('disabled', false).text(originalText);
+                    }
+                }).fail(function() {
+                    Swal.fire(getText('error'), getText('server_error'), 'error');
+                    button.prop('disabled', false).text(originalText);
+                });
+            }
+        });
+    });
+
+    /**
+     * Handles the 'Delete Request' button click for both cash and installment inquiries from the REPORT PAGE.
+     * Selector: .delete-inquiry-report-btn
+     * This handler is more generic and ensures redirection to the list page after deletion.
+     */
+    $(document.body).on('click', '.delete-inquiry-report-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        const inquiryType = button.data('inquiry-type');
+        const backUrl = $('.report-back-button-wrapper a').attr('href'); 
+        
+        const ajaxAction = (inquiryType === 'cash') ? 'maneli_delete_cash_inquiry' : 'maneli_delete_inquiry';
+        const nonce = (inquiryType === 'cash') ? maneliInquiryLists.nonces.cash_delete : maneliInquiryLists.nonces.inquiry_delete;
+        const originalText = button.text();
+
+        Swal.fire({
+            title: getText('confirm_delete_title'), // Using the general report confirmation title
+            text: getText('confirm_delete_text'),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: getText('confirm_button'),
+            cancelButtonText: getText('cancel_button')
+        }).then((result) => {
+            if (result.isConfirmed) {
+                button.prop('disabled', true).text('...');
+                $.post(maneliInquiryLists.ajax_url, {
+                    action: ajaxAction,
+                    nonce: nonce,
+                    inquiry_id: inquiryId
+                }, function(response) {
+                    if (response.success) {
+                        Swal.fire(getText('delete_title'), response.data.message || 'Request deleted.', 'success').then(() => {
+                            if (backUrl) window.location.href = backUrl; // Redirect to list on successful deletion
+                        });
+                    } else {
+                        Swal.fire(getText('error'), response.data.message, 'error');
+                        button.prop('disabled', false).text(originalText);
+                    }
+                }).fail(function() {
+                    Swal.fire(getText('error'), getText('server_error'), 'error');
+                    button.prop('disabled', false).text(originalText);
+                });
+            }
+        });
+    });
+
+
     /**
      * Handles the 'Approve' button click for an installment inquiry (on the report page).
-     * This uses a separate action from the lists and also handles expert assignment via modal.
+     * This action is decoupled and submits the hidden admin form.
      */
     $(document.body).on('click', '.confirm-inquiry-btn', function() {
         const button = $(this);
         const inquiryId = button.data('inquiry-id');
-        const inquiryType = button.data('inquiry-type');
-        const nextStatus = button.data('next-status'); // Should be 'user_confirmed'
         
         // Clone the expert filter (only present for admins, not experts)
         const expertFilterSelector = '#expert-filter';
@@ -333,12 +390,12 @@ jQuery(document).ready(function($) {
 
         Swal.fire({
             title: `${getText('assign_title')} #${inquiryId}`,
-            text: getText('approval_prompt'),
             html: `<div style="text-align: right; font-family: inherit;">
+                     <p style="margin-bottom: 15px;">${getText('confirm_delete_title')}</p>
                      <label for="swal-expert-filter-approve" style="display: block; margin-bottom: 10px;">${getText('assign_label')}</label>
                      ${expertOptionsHTML}
                    </div>`,
-            confirmButtonText: getText('confirm_approval_button'),
+            confirmButtonText: getText('assign_button'),
             showCancelButton: true,
             cancelButtonText: getText('cancel_button'),
              didOpen: () => {
@@ -356,15 +413,11 @@ jQuery(document).ready(function($) {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                const originalText = button.text();
-                button.prop('disabled', true).text('...');
-                
                 // Submit the main hidden form with the chosen expert
                 const form = $('#admin-action-form');
                 $('#final-status-input').val('approved');
                 $('#assigned-expert-input').val(result.value);
                 form.submit();
-                
             }
         });
     });
@@ -375,7 +428,6 @@ jQuery(document).ready(function($) {
     $(document.body).on('click', '.reject-inquiry-btn', function() {
         const button = $(this);
         const inquiryId = button.data('inquiry-id');
-        const originalText = button.text();
         
         // Use installment_rejection_reasons for installment inquiry rejection
         let reasonOptions = `<option value="">${getText('reject_option_default')}</option>`;
@@ -428,7 +480,6 @@ jQuery(document).ready(function($) {
     const installmentFilterForm = $('#maneli-inquiry-filter-form');
     const cashFilterForm = $('#maneli-cash-inquiry-filter-form');
     
-    let filterForm = installmentFilterForm.length ? installmentFilterForm : cashFilterForm;
     let listType = installmentFilterForm.length ? 'installment' : (cashFilterForm.length ? 'cash' : null);
 
     if (listType) {
