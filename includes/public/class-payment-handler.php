@@ -6,7 +6,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.3 (Sadad API Refactored to wp_remote_post)
+ * @version 1.0.4 (Added payment verification security checks)
  */
 
 if (!defined('ABSPATH')) {
@@ -212,6 +212,7 @@ class Maneli_Payment_Handler {
         $authority = sanitize_text_field($_GET['Authority']);
         $status = sanitize_text_field($_GET['Status']);
         $user_id = intval($_GET['uid']);
+        $current_user_id = get_current_user_id();
 
         $options = get_option('maneli_inquiry_all_options', []);
         $merchant_id = $options['zarinpal_merchant_code'] ?? '';
@@ -222,6 +223,12 @@ class Maneli_Payment_Handler {
         $redirect_url = ($payment_type === 'cash_down_payment')
             ? home_url('/dashboard/?endp=inf_menu_4')
             : home_url('/dashboard/?endp=inf_menu_1');
+
+        // SECURITY CHECK: Ensure the current logged-in user matches the transaction user, if logged in.
+        if (is_user_logged_in() && $current_user_id !== $user_id) {
+             $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'maneli-car-inquiry'));
+             return;
+        }
 
         if ($authority !== $saved_authority) {
             $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Transaction details mismatch.', 'maneli-car-inquiry'));
@@ -323,12 +330,19 @@ class Maneli_Payment_Handler {
         $order_id = sanitize_text_field($_POST["OrderId"]);
         $res_code = sanitize_text_field($_POST["ResCode"]);
         $user_id_parts = explode('-', $order_id);
-        $user_id = end($user_id_parts);
+        $user_id = intval(end($user_id_parts));
+        $current_user_id = get_current_user_id();
         $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
     
         $redirect_url = ($payment_type === 'cash_down_payment')
             ? home_url('/dashboard/?endp=inf_menu_4')
             : home_url('/dashboard/?endp=inf_menu_1');
+        
+        // SECURITY CHECK: Ensure the current logged-in user matches the transaction user, if logged in.
+        if (is_user_logged_in() && $current_user_id !== $user_id) {
+             $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'maneli-car-inquiry'));
+             return;
+        }
     
         if ($res_code == 0) {
             if (empty($_POST["token"])) {

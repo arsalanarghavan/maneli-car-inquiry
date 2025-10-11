@@ -5,7 +5,7 @@
  *
  * این فایل منطق فیلترینگ AJAX که در نسخه اصلی حذف شده بود را پیاده‌سازی می‌کند.
  *
- * @version 1.0.1 (Fixed AJAX Filtering & Added Localization for JS strings)
+ * @version 1.0.2 (Fixed AJAX Filtering & Added Localization for JS strings, Fixed data-title issue)
  */
 jQuery(document).ready(function($) {
     'use strict';
@@ -31,6 +31,13 @@ jQuery(document).ready(function($) {
         
         // Clone the appropriate expert filter dropdown from the page to use in the modal
         const expertFilterSelector = (inquiryType === 'cash') ? '#cash-expert-filter' : '#expert-filter';
+        
+        // Ensure expert filter exists (might be missing if user is expert and only sees their own list)
+        if (!$(expertFilterSelector).length) {
+            Swal.fire(getText('error'), getText('no_experts_available'), 'error');
+            return;
+        }
+
         const expertOptionsHTML = $(expertFilterSelector)
             .clone()
             .prop('id', 'swal-expert-filter')
@@ -78,10 +85,16 @@ jQuery(document).ready(function($) {
                                location.reload();
                            } else {
                                // If on a list, update the table row directly.
-                               button.closest('td').html(response.data.expert_name);
+                               const row = button.closest('tr');
+                               // Update Assigned Expert column: Find TD based on its class
+                               // Note: The helper uses class="assign-expert-cell" in its output (in a robust version).
+                               // For now, we update the button's parent TD.
+                               button.parent().html(response.data.expert_name);
                                if (response.data.new_status_label) {
-                                   // Note: The data-title is still hardcoded in the template, but the content is now dynamically updated.
-                                   button.closest('tr').find('td[data-title="وضعیت"]').text(response.data.new_status_label);
+                                   // Update Status column: Find TD with status-cell class
+                                   // This uses a robust way to find the status column's cell for either list.
+                                   const statusCell = row.find('.inquiry-status-cell-installment, .inquiry-status-cell-cash');
+                                   statusCell.text(response.data.new_status_label);
                                }
                            }
                         });
@@ -296,6 +309,116 @@ jQuery(document).ready(function($) {
             }
         });
     });
+    
+    /**
+     * Handles the 'Approve' button click for an installment inquiry (on the report page).
+     * This uses a separate action from the lists and also handles expert assignment via modal.
+     */
+    $(document.body).on('click', '.confirm-inquiry-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        const inquiryType = button.data('inquiry-type');
+        const nextStatus = button.data('next-status'); // Should be 'user_confirmed'
+        
+        // Clone the expert filter (only present for admins, not experts)
+        const expertFilterSelector = '#expert-filter';
+        const expertOptionsHTML = $(expertFilterSelector).length ? 
+            $(expertFilterSelector)
+                .clone()
+                .prop('id', 'swal-expert-filter-approve')
+                .prepend(`<option value="auto">${getText('auto_assign')}</option>`)
+                .val('auto')
+                .get(0).outerHTML
+            : `<input type="hidden" id="swal-expert-filter-approve" value="auto">`; // Default to auto-assign if admin is not available/only expert is viewing
+
+        Swal.fire({
+            title: `${getText('assign_title')} #${inquiryId}`,
+            text: getText('approval_prompt'),
+            html: `<div style="text-align: right; font-family: inherit;">
+                     <label for="swal-expert-filter-approve" style="display: block; margin-bottom: 10px;">${getText('assign_label')}</label>
+                     ${expertOptionsHTML}
+                   </div>`,
+            confirmButtonText: getText('confirm_approval_button'),
+            showCancelButton: true,
+            cancelButtonText: getText('cancel_button'),
+             didOpen: () => {
+                 // Initialize Select2 in the modal only if the select element is present
+                 if($('#swal-expert-filter-approve').is('select')) {
+                     $('#swal-expert-filter-approve').select2({
+                         placeholder: getText('select_expert_placeholder'),
+                         allowClear: false,
+                         width: '100%'
+                    });
+                 }
+            },
+            preConfirm: () => {
+                return $('#swal-expert-filter-approve').val();
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const originalText = button.text();
+                button.prop('disabled', true).text('...');
+                
+                // Submit the main hidden form with the chosen expert
+                const form = $('#admin-action-form');
+                $('#final-status-input').val('approved');
+                $('#assigned-expert-input').val(result.value);
+                form.submit();
+                
+            }
+        });
+    });
+
+    /**
+     * Handles the 'Reject' button click for an installment inquiry (on the report page).
+     */
+    $(document.body).on('click', '.reject-inquiry-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        const originalText = button.text();
+        
+        // Use installment_rejection_reasons for installment inquiry rejection
+        let reasonOptions = `<option value="">${getText('reject_option_default')}</option>`;
+        if(maneliInquiryLists.installment_rejection_reasons && maneliInquiryLists.installment_rejection_reasons.length > 0) {
+            maneliInquiryLists.installment_rejection_reasons.forEach(reason => {
+                reasonOptions += `<option value="${reason}">${reason}</option>`;
+            });
+        }
+        reasonOptions += `<option value="custom">${getText('reject_option_custom')}</option>`;
+
+        Swal.fire({
+            title: `${getText('reject_title')} #${inquiryId}`,
+            html: `<div style="text-align: right; font-family: inherit;">
+                     <label for="swal-rejection-reason-select" style="display: block; margin-bottom: 10px;">${getText('reject_label')}</label>
+                     <select id="swal-rejection-reason-select" class="swal2-select" style="width: 100%;">${reasonOptions}</select>
+                     <textarea id="swal-rejection-reason-custom" class="swal2-textarea" placeholder="${getText('reject_placeholder_custom')}" style="display: none; margin-top: 10px;"></textarea>
+                   </div>`,
+            confirmButtonText: getText('reject_submit_button'),
+            showCancelButton: true,
+            cancelButtonText: getText('cancel_button'),
+            didOpen: () => {
+                $('#swal-rejection-reason-select').on('change', function() {
+                    $('#swal-rejection-reason-custom').toggle($(this).val() === 'custom');
+                });
+            },
+            preConfirm: () => {
+                const select = $('#swal-rejection-reason-select');
+                let reason = select.val() === 'custom' ? $('#swal-rejection-reason-custom').val() : select.val();
+                if (!reason) {
+                    Swal.showValidationMessage(getText('rejection_reason_required'));
+                }
+                return reason;
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                 const form = $('#admin-action-form');
+                 // Set hidden fields and submit the form via admin-post.php
+                 $('#final-status-input').val('rejected');
+                 $('#rejection-reason-input').val(result.value);
+                 form.submit();
+            }
+        });
+    });
 
     //======================================================================
     //  AJAX LIST FILTERING & PAGINATION (IMPLEMENTATION OF MISSING LOGIC)
@@ -402,19 +525,6 @@ jQuery(document).ready(function($) {
         
         // Handle expert filter change (using change event on the original select element)
         expertFilter.on('change', function() { fetchInquiries(1); });
-
-        // Re-bind the change event for Select2 wrapper for proper functionality
-        if (expertFilter.hasClass('maneli-select2')) {
-            // Because Select2 generates a new structure, we listen to the change event on the body 
-            // and filter for the specific element inside the wrapper.
-             $(document.body).on('change', '.select2-container', function(e) {
-                // Only act if the change event bubbled up from the target select
-                if ($(e.target).is(expertFilter)) {
-                    fetchInquiries(1);
-                }
-            });
-        }
-
 
         // Handle pagination clicks using event delegation
         paginationWrapper.on('click', 'a.page-numbers', function(e) {

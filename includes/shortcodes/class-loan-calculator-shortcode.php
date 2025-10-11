@@ -24,21 +24,23 @@ class Maneli_Loan_Calculator_Shortcode {
      * and AJAX settings if the shortcode is present on the page.
      */
     public function enqueue_calculator_assets() {
+        // اطمینان از اینکه اسکریپت فقط در صفحات محصول یا صفحاتی که شورت‌کد در آن هست بارگذاری شود.
         if (!is_product() && !has_shortcode(get_post(get_the_ID())->post_content, 'loan_calculator')) {
             return;
         }
 
         $options = get_option('maneli_inquiry_all_options', []);
         
-        // Fetch configurable interest rate (NEW)
+        // Fetch configurable interest rate 
         $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
         
         // Standard calculator JS enqueue
+        // از آنجایی که این کلاس مسئولیت بارگذاری اسکریپت را بر عهده دارد، باید مسیر و نسخه را به درستی مشخص کند.
         wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], '1.0.0', true);
         
         // Localize script with AJAX info and the configurable rate
         $localize_data = [
-            'interestRate' => $interest_rate, // NEW: Pass the monthly rate
+            'interestRate' => $interest_rate, // پاس دادن نرخ سود ماهانه
         ];
         
         if (is_user_logged_in()) {
@@ -52,12 +54,11 @@ class Maneli_Loan_Calculator_Shortcode {
 
     /**
      * Main render method for the [loan_calculator] shortcode.
-     * It validates the context and delegates rendering to template files.
      *
      * @return string The HTML output for the shortcode.
      */
     public function render_shortcode() {
-        // Ensure this shortcode only runs on a single product page.
+        // اطمینان از اجرا شدن فقط در صفحه محصول
         if (!function_exists('is_product') || !is_product() || !function_exists('WC')) {
             return '';
         }
@@ -68,14 +69,14 @@ class Maneli_Loan_Calculator_Shortcode {
 
         ob_start();
 
-        // Display a success message if a cash inquiry was just sent.
+        // نمایش پیام موفقیت‌آمیز بودن ارسال استعلام نقدی
         if (isset($_GET['cash_inquiry_sent']) && $_GET['cash_inquiry_sent'] === 'true') {
             maneli_get_template_part('public/cash-inquiry-success-message');
         }
 
         $car_status = get_post_meta($product->get_id(), '_maneli_car_status', true);
 
-        // If the car is marked as 'unavailable', show a specific message and a disabled calculator.
+        // اگر وضعیت خودرو 'unavailable' باشد، یک پیام و ماشین حساب غیرفعال نمایش داده می‌شود.
         if ($car_status === 'unavailable') {
             $options = get_option('maneli_inquiry_all_options', []);
             $message = $options['unavailable_product_message'] ?? esc_html__('This car is currently unavailable for purchase.', 'maneli-car-inquiry');
@@ -85,7 +86,7 @@ class Maneli_Loan_Calculator_Shortcode {
             return ob_get_clean();
         }
 
-        // Prepare data to be passed to the template files.
+        // آماده‌سازی داده‌ها برای ارسال به تمپلیت
         $cash_price = (int)$product->get_regular_price();
         $installment_price = (int)get_post_meta($product->get_id(), 'installment_price', true);
         if (empty($installment_price)) {
@@ -100,11 +101,11 @@ class Maneli_Loan_Calculator_Shortcode {
             'cash_price'        => $cash_price,
             'installment_price' => $installment_price,
             'min_down_payment'  => (int)get_post_meta($product->get_id(), 'min_downpayment', true),
-            'max_down_payment'  => (int)($installment_price * 0.8), // 80% of the price
+            'max_down_payment'  => (int)($installment_price * 0.8), // ۸۰٪ از قیمت کل
             'car_colors'        => $car_colors,
         ];
         
-        // Render the main calculator container with its tabs and content.
+        // رندر کردن کانتینر اصلی ماشین حساب با تب‌ها و محتوای آن
         maneli_get_template_part('shortcodes/calculator/main-container', $template_args);
 
         return ob_get_clean();

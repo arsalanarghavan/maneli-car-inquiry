@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.2 (Configurable loan interest rate implementation)
+ * @version 1.0.3 (Configurable loan interest rate implementation & Expert meta cleanup)
  */
 
 if (!defined('ABSPATH')) {
@@ -229,6 +229,9 @@ class Maneli_Admin_Actions_Handler {
             update_post_meta($post_id, 'inquiry_status', 'user_confirmed'); 
         }
         
+        // 7. Cleanup temporary user meta (FIX: Important cleanup)
+        $this->cleanup_user_meta($customer_id);
+
         // --- Inquiry Creation Logic END ---
 
         $redirect_url = add_query_arg('inquiry_created', '1', wp_get_referer());
@@ -499,5 +502,22 @@ class Maneli_Admin_Actions_Handler {
         }
         
         return $meta_map;
+    }
+    
+    /**
+     * Cleans up all temporary meta fields from the user's profile after inquiry creation.
+     */
+    private function cleanup_user_meta($user_id) {
+        $keys_to_delete = [
+            'maneli_inquiry_down_payment', 
+            'maneli_inquiry_term_months',
+            'maneli_inquiry_total_price',
+            'maneli_inquiry_step', 
+            'maneli_selected_car_id', 
+            'maneli_temp_inquiry_data'
+        ];
+        foreach ($keys_to_delete as $key) {
+            delete_user_meta($user_id, $key);
+        }
     }
 }

@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Removed duplicate calculator assets loading)
  */
 
 if (!defined('ABSPATH')) {
@@ -53,25 +53,13 @@ class Maneli_Shortcode_Handler {
 
         // Get file modification times for cache busting
         $css_version = filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css');
-        $js_version = filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/calculator.js');
 
         // Global styles and libraries
         wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
         wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', [], null, true);
 
-        // Conditionally load assets for the product page calculator
-        if (is_product()) {
-            wp_enqueue_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], $js_version, true);
-            
-            if (is_user_logged_in()) {
-                wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', [
-                    'ajax_url'         => admin_url('admin-ajax.php'),
-                    'inquiry_page_url' => home_url('/dashboard/?endp=inf_menu_1'),
-                    'nonce'            => wp_create_nonce('maneli_ajax_nonce')
-                ]);
-            }
-        }
+        // نکته: بلوک قبلی بارگذاری assets/js/calculator.js که تکراری بود، از اینجا حذف شد.
         
         // Conditionally load assets for pages containing specific shortcodes that need Select2
         global $post;
