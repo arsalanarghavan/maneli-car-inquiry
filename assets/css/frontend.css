@@ -433,14 +433,19 @@
 .issuer-choice-wrapper .form-group-radio input {
     margin-left: 5px;
 }
+/* === NEW STYLES FOR FORM TITLES === */
 .form-section-title {
     font-size: 16px;
     font-weight: bold;
-    border-top: 1px solid #ddd;
-    padding-top: 20px;
     margin-top: 30px;
     margin-bottom: 20px;
+    background-color: var(--theme-blue);
+    color: #fff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: none; /* remove previous top border */
 }
+/* === END NEW STYLES === */
 
 /* Progress Tracker Styles */
 .progress-tracker { max-width: 800px; margin-left: auto; margin-right: auto; display: flex; justify-content: space-between; position: relative; margin-bottom: 50px; padding-bottom: 20px; }
