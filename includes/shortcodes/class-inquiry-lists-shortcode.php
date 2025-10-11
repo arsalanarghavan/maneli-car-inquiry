@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Shortcodes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.0
+ * @version 1.0.1 (Removed dependency on obsolete customer installment report template)
  */
 
 if (!defined('ABSPATH')) {
@@ -141,6 +141,7 @@ class Maneli_Inquiry_Lists_Shortcode {
             return maneli_get_template_part('shortcodes/inquiry-lists/report-admin-installment', ['inquiry_id' => $inquiry_id], false);
         } else {
             // Customers see the final step of the form process as their report.
+            // FIX: Ensure this points to the correct, modern template and bypasses the old, buggy one.
             return maneli_get_template_part('shortcodes/inquiry-form/step-5-final-report', ['inquiry_id' => $inquiry_id], false);
         }
     }

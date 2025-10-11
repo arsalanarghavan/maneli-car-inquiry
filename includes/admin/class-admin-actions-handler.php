@@ -117,7 +117,7 @@ class Maneli_Admin_Actions_Handler {
 
     /**
      * Handles inquiry creation by an expert or admin from the frontend form.
-     * **FIXED:** Missing post creation and meta saving logic completed here.
+     * **FIXED:** Role demotion bug corrected.
      */
     public function handle_expert_create_inquiry() {
         check_admin_referer('maneli_expert_create_nonce');
@@ -143,21 +143,37 @@ class Maneli_Admin_Actions_Handler {
 
         if (!$customer_id) $customer_id = email_exists($dummy_email);
 
+        $is_new_user = false;
         if (!$customer_id) {
             $random_password = wp_generate_password(12, false);
             $customer_id = wp_create_user($mobile_number, $random_password, $dummy_email);
             if (is_wp_error($customer_id)) {
                 wp_die(esc_html__('Error creating new user: ', 'maneli-car-inquiry') . $customer_id->get_error_message());
             }
+            $is_new_user = true;
         }
         
-        // Update user data regardless of whether they are new or existing
-        wp_update_user([
+        // --- FIX FOR ROLE DEMOTION BUG ---
+        $current_user_roles = [];
+        if ($customer_id > 0) {
+            $current_user = get_userdata($customer_id);
+            $current_user_roles = $current_user ? $current_user->roles : [];
+        }
+
+        $user_update_data = [
             'ID'         => $customer_id,
             'first_name' => sanitize_text_field($_POST['first_name']),
             'last_name'  => sanitize_text_field($_POST['last_name']),
-            'role'       => 'customer'
-        ]);
+        ];
+
+        // Only set the role to 'customer' if the user is new or currently has no role/is only a customer.
+        if ($is_new_user || empty($current_user_roles) || (count($current_user_roles) === 1 && $current_user_roles[0] === 'customer')) {
+            $user_update_data['role'] = 'customer';
+        }
+
+        // Update user data regardless of whether they are new or existing
+        wp_update_user($user_update_data);
+        // --- END FIX ---
 
         // Update customer meta with the provided data
         $this->update_customer_meta($customer_id, $_POST);
@@ -229,7 +245,7 @@ class Maneli_Admin_Actions_Handler {
             update_post_meta($post_id, 'inquiry_status', 'user_confirmed'); 
         }
         
-        // 7. Cleanup temporary user meta (FIX: Important cleanup)
+        // 7. Cleanup temporary user meta
         $this->cleanup_user_meta($customer_id);
 
         // --- Inquiry Creation Logic END ---
@@ -275,7 +291,7 @@ class Maneli_Admin_Actions_Handler {
 
         if (isset($_POST['user_role'])) {
             $new_role = sanitize_key($_POST['user_role']);
-            if (in_array($new_role, ['customer', 'maneli_expert', 'maneli_admin'], true)) {
+            if (in_array($new_role, ['customer', 'maneli_expert', 'maneli_admin', 'administrator'], true)) {
                 $user_data['role'] = $new_role;
             }
         }

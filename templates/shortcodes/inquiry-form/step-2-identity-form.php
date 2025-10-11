@@ -7,7 +7,7 @@
  *
  * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryForm
  * @author  Gemini
- * @version 1.0.1 (Added default selection for issuer type)
+ * @version 1.0.2 (Security fix for $car_image_html escaping)
  *
  * @var int      $user_id             The current user's ID.
  * @var WP_User  $user_info           The current user's object.
@@ -41,7 +41,7 @@ $loan_amount = (int)$total_price - (int)$down_payment;
         </table>
     </div>
     <div class="inquiry-car-image">
-        <?php echo $car_image_html; // This is already prepared HTML, so no need for escaping here. ?>
+        <?php echo wp_kses_post($car_image_html); // FIX: Ensuring image HTML is safely escaped ?>
     </div>
 </div>
 

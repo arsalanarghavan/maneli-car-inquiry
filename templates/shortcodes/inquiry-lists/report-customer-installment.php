@@ -2,11 +2,12 @@
 /**
  * Template for the Customer's view of a single Installment Inquiry Report (Final Step).
  *
- * This template displays the final result of an installment inquiry to the customer.
+ * این تمپلیت برای سازگاری با تمپلیت اصلی گزارش نهایی مشتری (step-5-final-report.php) و استفاده از تابع
+ * کمکی Maneli_Render_Helpers::render_cheque_status_info برای نمایش وضعیت اعتبارسنجی، یکسان سازی شده است.
  *
  * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryLists
  * @author  Gemini
- * @version 1.0.0
+ * @version 1.0.1 (Unified with step-5-final-report)
  *
  * @var int $inquiry_id The ID of the inquiry post.
  */
@@ -15,6 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Fetch all necessary data for the report
 $status = get_post_meta($inquiry_id, 'inquiry_status', true);
 $post_meta = get_post_meta($inquiry_id);
 $product_id = $post_meta['product_id'][0] ?? 0;
@@ -22,6 +24,9 @@ $car_name = get_the_title($product_id);
 $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
 $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
 ?>
+
+<h3><?php esc_html_e('Step 5: Final Result', 'maneli-car-inquiry'); ?></h3>
+
 <div class="customer-report">
     <?php if ($status === 'user_confirmed'): ?>
         <div class="status-box status-final">
@@ -61,26 +66,9 @@ $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
                     <td><?php esc_html_e('Bank inquiry was not performed.', 'maneli-car-inquiry'); ?></td>
                 </tr>
             </table>
-        <?php else: ?>
-            <div class="maneli-status-bar">
-                <?php
-                // Same color bar logic as before
-                ?>
-            </div>
-            <table class="summary-table" style="margin-top:20px;">
-                <?php
-                // Same cheque color map logic as before
-                $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
-                ?>
-                <tr>
-                    <td><strong><?php esc_html_e('Sayad Cheque Status:', 'maneli-car-inquiry'); ?></strong></td>
-                    <td><strong class="cheque-color-<?php echo esc_attr($cheque_color_code); ?>"><?php echo esc_html($color_info['text']); ?></strong></td>
-                </tr>
-                <tr>
-                    <td><strong><?php esc_html_e('Status Explanation:', 'maneli-car-inquiry'); ?></strong></td>
-                    <td><?php echo esc_html($color_info['desc']); ?></td>
-                </tr>
-            </table>
-        <?php endif; ?>
+        <?php else:
+            // استفاده از تابع کمکی برای نمایش نوار وضعیت
+            echo Maneli_Render_Helpers::render_cheque_status_info($cheque_color_code);
+        endif; ?>
     </div>
 </div>

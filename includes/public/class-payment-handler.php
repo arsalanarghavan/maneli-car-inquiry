@@ -6,7 +6,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.4 (Added payment verification security checks)
+ * @version 1.0.5 (Sadad API fix - unnecessary conditional removed)
  */
 
 if (!defined('ABSPATH')) {
@@ -417,7 +417,7 @@ class Maneli_Payment_Handler {
 
     /**
      * FIX: Sadad API helper: Makes a request to the API using wp_remote_post.
-     * This replaces the use of cURL with the standard WordPress HTTP API.
+     * This replaces the use of cURL with the standard WordPress HTTP API and removes redundant conditional logic.
      */
     private function sadad_call_api($url, $data = false) {
         $args = [
@@ -425,13 +425,12 @@ class Maneli_Payment_Handler {
             'timeout' => 30,
         ];
         
+        // The body is encoded only if data is present.
         if ($data) {
             $args['body'] = json_encode($data);
-            $response = wp_remote_post($url, $args);
-        } else {
-             // In Sadad's case, all calls are POST, but maintaining a robust structure.
-             $response = wp_remote_post($url, $args);
         }
+        
+        $response = wp_remote_post($url, $args);
 
         if (is_wp_error($response)) {
              error_log('Maneli Sadad API Error: ' . $response->get_error_message());
