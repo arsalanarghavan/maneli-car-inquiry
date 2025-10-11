@@ -694,22 +694,26 @@ class Maneli_Inquiry_Lists_Shortcode {
             
             <div class="report-box">
                 <h3 class="report-box-title">اطلاعات خودرو و شرایط اقساط</h3>
-                <div class="report-car-image">
-                    <?php
-                    if ($product_id && has_post_thumbnail($product_id)) {
-                        echo get_the_post_thumbnail($product_id, 'medium');
-                    }
-                    ?>
+                <div class="report-box-flex">
+                    <div class="report-car-image">
+                        <?php
+                        if ($product_id && has_post_thumbnail($product_id)) {
+                            echo get_the_post_thumbnail($product_id, 'medium');
+                        }
+                        ?>
+                    </div>
+                    <div class="report-details-table">
+                        <table class="summary-table">
+                            <tbody>
+                                <tr><th>خودروی انتخابی</th><td><?php echo get_the_title($product_id); ?></td></tr>
+                                <tr><th>قیمت کل</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0))); ?></td></tr>
+                                <tr><th>مقدار پیش پرداخت</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0))); ?></td></tr>
+                                <tr><th>تعداد اقساط</th><td><?php printf('%s <span>ماهه</span>', esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0)); ?></td></tr>
+                                <tr><th>مبلغ هر قسط</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0))); ?></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <table class="summary-table">
-                    <tbody>
-                        <tr><th>خودروی انتخابی</th><td><?php echo get_the_title($product_id); ?></td></tr>
-                        <tr><th>قیمت کل</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0))); ?></td></tr>
-                        <tr><th>مقدار پیش پرداخت</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0))); ?></td></tr>
-                        <tr><th>تعداد اقساط</th><td><?php printf('%s <span>ماهه</span>', esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0)); ?></td></tr>
-                        <tr><th>مبلغ هر قسط</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0))); ?></td></tr>
-                    </tbody>
-                </table>
             </div>
 
             <div class="report-box">
@@ -964,24 +968,33 @@ class Maneli_Inquiry_Lists_Shortcode {
 
             <div class="report-box">
                 <h3 class="report-box-title">اطلاعات درخواست</h3>
-                <table class="summary-table">
-                    <tbody>
-                        <tr><th>مشتری</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true)); ?></td></tr>
-                        <tr><th>شماره موبایل</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td></tr>
-                        <tr><th>خودرو</th><td><?php echo esc_html(get_the_title($product_id)); ?></td></tr>
-                        <tr><th>رنگ درخواستی</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
-                        <?php 
-                        $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
-                        if (!empty($down_payment)): ?>
-                            <tr><th>مبلغ پیش‌پرداخت</th><td><?php echo number_format_i18n($down_payment) . ' تومان'; ?></td></tr>
+                <div class="report-box-flex">
+                     <div class="report-car-image">
+                        <?php if ($product_id && has_post_thumbnail($product_id)): ?>
+                            <?php echo get_the_post_thumbnail($product_id, 'medium'); ?>
                         <?php endif; ?>
-                         <?php 
-                        $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
-                        if (!empty($rejection_reason)): ?>
-                            <tr><th>دلیل رد</th><td><?php echo esc_html($rejection_reason); ?></td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                    </div>
+                    <div class="report-details-table">
+                        <table class="summary-table">
+                            <tbody>
+                                <tr><th>مشتری</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true)); ?></td></tr>
+                                <tr><th>شماره موبایل</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></td></tr>
+                                <tr><th>خودرو</th><td><?php echo esc_html(get_the_title($product_id)); ?></td></tr>
+                                <tr><th>رنگ درخواستی</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
+                                <?php 
+                                $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                                if (!empty($down_payment)): ?>
+                                    <tr><th>مبلغ پیش‌پرداخت</th><td><?php echo number_format_i18n($down_payment) . ' تومان'; ?></td></tr>
+                                <?php endif; ?>
+                                 <?php 
+                                $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
+                                if (!empty($rejection_reason)): ?>
+                                    <tr><th>دلیل رد</th><td><?php echo esc_html($rejection_reason); ?></td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div class="admin-actions-box">
@@ -1037,27 +1050,31 @@ class Maneli_Inquiry_Lists_Shortcode {
 
             <div class="report-box">
                 <h3 class="report-box-title">اطلاعات درخواست</h3>
-                 <div class="report-car-image">
-                    <?php if ($product_id && has_post_thumbnail($product_id)): ?>
-                        <?php echo get_the_post_thumbnail($product_id, 'medium'); ?>
-                    <?php endif; ?>
+                <div class="report-box-flex">
+                     <div class="report-car-image">
+                        <?php if ($product_id && has_post_thumbnail($product_id)): ?>
+                            <?php echo get_the_post_thumbnail($product_id, 'medium'); ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="report-details-table">
+                        <table class="summary-table">
+                            <tbody>
+                                <tr><th>خودرو</th><td><?php echo esc_html(get_the_title($product_id)); ?></td></tr>
+                                <tr><th>رنگ درخواستی</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
+                                <?php 
+                                $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                                if (!empty($down_payment)): ?>
+                                    <tr><th>مبلغ پیش‌پرداخت</th><td><?php echo number_format_i18n($down_payment) . ' تومان'; ?></td></tr>
+                                <?php endif; ?>
+                                 <?php 
+                                $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
+                                if (!empty($rejection_reason)): ?>
+                                    <tr><th>توضیحات</th><td><?php echo esc_html($rejection_reason); ?></td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <table class="summary-table">
-                    <tbody>
-                        <tr><th>خودرو</th><td><?php echo esc_html(get_the_title($product_id)); ?></td></tr>
-                        <tr><th>رنگ درخواستی</th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
-                        <?php 
-                        $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
-                        if (!empty($down_payment)): ?>
-                            <tr><th>مبلغ پیش‌پرداخت</th><td><?php echo number_format_i18n($down_payment) . ' تومان'; ?></td></tr>
-                        <?php endif; ?>
-                         <?php 
-                        $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
-                        if (!empty($rejection_reason)): ?>
-                            <tr><th>توضیحات</th><td><?php echo esc_html($rejection_reason); ?></td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
             </div>
 
             <?php if ($status_key === 'awaiting_payment'): ?>

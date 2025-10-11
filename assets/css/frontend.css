@@ -575,6 +575,27 @@
     height: auto;
     border-radius: 8px;
 }
+
+/* New Flexbox layout for car info */
+.report-box-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: flex-start;
+}
+.report-box-flex .report-car-image {
+    flex: 1 1 200px; /* Flex-grow, flex-shrink, flex-basis */
+    margin-bottom: 0;
+}
+.report-box-flex .report-details-table {
+    flex: 2 1 300px; /* Take twice the space of the image */
+}
+.report-box-flex .report-details-table .summary-table {
+    margin-top: 0;
+}
+/* End New Flexbox layout */
+
+
 .frontend-expert-report .form-grid .form-group label,
 .frontend-customer-report .form-grid .form-group label {
     font-weight: bold;

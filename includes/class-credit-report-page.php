@@ -48,6 +48,15 @@ class Maneli_Credit_Report_Page {
             <div class="report-box">
                 <h2>خودروی درخواستی</h2>
                 <div class="report-flex-container">
+                    <div class="report-image-container">
+                        <?php
+                        if ($product_id && has_post_thumbnail($product_id)) {
+                            echo get_the_post_thumbnail($product_id, 'medium');
+                        } else {
+                            echo '<div class="no-image">تصویری برای این محصول ثبت نشده است.</div>';
+                        }
+                        ?>
+                    </div>
                     <div class="report-details-table">
                         <table class="form-table">
                             <tbody>
@@ -58,15 +67,6 @@ class Maneli_Credit_Report_Page {
                                 <tr><th scope="row">مبلغ هر قسط</th><td><?php printf('%s <span>تومان</span>', number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0))); ?></td></tr>
                             </tbody>
                         </table>
-                    </div>
-                    <div class="report-image-container">
-                        <?php
-                        if ($product_id && has_post_thumbnail($product_id)) {
-                            echo get_the_post_thumbnail($product_id, 'medium');
-                        } else {
-                            echo '<div class="no-image">تصویری برای این محصول ثبت نشده است.</div>';
-                        }
-                        ?>
                     </div>
                 </div>
             </div>
