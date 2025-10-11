@@ -102,7 +102,7 @@ class Maneli_User_Management_Shortcodes {
         wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
         wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
         
-        // FIX: Removed dependency on missing profile-datepicker-init.js and added inline script
+        // FIX: Removed dependency on missing JS and used inline script to ensure Datepicker initialization
         wp_add_inline_script('maneli-jalali-datepicker', '
             document.addEventListener("DOMContentLoaded", function() {
                 if (typeof kamadatepicker !== "undefined") {

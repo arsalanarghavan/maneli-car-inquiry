@@ -14,6 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Maneli_Admin_Dashboard_Widgets و Maneli_CPT_Handler باید قبلا در هسته بارگذاری شده باشند.
 $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']) : [];
 ?>
 
@@ -61,7 +62,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                         <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                        <th class="inquiry-status-cell-installment"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
                         <?php if (current_user_can('manage_maneli_inquiries')) echo '<th>' . esc_html__('Assigned', 'maneli-car-inquiry') . '</th>'; ?>
                         <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>

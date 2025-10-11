@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Security fix for ajax_delete_user)
+ * @version 1.0.2 (Complete implementation and security checks)
  */
 
 if (!defined('ABSPATH')) {
@@ -47,24 +47,34 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_inquiry_details_nonce', 'nonce');
         if (!is_user_logged_in()) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
         }
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            return;
         }
         
         $inquiry = get_post($inquiry_id);
         $current_user_id = get_current_user_id();
         $can_view = false;
-        if (current_user_can('manage_maneli_inquiries') || (int)$inquiry->post_author === $current_user_id) {
-            $can_view = true;
-        } elseif (in_array('maneli_expert', get_userdata($current_user_id)->roles)) {
-            $assigned_expert_id = (int)get_post_meta($inquiry_id, 'assigned_expert_id', true);
-            if ($assigned_expert_id === $current_user_id) $can_view = true;
+        
+        // Use Permission Helper if possible, otherwise use manual check
+        if (class_exists('Maneli_Permission_Helpers')) {
+            $can_view = Maneli_Permission_Helpers::can_user_view_inquiry($inquiry_id, $current_user_id);
+        } else {
+             if (current_user_can('manage_maneli_inquiries') || (int)$inquiry->post_author === $current_user_id) {
+                $can_view = true;
+            } elseif (in_array('maneli_expert', get_userdata($current_user_id)->roles)) {
+                $assigned_expert_id = (int)get_post_meta($inquiry_id, 'assigned_expert_id', true);
+                if ($assigned_expert_id === $current_user_id) $can_view = true;
+            }
         }
+        
 
         if (!$can_view) {
             wp_send_json_error(['message' => esc_html__('You do not have permission to view this report.', 'maneli-car-inquiry')], 403);
+            return;
         }
 
         $post_meta = get_post_meta($inquiry_id);
@@ -96,6 +106,7 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_inquiry_filter_nonce', '_ajax_nonce');
         if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
         }
     
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
@@ -139,26 +150,75 @@ class Maneli_Ajax_Handler {
         $html = ob_get_clean();
         wp_reset_postdata();
         
-        $pagination_html = paginate_links(['base' => add_query_arg('paged', '%#%'), 'format' => '?paged=%#%', 'current' => $paged, 'total' => $inquiry_query->max_num_pages, 'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'), 'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'), 'type'  => 'plain']);
+        $pagination_html = paginate_links([
+            'base' => add_query_arg('paged', '%#%'), 
+            'format' => '?paged=%#%', 
+            'current' => $paged, 
+            'total' => $inquiry_query->max_num_pages, 
+            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'), 
+            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'), 
+            'type'  => 'plain'
+        ]);
     
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 
-    // ... [Other AJAX methods will go here, fully implemented] ...
-    
     //======================================================================
     // Cash Inquiry Handlers
     //======================================================================
+    
+    public function ajax_get_cash_inquiry_details() {
+        check_ajax_referer('maneli_cash_inquiry_details_nonce', 'nonce');
+        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        // Security Check: Ensure the user has permission to view this specific inquiry
+        if (class_exists('Maneli_Permission_Helpers') && !Maneli_Permission_Helpers::can_user_view_inquiry($inquiry_id, get_current_user_id())) {
+             wp_send_json_error(['message' => esc_html__('You do not have permission to view this report.', 'maneli-car-inquiry')], 403);
+             return;
+        }
+
+        $post_meta = get_post_meta($inquiry_id);
+        $product_id = $post_meta['product_id'][0] ?? 0;
+
+        $data = [
+            'id' => $inquiry_id,
+            'status_label' => Maneli_CPT_Handler::get_cash_inquiry_status_label($post_meta['cash_inquiry_status'][0] ?? 'pending'),
+            'status_key' => $post_meta['cash_inquiry_status'][0] ?? 'pending',
+            'rejection_reason' => $post_meta['cash_rejection_reason'][0] ?? '',
+            'car' => [
+                'name' => get_the_title($product_id),
+                'color' => $post_meta['cash_car_color'][0] ?? '',
+                'down_payment' => Maneli_Render_Helpers::format_money($post_meta['cash_down_payment'][0] ?? 0),
+            ],
+            'customer' => [
+                'first_name' => $post_meta['cash_first_name'][0] ?? '',
+                'last_name' => $post_meta['cash_last_name'][0] ?? '',
+                'mobile' => $post_meta['mobile_number'][0] ?? '',
+            ],
+        ];
+        wp_send_json_success($data);
+    }
 
     public function ajax_update_cash_inquiry() {
         check_ajax_referer('maneli_cash_inquiry_update_nonce', 'nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            return;
         }
     
         update_post_meta($inquiry_id, 'cash_first_name', sanitize_text_field($_POST['first_name'] ?? ''));
@@ -173,11 +233,13 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_cash_inquiry_delete_nonce', 'nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            return;
         }
     
         if (wp_delete_post($inquiry_id, true)) {
@@ -191,11 +253,13 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_cash_set_downpayment_nonce', 'nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            return;
         }
         
         $new_status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
@@ -209,13 +273,14 @@ class Maneli_Ajax_Handler {
             $amount = preg_replace('/[^0-9]/', '', $_POST['amount'] ?? 0);
             if ($amount <= 0) {
                 wp_send_json_error(['message' => esc_html__('Please enter a valid amount.', 'maneli-car-inquiry')]);
+                return;
             }
             update_post_meta($inquiry_id, 'cash_down_payment', $amount);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'awaiting_payment');
             
             $pattern_id = $options['cash_inquiry_approved_pattern'] ?? 0;
             if ($pattern_id > 0 && !empty($customer_mobile)) {
-                $params = [(string)$customer_name, (string)$car_name, (string)number_format_i18n($amount)];
+                $params = [(string)$customer_name, (string)$car_name, (string)Maneli_Render_Helpers::format_money($amount)];
                 $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
             }
             
@@ -223,6 +288,7 @@ class Maneli_Ajax_Handler {
             $reason = isset($_POST['reason']) ? sanitize_textarea_field($_POST['reason']) : '';
             if (empty($reason)) {
                 wp_send_json_error(['message' => esc_html__('A reason for rejection is required.', 'maneli-car-inquiry')]);
+                return;
             }
             update_post_meta($inquiry_id, 'cash_rejection_reason', $reason);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
@@ -234,6 +300,7 @@ class Maneli_Ajax_Handler {
             }
         } else {
             wp_send_json_error(['message' => esc_html__('Invalid data submitted.', 'maneli-car-inquiry')]);
+            return;
         }
     
         wp_send_json_success(['message' => esc_html__('Status changed successfully.', 'maneli-car-inquiry')]);
@@ -243,6 +310,7 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_cash_inquiry_filter_nonce', '_ajax_nonce');
         if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
         }
 
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
@@ -282,7 +350,15 @@ class Maneli_Ajax_Handler {
         $html = ob_get_clean();
         wp_reset_postdata();
         
-        $pagination_html = paginate_links(['base' => add_query_arg('paged', '%#%'), 'format' => '?paged=%#%', 'current' => $paged, 'total' => $inquiry_query->max_num_pages, 'prev_text' => '«', 'next_text' => '»', 'type'  => 'plain']);
+        $pagination_html = paginate_links([
+            'base' => add_query_arg('paged', '%#%'), 
+            'format' => '?paged=%#%', 
+            'current' => $paged, 
+            'total' => $inquiry_query->max_num_pages, 
+            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'),
+            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'),
+            'type'  => 'plain'
+        ]);
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
     
@@ -294,6 +370,7 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_cash_inquiry_assign_expert_nonce', 'nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
@@ -301,6 +378,7 @@ class Maneli_Ajax_Handler {
     
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            return;
         }
         
         $admin_actions = new Maneli_Admin_Actions_Handler();
@@ -308,6 +386,7 @@ class Maneli_Ajax_Handler {
 
         if (is_wp_error($expert_data)) {
             wp_send_json_error(['message' => $expert_data->get_error_message()]);
+            return;
         }
         
         update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
@@ -323,6 +402,7 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_inquiry_assign_expert_nonce', 'nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
@@ -330,6 +410,7 @@ class Maneli_Ajax_Handler {
     
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            return;
         }
     
         $admin_actions = new Maneli_Admin_Actions_Handler();
@@ -337,6 +418,7 @@ class Maneli_Ajax_Handler {
 
         if (is_wp_error($expert_data)) {
             wp_send_json_error(['message' => $expert_data->get_error_message()]);
+            return;
         }
         
         update_post_meta($inquiry_id, 'inquiry_status', 'user_confirmed');
@@ -356,6 +438,7 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_user_filter_nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
         }
 
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
@@ -384,7 +467,15 @@ class Maneli_Ajax_Handler {
         }
         $html = ob_get_clean();
         
-        $pagination_html = paginate_links(['base' => '#', 'format' => '?paged=%#%', 'current' => $paged, 'total' => ceil($user_query->get_total() / 50), 'type' => 'plain', 'prev_text' => '«', 'next_text' => '»']);
+        $pagination_html = paginate_links([
+            'base' => '#', 
+            'format' => '?paged=%#%', 
+            'current' => $paged, 
+            'total' => ceil($user_query->get_total() / 50), 
+            'type' => 'plain', 
+            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'),
+            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry')
+        ]);
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 
@@ -393,13 +484,16 @@ class Maneli_Ajax_Handler {
         // FIX: Added 'delete_users' capability check for security
         if (!current_user_can('manage_maneli_inquiries') || !current_user_can('delete_users')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
         }
         $user_id_to_delete = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         if (!$user_id_to_delete) {
             wp_send_json_error(['message' => esc_html__('User ID not specified.', 'maneli-car-inquiry')]);
+            return;
         }
         if ($user_id_to_delete === get_current_user_id()) {
             wp_send_json_error(['message' => esc_html__('You cannot delete your own account.', 'maneli-car-inquiry')]);
+            return;
         }
         require_once(ABSPATH . 'wp-admin/includes/user.php');
         if (wp_delete_user($user_id_to_delete)) {
@@ -417,6 +511,7 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_product_filter_nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
         }
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $args = ['limit' => 50, 'page' => $paged, 'orderby' => 'title', 'order' => 'ASC', 'paginate' => true];
@@ -433,7 +528,15 @@ class Maneli_Ajax_Handler {
         }
         $html = ob_get_clean();
 
-        $pagination_html = paginate_links(['base' => '#', 'format' => '?paged=%#%', 'current' => $paged, 'total' => $query_result->max_num_pages, 'type' => 'plain', 'prev_text' => '«', 'next_text' => '»']);
+        $pagination_html = paginate_links([
+            'base' => '#', 
+            'format' => '?paged=%#%', 
+            'current' => $paged, 
+            'total' => $query_result->max_num_pages, 
+            'type' => 'plain', 
+            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'),
+            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry')
+        ]);
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
     
@@ -441,6 +544,7 @@ class Maneli_Ajax_Handler {
         check_ajax_referer('maneli_product_data_nonce', 'nonce');
         if (!current_user_can('manage_maneli_inquiries')) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
         }
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
         $field_type = isset($_POST['field_type']) ? sanitize_key($_POST['field_type']) : '';
@@ -448,10 +552,12 @@ class Maneli_Ajax_Handler {
 
         if (!$product_id || empty($field_type)) {
             wp_send_json_error(esc_html__('Invalid data sent.', 'maneli-car-inquiry'));
+            return;
         }
         $product = wc_get_product($product_id);
         if (!$product) {
             wp_send_json_error(esc_html__('Product not found.', 'maneli-car-inquiry'));
+            return;
         }
 
         switch ($field_type) {

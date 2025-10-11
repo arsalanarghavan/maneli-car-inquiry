@@ -70,7 +70,7 @@ class Maneli_Admin_Actions_Handler {
             wp_die(esc_html__('Invalid status provided.', 'maneli-car-inquiry'));
         }
         
-        $final_status = $new_status_request;
+        $final_status = $new_status_request; // Initialize $final_status for robustness
         $sms_params = [];
         $options = get_option('maneli_inquiry_all_options', []);
         
@@ -83,7 +83,7 @@ class Maneli_Admin_Actions_Handler {
             }
             $sms_pattern_key = 'sms_pattern_approved';
 
-        } elseif ($final_status === 'rejected') {
+        } elseif ($new_status_request === 'rejected') { 
             $reason = isset($_POST['rejection_reason']) ? sanitize_textarea_field($_POST['rejection_reason']) : '';
             update_post_meta($post_id, 'rejection_reason', $reason);
             $sms_pattern_key = 'sms_pattern_rejected';

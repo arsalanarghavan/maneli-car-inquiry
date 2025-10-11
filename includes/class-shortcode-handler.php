@@ -59,7 +59,6 @@ class Maneli_Shortcode_Handler {
         wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css', [], '5.15.4');
         wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', [], null, true);
 
-        // نکته: بلوک قبلی بارگذاری assets/js/calculator.js که تکراری بود، از اینجا حذف شد.
         
         // Conditionally load assets for pages containing specific shortcodes that need Select2
         global $post;
@@ -79,9 +78,11 @@ class Maneli_Shortcode_Handler {
         $shortcodes_to_check = [
             'maneli_user_list',
             'maneli_inquiry_list',
-            'maneli_expert_inquiry_list', // Backward compatibility
+            'maneli_expert_inquiry_list',
             'maneli_cash_inquiry_list',
             'maneli_product_editor',
+            // Add 'car_inquiry_form' for expert panel which uses Select2
+            'car_inquiry_form', 
         ];
 
         foreach ($shortcodes_to_check as $shortcode) {

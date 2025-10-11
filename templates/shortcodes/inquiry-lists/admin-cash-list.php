@@ -62,7 +62,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                         <th><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Mobile', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                        <th class="inquiry-status-cell-cash"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Assigned', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
                         <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>

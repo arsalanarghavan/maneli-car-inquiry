@@ -77,11 +77,13 @@ class Maneli_Inquiry_Lists_Shortcode {
 
     private function render_admin_inquiry_list() {
         $this->enqueue_admin_list_assets();
+        // این تمپلیت صرفاً ساختار جدول و فیلترها را فراهم می‌کند و محتوای اصلی توسط AJAX در inquiry-lists.js بارگذاری می‌شود.
         return maneli_get_template_part('shortcodes/inquiry-lists/admin-installment-list', [], false);
     }
 
     private function render_admin_cash_inquiry_list() {
         $this->enqueue_admin_list_assets();
+        // این تمپلیت صرفاً ساختار جدول و فیلترها را فراهم می‌کند و محتوای اصلی توسط AJAX در inquiry-lists.js بارگذاری می‌شود.
         return maneli_get_template_part('shortcodes/inquiry-lists/admin-cash-list', [], false);
     }
 
@@ -98,6 +100,7 @@ class Maneli_Inquiry_Lists_Shortcode {
             'author'         => $user_id,
             'orderby'        => 'date',
             'order'          => 'DESC',
+            'post_status'    => ['publish', 'private'],
         ]);
         
         $args = ['inquiries_query' => $query, 'current_url' => remove_query_arg('inquiry_id')];
@@ -113,6 +116,7 @@ class Maneli_Inquiry_Lists_Shortcode {
             'author'         => $user_id,
             'orderby'        => 'date',
             'order'          => 'DESC',
+            'post_status'    => ['publish', 'private'],
         ]);
 
         $args = ['inquiries_query' => $query, 'current_url' => remove_query_arg('cash_inquiry_id')];
@@ -141,7 +145,6 @@ class Maneli_Inquiry_Lists_Shortcode {
             return maneli_get_template_part('shortcodes/inquiry-lists/report-admin-installment', ['inquiry_id' => $inquiry_id], false);
         } else {
             // Customers see the final step of the form process as their report.
-            // FIX: Ensure this points to the correct, modern template and bypasses the old, buggy one.
             return maneli_get_template_part('shortcodes/inquiry-form/step-5-final-report', ['inquiry_id' => $inquiry_id], false);
         }
     }
@@ -171,11 +174,13 @@ class Maneli_Inquiry_Lists_Shortcode {
      * FIX: Added installment_rejection_reasons and localized all hardcoded JS strings.
      */
     private function enqueue_admin_list_assets() {
+        // توجه: MANELI_INQUIRY_PLUGIN_URL باید قبلاً در فایل اصلی پلاگین تعریف شده باشد.
+
         wp_enqueue_script(
             'maneli-inquiry-lists-js',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js',
             ['jquery', 'sweetalert2'],
-            '1.0.0',
+            '1.0.0', // ورژن باید به صورت پویا یا ثابت تعریف شود
             true
         );
 
@@ -185,7 +190,7 @@ class Maneli_Inquiry_Lists_Shortcode {
         $cash_rejection_reasons_raw = $options['cash_inquiry_rejection_reasons'] ?? '';
         $cash_rejection_reasons = array_filter(array_map('trim', explode("\n", $cash_rejection_reasons_raw)));
 
-        // Installment Inquiry Rejection Reasons (NEW)
+        // Installment Inquiry Rejection Reasons 
         $installment_rejection_reasons_raw = $options['installment_rejection_reasons'] ?? '';
         $installment_rejection_reasons = array_filter(array_map('trim', explode("\n", $installment_rejection_reasons_raw)));
 
@@ -203,7 +208,7 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'assign_expert' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
             ],
             'cash_rejection_reasons' => $cash_rejection_reasons,
-            'installment_rejection_reasons' => $installment_rejection_reasons, // NEW: Installment reasons added
+            'installment_rejection_reasons' => $installment_rejection_reasons, 
             'text' => [
                 'error' => esc_html__('Error', 'maneli-car-inquiry'),
                 'success' => esc_html__('Success', 'maneli-car-inquiry'),
@@ -212,7 +217,7 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'confirm_button' => esc_html__('Yes, delete it!', 'maneli-car-inquiry'),
                 'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
                 
-                // Localized strings from former JS getHardcodedText
+                // Localized strings for modal and actions in JS
                 'assign_title' => esc_html__('Referral Request', 'maneli-car-inquiry'),
                 'assign_label' => esc_html__('Select an expert for this request:', 'maneli-car-inquiry'),
                 'auto_assign' => esc_html__('-- Automatic Assignment (Round-robin) --', 'maneli-car-inquiry'),
