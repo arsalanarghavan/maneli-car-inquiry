@@ -46,6 +46,7 @@ class Maneli_Roles_Caps {
             'read'                    => true,
             'manage_maneli_inquiries' => true, // Master capability for the plugin
             'edit_posts'              => true, // Allows editing inquiries
+            'delete_users'            => true, // ADDED: Allows Maneli Admin to delete users from frontend panel
         ]);
 
         // Define capabilities for 'Maneli Expert'

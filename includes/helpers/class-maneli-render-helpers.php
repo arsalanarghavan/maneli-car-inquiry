@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Helpers
  * @author  Gemini
- * @version 1.0.2 (Added format_money and maneli_gregorian_to_jalali helpers)
+ * @version 1.1.0 (Added loan calculation and meta label helpers)
  */
 
 if (!defined('ABSPATH')) {
@@ -40,6 +40,69 @@ class Maneli_Render_Helpers {
         }
         // Fallback to Gregorian if the helper is somehow missing
         return sprintf('%s/%s/%s', $gy, $gm, $gd);
+    }
+
+    /**
+     * Calculates the monthly installment amount using the simplified loan formula 
+     * based on the configurable monthly interest rate from plugin settings.
+     * * This method centralizes the loan calculation logic.
+     *
+     * @param float $loan_amount The loan amount (principal).
+     * @param int $term_months The number of months.
+     * @return int The calculated monthly installment amount (rounded).
+     */
+    public static function calculate_installment_amount($loan_amount, $term_months) {
+        if ($loan_amount <= 0 || $term_months <= 0) {
+            return 0;
+        }
+
+        $options = get_option('maneli_inquiry_all_options', []);
+        // Get the rate from settings, fallback to hardcoded 0.035
+        $monthly_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
+        
+        // Replicating the simple calculation logic from the JS/Expert Panel
+        $monthly_interest_amount = $loan_amount * $monthly_rate;
+        $total_interest = $monthly_interest_amount * ($term_months + 1);
+        $total_repayment = $loan_amount + $total_interest;
+        $installment_amount = (int)round($total_repayment / $term_months);
+
+        return $installment_amount;
+    }
+
+    /**
+     * Converts a technical meta key value (e.g., residency_status) into its human-readable, 
+     * localized label. Used primarily in admin/report views and meta boxes.
+     *
+     * @param string $key The meta key (e.g., 'residency_status', 'workplace_status').
+     * @param string $value The raw meta value (e.g., 'owner', 'permanent').
+     * @return string The translated label or the original value if no translation exists.
+     */
+    public static function get_meta_label($key, $value) {
+        if (empty($value)) {
+            return '—';
+        }
+        
+        switch ($key) {
+            case 'residency_status':
+            case 'issuer_residency_status':
+                $labels = [
+                    'owner'  => esc_html__('Owner', 'maneli-car-inquiry'),
+                    'tenant' => esc_html__('Tenant', 'maneli-car-inquiry'),
+                ];
+                return $labels[$value] ?? $value;
+
+            case 'workplace_status':
+            case 'issuer_workplace_status':
+                $labels = [
+                    'permanent' => esc_html__('Permanent', 'maneli-car-inquiry'),
+                    'contract'  => esc_html__('Contract', 'maneli-car-inquiry'),
+                    'freelance' => esc_html__('Freelance', 'maneli-car-inquiry'),
+                ];
+                return $labels[$value] ?? $value;
+
+            default:
+                return $value;
+        }
     }
 
     /**

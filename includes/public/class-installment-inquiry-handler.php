@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.4 (Security Fix: Implemented local decryption for Finotex keys)
+ * @version 1.0.5 (Refactored: Removed redundant loan calculation, using centralized helper)
  */
 
 if (!defined('ABSPATH')) {
@@ -33,7 +33,7 @@ class Maneli_Installment_Inquiry_Handler {
     }
     
     // =======================================================
-    //  DECRYPTION HELPERS (COPIED FROM SETTINGS HANDLER)
+    //  DECRYPTION HELPERS
     // =======================================================
     
     /**
@@ -80,31 +80,6 @@ class Maneli_Installment_Inquiry_Handler {
     }
 
     /**
-     * Calculates the monthly installment amount using the simplified loan formula 
-     * common in the Maneli plugin (replaces hardcoded 0.035).
-     * * @param float $loan_amount The loan amount (principal).
-     * @param int $term_months The number of months.
-     * @return int The calculated monthly installment amount (rounded).
-     */
-    private function calculate_installment_amount($loan_amount, $term_months) {
-        if ($loan_amount <= 0 || $term_months <= 0) {
-            return 0;
-        }
-
-        $options = get_option('maneli_inquiry_all_options', []);
-        // NEW: Get the rate from settings, fallback to hardcoded 0.035
-        $monthly_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
-        
-        // Replicating the simple calculation logic from the JS/Expert Panel (not standard PMT)
-        $monthly_interest_amount = $loan_amount * $monthly_rate;
-        $total_interest = $monthly_interest_amount * ($term_months + 1);
-        $total_repayment = $loan_amount + $total_interest;
-        $installment_amount = (int)round($total_repayment / $term_months);
-
-        return $installment_amount;
-    }
-
-    /**
      * AJAX handler for Step 1: Saving the selected car and calculator data to user meta.
      * It recalculates the installment on the server to prevent client-side tampering.
      */
@@ -123,7 +98,8 @@ class Maneli_Installment_Inquiry_Handler {
         $term_months = (int)sanitize_text_field($_POST['term_months'] ?? 12);
         $loan_amount = (int)$total_price - (int)$down_payment;
         
-        $recalculated_installment = $this->calculate_installment_amount($loan_amount, $term_months);
+        // USE CENTRALIZED HELPER
+        $recalculated_installment = Maneli_Render_Helpers::calculate_installment_amount($loan_amount, $term_months);
         
         $meta_to_save = [
             'maneli_selected_car_id'      => intval($_POST['product_id']),
@@ -301,7 +277,8 @@ class Maneli_Installment_Inquiry_Handler {
         $term_months = get_user_meta($user_id, 'maneli_inquiry_term_months', true);
         
         $loan_amount = (int)$total_price - (int)$down_payment;
-        $recalculated_installment = $this->calculate_installment_amount($loan_amount, (int)$term_months);
+        // USE CENTRALIZED HELPER
+        $recalculated_installment = Maneli_Render_Helpers::calculate_installment_amount($loan_amount, (int)$term_months);
         
         $calculator_meta_keys = [
             'maneli_inquiry_down_payment', 

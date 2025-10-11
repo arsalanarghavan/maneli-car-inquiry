@@ -6,7 +6,7 @@
  *
  * @package Maneli_Car_Inquiry/Templates/Admin
  * @author  Gemini
- * @version 1.0.0
+ * @version 1.0.1 (Refactored to use Maneli_Render_Helpers::get_meta_label for status fields)
  *
  * @var int $post_id The ID of the current inquiry post.
  */
@@ -31,21 +31,12 @@ $render_fields_table = function($fields, $meta_source) {
         foreach ($pair as $key => $label) {
             $value = $meta_source[$key][0] ?? '—';
 
-            // Handle special formatting for status fields
-            if (str_contains($key, 'residency_status')) {
-                $value = ($value === 'owner') ? esc_html__('Owner', 'maneli-car-inquiry') : (($value === 'tenant') ? esc_html__('Tenant', 'maneli-car-inquiry') : $value);
-            }
-            if (str_contains($key, 'workplace_status')) {
-                $statuses = [
-                    'permanent' => esc_html__('Permanent', 'maneli-car-inquiry'),
-                    'contract'  => esc_html__('Contract', 'maneli-car-inquiry'),
-                    'freelance' => esc_html__('Freelance', 'maneli-car-inquiry'),
-                ];
-                $value = $statuses[$value] ?? $value;
-            }
+            // Use the centralized helper for localization and status translation
+            // This replaces the complex inline logic from the previous version.
+            $display_value = Maneli_Render_Helpers::get_meta_label($key, $value);
 
             echo '<th scope="row" style="width: 15%;"><label>' . esc_html($label) . '</label></th>';
-            echo '<td style="width: 35%;">' . esc_html($value) . '</td>';
+            echo '<td style="width: 35%;">' . esc_html($display_value) . '</td>';
         }
         // If there's only one item in the row, add empty cells to maintain table structure
         if (count($pair) < 2) {
@@ -107,10 +98,11 @@ if ($issuer_type === 'other') :
 
 <h3 style="margin-top:20px; border-top:1px solid #ddd; padding-top:20px;"><?php esc_html_e('Car and Installment Details', 'maneli-car-inquiry'); ?></h3>
 <?php
+// Use Maneli_Render_Helpers for calculations and formatting
+$loan_amount = (int)($post_meta['maneli_inquiry_total_price'][0] ?? 0) - (int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0);
 $product_id = $post_meta['product_id'][0] ?? 0;
 $product = $product_id ? wc_get_product($product_id) : null;
 $car_model = $product ? $product->get_attribute('pa_model') : '—';
-$loan_amount = (int)($post_meta['maneli_inquiry_total_price'][0] ?? 0) - (int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0);
 
 $car_fields = [
     'product_name' => esc_html__('Car Name', 'maneli-car-inquiry'),
@@ -126,11 +118,11 @@ $car_fields = [
 $car_meta_values = [
     'product_name' => [get_the_title($product_id)],
     'car_model' => [$car_model],
-    'loan_amount' => [number_format_i18n($loan_amount) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
-    'maneli_inquiry_total_price' => [number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
-    'maneli_inquiry_down_payment' => [number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
+    'loan_amount' => [Maneli_Render_Helpers::format_money($loan_amount) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
+    'maneli_inquiry_total_price' => [Maneli_Render_Helpers::format_money((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
+    'maneli_inquiry_down_payment' => [Maneli_Render_Helpers::format_money((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
     'maneli_inquiry_term_months' => [($post_meta['maneli_inquiry_term_months'][0] ?? '') . ' ' . esc_html__('Months', 'maneli-car-inquiry')],
-    'maneli_inquiry_installment' => [number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
+    'maneli_inquiry_installment' => [Maneli_Render_Helpers::format_money((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry')],
 ];
 
 $render_fields_table($car_fields, $car_meta_values);

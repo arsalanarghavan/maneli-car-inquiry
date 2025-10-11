@@ -7,7 +7,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Shortcodes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Fixed Datepicker initialization dependency)
+ * @version 1.0.2 (Removed Datepicker asset enqueuing logic for centralization)
  */
 
 if (!defined('ABSPATH')) {
@@ -98,24 +98,10 @@ class Maneli_User_Management_Shortcodes {
             return '<div class="maneli-inquiry-wrapper error-box"><p>' . esc_html__('The requested user was not found.', 'maneli-car-inquiry') . '</p></div>';
         }
 
-        // Enqueue datepicker assets specifically for the edit form
-        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
-        wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
-        
-        // FIX: Removed dependency on missing JS and used inline script to ensure Datepicker initialization
-        wp_add_inline_script('maneli-jalali-datepicker', '
-            document.addEventListener("DOMContentLoaded", function() {
-                if (typeof kamadatepicker !== "undefined") {
-                    // Initialize the input with ID "birth_date"
-                    kamadatepicker("birth_date", {
-                        bidi: true,
-                        placeholder: "مثال: ۱۳۶۵/۰۴/۱۵",
-                        format: "YYYY/MM/DD"
-                    });
-                }
-            });
-        ');
-
+        // NOTE: Datepicker assets are now loaded globally via class-shortcode-handler 
+        // if this shortcode is present on the page, and the specific initialization 
+        // is handled in assets/js/frontend/inquiry-form.js.
+        // The custom asset loading logic is intentionally removed from here.
 
         $template_args = [
             'user'      => $user,
@@ -171,5 +157,18 @@ class Maneli_User_Management_Shortcodes {
                 'server_error'   => esc_html__('A server error occurred.', 'maneli-car-inquiry'),
             ]
         ]);
+        
+        // Ensure datepicker assets are loaded for the edit form
+        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
+        wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
+        
+        // This script contains the shared datepicker initialization logic.
+        wp_enqueue_script(
+            'maneli-inquiry-form-js',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
+            ['maneli-jalali-datepicker'],
+            '1.0.0',
+            true
+        );
     }
 }

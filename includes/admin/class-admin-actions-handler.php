@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.5 (Fixed graceful expert assignment failure and updated error handling)
+ * @version 1.0.6 (Removed loan calculator duplication and added expert form validation)
  */
 
 if (!defined('ABSPATH')) {
@@ -26,31 +26,8 @@ class Maneli_Admin_Actions_Handler {
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
     }
     
-    /**
-     * Helper function to calculate monthly installment.
-     * This logic uses the configurable monthly interest rate from plugin settings.
-     * * @param float $loan_amount The loan amount (principal).
-     * @param int $term_months The number of months.
-     * @return int The calculated monthly installment amount (rounded).
-     */
-    private function calculate_installment_amount($loan_amount, $term_months) {
-        if ($loan_amount <= 0 || $term_months <= 0) {
-            return 0;
-        }
-
-        $options = get_option('maneli_inquiry_all_options', []);
-        // NEW: Get the rate from settings, fallback to hardcoded 0.035
-        $monthly_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
-        
-        // Replicating the simple calculation logic from the JS/Expert Panel (not standard PMT)
-        $monthly_interest_amount = $loan_amount * $monthly_rate;
-        $total_interest = $monthly_interest_amount * ($term_months + 1);
-        $total_repayment = $loan_amount + $total_interest;
-        $installment_amount = (int)round($total_repayment / $term_months);
-
-        return $installment_amount;
-    }
-
+    // NOTE: private function calculate_installment_amount has been removed. 
+    // All installment calculations now use Maneli_Render_Helpers::calculate_installment_amount().
 
     /**
      * Handles the final status update for an installment inquiry by an admin from the frontend report page.
@@ -136,6 +113,7 @@ class Maneli_Admin_Actions_Handler {
         
         $base_redirect_url = wp_get_referer() ? esc_url_raw(wp_unslash(wp_get_referer())) : home_url('/dashboard/');
     
+        // 1. Validate Buyer Fields (always required)
         $required_fields = ['first_name', 'last_name', 'national_code', 'mobile_number', 'father_name', 'birth_date'];
         foreach($required_fields as $field) {
             if (empty($_POST[$field])) {
@@ -143,6 +121,17 @@ class Maneli_Admin_Actions_Handler {
             }
         }
         
+        // 2. Validate Issuer Fields (if issuer_type is 'other')
+        $issuer_type = sanitize_key($_POST['issuer_type'] ?? 'self');
+        if ($issuer_type === 'other') {
+            $issuer_required_fields = ['issuer_national_code', 'issuer_birth_date', 'issuer_first_name', 'issuer_last_name'];
+            foreach($issuer_required_fields as $field) {
+                if (empty($_POST[$field])) {
+                     wp_die(sprintf(esc_html__('Error: The field "%s" for the cheque issuer is required.', 'maneli-car-inquiry'), $field));
+                }
+            }
+        }
+
         $mobile_number = sanitize_text_field($_POST['mobile_number']);
         $customer_id = username_exists($mobile_number);
         $dummy_email = $mobile_number . '@manelikhodro.com';
@@ -187,7 +176,6 @@ class Maneli_Admin_Actions_Handler {
         // --- Inquiry Creation Logic START ---
         $inquiry_handler = new Maneli_Installment_Inquiry_Handler();
         
-        $issuer_type = sanitize_key($_POST['issuer_type'] ?? 'self');
         $national_code_for_api = ($issuer_type === 'other' && !empty($_POST['issuer_national_code']))
             ? sanitize_text_field($_POST['issuer_national_code'])
             : sanitize_text_field($_POST['national_code']);
@@ -205,8 +193,8 @@ class Maneli_Admin_Actions_Handler {
         
         $loan_amount = $total_price - $down_payment;
         
-        // NEW: Use the helper function with the configurable interest rate
-        $installment_amount = $this->calculate_installment_amount($loan_amount, $term_months);
+        // NEW: Use the centralized helper function
+        $installment_amount = Maneli_Render_Helpers::calculate_installment_amount($loan_amount, $term_months);
 
         // 3. Prepare All Data for Post Meta
         $all_post_meta = $this->prepare_expert_inquiry_meta($_POST, $issuer_type, $product_id, $total_price, $down_payment, $term_months, $installment_amount);

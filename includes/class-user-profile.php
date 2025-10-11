@@ -4,7 +4,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Fixed Datepicker initialization dependency)
+ * @version 1.0.2 (Removed inline script for Datepicker initialization)
  */
 
 if (!defined('ABSPATH')) {
@@ -43,6 +43,7 @@ class Maneli_User_Profile {
                 'fields' => [
                     'national_code' => ['label' => esc_html__('National Code', 'maneli-car-inquiry'), 'type' => 'text'],
                     'father_name'   => ['label' => esc_html__('Father\'s Name', 'maneli-car-inquiry'), 'type' => 'text'],
+                    // Note: 'birth_date' uses the class 'maneli-datepicker' which is targeted by the centralized JS file.
                     'birth_date'    => ['label' => esc_html__('Date of Birth', 'maneli-car-inquiry'), 'type' => 'text', 'class' => 'maneli-datepicker'],
                     'mobile_number' => ['label' => esc_html__('Mobile Number', 'maneli-car-inquiry'), 'type' => 'tel', 'desc' => esc_html__('Used for SMS notifications and as the username.', 'maneli-car-inquiry')],
                     'phone_number'  => ['label' => esc_html__('Phone Number', 'maneli-car-inquiry'), 'type' => 'tel'],
@@ -95,21 +96,15 @@ class Maneli_User_Profile {
         wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
         wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
         
-        // FIX: Removed dependency on missing profile-datepicker-init.js and used inline script for robustness
-        wp_add_inline_script('maneli-jalali-datepicker', '
-            document.addEventListener("DOMContentLoaded", function() {
-                if (typeof kamadatepicker !== "undefined") {
-                    // Initialize all elements with class maneli-datepicker
-                    document.querySelectorAll(".maneli-datepicker").forEach(function(element) {
-                        kamadatepicker(element.id, {
-                            bidi: true,
-                            placeholder: "مثال: ۱۳۶۵/۰۴/۱۵",
-                            format: "YYYY/MM/DD"
-                        });
-                    });
-                }
-            });
-        ');
+        // FIX: Removed the wp_add_inline_script block.
+        // The initialization logic is now assumed to be in the centralized JS file.
+        wp_enqueue_script(
+            'maneli-profile-datepicker-init',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
+            ['maneli-jalali-datepicker'],
+            '1.0.0',
+            true
+        );
     }
 
     /**
