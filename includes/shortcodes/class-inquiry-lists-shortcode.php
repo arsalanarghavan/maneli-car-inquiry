@@ -14,6 +14,46 @@ class Maneli_Inquiry_Lists_Shortcode {
         add_shortcode('maneli_expert_inquiry_list', [$this, 'render_inquiry_list']);
     }
 
+    /**
+     * Helper function to enqueue the necessary admin/expert action scripts.
+     */
+    private function enqueue_action_scripts() {
+        // Enqueue the script for shared actions like assigning experts.
+        wp_enqueue_script(
+            'maneli-inquiry-admin-actions',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/inquiry-admin-actions.js',
+            ['jquery', 'sweetalert2'],
+            '1.1.0', // Updated version
+            true
+        );
+
+        // Enqueue the script for cash-specific actions.
+        wp_enqueue_script(
+            'maneli-cash-inquiry-actions',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/cash-inquiry-actions.js',
+            ['jquery', 'sweetalert2', 'maneli-inquiry-admin-actions'], // Dependent on the main actions script
+            '1.1.0',
+            true
+        );
+
+        // Localize data and attach it to the main admin actions script, making it available to both.
+        $options = get_option('maneli_inquiry_all_options', []);
+        $rejection_reasons_raw = $options['cash_inquiry_rejection_reasons'] ?? '';
+        $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_reasons_raw)));
+
+        wp_localize_script('maneli-inquiry-admin-actions', 'maneli_inquiry_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
+            'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
+            'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
+            'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
+            'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
+            'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
+            'assign_nonce' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
+            'cash_rejection_reasons' => $rejection_reasons,
+        ]);
+    }
+
     public function render_inquiry_list() {
         if (isset($_GET['inquiry_id']) && !empty($_GET['inquiry_id'])) {
             return $this->render_frontend_credit_report();
@@ -30,14 +70,7 @@ class Maneli_Inquiry_Lists_Shortcode {
             return $this->render_customer_inquiry_list($current_user->ID);
         }
         
-        $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
-        if (file_exists($js_path)) {
-            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.8', true);
-            wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'assign_nonce' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
-            ]);
-        }
+        $this->enqueue_action_scripts();
 
         ob_start();
         ?>
@@ -212,32 +245,13 @@ class Maneli_Inquiry_Lists_Shortcode {
                 return $this->render_single_customer_cash_inquiry($inquiry_id);
             }
         }
-
-        $options = get_option('maneli_inquiry_all_options', []);
-        $rejection_reasons_raw = $options['cash_inquiry_rejection_reasons'] ?? '';
-        $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_reasons_raw)));
-
-        $js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/inquiry-actions.js';
-        if (file_exists($js_path)) {
-            wp_enqueue_script('maneli-inquiry-actions', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/inquiry-actions.js', ['jquery', 'sweetalert2'], '1.0.8', true);
-            wp_localize_script('maneli-inquiry-actions', 'maneli_inquiry_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'details_nonce' => wp_create_nonce('maneli_inquiry_details_nonce'),
-                'cash_details_nonce' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
-                'cash_update_nonce' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
-                'cash_delete_nonce' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
-                'cash_set_downpayment_nonce' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
-                'cash_assign_expert_nonce' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
-                'assign_nonce' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
-                'cash_rejection_reasons' => $rejection_reasons,
-            ]);
-        }
         
         if (!is_user_logged_in()) {
             return '<div class="maneli-inquiry-wrapper error-box"><p>برای مشاهده این بخش، لطفاً ابتدا وارد شوید.</p></div>';
         }
 
         if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles)) {
+            $this->enqueue_action_scripts();
             return $this->render_admin_cash_inquiry_list();
         } else {
             return $this->render_customer_cash_inquiry_list(get_current_user_id());
@@ -388,10 +402,10 @@ class Maneli_Inquiry_Lists_Shortcode {
 
     private function render_customer_cash_inquiry_list($user_id) {
         if (isset($_GET['payment_status'])) {
-            // We need access to the display_payment_message method, which is now in the form shortcode class.
-            // For now, let's create an instance.
-            $form_shortcode = new Maneli_Inquiry_Form_Shortcode();
-            $form_shortcode->display_payment_message(sanitize_text_field($_GET['payment_status']));
+            $form_shortcode_instance = new Maneli_Inquiry_Form_Shortcode();
+            $reflectionMethod = new ReflectionMethod('Maneli_Inquiry_Form_Shortcode', 'display_payment_message');
+            $reflectionMethod->setAccessible(true);
+            $reflectionMethod->invoke($form_shortcode_instance, sanitize_text_field($_GET['payment_status']));
         }
         $paged = get_query_var('paged') ? get_query_var('paged') : 1;
         $args = [
@@ -623,9 +637,10 @@ class Maneli_Inquiry_Lists_Shortcode {
         }
         
         if ($can_view_as_customer && !$can_view_as_admin && !$can_view_as_expert) {
-             // We need access to this method from the form shortcode class
              $form_shortcode = new Maneli_Inquiry_Form_Shortcode();
-             return $form_shortcode->render_customer_report_html($inquiry_id);
+             $reflectionMethod = new ReflectionMethod('Maneli_Inquiry_Form_Shortcode', 'render_customer_report_html');
+             $reflectionMethod->setAccessible(true);
+             return $reflectionMethod->invoke($form_shortcode, $inquiry_id);
         }
 
         $post_meta = get_post_meta($inquiry_id);
