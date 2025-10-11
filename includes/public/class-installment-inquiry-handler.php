@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.2 (Configurable loan interest rate)
+ * @version 1.0.4 (Security Fix: Implemented local decryption for Finotex keys)
  */
 
 if (!defined('ABSPATH')) {
@@ -30,6 +30,53 @@ class Maneli_Installment_Inquiry_Handler {
 
         // Handle re-try logic for failed inquiries.
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
+    }
+    
+    // =======================================================
+    //  DECRYPTION HELPERS (COPIED FROM SETTINGS HANDLER)
+    // =======================================================
+    
+    /**
+     * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
+     * @return string The encryption key.
+     */
+    private function get_encryption_key() {
+        // Use a unique, secure key from wp-config.php
+        $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
+        // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
+        return hash('sha256', $key, true); 
+    }
+
+    /**
+     * Decrypts data using AES-256-CBC.
+     * @param string $encrypted_data The encrypted data (Base64 encoded).
+     * @return string The decrypted data or empty string on failure.
+     */
+    private function decrypt_data($encrypted_data) {
+        if (empty($encrypted_data)) {
+            return '';
+        }
+        $key = $this->get_encryption_key();
+        $cipher = 'aes-256-cbc';
+        
+        // Decode and separate IV and encrypted data
+        $parts = explode('::', base64_decode($encrypted_data), 2);
+        
+        if (count($parts) !== 2) {
+            return ''; // Invalid format or decryption failed
+        }
+        $encrypted = $parts[0];
+        $iv = $parts[1];
+        
+        // Basic check for IV length
+        if (strlen($iv) !== openssl_cipher_iv_length($cipher)) {
+            return '';
+        }
+
+        // Decrypt
+        $decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
+        
+        return $decrypted === false ? '' : $decrypted;
     }
 
     /**
@@ -291,12 +338,18 @@ class Maneli_Installment_Inquiry_Handler {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Finotex inquiry is disabled in settings or API constant is missing.'];
         }
 
-        $client_id = $options['finotex_client_id'] ?? '';
-        $api_key = $options['finotex_api_key'] ?? '';
+        // === START: SECURITY IMPROVEMENT - Check for constants first, then decrypt ===
+        $client_id_raw = $options['finotex_username'] ?? '';
+        $api_key_raw = $options['finotex_password'] ?? '';
+        
+        $client_id = defined('MANELI_FINOTEX_CLIENT_ID') ? MANELI_FINOTEX_CLIENT_ID : $this->decrypt_data($client_id_raw);
+        $api_key = defined('MANELI_FINOTEX_API_KEY') ? MANELI_FINOTEX_API_KEY : $this->decrypt_data($api_key_raw);
+        // === END: SECURITY IMPROVEMENT ===
+        
         $result = ['status' => 'FAILED', 'data' => null, 'raw_response' => ''];
 
         if (empty($client_id) || empty($api_key)) {
-            $result['raw_response'] = 'Plugin Error: Finotex Client ID or Access Token not set in settings.';
+            $result['raw_response'] = 'Plugin Error: Finotex Client ID or API Key not set (missing required credentials/encrypted data).';
             return $result;
         }
 

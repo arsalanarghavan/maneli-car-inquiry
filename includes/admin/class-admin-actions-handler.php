@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.4 (Fixed User Meta Save on Admin Create User)
+ * @version 1.0.5 (Fixed graceful expert assignment failure and updated error handling)
  */
 
 if (!defined('ABSPATH')) {
@@ -65,6 +65,8 @@ class Maneli_Admin_Actions_Handler {
         $post_id = intval($_POST['inquiry_id']);
         $new_status_request = sanitize_text_field($_POST['new_status']);
         $valid_statuses = ['approved', 'rejected', 'more_docs'];
+        
+        $redirect_url = home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id);
 
         if (!in_array($new_status_request, $valid_statuses, true)) {
             wp_die(esc_html__('Invalid status provided.', 'maneli-car-inquiry'));
@@ -78,8 +80,12 @@ class Maneli_Admin_Actions_Handler {
             $final_status = 'user_confirmed';
             $selected_expert_id_str = isset($_POST['assigned_expert_id']) ? sanitize_text_field($_POST['assigned_expert_id']) : 'auto';
             $expert_data = $this->assign_expert_to_post($post_id, $selected_expert_id_str, 'installment');
+            
+            // FIX: Handle WP_Error for expert assignment gracefully (redirect with error)
             if (is_wp_error($expert_data)) {
-                wp_die($expert_data->get_error_message());
+                $redirect_with_error = add_query_arg('expert_error', urlencode($expert_data->get_error_message()), $redirect_url);
+                wp_redirect($redirect_with_error);
+                exit;
             }
             $sms_pattern_key = 'sms_pattern_approved';
 
@@ -110,14 +116,12 @@ class Maneli_Admin_Actions_Handler {
             $sms_handler->send_pattern($sms_pattern_id, $mobile_number, $sms_params);
         }
         
-        $redirect_url = home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id);
         wp_redirect($redirect_url);
         exit;
     }
 
     /**
      * Handles inquiry creation by an expert or admin from the frontend form.
-     * **FIXED:** Role demotion bug corrected.
      */
     public function handle_expert_create_inquiry() {
         check_admin_referer('maneli_expert_create_nonce');
@@ -129,6 +133,8 @@ class Maneli_Admin_Actions_Handler {
         if (empty($product_id)) {
             wp_die(esc_html__('Please select a car.', 'maneli-car-inquiry'));
         }
+        
+        $base_redirect_url = wp_get_referer() ? esc_url_raw(wp_unslash(wp_get_referer())) : home_url('/dashboard/');
     
         $required_fields = ['first_name', 'last_name', 'national_code', 'mobile_number', 'father_name', 'birth_date'];
         foreach($required_fields as $field) {
@@ -186,7 +192,7 @@ class Maneli_Admin_Actions_Handler {
             ? sanitize_text_field($_POST['issuer_national_code'])
             : sanitize_text_field($_POST['national_code']);
 
-        // 1. Execute Finotex Inquiry
+        // 1. Execute Finotex Inquiry (Handler manages decryption internally)
         $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
         
         // 2. Calculate Loan Details (Replicating JS calculator logic)
@@ -240,17 +246,24 @@ class Maneli_Admin_Actions_Handler {
         // 6. Assign Expert if requested
         $assigned_expert_id_str = sanitize_text_field($_POST['assigned_expert_id'] ?? 'auto');
         $expert_data = $this->assign_expert_to_post($post_id, $assigned_expert_id_str, 'installment');
-        if (!is_wp_error($expert_data)) {
-            // Set status to approved if manually assigned
+        
+        // FIX: Handle failure in expert assignment during creation
+        if (is_wp_error($expert_data)) {
+            $redirect_url = add_query_arg('inquiry_created', '1', $base_redirect_url);
+            $redirect_url = add_query_arg('expert_error', urlencode($expert_data->get_error_message() . ' (Inquiry was still created with status: ' . $initial_status . ')'), $redirect_url);
+            wp_redirect($redirect_url);
+            exit;
+        } else {
+            // Set status to approved if manually assigned successfully
             update_post_meta($post_id, 'inquiry_status', 'user_confirmed'); 
         }
-        
+
         // 7. Cleanup temporary user meta
         $this->cleanup_user_meta($customer_id);
 
         // --- Inquiry Creation Logic END ---
 
-        $redirect_url = add_query_arg('inquiry_created', '1', wp_get_referer());
+        $redirect_url = add_query_arg('inquiry_created', '1', $base_redirect_url);
         wp_redirect($redirect_url);
         exit;
     }
@@ -382,6 +395,7 @@ class Maneli_Admin_Actions_Handler {
         $national_code_for_api = ($issuer_type === 'other' && !empty($post_meta['issuer_national_code'][0])) ? $post_meta['issuer_national_code'][0] : ($post_meta['national_code'][0] ?? '');
         
         $inquiry_handler = new Maneli_Installment_Inquiry_Handler();
+        // Handler now manages decryption internally
         $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
 
         wp_update_post(['ID' => $post_id, 'post_content' => "Finotex API raw response (Retried by Admin):\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>"]);
@@ -400,7 +414,9 @@ class Maneli_Admin_Actions_Handler {
     public function assign_expert_to_post($post_id, $expert_id_str, $inquiry_type) {
         if ('auto' === $expert_id_str) {
             $option_key = ($inquiry_type === 'cash') ? 'maneli_cash_expert_last_assigned_index' : 'maneli_expert_last_assigned_index';
+            // Only consider users with the 'maneli_expert' role
             $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'ID', 'order' => 'ASC']);
+            
             if (empty($expert_users)) {
                 return new WP_Error('no_experts', esc_html__('No experts found for automatic assignment.', 'maneli-car-inquiry'));
             }

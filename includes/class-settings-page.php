@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Added Finance Tab and loan_interest_rate)
+ * @version 1.0.3 (Security Fix: Encrypted storage of Finotex and Sadad keys, fixed syntax errors in HTML rendering)
  */
 
 if (!defined('ABSPATH')) {
@@ -24,6 +24,74 @@ class Maneli_Settings_Page {
         add_action('admin_menu', [$this, 'add_plugin_admin_menu']);
         add_action('admin_init', [$this, 'register_and_build_fields']);
         add_action('admin_post_maneli_save_frontend_settings', [$this, 'handle_frontend_settings_save']);
+    }
+
+    /**
+     * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
+     * @return string The encryption key.
+     */
+    private function get_encryption_key() {
+        // Use a unique, secure key from wp-config.php
+        $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
+        // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
+        return hash('sha256', $key, true); 
+    }
+
+    /**
+     * Encrypts data using AES-256-CBC.
+     * @param string $data The data to encrypt.
+     * @return string The Base64 encoded encrypted data with IV.
+     */
+    public function encrypt_data($data) {
+        if (empty($data)) {
+            return '';
+        }
+        $key = $this->get_encryption_key();
+        $cipher = 'aes-256-cbc';
+        $iv_length = openssl_cipher_iv_length($cipher);
+        
+        // Use a cryptographically secure IV
+        $iv = openssl_random_pseudo_bytes($iv_length);
+        $encrypted = openssl_encrypt($data, $cipher, $key, 0, $iv);
+        
+        if ($encrypted === false) {
+             return ''; // Encryption failed
+        }
+
+        // Return IV and encrypted data combined with a separator, then Base64 encode
+        return base64_encode($encrypted . '::' . $iv);
+    }
+
+    /**
+     * Decrypts data using AES-256-CBC.
+     * @param string $encrypted_data The encrypted data (Base64 encoded).
+     * @return string The decrypted data or empty string on failure.
+     */
+    public function decrypt_data($encrypted_data) {
+        if (empty($encrypted_data)) {
+            return '';
+        }
+        $key = $this->get_encryption_key();
+        $cipher = 'aes-256-cbc';
+        
+        // Decode and separate IV and encrypted data
+        $parts = explode('::', base64_decode($encrypted_data), 2);
+        
+        if (count($parts) !== 2) {
+            return ''; // Invalid format or decryption failed
+        }
+        $encrypted = $parts[0];
+        $iv = $parts[1];
+        
+        // Basic check for IV length
+        if (strlen($iv) !== openssl_cipher_iv_length($cipher)) {
+            return '';
+        }
+
+        // Decrypt
+        $decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
+        
+        return $decrypted === false ? '' : $decrypted;
     }
 
     /**
@@ -122,32 +190,51 @@ class Maneli_Settings_Page {
         $value = $options[$name] ?? ($args['default'] ?? '');
         $field_name = "{$this->options_name}[{$name}]";
         
+        // Check if the field is sensitive and contains encrypted data
+        $is_sensitive = in_array($name, ['finotex_username', 'finotex_password', 'sadad_key'], true);
+
+        if ($is_sensitive && !empty($value)) {
+            $value = $this->decrypt_data($value);
+            // If decryption fails, the input will be empty, forcing the user to re-enter.
+        }
+
         switch ($type) {
             case 'textarea':
-                echo "<textarea name='{$field_name}' rows='5' class='large-text'>" . esc_textarea($value) . "</textarea>";
+                echo "<textarea name='" . esc_attr($field_name) . "' rows='5' class='large-text'>" . esc_textarea($value) . "</textarea>";
                 break;
             case 'switch':
                 echo '<label class="maneli-switch">';
-                echo "<input type='checkbox' name='{$field_name}' value='1' " . checked('1', $value, false) . '>';
+                echo "<input type='checkbox' name='" . esc_attr($field_name) . "' value='1' " . checked('1', $value, false) . '>';
                 echo '<span class="maneli-slider round"></span></label>';
                 break;
+            case 'html':
+                 // For 'html' type, the content is in the 'desc' key, nothing to render for the field itself.
+                 break;
             default: // Catches text, number, password, etc.
-                echo "<input type='" . esc_attr($type) . "' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
+                // FIX: Corrected PHP string concatenation error here
+                echo "<input type='" . esc_attr($type) . "' name='" . esc_attr($field_name) . "' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
                 break;
         }
 
+        // Output description AFTER the field (for default fields) or AS the field (for html type)
         if (!empty($args['desc'])) {
-            echo "<p class='description'>" . wp_kses_post($args['desc']) . "</p>";
+            if ($type === 'html') {
+                 echo wp_kses_post($args['desc']);
+            } else {
+                 // FIX: Corrected PHP string concatenation error here
+                 echo "<p class='description'>" . wp_kses_post($args['desc']) . "</p>";
+            }
         }
     }
 
     /**
-     * Sanitizes and merges new options with old options, handling unchecked checkboxes.
+     * Sanitizes and merges new options with old options, handling unchecked checkboxes and encryption.
      */
     public function sanitize_and_merge_options($input) {
         $old_options = get_option($this->options_name, []);
         $sanitized_input = [];
         $all_fields = $this->get_all_settings_fields();
+        $sensitive_keys = ['finotex_username', 'finotex_password', 'sadad_key'];
         
         foreach ($all_fields as $tab) {
             if(empty($tab['sections'])) continue;
@@ -155,14 +242,32 @@ class Maneli_Settings_Page {
                 if (empty($section['fields'])) continue;
                 foreach ($section['fields'] as $field) {
                     $key = $field['name'];
+                    
+                    // Skip custom display fields (html type)
+                    if ($field['type'] === 'html') continue;
+                    
                     if (isset($input[$key])) {
-                        // Special handling for number type to allow floats (like 0.035)
-                        if ($field['type'] === 'number' && ($key === 'loan_interest_rate' || $key === 'inquiry_fee')) {
-                            $sanitized_input[$key] = sanitize_text_field($input[$key]);
+                        $value = $input[$key];
+                        
+                        // Encrypt sensitive fields if a value is provided
+                        if (in_array($key, $sensitive_keys, true)) {
+                            // Only encrypt non-empty values. If empty, save as empty string (which decrypts to empty).
+                            if (!empty($value)) {
+                                $value = $this->encrypt_data(sanitize_text_field($value));
+                            } else {
+                                $value = '';
+                            }
+                        } elseif ($field['type'] === 'number' && ($key === 'loan_interest_rate' || $key === 'inquiry_fee')) {
+                            $value = sanitize_text_field($value);
                         } else {
-                            $sanitized_input[$key] = ($field['type'] === 'textarea') ? sanitize_textarea_field($input[$key]) : sanitize_text_field($input[$key]);
+                            $value = ($field['type'] === 'textarea') ? sanitize_textarea_field($value) : sanitize_text_field($value);
                         }
+                        
+                        $sanitized_input[$key] = $value;
+
                     }
+                    
+                    // Handle switch fields that might be missing (unchecked)
                     if ($field['type'] === 'switch' && !isset($input[$key])) {
                         $sanitized_input[$key] = '0';
                     }
@@ -241,7 +346,24 @@ class Maneli_Settings_Page {
                             ['name' => 'discount_code', 'label' => esc_html__('Discount Code', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Enter a code for 100% off the inquiry fee.', 'maneli-car-inquiry')],
                             ['name' => 'discount_code_text', 'label' => esc_html__('Discount Code Success Message', 'maneli-car-inquiry'), 'type' => 'text', 'default' => esc_html__('100% discount applied successfully.', 'maneli-car-inquiry')],
                         ]
-                    ]
+                    ],
+                    'maneli_sadad_section' => [
+                        'title' => esc_html__('Sadad (Melli Bank) Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                             ['name' => 'sadad_enabled', 'label' => esc_html__('Enable Sadad', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0'],
+                             ['name' => 'sadad_terminal_id', 'label' => esc_html__('Terminal ID', 'maneli-car-inquiry'), 'type' => 'text'],
+                             ['name' => 'sadad_merchant_id', 'label' => esc_html__('Merchant ID', 'maneli-car-inquiry'), 'type' => 'text'],
+                             // Encrypted Field
+                             ['name' => 'sadad_key', 'label' => esc_html__('Sadad Encryption Key', 'maneli-car-inquiry'), 'type' => 'password', 'desc' => esc_html__('The encryption key (TDes key) provided by Sadad. Stored securely encrypted.', 'maneli-car-inquiry')],
+                        ]
+                    ],
+                    'maneli_zarinpal_section' => [
+                        'title' => esc_html__('Zarinpal Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'zarinpal_enabled', 'label' => esc_html__('Enable Zarinpal', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1'],
+                            ['name' => 'zarinpal_merchant_code', 'label' => esc_html__('Merchant ID', 'maneli-car-inquiry'), 'type' => 'text'],
+                        ]
+                    ],
                 ]
             ],
             'sms' => [
@@ -320,8 +442,9 @@ class Maneli_Settings_Page {
                         'title' => esc_html__('Cheque Color Inquiry Service', 'maneli-car-inquiry'),
                         'fields' => [
                             ['name' => 'finotex_enabled', 'label' => esc_html__('Enable Finotex Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable the cheque color inquiry via the Finotex service.', 'maneli-car-inquiry')],
-                            ['name' => 'finotex_username', 'label' => esc_html__('Finotex Username', 'maneli-car-inquiry'), 'type' => 'text'],
-                            ['name' => 'finotex_password', 'label' => esc_html__('Finotex Password', 'maneli-car-inquiry'), 'type' => 'password'],
+                            // Encrypted Fields
+                            ['name' => 'finotex_username', 'label' => esc_html__('Finotex Client ID', 'maneli-car-inquiry'), 'type' => 'password', 'desc' => esc_html__('Client ID provided by Finotex. Stored securely encrypted.', 'maneli-car-inquiry')],
+                            ['name' => 'finotex_password', 'label' => esc_html__('Finotex API Key', 'maneli-car-inquiry'), 'type' => 'password', 'desc' => esc_html__('API Key (Access Token) provided by Finotex. Stored securely encrypted.', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]

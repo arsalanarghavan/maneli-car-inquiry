@@ -6,7 +6,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.6 (Sadad API fix - Added OpenSSL check)
+ * @version 1.0.8 (Security Fix: Encrypted key decryption and tokenization)
  */
 
 if (!defined('ABSPATH')) {
@@ -24,6 +24,76 @@ class Maneli_Payment_Handler {
         
         add_action('admin_post_nopriv_maneli_start_cash_payment', '__return_false');
         add_action('admin_post_maneli_start_cash_payment', [$this, 'handle_cash_down_payment_submission']);
+    }
+    
+    // =======================================================
+    //  DECRYPTION HELPERS (COPIED FROM SETTINGS HANDLER)
+    // =======================================================
+    
+    /**
+     * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
+     * @return string The encryption key.
+     */
+    private function get_encryption_key() {
+        // Use a unique, secure key from wp-config.php
+        $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
+        // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
+        return hash('sha256', $key, true); 
+    }
+
+    /**
+     * Decrypts data using AES-256-CBC.
+     * @param string $encrypted_data The encrypted data (Base64 encoded).
+     * @return string The decrypted data or empty string on failure.
+     */
+    private function decrypt_data($encrypted_data) {
+        if (empty($encrypted_data)) {
+            return '';
+        }
+        $key = $this->get_encryption_key();
+        $cipher = 'aes-256-cbc';
+        
+        // Decode and separate IV and encrypted data
+        $parts = explode('::', base64_decode($encrypted_data), 2);
+        
+        if (count($parts) !== 2) {
+            return ''; // Invalid format or decryption failed
+        }
+        $encrypted = $parts[0];
+        $iv = $parts[1];
+        
+        // Basic check for IV length
+        if (strlen($iv) !== openssl_cipher_iv_length($cipher)) {
+            return '';
+        }
+
+        // Decrypt
+        $decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
+        
+        return $decrypted === false ? '' : $decrypted;
+    }
+    
+    // =======================================================
+    //  TOKENIZATION HELPER
+    // =======================================================
+    
+    /**
+     * Generates a unique, unguessable token and stores user ID and payment data against it.
+     * @param int $user_id The ID of the user starting the payment.
+     * @return string The unique token.
+     */
+    private function generate_and_save_token($user_id) {
+        // Generate a cryptographically secure, unique token
+        $token = bin2hex(random_bytes(16)); // 32 chars hex string
+        
+        // Store the token and associated metadata (user ID) for lookup
+        // Transients are used for auto-cleanup and security.
+        set_transient('maneli_payment_token_' . $token, $user_id, 3600); // Token -> User ID (Expires in 1 hour)
+        
+        // Store the current token as user meta for redundancy
+        update_user_meta($user_id, 'maneli_current_payment_token', $token);
+        
+        return $token;
     }
 
     /**
@@ -95,7 +165,7 @@ class Maneli_Payment_Handler {
 
     /**
      * Centralized function to select and start the payment process with the active gateway.
-     *
+     *\
      * @param int $user_id      User's ID.
      * @param int $amount_toman Amount in Toman.
      */
@@ -103,10 +173,23 @@ class Maneli_Payment_Handler {
         $options = get_option('maneli_inquiry_all_options', []);
         $active_gateway = $options['active_gateway'] ?? 'zarinpal';
         $order_id = time() . '-' . $user_id;
+        $payment_token = $this->generate_and_save_token($user_id); // Generate the secure token
+        
+        // Store necessary payment details against the token
+        $transient_key = 'maneli_payment_data_' . $payment_token;
+        set_transient($transient_key, [
+            'order_id'      => $order_id,
+            'amount'        => $amount_toman,
+            'payment_type'  => get_user_meta($user_id, 'maneli_payment_type', true),
+            'cash_inquiry_id' => get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true),
+        ], 3600);
 
-        update_user_meta($user_id, 'maneli_payment_order_id', $order_id);
-        update_user_meta($user_id, 'maneli_payment_amount', $amount_toman);
-
+        // Clean up redundant user meta
+        delete_user_meta($user_id, 'maneli_payment_order_id');
+        delete_user_meta($user_id, 'maneli_payment_amount');
+        delete_user_meta($user_id, 'maneli_payment_authority');
+        delete_user_meta($user_id, 'maneli_payment_token');
+        
         $gateway_map = [
             'sadad'    => 'process_sadad_payment',
             'zarinpal' => 'process_zarinpal_payment',
@@ -117,12 +200,12 @@ class Maneli_Payment_Handler {
         };
 
         if (isset($gateway_map[$active_gateway]) && $is_gateway_available($active_gateway)) {
-            $this->{$gateway_map[$active_gateway]}($user_id, $order_id, $amount_toman, $options);
+            $this->{$gateway_map[$active_gateway]}($user_id, $payment_token, $amount_toman, $options);
         } else {
             // Fallback to the first available gateway if the active one is disabled
             foreach ($gateway_map as $gateway => $method) {
                 if ($is_gateway_available($gateway)) {
-                    $this->{$method}($user_id, $order_id, $amount_toman, $options);
+                    $this->{$method}($user_id, $payment_token, $amount_toman, $options);
                     return;
                 }
             }
@@ -153,15 +236,21 @@ class Maneli_Payment_Handler {
     /**
      * Processes payment request via Zarinpal.
      */
-    private function process_zarinpal_payment($user_id, $order_id, $amount_toman, $options) {
+    private function process_zarinpal_payment($user_id, $payment_token, $amount_toman, $options) {
         $merchant_id = $options['zarinpal_merchant_code'] ?? '';
+        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        $order_id = $payment_data['order_id'];
+        
         if (empty($merchant_id)) {
             wp_die(esc_html__('Zarinpal Merchant ID is not configured.', 'maneli-car-inquiry'));
         }
 
         $user_info = get_userdata($user_id);
         $description = sprintf(esc_html__('Payment for order ID %s', 'maneli-car-inquiry'), $order_id);
-        $callback_url = home_url('/?maneli_payment_verify=zarinpal&uid=' . $user_id);
+        
+        // === SECURITY FIX: Use token in callback URL instead of user_id ===
+        $callback_url = home_url('/?maneli_payment_verify=zarinpal&token=' . $payment_token);
+        // === END: SECURITY FIX ===
 
         $data = [
             'merchant_id'  => $merchant_id,
@@ -171,6 +260,7 @@ class Maneli_Payment_Handler {
             'metadata'     => [
                 'email'    => $user_info->user_email,
                 'order_id' => $order_id,
+                'token'    => $payment_token, // Also send token for redundancy
             ],
         ];
 
@@ -189,7 +279,9 @@ class Maneli_Payment_Handler {
         $result = json_decode(wp_remote_retrieve_body($response), true);
 
         if (!empty($result['data']) && !empty($result['data']['authority']) && $result['data']['code'] == 100) {
-            update_user_meta($user_id, 'maneli_payment_authority', $result['data']['authority']);
+            // Save authority against the payment token for verification lookup
+            $payment_data['authority'] = $result['data']['authority'];
+            set_transient('maneli_payment_data_' . $payment_token, $payment_data, 3600);
             
             // Using MANELI_ZARINPAL_STARTPAY_URL constant
             $startpay_url = defined('MANELI_ZARINPAL_STARTPAY_URL') ? MANELI_ZARINPAL_STARTPAY_URL : 'https://www.zarinpal.com/pg/StartPay/';
@@ -205,41 +297,53 @@ class Maneli_Payment_Handler {
      * Verifies a Zarinpal transaction.
      */
     private function verify_zarinpal_payment() {
-        if (empty($_GET['Authority']) || empty($_GET['Status']) || empty($_GET['uid'])) {
+        // === START: SECURITY FIX - Retrieve token from URL and perform lookup ===
+        $authority = sanitize_text_field($_GET['Authority'] ?? '');
+        $status = sanitize_text_field($_GET['Status'] ?? '');
+        $payment_token = sanitize_text_field($_GET['token'] ?? '');
+        
+        if (empty($authority) || empty($status) || empty($payment_token)) {
             return;
         }
-
-        $authority = sanitize_text_field($_GET['Authority']);
-        $status = sanitize_text_field($_GET['Status']);
-        $user_id = intval($_GET['uid']);
+        
+        // 1. LOOKUP USER ID AND PAYMENT DATA VIA TOKEN
+        $user_id = (int)get_transient('maneli_payment_token_' . $payment_token);
+        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        
+        if (!$user_id || empty($payment_data)) {
+            $this->finalize_and_redirect(0, home_url('/dashboard/'), 'failed', esc_html__('Payment token expired or invalid.', 'maneli-car-inquiry'));
+            return;
+        }
+        
         $current_user_id = get_current_user_id();
-
         $options = get_option('maneli_inquiry_all_options', []);
         $merchant_id = $options['zarinpal_merchant_code'] ?? '';
-        $amount = get_user_meta($user_id, 'maneli_payment_amount', true);
-        $saved_authority = get_user_meta($user_id, 'maneli_payment_authority', true);
-        $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
+        $amount_toman = (int)$payment_data['amount'];
+        $saved_authority = $payment_data['authority'] ?? '';
+        $payment_type = $payment_data['payment_type'] ?? '';
         
         $redirect_url = ($payment_type === 'cash_down_payment')
             ? home_url('/dashboard/?endp=inf_menu_4')
             : home_url('/dashboard/?endp=inf_menu_1');
 
-        // SECURITY CHECK: Ensure the current logged-in user matches the transaction user, if logged in.
+        // 2. SECURITY CHECK: Ensure the token is current for the logged-in user if available
         if (is_user_logged_in() && $current_user_id !== $user_id) {
              $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'maneli-car-inquiry'));
              return;
         }
-
+        
+        // 3. CHECK AUTHORITY MATCH
         if ($authority !== $saved_authority) {
             $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Transaction details mismatch.', 'maneli-car-inquiry'));
             return;
         }
+        // === END: SECURITY FIX ===
 
         if ($status === 'OK') {
             $data = [
                 'merchant_id' => $merchant_id,
                 'authority'   => $authority,
-                'amount'      => (int)$amount * 10,
+                'amount'      => $amount_toman * 10, // Amount in Rials
             ];
 
             // Using MANELI_ZARINPAL_VERIFY_URL constant
@@ -260,7 +364,7 @@ class Maneli_Payment_Handler {
             if (!empty($result['data']) && in_array($result['data']['code'], [100, 101])) {
                 // Payment successful, trigger finalization hooks
                 if ($payment_type === 'cash_down_payment') {
-                    $inquiry_id = get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true);
+                    $inquiry_id = $payment_data['cash_inquiry_id'] ?? 0;
                     if ($inquiry_id) {
                         do_action('maneli_cash_inquiry_payment_successful', $user_id, $inquiry_id);
                     }
@@ -280,12 +384,20 @@ class Maneli_Payment_Handler {
     /**
      * Processes payment request via Sadad.
      */
-    private function process_sadad_payment($user_id, $order_id, $amount_toman, $options) {
+    private function process_sadad_payment($user_id, $payment_token, $amount_toman, $options) {
         $merchant_id = $options['sadad_merchant_id'] ?? '';
         $terminal_id = $options['sadad_terminal_id'] ?? '';
-        $terminal_key = $options['sadad_key'] ?? '';
+        
+        // === START: SECURITY FIX - Decrypt Sadad Key ===
+        $encrypted_key = $options['sadad_key'] ?? '';
+        $terminal_key = $this->decrypt_data($encrypted_key);
+        // === END: SECURITY FIX ===
+        
+        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        $order_id = $payment_data['order_id'];
+        
         if (empty($merchant_id) || empty($terminal_id) || empty($terminal_key)) {
-            wp_die(esc_html__('Sadad payment gateway information is incomplete in settings.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Sadad payment gateway information is incomplete (missing IDs or Sadad Encryption Key).', 'maneli-car-inquiry'));
         }
 
         $amount_rial = $amount_toman * 10;
@@ -300,12 +412,16 @@ class Maneli_Payment_Handler {
             wp_die(esc_html__('OpenSSL PHP extension is not enabled. Sadad payment gateway requires this extension.', 'maneli-car-inquiry'));
         }
 
+        // === START: SECURITY FIX - Use token in ReturnUrl ===
+        $return_url = home_url('/?maneli_payment_verify=sadad&token=' . $payment_token);
+        // === END: SECURITY FIX ===
+
         $data = [
             'TerminalId'    => $terminal_id,
             'MerchantId'    => $merchant_id,
             'Amount'        => $amount_rial,
             'SignData'      => $sign_data,
-            'ReturnUrl'     => home_url('/?maneli_payment_verify=sadad'),
+            'ReturnUrl'     => $return_url,
             'LocalDateTime' => date("m/d/Y g:i:s a"),
             'OrderId'       => $order_id
         ];
@@ -315,7 +431,9 @@ class Maneli_Payment_Handler {
         $result = $this->sadad_call_api($request_url, $data);
 
         if ($result && isset($result->ResCode) && $result->ResCode == 0) {
-            update_user_meta($user_id, 'maneli_payment_token', $result->Token);
+            // Save Token and Sadad-specific data against the unique payment token
+            $payment_data['sadad_token'] = $result->Token;
+            set_transient('maneli_payment_data_' . $payment_token, $payment_data, 3600);
             
             // Using MANELI_SADAD_PURCHASE_URL constant
             $purchase_url = defined('MANELI_SADAD_PURCHASE_URL') ? MANELI_SADAD_PURCHASE_URL : 'https://sadad.shaparak.ir/VPG/Purchase?Token=';
@@ -328,34 +446,55 @@ class Maneli_Payment_Handler {
     }
 
     private function verify_sadad_payment() {
-        if (empty($_POST["OrderId"]) || !isset($_POST["ResCode"])) {
+        // === START: SECURITY FIX - Retrieve token from URL and perform lookup ===
+        $payment_token = sanitize_text_field($_GET['token'] ?? '');
+        $order_id = sanitize_text_field($_POST["OrderId"] ?? '');
+        $res_code = sanitize_text_field($_POST["ResCode"] ?? '');
+        
+        if (empty($payment_token) || empty($order_id) || !isset($_POST["ResCode"])) {
             return;
         }
-    
-        $order_id = sanitize_text_field($_POST["OrderId"]);
-        $res_code = sanitize_text_field($_POST["ResCode"]);
-        $user_id_parts = explode('-', $order_id);
-        $user_id = intval(end($user_id_parts));
+
+        // 1. LOOKUP USER ID AND PAYMENT DATA VIA TOKEN
+        $user_id = (int)get_transient('maneli_payment_token_' . $payment_token);
+        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        
+        if (!$user_id || empty($payment_data)) {
+            $this->finalize_and_redirect(0, home_url('/dashboard/'), 'failed', esc_html__('Payment token expired or invalid.', 'maneli-car-inquiry'));
+            return;
+        }
+        
         $current_user_id = get_current_user_id();
-        $payment_type = get_user_meta($user_id, 'maneli_payment_type', true);
-    
+        $payment_type = $payment_data['payment_type'] ?? '';
+        $expected_order_id = $payment_data['order_id'] ?? '';
+        $options = get_option('maneli_inquiry_all_options', []);
+
         $redirect_url = ($payment_type === 'cash_down_payment')
             ? home_url('/dashboard/?endp=inf_menu_4')
             : home_url('/dashboard/?endp=inf_menu_1');
-        
-        // SECURITY CHECK: Ensure the current logged-in user matches the transaction user, if logged in.
+
+        // 2. SECURITY CHECK: Ensure token is current for the logged-in user and OrderId matches
         if (is_user_logged_in() && $current_user_id !== $user_id) {
              $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'maneli-car-inquiry'));
              return;
         }
-    
+        if ($order_id !== $expected_order_id) {
+            $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Security check failed. Order ID mismatch.', 'maneli-car-inquiry'));
+             return;
+        }
+        // === END: SECURITY FIX ===
+
         if ($res_code == 0) {
             if (empty($_POST["token"])) {
                 $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Invalid token returned from the bank.', 'maneli-car-inquiry'));
             } else {
                 $token = sanitize_text_field($_POST["token"]);
-                $options = get_option('maneli_inquiry_all_options', []);
-                $terminal_key = $options['sadad_key'] ?? '';
+                
+                // === START: SECURITY FIX - Decrypt Sadad Key ===
+                $encrypted_key = $options['sadad_key'] ?? '';
+                $terminal_key = $this->decrypt_data($encrypted_key);
+                // === END: SECURITY FIX ===
+                
                 $verify_data = [
                     'Token'    => $token,
                     'SignData' => $this->sadad_encrypt_pkcs7($token, $terminal_key)
@@ -367,7 +506,7 @@ class Maneli_Payment_Handler {
     
                 if ($result && isset($result->ResCode) && $result->ResCode == 0) {
                     if ($payment_type === 'cash_down_payment') {
-                        $inquiry_id = get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true);
+                        $inquiry_id = $payment_data['cash_inquiry_id'] ?? 0;
                         if ($inquiry_id) {
                             do_action('maneli_cash_inquiry_payment_successful', $user_id, $inquiry_id);
                         }
@@ -390,13 +529,25 @@ class Maneli_Payment_Handler {
      * Cleans up user meta, builds the redirect URL, and performs the redirect.
      */
     private function finalize_and_redirect($user_id, $redirect_url, $status, $reason = '') {
-        // Clean up all temporary payment-related user meta
-        delete_user_meta($user_id, 'maneli_payment_order_id');
-        delete_user_meta($user_id, 'maneli_payment_amount');
-        delete_user_meta($user_id, 'maneli_payment_authority'); // Zarinpal
-        delete_user_meta($user_id, 'maneli_payment_token');      // Sadad
+        
+        // --- START: CLEANUP --- 
+        // Look up the token via user ID for cleanup
+        $token = get_user_meta($user_id, 'maneli_current_payment_token', true);
+
+        if ($token) {
+            // Delete transients associated with the token
+            delete_transient('maneli_payment_token_' . $token);
+            delete_transient('maneli_payment_data_' . $token);
+            // Delete the redundant user meta
+            delete_user_meta($user_id, 'maneli_current_payment_token'); 
+        }
+        
+        // Clean up other old/redundant meta fields
+        delete_user_meta($user_id, 'maneli_payment_authority'); 
+        delete_user_meta($user_id, 'maneli_payment_token');      
         delete_user_meta($user_id, 'maneli_payment_type');
         delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
+        // --- END: CLEANUP --- 
         
         // Build the redirect URL with status
         $redirect_url = add_query_arg('payment_status', $status, $redirect_url);
