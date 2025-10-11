@@ -282,6 +282,7 @@
 .maneli-inquiry-wrapper form input[type="text"],
 .maneli-inquiry-wrapper form input[type="email"],
 .maneli-inquiry-wrapper form input[type="password"],
+.maneli-inquiry-wrapper form textarea,
 .maneli-inquiry-wrapper form button {
     font-family: inherit;
     width: 100%;
@@ -335,25 +336,31 @@
 }
 
 /* Form Grid Layouts */
-.inquiry-car-image {
-    text-align: center;
+.inquiry-summary-flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: center;
     margin-bottom: 30px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.inquiry-summary-box {
+    flex: 2;
+    min-width: 300px;
+}
+.inquiry-car-image {
+    flex: 1;
+    text-align: center;
+    min-width: 200px;
 }
 .inquiry-car-image img {
-    max-width: 300px;
-    width: 100%;
+    max-width: 100%;
     height: auto;
     border-radius: 8px;
     box-shadow: none;
     border: none;
-}
-.inquiry-summary-box {
-    max-width: 700px;
-    margin: 0 auto 30px auto;
-    background-color: transparent;
-    border: none;
-    border-bottom: 1px solid #eee;
-    padding: 0 0 20px 0;
 }
 .inquiry-summary-box h4 {
     margin-top: 0;
