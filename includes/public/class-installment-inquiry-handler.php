@@ -1,4 +1,13 @@
 <?php
+/**
+ * Handles the multi-step process for creating an installment inquiry for a customer.
+ * This class now listens for hooks to finalize inquiries, decoupling it from the payment handler.
+ *
+ * @package Maneli_Car_Inquiry/Includes/Public
+ * @author  Arsalan Arghavan (Refactored by Gemini)
+ * @version 1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -6,35 +15,71 @@ if (!defined('ABSPATH')) {
 class Maneli_Installment_Inquiry_Handler {
 
     public function __construct() {
-        // Customer Workflow Hooks for Installment Inquiries
+        // Step 1: Handle car selection from the product page calculator.
         add_action('wp_ajax_maneli_select_car_ajax', [$this, 'handle_car_selection_ajax']);
+
+        // Step 2: Handle identity form submission.
         add_action('admin_post_nopriv_maneli_submit_identity', '__return_false');
         add_action('admin_post_maneli_submit_identity', [$this, 'handle_identity_submission']);
+
+        // Step 3 (Implicit): Listens for a successful payment hook to finalize the installment inquiry.
+        add_action('maneli_inquiry_payment_successful', [$this, 'finalize_inquiry_from_hook']);
+        
+        // Bonus: Also listens for cash payment success to update its status. This keeps concerns separate.
+        add_action('maneli_cash_inquiry_payment_successful', [$this, 'finalize_cash_inquiry_from_hook'], 10, 2);
+
+        // Handle re-try logic for failed inquiries.
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
     }
 
+    /**
+     * AJAX handler for Step 1: Saving the selected car and calculator data to user meta.
+     */
     public function handle_car_selection_ajax() {
         check_ajax_referer('maneli_ajax_nonce', 'nonce');
+
         if (!is_user_logged_in() || empty($_POST['product_id'])) {
-            wp_send_json_error(['message' => 'درخواست نامعتبر است.']);
+            wp_send_json_error(['message' => esc_html__('Invalid request. Please log in and try again.', 'maneli-car-inquiry')]);
         }
+
         $user_id = get_current_user_id();
-        update_user_meta($user_id, 'maneli_selected_car_id', intval($_POST['product_id']));
-        update_user_meta($user_id, 'maneli_inquiry_step', 'form_pending');
-        if (isset($_POST['down_payment'])) { update_user_meta($user_id, 'maneli_inquiry_down_payment', sanitize_text_field($_POST['down_payment'])); }
-        if (isset($_POST['term_months'])) { update_user_meta($user_id, 'maneli_inquiry_term_months', sanitize_text_field($_POST['term_months'])); }
-        if (isset($_POST['total_price'])) { update_user_meta($user_id, 'maneli_inquiry_total_price', sanitize_text_field($_POST['total_price'])); }
-        if (isset($_POST['installment_amount'])) { update_user_meta($user_id, 'maneli_inquiry_installment', sanitize_text_field($_POST['installment_amount'])); }
-        wp_send_json_success(['message' => 'خودرو با موفقیت انتخاب شد.']);
+        $meta_to_save = [
+            'maneli_selected_car_id'      => intval($_POST['product_id']),
+            'maneli_inquiry_step'         => 'form_pending',
+            'maneli_inquiry_down_payment' => sanitize_text_field($_POST['down_payment'] ?? ''),
+            'maneli_inquiry_term_months'  => sanitize_text_field($_POST['term_months'] ?? ''),
+            'maneli_inquiry_total_price'  => sanitize_text_field($_POST['total_price'] ?? ''),
+            'maneli_inquiry_installment'  => sanitize_text_field($_POST['installment_amount'] ?? ''),
+        ];
+
+        foreach ($meta_to_save as $key => $value) {
+            update_user_meta($user_id, $key, $value);
+        }
+
+        wp_send_json_success(['message' => esc_html__('Car selected. Redirecting...', 'maneli-car-inquiry')]);
     }
 
+    /**
+     * Handler for Step 2: Processing the identity form submission.
+     */
     public function handle_identity_submission() {
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_submit_identity_nonce')) wp_die('خطای امنیتی!');
-        if (!is_user_logged_in()) { wp_redirect(wp_get_referer()); exit; }
-        
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_submit_identity_nonce')) {
+            wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
+        }
+        if (!is_user_logged_in()) {
+            wp_redirect(home_url());
+            exit;
+        }
+
         $user_id = get_current_user_id();
         
-        // Sanitize all buyer fields
+        $required_fields = ['first_name', 'last_name', 'national_code', 'mobile_number'];
+        foreach ($required_fields as $field) {
+            if (empty($_POST[$field])) {
+                wp_die(sprintf(esc_html__('Error: The field "%s" is required.', 'maneli-car-inquiry'), $field));
+            }
+        }
+        
         $buyer_fields = [
             'first_name', 'last_name', 'father_name', 'national_code', 'occupation', 
             'income_level', 'mobile_number', 'phone_number', 'residency_status', 
@@ -43,14 +88,10 @@ class Maneli_Installment_Inquiry_Handler {
         ];
         $buyer_data = [];
         foreach ($buyer_fields as $key) {
-             if (empty($_POST[$key]) && in_array($key, ['first_name', 'last_name', 'national_code', 'mobile_number'])) {
-                wp_die("خطا: لطفاً فیلدهای الزامی خریدار را پر کنید: نام، نام خانوادگی، کد ملی و شماره همراه.");
-            }
             $buyer_data[$key] = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
         }
-        
-        // Sanitize all issuer fields if applicable
-        $issuer_type = isset($_POST['issuer_type']) ? sanitize_text_field($_POST['issuer_type']) : 'self';
+
+        $issuer_type = isset($_POST['issuer_type']) ? sanitize_key($_POST['issuer_type']) : 'self';
         $issuer_data = [];
         if ($issuer_type === 'other') {
             $issuer_fields = [
@@ -60,119 +101,151 @@ class Maneli_Installment_Inquiry_Handler {
                 'issuer_occupation'
             ];
             foreach ($issuer_fields as $key) {
-                // Use appropriate sanitization based on field type
-                if ($key === 'issuer_address') {
-                    $issuer_data[$key] = sanitize_textarea_field($_POST[$key] ?? '');
-                } else {
-                    $issuer_data[$key] = sanitize_text_field($_POST[$key] ?? '');
-                }
+                // Address can be multi-line
+                $issuer_data[$key] = isset($_POST[$key]) ? sanitize_textarea_field($_POST[$key]) : '';
             }
         }
 
-        $temp_data = [
-            'buyer_data' => $buyer_data, 
-            'issuer_data' => $issuer_data, 
-            'issuer_type' => $issuer_type
-        ];
-        update_user_meta($user_id, 'maneli_temp_inquiry_data', $temp_data);
-        
+        // Store sanitized data temporarily, waiting for payment (if any)
+        update_user_meta($user_id, 'maneli_temp_inquiry_data', [
+            'buyer_data'  => $buyer_data,
+            'issuer_data' => $issuer_data,
+            'issuer_type' => $issuer_type,
+        ]);
+
         $options = get_option('maneli_inquiry_all_options', []);
-        $inquiry_fee = (int)($options['inquiry_fee'] ?? 0);
-        $payment_enabled = isset($options['payment_enabled']) && $options['payment_enabled'] == '1';
+        $payment_enabled = !empty($options['payment_enabled']) && $options['payment_enabled'] == '1';
+        $inquiry_fee = !empty($options['inquiry_fee']) ? (int)$options['inquiry_fee'] : 0;
 
         if ($payment_enabled && $inquiry_fee > 0) {
             update_user_meta($user_id, 'maneli_inquiry_step', 'payment_pending');
         } else {
-            $this->finalize_inquiry($user_id, true);
+            // No payment needed, finalize the inquiry right away by triggering the success hook
+            do_action('maneli_inquiry_payment_successful', $user_id);
         }
+
         wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
         exit;
     }
+    
+    /**
+     * Callback for the hook `maneli_inquiry_payment_successful`.
+     * This is the decoupled entry point for finalizing an installment inquiry.
+     * @param int $user_id The user ID passed from the hook.
+     */
+    public function finalize_inquiry_from_hook($user_id) {
+        $this->finalize_inquiry($user_id, true);
+    }
+    
+    /**
+     * Callback for the hook `maneli_cash_inquiry_payment_successful`.
+     * This updates the status of a cash inquiry post after successful payment.
+     * @param int $user_id The user ID.
+     * @param int $inquiry_id The cash inquiry post ID.
+     */
+    public function finalize_cash_inquiry_from_hook($user_id, $inquiry_id) {
+        if ($inquiry_id && get_post_type($inquiry_id) === 'cash_inquiry') {
+            update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
+        }
+    }
 
+    /**
+     * Finalizes the inquiry process by creating the post, calling APIs, and sending notifications.
+     *
+     * @param int  $user_id The ID of the user.
+     * @param bool $is_new  Whether this is a brand new inquiry (for notification purposes).
+     * @return bool True on success, false on failure.
+     */
     public function finalize_inquiry($user_id, $is_new = false) {
         $temp_data = get_user_meta($user_id, 'maneli_temp_inquiry_data', true);
-        if (empty($temp_data)) return false;
+        if (empty($temp_data)) {
+            return false;
+        }
 
         $buyer_data = $temp_data['buyer_data'];
         $issuer_data = $temp_data['issuer_data'];
         $issuer_type = $temp_data['issuer_type'];
 
-        // Update user profile with new data
+        // Update user profile with submitted data
         wp_update_user(['ID' => $user_id, 'first_name' => $buyer_data['first_name'], 'last_name' => $buyer_data['last_name']]);
-        foreach ($buyer_data as $key => $value) { 
-            update_user_meta($user_id, $key, $value); 
+        foreach ($buyer_data as $key => $value) {
+            update_user_meta($user_id, $key, $value);
         }
-        
-        $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code'])) ? $issuer_data['issuer_national_code'] : $buyer_data['national_code'];
-        
+
+        $national_code_for_api = ($issuer_type === 'other' && !empty($issuer_data['issuer_national_code']))
+            ? $issuer_data['issuer_national_code']
+            : $buyer_data['national_code'];
+
         $finotex_result = $this->execute_finotex_inquiry($national_code_for_api);
-        
+
         $car_id = get_user_meta($user_id, 'maneli_selected_car_id', true);
-        $post_content = "گزارش استعلام از فینوتک:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>";
-        $post_title = 'استعلام برای: ' . get_the_title($car_id) . ' - ' . $buyer_data['first_name'] . ' ' . $buyer_data['last_name'];
+        $post_title = sprintf(
+            '%s: %s - %s',
+            esc_html__('Inquiry for', 'maneli-car-inquiry'),
+            get_the_title($car_id),
+            $buyer_data['first_name'] . ' ' . $buyer_data['last_name']
+        );
         
         $post_id = wp_insert_post([
             'post_title'   => $post_title,
-            'post_content' => $post_content,
+            'post_content' => "Finotex API raw response:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>",
             'post_status'  => 'publish',
             'post_author'  => $user_id,
             'post_type'    => 'inquiry'
         ]);
 
-        if ($post_id && !is_wp_error($post_id)) {
-            $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
-            if ($finotex_result['status'] === 'SKIPPED') {
-                $initial_status = 'pending';
-            }
-            update_post_meta($post_id, 'inquiry_status', $initial_status);
-
-            update_post_meta($post_id, 'issuer_type', $issuer_type);
-            
-            // Save all buyer and issuer data as post meta
-            foreach ($buyer_data as $key => $value) { update_post_meta($post_id, $key, $value); }
-            if (!empty($issuer_data)) { foreach ($issuer_data as $key => $value) { update_post_meta($post_id, $key, $value); } }
-            
-            update_post_meta($post_id, 'product_id', $car_id);
-            update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
-            
-            $calculator_meta_keys = ['maneli_inquiry_down_payment', 'maneli_inquiry_term_months', 'maneli_inquiry_total_price', 'maneli_inquiry_installment'];
-            foreach($calculator_meta_keys as $key) { $value = get_user_meta($user_id, $key, true); if ($value) { update_post_meta($post_id, $key, $value); } }
-            
-            if ($is_new && $initial_status === 'pending') {
-                $sms_handler = new Maneli_SMS_Handler();
-                $customer_name = ($buyer_data['first_name'] ?? '') . ' ' . ($buyer_data['last_name'] ?? '');
-                $car_name = get_the_title($car_id) ?? '';
-                $all_options = get_option('maneli_inquiry_all_options', []);
-                $admin_mobile = $all_options['admin_notification_mobile'] ?? '';
-                $pattern_admin = $all_options['sms_pattern_new_inquiry'] ?? 0;
-                if (!empty($admin_mobile) && $pattern_admin > 0) { $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name]); }
-                $customer_mobile = $buyer_data['mobile_number'] ?? '';
-                $pattern_customer = $all_options['sms_pattern_pending'] ?? 0;
-                if (!empty($customer_mobile) && $pattern_customer > 0) { $sms_handler->send_pattern($pattern_customer, $customer_mobile, [$customer_name, $car_name]); }
-            }
-            
-            delete_user_meta($user_id, 'maneli_inquiry_step');
-            delete_user_meta($user_id, 'maneli_selected_car_id');
-            delete_user_meta($user_id, 'maneli_temp_inquiry_data');
-            foreach($calculator_meta_keys as $key) { delete_user_meta($user_id, $key); }
+        if (is_wp_error($post_id)) {
+            error_log('Maneli Inquiry Error: Failed to insert post. ' . $post_id->get_error_message());
+            return false;
         }
+
+        $initial_status = ($finotex_result['status'] === 'DONE') ? 'pending' : 'failed';
+        if ($finotex_result['status'] === 'SKIPPED') {
+            $initial_status = 'pending';
+        }
+        
+        update_post_meta($post_id, 'inquiry_status', $initial_status);
+        update_post_meta($post_id, 'issuer_type', $issuer_type);
+        
+        foreach ($buyer_data as $key => $value) { update_post_meta($post_id, $key, $value); }
+        if (!empty($issuer_data)) { foreach ($issuer_data as $key => $value) { update_post_meta($post_id, $key, $value); } }
+        
+        update_post_meta($post_id, 'product_id', $car_id);
+        update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
+        
+        $calculator_meta_keys = ['maneli_inquiry_down_payment', 'maneli_inquiry_term_months', 'maneli_inquiry_total_price', 'maneli_inquiry_installment'];
+        foreach($calculator_meta_keys as $key) {
+            $value = get_user_meta($user_id, $key, true);
+            if ($value) { update_post_meta($post_id, $key, $value); }
+        }
+        
+        if ($is_new && $initial_status === 'pending') {
+            $this->send_new_inquiry_notifications($buyer_data, $car_id);
+        }
+        
+        $this->cleanup_user_meta($user_id, $calculator_meta_keys);
+        
         return true;
     }
 
+    /**
+     * Executes the Finotex API call to get cheque status.
+     * @param string $national_code The national ID code to check.
+     * @return array An array containing the status, data, and raw response.
+     */
     private function execute_finotex_inquiry($national_code) {
-        $all_options = get_option('maneli_inquiry_all_options', []);
-        $finotex_enabled = isset($all_options['finotex_enabled']) && $all_options['finotex_enabled'] == '1';
+        $options = get_option('maneli_inquiry_all_options', []);
         
-        if (!$finotex_enabled) {
-            return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'استعلام فینوتک در تنظیمات غیرفعال است.'];
+        if (empty($options['finotex_enabled']) || $options['finotex_enabled'] !== '1') {
+            return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Finotex inquiry is disabled in settings.'];
         }
 
-        $client_id = $all_options['finotex_client_id'] ?? '';
-        $api_key = $all_options['finotex_api_key'] ?? '';
+        $client_id = $options['finotex_client_id'] ?? '';
+        $api_key = $options['finotex_api_key'] ?? '';
         $result = ['status' => 'FAILED', 'data' => null, 'raw_response' => ''];
 
         if (empty($client_id) || empty($api_key)) {
-            $result['raw_response'] = 'خطای پلاگین: شناسه کلاینت یا توکن فینوتک در تنظیمات وارد نشده است.';
+            $result['raw_response'] = 'Plugin Error: Finotex Client ID or Access Token not set in settings.';
             return $result;
         }
 
@@ -182,11 +255,11 @@ class Maneli_Installment_Inquiry_Handler {
         
         $response = wp_remote_get($api_url_with_params, [
             'headers' => ['Authorization' => 'Bearer ' . $api_key, 'Accept' => 'application/json'],
-            'timeout' => 45
+            'timeout' => 45,
         ]);
 
         if (is_wp_error($response)) {
-            $result['raw_response'] = 'خطای اتصال وردپرس: ' . $response->get_error_message();
+            $result['raw_response'] = 'WordPress Connection Error: ' . $response->get_error_message();
             return $result;
         }
 
@@ -204,15 +277,65 @@ class Maneli_Installment_Inquiry_Handler {
         return $result;
     }
 
+    /**
+     * Handles the user's request to retry a failed inquiry.
+     */
     public function handle_inquiry_retry() {
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_retry_inquiry_nonce')) wp_die('خطای امنیتی!');
-        if (!is_user_logged_in() || empty($_POST['inquiry_id'])) wp_die('درخواست نامعتبر!');
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_retry_inquiry_nonce')) {
+            wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
+        }
+        if (!is_user_logged_in() || empty($_POST['inquiry_id'])) {
+            wp_die(esc_html__('Invalid request.', 'maneli-car-inquiry'));
+        }
+        
         $user_id = get_current_user_id();
         $post_id = intval($_POST['inquiry_id']);
-        if (get_post_field('post_author', $post_id) != $user_id) wp_die('خطای دسترسی!');
+
+        if (get_post_field('post_author', $post_id) != $user_id) {
+            wp_die(esc_html__('Access denied.', 'maneli-car-inquiry'));
+        }
+
         wp_delete_post($post_id, true);
         update_user_meta($user_id, 'maneli_inquiry_step', 'form_pending');
+        
         wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
         exit;
+    }
+
+    /**
+     * Sends notifications to admin and customer for a new inquiry.
+     */
+    private function send_new_inquiry_notifications($buyer_data, $car_id) {
+        $sms_handler = new Maneli_SMS_Handler();
+        $customer_name = ($buyer_data['first_name'] ?? '') . ' ' . ($buyer_data['last_name'] ?? '');
+        $car_name = get_the_title($car_id) ?? '';
+        $options = get_option('maneli_inquiry_all_options', []);
+
+        // Notify Admin
+        $admin_mobile = $options['admin_notification_mobile'] ?? '';
+        $pattern_admin = $options['sms_pattern_new_inquiry'] ?? 0;
+        if (!empty($admin_mobile) && $pattern_admin > 0) {
+            $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name]);
+        }
+
+        // Notify Customer
+        $customer_mobile = $buyer_data['mobile_number'] ?? '';
+        $pattern_customer = $options['sms_pattern_pending'] ?? 0;
+        if (!empty($customer_mobile) && $pattern_customer > 0) {
+            $sms_handler->send_pattern($pattern_customer, $customer_mobile, [$customer_name, $car_name]);
+        }
+    }
+    
+    /**
+     * Cleans up all temporary meta fields from the user's profile after inquiry creation.
+     */
+    private function cleanup_user_meta($user_id, $calculator_meta_keys) {
+        $keys_to_delete = array_merge(
+            $calculator_meta_keys,
+            ['maneli_inquiry_step', 'maneli_selected_car_id', 'maneli_temp_inquiry_data']
+        );
+        foreach ($keys_to_delete as $key) {
+            delete_user_meta($user_id, $key);
+        }
     }
 }

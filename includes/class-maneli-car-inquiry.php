@@ -1,19 +1,66 @@
 <?php
+/**
+ * The core plugin class that orchestrates the entire Maneli Car Inquiry plugin.
+ * It is responsible for loading dependencies, setting up internationalization,
+ * and initializing all components.
+ *
+ * @package Maneli_Car_Inquiry/Includes
+ * @author  Arsalan Arghavan (Refactored by Gemini)
+ * @version 1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
-/**
- * Main plugin class.
- */
 final class Maneli_Car_Inquiry_Plugin {
 
-    public function __construct() {
+    /**
+     * The single instance of the class.
+     * @var Maneli_Car_Inquiry_Plugin
+     */
+    private static $instance = null;
+
+    /**
+     * Main plugin instance. Ensures only one instance of the plugin class is loaded or can be loaded.
+     * @return Maneli_Car_Inquiry_Plugin - Main instance.
+     */
+    public static function instance() {
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    /**
+     * Constructor. Private to prevent direct object creation.
+     */
+    private function __construct() {
+        $this->define_hooks();
+    }
+
+    /**
+     * Register all hooks related to the core functionality of the plugin.
+     */
+    private function define_hooks() {
         add_action('plugins_loaded', [$this, 'initialize']);
+        add_action('init', [$this, 'load_plugin_textdomain']);
+    }
+
+    /**
+     * Load the plugin text domain for translation.
+     */
+    public function load_plugin_textdomain() {
+        load_plugin_textdomain(
+            'maneli-car-inquiry',
+            false,
+            dirname(plugin_basename(MANELI_INQUIRY_PLUGIN_PATH)) . '/languages/'
+        );
     }
 
     /**
      * Initializes the plugin after all other plugins are loaded.
+     * Checks for WooCommerce dependency before proceeding.
      */
     public function initialize() {
         if (!class_exists('WooCommerce')) {
@@ -25,11 +72,13 @@ final class Maneli_Car_Inquiry_Plugin {
     }
 
     /**
-     * Includes all necessary files.
+     * Includes all necessary PHP files for the plugin to function.
      */
-    public function includes() {
-        // Core Functionality
+    private function includes() {
+        // Core Functionality & Helpers
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-roles-caps.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-hooks.php';
         
@@ -44,13 +93,15 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-admin-dashboard-widgets.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-product-editor-page.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
         
         // Frontend Features
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
     }
 
     /**
-     * Initializes all the classes.
+     * Initializes all the necessary classes by creating instances of them.
      */
     private function init_classes() {
         new Maneli_Roles_Caps();
@@ -61,19 +112,33 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Shortcode_Handler();
         new Maneli_Expert_Panel();
         new Maneli_User_Profile();
+        new Maneli_Product_Editor_Page();
+        new Maneli_Credit_Report_Page();
 
         $options = get_option('maneli_inquiry_all_options', []);
-        if (isset($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
+        if (!empty($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
             new Maneli_Grouped_Attributes();
         }
     }
 
     /**
-     * Shows a notice if WooCommerce is not active.
+     * Displays a notice in the admin area if WooCommerce is not active.
      */
     public function woocommerce_not_active_notice() {
         ?>
-        <div class="error"><p>پلاگین استعلام خودرو برای کار کردن به ووکامرس نیاز دارد. لطفاً ووکامرس را نصب و فعال کنید.</p></div>
+        <div class="notice notice-error is-dismissible">
+            <p>
+                <?php esc_html_e('Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue.', 'maneli-car-inquiry'); ?>
+            </p>
+        </div>
         <?php
+    }
+
+    /**
+     * The main method that runs the plugin.
+     * This is called from the root plugin file.
+     */
+    public function run() {
+        // The constructor handles all the necessary hooks. This method is the entry point.
     }
 }

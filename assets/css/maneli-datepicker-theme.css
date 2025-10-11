@@ -1,70 +1,105 @@
-/* KAMA Datepicker Styles */
+/**
+ * Maneli Car Inquiry - Jalali Datepicker Theme
+ *
+ * This file contains the styles for the KAMA Datepicker to match the
+ * plugin's overall design theme. It uses CSS variables defined in frontend.css.
+ *
+ * @version 1.0.0
+ */
+
+/* === 1. Main Container === */
 div.kamadatepicker-container {
-    font-family: inherit !important;
-    z-index: 10000 !important;
+    font-family: inherit !important; /* Inherit theme's font */
+    z-index: 10000 !important;      /* Ensure it appears above other elements */
     position: absolute;
-    border: 1px solid #ccc;
-    background: #fff;
+    border: 1px solid var(--border-color, #ccc);
+    background: var(--background-white, #fff);
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     width: 290px;
 }
+
 div.kamadatepicker-container table {
     width: 100%;
     border-collapse: collapse;
 }
+
 div.kamadatepicker-container table tr td,
 div.kamadatepicker-container table tr th {
     text-align: center;
     padding: 8px;
     font-size: 14px;
 }
+
+/* === 2. Header (Month Navigation) === */
 div.kamadatepicker-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
 }
+
 div.kamadatepicker-header .kamadatepicker-month-name {
     font-weight: bold;
     font-size: 16px;
+    color: var(--text-dark, #333);
 }
+
 div.kamadatepicker-header button {
     background: transparent;
     border: none;
     cursor: pointer;
     font-size: 20px;
-    color: #3989BE;
+    color: var(--theme-blue, #2D89BE); /* Use theme color */
     padding: 5px 10px;
     border-radius: 4px;
+    transition: background-color 0.2s ease;
 }
+
 div.kamadatepicker-header button:hover {
-    background-color: #f0f8ff;
+    background-color: #f0f8ff; /* A light blue for hover */
 }
+
+/* === 3. Body (Days) === */
 div.kamadatepicker-body .kamadatepicker-day-name {
-    color: #555;
+    color: var(--text-light, #555);
     font-weight: bold;
 }
+
 div.kamadatepicker-body .kamadatepicker-day {
     cursor: pointer;
     border-radius: 50%;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
+
+/* Today's date */
 div.kamadatepicker-body .kamadatepicker-day.today {
-    border: 1px solid #3989BE;
+    border: 1px solid var(--theme-blue, #2D89BE);
+    color: var(--theme-blue, #2D89BE);
+    font-weight: bold;
 }
+
+/* Selected date */
 div.kamadatepicker-body .kamadatepicker-day.selected {
-    background-color: #3989BE;
-    color: #fff;
+    background-color: var(--theme-blue, #2D89BE);
+    color: var(--background-white, #fff);
+    border: 1px solid var(--theme-blue, #2D89BE);
 }
+
+/* Hover effect on non-selected days */
 div.kamadatepicker-body .kamadatepicker-day:hover:not(.selected) {
-    background-color: #e9f3f9;
+    background-color: #e9f3f9; /* A very light blue */
 }
+
+/* Disabled days */
 div.kamadatepicker-body .kamadatepicker-day.disabled {
     color: #ccc;
     cursor: default;
+    background-color: transparent;
+    border-color: transparent;
 }
+
 div.kamadatepicker-body .kamadatepicker-day.disabled:hover {
     background-color: transparent;
 }

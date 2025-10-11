@@ -1,25 +1,40 @@
+/**
+ * Handles frontend logic for the Expert's New Inquiry Form.
+ * This includes initializing the Select2 AJAX search for cars,
+ * displaying the loan calculator, and managing form visibility.
+ *
+ * @version 1.0.0
+ */
 (function($) {
     'use strict';
 
     $(document).ready(function() {
         const expertForm = $('#expert-inquiry-form');
         if (!expertForm.length) {
+            // If the expert form is not on the page, do nothing.
             return;
         }
 
+        // --- 1. DOM Element Cache ---
         const productSelect = $('#product_id_expert');
         const detailsWrapper = $('#expert-form-details');
+        const calculatorWrapper = $('#loan-calculator-wrapper');
+        const issuerRadios = expertForm.find('input[name="issuer_type"]');
+        const issuerForm = $('#issuer-form-wrapper');
 
+        // --- 2. Helper Functions ---
         const formatMoney = (num) => {
-            if (isNaN(num) || num === null) return '-';
+            if (isNaN(num) || num === null) return '۰';
             return Math.ceil(num).toLocaleString('fa-IR');
         };
-
+        
         const parseMoney = (str) => {
-             if (!str) return 0;
-             return parseInt(String(str).replace(/,/g, ''), 10) || 0;
+            if (!str) return 0;
+            // Converts a formatted string (with commas and Persian/English numerals) to a plain integer.
+            return parseInt(String(str).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9]/g, ''), 10) || 0;
         };
 
+        // --- 3. Initialize Select2 for Car Search ---
         productSelect.select2({
             placeholder: 'نام خودرو را جستجو کنید...',
             dir: "rtl",
@@ -37,26 +52,31 @@
                         search: params.term,
                     };
                 },
-                processResults: function(data, params) {
+                processResults: function(data) {
                     if (data.success) {
-                        return {
-                            results: data.data.results
-                        };
+                        return { results: data.data.results };
                     } else {
                         console.error('Server error:', data.data ? data.data.message : 'Unknown error');
                         return { results: [] };
                     }
-                }
+                },
+                cache: true
             }
         });
 
+        // --- 4. Event Handlers ---
+
+        /**
+         * Handles the selection of a car from the Select2 dropdown.
+         * Renders the loan calculator and sets up its event listeners.
+         */
         productSelect.on('select2:select', function(e) {
             const data = e.params.data;
-            const price = parseInt(data.price);
-            const minDownPayment = parseInt(data.min_downpayment);
+            const price = parseInt(data.price, 10);
+            const minDownPayment = parseInt(data.min_downpayment, 10);
 
             if (price > 0) {
-                const calculatorWrapper = $('#loan-calculator-wrapper');
+                // Inject the calculator HTML into the wrapper
                 const calculatorHTML = `
                     <div class="form-grid" style="margin-top: 20px;">
                         <div class="form-row">
@@ -94,71 +114,72 @@
                 calculatorWrapper.html(calculatorHTML);
                 detailsWrapper.slideDown();
 
+                // --- Calculator Live Update Logic ---
                 const downPaymentInput = $('#expert_down_payment');
                 const termSelect = $('#expert_term_months');
-                const installmentDisplay = $('#expert-installment-amount');
-                const loanAmountDisplay = $('#expert-loan-amount');
-                const totalRepaymentDisplay = $('#expert-total-repayment');
                 
-                downPaymentInput.on('keyup input', function(event) {
-                    let value = parseMoney($(this).val());
-                    if (value > 0) {
-                       $(this).val(value.toLocaleString('en-US'));
-                    } else {
-                       $(this).val('');
-                    }
-                    calculateInstallment();
-                });
-
-                function calculateInstallment() {
-                    let dp = parseMoney(downPaymentInput.val());
-                    const months = parseInt(termSelect.val()) || 12;
+                const calculateInstallment = () => {
+                    const dp = parseMoney(downPaymentInput.val());
+                    const months = parseInt(termSelect.val(), 10) || 12;
                     const loanAmount = price - dp;
 
                     if (loanAmount <= 0) {
-                        installmentDisplay.text('0');
-                        loanAmountDisplay.text('0');
-                        totalRepaymentDisplay.text(formatMoney(dp));
+                        $('#expert-installment-amount').text('۰');
+                        $('#expert-loan-amount').text('۰');
+                        $('#expert-total-repayment').text(formatMoney(dp));
                         return;
                     }
-
+                    
                     const monthlyInterestAmount = loanAmount * 0.035;
                     const totalInterest = monthlyInterestAmount * (months + 1);
                     const totalRepayment = loanAmount + totalInterest;
                     const installment = totalRepayment / months;
 
-                    loanAmountDisplay.text(formatMoney(loanAmount));
-                    totalRepaymentDisplay.text(formatMoney(totalRepayment));
-                    installmentDisplay.text(formatMoney(installment));
-                }
+                    $('#expert-loan-amount').text(formatMoney(loanAmount));
+                    $('#expert-total-repayment').text(formatMoney(totalRepayment));
+                    $('#expert-installment-amount').text(formatMoney(installment));
+                };
+                
+                downPaymentInput.on('keyup input', function() {
+                    const value = $(this).val();
+                    const parsedValue = parseMoney(value);
+                    if (parsedValue > 0) {
+                        // Reformat the input value with commas while typing
+                        $(this).val(parsedValue.toLocaleString('en-US'));
+                    }
+                    calculateInstallment();
+                });
 
-                downPaymentInput.on('change', calculateInstallment);
                 termSelect.on('change', calculateInstallment);
 
-                downPaymentInput.val(minDownPayment.toString()).trigger('keyup');
+                // Set initial value and trigger calculation
+                downPaymentInput.val(minDownPayment.toLocaleString('en-US')).trigger('input');
             }
         });
 
-        productSelect.on('select2:unselect', function(e) {
+        /**
+         * Handles the clearing of a car selection.
+         * Hides the calculator and details form.
+         */
+        productSelect.on('select2:unselect', function() {
             detailsWrapper.slideUp();
-            $('#loan-calculator-wrapper').empty();
+            calculatorWrapper.empty();
         });
 
-        const issuerRadios = expertForm.find('input[name="issuer_type"]');
-        const issuerForm = $('#issuer-form-wrapper');
-        const issuerInputs = issuerForm.find('input');
-
-        function toggleIssuerForm() {
+        /**
+         * Toggles the visibility of the cheque issuer's form fields.
+         */
+        const toggleIssuerForm = () => {
             const selectedValue = expertForm.find('input[name="issuer_type"]:checked').val();
-            if (selectedValue === 'self') {
-                issuerForm.slideUp();
-                issuerInputs.prop('required', false);
-            } else {
-                issuerForm.slideDown();
-                issuerInputs.prop('required', true);
-            }
-        }
+            const isOther = selectedValue === 'other';
+            
+            issuerForm.slideToggle(isOther);
+            issuerForm.find('input, select').prop('required', isOther);
+        };
+
         issuerRadios.on('change', toggleIssuerForm);
+
+        // Initial check on page load
         toggleIssuerForm(); 
     });
 

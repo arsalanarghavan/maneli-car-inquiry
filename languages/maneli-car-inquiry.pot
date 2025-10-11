@@ -1,0 +1,200 @@
+# Copyright (C) 2023 ArsalanArghavan
+# This file is distributed under the same license as the Maneli Car Inquiry Core package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Maneli Car Inquiry Core 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/maneli-car-inquiry\n"
+"POT-Creation-Date: 2023-10-27 10:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: Poedit 3.3.1\n"
+
+#: includes/admin/class-admin-actions-handler.php:40
+msgid "Invalid request or insufficient permissions."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:47
+msgid "Invalid status provided."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:110
+#: includes/admin/class-ajax-handler.php:571
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:115
+msgid "Please select a car."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:121
+msgid "Error: The field \"%s\" for the buyer is required."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:132
+msgid "Error creating new user: "
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:151
+msgid "Error creating inquiry post."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:164
+msgid "User ID not specified."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:171
+msgid "You cannot change your own administrative role to a lower-level role."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:204
+msgid "Mobile number and password are required."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:211
+msgid "A user with this mobile number already exists."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:215
+msgid "An email associated with this mobile number already exists."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:46
+#: includes/admin/class-ajax-handler.php:84
+#: includes/admin/class-ajax-handler.php:461
+#: includes/admin/class-ajax-handler.php:484
+#: includes/admin/class-ajax-handler.php:530
+#: includes/admin/class-ajax-handler.php:550
+#: includes/admin/class-ajax-handler.php:571
+#: includes/admin/class-ajax-handler.php:627
+msgid "Unauthorized access."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:51
+#: includes/admin/class-ajax-handler.php:382
+msgid "Invalid inquiry ID."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:59
+msgid "You do not have permission to view this report."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:89
+#: includes/admin/class-ajax-handler.php:260
+#: includes/admin/class-ajax-handler.php:280
+#: includes/admin/class-ajax-handler.php:301
+#: includes/admin/class-ajax-handler.php:403
+msgid "Invalid request ID."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:163
+msgid "No inquiries found matching your criteria."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:168
+msgid "&laquo; Previous"
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:168
+msgid "Next &raquo;"
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:218
+msgid "No requests found."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:264
+msgid "Request updated successfully."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:284
+msgid "Request deleted successfully."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:286
+msgid "Error deleting request."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:306
+msgid "Please enter a valid amount."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:322
+msgid "A reason for rejection is required."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:333
+msgid "Invalid data submitted."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:336
+msgid "Status changed successfully."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:386
+msgid "Inquiry successfully assigned to %s."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:407
+#: includes/admin/class-ajax-handler.php:427
+msgid "No experts found for automatic assignment."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:415
+#: includes/admin/class-ajax-handler.php:435
+msgid "The selected expert is not valid."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:446
+msgid "Inquiry successfully assigned to %s."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:465
+msgid "No users found matching your criteria."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:488
+msgid "User ID not specified."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:492
+msgid "You cannot delete your own account."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:497
+msgid "An error occurred while deleting the user."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:518
+msgid "No products found matching your criteria."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:534
+#: includes/admin/class-ajax-handler.php:596
+msgid "Invalid data sent."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:538
+msgid "Product not found."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:549
+msgid "Invalid field type."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:555
+msgid "Updated."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:600
+msgid "Invalid inquiry type."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:611
+msgid "Request successfully assigned to %s."
+msgstr ""
+
+# ... و بقیه متن‌های استخراج شده از تمام فایل‌ها

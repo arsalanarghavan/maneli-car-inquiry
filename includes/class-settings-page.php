@@ -1,4 +1,12 @@
 <?php
+/**
+ * Creates and manages the plugin's settings page in the WordPress admin area.
+ * This class defines all settings tabs, sections, and fields.
+ *
+ * @package Maneli_Car_Inquiry/Includes
+ * @author  Arsalan Arghavan (Refactored by Gemini)
+ * @version 1.0.0
+ */
 
 if (!defined('ABSPATH')) {
     exit;
@@ -6,137 +14,111 @@ if (!defined('ABSPATH')) {
 
 class Maneli_Settings_Page {
 
+    /**
+     * The name of the option in the wp_options table where all settings are stored.
+     * @var string
+     */
     private $options_name = 'maneli_inquiry_all_options';
 
     public function __construct() {
-        add_action('admin_menu', [$this, 'add_plugin_menu']);
-        add_action('admin_init', [$this, 'register_settings']);
+        add_action('admin_menu', [$this, 'add_plugin_admin_menu']);
+        add_action('admin_init', [$this, 'register_and_build_fields']);
         add_action('admin_post_maneli_save_frontend_settings', [$this, 'handle_frontend_settings_save']);
     }
 
-    public function add_plugin_menu() {
+    /**
+     * Adds the settings page to the WordPress admin menu under the "Settings" section.
+     */
+    public function add_plugin_admin_menu() {
         add_options_page(
-            'تنظیمات استعلام خودرو',
-            'تنظیمات استعلام خودرو',
+            esc_html__('Car Inquiry Settings', 'maneli-car-inquiry'),
+            esc_html__('Car Inquiry Settings', 'maneli-car-inquiry'),
             'manage_options',
             'maneli-inquiry-settings',
-            [$this, 'render_settings_page']
+            [$this, 'render_settings_page_html']
         );
     }
-    
-    public function render_settings_page() {
-        $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'gateways';
+
+    /**
+     * Renders the main HTML structure for the backend settings page.
+     */
+    public function render_settings_page_html() {
+        $active_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'gateways';
         ?>
         <div class="wrap">
-            <h1>تنظیمات پلاگین استعلام خودرو</h1>
+            <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
             <?php settings_errors(); ?>
-            <h2 class="nav-tab-wrapper">
+            
+            <nav class="nav-tab-wrapper">
                 <?php
-                $all_settings = $this->get_all_settings_public();
+                $all_settings = $this->get_all_settings_fields();
                 foreach ($all_settings as $tab_key => $tab_data) {
-                    $class = ($active_tab == $tab_key) ? 'nav-tab-active' : '';
-                    echo '<a href="?page=maneli-inquiry-settings&tab=' . esc_attr($tab_key) . '" class="nav-tab ' . $class . '">' . esc_html($tab_data['title']) . '</a>';
+                    $class = ($active_tab === $tab_key) ? 'nav-tab-active' : '';
+                    $url = '?page=maneli-inquiry-settings&tab=' . esc_attr($tab_key);
+                    echo '<a href="' . esc_url($url) . '" class="nav-tab ' . esc_attr($class) . '">' . esc_html($tab_data['title']) . '</a>';
                 }
                 ?>
-            </h2>
+            </nav>
+
             <form method="post" action="options.php">
                 <?php
                 settings_fields('maneli_inquiry_settings_group');
                 do_settings_sections('maneli-' . $active_tab . '-settings-section');
-                submit_button('ذخیره تنظیمات');
+                submit_button(esc_html__('Save Settings', 'maneli-car-inquiry'));
                 ?>
             </form>
         </div>
         <?php
     }
 
-    public function register_settings() {
+    /**
+     * Registers the main setting group and dynamically builds sections and fields for each tab.
+     */
+    public function register_and_build_fields() {
         register_setting(
             'maneli_inquiry_settings_group',
             $this->options_name,
             [$this, 'sanitize_and_merge_options']
         );
 
-        foreach (array_keys($this->get_all_settings_public()) as $tab) {
-            $this->register_tab_settings($tab);
-        }
-    }
+        foreach ($this->get_all_settings_fields() as $tab_key => $tab_data) {
+            if (empty($tab_data['sections'])) continue;
 
-    private function register_tab_settings($tab) {
-        $settings = $this->get_all_settings_public();
-        if (!isset($settings[$tab]['sections'])) return;
-
-        foreach ($settings[$tab]['sections'] as $section_id => $section) {
-            add_settings_section(
-                $section_id,
-                $section['title'],
-                function() use ($section) {
-                    if (!empty($section['desc'])) {
-                        echo '<p>' . wp_kses_post($section['desc']) . '</p>';
-                    }
-                },
-                'maneli-' . $tab . '-settings-section'
-            );
-
-            if (empty($section['fields'])) continue;
-
-            foreach ($section['fields'] as $field) {
-                add_settings_field(
-                    $field['name'],
-                    $field['label'],
-                    [$this, 'render_field'],
-                    'maneli-' . $tab . '-settings-section',
+            foreach ($tab_data['sections'] as $section_id => $section) {
+                add_settings_section(
                     $section_id,
-                    $field
-                );
-            }
-        }
-    }
-    
-    public function sanitize_and_merge_options($input) {
-        $old_options = get_option($this->options_name, []);
-        $sanitized_input = [];
-        foreach ($input as $key => $value) {
-             if (is_array($value)) {
-                $sanitized_input[$key] = $value;
-            } elseif (in_array($key, ['sadad_key', 'finotex_api_key', 'zero_fee_message', 'unavailable_product_message', 'cash_inquiry_rejection_reasons'])) {
-                $sanitized_input[$key] = sanitize_textarea_field($value);
-            } else {
-                $sanitized_input[$key] = sanitize_text_field($value);
-            }
-        }
-        $merged_options = array_merge($old_options, $sanitized_input);
-        
-        $all_settings = $this->get_all_settings_public();
-        $all_checkboxes = [];
-        foreach ($all_settings as $tab_data) {
-            if (isset($tab_data['sections'])) {
-                foreach ($tab_data['sections'] as $section) {
-                    if (isset($section['fields'])) {
-                        foreach ($section['fields'] as $field) {
-                            if (isset($field['type']) && $field['type'] === 'switch') {
-                                $all_checkboxes[] = $field['name'];
-                            }
+                    $section['title'],
+                    function() use ($section) {
+                        if (!empty($section['desc'])) {
+                            echo '<p>' . wp_kses_post($section['desc']) . '</p>';
                         }
-                    }
+                    },
+                    'maneli-' . $tab_key . '-settings-section'
+                );
+
+                if (empty($section['fields'])) continue;
+
+                foreach ($section['fields'] as $field) {
+                    add_settings_field(
+                        $field['name'],
+                        $field['label'],
+                        [$this, 'render_field_html'],
+                        'maneli-' . $tab_key . '-settings-section',
+                        $section_id,
+                        $field
+                    );
                 }
             }
         }
-
-        foreach($all_checkboxes as $cb) {
-            if (!isset($input[$cb])) {
-               $merged_options[$cb] = '0';
-            }
-        }
-        
-        return $merged_options;
     }
 
-    public function render_field($args) {
+    /**
+     * Renders the HTML for a given settings field based on its type.
+     */
+    public function render_field_html($args) {
         $options = get_option($this->options_name, []);
         $name = $args['name'];
         $type = $args['type'] ?? 'text';
-        $desc = $args['desc'] ?? '';
         $value = $options[$name] ?? ($args['default'] ?? '');
         $field_name = "{$this->options_name}[{$name}]";
         
@@ -144,195 +126,183 @@ class Maneli_Settings_Page {
             case 'textarea':
                 echo "<textarea name='{$field_name}' rows='5' class='large-text'>" . esc_textarea($value) . "</textarea>";
                 break;
-            case 'text':
-                 echo "<input type='text' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text'>";
-                 break;
             case 'switch':
                 echo '<label class="maneli-switch">';
                 echo "<input type='checkbox' name='{$field_name}' value='1' " . checked('1', $value, false) . '>';
                 echo '<span class="maneli-slider round"></span></label>';
                 break;
-            default:
-                echo "<input type='{$type}' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
+            default: // Catches text, number, password, etc.
+                echo "<input type='" . esc_attr($type) . "' name='{$field_name}' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
                 break;
         }
 
-        if ($desc) {
-            echo "<p class='description'>" . wp_kses_post($desc) . "</p>";
+        if (!empty($args['desc'])) {
+            echo "<p class='description'>" . wp_kses_post($args['desc']) . "</p>";
         }
     }
-    
-    public function manually_render_settings_tab_public($tab) {
-        $all_settings = $this->get_all_settings_public();
-        if (!isset($all_settings[$tab]['sections'])) return;
-    
-        if ($tab === 'experts') {
-            $section = $all_settings['experts']['sections']['maneli_experts_list_section'];
-            echo "<h3 class='maneli-settings-section-title'>" . esc_html($section['title']) . "</h3>";
-            echo '<p>' . wp_kses_post($section['desc']) . '</p>';
-            $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name']);
-            if (!empty($expert_users)) {
-                echo '<table class="shop_table shop_table_responsive expert-list-table">';
-                echo '<thead><tr><th>نام کارشناس</th><th>ایمیل</th><th>شماره موبایل</th></tr></thead>';
-                echo '<tbody>';
-                foreach ($expert_users as $expert) {
-                    echo '<tr>';
-                    echo '<td data-title="نام">' . esc_html($expert->display_name) . '</td>';
-                    echo '<td data-title="ایمیل">' . esc_html($expert->user_email) . '</td>';
-                    echo '<td data-title="موبایل">' . esc_html(get_user_meta($expert->ID, 'mobile_number', true) ?: ' ثبت نشده') . '</td>';
-                    echo '</tr>';
+
+    /**
+     * Sanitizes and merges new options with old options, handling unchecked checkboxes.
+     */
+    public function sanitize_and_merge_options($input) {
+        $old_options = get_option($this->options_name, []);
+        $sanitized_input = [];
+        $all_fields = $this->get_all_settings_fields();
+        
+        foreach ($all_fields as $tab) {
+            if(empty($tab['sections'])) continue;
+            foreach ($tab['sections'] as $section) {
+                if (empty($section['fields'])) continue;
+                foreach ($section['fields'] as $field) {
+                    $key = $field['name'];
+                    if (isset($input[$key])) {
+                        $sanitized_input[$key] = ($field['type'] === 'textarea') ? sanitize_textarea_field($input[$key]) : sanitize_text_field($input[$key]);
+                    }
+                    if ($field['type'] === 'switch' && !isset($input[$key])) {
+                        $sanitized_input[$key] = '0';
+                    }
                 }
-                echo '</tbody></table>';
-            } else {
-                echo '<p>در حال حاضر هیچ کارشناسی ثبت نشده است.</p>';
             }
-            return;
+        }
+        
+        return array_merge($old_options, $sanitized_input);
+    }
+    
+    /**
+     * Handles saving settings from the frontend settings shortcode.
+     */
+    public function handle_frontend_settings_save() {
+        check_admin_referer('maneli_save_frontend_settings_nonce');
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_die(esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry'));
         }
 
-        foreach ($all_settings[$tab]['sections'] as $section_id => $section) {
-            echo "<h3 class='maneli-settings-section-title'>" . esc_html($section['title']) . "</h3>";
-            if (!empty($section['desc'])) echo '<p>' . wp_kses_post($section['desc']) . '</p>';
-            
-            if (empty($section['fields'])) continue;
-
-            echo '<table class="form-table">';
-            foreach ($section['fields'] as $field) {
-                echo '<tr>';
-                echo '<th scope="row"><label for="' . esc_attr($this->options_name . '_' . $field['name']) . '">' . esc_html($field['label']) . '</label></th>';
-                echo '<td>';
-                $this->render_field($field);
-                echo '</td>';
-                echo '</tr>';
-            }
-            echo '</table>';
-        }
+        $options = isset($_POST[$this->options_name]) ? (array) $_POST[$this->options_name] : [];
+        $sanitized_options = $this->sanitize_and_merge_options($options);
+        update_option($this->options_name, $sanitized_options);
+        
+        $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
+        wp_redirect(add_query_arg('settings-updated', 'true', $redirect_url));
+        exit;
     }
 
+    /**
+     * Public method to get the settings fields structure for use in other classes.
+     */
     public function get_all_settings_public() {
+        return $this->get_all_settings_fields();
+    }
+    
+    /**
+     * Defines the entire structure of the plugin's settings, organized by tabs and sections.
+     */
+    private function get_all_settings_fields() {
         return [
             'gateways' => [
-                'title' => 'درگاه پرداخت',
+                'title' => esc_html__('Payment Gateway', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-money-check-alt',
                 'sections' => [
                     'maneli_payment_general_section' => [
-                        'title' => 'تنظیمات عمومی پرداخت', 'desc' => '',
+                        'title' => esc_html__('General Payment Settings', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'payment_enabled', 'label' => 'فعال‌سازی درگاه پرداخت', 'type' => 'switch', 'desc' => 'با فعال‌سازی این گزینه، مرحله پرداخت هزینه استعلام برای کاربران نمایش داده می‌شود.'],
-                            ['name' => 'inquiry_fee', 'label' => 'هزینه استعلام (تومان)', 'type' => 'number', 'desc' => 'مبلغ را به تومان وارد کنید. برای رایگان بودن، عدد 0 را وارد کنید.'],
-                            ['name' => 'zero_fee_message', 'label' => 'پیام در صورت رایگان بودن استعلام', 'type' => 'textarea', 'desc' => 'این پیام زمانی نمایش داده می‌شود که هزینه استعلام 0 باشد.', 'default' => 'هزینه استعلام برای شما رایگان در نظر گرفته شده است. لطفاً برای ادامه روی دکمه زیر کلیک کنید.'],
+                            ['name' => 'payment_enabled', 'label' => esc_html__('Enable Payment Gateway', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('If enabled, the inquiry fee payment step will be shown to users.', 'maneli-car-inquiry')],
+                            ['name' => 'inquiry_fee', 'label' => esc_html__('Inquiry Fee (Toman)', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Enter 0 for free inquiries.', 'maneli-car-inquiry')],
+                            ['name' => 'zero_fee_message', 'label' => esc_html__('Message for Free Inquiry', 'maneli-car-inquiry'), 'type' => 'textarea', 'default' => esc_html__('The inquiry fee is waived for you. Please click the button below to continue.', 'maneli-car-inquiry')],
                         ]
                     ],
                      'maneli_discount_section' => [
-                        'title' => 'تنظیمات کد تخفیف', 'desc' => '',
+                        'title' => esc_html__('Discount Code Settings', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'discount_code', 'label' => 'کد تخفیف', 'type' => 'text', 'desc' => 'یک کد تخفیف برای ۱۰۰٪ تخفیف در هزینه استعلام وارد کنید.'],
-                            ['name' => 'discount_code_text', 'label' => 'متن پیام کد تخفیف', 'type' => 'text', 'desc' => 'این پیام پس از اعمال کد تخفیف موفق به کاربر نمایش داده می‌شود.', 'default' => 'تخفیف ۱۰۰٪ با موفقیت اعمال شد.'],
+                            ['name' => 'discount_code', 'label' => esc_html__('Discount Code', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Enter a code for 100% off the inquiry fee.', 'maneli-car-inquiry')],
+                            ['name' => 'discount_code_text', 'label' => esc_html__('Discount Code Success Message', 'maneli-car-inquiry'), 'type' => 'text', 'default' => esc_html__('100% discount applied successfully.', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]
             ],
             'sms' => [
-                'title' => 'پیامک',
+                'title' => esc_html__('SMS', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-mobile-alt',
                 'sections' => [
                     'maneli_sms_api_section' => [
-                        'title' => 'اطلاعات پنل ملی پیامک', 'desc' => '',
+                        'title' => esc_html__('MeliPayamak Panel Information', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'sms_username', 'label' => 'نام کاربری', 'type' => 'text'],
-                            ['name' => 'sms_password', 'label' => 'رمز عبور', 'type' => 'password'],
+                            ['name' => 'sms_username', 'label' => esc_html__('Username', 'maneli-car-inquiry'), 'type' => 'text'],
+                            ['name' => 'sms_password', 'label' => esc_html__('Password', 'maneli-car-inquiry'), 'type' => 'password'],
                         ]
                     ],
                     'maneli_sms_patterns_section' => [
-                        'title' => 'کدهای پترن پیامک (Body ID) - عمومی و اقساطی',
-                        'desc' => 'در این بخش، به جای متن کامل پیامک، فقط <strong>کد پترن (Body ID)</strong> که در پنل ملی پیامک شما تایید شده است را وارد کنید.<br>ترتیب متغیرها باید دقیقاً مطابق توضیحات هر فیلد باشد.',
+                        'title' => esc_html__('SMS Pattern Codes (Body ID) - General & Installment', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Enter only the approved Pattern Code (Body ID) from your SMS panel. Variable order must match the descriptions.', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'admin_notification_mobile', 'label' => 'شماره موبایل مدیر', 'type' => 'text', 'desc' => 'شماره موبایل برای دریافت پیام ثبت درخواست‌های جدید.'],
-                            ['name' => 'sms_pattern_new_inquiry', 'label' => 'پترن «درخواست جدید برای مدیر»', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
-                            ['name' => 'sms_pattern_pending', 'label' => 'پترن «در انتظار بررسی» (اقساطی)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
-                            ['name' => 'sms_pattern_approved', 'label' => 'پترن «تایید شده» (اقساطی)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو'],
-                            ['name' => 'sms_pattern_rejected', 'label' => 'پترن «رد شده» (اقساطی)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد'],
-                            ['name' => 'sms_pattern_expert_referral', 'label' => 'پترن «ارجاع به کارشناس» (اقساطی)', 'type' => 'number', 'desc' => 'متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو'],
+                            ['name' => 'admin_notification_mobile', 'label' => esc_html__('Admin Mobile Number', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Mobile number to receive new request notifications.', 'maneli-car-inquiry')],
+                            ['name' => 'sms_pattern_new_inquiry', 'label' => esc_html__('Pattern: "New Request for Admin"', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'sms_pattern_pending', 'label' => esc_html__('Pattern: "Pending Review" (Installment)', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'sms_pattern_approved', 'label' => esc_html__('Pattern: "Approved" (Installment)', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'sms_pattern_rejected', 'label' => esc_html__('Pattern: "Rejected" (Installment)', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'sms_pattern_expert_referral', 'label' => esc_html__('Pattern: "Referral to Expert" (Installment)', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
                         ]
                     ],
                     'maneli_cash_inquiry_sms_section' => [
-                        'title' => 'کدهای پترن پیامک - درخواست نقدی',
-                        'desc' => 'پترن‌های مربوط به فرآیند خرید نقدی.',
+                        'title' => esc_html__('SMS Pattern Codes - Cash Request', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'cash_inquiry_approved_pattern', 'label' => 'پترن «تایید درخواست نقدی»', 'type' => 'number', 'desc' => 'ارسال به مشتری پس از تعیین پیش‌پرداخت. متغیرها: 1. نام مشتری 2. نام خودرو 3. مبلغ پیش‌پرداخت'],
-                            ['name' => 'cash_inquiry_rejected_pattern', 'label' => 'پترن «رد درخواست نقدی»', 'type' => 'number', 'desc' => 'ارسال به مشتری پس از رد درخواست. متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد'],
-                            ['name' => 'cash_inquiry_expert_referral_pattern', 'label' => 'پترن «ارجاع درخواست نقدی به کارشناس»', 'type' => 'number', 'desc' => 'ارسال به کارشناس. متغیرها: 1. نام کارشناس 2. نام مشتری 3. موبایل مشتری 4. نام خودرو'],
+                            ['name' => 'cash_inquiry_approved_pattern', 'label' => esc_html__('Pattern: "Cash Request Approved"', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Sent to customer after down payment is set. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount', 'maneli-car-inquiry')],
+                            ['name' => 'cash_inquiry_rejected_pattern', 'label' => esc_html__('Pattern: "Cash Request Rejected"', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'cash_inquiry_expert_referral_pattern', 'label' => esc_html__('Pattern: "Cash Request Referral to Expert"', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]
             ],
             'cash_inquiry' => [
-                'title' => 'درخواست نقدی',
+                'title' => esc_html__('Cash Request', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-money-bill-wave',
                 'sections' => [
                     'maneli_cash_inquiry_reasons_section' => [
-                        'title' => 'تنظیمات فرآیند درخواست نقدی',
-                        'desc' => '',
+                        'title' => esc_html__('Cash Request Process Settings', 'maneli-car-inquiry'),
                         'fields' => [
-                             ['name' => 'cash_inquiry_rejection_reasons', 'label' => 'دلایل آماده برای رد درخواست', 'type' => 'textarea', 'desc' => 'هر دلیل را در یک خط جداگانه وارد کنید. این دلایل در هنگام رد درخواست به صورت یک لیست به مدیر نمایش داده می‌شوند.'],
+                             ['name' => 'cash_inquiry_rejection_reasons', 'label' => esc_html__('Predefined Rejection Reasons', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one reason per line. These will be shown as a list to the admin when rejecting a request.', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]
             ],
             'experts' => [
-                'title' => 'کارشناسان',
+                'title' => esc_html__('Experts', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-users',
                 'sections' => [
                     'maneli_experts_list_section' => [
-                        'title' => 'مدیریت کارشناسان',
-                        'desc' => 'سیستم به صورت خودکار تمام کاربرانی که نقش کاربری آن‌ها <strong>«کارشناس مانلی»</strong> باشد را به عنوان کارشناس فروش شناسایی می‌کند.<br>درخواست‌ها به صورت گردشی (Round-robin) و به ترتیب به این کارشناسان ارجاع داده خواهد شد.<br>برای افزودن کارشناس جدید, کافیست از منوی <strong>کاربران > افزودن کاربر</strong>، یک کاربر جدید با نقش «کارشناس مانلی» بسازید و شماره موبایل او را در پروفایلش (فیلد "شماره موبایل") وارد کنید.',
-                        'fields' => []
+                        'title' => esc_html__('Expert Management', 'maneli-car-inquiry'),
+                        'desc' => wp_kses_post(__('The system automatically identifies all users with the <strong>"Maneli Expert"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the "Maneli Expert" role and enter their mobile number in their profile.', 'maneli-car-inquiry')),
+                        'fields' => [] // This section is for display only
                     ]
                 ]
             ],
             'finotex' => [
-                'title' => 'فینوتک',
+                'title' => esc_html__('Finotex', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-university',
                 'sections' => [
                     'maneli_finotex_cheque_section' => [
-                        'title' => 'سرویس استعلام رنگ چک', 'desc' => '',
+                        'title' => esc_html__('Cheque Color Inquiry Service', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'finotex_enabled', 'label' => 'فعال‌سازی استعلام فینوتک', 'type' => 'switch', 'desc' => 'در صورت فعال بودن، در زمان ثبت درخواست، استعلام بانکی از فینوتک انجام می‌شود.'],
-                            ['name' => 'finotex_client_id', 'label' => 'شناسه کلاینت (Client ID)', 'type' => 'text'],
-                            ['name' => 'finotex_api_key', 'label' => 'توکن دسترسی (Access Token)', 'type' => 'textarea'],
+                            ['name' => 'finotex_enabled', 'label' => esc_html__('Enable Finotex Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('If enabled, a bank inquiry will be performed via Finotex upon submission.', 'maneli-car-inquiry')],
+                            ['name' => 'finotex_client_id', 'label' => esc_html__('Client ID', 'maneli-car-inquiry'), 'type' => 'text'],
+                            ['name' => 'finotex_api_key', 'label' => esc_html__('Access Token', 'maneli-car-inquiry'), 'type' => 'textarea'],
                         ]
                     ]
                 ]
             ],
             'display' => [
-                'title' => 'تنظیمات نمایش',
+                'title' => esc_html__('Display Settings', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-paint-brush',
                 'sections' => [
                     'maneli_display_main_section' => [
-                        'title' => 'تنظیمات عمومی نمایش',
-                        'desc' => 'در این بخش می‌توانید نحوه نمایش بخش‌های مختلف در سایت را برای کاربران کنترل کنید.',
+                        'title' => esc_html__('General Display Settings', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'hide_prices_for_customers', 'label' => 'مخفی کردن قیمت برای مشتریان', 'type' => 'switch', 'desc' => 'با فعال کردن این گزینه، قیمت‌ها در تمام بخش‌های فروشگاه برای کاربرانی که مدیر نیستند، مخفی می‌شود.'],
-                            ['name' => 'enable_grouped_attributes', 'label' => 'فعال‌سازی نمایش گروهی ویژگی‌ها', 'type' => 'switch', 'desc' => 'با فعال کردن این گزینه، جدول ویژگی‌ها بر اساس گروه (مثال: فنی - ابعاد) دسته‌بندی و نمایش داده می‌شود.'],
-                            ['name' => 'unavailable_product_message', 'label' => 'پیام محصول ناموجود', 'type' => 'text', 'desc' => 'این پیام روی فرم محاسبه اقساط برای محصولاتی که وضعیت "ناموجود" دارند، نمایش داده می‌شود.', 'default' => 'در حال حاضر امکان خرید این خودرو میسر نمی‌باشد.'],
+                            ['name' => 'hide_prices_for_customers', 'label' => esc_html__('Hide Prices for Customers', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('If enabled, prices will be hidden from non-admin users across the store.', 'maneli-car-inquiry')],
+                            ['name' => 'enable_grouped_attributes', 'label' => esc_html__('Enable Grouped Attributes Display', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('If enabled, the attributes table will be grouped by category (e.g., Technical, Dimensions).', 'maneli-car-inquiry')],
+                            ['name' => 'unavailable_product_message', 'label' => esc_html__('Unavailable Product Message', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('This message is shown on the calculator for "Unavailable" products.', 'maneli-car-inquiry'), 'default' => esc_html__('This car is currently unavailable for purchase.', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]
             ]
         ];
-    }
-    
-    public function handle_frontend_settings_save() {
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_save_frontend_settings_nonce')) {
-            wp_die('خطای امنیتی!');
-        }
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_die('شما اجازه‌ی انجام این کار را ندارید.');
-        }
-        $options = isset($_POST[$this->options_name]) ? (array) $_POST[$this->options_name] : [];
-        $sanitized_options = $this->sanitize_and_merge_options($options);
-        update_option($this->options_name, $sanitized_options);
-        $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
-        wp_redirect(add_query_arg('settings-updated', 'true', $redirect_url));
-        exit;
     }
 }

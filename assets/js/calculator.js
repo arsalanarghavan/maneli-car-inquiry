@@ -1,32 +1,58 @@
+/**
+ * Handles frontend logic for the loan calculator widget on the single product page.
+ * This includes tab switching, live calculation for installments, and AJAX form submission.
+ *
+ * @version 1.0.0
+ */
+
 document.addEventListener("DOMContentLoaded", function () {
     const calcContainer = document.querySelector(".maneli-calculator-container");
-    if (!calcContainer) return;
+    if (!calcContainer) {
+        // If the calculator container is not on the page, do nothing.
+        return;
+    }
 
-    // --- TAB SWITCHING LOGIC ---
+    // --- 1. TAB SWITCHING LOGIC ---
     const tabs = calcContainer.querySelectorAll('.calculator-tabs .tab-link');
     const contents = calcContainer.querySelectorAll('.tabs-content-wrapper .tab-content');
 
     tabs.forEach(tab => {
-        tab.addEventListener('click', function(e) {
+        tab.addEventListener('click', function (e) {
             e.preventDefault();
-            
+
+            // Deactivate all tabs and content panels
             tabs.forEach(item => item.classList.remove('active'));
             contents.forEach(content => content.classList.remove('active'));
-            
+
+            // Activate the clicked tab and its corresponding content panel
             this.classList.add('active');
             const activeContent = calcContainer.querySelector('#' + this.dataset.tab);
-            if(activeContent) {
+            if (activeContent) {
                 activeContent.classList.add('active');
             }
         });
     });
 
-    // --- HELPER FUNCTIONS ---
-    const formatMoney = (num) => Number(num).toLocaleString('fa-IR');
-    const parseMoney = (str) => parseInt(String(str).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9]/g, '')) || 0;
+    // --- 2. HELPER FUNCTIONS ---
+    const formatMoney = (num) => {
+        if (isNaN(num) || num === null) return '۰';
+        // Converts number to Persian/Farsi numerals for display
+        return Math.ceil(num).toLocaleString('fa-IR');
+    };
+    const parseMoney = (str) => {
+        if (!str) return 0;
+        // Converts a formatted string (with commas and Persian numerals) to a plain integer
+        const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+        const englishDigits = '0123456789';
+        let englishStr = String(str).replace(/,/g, '');
+        for (let i = 0; i < persianDigits.length; i++) {
+            englishStr = englishStr.replace(new RegExp(persianDigits[i], 'g'), englishDigits[i]);
+        }
+        return parseInt(englishStr, 10) || 0;
+    };
     const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-    // --- CASH TAB LOGIC ---
+    // --- 3. CASH TAB LOGIC ---
     const cashTab = document.getElementById("cash-tab");
     if (cashTab) {
         const cashPriceEl = document.getElementById('cashPriceAmount');
@@ -34,132 +60,173 @@ document.addEventListener("DOMContentLoaded", function () {
             const priceValue = parseMoney(cashPriceEl.innerText);
             cashPriceEl.innerText = formatMoney(priceValue);
         }
-        // Note: The form submission is now a standard, non-AJAX POST request.
-        // The backend (class-form-handler.php) handles the logic for guests vs. logged-in users.
+        // Note: The form submission is a standard, non-AJAX POST request.
+        // The backend handles logic for guests vs. logged-in users.
     }
 
-    // --- INSTALLMENT CALCULATOR LOGIC (Scoped to its specific container) ---
+    // --- 4. INSTALLMENT CALCULATOR LOGIC ---
     const installmentTab = document.getElementById("installment-tab");
     if (installmentTab) {
+        const calc = document.getElementById("loan-calculator");
+        if (!calc) return;
+
+        // Get initial values from data attributes
+        const productPrice = parseInt(calc.dataset.price) || 0;
+        const minDown = parseInt(calc.dataset.minDown) || 0;
+        const maxDown = parseInt(calc.dataset.maxDown) || (productPrice * 0.8);
+
+        // Get DOM elements
+        const input = document.getElementById("downPaymentInput");
+        const slider = document.getElementById("downPaymentSlider");
+        const minDisplay = document.getElementById("minDownDisplay");
+        const installmentEl = document.getElementById("installmentAmount");
         const actionBtn = installmentTab.querySelector(".loan-action-btn");
 
-        // AJAX submission for installment form (for logged-in users only)
+        /**
+         * Updates the visual fill of the slider based on its current value.
+         */
+        function updateSliderLook() {
+            if (!slider) return;
+            const percentage = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+            slider.style.setProperty('--value-percent', percentage + '%');
+        }
+
+        /**
+         * Calculates and displays the monthly installment amount.
+         */
+        function calculateInstallment() {
+            if (!input || !installmentEl) return;
+            const dp = parseMoney(input.value);
+            const activeBtn = installmentTab.querySelector(".term-btn.active");
+            if (!activeBtn) return;
+
+            const selectedMonths = parseInt(activeBtn.dataset.months);
+            const loanAmount = productPrice - dp;
+
+            if (loanAmount <= 0) {
+                installmentEl.innerText = formatMoney(0);
+                return;
+            }
+
+            // Calculation logic (3.5% interest rate)
+            const monthlyInterestAmount = loanAmount * 0.035;
+            const totalInterest = monthlyInterestAmount * (selectedMonths + 1);
+            const totalRepayment = loanAmount + totalInterest;
+            const installment = totalRepayment / selectedMonths;
+
+            installmentEl.innerText = formatMoney(installment);
+        }
+
+        /**
+         * Sets the initial state of the calculator.
+         */
+        function initializeCalculator() {
+            if (!slider || !input || !minDisplay) return;
+
+            slider.min = 0;
+            slider.max = productPrice;
+            slider.value = minDown;
+            input.value = formatMoney(minDown);
+            minDisplay.innerText = formatMoney(minDown);
+
+            updateSliderLook();
+            calculateInstallment();
+        }
+
+        // --- Event Listeners for Installment Calculator ---
+
+        if (slider) {
+            slider.addEventListener("input", () => {
+                if (input) input.value = formatMoney(slider.value);
+                updateSliderLook();
+                calculateInstallment();
+            });
+            slider.addEventListener("change", () => { // On release
+                let value = parseInt(slider.value);
+                let clampedValue = clamp(value, minDown, maxDown);
+                if (value !== clampedValue) {
+                    slider.value = clampedValue;
+                    if (input) input.value = formatMoney(clampedValue);
+                    updateSliderLook();
+                }
+                calculateInstallment();
+            });
+        }
+
+        if (input) {
+            input.addEventListener('input', () => {
+                let value = parseMoney(input.value);
+                if (slider) slider.value = clamp(value, 0, productPrice);
+                updateSliderLook();
+                calculateInstallment();
+            });
+            input.addEventListener('blur', () => { // On focus out
+                let value = parseMoney(input.value);
+                let clampedValue = clamp(value, minDown, maxDown);
+                if (slider) slider.value = clampedValue;
+                input.value = formatMoney(clampedValue);
+                updateSliderLook();
+                calculateInstallment();
+            });
+        }
+
+        installmentTab.querySelectorAll(".term-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const currentActive = installmentTab.querySelector(".term-btn.active");
+                if (currentActive) {
+                    currentActive.classList.remove("active");
+                }
+                btn.classList.add("active");
+                calculateInstallment();
+            });
+        });
+
+        // AJAX submission for logged-in users
         if (actionBtn && typeof maneli_ajax_object !== 'undefined') {
             actionBtn.addEventListener("click", function (e) {
                 e.preventDefault();
 
-                const calcForm = installmentTab.querySelector("form.loan-calculator-form");
-                const productIdInput = calcForm.querySelector('input[name="product_id"]');
-                const nonceInput = calcForm.querySelector('input[name="_wpnonce"]');
-
-                if (!productIdInput || !nonceInput) {
-                    alert("خطایی رخ داده است (کد ۱). لطفاً صفحه را رفرش کنید.");
-                    return;
-                }
-                
                 actionBtn.disabled = true;
                 actionBtn.textContent = "در حال ارسال اطلاعات...";
 
                 const downPayment = parseMoney(document.getElementById('downPaymentInput').value);
                 const termMonths = installmentTab.querySelector('.term-btn.active').dataset.months;
                 const installmentAmount = parseMoney(document.getElementById('installmentAmount').innerText);
-                const totalPrice = document.getElementById('loan-calculator').dataset.price;
+                const totalPrice = calc.dataset.price;
+                const productId = installmentTab.querySelector('input[name="product_id"]').value;
 
                 const formData = new FormData();
                 formData.append('action', 'maneli_select_car_ajax');
-                formData.append('product_id', productIdInput.value);
-                formData.append('nonce', nonceInput.value);
+                formData.append('product_id', productId);
+                formData.append('nonce', maneli_ajax_object.nonce);
                 formData.append('down_payment', downPayment);
                 formData.append('term_months', termMonths);
                 formData.append('installment_amount', installmentAmount);
                 formData.append('total_price', totalPrice);
-                
-                fetch(maneli_ajax_object.ajax_url, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = maneli_ajax_object.inquiry_page_url;
-                    } else {
-                        alert("خطا در ارسال اطلاعات: " + data.data.message);
+
+                fetch(maneli_ajax_object.ajax_url, { method: 'POST', body: formData })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = maneli_ajax_object.inquiry_page_url;
+                        } else {
+                            alert("خطا در ارسال اطلاعات: " + (data.data.message || "خطای ناشناخته."));
+                            actionBtn.disabled = false;
+                            actionBtn.textContent = "استعلام سنجی بانکی جهت خرید خودرو";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("یک خطای ناشناخته در ارتباط با سرور رخ داد.");
                         actionBtn.disabled = false;
                         actionBtn.textContent = "استعلام سنجی بانکی جهت خرید خودرو";
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("یک خطای ناشناخته در ارتباط با سرور رخ داد.");
-                    actionBtn.disabled = false;
-                    actionBtn.textContent = "استعلام سنجی بانکی جهت خرید خودرو";
-                });
+                    });
             });
         }
-        
-        // Display and calculation logic for installment form
-        const calc = document.getElementById("loan-calculator");
-        if (calc) {
-            const productPrice = parseInt(calc.dataset.price) || 0;
-            const minDown = parseInt(calc.dataset.minDown) || 0;
-            const maxDown = parseInt(calc.dataset.maxDown) || (productPrice * 0.8);
-            const input = document.getElementById("downPaymentInput");
-            const slider = document.getElementById("downPaymentSlider");
-            const minDisplay = document.getElementById("minDownDisplay");
-            const installmentEl = document.getElementById("installmentAmount");
-            
-            function updateSliderLook() {
-                if (!slider) return;
-                const percentage = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
-                slider.style.setProperty('--value-percent', percentage + '%');
-            }
-            function calculateInstallment() {
-                if (!input || !installmentEl) return;
-                const dp = parseMoney(input.value);
-                const activeBtn = installmentTab.querySelector(".term-btn.active");
-                if (!activeBtn) return;
-                const selectedMonths = parseInt(activeBtn.dataset.months);
-                const loanAmount = productPrice - dp;
-                if (loanAmount <= 0) { installmentEl.innerText = "0"; return; }
-                const monthlyInterestAmount = loanAmount * 0.035;
-                const totalInterest = monthlyInterestAmount * (selectedMonths + 1);
-                const totalRepayment = loanAmount + totalInterest;
-                const installment = totalRepayment / selectedMonths;
-                installmentEl.innerText = formatMoney(Math.ceil(installment));
-            }
-            function initializeCalculator() {
-                if (!slider || !input || !minDisplay) return;
-                slider.min = 0;
-                slider.max = productPrice;
-                slider.value = minDown;
-                input.value = formatMoney(minDown);
-                minDisplay.innerText = formatMoney(minDown);
-                updateSliderLook();
-                calculateInstallment();
-            }
-            if (slider) {
-                slider.addEventListener("input", () => { if (input) input.value = formatMoney(slider.value); updateSliderLook(); calculateInstallment(); });
-                slider.addEventListener("change", () => {
-                    let value = parseInt(slider.value);
-                    let clampedValue = clamp(value, minDown, maxDown);
-                    if (value !== clampedValue) { slider.value = clampedValue; if (input) input.value = formatMoney(clampedValue); updateSliderLook(); }
-                    calculateInstallment();
-                });
-            }
-            if(input) {
-                input.addEventListener('input', () => { let value = parseMoney(input.value); if(slider) slider.value = clamp(value, 0, productPrice); updateSliderLook(); calculateInstallment(); });
-                input.addEventListener('blur', () => { let value = parseMoney(input.value); let clampedValue = clamp(value, minDown, maxDown); if(slider) slider.value = clampedValue; input.value = formatMoney(clampedValue); updateSliderLook(); calculateInstallment(); });
-            }
-            installmentTab.querySelectorAll(".term-btn").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    installmentTab.querySelector(".term-btn.active")?.classList.remove("active");
-                    btn.classList.add("active");
-                    calculateInstallment();
-                });
-            });
-            if (productPrice > 0) {
-               initializeCalculator();
-            }
+
+        // Initialize the calculator if the product has a price.
+        if (productPrice > 0) {
+            initializeCalculator();
         }
     }
 });

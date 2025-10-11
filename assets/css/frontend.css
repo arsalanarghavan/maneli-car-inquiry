@@ -1,718 +1,46 @@
-/* General Styles */
+/**
+ * Maneli Car Inquiry - Main Frontend Stylesheet
+ *
+ * This file contains global variables, base styles for plugin wrappers,
+ * form elements, buttons, and status/message boxes that are used across
+ * multiple components.
+ *
+ * @version 1.0.0
+ */
+
+/* === 1. ROOT & GLOBAL VARIABLES === */
 :root {
-    --theme-blue: #2D89BE;
-    --value-percent: 0%;
+    --theme-blue: #2D89BE;      /* Main brand color */
+    --theme-green: #28a745;     /* Success color */
+    --theme-red: #dc3545;       /* Error/Danger color */
+    --theme-yellow: #ffc107;    /* Warning/Pending color */
+    --theme-cyan: #17a2b8;      /* Info color */
+    --text-dark: #333;
+    --text-light: #555;
+    --border-color: #e0e0e0;
+    --background-light: #f8f9fa;
+    --background-white: #fff;
+    --value-percent: 0%;        /* Used for slider track fill */
 }
 
-/* === LOAN CALCULATOR STYLE FIX === */
-.loan-calculator-form {
-    max-width: 600px;
-    margin: 0 auto;
-    border: 1px solid #e0e0e0;
-    border-top: none;
-    padding: 25px;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08); /* Added shadow for consistency */
-}
-.loan-calculator-form .loan-section {
-    border-top: 1px solid #eee;
-    padding: 20px 0;
-    background-color: transparent;
-}
-.loan-calculator-form .loan-section:first-of-type {
-    border-top: none;
-    padding-top: 0;
-}
-/* === END: LOAN CALCULATOR STYLE FIX === */
-
-#loan-calculator {
-    padding: 0;
-    font-family: inherit;
-    direction: rtl;
-    color: #333;
-}
-.loan-title {
-    text-align: center;
-    font-size: 20px;
-    font-weight: 700;
-    margin-top: 0;
-    margin-bottom: 24px;
-}
-.loan-subtitle {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-.loan-requirements {
-    font-size: 14px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    line-height: 1.8;
-}
-.loan-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-.loan-label {
-    font-weight: 600;
-    font-size: 16px;
-}
-.loan-note {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
-    color: #666;
-    margin-top: 16px;
-}
-#downPaymentInput {
-    flex: 0 1 33%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px !important;
-    font-size: 16px;
-    text-align: left;
-    direction: ltr;
-}
-#downPaymentSlider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    margin-top: 20px;
-    background: transparent;
-    border: none;
-}
-#downPaymentSlider::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 2px;
-    cursor: pointer;
-    background: linear-gradient(to left, var(--theme-blue) var(--value-percent), #e0e0e0 var(--value-percent));
-}
-#downPaymentSlider::-moz-range-track {
-    width: 100%;
-    height: 2px;
-    cursor: pointer;
-    background: #e0e0e0;
-}
-#downPaymentSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #fff;
-    border: 4px solid var(--theme-blue);
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(0,0,0,0.15);
-    margin-top: -9px;
-}
-#downPaymentSlider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    border: 4px solid var(--theme-blue);
-    border-radius: 50%;
-    cursor: pointer;
-}
-.loan-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-.term-btn, .loan-action-btn {
-    padding: 10px 16px;
-    border: 2px solid var(--theme-blue);
-    background: #fff;
-    color: #000;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 15px;
-    transition: all 0.2s ease-in-out;
-    text-decoration: none;
-    font-family: inherit;
-}
-.term-btn:hover, .term-btn.active {
-    background: var(--theme-blue);
-    color: #fff;
-}
-.loan-action-wrapper {
-    text-align: center;
-}
-.loan-action-btn {
-    display: inline-block;
-    width: auto;
-    font-size: 16px;
-    font-weight: bold;
-    background: var(--theme-blue);
-    color: #fff;
-}
-.loan-action-btn:hover {
-    opacity: 0.9;
-}
-.result-section {
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-}
-.result-section strong {
-    margin-left: 8px;
-    color: #333 !important;
-}
-#installmentAmount,
-#cashPriceAmount {
-    color: var(--theme-blue);
-    font-size: 22px;
-}
-
-/* === NEW: Calculator Tabs === */
-.maneli-calculator-container {
-    max-width: 600px;
-    margin: 40px auto;
-}
-.calculator-tabs {
-    display: flex;
-    border: 1px solid #e0e0e0;
-    border-bottom: none;
-    border-radius: 12px 12px 0 0;
-    background-color: #f9f9f9;
-    overflow: hidden;
-}
-.calculator-tabs .tab-link {
-    flex: 1;
-    padding: 15px 10px;
-    text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-    color: #555;
-    background-color: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-}
-.calculator-tabs .tab-link:hover {
-    color: var(--theme-blue);
-}
-.calculator-tabs .tab-link.active {
-    color: var(--theme-blue);
-    border-bottom-color: var(--theme-blue);
-}
-.maneli-calculator-container .tab-content {
-    display: none;
-}
-.maneli-calculator-container .tab-content.active {
-    display: block;
-}
-
-/* === NEW: Cash Request Form Styles === */
-.cash-request-form .form-grid {
-    padding: 0;
-    margin: 0;
-}
-.cash-request-form .form-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
-}
-.cash-request-form .form-row:last-child {
-    margin-bottom: 0;
-}
-.cash-request-form .form-group {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-.cash-request-form .form-group label {
-    display: block;
-    font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 8px;
-    text-align: right;
-}
-.cash-request-form .form-group input[type="text"],
-.cash-request-form .form-group select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 8px !important;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-.cash-request-form .loan-action-btn {
-    width: auto;
-}
-
-/* Inquiry Form General Styles */
+/* === 2. GENERAL PLUGIN WRAPPER & UTILITIES === */
 .maneli-inquiry-wrapper {
     max-width: 100%;
-    margin: 40px 0;
-    padding: 0;
-    border: none;
-    background-color: transparent;
-    box-shadow: none;
+    margin: 40px auto; /* Centered with top/bottom margin */
     font-family: inherit;
-}
-.maneli-inquiry-wrapper form,
-.maneli-inquiry-form {
-    max-width: 700px;
-    margin: 0 auto;
-    border: none;
-    padding: 0;
-    border-radius: 0;
-    background-color: transparent;
-    font-family: inherit;
-}
-.maneli-inquiry-wrapper form .form-group {
-    margin-bottom: 15px;
-}
-.maneli-inquiry-wrapper form label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #444;
-}
-.maneli-inquiry-wrapper form select,
-.maneli-inquiry-wrapper form input[type="text"],
-.maneli-inquiry-wrapper form input[type="email"],
-.maneli-inquiry-wrapper form input[type="password"],
-.maneli-inquiry-wrapper form textarea,
-.maneli-inquiry-wrapper form button {
-    font-family: inherit;
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px !important;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    font-size: 15px;
-    background-color: #f9f9f9;
-}
-.maneli-inquiry-wrapper form button {
-    background-color: var(--theme-blue);
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-}
-.inquiry-action-form {
-    margin-top: 20px;
-}
-
-/* Status & Message Boxes */
-.status-box {
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 15px 20px;
-    border-radius: 4px;
-    margin-top: 15px;
-    margin-bottom: 20px;
-    border-right-width: 5px;
-    border-right-style: solid;
-    background-color: #f8f9fa;
-}
-.status-approved, .status-final {
-    background-color: #e8f5e9;
-    border-color: #4caf50;
-    color: #2e7d32;
-}
-.status-rejected, .status-failed, .error-box {
-    background-color: #ffebee;
-    border-color: #f44336;
-    color: #c62828;
-}
-.status-pending {
-    background-color: #fff3e0;
-    border-color: #ff9800;
-    color: #e65100;
-}
-
-/* Form Grid Layouts */
-.inquiry-summary-flex-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    align-items: center;
-    margin-bottom: 30px;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
-.inquiry-summary-box {
-    flex: 2;
-    min-width: 300px;
-}
-.inquiry-car-image {
-    flex: 1;
-    text-align: center;
-    min-width: 200px;
-}
-.inquiry-car-image img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: none;
-    border: none;
-}
-.inquiry-summary-box h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 18px;
-}
-.summary-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-.summary-table td, .summary-table th {
-    padding: 10px 5px;
-    border: none;
-}
-.summary-table tr {
-    border-bottom: 1px solid #f0f0f0;
-}
-.summary-table tr:last-child {
-    border-bottom: none;
-}
-.summary-table th,
-.summary-table td:first-child {
-    text-align: right;
-    font-weight: bold;
-    color: #555;
-    width: 30%;
-}
-.summary-table td {
-    text-align: right;
-}
-.summary-table td span {
-    margin-right: 5px;
-    font-weight: normal;
-    color: #555;
-}
-.form-grid .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-bottom: 15px;
-}
-.form-grid .form-group {
-    flex: 1;
-    min-width: 200px;
-    margin-bottom: 0;
-}
-.form-grid .form-row:last-child {
-    margin-bottom: 0;
-}
-
-/* Issuer Choice & Payment Box Styles */
-.issuer-choice-wrapper, .payment-box {
-    max-width: 700px;
-    margin: 40px auto 30px auto;
-    background-color: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    padding: 20px;
-    border-radius: 4px;
-}
-.issuer-choice-wrapper h4, .payment-box h3 {
-    margin-top: 0;
-}
-.issuer-choice-wrapper .form-group-radio label {
-    font-weight: normal;
-    display: block;
-    margin-bottom: 8px;
-    cursor: pointer;
-}
-.issuer-choice-wrapper .form-group-radio input {
-    margin-left: 5px;
-}
-/* === NEW STYLES FOR FORM TITLES === */
-.form-section-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 30px;
-    margin-bottom: 20px;
-    background-color: var(--theme-blue);
-    color: #fff;
-    padding: 12px 15px;
-    border-radius: 8px;
-    border: none; /* remove previous top border */
-}
-/* === END NEW STYLES === */
-
-/* Progress Tracker Styles */
-.progress-tracker { max-width: 800px; margin-left: auto; margin-right: auto; display: flex; justify-content: space-between; position: relative; margin-bottom: 50px; padding-bottom: 20px; }
-.progress-tracker::before { content: ''; position: absolute; top: 15px; right: 0; width: 100%; height: 2px; background-color: #ddd; z-index: 1; }
-.progress-tracker .step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; width: 25%; text-align: center; }
-.progress-tracker .step .circle { width: 30px; height: 30px; border-radius: 50%; background-color: #fff; border: 2px solid #ddd; color: #999; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: all 0.3s ease; }
-.progress-tracker .step .label { margin-top: 10px; font-size: 12px; color: #999; transition: color 0.3s ease; }
-.progress-tracker .step .label .step-title { font-weight: bold; display: block; }
-.progress-tracker .step.completed .circle { background-color: var(--theme-blue); border-color: var(--theme-blue); color: #fff; }
-.progress-tracker .step.active .circle { border-color: var(--theme-blue); transform: scale(1.2); color: var(--theme-blue); background-color: #fff; }
-.progress-tracker .step.completed .label,
-.progress-tracker .step.active .label { color: #333; }
-
-/* Final Customer Report Styles */
-.customer-report {
-    max-width: 700px;
-    margin: 20px auto;
-    border: 1px solid #e0e0e0;
-    background-color: #fff;
-    padding: 25px 30px;
-    border-radius: 8px;
-}
-.customer-report .report-section {
-    margin-top: 25px;
-    padding-top: 25px;
-    border-top: 1px dashed #ccc;
-}
-.customer-report .report-section:first-of-type {
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-}
-.customer-report h4 {
-    font-size: 18px;
-    margin-bottom: 15px;
-}
-.customer-report .summary-table td:last-child {
-    font-weight: normal;
-}
-.customer-report .summary-table strong.cheque-color-1 { color: #2e7d32; }
-.customer-report .summary-table strong.cheque-color-2,
-.customer-report .summary-table strong.cheque-color-3 { color: #e65100; }
-.customer-report .summary-table strong.cheque-color-4 { color: #4e342e; }
-.customer-report .summary-table strong.cheque-color-5 { color: #c62828; }
-
-/* CSS Status Bar for Frontend */
-.maneli-status-bar { display: flex; width: 100%; height: 30px; border-radius: 5px; overflow: hidden; margin: 20px 0; border: 1px solid #ccc; }
-.bar-segment { flex: 1; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; text-shadow: 1px 1px 1px rgba(0,0,0,0.4); transition: all 0.3s ease; }
-.bar-segment.active { transform: scaleY(1.15); font-weight: bold; box-shadow: inset 0 0 5px rgba(0,0,0,0.3); z-index: 2; }
-.bar-segment span { opacity: 0; transition: opacity 0.3s ease; }
-.bar-segment.active span { opacity: 1; }
-.bar-segment.segment-white { background-color: #4CAF50; }
-.bar-segment.segment-yellow { background-color: #FFEB3B; color: #333; text-shadow: none; }
-.bar-segment.segment-orange { background-color: #FF9800; }
-.bar-segment.segment-brown { background-color: #795548; }
-.bar-segment.segment-red { background-color: #F44336; }
-
-/* Expert Panel Styles */
-.maneli-expert-panel { max-width: 800px; margin: 20px auto; }
-.maneli-expert-panel h2 { font-size: 24px; margin-bottom: 10px; }
-.maneli-expert-panel > p { margin-bottom: 25px; color: #555; }
-.expert-form-section { background: #fff; border: 1px solid #ddd; padding: 25px; margin-bottom: 25px; border-radius: 4px; }
-.expert-form-section h3 { margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #eee; margin-bottom: 20px; font-size: 18px; }
-.maneli-expert-panel .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-.maneli-expert-panel select, .maneli-expert-panel input[type="text"], .maneli-expert-panel input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-.maneli-expert-panel .result-display { padding: 10px; background-color: #f0f0f1; border: 1px solid #ddd; border-radius: 4px; font-weight: bold; font-size: 1.2em; color: var(--theme-blue); text-align: right; }
-.maneli-expert-panel .result-display span:first-child { margin-left: 8px; }
-.maneli-expert-panel .button-primary { font-size: 16px !important; padding: 10px 20px !important; height: auto !important; }
-.maneli-expert-panel .input-note { font-size: 12px; color: #777; margin-top: 5px; }
-.maneli-expert-panel .select2-container { width: 100% !important; }
-.maneli-expert-panel .select2-container .select2-selection--single { height: 42px !important; padding: 5px; }
-.maneli-expert-panel .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 30px; }
-.maneli-expert-panel .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px; }
-.maneli-expert-panel .maneli-table { font-family: inherit; }
-
-/* === START: Button Hover Fix === */
-.loan-action-btn {
-    border: 2px solid var(--theme-blue);
-    transition: all 0.2s ease-in-out;
-}
-.loan-action-btn:hover {
-    background: #fff;
-    color: var(--theme-blue);
-    opacity: 1;
-}
-/* === END: Button Hover Fix === */
-
-/* === START: Expert & Customer Frontend Report Styles === */
-.frontend-expert-report, .frontend-customer-report {
-    max-width: 800px;
-    margin: 40px auto;
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    padding: 20px 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-.frontend-expert-report .report-main-title,
-.frontend-customer-report .report-main-title {
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 24px;
-}
-.frontend-expert-report .report-main-title small,
-.frontend-customer-report .report-main-title small {
-    font-size: 16px;
-    color: #777;
-    display: block;
-    margin-top: 5px;
-}
-.frontend-expert-report .report-box,
-.frontend-customer-report .report-box {
-    margin-bottom: 25px;
-    padding-bottom: 25px;
-    border-bottom: 1px solid #eee;
-}
-.frontend-expert-report .report-box:last-of-type,
-.frontend-customer-report .report-box:last-of-type {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-.frontend-expert-report .report-box-title,
-.frontend-customer-report .report-box-title {
-    font-size: 18px;
-    margin-top: 0;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-}
-.frontend-expert-report .report-car-image,
-.frontend-customer-report .report-car-image {
-    text-align: center;
-    margin-bottom: 25px;
-}
-.frontend-expert-report .report-car-image img,
-.frontend-customer-report .report-car-image img {
-    max-width: 300px;
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-}
-
-/* New Flexbox layout for car info */
-.report-box-flex {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    align-items: flex-start;
-}
-.report-box-flex .report-car-image {
-    flex: 1 1 200px; /* Flex-grow, flex-shrink, flex-basis */
-    margin-bottom: 0;
-}
-.report-box-flex .report-details-table {
-    flex: 2 1 300px; /* Take twice the space of the image */
-}
-.report-box-flex .report-details-table .summary-table {
-    margin-top: 0;
-}
-/* End New Flexbox layout */
-
-
-.frontend-expert-report .form-grid .form-group label,
-.frontend-customer-report .form-grid .form-group label {
-    font-weight: bold;
-    color: #555;
-    margin-bottom: 8px;
-}
-.frontend-expert-report .form-grid .form-group .detail-value-box,
-.frontend-customer-report .form-grid .form-group .detail-value-box {
-    background-color: #f8f9fa;
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #e9ecef;
-    min-height: 42px;
-    text-align: right;
-    width: 100%;
+    color: var(--text-dark);
     box-sizing: border-box;
 }
-.frontend-expert-report .report-section-divider,
-.frontend-customer-report .report-section-divider {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-    margin-top: 25px;
-    padding-top: 25px;
-    border-top: 1px solid #eee;
-}
-.frontend-expert-report .right-aligned-table th,
-.frontend-expert-report .right-aligned-table td,
-.frontend-customer-report .right-aligned-table th,
-.frontend-customer-report .right-aligned-table td {
-    text-align: right;
-}
-.frontend-expert-report .right-aligned-table th,
-.frontend-customer-report .right-aligned-table th {
-    width: 30%;
-}
-.frontend-expert-report .report-back-button-wrapper,
-.frontend-customer-report .report-back-button-wrapper {
-    margin-top: 30px;
-    text-align: center;
-}
-/* === END: Frontend Report Styles === */
 
-/* === Full Width Container & User List Styles === */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Full width container for dashboard pages */
 .maneli-full-width-container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-}
-.user-list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-.user-list-filters {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-    border: 1px solid #e9ecef;
-}
-.user-list-filters .filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    width: 100%;
-    align-items: flex-end;
-}
-.user-list-filters .search-row {
-    margin-bottom: 15px;
-}
-.user-list-filters .search-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 15px;
-    box-sizing: border-box;
-}
-.user-list-filters .filter-group {
-    flex: 1 1 200px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-.user-list-filters label {
-    font-weight: 500;
-    font-size: 14px;
-    color: #495057;
-}
-.user-list-filters select {
-    width: 100%;
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #ced4da;
-    background-color: #fff;
-    height: 45px;
-}
-.user-list-filters .select2-container .select2-selection--single {
-    height: 45px !important;
-    padding-top: 5px;
-}
-.maneli-table-wrapper {
-    overflow-x: auto;
 }
 
 /* Spinner for AJAX loading */
@@ -726,21 +54,113 @@
     background-position: center;
     animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
+/* === 3. SHARED FORM ELEMENTS === */
+.maneli-inquiry-form {
+    max-width: 700px;
+    margin: 0 auto;
+}
 
+.maneli-inquiry-form label,
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--text-light);
+}
 
-/* === DEFINITIVE FIX FOR ALL BUTTONS === */
-.maneli-inquiry-wrapper .shop_table .button,
+.maneli-inquiry-form input[type="text"],
+.maneli-inquiry-form input[type="email"],
+.maneli-inquiry-form input[type="password"],
+.maneli-inquiry-form input[type="tel"],
+.maneli-inquiry-form input[type="number"],
+.maneli-inquiry-form textarea,
+.maneli-inquiry-form select {
+    font-family: inherit;
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px !important;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 15px;
+    background-color: var(--background-light);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.maneli-inquiry-form input:focus,
+.maneli-inquiry-form textarea:focus,
+.maneli-inquiry-form select:focus {
+    border-color: var(--theme-blue);
+    box-shadow: 0 0 0 2px rgba(45, 137, 190, 0.2);
+    outline: none;
+}
+
+/* Form Grid Layout */
+.form-grid {
+    padding: 0;
+    margin: 0;
+}
+.form-grid .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+.form-grid .form-group {
+    flex: 1;
+    min-width: 200px;
+    margin-bottom: 0;
+}
+
+/* === 4. SHARED BUTTON STYLES === */
+.loan-action-btn,
+.action-btn {
+    display: inline-block;
+    width: auto;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 25px;
+    border: 2px solid var(--theme-blue);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Primary Button Style */
+.loan-action-btn {
+    background: var(--theme-blue);
+    color: var(--background-white);
+}
+.loan-action-btn:hover {
+    background: var(--background-white);
+    color: var(--theme-blue);
+    opacity: 1;
+}
+
+/* Specific Action Buttons (used in reports) */
+.action-btn {
+    border: none;
+    color: var(--background-white);
+}
+.action-btn.approve { background-color: var(--theme-green); }
+.action-btn.reject { background-color: var(--theme-red); }
+.action-btn:hover { opacity: 0.85; }
+
+/* General WooCommerce button override within plugin wrappers */
+.maneli-inquiry-wrapper .button,
 .maneli-inquiry-wrapper a.button,
 .maneli-inquiry-wrapper button.button,
 .maneli-inquiry-wrapper input.button {
     background-color: var(--theme-blue) !important;
     border-color: var(--theme-blue) !important;
-    color: #fff !important;
+    color: var(--background-white) !important;
     transition: background-color 0.2s ease-in-out !important;
     border-radius: 4px !important;
     padding: 8px 16px !important;
@@ -748,371 +168,54 @@
     height: auto !important;
     line-height: normal !important;
 }
-
-.maneli-inquiry-wrapper .shop_table .button:hover,
-.maneli-inquiry-wrapper a.button:hover,
-.maneli-inquiry-wrapper button.button:hover,
-.maneli-inquiry-wrapper input.button:hover {
+.maneli-inquiry-wrapper .button:hover {
     background-color: #277ab0 !important;
     border-color: #277ab0 !important;
-    color: #fff !important;
-}
-
-/* Specific button overrides */
-.maneli-inquiry-wrapper .shop_table .button.delete-user-btn {
-    background-color: #dc3545 !important;
-    border-color: #dc3545 !important;
-    margin-right: 5px;
-}
-.maneli-inquiry-wrapper .shop_table .button.delete-user-btn:hover {
-    background-color: #c82333 !important;
-    border-color: #bd2130 !important;
 }
 
 
-/* === NEW STYLES FOR REPORT PAGE === */
+/* === 5. STATUS & MESSAGE BOXES === */
+.status-box, .error-box {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 25px;
+    border-right-width: 5px;
+    border-right-style: solid;
+    background-color: var(--background-light);
+}
+.status-box p:last-child, .error-box p:last-child {
+    margin-bottom: 0;
+}
+
+.status-approved, .status-final {
+    background-color: #e8f5e9;
+    border-color: var(--theme-green);
+    color: #2e7d32;
+}
+.status-rejected, .status-failed, .error-box {
+    background-color: #ffebee;
+    border-color: var(--theme-red);
+    color: #c62828;
+}
+.status-pending {
+    background-color: #fff3e0;
+    border-color: var(--theme-yellow);
+    color: #e65100;
+}
+
+/* Report Status Box (used in single report views) */
 .report-status-box {
     padding: 15px 20px;
     border-radius: 8px;
     margin-bottom: 25px;
     font-size: 16px;
     text-align: center;
-    color: #fff;
+    color: var(--background-white);
 }
-.report-status-box.status-bg-approved, .report-status-box.status-bg-completed {
-    background-color: #28a745;
-}
-.report-status-box.status-bg-rejected {
-    background-color: #dc3545;
-}
-.report-status-box.status-bg-pending {
-    background-color: #ffc107;
-    color: #212529;
-}
-.report-status-box.status-bg-awaiting_payment {
-    background-color: #17a2b8;
-}
-
-.admin-actions-box {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    padding: 20px;
-    border-radius: 8px;
-    margin-top: 30px;
-}
-.admin-actions-box p {
-    margin-top: 0;
-}
-.action-button-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: stretch;
-}
-.approve-section {
-    display: flex;
-    flex-grow: 1;
-    gap: 10px;
-    align-items: center;
-}
-.approve-section label {
-    white-space: nowrap;
-    font-weight: bold;
-}
-.approve-section select {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    height: 47px;
-    box-sizing: border-box;
-}
-.action-btn {
-    padding: 12px 20px;
-    border-radius: 5px;
-    border: none;
-    color: #fff;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    font-family: inherit;
-    height: 47px;
-    box-sizing: border-box;
-}
-.action-btn:hover {
-    opacity: 0.85;
-}
-.action-btn.approve {
-    background-color: #28a745;
-}
-.action-btn.reject {
-    background-color: #dc3545;
-}
-
-/* Modal Styles */
-.maneli-modal-frontend { display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
-.maneli-modal-frontend .modal-content { font-family: inherit; background-color: #fefefe; margin: 15% auto; padding: 20px 30px; border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 4px; position: relative; }
-.maneli-modal-frontend .modal-close { color: #aaa; float: left; font-size: 28px; font-weight: bold; line-height: 1; cursor: pointer; }
-.maneli-modal-frontend .modal-content .form-group { margin: 15px 0; }
-.maneli-modal-frontend .modal-content .button-primary {
-    background-color: var(--theme-blue);
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-    width: auto;
-    padding: 10px 20px;
-}
-.admin-notice {
-    padding: 15px;
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-    border-radius: 4px;
-    color: #856404;
-}
-
-/* Datepicker RTL Styles */
-div.kamadatepicker-container {
-    font-family: inherit !important;
-    z-index: 10000 !important;
-}
-
-/* === START: Styles for Unavailable Products (Corrected) === */
-.maneli-calculator-container.unavailable {
-    position: relative;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-}
-
-.unavailable-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    border-radius: 12px;
-}
-
-.unavailable-overlay p {
-    background-color: rgba(255, 255, 255, 0.85);
-    padding: 15px 25px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #2D89BE;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    text-align: center;
-}
-/* === END: Styles for Unavailable Products === */
-
-/* === START: Modern Settings Panel Styles === */
-.maneli-settings-container {
-    display: flex;
-    gap: 30px;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 12px;
-    font-family: inherit;
-    max-width: 1100px;
-    margin: 40px auto;
-}
-
-.maneli-settings-sidebar {
-    flex: 0 0 220px;
-}
-
-.maneli-settings-tabs {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.maneli-settings-tabs li a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
-    text-decoration: none;
-    color: #444;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    border: 1px solid transparent;
-}
-
-.maneli-settings-tabs li a .fas {
-    font-size: 18px;
-    width: 20px;
-    text-align: center;
-    color: #888;
-    transition: color 0.2s ease-in-out;
-}
-
-.maneli-settings-tabs li a:hover {
-    background-color: #e9ecef;
-    color: #000;
-}
-
-.maneli-settings-tabs li a.active {
-    background-color: var(--theme-blue);
-    color: #fff;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(45, 137, 190, 0.3);
-}
-
-.maneli-settings-tabs li a.active .fas {
-    color: #fff;
-}
-
-
-.maneli-settings-content {
-    flex-grow: 1;
-    background-color: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-}
-
-.maneli-tab-pane {
-    display: none;
-    animation: fadeIn 0.4s;
-}
-
-.maneli-tab-pane.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.maneli-settings-section-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #333;
-    margin-top: 0;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-}
-
-.maneli-settings-content .form-table {
-    margin-bottom: 30px;
-}
-
-.maneli-settings-content .form-table th {
-    font-weight: 600;
-    width: 250px;
-}
-
-.maneli-settings-save-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 25px;
-    font-size: 16px;
-    font-weight: bold;
-    background: var(--theme-blue);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-}
-
-.maneli-settings-save-btn:hover {
-    opacity: 0.9;
-    box-shadow: 0 4px 12px rgba(45, 137, 190, 0.4);
-}
-
-.maneli-settings-save-btn .fas {
-    font-size: 16px;
-}
-/* === END: Modern Settings Panel Styles === */
-
-/* === START: SweetAlert Modal Styles for Inquiry Details === */
-.swal2-popup .swal-content-container {
-    text-align: right;
-    max-height: 70vh;
-    overflow-y: auto;
-    padding: 0 15px;
-}
-.swal2-popup .report-box {
-    border: 1px solid #eee;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-.swal2-popup .report-box-title {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin: 0 0 15px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
-}
-.swal2-popup .swal-car-image {
-    max-width: 200px;
-    border-radius: 8px;
-    display: block;
-    margin: 0 auto 20px auto;
-}
-.swal2-popup .summary-table {
-    width: 100%;
-    font-size: 0.9em;
-}
-.swal2-popup .swal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    font-size: 0.9em;
-}
-.swal2-popup .swal-grid .full-width {
-    grid-column: 1 / -1;
-}
-.swal2-popup .report-section-divider {
-    font-size: 1em;
-    font-weight: bold;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px dashed #ddd;
-}
-.swal2-popup .status-box {
-    margin: 0 0 20px 0;
-    padding: 10px 15px;
-    text-align: center;
-    color: #fff;
-    border-radius: 5px;
-}
-.swal2-popup .status-box p { margin: 0; }
-.swal2-popup .status-box.status-bg-user_confirmed,
-.swal2-popup .status-box.status-bg-approved { background-color: #28a745; }
-.swal2-popup .status-box.status-bg-rejected,
-.swal2-popup .status-box.status-bg-failed { background-color: #dc3545; }
-.swal2-popup .status-box.status-bg-pending,
-.swal2-popup .status-box.status-bg-more_docs { background-color: #ffc107; color: #212529; }
-.swal2-popup .cheque-color-1 { color: #2e7d32; }
-.swal2-popup .cheque-color-2, .swal2-popup .cheque-color-3 { color: #e65100; }
-.swal2-popup .cheque-color-4 { color: #4e342e; }
-.swal2-popup .cheque-color-5 { color: #c62828; }
-/* === END: SweetAlert Modal Styles === */
-
-/* === START: Cash Inquiry Action Buttons === */
-.cash-inquiry-actions .button {
-    margin-right: 5px;
-    margin-bottom: 5px;
-}
-.cash-inquiry-actions .button.view-cash-inquiry { background-color: #007bff !important; border-color: #007bff !important; }
-.cash-inquiry-actions .button.edit-cash-inquiry { background-color: #ffc107 !important; border-color: #ffc107 !important; color: #212529 !important; }
-.cash-inquiry-actions .button.delete-cash-inquiry { background-color: #dc3545 !important; border-color: #dc3545 !important; }
-.cash-inquiry-actions .button.set-downpayment { background-color: #28a745 !important; border-color: #28a745 !important; }
-/* === END: Cash Inquiry Action Buttons === */
+.report-status-box.status-bg-approved, .report-status-box.status-bg-completed { background-color: var(--theme-green); }
+.report-status-box.status-bg-rejected { background-color: var(--theme-red); }
+.report-status-box.status-bg-pending { background-color: var(--theme-yellow); color: var(--text-dark); }
+.report-status-box.status-bg-awaiting_payment { background-color: var(--theme-cyan); }

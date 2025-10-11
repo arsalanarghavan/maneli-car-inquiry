@@ -1,4 +1,12 @@
 <?php
+/**
+ * Handles AJAX functionality for the Expert Panel, specifically for searching products.
+ *
+ * @package Maneli_Car_Inquiry/Includes
+ * @author  Arsalan Arghavan (Refactored by Gemini)
+ * @version 1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -10,66 +18,67 @@ class Maneli_Expert_Panel {
     }
 
     /**
-     * Final AJAX handler for car search.
-     * This version uses a direct DB query for reliability and includes robust checks.
+     * AJAX handler for searching WooCommerce products by title.
+     * Used by the Select2 input in the expert's new inquiry form.
      */
     public function handle_car_search_ajax() {
-        // Check 1: Verify the AJAX request nonce for security.
+        // 1. Security Check: Verify the AJAX nonce.
         if (!check_ajax_referer('maneli_expert_car_search_nonce', 'nonce', false)) {
             wp_send_json_error(
-                ['message' => 'خطای امنیتی (Nonce نامعتبر). لطفاً صفحه را رفرش کنید.'],
+                ['message' => esc_html__('Security check failed. Please refresh the page and try again.', 'maneli-car-inquiry')],
                 403
             );
             return;
         }
 
-        // Check 2: Verify user is logged in and has a basic capability.
+        // 2. Permission Check: Ensure the user is logged in and has sufficient permissions.
         if (!is_user_logged_in() || !current_user_can('edit_posts')) {
             wp_send_json_error(
-                ['message' => 'شما دسترسی لازم برای این کار را ندارید.'],
+                ['message' => esc_html__('You do not have sufficient permissions to perform this action.', 'maneli-car-inquiry')],
                 403
             );
             return;
         }
 
-        // Check 3: Ensure a search term is provided.
-        if (!isset($_POST['search']) || empty(trim($_POST['search']))) {
-            wp_send_json_success(['results' => []]); // Return empty if search is empty
+        // 3. Input Validation: Ensure a search term is provided.
+        $search_term = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+        if (empty(trim($search_term))) {
+            wp_send_json_success(['results' => []]); // Return empty results for an empty search
             return;
         }
 
         global $wpdb;
-        $search_term = sanitize_text_field($_POST['search']);
         $like_term = '%' . $wpdb->esc_like($search_term) . '%';
 
-        // Direct database query to bypass any and all permission layers.
+        // 4. Database Query: Directly query the database for published products matching the title.
+        // This is a reliable way to get product IDs without interference from other plugins or complex meta queries.
         $product_ids = $wpdb->get_col($wpdb->prepare(
             "SELECT ID FROM {$wpdb->posts} 
              WHERE post_type = 'product' 
              AND post_status = 'publish' 
              AND post_title LIKE %s 
              ORDER BY post_title ASC
-             LIMIT 20",
+             LIMIT 20", // Limit results for performance
             $like_term
         ));
 
         $results = [];
         if (!empty($product_ids)) {
             foreach ($product_ids as $product_id) {
-                // Using wc_get_product is safe as we already have the ID.
+                // Use wc_get_product to safely retrieve product data.
                 $product = wc_get_product($product_id);
                 if ($product) {
                     $results[] = [
-                        'id'   => $product->get_id(),
-                        'text' => $product->get_name(),
-                        'price' => $product->get_price(),
-                        'min_downpayment' => get_post_meta($product->get_id(), 'min_downpayment', true) ?: 0
+                        'id'              => $product->get_id(),
+                        'text'            => $product->get_name(), // 'text' is the standard for Select2
+                        'price'           => $product->get_price(),
+                        'min_downpayment' => get_post_meta($product->get_id(), 'min_downpayment', true) ?: 0,
                     ];
                 }
             }
         }
         
-        // Always send a success response, even if the results are empty.
+        // 5. Send Response: Always send a success response with the results array.
         wp_send_json_success(['results' => $results]);
     }
 }

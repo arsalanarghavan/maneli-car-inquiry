@@ -1,137 +1,180 @@
 <?php
+/**
+ * Adds and manages custom fields on the user profile page in the WordPress admin area.
+ *
+ * @package Maneli_Car_Inquiry/Includes
+ * @author  Arsalan Arghavan (Refactored by Gemini)
+ * @version 1.0.0
+ */
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
 class Maneli_User_Profile {
 
+    /**
+     * An array of custom fields to be added to the user profile.
+     * @var array
+     */
+    private $custom_fields;
+
     public function __construct() {
-        add_action('show_user_profile', [$this, 'add_custom_user_fields']);
-        add_action('edit_user_profile', [$this, 'add_custom_user_fields']);
+        $this->define_custom_fields();
+        
+        // Hooks to add and save the custom fields
+        add_action('show_user_profile', [$this, 'render_custom_user_fields']);
+        add_action('edit_user_profile', [$this, 'render_custom_user_fields']);
         add_action('personal_options_update', [$this, 'save_custom_user_fields']);
         add_action('edit_user_profile_update', [$this, 'save_custom_user_fields']);
 
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_datepicker_assets']);
+        // Hook to enqueue scripts for the profile page
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+    }
+    
+    /**
+     * Defines the structure of all custom fields to be added.
+     * This makes adding/removing fields easier in the future.
+     */
+    private function define_custom_fields() {
+        $this->custom_fields = [
+            'inquiry_info' => [
+                'title' => esc_html__('Inquiry Supplementary Information', 'maneli-car-inquiry'),
+                'fields' => [
+                    'national_code' => ['label' => esc_html__('National Code', 'maneli-car-inquiry'), 'type' => 'text'],
+                    'father_name'   => ['label' => esc_html__('Father\'s Name', 'maneli-car-inquiry'), 'type' => 'text'],
+                    'birth_date'    => ['label' => esc_html__('Date of Birth', 'maneli-car-inquiry'), 'type' => 'text', 'class' => 'maneli-datepicker'],
+                    'mobile_number' => ['label' => esc_html__('Mobile Number', 'maneli-car-inquiry'), 'type' => 'tel', 'desc' => esc_html__('Used for SMS notifications and as the username.', 'maneli-car-inquiry')],
+                    'phone_number'  => ['label' => esc_html__('Phone Number', 'maneli-car-inquiry'), 'type' => 'tel'],
+                    'occupation'    => ['label' => esc_html__('Occupation', 'maneli-car-inquiry'), 'type' => 'text'],
+                    'income_level'  => ['label' => esc_html__('Income Level (Toman)', 'maneli-car-inquiry'), 'type' => 'number'],
+                    'address'       => ['label' => esc_html__('Address', 'maneli-car-inquiry'), 'type' => 'textarea'],
+                    'residency_status' => [
+                        'label'   => esc_html__('Residency Status', 'maneli-car-inquiry'),
+                        'type'    => 'select',
+                        'options' => [
+                            ''       => esc_html__('-- Select --', 'maneli-car-inquiry'),
+                            'owner'  => esc_html__('Owner', 'maneli-car-inquiry'),
+                            'tenant' => esc_html__('Tenant', 'maneli-car-inquiry'),
+                        ]
+                    ],
+                    'workplace_status' => [
+                        'label'   => esc_html__('Workplace Status', 'maneli-car-inquiry'),
+                        'type'    => 'select',
+                        'options' => [
+                            ''          => esc_html__('-- Select --', 'maneli-car-inquiry'),
+                            'permanent' => esc_html__('Permanent', 'maneli-car-inquiry'),
+                            'contract'  => esc_html__('Contract', 'maneli-car-inquiry'),
+                            'freelance' => esc_html__('Freelance', 'maneli-car-inquiry'),
+                        ]
+                    ],
+                ]
+            ],
+            'bank_info' => [
+                'title' => esc_html__('Bank Information', 'maneli-car-inquiry'),
+                'fields' => [
+                    'bank_name'      => ['label' => esc_html__('Bank Name', 'maneli-car-inquiry'), 'type' => 'text'],
+                    'account_number' => ['label' => esc_html__('Account Number', 'maneli-car-inquiry'), 'type' => 'text'],
+                    'branch_code'    => ['label' => esc_html__('Branch Code', 'maneli-car-inquiry'), 'type' => 'text'],
+                    'branch_name'    => ['label' => esc_html__('Branch Name', 'maneli-car-inquiry'), 'type' => 'text'],
+                ]
+            ]
+        ];
     }
 
-    public function enqueue_admin_datepicker_assets($hook) {
-        if ($hook == 'profile.php' || $hook == 'user-edit.php') {
-            wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css');
-            wp_enqueue_script(
-                'maneli-jalali-datepicker',
-                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js',
-                [], '2.0.0', true
-            );
+
+    /**
+     * Enqueues datepicker assets specifically on user profile pages.
+     */
+    public function enqueue_admin_assets($hook) {
+        if ($hook !== 'profile.php' && $hook !== 'user-edit.php') {
+            return;
+        }
+
+        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
+        wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
+        
+        // Enqueue a dedicated script to initialize the datepicker, avoiding inline scripts.
+        wp_enqueue_script('maneli-profile-datepicker-init', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/profile-datepicker.js', ['maneli-jalali-datepicker'], '1.0.0', true);
+    }
+
+    /**
+     * Renders the custom fields on the user profile page.
+     *
+     * @param WP_User $user The user object.
+     */
+    public function render_custom_user_fields($user) {
+        foreach ($this->custom_fields as $section_id => $section_data) {
+            ?>
+            <h3><?php echo esc_html($section_data['title']); ?></h3>
+            <table class="form-table">
+                <?php foreach ($section_data['fields'] as $field_key => $field_args) : ?>
+                    <tr>
+                        <th><label for="<?php echo esc_attr($field_key); ?>"><?php echo esc_html($field_args['label']); ?></label></th>
+                        <td>
+                            <?php
+                            $value = get_user_meta($user->ID, $field_key, true);
+                            $this->render_field_html($field_key, $field_args, $value);
+                            ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+            <?php
         }
     }
 
-    public function add_custom_user_fields($user) {
-        $init_script = "
-            document.addEventListener('DOMContentLoaded', function() {
-                if (typeof kamadatepicker !== 'undefined') {
-                    kamadatepicker('birth_date', {
-                        bidi: true,
-                        placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
-                        format: 'YYYY/MM/DD'
-                    });
+    /**
+     * Generates the HTML for a single field based on its type.
+     *
+     * @param string $key   The meta key for the field.
+     * @param array  $args  The field's arguments (type, options, etc.).
+     * @param mixed  $value The current value of the field.
+     */
+    private function render_field_html($key, $args, $value) {
+        $type = $args['type'] ?? 'text';
+        $class = 'regular-text ' . ($args['class'] ?? '');
+
+        switch ($type) {
+            case 'textarea':
+                echo '<textarea name="' . esc_attr($key) . '" id="' . esc_attr($key) . '" rows="3" class="' . esc_attr($class) . '">' . esc_textarea($value) . '</textarea>';
+                break;
+            case 'select':
+                echo '<select name="' . esc_attr($key) . '" id="' . esc_attr($key) . '">';
+                foreach ($args['options'] as $option_value => $option_label) {
+                    echo '<option value="' . esc_attr($option_value) . '" ' . selected($value, $option_value, false) . '>' . esc_html($option_label) . '</option>';
                 }
-            });
-        ";
-        wp_add_inline_script('maneli-jalali-datepicker', $init_script);
-        ?>
-        <h3>اطلاعات تکمیلی استعلام</h3>
-        <table class="form-table">
-            <tr>
-                <th><label for="national_code">کد ملی</label></th>
-                <td><input type="text" name="national_code" id="national_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'national_code', true)); ?>" class="regular-text" /></td>
-            </tr>
-            <tr>
-                <th><label for="father_name">نام پدر</label></th>
-                <td><input type="text" name="father_name" id="father_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'father_name', true)); ?>" class="regular-text" /></td>
-            </tr>
-            <tr>
-                <th><label for="birth_date">تاریخ تولد</label></th>
-                <td><input type="text" name="birth_date" id="birth_date" value="<?php echo esc_attr(get_user_meta($user->ID, 'birth_date', true)); ?>" class="regular-text" /></td>
-            </tr>
-            <tr>
-                <th><label for="mobile_number">شماره موبایل</label></th>
-                <td><input type="text" name="mobile_number" id="mobile_number" value="<?php echo esc_attr(get_user_meta($user->ID, 'mobile_number', true)); ?>" class="regular-text" /><p class="description">این شماره برای ارسال پیامک‌ها و به عنوان نام کاربری استفاده می‌شود.</p></td>
-            </tr>
-             <tr>
-                <th><label for="phone_number">شماره تماس ثابت</label></th>
-                <td><input type="text" name="phone_number" id="phone_number" value="<?php echo esc_attr(get_user_meta($user->ID, 'phone_number', true)); ?>" class="regular-text" /></td>
-            </tr>
-             <tr>
-                <th><label for="occupation">شغل</label></th>
-                <td><input type="text" name="occupation" id="occupation" value="<?php echo esc_attr(get_user_meta($user->ID, 'occupation', true)); ?>" class="regular-text" /></td>
-            </tr>
-             <tr>
-                <th><label for="income_level">میزان درآمد (تومان)</label></th>
-                <td><input type="text" name="income_level" id="income_level" value="<?php echo esc_attr(get_user_meta($user->ID, 'income_level', true)); ?>" class="regular-text" /></td>
-            </tr>
-            <tr>
-                <th><label for="address">آدرس</label></th>
-                <td><textarea name="address" id="address" rows="3" class="regular-text"><?php echo esc_textarea(get_user_meta($user->ID, 'address', true)); ?></textarea></td>
-            </tr>
-             <tr>
-                <th><label for="residency_status">وضعیت محل سکونت</label></th>
-                <td>
-                    <select name="residency_status" id="residency_status">
-                        <option value="">-- انتخاب کنید --</option>
-                        <option value="owner" <?php selected(get_user_meta($user->ID, 'residency_status', true), 'owner'); ?>>مالک</option>
-                        <option value="tenant" <?php selected(get_user_meta($user->ID, 'residency_status', true), 'tenant'); ?>>مستاجر</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th><label for="workplace_status">وضعیت محل کار</label></th>
-                <td>
-                     <select name="workplace_status" id="workplace_status">
-                        <option value="">-- انتخاب کنید --</option>
-                        <option value="permanent" <?php selected(get_user_meta($user->ID, 'workplace_status', true), 'permanent'); ?>>رسمی</option>
-                        <option value="contract" <?php selected(get_user_meta($user->ID, 'workplace_status', true), 'contract'); ?>>قراردادی</option>
-                        <option value="freelance" <?php selected(get_user_meta($user->ID, 'workplace_status', true), 'freelance'); ?>>آزاد</option>
-                    </select>
-                </td>
-            </tr>
-             <tr><th colspan="2"><h3>اطلاعات بانکی</h3></th></tr>
-             <tr>
-                <th><label for="bank_name">نام بانک</label></th>
-                <td><input type="text" name="bank_name" id="bank_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'bank_name', true)); ?>" class="regular-text" /></td>
-            </tr>
-             <tr>
-                <th><label for="account_number">شماره حساب</label></th>
-                <td><input type="text" name="account_number" id="account_number" value="<?php echo esc_attr(get_user_meta($user->ID, 'account_number', true)); ?>" class="regular-text" /></td>
-            </tr>
-             <tr>
-                <th><label for="branch_code">کد شعبه</label></th>
-                <td><input type="text" name="branch_code" id="branch_code" value="<?php echo esc_attr(get_user_meta($user->ID, 'branch_code', true)); ?>" class="regular-text" /></td>
-            </tr>
-             <tr>
-                <th><label for="branch_name">نام شعبه</label></th>
-                <td><input type="text" name="branch_name" id="branch_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'branch_name', true)); ?>" class="regular-text" /></td>
-            </tr>
-        </table>
-        <?php
+                echo '</select>';
+                break;
+            default:
+                echo '<input type="' . esc_attr($type) . '" name="' . esc_attr($key) . '" id="' . esc_attr($key) . '" value="' . esc_attr($value) . '" class="' . esc_attr($class) . '" />';
+                break;
+        }
+
+        if (!empty($args['desc'])) {
+            echo '<p class="description">' . wp_kses_post($args['desc']) . '</p>';
+        }
     }
 
+    /**
+     * Saves the custom user fields when the profile is updated.
+     *
+     * @param int $user_id The ID of the user being updated.
+     */
     public function save_custom_user_fields($user_id) {
         if (!current_user_can('edit_user', $user_id)) {
             return false;
         }
 
-        $fields_to_save = [
-            'national_code', 'father_name', 'birth_date', 'mobile_number', 'phone_number',
-            'occupation', 'income_level', 'address', 'residency_status', 'workplace_status',
-            'bank_name', 'account_number', 'branch_code', 'branch_name'
-        ];
-
-        foreach($fields_to_save as $field) {
-            if (isset($_POST[$field])) {
-                if ($field === 'address') {
-                    update_user_meta($user_id, $field, sanitize_textarea_field($_POST[$field]));
-                } else {
-                    update_user_meta($user_id, $field, sanitize_text_field($_POST[$field]));
+        foreach ($this->custom_fields as $section) {
+            foreach ($section['fields'] as $field_key => $field_args) {
+                if (isset($_POST[$field_key])) {
+                    $value = $_POST[$field_key];
+                    $sanitized_value = ($field_args['type'] === 'textarea')
+                        ? sanitize_textarea_field($value)
+                        : sanitize_text_field($value);
+                    
+                    update_user_meta($user_id, $field_key, $sanitized_value);
                 }
             }
         }
