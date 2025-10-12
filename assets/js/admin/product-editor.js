@@ -4,12 +4,16 @@
  *
  * This includes live price formatting and auto-saving data changes via AJAX.
  *
- * @version 1.0.0
+ * @version 1.0.1 (Localized AJAX error message)
  */
 jQuery(document).ready(function($) {
     'use strict';
 
     // Data is passed from PHP via wp_localize_script as `maneliAdminProductEditor`
+    
+    // Helper to get localized error text for robustness.
+    // It is assumed 'ajax_error' is passed from PHP (as requested in the original fix plan).
+    const getErrorText = (key) => maneliAdminProductEditor.text[key] || 'An unknown error occurred.';
 
     /**
      * Helper function to format a number with thousand separators.
@@ -76,14 +80,16 @@ jQuery(document).ready(function($) {
             } else {
                 // Red border for error
                 inputField.css('border-color', '#dc3232');
-                console.error(maneliAdminProductEditor.text.error, response.data);
+                // Use localized text for the error message
+                console.error(getErrorText('error'), response.data);
                 // Optionally, show an alert to the user
-                // alert(maneliAdminProductEditor.text.error + ' ' + response.data.message);
+                // alert(getErrorText('error') + ' ' + (response.data.message || getErrorText('unknown_error')));
             }
         }).fail(function() {
             spinner.removeClass('is-active');
             inputField.css('border-color', '#dc3232'); // Red border for AJAX failure
-            console.error('An AJAX error occurred.');
+            // Use localized text for the general AJAX error failure
+            console.error(getErrorText('ajax_error'));
         }).always(function() {
             // Reset the border color after a short delay to remove the feedback indicator.
             setTimeout(() => inputField.css('border-color', ''), 2000);

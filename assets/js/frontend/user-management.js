@@ -4,7 +4,7 @@
  *
  * This includes AJAX filtering, pagination, and user deletion with confirmation.
  *
- * @version 1.0.0
+ * @version 1.0.1 (Localized all hardcoded strings)
  */
 jQuery(document).ready(function($) {
     'use strict';
@@ -26,6 +26,9 @@ jQuery(document).ready(function($) {
 
     let xhr;
     let searchTimeout;
+
+    // Helper function to get localized text. Assumes 'unknown_error' is available.
+    const getText = (key, fallback = '...') => maneliUserManagement.text[key] || fallback;
 
     /**
      * Fetches and updates the user list via AJAX based on current filter values.
@@ -61,14 +64,16 @@ jQuery(document).ready(function($) {
                     userListBody.html(response.data.html);
                     paginationWrapper.html(response.data.pagination_html);
                 } else {
-                    userListBody.html('<tr><td colspan="5" style="text-align:center;">' + (response.data.message || 'An error occurred.') + '</td></tr>');
+                    // FIX: Use localized string for the error message
+                    userListBody.html('<tr><td colspan="5" style="text-align:center;">' + (response.data.message || getText('unknown_error')) + '</td></tr>');
                     paginationWrapper.html('');
                 }
             },
             error: function(jqXHR, textStatus) {
                 if (textStatus !== 'abort') {
                     console.error('AJAX Error:', textStatus);
-                    userListBody.html('<tr><td colspan="5" style="text-align:center;">' + maneliUserManagement.text.server_error + '</td></tr>');
+                    // FIX: Use localized string for server error
+                    userListBody.html('<tr><td colspan="5" style="text-align:center;">' + getText('server_error') + '</td></tr>');
                 }
             },
             complete: function() {
@@ -127,15 +132,15 @@ jQuery(document).ready(function($) {
         const userId = button.data('user-id');
 
         Swal.fire({
-            title: maneliUserManagement.text.confirm_delete,
+            title: getText('confirm_delete'),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
-            confirmButtonText: maneliUserManagement.text.delete,
-            cancelButtonText: maneliUserManagement.text.cancel_button || 'Cancel'
+            confirmButtonText: getText('delete'),
+            cancelButtonText: getText('cancel_button') // FIX: Use localized string
         }).then((result) => {
             if (result.isConfirmed) {
-                button.text(maneliUserManagement.text.deleting).prop('disabled', true);
+                button.text(getText('deleting')).prop('disabled', true);
 
                 $.ajax({
                     url: maneliUserManagement.ajax_url,
@@ -151,13 +156,15 @@ jQuery(document).ready(function($) {
                                 $(this).remove();
                             });
                         } else {
-                            alert(maneliUserManagement.text.error_deleting + ' ' + (response.data.message || ''));
-                            button.text(maneliUserManagement.text.delete).prop('disabled', false);
+                            // FIX: Use localized strings for alerts
+                            alert(getText('error_deleting') + ' ' + (response.data.message || getText('unknown_error')));
+                            button.text(getText('delete')).prop('disabled', false);
                         }
                     },
                     error: function() {
-                        alert(maneliUserManagement.text.server_error);
-                        button.text(maneliUserManagement.text.delete).prop('disabled', false);
+                        // FIX: Use localized string for server error alert
+                        alert(getText('server_error'));
+                        button.text(getText('delete')).prop('disabled', false);
                     }
                 });
             }

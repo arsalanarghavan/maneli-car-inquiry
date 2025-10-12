@@ -5,7 +5,7 @@
  *
  * @package Maneli_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Added interest rate localization)
+ * @version 1.0.2 (Added Localization for Expert Panel JS strings)
  */
 
 if (!defined('ABSPATH')) {
@@ -16,22 +16,16 @@ class Maneli_Expert_Panel {
 
     public function __construct() {
         add_action('wp_ajax_maneli_search_cars', [$this, 'handle_car_search_ajax']);
-        // Note: Assuming a hook exists to enqueue assets for the expert panel page/shortcode.
-        // If an expert panel shortcode exists, you would hook asset enqueueing to 'wp_enqueue_scripts'.
-        // For simplicity, a generic hook is assumed if the asset localization is critical.
-        // add_action('wp_enqueue_scripts', [$this, 'enqueue_expert_panel_assets']); 
-        
         // Since expert-panel.js is needed for the inquiry creation form:
         add_action('wp_enqueue_scripts', [$this, 'enqueue_expert_panel_assets']);
     }
 
     /**
      * Enqueues assets specifically for the Expert Panel shortcode/form page.
-     * This localizes the configurable loan interest rate.
+     * This localizes the configurable loan interest rate and all necessary text strings.
      */
     public function enqueue_expert_panel_assets() {
         // Only enqueue if user can create inquiries and if the shortcode is present.
-        // A dedicated check (like has_shortcode) should be used in a production environment.
         if (!current_user_can('edit_posts')) {
              return;
         }
@@ -45,7 +39,24 @@ class Maneli_Expert_Panel {
         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce'),
-            'interestRate' => $interest_rate, // NEW: Pass the monthly rate
+            'interestRate' => $interest_rate, // Pass the monthly rate
+            'text'     => [
+                'car_search_placeholder' => esc_html__('Search for a car name...', 'maneli-car-inquiry'),
+                'down_payment_label'     => esc_html__('Down Payment Amount (Toman)', 'maneli-car-inquiry'),
+                'min_down_payment_desc'  => esc_html__('Minimum recommended down payment:', 'maneli-car-inquiry'),
+                'term_months_label'      => esc_html__('Repayment Period (Months)', 'maneli-car-inquiry'),
+                'loan_amount_label'      => esc_html__('Total Loan Amount', 'maneli-car-inquiry'),
+                'total_repayment_label'  => esc_html__('Total Repayment Amount', 'maneli-car-inquiry'),
+                'installment_amount_label' => esc_html__('Approximate Installment Amount', 'maneli-car-inquiry'),
+                'toman'                  => esc_html__('Toman', 'maneli-car-inquiry'),
+                'term_12'                => esc_html__('12 Months', 'maneli-car-inquiry'),
+                'term_18'                => esc_html__('18 Months', 'maneli-car-inquiry'),
+                'term_24'                => esc_html__('24 Months', 'maneli-car-inquiry'),
+                'term_36'                => esc_html__('36 Months', 'maneli-car-inquiry'),
+                'server_error'           => esc_html__('Server error:', 'maneli-car-inquiry'),
+                'unknown_error'          => esc_html__('Unknown error', 'maneli-car-inquiry'),
+                'datepicker_placeholder' => esc_html__('e.g., 1365/04/15', 'maneli-car-inquiry'),
+            ]
         ]);
     }
 
@@ -83,7 +94,6 @@ class Maneli_Expert_Panel {
         $like_term = '%' . $wpdb->esc_like($search_term) . '%';
 
         // 4. Database Query: Directly query the database for published products matching the title.
-        // This is a reliable way to get product IDs without interference from other plugins or complex meta queries.
         $product_ids = $wpdb->get_col($wpdb->prepare(
             "SELECT ID FROM {$wpdb->posts} 
              WHERE post_type = 'product' 

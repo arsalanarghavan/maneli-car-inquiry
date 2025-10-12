@@ -7,10 +7,28 @@
  * 2. Expert New Inquiry Form (expert-new-inquiry-form.php)
  * 3. User Edit Forms (form-edit-user.php and admin user profile)
  *
- * @version 1.0.1 (Centralized Datepicker initialization)
+ * @version 1.0.2 (Localized Datepicker placeholder)
  */
 document.addEventListener('DOMContentLoaded', function() {
-    
+
+    /**
+     * Dynamically retrieves the datepicker placeholder text from available localization objects.
+     *
+     * این تابع فرض می‌کند که رشته‌ی محلی‌سازی شده با کلید 'datepicker_placeholder' 
+     * در آبجکت maneli_expert_ajax.text قرار داده شده است.
+     *
+     * @return {string} The localized placeholder text or a default.
+     */
+    function getDatepickerPlaceholder() {
+        if (typeof maneli_expert_ajax !== 'undefined' && maneli_expert_ajax.text && maneli_expert_ajax.text.datepicker_placeholder) {
+            return maneli_expert_ajax.text.datepicker_placeholder;
+        }
+        // Fallback to a generic, non-hardcoded value to maintain the datepicker's function.
+        return 'YYYY/MM/DD'; 
+    }
+
+    const datepickerPlaceholder = getDatepickerPlaceholder();
+
     // --- 1. Datepicker Initialization ---
     // Check if the kamadatepicker library is available.
     if (typeof kamadatepicker !== 'undefined') {
@@ -37,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 kamadatepicker(element.id || element, {
                     bidi: true, // Enable bidirectional support for RTL
-                    placeholder: 'مثال: ۱۳۶۵/۰۴/۱۵',
+                    placeholder: datepickerPlaceholder, // FIX: Use localized string
                     format: 'YYYY/MM/DD'
                 });
                 element.setAttribute('data-kdp-init', 'true'); // Mark as initialized
