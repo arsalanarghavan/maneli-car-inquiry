@@ -1126,6 +1126,36 @@ msgstr "ایجاد کاربر"
 msgid "Cancel"
 msgstr "انصراف"
 
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Status:"
+msgstr "وضعیت:"
+
+msgid "Are you sure you want to delete this user? This action cannot be undone."
+msgstr "آیا مطمئن هستید که می‌خواهید این کاربر را حذف کنید؟ این عمل قابل بازگشت نیست."
+
+msgid "Are you sure you want to delete this request?"
+msgstr "آیا مطمئن هستید که می‌خواهید این درخواست را حذف کنید?"
+
+msgid "This action cannot be undone!"
+msgstr "این عمل قابل بازگشت نیست!"
+
+msgid "Yes, delete it!"
+msgstr "بله، حذف شود!"
+
+msgid "Delete Request"
+msgstr "حذف درخواست"
+
+msgid "Are you sure you want to permanently delete this request?"
+msgstr "آیا مطمئن هستید که می‌خواهید این درخواست را برای همیشه حذف کنید?"
+
+msgid "Deleted!"
+msgstr "حذف شد!"
+
 msgid "Save Changes"
 msgstr "ذخیره تغییرات"
 

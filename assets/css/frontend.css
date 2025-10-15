@@ -575,7 +575,415 @@
     border: 1px solid #f5c6cb;
 }
 
-/* === 11. RESPONSIVE DESIGN === */
+/* === 11. STATISTICS WIDGETS === */
+.maneli-stats-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-widget {
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-widget::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.stat-widget:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.stat-widget .stat-title {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.stat-widget .stat-value {
+    font-size: 36px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* === 12. USER LIST FILTERS & SEARCH === */
+.user-list-filters {
+    background: var(--background-white);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.filter-row {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.filter-row:last-child {
+    margin-bottom: 0;
+}
+
+.filter-row.search-row {
+    margin-bottom: 15px;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+    font-size: 14px;
+}
+
+.filter-group select,
+.filter-group input[type="search"],
+.search-input {
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    background: var(--background-light);
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.filter-group select:focus,
+.filter-group input[type="search"]:focus,
+.search-input:focus {
+    border-color: var(--theme-blue);
+    box-shadow: 0 0 0 3px rgba(45, 137, 190, 0.1);
+    outline: none;
+    background: var(--background-white);
+}
+
+.search-input {
+    width: 100%;
+}
+
+/* === 13. TABLE WRAPPER & STYLES === */
+.maneli-table-wrapper {
+    background: var(--background-white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.maneli-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.maneli-table-wrapper thead {
+    background: linear-gradient(135deg, var(--theme-blue) 0%, #4a90e2 100%);
+    color: var(--background-white);
+}
+
+.maneli-table-wrapper thead th {
+    padding: 16px;
+    text-align: right;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.maneli-table-wrapper tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.maneli-table-wrapper tbody tr:hover {
+    background-color: rgba(45, 137, 190, 0.03);
+}
+
+.maneli-table-wrapper tbody td {
+    padding: 14px 16px;
+    text-align: right;
+    font-size: 14px;
+    color: var(--text-dark);
+}
+
+.maneli-table-wrapper tbody td[data-title]:before {
+    content: attr(data-title);
+    font-weight: 600;
+    display: none;
+    margin-left: 10px;
+}
+
+/* === 14. USER LIST HEADER === */
+.user-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.user-list-header h3 {
+    margin: 0;
+    color: var(--theme-blue);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.user-list-header .button-primary {
+    background: linear-gradient(135deg, var(--theme-blue) 0%, #4a90e2 100%) !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(45, 137, 190, 0.3) !important;
+}
+
+.user-list-header .button-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(45, 137, 190, 0.4) !important;
+}
+
+/* === 15. PAGINATION === */
+.maneli-pagination-wrapper {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.maneli-pagination-wrapper .page-numbers {
+    display: inline-block;
+    padding: 10px 16px;
+    margin: 0 4px;
+    background: var(--background-white);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.maneli-pagination-wrapper .page-numbers:hover,
+.maneli-pagination-wrapper .page-numbers.current {
+    background: var(--theme-blue);
+    border-color: var(--theme-blue);
+    color: var(--background-white);
+    transform: translateY(-2px);
+}
+
+.maneli-pagination-wrapper .page-numbers.dots {
+    border: none;
+    background: transparent;
+}
+
+/* === 16. SETTINGS PAGE STYLES === */
+.maneli-settings-container {
+    display: flex;
+    gap: 30px;
+    background: var(--background-white);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.maneli-settings-sidebar {
+    flex: 0 0 280px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px 0;
+}
+
+.maneli-settings-tabs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.maneli-settings-tabs li {
+    margin: 0;
+}
+
+.maneli-tab-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 30px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-right: 3px solid transparent;
+}
+
+.maneli-tab-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--background-white);
+}
+
+.maneli-tab-link.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--background-white);
+    border-right-color: var(--background-white);
+    font-weight: 600;
+}
+
+.maneli-tab-link i {
+    font-size: 18px;
+    width: 24px;
+}
+
+.maneli-settings-content {
+    flex: 1;
+    padding: 40px;
+}
+
+.maneli-tab-pane {
+    display: none;
+}
+
+.maneli-tab-pane.active {
+    display: block;
+}
+
+.maneli-settings-section-title {
+    color: var(--theme-blue);
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.maneli-settings-section-title:first-child {
+    margin-top: 0;
+}
+
+.maneli-settings-save-btn {
+    background: linear-gradient(135deg, var(--theme-green) 0%, #4caf50 100%) !important;
+    color: var(--background-white) !important;
+    border: none !important;
+    padding: 14px 32px !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.maneli-settings-save-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4) !important;
+}
+
+/* === 17. SWITCH TOGGLE === */
+.maneli-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.maneli-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.maneli-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+}
+
+.maneli-slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+}
+
+input:checked + .maneli-slider {
+    background-color: var(--theme-green);
+}
+
+input:checked + .maneli-slider:before {
+    transform: translateX(30px);
+}
+
+.maneli-slider.round {
+    border-radius: 30px;
+}
+
+.maneli-slider.round:before {
+    border-radius: 50%;
+}
+
+/* === 18. RESPONSIVE DESIGN === */
+@media (max-width: 1024px) {
+    .maneli-settings-container {
+        flex-direction: column;
+    }
+    
+    .maneli-settings-sidebar {
+        flex: 1;
+    }
+    
+    .maneli-settings-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 20px;
+    }
+    
+    .maneli-tab-link {
+        border-right: none;
+        border-bottom: 3px solid transparent;
+        padding: 12px 20px;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .maneli-tab-link.active {
+        border-right-color: transparent;
+        border-bottom-color: var(--background-white);
+    }
+}
+
 @media (max-width: 768px) {
     .maneli-inquiry-wrapper {
         margin: 20px 10px;
@@ -607,5 +1015,45 @@
     .expert-status-badge {
         font-size: 10px;
         padding: 3px 8px;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .user-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .maneli-settings-content {
+        padding: 20px;
+    }
+    
+    .maneli-table-wrapper tbody td[data-title]:before {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--theme-blue);
+    }
+    
+    .maneli-table-wrapper tbody td {
+        display: block;
+        text-align: right;
+        padding: 10px 16px;
+    }
+    
+    .maneli-table-wrapper thead {
+        display: none;
+    }
+    
+    .maneli-table-wrapper tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
     }
 }

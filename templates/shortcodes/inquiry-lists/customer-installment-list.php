@@ -43,7 +43,9 @@ if (!defined('ABSPATH')) {
                         $product_id = get_post_meta($inquiry_id, 'product_id', true);
                         $status = get_post_meta($inquiry_id, 'inquiry_status', true);
                         $expert_status = get_post_meta($inquiry_id, 'expert_status', true);
-                        $report_url = add_query_arg('inquiry_id', $inquiry_id, $current_url);
+                        // Fix: Remove existing inquiry_id parameter from current_url before adding new one
+                        $base_url = remove_query_arg(['inquiry_id', 'paged'], $current_url);
+                        $report_url = add_query_arg('inquiry_id', $inquiry_id, $base_url);
                         $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
                         ?>
                         <tr>
