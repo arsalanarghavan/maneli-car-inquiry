@@ -179,43 +179,433 @@
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
-    padding: 15px 20px;
-    border-radius: 4px;
+    padding: 20px 25px;
+    border-radius: 12px;
     margin-bottom: 25px;
     border-right-width: 5px;
     border-right-style: solid;
     background-color: var(--background-light);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 .status-box p:last-child, .error-box p:last-child {
     margin-bottom: 0;
 }
 
 .status-approved, .status-final {
-    background-color: #e8f5e9;
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
     border-color: var(--theme-green);
     color: #2e7d32;
 }
 .status-rejected, .status-failed, .error-box {
-    background-color: #ffebee;
+    background: linear-gradient(135deg, #ffebee 0%, #fce4ec 100%);
     border-color: var(--theme-red);
     color: #c62828;
 }
 .status-pending {
-    background-color: #fff3e0;
+    background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);
     border-color: var(--theme-yellow);
     color: #e65100;
 }
 
 /* Report Status Box (used in single report views) */
 .report-status-box {
-    padding: 15px 20px;
-    border-radius: 8px;
+    padding: 20px 25px;
+    border-radius: 12px;
     margin-bottom: 25px;
     font-size: 16px;
     text-align: center;
     color: var(--background-white);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
 }
-.report-status-box.status-bg-approved, .report-status-box.status-bg-completed { background-color: var(--theme-green); }
-.report-status-box.status-bg-rejected { background-color: var(--theme-red); }
-.report-status-box.status-bg-pending { background-color: var(--theme-yellow); color: var(--text-dark); }
-.report-status-box.status-bg-awaiting_payment { background-color: var(--theme-cyan); }
+.report-status-box:hover {
+    transform: translateY(-2px);
+}
+.report-status-box.status-bg-approved, .report-status-box.status-bg-completed { 
+    background: linear-gradient(135deg, var(--theme-green) 0%, #4caf50 100%); 
+}
+.report-status-box.status-bg-rejected { 
+    background: linear-gradient(135deg, var(--theme-red) 0%, #f44336 100%); 
+}
+.report-status-box.status-bg-pending { 
+    background: linear-gradient(135deg, var(--theme-yellow) 0%, #ff9800 100%); 
+    color: var(--text-dark); 
+}
+.report-status-box.status-bg-awaiting_payment { 
+    background: linear-gradient(135deg, var(--theme-cyan) 0%, #00bcd4 100%); 
+}
+
+/* === 6. MEETING CALENDAR & SCHEDULING STYLES === */
+.maneli-meetings-calendar {
+    background: var(--background-white);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}
+
+.calendar-day {
+    margin-bottom: 30px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-day h3 {
+    background: linear-gradient(135deg, var(--theme-blue) 0%, #4a90e2 100%);
+    color: var(--background-white);
+    margin: 0;
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.calendar-events {
+    padding: 20px;
+    background: var(--background-white);
+}
+
+.calendar-event {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    border-left: 4px solid var(--theme-blue);
+    transition: all 0.2s ease;
+}
+
+.calendar-event:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-event .time {
+    font-weight: 600;
+    color: var(--theme-blue);
+    margin-right: 12px;
+    min-width: 60px;
+}
+
+.calendar-event .name {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+/* Meeting Schedule Form */
+.meeting-schedule {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.meeting-schedule h3 {
+    color: var(--theme-blue);
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.meeting-schedule form {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.meeting-schedule form > div {
+    flex: 1;
+    min-width: 200px;
+}
+
+.meeting-schedule label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+.meeting-schedule input[type="date"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    background: var(--background-white);
+    transition: all 0.2s ease;
+}
+
+.meeting-schedule input[type="date"]:focus {
+    border-color: var(--theme-blue);
+    box-shadow: 0 0 0 3px rgba(45, 137, 190, 0.1);
+    outline: none;
+}
+
+#meeting_slots {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.slot-btn {
+    padding: 10px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--background-white);
+    color: var(--text-dark);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    text-align: center;
+}
+
+.slot-btn:hover {
+    border-color: var(--theme-blue);
+    background: rgba(45, 137, 190, 0.05);
+}
+
+.slot-btn.available {
+    border-color: var(--theme-green);
+    color: var(--theme-green);
+}
+
+.slot-btn.available:hover {
+    background: var(--theme-green);
+    color: var(--background-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.slot-btn.selected {
+    background: var(--theme-blue);
+    color: var(--background-white);
+    border-color: var(--theme-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(45, 137, 190, 0.3);
+}
+
+.slot-btn.busy {
+    background: #f8f9fa;
+    color: #6c757d;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.meeting-schedule button[type="submit"] {
+    background: linear-gradient(135deg, var(--theme-green) 0%, #4caf50 100%);
+    color: var(--background-white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.meeting-schedule button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+/* === 7. MODERN CARD STYLES === */
+.maneli-card {
+    background: var(--background-white);
+    border-radius: 16px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.maneli-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+.maneli-card h3 {
+    color: var(--theme-blue);
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+/* === 8. ENHANCED FORM STYLES === */
+.maneli-inquiry-form {
+    background: var(--background-white);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.maneli-inquiry-form input[type="text"],
+.maneli-inquiry-form input[type="email"],
+.maneli-inquiry-form input[type="password"],
+.maneli-inquiry-form input[type="tel"],
+.maneli-inquiry-form input[type="number"],
+.maneli-inquiry-form textarea,
+.maneli-inquiry-form select {
+    background: var(--background-white);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.maneli-inquiry-form input:focus,
+.maneli-inquiry-form textarea:focus,
+.maneli-inquiry-form select:focus {
+    border-color: var(--theme-blue);
+    box-shadow: 0 0 0 4px rgba(45, 137, 190, 0.1);
+    transform: translateY(-1px);
+}
+
+/* === 9. ENHANCED BUTTON STYLES === */
+.loan-action-btn,
+.action-btn {
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.loan-action-btn::before,
+.action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.loan-action-btn:hover::before,
+.action-btn:hover::before {
+    left: 100%;
+}
+
+.loan-action-btn:hover,
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* === 10. EXPERT STATUS BADGE STYLES === */
+.expert-status-badge {
+    background: linear-gradient(135deg, var(--theme-blue) 0%, #4a90e2 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.expert-status-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Status indicator styles for better visibility */
+.status-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-indicator.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-indicator.status-approved {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-indicator.status-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-indicator.status-user_confirmed {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-indicator.status-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* === 11. RESPONSIVE DESIGN === */
+@media (max-width: 768px) {
+    .maneli-inquiry-wrapper {
+        margin: 20px 10px;
+        padding: 0 10px;
+    }
+    
+    .meeting-schedule form {
+        flex-direction: column;
+    }
+    
+    .meeting-schedule form > div {
+        min-width: 100%;
+    }
+    
+    #meeting_slots {
+        justify-content: center;
+    }
+    
+    .calendar-event {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .calendar-event .time {
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+    
+    .expert-status-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+    }
+}

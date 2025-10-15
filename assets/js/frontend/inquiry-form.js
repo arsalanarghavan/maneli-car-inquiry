@@ -205,23 +205,42 @@ document.addEventListener('DOMContentLoaded', function() {
     (function initMeetings(){
         const dateInput = document.getElementById('meeting_date');
         const slotsWrap = document.getElementById('meeting_slots');
-        const bookBtnsSelector = '.book-meeting-btn';
         if (!dateInput || !slotsWrap) return;
+        
         function fetchSlots(){
+            if (!dateInput.value) {
+                slotsWrap.innerHTML = '<div class="status-box status-pending"><p>لطفاً ابتدا تاریخ را انتخاب کنید</p></div>';
+                return;
+            }
+            
+            slotsWrap.innerHTML = '<div class="spinner is-active"></div>';
+            
             const params = new URLSearchParams();
             params.append('action', 'maneli_get_meeting_slots');
             params.append('nonce', (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) || '');
             params.append('date', dateInput.value);
+            
             fetch((window.maneliInquiryForm && maneliInquiryForm.ajax_url) || '/wp-admin/admin-ajax.php', {
-                method: 'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body: params.toString()
+                method: 'POST', 
+                headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, 
+                body: params.toString()
             }).then(r=>r.json()).then(res=>{
-                if (!res.success) { slotsWrap.innerHTML = '<div class="status-box status-error">'+(res.data && res.data.message || 'Error')+'</div>'; return; }
+                if (!res.success) { 
+                    slotsWrap.innerHTML = '<div class="status-box status-error"><p>'+(res.data && res.data.message || 'خطا در دریافت اطلاعات')+'</p></div>'; 
+                    return; 
+                }
                 const slots = res.data.slots || [];
+                if (slots.length === 0) {
+                    slotsWrap.innerHTML = '<div class="status-box status-pending"><p>هیچ اسلات خالی برای این تاریخ وجود ندارد</p></div>';
+                    return;
+                }
+                
                 slotsWrap.innerHTML = slots.map(s=>{
                     const cls = s.available ? 'available' : 'busy';
                     const dis = s.available ? '' : 'disabled';
                     return '<button type="button" class="slot-btn '+cls+'" data-start="'+s.start+'" '+dis+'>'+s.time+'</button>';
                 }).join('');
+                
                 slotsWrap.querySelectorAll('.slot-btn.available').forEach(btn=>{
                     btn.addEventListener('click', ()=>{
                         slotsWrap.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));
@@ -229,8 +248,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('meeting_start').value = btn.getAttribute('data-start');
                     });
                 });
+            }).catch(err => {
+                slotsWrap.innerHTML = '<div class="status-box status-error"><p>خطا در ارتباط با سرور</p></div>';
             });
         }
+        
         dateInput.addEventListener('change', fetchSlots);
         if (dateInput.value) fetchSlots();
 
@@ -239,17 +261,40 @@ document.addEventListener('DOMContentLoaded', function() {
             form.addEventListener('submit', function(e){
                 e.preventDefault();
                 const start = document.getElementById('meeting_start').value;
-                if (!start) return;
+                if (!start) {
+                    alert('لطفاً یک زمان را انتخاب کنید');
+                    return;
+                }
+                
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'در حال رزرو...';
+                submitBtn.disabled = true;
+                
                 const params = new URLSearchParams();
                 params.append('action', 'maneli_book_meeting');
                 params.append('nonce', (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) || '');
                 params.append('start', start);
                 params.append('inquiry_id', form.getAttribute('data-inquiry-id'));
                 params.append('inquiry_type', form.getAttribute('data-inquiry-type'));
+                
                 fetch((window.maneliInquiryForm && maneliInquiryForm.ajax_url) || '/wp-admin/admin-ajax.php', {
-                    method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body: params.toString()
+                    method:'POST', 
+                    headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, 
+                    body: params.toString()
                 }).then(r=>r.json()).then(res=>{
-                    if (res.success) { form.reset(); slotsWrap.innerHTML=''; alert('رزرو با موفقیت انجام شد'); } else { alert(res.data && res.data.message || 'Error'); }
+                    if (res.success) { 
+                        form.reset(); 
+                        slotsWrap.innerHTML=''; 
+                        alert('رزرو با موفقیت انجام شد');
+                    } else { 
+                        alert(res.data && res.data.message || 'خطا در رزرو'); 
+                    }
+                }).catch(err => {
+                    alert('خطا در ارتباط با سرور');
+                }).finally(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
                 });
             });
         }

@@ -86,16 +86,20 @@ class Maneli_Admin_Shortcodes {
         }
         ob_start();
         echo '<div class="maneli-meetings-calendar">';
-        foreach ($by_day as $day => $items) {
-            echo '<div class="calendar-day"><h3>' . esc_html($day) . '</h3>';
-            echo '<div class="calendar-events">';
-            foreach ($items as $ev) {
-                echo '<div class="calendar-event"><span class="time">' . esc_html($ev['time']) . '</span> - <span class="name">' . esc_html($ev['customer']) . '</span></div>';
-            }
-            echo '</div></div>';
-        }
         if (empty($by_day)) {
-            echo '<p>' . esc_html__('No meetings scheduled.', 'maneli-car-inquiry') . '</p>';
+            echo '<div class="status-box status-pending"><p>' . esc_html__('No meetings scheduled.', 'maneli-car-inquiry') . '</p></div>';
+        } else {
+            foreach ($by_day as $day => $items) {
+                echo '<div class="calendar-day"><h3>' . esc_html(date_i18n('l, F j, Y', strtotime($day))) . '</h3>';
+                echo '<div class="calendar-events">';
+                foreach ($items as $ev) {
+                    echo '<div class="calendar-event">';
+                    echo '<span class="time">' . esc_html($ev['time']) . '</span>';
+                    echo '<span class="name">' . esc_html($ev['customer']) . '</span>';
+                    echo '</div>';
+                }
+                echo '</div></div>';
+            }
         }
         echo '</div>';
         return ob_get_clean();

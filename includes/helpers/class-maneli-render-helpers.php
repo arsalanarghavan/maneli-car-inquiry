@@ -217,12 +217,16 @@ class Maneli_Render_Helpers {
         // از آنجایی که در حالت فرانت‌اند تنها هستیم، از توابع عمومی وردپرس استفاده می‌کنیم.
         $product_id        = get_post_meta( $inquiry_id, 'product_id', true );
         $inquiry_status    = get_post_meta( $inquiry_id, 'inquiry_status', true );
+        $expert_status     = get_post_meta( $inquiry_id, 'expert_status', true );
         $customer          = get_userdata( $inquiry_post->post_author );
         $expert_name       = get_post_meta( $inquiry_id, 'assigned_expert_name', true );
         $report_url        = add_query_arg('inquiry_id', $inquiry_id, $base_url);
         // از کلاس CPT Handler برای گرفتن لیبل وضعیت استفاده می‌کنیم (باید بارگذاری شده باشد).
         $status_label      = Maneli_CPT_Handler::get_status_label($inquiry_status); 
         $is_admin          = current_user_can( 'manage_maneli_inquiries' );
+        
+        // Get expert status info
+        $expert_status_info = self::get_expert_status_info($expert_status);
         ?>
         <tr>
             <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
@@ -230,6 +234,9 @@ class Maneli_Render_Helpers {
             <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
             <td class="inquiry-status-cell-installment" data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
                 <span class="status-indicator status-<?php echo esc_attr($inquiry_status); ?>"><?php echo esc_html($status_label); ?></span>
+                <?php if ($expert_status_info): ?>
+                    <br><span class="expert-status-badge" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html($expert_status_info['label']); ?></span>
+                <?php endif; ?>
             </td>
             <?php if ($is_admin) : ?>
                 <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>"><?php echo esc_html($expert_name ?: '—'); ?></td>
@@ -257,6 +264,7 @@ class Maneli_Render_Helpers {
         
         $product_id     = get_post_meta( $inquiry_id, 'product_id', true );
         $inquiry_status = get_post_meta( $inquiry_id, 'cash_inquiry_status', true );
+        $expert_status  = get_post_meta( $inquiry_id, 'expert_status', true );
         $customer_name  = get_post_meta( $inquiry_id, 'cash_first_name', true ) . ' ' . get_post_meta( $inquiry_id, 'cash_last_name', true );
         $customer_mobile= get_post_meta( $inquiry_id, 'mobile_number', true );
         $expert_name    = get_post_meta( $inquiry_id, 'assigned_expert_name', true );
@@ -264,6 +272,9 @@ class Maneli_Render_Helpers {
         // از کلاس CPT Handler برای گرفتن لیبل وضعیت استفاده می‌کنیم.
         $status_label   = Maneli_CPT_Handler::get_cash_inquiry_status_label($inquiry_status); 
         $is_admin       = current_user_can( 'manage_maneli_inquiries' );
+
+        // Get expert status info
+        $expert_status_info = self::get_expert_status_info($expert_status);
 
         $set_downpayment_button = ($inquiry_status === 'pending' || $inquiry_status === 'approved') ? 
             '<a href="#" class="set-down-payment-btn" data-inquiry-id="' . esc_attr($inquiry_id) . '" style="display: block; font-size: 11px; margin-top: 5px;">' . esc_html__('Set Down Payment', 'maneli-car-inquiry') . '</a>' : '';
@@ -275,6 +286,9 @@ class Maneli_Render_Helpers {
             <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
             <td class="inquiry-status-cell-cash" data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
                 <span class="status-indicator status-<?php echo esc_attr($inquiry_status); ?>"><?php echo esc_html($status_label); ?></span>
+                <?php if ($expert_status_info): ?>
+                    <br><span class="expert-status-badge" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html($expert_status_info['label']); ?></span>
+                <?php endif; ?>
                 <?php if ($is_admin) echo $set_downpayment_button; ?>
             </td>
             <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>"><?php echo esc_html($expert_name ?: '—'); ?></td>
@@ -287,5 +301,39 @@ class Maneli_Render_Helpers {
             </td>
         </tr>
         <?php
+    }
+    
+    /**
+     * Get expert status information (label and color) from settings.
+     *
+     * @param string $expert_status The expert status key.
+     * @return array|null Array with 'label' and 'color' keys, or null if not found.
+     */
+    public static function get_expert_status_info($expert_status) {
+        if (empty($expert_status)) {
+            return null;
+        }
+        
+        $options = get_option('maneli_inquiry_all_options', []);
+        $raw = $options['expert_statuses'] ?? '';
+        $lines = array_filter(array_map('trim', explode("\n", (string)$raw)));
+        
+        foreach ($lines as $line) {
+            $parts = explode('|', $line);
+            if (count($parts) >= 3) {
+                $key = trim($parts[0]);
+                $label = trim($parts[1]);
+                $color = trim($parts[2]);
+                
+                if ($key === $expert_status) {
+                    return [
+                        'label' => $label,
+                        'color' => $color
+                    ];
+                }
+            }
+        }
+        
+        return null;
     }
 }

@@ -56,12 +56,19 @@ if (!defined('ABSPATH')) {
                         $inquiry_id = get_the_ID();
                         $product_id = get_post_meta($inquiry_id, 'product_id', true);
                         $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+                        $expert_status = get_post_meta($inquiry_id, 'expert_status', true);
                         $report_url = add_query_arg('cash_inquiry_id', $inquiry_id, $current_url);
+                        $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
                         ?>
                         <tr>
                             <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
                             <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
-                            <td data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>"><?php echo esc_html(Maneli_CPT_Handler::get_cash_inquiry_status_label($status)); ?></td>
+                            <td data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
+                                <span class="status-indicator status-<?php echo esc_attr($status); ?>"><?php echo esc_html(Maneli_CPT_Handler::get_cash_inquiry_status_label($status)); ?></span>
+                                <?php if ($expert_status_info): ?>
+                                    <br><span class="expert-status-badge" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html($expert_status_info['label']); ?></span>
+                                <?php endif; ?>
+                            </td>
                             <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_date('Y/m/d', $inquiry_id)); ?></td>
                             <td class="woocommerce-orders-table__cell-order-actions">
                                 <a href="<?php echo esc_url($report_url); ?>" class="button view"><?php esc_html_e('View Details', 'maneli-car-inquiry'); ?></a>
