@@ -52,8 +52,29 @@ class Maneli_Product_Editor_Shortcode {
             ]
         ]);
 
-        ob_start();
-        maneli_get_template_part('shortcodes/product-editor', [], false);
-        return ob_get_clean();
+        // Prepare data for the template
+        $paged = max(1, get_query_var('paged'));
+        $initial_products_query = wc_get_products([
+            'limit' => 50,
+            'page' => $paged,
+            'status' => 'publish',
+            'type' => 'simple',
+            'category' => ['car-listing'],
+            'return' => 'objects',
+        ]);
+        
+        $total_products = wp_count_posts('product')->publish;
+        $max_num_pages = ceil($total_products / 50);
+        
+        $template_args = [
+            'product_stats_widgets_html' => Maneli_Admin_Dashboard_Widgets::render_product_statistics_widgets(),
+            'initial_products_query' => (object)[
+                'products' => $initial_products_query,
+                'max_num_pages' => $max_num_pages,
+            ],
+            'paged' => $paged,
+        ];
+
+        return maneli_get_template_part('shortcodes/product-editor', $template_args, false);
     }
 }
