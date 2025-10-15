@@ -58,8 +58,6 @@ class Maneli_Product_Editor_Shortcode {
             'limit' => 50,
             'page' => $paged,
             'status' => 'publish',
-            'type' => 'simple',
-            'category' => ['car-listing'],
             'return' => 'objects',
         ]);
         

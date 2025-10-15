@@ -186,3 +186,181 @@
 .maneli-modal .modal-content .form-group {
     margin: 15px 0;
 }
+
+
+/* === 6. DASHBOARD STATISTICS WIDGETS === */
+.maneli-dashboard-stats-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-widget {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.stat-widget:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-widget .stat-count {
+    display: block;
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--color-dark-text);
+}
+
+.stat-widget .stat-label {
+    display: block;
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Specific color schemes for different stat types */
+.stat-widget.stat-total {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-color: #2196F3;
+}
+
+.stat-widget.stat-total .stat-count {
+    color: #1976D2;
+}
+
+.stat-widget.stat-pending,
+.stat-widget.stat-awaiting {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border-color: var(--status-pending);
+}
+
+.stat-widget.stat-pending .stat-count,
+.stat-widget.stat-awaiting .stat-count {
+    color: #f57c00;
+}
+
+.stat-widget.stat-approved,
+.stat-widget.stat-referred {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-color: var(--status-approved);
+}
+
+.stat-widget.stat-approved .stat-count,
+.stat-widget.stat-referred .stat-count {
+    color: var(--status-approved);
+}
+
+.stat-widget.stat-rejected {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    border-color: var(--status-rejected);
+}
+
+.stat-widget.stat-rejected .stat-count {
+    color: var(--status-rejected);
+}
+
+.stat-widget.stat-more-docs {
+    background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+    border-color: var(--status-more-docs);
+}
+
+.stat-widget.stat-more-docs .stat-count {
+    color: var(--status-more-docs);
+}
+
+.stat-widget.stat-failed {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    border-color: var(--status-failed);
+}
+
+.stat-widget.stat-failed .stat-count {
+    color: var(--status-failed);
+}
+
+.stat-widget.stat-active {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-color: var(--status-approved);
+}
+
+.stat-widget.stat-active .stat-count {
+    color: var(--status-approved);
+}
+
+.stat-widget.stat-unavailable {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border-color: var(--status-pending);
+}
+
+.stat-widget.stat-unavailable .stat-count {
+    color: #f57c00;
+}
+
+.stat-widget.stat-disabled {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    border-color: #9e9e9e;
+}
+
+.stat-widget.stat-disabled .stat-count {
+    color: #616161;
+}
+
+.stat-widget.stat-expert {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border-color: #ff9800;
+}
+
+.stat-widget.stat-expert .stat-count {
+    color: #ef6c00;
+}
+
+.stat-widget.stat-admin {
+    background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+    border-color: #3f51b5;
+}
+
+.stat-widget.stat-admin .stat-count {
+    color: #3f51b5;
+}
+
+/* Responsive adjustments for statistics widgets */
+@media (max-width: 768px) {
+    .maneli-dashboard-stats-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .stat-widget .stat-count {
+        font-size: 28px;
+    }
+    
+    .stat-widget .stat-label {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .maneli-dashboard-stats-wrapper {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .stat-widget {
+        padding: 15px;
+    }
+    
+    .stat-widget .stat-count {
+        font-size: 24px;
+    }
+    
+    .stat-widget .stat-label {
+        font-size: 12px;
+    }
+}

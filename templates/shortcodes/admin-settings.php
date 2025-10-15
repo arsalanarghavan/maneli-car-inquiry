@@ -60,58 +60,77 @@ $first_tab_key = !empty($all_settings_tabs) ? array_key_first($all_settings_tabs
                     <div id="<?php echo esc_attr($tab_key); ?>" class="maneli-tab-pane <?php echo ($tab_key === $first_tab_key) ? 'active' : ''; ?>">
                         <?php
                         // This special section is for display only and doesn't have standard fields
-                        if ($tab_key === 'experts') {
+                        if ($tab_key === 'experts') :
                             $section = $tab_data['sections']['maneli_experts_list_section'];
-                            echo "<h3 class='maneli-settings-section-title'>" . esc_html($section['title']) . "</h3>";
-                            echo '<p>' . wp_kses_post($section['desc']) . '</p>';
+                            ?>
+                            <h3 class='maneli-settings-section-title'><?php echo esc_html($section['title']); ?></h3>
+                            <p><?php echo wp_kses_post($section['desc']); ?></p>
+                            <?php
                             $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name']);
-                            if (!empty($expert_users)) {
-                                echo '<table class="shop_table shop_table_responsive expert-list-table">';
-                                echo '<thead><tr><th>' . esc_html__('Expert Name', 'maneli-car-inquiry') . '</th><th>' . esc_html__('Email', 'maneli-car-inquiry') . '</th><th>' . esc_html__('Mobile Number', 'maneli-car-inquiry') . '</th></tr></thead>';
-                                echo '<tbody>';
-                                foreach ($expert_users as $expert) {
-                                    echo '<tr>';
-                                    echo '<td data-title="' . esc_attr__('Name', 'maneli-car-inquiry') . '">' . esc_html($expert->display_name) . '</td>';
-                                    echo '<td data-title="' . esc_attr__('Email', 'maneli-car-inquiry') . '">' . esc_html($expert->user_email) . '</td>';
-                                    echo '<td data-title="' . esc_attr__('Mobile', 'maneli-car-inquiry') . '">' . esc_html(get_user_meta($expert->ID, 'mobile_number', true) ?: esc_html__('Not set', 'maneli-car-inquiry')) . '</td>';
-                                    echo '</tr>';
-                                }
-                                echo '</tbody></table>';
-                            } else {
-                                echo '<p>' . esc_html__('No experts are currently registered.', 'maneli-car-inquiry') . '</p>';
-                            }
-                            continue; // Move to the next tab
-                        }
-                        
-                        // Render standard sections and fields
-                        if (!empty($tab_data['sections'])) {
-                            foreach($tab_data['sections'] as $section) {
-                                echo "<h3 class='maneli-settings-section-title'>" . esc_html($section['title']) . "</h3>";
-                                if (!empty($section['desc'])) echo '<p>' . wp_kses_post($section['desc']) . '</p>';
-                                
-                                if (!empty($section['fields'])) {
-                                    echo '<table class="form-table">';
-                                    foreach ($section['fields'] as $field) {
-                                        echo '<tr>';
-                                        echo '<th scope="row"><label for="' . esc_attr($settings_page_handler->get_options_name() . '_' . $field['name']) . '">' . esc_html($field['label']) . '</label></th>';
-                                        echo '<td>';
-                                        $settings_page_handler->render_field_html($field);
-                                        echo '</td>';
-                                        echo '</tr>';
-                                    }
-                                    echo '</table>';
-                                }
-                            }
-                        }
-                        ?>
+                            if (!empty($expert_users)) :
+                                ?>
+                                <table class="shop_table shop_table_responsive expert-list-table">
+                                    <thead>
+                                        <tr>
+                                            <th><?php esc_html_e('Expert Name', 'maneli-car-inquiry'); ?></th>
+                                            <th><?php esc_html_e('Email', 'maneli-car-inquiry'); ?></th>
+                                            <th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($expert_users as $expert) : ?>
+                                            <tr>
+                                                <td data-title="<?php esc_attr_e('Name', 'maneli-car-inquiry'); ?>"><?php echo esc_html($expert->display_name); ?></td>
+                                                <td data-title="<?php esc_attr_e('Email', 'maneli-car-inquiry'); ?>"><?php echo esc_html($expert->user_email); ?></td>
+                                                <td data-title="<?php esc_attr_e('Mobile', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_user_meta($expert->ID, 'mobile_number', true) ?: esc_html__('Not set', 'maneli-car-inquiry')); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php else : ?>
+                                <p><?php esc_html_e('No experts are currently registered.', 'maneli-car-inquiry'); ?></p>
+                            <?php endif; ?>
+                        <?php else : ?>
+                            <?php
+                            // Render standard sections and fields
+                            if (!empty($tab_data['sections'])) :
+                                foreach($tab_data['sections'] as $section) :
+                                    ?>
+                                    <h3 class='maneli-settings-section-title'><?php echo esc_html($section['title']); ?></h3>
+                                    <?php if (!empty($section['desc'])) : ?>
+                                        <p><?php echo wp_kses_post($section['desc']); ?></p>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($section['fields'])) : ?>
+                                        <table class="form-table">
+                                            <?php foreach ($section['fields'] as $field) : ?>
+                                                <tr>
+                                                    <th scope="row">
+                                                        <label for="<?php echo esc_attr($settings_page_handler->get_options_name() . '_' . $field['name']); ?>">
+                                                            <?php echo esc_html($field['label']); ?>
+                                                        </label>
+                                                    </th>
+                                                    <td>
+                                                        <?php $settings_page_handler->render_field_html($field); ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </table>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
 
-                <p class="submit">
-                    <button type="submit" name="submit" id="submit" class="maneli-settings-save-btn">
-                        <i class="fas fa-save"></i> <?php esc_html_e('Save Changes', 'maneli-car-inquiry'); ?>
-                    </button>
-                </p>
+                <!-- Save Button - Always Visible -->
+                <div class="maneli-settings-save-container">
+                    <p class="submit">
+                        <button type="submit" name="submit" id="submit" class="maneli-settings-save-btn">
+                            <i class="fas fa-save"></i> <?php esc_html_e('Save Changes', 'maneli-car-inquiry'); ?>
+                        </button>
+                    </p>
+                </div>
             </form>
         </div>
     </div>
