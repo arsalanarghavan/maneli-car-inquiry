@@ -1933,3 +1933,55 @@ msgstr "حالت ترکیب نشان وضعیت کارشناس"
 
 msgid "Expert status badge isolation"
 msgstr "جداسازی نشان وضعیت کارشناس"
+
+# Additional Missing Translations
+msgid "Account Number:"
+msgstr "شماره حساب:"
+
+msgid "Address:"
+msgstr "آدرس:"
+
+msgid "Approximate Installment Amount:"
+msgstr "مبلغ تقریبی هر قسط:"
+
+msgid "Bank Name:"
+msgstr "نام بانک:"
+
+msgid "Branch Code:"
+msgstr "کد شعبه:"
+
+msgid "Branch Name:"
+msgstr "نام شعبه:"
+
+msgid "Continue to Next Step"
+msgstr "ادامه به مرحله بعد"
+
+msgid "Date of Birth:"
+msgstr "تاریخ تولد:"
+
+msgid "Email:"
+msgstr "ایمیل:"
+
+msgid "Father's Name:"
+msgstr "نام پدر:"
+
+msgid "Income Level (Toman):"
+msgstr "میزان درآمد (تومان):"
+
+msgid "Issuer Full Name:"
+msgstr "نام و نام خانوادگی صادرکننده:"
+
+msgid "Mobile Number (Username):"
+msgstr "شماره موبایل (نام کاربری):"
+
+msgid "National Code:"
+msgstr "کد ملی:"
+
+msgid "Occupation:"
+msgstr "شغل:"
+
+msgid "Phone Number:"
+msgstr "شماره تلفن:"
+
+msgid "Status:"
+msgstr "وضعیت:"
