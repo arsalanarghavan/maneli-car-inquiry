@@ -21,6 +21,15 @@ $first_tab_key = !empty($all_settings_tabs) ? array_key_first($all_settings_tabs
 ?>
 
 <div class="maneli-inquiry-wrapper">
+    <!-- Settings Header -->
+    <div class="maneli-settings-header">
+        <h2 class="maneli-settings-title">
+            <i class="fas fa-cog"></i>
+            <?php esc_html_e('Plugin Settings', 'maneli-car-inquiry'); ?>
+        </h2>
+        <p class="maneli-settings-subtitle"><?php esc_html_e('Configure all aspects of the Maneli Car Inquiry plugin from this centralized settings panel.', 'maneli-car-inquiry'); ?></p>
+    </div>
+
     <?php if ($settings_updated) : ?>
         <div class="status-box status-approved">
             <p><?php esc_html_e('Settings saved successfully.', 'maneli-car-inquiry'); ?></p>
