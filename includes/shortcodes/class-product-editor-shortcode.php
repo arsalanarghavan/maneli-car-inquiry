@@ -1,41 +1,59 @@
 <?php
 /**
- * Creates and manages the custom admin page for quick product editing.
- * This class has been neutralized to prevent the creation of the backend admin page,
- * ensuring all product editing functionality is handled by the shortcode on the frontend.
+ * Handles the [maneli_product_editor] shortcode for frontend product editing.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Maneli_Car_Inquiry/Includes/Shortcodes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.1.0 (Neutralized for frontend-only mode)
+ * @version 1.0.0
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Product_Editor_Page {
-
-    /**
-     * The hook suffix for the custom admin page.
-     * @var string
-     */
-    private $page_hook_suffix;
+class Maneli_Product_Editor_Shortcode {
 
     public function __construct() {
-        // تمامی هوک‌های مربوط به افزودن صفحه به منوی ادمین و بارگذاری اسکریپت‌ها
-        // از محیط ادمین حذف شدند تا عملیات فقط در فرانت‌اند انجام شود.
+        add_shortcode('maneli_product_editor', [$this, 'render_product_editor']);
     }
 
     /**
-     * این متد دیگر از طریق هیچ هوکی فراخوانی نمی‌شود و تنها برای
-     * حفظ ساختار فایل اصلی باقی مانده است. نمایش واقعی توسط شورت‌کد انجام می‌شود.
+     * Renders the product editor shortcode.
      */
-    public function render_page_html() {
-        if (!class_exists('WooCommerce')) {
-            echo '<div class="notice notice-error"><p>' . esc_html__('To use this plugin, please install and activate WooCommerce first.', 'maneli-car-inquiry') . '</p></div>';
-            return;
+    public function render_product_editor() {
+        if (!current_user_can('manage_maneli_inquiries')) {
+            return '<div class="maneli-inquiry-wrapper error-box"><p>' . esc_html__('You do not have sufficient permissions to access this page.', 'maneli-car-inquiry') . '</p></div>';
         }
-        
-        // محتوای واقعی این صفحه به کلاس Maneli_Product_Editor_Shortcode منتقل شده است.
+
+        // Enqueue necessary scripts
+        wp_enqueue_script(
+            'maneli-product-editor-js',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/product-editor.js',
+            ['jquery'],
+            '1.0.0',
+            true
+        );
+
+        wp_enqueue_style(
+            'maneli-product-editor-css',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/css/admin-styles.css',
+            [],
+            '1.0.0'
+        );
+
+        // Localize script for AJAX
+        wp_localize_script('maneli-product-editor-js', 'maneliProductEditor', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('maneli_product_editor_nonce'),
+            'text' => [
+                'loading' => esc_html__('Loading...', 'maneli-car-inquiry'),
+                'error' => esc_html__('An error occurred. Please try again.', 'maneli-car-inquiry'),
+                'success' => esc_html__('Operation completed successfully.', 'maneli-car-inquiry'),
+            ]
+        ]);
+
+        ob_start();
+        maneli_get_template_part('shortcodes/product-editor', [], false);
+        return ob_get_clean();
     }
 }

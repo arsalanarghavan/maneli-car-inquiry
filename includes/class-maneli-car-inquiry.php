@@ -43,8 +43,8 @@ final class Maneli_Car_Inquiry_Plugin {
      * Register all hooks related to the core functionality of the plugin.
      */
     private function define_hooks() {
-        add_action('plugins_loaded', [$this, 'initialize']);
-        add_action('init', [$this, 'load_plugin_textdomain']);
+        add_action('plugins_loaded', [$this, 'load_plugin_textdomain'], 1);
+        add_action('plugins_loaded', [$this, 'initialize'], 5);
     }
 
     /**
