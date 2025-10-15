@@ -22,6 +22,10 @@ class Maneli_Installment_Inquiry_Handler {
         add_action('admin_post_nopriv_maneli_submit_identity', '__return_false');
         add_action('admin_post_maneli_submit_identity', [$this, 'handle_identity_submission']);
 
+        // New Step 3: Confirm car step submission
+        add_action('admin_post_nopriv_maneli_confirm_car_step', '__return_false');
+        add_action('admin_post_maneli_confirm_car_step', [$this, 'handle_confirm_car_step']);
+
         // Step 3 (Implicit): Listens for a successful payment hook to finalize the installment inquiry.
         add_action('maneli_inquiry_payment_successful', [$this, 'finalize_inquiry_from_hook']);
         
@@ -30,6 +34,10 @@ class Maneli_Installment_Inquiry_Handler {
 
         // Handle re-try logic for failed inquiries.
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
+
+        // Public AJAX: Confirm car catalog (customers)
+        add_action('wp_ajax_maneli_confirm_car_catalog', [$this, 'ajax_confirm_car_catalog']);
+        add_action('wp_ajax_nopriv_maneli_confirm_car_catalog', '__return_false');
     }
     
     // =======================================================
@@ -45,6 +53,76 @@ class Maneli_Installment_Inquiry_Handler {
         $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
         // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
         return hash('sha256', $key, true); 
+    }
+
+    /**
+     * Returns HTML for product cards (image + title) with pagination, for confirm car step.
+     */
+    public function ajax_confirm_car_catalog() {
+        check_ajax_referer('maneli_confirm_car_catalog_nonce', 'nonce');
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $paged = isset($_POST['page']) ? max(1, absint($_POST['page'])) : 1;
+        $search = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+        $per_page = 8; // 2 rows x 4 columns
+
+        $args = [
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
+            'posts_per_page' => $per_page,
+            'paged'          => $paged,
+            'orderby'        => 'date',
+            'order'          => 'DESC',
+            's'              => $search,
+        ];
+
+        // Optional: category filter
+        if (!empty($_POST['category'])) {
+            $args['tax_query'][] = [
+                'taxonomy' => 'product_cat',
+                'field'    => 'slug',
+                'terms'    => sanitize_text_field($_POST['category']),
+            ];
+        }
+        // Optional: brand filter (via attribute pa_brand)
+        if (!empty($_POST['brand'])) {
+            $args['tax_query'][] = [
+                'taxonomy' => 'pa_brand',
+                'field'    => 'slug',
+                'terms'    => sanitize_text_field($_POST['brand']),
+            ];
+        }
+
+        $query = new WP_Query($args);
+
+        ob_start();
+        if ($query->have_posts()) {
+            while ($query->have_posts()) { $query->the_post();
+                $pid = get_the_ID();
+                $img = get_the_post_thumbnail($pid, 'medium');
+                echo '<div class="product-card">';
+                echo '<div class="thumb">' . wp_kses_post($img) . '</div>';
+                echo '<div class="title" style="text-align:center; margin-top:8px;">' . esc_html(get_the_title()) . '</div>';
+                echo '</div>';
+            }
+        }
+        $html = ob_get_clean();
+        wp_reset_postdata();
+
+        $pagination_html = paginate_links([
+            'base'      => '#',
+            'format'    => '?paged=%#%',
+            'current'   => $paged,
+            'total'     => max(1, (int)$query->max_num_pages),
+            'prev_text' => esc_html__('« Previous', 'maneli-car-inquiry'),
+            'next_text' => esc_html__('Next »', 'maneli-car-inquiry'),
+            'type'      => 'plain'
+        ]);
+
+        wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 
     /**
@@ -189,12 +267,34 @@ class Maneli_Installment_Inquiry_Handler {
         $inquiry_fee = !empty($options['inquiry_fee']) ? (int)$options['inquiry_fee'] : 0;
 
         if ($payment_enabled && $inquiry_fee > 0) {
-            update_user_meta($user_id, 'maneli_inquiry_step', 'payment_pending');
+            update_user_meta($user_id, 'maneli_inquiry_step', 'confirm_car_pending');
         } else {
             // No payment needed, finalize the inquiry right away by triggering the success hook
             do_action('maneli_inquiry_payment_successful', $user_id);
         }
 
+        wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
+        exit;
+    }
+
+    /**
+     * Handles Step 3 confirmation and routes to payment step.
+     */
+    public function handle_confirm_car_step() {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_confirm_car_step_nonce')) {
+            wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
+        }
+        if (!is_user_logged_in()) {
+            wp_redirect(home_url());
+            exit;
+        }
+        $user_id = get_current_user_id();
+        if (empty($_POST['confirm_car_agree'])) {
+            wp_die(esc_html__('Please confirm your selected car to continue.', 'maneli-car-inquiry'));
+        }
+
+        // Move to payment step now
+        update_user_meta($user_id, 'maneli_inquiry_step', 'payment_pending');
         wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
         exit;
     }

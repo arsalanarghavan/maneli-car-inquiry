@@ -20,16 +20,17 @@ if (!defined('ABSPATH')) {
 $steps = [
     1 => esc_html__('Select Car', 'maneli-car-inquiry'),
     2 => esc_html__('Complete Information', 'maneli-car-inquiry'),
-    3 => esc_html__('Payment', 'maneli-car-inquiry'),
-    4 => esc_html__('Pending Review', 'maneli-car-inquiry'),
-    5 => esc_html__('Final Result', 'maneli-car-inquiry'),
+    3 => esc_html__('Confirm Car', 'maneli-car-inquiry'),
+    4 => esc_html__('Payment', 'maneli-car-inquiry'),
+    5 => esc_html__('Pending Review', 'maneli-car-inquiry'),
+    6 => esc_html__('Final Result', 'maneli-car-inquiry'),
 ];
 
 // Conditionally remove the payment step if it's disabled in the settings
 $options = get_option('maneli_inquiry_all_options', []);
 $payment_enabled = !empty($options['payment_enabled']) && $options['payment_enabled'] == '1';
 if (!$payment_enabled) {
-    unset($steps[3]);
+    unset($steps[4]);
 }
 ?>
 

@@ -153,4 +153,49 @@ document.addEventListener('DOMContentLoaded', function() {
             this.parentElement.style.display = 'none';
         });
     }
+
+    // --- 4. Confirm Car Step: Catalog load & filters ---
+    (function initConfirmCarCatalog(){
+        const catalog = document.getElementById('confirm_car_catalog');
+        const pagination = document.getElementById('confirm_car_pagination');
+        const searchInput = document.getElementById('confirm_car_search');
+        const filterBtn = document.getElementById('confirm_car_filter_btn');
+        if (!catalog || !pagination) return;
+
+        function fetchCatalog(page=1){
+            const params = new URLSearchParams();
+            params.append('action', 'maneli_confirm_car_catalog');
+            params.append('nonce', (window.maneli_expert_ajax && maneli_expert_ajax.nonce) || '');
+            params.append('page', String(page));
+            if (searchInput && searchInput.value) params.append('search', searchInput.value);
+            // Future: brand & category selects
+            const brandSel = document.getElementById('confirm_car_brand');
+            const catSel = document.getElementById('confirm_car_category');
+            if (brandSel && brandSel.value) params.append('brand', brandSel.value);
+            if (catSel && catSel.value) params.append('category', catSel.value);
+
+            fetch((window.ajaxurl || '/wp-admin/admin-ajax.php'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                body: params.toString()
+            }).then(r=>r.json()).then(res=>{
+                if (!res || !res.success) return;
+                catalog.innerHTML = res.data.html || '';
+                pagination.innerHTML = res.data.pagination_html || '';
+                // Hook clicks on pagination links
+                pagination.querySelectorAll('a').forEach(a=>{
+                    a.addEventListener('click', function(e){
+                        e.preventDefault();
+                        const m = this.href.match(/paged=(\d+)/);
+                        const next = m ? parseInt(m[1], 10) : 1;
+                        fetchCatalog(next);
+                    });
+                });
+            });
+        }
+
+        if (filterBtn) filterBtn.addEventListener('click', ()=>fetchCatalog(1));
+        if (searchInput) searchInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); fetchCatalog(1);} });
+        fetchCatalog(1);
+    })();
 });

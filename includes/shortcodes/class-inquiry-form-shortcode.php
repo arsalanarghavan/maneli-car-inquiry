@@ -93,6 +93,9 @@ class Maneli_Inquiry_Form_Shortcode {
                 case 'form_pending':
                     $this->render_step2_identity_form($user_id);
                     break;
+                case 'confirm_car_pending':
+                    $this->render_step3_confirm_car($user_id);
+                    break;
                 case 'payment_pending':
                     maneli_get_template_part('shortcodes/inquiry-form/step-3-payment', ['user_id' => $user_id]);
                     break;
@@ -135,6 +138,36 @@ class Maneli_Inquiry_Form_Shortcode {
         ];
 
         maneli_get_template_part('shortcodes/inquiry-form/step-2-identity-form', $template_args);
+    }
+
+    /**
+     * Renders Step 3: Confirm selected car (read-only selection with catalog preview).
+     *
+     * @param int $user_id The current user's ID.
+     */
+    private function render_step3_confirm_car($user_id) {
+        $this->load_datepicker_assets();
+
+        $car_id = get_user_meta($user_id, 'maneli_selected_car_id', true);
+        $product = $car_id ? wc_get_product($car_id) : null;
+        if (!$product) {
+            echo '<div class="error-box"><p>' . esc_html__('Could not find the selected car. Please start over.', 'maneli-car-inquiry') . '</p></div>';
+            return;
+        }
+
+        $template_args = [
+            'user_id'             => $user_id,
+            'car_id'              => $car_id,
+            'car_name'            => $product->get_name(),
+            'car_model'           => $product->get_attribute('pa_model'),
+            'car_image_html'      => get_the_post_thumbnail($car_id, 'medium'),
+            'down_payment'        => get_user_meta($user_id, 'maneli_inquiry_down_payment', true),
+            'term_months'         => get_user_meta($user_id, 'maneli_inquiry_term_months', true),
+            'total_price'         => get_user_meta($user_id, 'maneli_inquiry_total_price', true),
+            'installment_amount'  => get_user_meta($user_id, 'maneli_inquiry_installment', true),
+        ];
+
+        maneli_get_template_part('shortcodes/inquiry-form/step-3-confirm-car', $template_args);
     }
     
     /**
