@@ -43,7 +43,7 @@ final class Maneli_Car_Inquiry_Plugin {
      * Register all hooks related to the core functionality of the plugin.
      */
     private function define_hooks() {
-        add_action('plugins_loaded', [$this, 'load_plugin_textdomain'], 1);
+        add_action('init', [$this, 'load_plugin_textdomain'], 0);
         add_action('plugins_loaded', [$this, 'initialize'], 5);
     }
 
@@ -51,11 +51,13 @@ final class Maneli_Car_Inquiry_Plugin {
      * Load the plugin text domain for translation.
      */
     public function load_plugin_textdomain() {
-        load_plugin_textdomain(
-            'maneli-car-inquiry',
-            false,
-            dirname(plugin_basename(MANELI_INQUIRY_PLUGIN_PATH)) . '/languages/'
-        );
+        $locale = apply_filters('plugin_locale', determine_locale(), 'maneli-car-inquiry');
+        $mofile = 'maneli-car-inquiry-' . $locale . '.mo';
+        
+        // Try plugin's languages directory first
+        $plugin_rel_path = dirname(plugin_basename(MANELI_INQUIRY_PLUGIN_PATH)) . '/languages/';
+        load_textdomain('maneli-car-inquiry', WP_LANG_DIR . '/plugins/' . $mofile);
+        load_plugin_textdomain('maneli-car-inquiry', false, $plugin_rel_path);
     }
 
     /**
