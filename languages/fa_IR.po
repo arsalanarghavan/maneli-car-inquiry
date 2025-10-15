@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Maneli Car Inquiry Core 1.0.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/maneli-car-inquiry\n"
 "POT-Creation-Date: 2025-10-12 05:46:00+0000\n"
-"PO-Revision-Date: 2025-10-12 11:48+0330\n"
+"PO-Revision-Date: 2025-10-12 13:09+0330\n"
 "Last-Translator: Gemini <gemini@google.com>\n"
 "Language-Team: Persian <team@example.com>\n"
 "Language: fa_IR\n"
@@ -112,11 +112,11 @@ msgstr "هیچ استعلامی مطابق با معیارهای شما یافت
 
 #: includes/admin/class-ajax-handler.php:168
 msgid "&laquo; Previous"
-msgstr "&laquo; قبلی"
+msgstr "« قبلی"
 
 #: includes/admin/class-ajax-handler.php:168
 msgid "Next &raquo;"
-msgstr "بعدی &raquo;"
+msgstr "بعدی »"
 
 #: includes/admin/class-ajax-handler.php:193
 msgid "Inquiry deleted successfully."
@@ -229,7 +229,7 @@ msgstr "کل استعلام‌ها"
 
 #: includes/class-admin-dashboard-widgets.php:109
 msgid "Docs Req."
-msgstr "مدارک لازم."
+msgstr "مدارک لازم"
 
 #: includes/class-admin-dashboard-widgets.php:130
 msgid "Total Cash Requests"
@@ -385,7 +385,7 @@ msgstr "تومان"
 
 #: includes/class-expert-panel.php:25
 #: includes/shortcodes/calculator/main-container.php:118
-#: includes/shortcodes/inquiry-lists/report-admin-installment.php:143
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:143
 msgid "12 Months"
 msgstr "۱۲ ماهه"
 
@@ -730,7 +730,7 @@ msgstr "مدیریت کارشناسان"
 
 #: includes/class-settings-page.php:283
 msgid "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
-msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>«کارشناس مانلی»</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده می‌شود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس مانلی» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
+msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس مانلی\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس مانلی» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
 
 #: includes/class-settings-page.php:288
 msgid "Finotex"
