@@ -27,6 +27,7 @@ class Maneli_CPT_Handler {
     public function register_post_types() {
         $this->register_inquiry_post_type();
         $this->register_cash_inquiry_post_type();
+        $this->register_meeting_post_type();
     }
 
     /**
@@ -78,6 +79,28 @@ class Maneli_CPT_Handler {
             'rewrite'            => false,
         ];
         register_post_type('cash_inquiry', $args);
+    }
+
+    /**
+     * Registers the 'maneli_meeting' post type to store meeting slots booked for customers.
+     */
+    private function register_meeting_post_type() {
+        $labels = [
+            'name'          => esc_html__('Meetings', 'maneli-car-inquiry'),
+            'singular_name' => esc_html__('Meeting', 'maneli-car-inquiry'),
+        ];
+        $args = [
+            'labels'          => $labels,
+            'supports'        => ['title', 'author'],
+            'public'          => false,
+            'show_ui'         => false,
+            'show_in_menu'    => false,
+            'capability_type' => 'post',
+            'capabilities'    => ['create_posts' => 'do_not_allow'],
+            'map_meta_cap'    => true,
+            'rewrite'         => false,
+        ];
+        register_post_type('maneli_meeting', $args);
     }
 
     /**

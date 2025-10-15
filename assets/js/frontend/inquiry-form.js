@@ -200,4 +200,58 @@ document.addEventListener('DOMContentLoaded', function() {
         if (searchInput) searchInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); fetchCatalog(1);} });
         fetchCatalog(1);
     })();
+
+    // --- 5. Meetings: load slots and book ---
+    (function initMeetings(){
+        const dateInput = document.getElementById('meeting_date');
+        const slotsWrap = document.getElementById('meeting_slots');
+        const bookBtnsSelector = '.book-meeting-btn';
+        if (!dateInput || !slotsWrap) return;
+        function fetchSlots(){
+            const params = new URLSearchParams();
+            params.append('action', 'maneli_get_meeting_slots');
+            params.append('nonce', (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) || '');
+            params.append('date', dateInput.value);
+            fetch((window.maneliInquiryForm && maneliInquiryForm.ajax_url) || '/wp-admin/admin-ajax.php', {
+                method: 'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body: params.toString()
+            }).then(r=>r.json()).then(res=>{
+                if (!res.success) { slotsWrap.innerHTML = '<div class="status-box status-error">'+(res.data && res.data.message || 'Error')+'</div>'; return; }
+                const slots = res.data.slots || [];
+                slotsWrap.innerHTML = slots.map(s=>{
+                    const cls = s.available ? 'available' : 'busy';
+                    const dis = s.available ? '' : 'disabled';
+                    return '<button type="button" class="slot-btn '+cls+'" data-start="'+s.start+'" '+dis+'>'+s.time+'</button>';
+                }).join('');
+                slotsWrap.querySelectorAll('.slot-btn.available').forEach(btn=>{
+                    btn.addEventListener('click', ()=>{
+                        slotsWrap.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        document.getElementById('meeting_start').value = btn.getAttribute('data-start');
+                    });
+                });
+            });
+        }
+        dateInput.addEventListener('change', fetchSlots);
+        if (dateInput.value) fetchSlots();
+
+        const form = document.getElementById('meeting_form');
+        if (form) {
+            form.addEventListener('submit', function(e){
+                e.preventDefault();
+                const start = document.getElementById('meeting_start').value;
+                if (!start) return;
+                const params = new URLSearchParams();
+                params.append('action', 'maneli_book_meeting');
+                params.append('nonce', (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) || '');
+                params.append('start', start);
+                params.append('inquiry_id', form.getAttribute('data-inquiry-id'));
+                params.append('inquiry_type', form.getAttribute('data-inquiry-type'));
+                fetch((window.maneliInquiryForm && maneliInquiryForm.ajax_url) || '/wp-admin/admin-ajax.php', {
+                    method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, body: params.toString()
+                }).then(r=>r.json()).then(res=>{
+                    if (res.success) { form.reset(); slotsWrap.innerHTML=''; alert('رزرو با موفقیت انجام شد'); } else { alert(res.data && res.data.message || 'Error'); }
+                });
+            });
+        }
+    })();
 });

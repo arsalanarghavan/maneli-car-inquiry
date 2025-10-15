@@ -176,6 +176,28 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
     </div>
     
     <?php if ($is_admin_or_expert): ?>
+    <div class="maneli-report-section meeting-schedule" style="flex: 1 1 100%; border: 1px solid #eee; padding: 20px; border-radius: 4px; margin-top: 20px;">
+        <h3><?php esc_html_e('Schedule In-Person Meeting', 'maneli-car-inquiry'); ?></h3>
+        <form id="meeting_form" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                <div>
+                    <label><?php esc_html_e('Select Date', 'maneli-car-inquiry'); ?>:</label>
+                    <input type="date" id="meeting_date" required>
+                    <input type="hidden" id="meeting_start" value="">
+                </div>
+                <div style="flex:1; min-width:260px;">
+                    <label><?php esc_html_e('Available Slots', 'maneli-car-inquiry'); ?>:</label>
+                    <div id="meeting_slots" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+                </div>
+                <div>
+                    <button type="submit" class="button button-primary"><?php esc_html_e('Book Meeting', 'maneli-car-inquiry'); ?></button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($is_admin_or_expert): ?>
     <div class="maneli-report-section expert-decision" style="flex: 1 1 100%; border: 1px solid #eee; padding: 20px; border-radius: 4px; margin-top: 20px;">
         <h3><?php esc_html_e('Expert Decision', 'maneli-car-inquiry'); ?></h3>
         <?php $options = get_option('maneli_inquiry_all_options', []); $raw = $options['expert_statuses'] ?? ''; $lines = array_filter(array_map('trim', explode("\n", (string)$raw))); $default_key = $options['expert_default_status'] ?? 'unknown'; ?>

@@ -15,6 +15,7 @@ class Maneli_Admin_Shortcodes {
 
     public function __construct() {
         add_shortcode('maneli_settings', [$this, 'render_settings_shortcode']);
+        add_shortcode('maneli_meetings_calendar', [$this, 'render_meetings_calendar']);
     }
 
     /**
@@ -51,5 +52,52 @@ class Maneli_Admin_Shortcodes {
         // 4. Render the template file.
         // The `false` argument tells the function to return the output as a string instead of echoing it.
         return maneli_get_template_part('shortcodes/admin-settings', $template_args, false);
+    }
+
+    /**
+     * Renders a simple full-width meetings calendar view (list grouped by day with times and customer names).
+     */
+    public function render_meetings_calendar() {
+        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true))) {
+            return '<div class="status-box status-error"><p>' . esc_html__('Unauthorized access.', 'maneli-car-inquiry') . '</p></div>';
+        }
+        $today = current_time('Y-m-d');
+        $meetings = get_posts([
+            'post_type' => 'maneli_meeting',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'orderby' => 'date',
+            'order' => 'ASC',
+            'date_query' => [ ['after' => $today . ' 00:00:00'] ],
+        ]);
+        $by_day = [];
+        foreach ($meetings as $m) {
+            $start = get_post_meta($m->ID, 'meeting_start', true);
+            $inquiry_id = get_post_meta($m->ID, 'meeting_inquiry_id', true);
+            $customer_name = '';
+            if (get_post_type($inquiry_id) === 'inquiry') {
+                $customer = get_userdata(get_post_field('post_author', $inquiry_id));
+                $customer_name = $customer ? $customer->display_name : '';
+            } elseif (get_post_type($inquiry_id) === 'cash_inquiry') {
+                $customer_name = (get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true));
+            }
+            $day = date('Y-m-d', strtotime($start));
+            $by_day[$day][] = [ 'time' => date('H:i', strtotime($start)), 'customer' => $customer_name ];
+        }
+        ob_start();
+        echo '<div class="maneli-meetings-calendar">';
+        foreach ($by_day as $day => $items) {
+            echo '<div class="calendar-day"><h3>' . esc_html($day) . '</h3>';
+            echo '<div class="calendar-events">';
+            foreach ($items as $ev) {
+                echo '<div class="calendar-event"><span class="time">' . esc_html($ev['time']) . '</span> - <span class="name">' . esc_html($ev['customer']) . '</span></div>';
+            }
+            echo '</div></div>';
+        }
+        if (empty($by_day)) {
+            echo '<p>' . esc_html__('No meetings scheduled.', 'maneli-car-inquiry') . '</p>';
+        }
+        echo '</div>';
+        return ob_get_clean();
     }
 }

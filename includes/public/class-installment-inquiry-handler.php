@@ -38,6 +38,10 @@ class Maneli_Installment_Inquiry_Handler {
         // Public AJAX: Confirm car catalog (customers)
         add_action('wp_ajax_maneli_confirm_car_catalog', [$this, 'ajax_confirm_car_catalog']);
         add_action('wp_ajax_nopriv_maneli_confirm_car_catalog', '__return_false');
+
+        // Meetings AJAX
+        add_action('wp_ajax_maneli_get_meeting_slots', [$this, 'ajax_get_meeting_slots']);
+        add_action('wp_ajax_maneli_book_meeting', [$this, 'ajax_book_meeting']);
     }
     
     // =======================================================
@@ -53,6 +57,104 @@ class Maneli_Installment_Inquiry_Handler {
         $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
         // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
         return hash('sha256', $key, true); 
+    }
+
+    /**
+     * Returns available meeting slots for a given date.
+     */
+    public function ajax_get_meeting_slots() {
+        check_ajax_referer('maneli_meetings_nonce', 'nonce');
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        }
+        $date = isset($_POST['date']) ? sanitize_text_field($_POST['date']) : '';
+        if (!$date) {
+            wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'maneli-car-inquiry')]);
+        }
+        $options = get_option('maneli_inquiry_all_options', []);
+        $start = $options['meetings_start_hour'] ?? '10:00';
+        $end   = $options['meetings_end_hour'] ?? '20:00';
+        $slot  = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
+
+        $start_ts = strtotime($date . ' ' . $start);
+        $end_ts   = strtotime($date . ' ' . $end);
+        if ($end_ts <= $start_ts) {
+            wp_send_json_error(['message' => esc_html__('Invalid schedule range.', 'maneli-car-inquiry')]);
+        }
+
+        // Fetch booked meetings on this date
+        $meetings = get_posts([
+            'post_type' => 'maneli_meeting',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'date_query' => [
+                [
+                    'after' => $date . ' 00:00:00',
+                    'before'=> $date . ' 23:59:59',
+                    'inclusive' => true,
+                ],
+            ],
+        ]);
+        $busy_map = [];
+        foreach ($meetings as $m) {
+            $busy_map[get_post_meta($m->ID, 'meeting_start', true)] = true;
+        }
+
+        $slots = [];
+        for ($t = $start_ts; $t < $end_ts; $t += $slot * 60) {
+            $key = date('Y-m-d H:i', $t);
+            $slots[] = [
+                'time' => date('H:i', $t),
+                'start' => $key,
+                'available' => empty($busy_map[$key]),
+            ];
+        }
+        wp_send_json_success(['slots' => $slots]);
+    }
+
+    /**
+     * Books a meeting if the slot is still free.
+     */
+    public function ajax_book_meeting() {
+        check_ajax_referer('maneli_meetings_nonce', 'nonce');
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        }
+        $start = isset($_POST['start']) ? sanitize_text_field($_POST['start']) : '';
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $type = isset($_POST['inquiry_type']) ? sanitize_key($_POST['inquiry_type']) : 'installment';
+        if (!$start || !$inquiry_id) {
+            wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'maneli-car-inquiry')]);
+        }
+        // Check conflict
+        $exists = get_posts([
+            'post_type' => 'maneli_meeting',
+            'posts_per_page' => 1,
+            'post_status' => 'publish',
+            'meta_query' => [
+                ['key' => 'meeting_start', 'value' => $start, 'compare' => '=']
+            ]
+        ]);
+        if (!empty($exists)) {
+            wp_send_json_error(['message' => esc_html__('Selected slot is no longer available.', 'maneli-car-inquiry')]);
+        }
+
+        $title = sprintf(esc_html__('Meeting - %s', 'maneli-car-inquiry'), date_i18n('Y/m/d H:i', strtotime($start)));
+        $post_id = wp_insert_post([
+            'post_type' => 'maneli_meeting',
+            'post_title'=> $title,
+            'post_status'=> 'publish',
+            'post_author'=> get_current_user_id(),
+        ]);
+        if (is_wp_error($post_id)) {
+            wp_send_json_error(['message' => esc_html__('Server error:', 'maneli-car-inquiry') . ' ' . $post_id->get_error_message()]);
+        }
+        update_post_meta($post_id, 'meeting_start', $start);
+        update_post_meta($post_id, 'meeting_inquiry_id', $inquiry_id);
+        update_post_meta($post_id, 'meeting_inquiry_type', $type);
+
+        // Link for quick view in calendar
+        wp_send_json_success(['message' => esc_html__('Meeting booked successfully.', 'maneli-car-inquiry')]);
     }
 
     /**

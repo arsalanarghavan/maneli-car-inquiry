@@ -413,6 +413,21 @@ class Maneli_Settings_Page {
                     ]
                 ]
             ],
+            'meetings' => [
+                'title' => esc_html__('Meetings & Calendar', 'maneli-car-inquiry'),
+                'icon'  => 'fas fa-calendar-alt',
+                'sections' => [
+                    'maneli_meetings_general' => [
+                        'title' => esc_html__('General Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'meetings_enabled', 'label' => esc_html__('Enable Meetings', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1'],
+                            ['name' => 'meetings_start_hour', 'label' => esc_html__('Workday Start (HH:MM)', 'maneli-car-inquiry'), 'type' => 'text', 'default' => '10:00'],
+                            ['name' => 'meetings_end_hour',   'label' => esc_html__('Workday End (HH:MM)', 'maneli-car-inquiry'),   'type' => 'text', 'default' => '20:00'],
+                            ['name' => 'meetings_slot_minutes','label' => esc_html__('Slot Duration (minutes)', 'maneli-car-inquiry'), 'type' => 'number', 'default' => '30'],
+                        ]
+                    ]
+                ]
+            ],
         ];
     }
 }

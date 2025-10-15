@@ -106,6 +106,27 @@ $status_class = $status_classes[$status] ?? 'status-bg-pending';
         <a href="<?php echo esc_url($back_link); ?>" class="loan-action-btn"><?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?></a>
     </div>
     <?php if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true)) : ?>
+    <div class="maneli-report-section meeting-schedule" style="margin-top: 20px; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
+        <h3><?php esc_html_e('Schedule In-Person Meeting', 'maneli-car-inquiry'); ?></h3>
+        <form id="meeting_form" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+                <div>
+                    <label><?php esc_html_e('Select Date', 'maneli-car-inquiry'); ?>:</label>
+                    <input type="date" id="meeting_date" required>
+                    <input type="hidden" id="meeting_start" value="">
+                </div>
+                <div style="flex:1; min-width:260px;">
+                    <label><?php esc_html_e('Available Slots', 'maneli-car-inquiry'); ?>:</label>
+                    <div id="meeting_slots" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+                </div>
+                <div>
+                    <button type="submit" class="action-btn" style="background-color: var(--theme-green); "><?php esc_html_e('Book Meeting', 'maneli-car-inquiry'); ?></button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+    <?php if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true)) : ?>
     <div class="maneli-report-section expert-decision" style="margin-top: 20px; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
         <h3><?php esc_html_e('Expert Decision', 'maneli-car-inquiry'); ?></h3>
         <?php $options = get_option('maneli_inquiry_all_options', []); $raw = $options['expert_statuses'] ?? ''; $lines = array_filter(array_map('trim', explode("\n", (string)$raw))); $default_key = $options['expert_default_status'] ?? 'unknown'; ?>
