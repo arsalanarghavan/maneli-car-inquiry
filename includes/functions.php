@@ -58,6 +58,47 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
     }
 }
 
+if (!function_exists('maneli_get_current_url')) {
+    /**
+     * Gets the current page URL while preserving specific query parameters.
+     * This is used for generating proper links within shortcodes.
+     *
+     * @param array $remove_params Optional. Array of query parameter names to remove from the URL.
+     * @param array $preserve_params Optional. Array of query parameter names to always preserve (e.g., 'endp').
+     * @return string The current URL with query parameters.
+     */
+    function maneli_get_current_url($remove_params = [], $preserve_params = ['endp']) {
+        global $wp;
+        
+        // Get the base URL
+        $current_url = home_url(add_query_arg([], $wp->request));
+        
+        // Parse current query string
+        $query_params = [];
+        
+        // First, preserve the parameters that should always be kept
+        foreach ($preserve_params as $param) {
+            if (isset($_GET[$param])) {
+                $query_params[$param] = sanitize_text_field($_GET[$param]);
+            }
+        }
+        
+        // Then add other parameters that are not in the remove list
+        foreach ($_GET as $key => $value) {
+            if (!in_array($key, $remove_params) && !isset($query_params[$key])) {
+                $query_params[$key] = sanitize_text_field($value);
+            }
+        }
+        
+        // Build the URL with preserved parameters
+        if (!empty($query_params)) {
+            return add_query_arg($query_params, $current_url);
+        }
+        
+        return $current_url;
+    }
+}
+
 if (!function_exists('maneli_get_template_part')) {
     /**
      * Includes a template file from the plugin's templates directory.

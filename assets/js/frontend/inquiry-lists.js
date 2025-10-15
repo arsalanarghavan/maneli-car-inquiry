@@ -509,8 +509,12 @@ jQuery(document).ready(function($) {
 
             const ajaxAction = (listType === 'installment') ? 'maneli_filter_inquiries_ajax' : 'maneli_filter_cash_inquiries_ajax';
             const nonce = (listType === 'installment') ? maneliInquiryLists.nonces.inquiry_filter : maneliInquiryLists.nonces.cash_filter;
-            // Use the base URL without query string for base_url parameter
-            const baseUrl = window.location.href.split('?')[0]; 
+            
+            // Build base URL preserving important query parameters (like 'endp')
+            const urlObj = new URL(window.location.href);
+            const paramsToRemove = ['inquiry_id', 'cash_inquiry_id', 'paged', 'page'];
+            paramsToRemove.forEach(param => urlObj.searchParams.delete(param));
+            const baseUrl = urlObj.toString(); 
             const colspan = listType === 'installment' ? 7 : 8; // Number of columns in the table
 
             const formData = {

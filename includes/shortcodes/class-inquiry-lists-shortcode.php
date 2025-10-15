@@ -103,7 +103,7 @@ class Maneli_Inquiry_Lists_Shortcode {
             'post_status'    => ['publish', 'private'],
         ]);
         
-        $args = ['inquiries_query' => $query, 'current_url' => remove_query_arg('inquiry_id')];
+        $args = ['inquiries_query' => $query, 'current_url' => maneli_get_current_url(['inquiry_id', 'paged'])];
         return maneli_get_template_part('shortcodes/inquiry-lists/customer-installment-list', $args, false);
     }
 
@@ -119,7 +119,7 @@ class Maneli_Inquiry_Lists_Shortcode {
             'post_status'    => ['publish', 'private'],
         ]);
 
-        $args = ['inquiries_query' => $query, 'current_url' => remove_query_arg('cash_inquiry_id')];
+        $args = ['inquiries_query' => $query, 'current_url' => maneli_get_current_url(['cash_inquiry_id', 'payment_status', 'paged'])];
         if (isset($_GET['payment_status'])) {
             $args['payment_status'] = sanitize_text_field($_GET['payment_status']);
         }

@@ -67,7 +67,7 @@ class Maneli_User_Management_Shortcodes {
         $template_args = [
             'user_stats_widgets_html' => Maneli_Admin_Dashboard_Widgets::render_user_statistics_widgets(),
             'initial_user_query'      => $initial_user_query,
-            'current_url'             => remove_query_arg(['edit_user', 'add_user', 'user-updated', 'user-created', 'user-deleted', 'error']),
+            'current_url'             => maneli_get_current_url(['edit_user', 'add_user', 'user-updated', 'user-created', 'user-deleted', 'error', 'paged']),
             'feedback_messages'       => $this->get_feedback_messages(),
         ];
         
@@ -81,7 +81,7 @@ class Maneli_User_Management_Shortcodes {
      */
     private function render_user_add_form() {
         $template_args = [
-            'back_link' => remove_query_arg('add_user'),
+            'back_link' => maneli_get_current_url(['add_user']),
         ];
         return maneli_get_template_part('shortcodes/user-management/form-add-user', $template_args, false);
     }
@@ -105,7 +105,7 @@ class Maneli_User_Management_Shortcodes {
 
         $template_args = [
             'user'      => $user,
-            'back_link' => remove_query_arg('edit_user'),
+            'back_link' => maneli_get_current_url(['edit_user']),
         ];
         return maneli_get_template_part('shortcodes/user-management/form-edit-user', $template_args, false);
     }

@@ -178,6 +178,42 @@ class Maneli_Inquiry_Form_Shortcode {
     private function render_expert_new_inquiry_form() {
         $this->load_datepicker_assets();
         
+        // Enqueue expert panel JS for car search
+        wp_enqueue_script(
+            'maneli-expert-panel-js',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js',
+            ['jquery', 'select2'],
+            '1.0.0',
+            true
+        );
+        
+        // Localize the script
+        $options = get_option('maneli_inquiry_all_options', []);
+        $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
+        
+        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce'),
+            'interestRate' => $interest_rate,
+            'text'     => [
+                'car_search_placeholder' => esc_html__('Search for a car name...', 'maneli-car-inquiry'),
+                'down_payment_label'     => esc_html__('Down Payment Amount (Toman)', 'maneli-car-inquiry'),
+                'min_down_payment_desc'  => esc_html__('Minimum recommended down payment:', 'maneli-car-inquiry'),
+                'term_months_label'      => esc_html__('Repayment Period (Months)', 'maneli-car-inquiry'),
+                'loan_amount_label'      => esc_html__('Total Loan Amount', 'maneli-car-inquiry'),
+                'total_repayment_label'  => esc_html__('Total Repayment Amount', 'maneli-car-inquiry'),
+                'installment_amount_label' => esc_html__('Approximate Installment Amount', 'maneli-car-inquiry'),
+                'toman'                  => esc_html__('Toman', 'maneli-car-inquiry'),
+                'term_12'                => esc_html__('12 Months', 'maneli-car-inquiry'),
+                'term_18'                => esc_html__('18 Months', 'maneli-car-inquiry'),
+                'term_24'                => esc_html__('24 Months', 'maneli-car-inquiry'),
+                'term_36'                => esc_html__('36 Months', 'maneli-car-inquiry'),
+                'server_error'           => esc_html__('Server error:', 'maneli-car-inquiry'),
+                'unknown_error'          => esc_html__('Unknown error', 'maneli-car-inquiry'),
+                'datepicker_placeholder' => esc_html__('e.g., 1365/04/15', 'maneli-car-inquiry'),
+            ]
+        ]);
+        
         $template_args = [];
         if (current_user_can('manage_maneli_inquiries')) {
             $template_args['experts'] = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
