@@ -24,6 +24,8 @@ class Maneli_Admin_Actions_Handler {
         // Expert Workflow Hooks
         add_action('admin_post_nopriv_maneli_expert_create_inquiry', '__return_false');
         add_action('admin_post_maneli_expert_create_inquiry', [$this, 'handle_expert_create_inquiry']);
+        add_action('admin_post_nopriv_maneli_expert_update_decision', '__return_false');
+        add_action('admin_post_maneli_expert_update_decision', [$this, 'handle_expert_update_decision']);
     }
     
     // NOTE: private function calculate_installment_amount has been removed. 
@@ -94,6 +96,40 @@ class Maneli_Admin_Actions_Handler {
         }
         
         wp_redirect($redirect_url);
+        exit;
+    }
+
+    /**
+     * Saves expert decision (status + optional note) for installment or cash inquiries.
+     */
+    public function handle_expert_update_decision() {
+        check_admin_referer('maneli_expert_update_decision');
+        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true))) {
+            wp_die(esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry'));
+        }
+
+        $post_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $type    = isset($_POST['inquiry_type']) ? sanitize_key($_POST['inquiry_type']) : 'installment';
+        $status  = isset($_POST['expert_status']) ? sanitize_text_field($_POST['expert_status']) : '';
+        $note    = isset($_POST['expert_note']) ? sanitize_textarea_field($_POST['expert_note']) : '';
+
+        if (!$post_id) {
+            wp_die(esc_html__('Invalid request ID.', 'maneli-car-inquiry'));
+        }
+        if ($type === 'cash' && get_post_type($post_id) !== 'cash_inquiry') {
+            wp_die(esc_html__('Invalid request ID.', 'maneli-car-inquiry'));
+        }
+        if ($type !== 'cash' && get_post_type($post_id) !== 'inquiry') {
+            wp_die(esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry'));
+        }
+
+        update_post_meta($post_id, 'expert_status', $status);
+        update_post_meta($post_id, 'expert_status_note', $note);
+        update_post_meta($post_id, 'expert_status_updated_by', get_current_user_id());
+        update_post_meta($post_id, 'expert_status_updated_at', current_time('mysql'));
+
+        $redirect = wp_get_referer() ?: home_url('/dashboard/');
+        wp_redirect($redirect);
         exit;
     }
 

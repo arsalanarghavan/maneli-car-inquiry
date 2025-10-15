@@ -20,10 +20,12 @@ if (!defined('ABSPATH')) {
 // Determine the message to display based on the inquiry status
 $options = get_option('maneli_inquiry_all_options', []);
 $default_wait = esc_html__('Your request has been submitted. The result will be announced within the next 24 hours.', 'maneli-car-inquiry');
-if ($status === 'more_docs') {
+// If the inquiry is approved (user_confirmed), show a configurable post-approval message instead
+if (!empty($_GET['status']) && $_GET['status'] === 'success' && !empty($options['msg_after_approval'])) {
+    $message = $options['msg_after_approval'];
+} else if ($status === 'more_docs') {
     $message = esc_html__('Our experts require additional documents to complete the process. Please wait for our team to contact you.', 'maneli-car-inquiry');
 } else {
-    // Default 'pending' message, editable via settings
     $message = !empty($options['msg_waiting_review']) ? $options['msg_waiting_review'] : $default_wait;
 }
 ?>

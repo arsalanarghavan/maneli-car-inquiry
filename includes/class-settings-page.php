@@ -353,6 +353,30 @@ class Maneli_Settings_Page {
                                 'type' => 'textarea',
                                 'default' => esc_html__('Your request has been submitted. The result will be announced within the next 24 hours.', 'maneli-car-inquiry')
                             ],
+                            [
+                                'name' => 'msg_after_approval',
+                                'label' => esc_html__('Post-Approval Message', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'default' => esc_html__('Your documents have been approved. Our team will contact you shortly for next steps.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_expert_decision_section' => [
+                        'title' => esc_html__('Expert Decision Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'expert_statuses',
+                                'label' => esc_html__('Statuses (one per line: key|label|#color)', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'default' => "unknown|" . esc_html__('Unknown', 'maneli-car-inquiry') . "|#9CA3AF\nprogress|" . esc_html__('Follow-up in Progress', 'maneli-car-inquiry') . "|#3B82F6\napproved|" . esc_html__('Approved', 'maneli-car-inquiry') . "|#10B981\nrejected|" . esc_html__('Rejected', 'maneli-car-inquiry') . "|#EF4444",
+                                'desc' => esc_html__('Example: unknown|Unknown|#999999', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'expert_default_status',
+                                'label' => esc_html__('Default Expert Status Key', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'default' => 'unknown'
+                            ],
                         ]
                     ],
                     'maneli_installment_rejection_reasons_section' => [
