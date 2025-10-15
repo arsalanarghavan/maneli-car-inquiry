@@ -221,6 +221,16 @@ class Maneli_Inquiry_Form_Shortcode {
             '1.0.0',
             true
         );
+        // Localize shared frontend data (AJAX and texts)
+        wp_localize_script('maneli-inquiry-form-js', 'maneliInquiryForm', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonces' => [
+                'confirm_catalog' => wp_create_nonce('maneli_confirm_car_catalog_nonce'),
+            ],
+            'text' => [
+                'datepicker_placeholder' => esc_html__('YYYY/MM/DD', 'maneli-car-inquiry'),
+            ],
+        ]);
         
         $this->datepicker_loaded = true;
     }

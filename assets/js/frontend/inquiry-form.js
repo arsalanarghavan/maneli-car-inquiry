@@ -165,7 +165,8 @@ document.addEventListener('DOMContentLoaded', function() {
         function fetchCatalog(page=1){
             const params = new URLSearchParams();
             params.append('action', 'maneli_confirm_car_catalog');
-            params.append('nonce', (window.maneli_expert_ajax && maneli_expert_ajax.nonce) || '');
+            const shared = (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) ? window.maneliInquiryForm.nonces.confirm_catalog : '';
+            params.append('nonce', shared);
             params.append('page', String(page));
             if (searchInput && searchInput.value) params.append('search', searchInput.value);
             // Future: brand & category selects
@@ -174,7 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (brandSel && brandSel.value) params.append('brand', brandSel.value);
             if (catSel && catSel.value) params.append('category', catSel.value);
 
-            fetch((window.ajaxurl || '/wp-admin/admin-ajax.php'), {
+            const ajaxUrl = (window.maneliInquiryForm && maneliInquiryForm.ajax_url) ? maneliInquiryForm.ajax_url : (window.ajaxurl || '/wp-admin/admin-ajax.php');
+            fetch(ajaxUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: params.toString()

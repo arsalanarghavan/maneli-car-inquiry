@@ -17,6 +17,86 @@ msgstr ""
 "X-Generator: Poedit 3.4.2\n"
 "X-Domain: maneli-car-inquiry\n"
 
+# New strings for added features (Confirm Car step, job fields, settings, filters)
+
+#: templates/shortcodes/inquiry-form/progress-tracker.php:23
+msgid "Confirm Car"
+msgstr "تایید خودرو"
+
+#: includes/class-settings-page.php
+msgid "Frontend Messages"
+msgstr "پیام‌های فرانت‌اند"
+
+#: includes/class-settings-page.php
+msgid "Price Disclaimer"
+msgstr "هشدار قیمت"
+
+#: includes/class-settings-page.php
+msgid "Waiting Review Message"
+msgstr "پیام انتظار بررسی"
+
+#: templates/shortcodes/inquiry-form/step-1-car-selection.php
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "Due to severe market fluctuations, car prices are approximate and may change until final approval."
+msgstr "به علت نوسانات شدید، قیمت خودروها تقریبی است و تا زمان تایید نهایی ممکن است تغییر کند."
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "The inquiry will be performed for the car below and cannot be changed."
+msgstr "استعلام برای خودروی زیر انجام می‌شود و قابل تغییر نیست."
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "Your Selected Car"
+msgstr "خودروی انتخابی شما"
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "Search…"
+msgstr "جستجو…"
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "All Brands"
+msgstr "همه برندها"
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "All Categories"
+msgstr "همه دسته‌بندی‌ها"
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "Filter"
+msgstr "فیلتر"
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "View Full Cars List"
+msgstr "مشاهده لیست کامل خودروها"
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "I agree and confirm this car."
+msgstr "موافقم، همین خودرو را انتخاب می‌کنم."
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "Previous Step"
+msgstr "مرحله قبل"
+
+#: templates/shortcodes/inquiry-form/step-3-confirm-car.php
+msgid "Continue"
+msgstr "ادامه"
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php
+msgid "Job Type"
+msgstr "نوع شغل"
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php
+msgid "Job Title:"
+msgstr "عنوان شغل:"
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php
+msgid "Issuer Job Title:"
+msgstr "عنوان شغل صادرکننده:"
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php
+msgid "Issuer Residency Status"
+msgstr "وضعیت اقامت صادرکننده"
+
 #: includes/admin/class-admin-actions-handler.php:40
 msgid "Invalid request or insufficient permissions."
 msgstr "درخواست نامعتبر یا عدم دسترسی کافی."
