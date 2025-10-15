@@ -84,7 +84,7 @@ $first_tab_key = !empty($all_settings_tabs) ? array_key_first($all_settings_tabs
                                     echo '<table class="form-table">';
                                     foreach ($section['fields'] as $field) {
                                         echo '<tr>';
-                                        echo '<th scope="row"><label for="' . esc_attr($settings_page_handler->options_name . '_' . $field['name']) . '">' . esc_html($field['label']) . '</label></th>';
+                                        echo '<th scope="row"><label for="' . esc_attr($settings_page_handler->get_options_name() . '_' . $field['name']) . '">' . esc_html($field['label']) . '</label></th>';
                                         echo '<td>';
                                         $settings_page_handler->render_field_html($field);
                                         echo '</td>';

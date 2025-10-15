@@ -225,6 +225,15 @@ class Maneli_Settings_Page {
     public function get_all_settings_public() {
         return $this->get_all_settings_fields();
     }
+
+    /**
+     * Public method to get the options name for use in templates.
+     *
+     * @return string The options name.
+     */
+    public function get_options_name() {
+        return $this->options_name;
+    }
     
     /**
      * Defines the entire structure of the plugin's settings, organized by tabs and sections.
