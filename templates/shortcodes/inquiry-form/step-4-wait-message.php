@@ -18,11 +18,13 @@ if (!defined('ABSPATH')) {
 }
 
 // Determine the message to display based on the inquiry status
+$options = get_option('maneli_inquiry_all_options', []);
+$default_wait = esc_html__('Your request has been submitted. The result will be announced within the next 24 hours.', 'maneli-car-inquiry');
 if ($status === 'more_docs') {
     $message = esc_html__('Our experts require additional documents to complete the process. Please wait for our team to contact you.', 'maneli-car-inquiry');
 } else {
-    // Default 'pending' message
-    $message = esc_html__('Your inquiry request has been successfully submitted. You will be notified of the result after it has been reviewed by our experts (usually within 24 business hours).', 'maneli-car-inquiry');
+    // Default 'pending' message, editable via settings
+    $message = !empty($options['msg_waiting_review']) ? $options['msg_waiting_review'] : $default_wait;
 }
 ?>
 
@@ -31,4 +33,5 @@ if ($status === 'more_docs') {
 <div class="status-box status-pending">
     <p><?php esc_html_e('Thank you for your patience.', 'maneli-car-inquiry'); ?></p>
     <p><?php echo esc_html($message); ?></p>
+    <p style="margin-top:8px; font-size: 12px; color: #666;">(<?php esc_html_e('Typically within 24 hours.', 'maneli-car-inquiry'); ?>)</p>
 </div>

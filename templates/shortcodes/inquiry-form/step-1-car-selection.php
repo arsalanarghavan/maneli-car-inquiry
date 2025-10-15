@@ -20,6 +20,10 @@ if (!defined('ABSPATH')) {
     <p>
         <?php esc_html_e('To begin the inquiry process, please first select your desired car from one of the product pages and click the "Bank Credit Check" button.', 'maneli-car-inquiry'); ?>
     </p>
+    <?php $options = get_option('maneli_inquiry_all_options', []); $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe market fluctuations, car prices are approximate and may change until final approval.', 'maneli-car-inquiry'); ?>
+    <div class="status-box status-warning">
+        <p><?php echo esc_html($price_msg); ?></p>
+    </div>
     <p>
         <a href="<?php echo esc_url(get_post_type_archive_link('product')); ?>" class="loan-action-btn">
             <?php esc_html_e('Go to Cars List', 'maneli-car-inquiry'); ?>

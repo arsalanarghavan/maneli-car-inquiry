@@ -139,7 +139,9 @@ class Maneli_Installment_Inquiry_Handler {
         }
         
         $buyer_fields = [
-            'first_name', 'last_name', 'father_name', 'national_code', 'occupation', 
+            'first_name', 'last_name', 'father_name', 'national_code',
+            // occupation is populated from job_title below to keep BC with admin views
+            'occupation', 'job_type', 'job_title',
             'income_level', 'mobile_number', 'phone_number', 'residency_status', 
             'workplace_status', 'address', 'birth_date', 'bank_name', 'account_number',
             'branch_code', 'branch_name'
@@ -149,6 +151,11 @@ class Maneli_Installment_Inquiry_Handler {
             $buyer_data[$key] = isset($_POST[$key]) ? sanitize_text_field($_POST[$key]) : '';
         }
 
+        // Map new job title to legacy occupation field for compatibility
+        if (!empty($buyer_data['job_title'])) {
+            $buyer_data['occupation'] = $buyer_data['job_title'];
+        }
+
         $issuer_type = isset($_POST['issuer_type']) ? sanitize_key($_POST['issuer_type']) : 'self';
         $issuer_data = [];
         if ($issuer_type === 'other') {
@@ -156,11 +163,17 @@ class Maneli_Installment_Inquiry_Handler {
                 'issuer_full_name', 'issuer_national_code', 'issuer_bank_name', 'issuer_account_number',
                 'issuer_branch_code', 'issuer_branch_name', 'issuer_residency_status', 
                 'issuer_workplace_status', 'issuer_address', 'issuer_phone_number', 'issuer_father_name',
-                'issuer_occupation'
+                // occupation is populated from issuer_job_title below
+                'issuer_occupation', 'issuer_job_type', 'issuer_job_title'
             ];
             foreach ($issuer_fields as $key) {
                 // Address can be multi-line
                 $issuer_data[$key] = isset($_POST[$key]) ? sanitize_textarea_field($_POST[$key]) : '';
+            }
+
+            // Map new issuer job title to legacy issuer_occupation field
+            if (!empty($issuer_data['issuer_job_title'])) {
+                $issuer_data['issuer_occupation'] = $issuer_data['issuer_job_title'];
             }
         }
 

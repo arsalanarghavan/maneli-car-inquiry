@@ -338,6 +338,23 @@ class Maneli_Settings_Page {
                 'title' => esc_html__('Installment Request', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-car',
                 'sections' => [
+                    'maneli_front_messages_section' => [
+                        'title' => esc_html__('Frontend Messages', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'msg_price_disclaimer',
+                                'label' => esc_html__('Price Disclaimer', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'default' => esc_html__('Due to severe market fluctuations, car prices are approximate and may change until final approval.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'msg_waiting_review',
+                                'label' => esc_html__('Waiting Review Message', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'default' => esc_html__('Your request has been submitted. The result will be announced within the next 24 hours.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
                     'maneli_installment_rejection_reasons_section' => [
                         'title' => esc_html__('Installment Rejection Reasons', 'maneli-car-inquiry'),
                         'fields' => [

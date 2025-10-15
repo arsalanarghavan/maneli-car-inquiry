@@ -171,6 +171,10 @@ class Maneli_Admin_Actions_Handler {
         // --- END FIX ---
 
         // Update customer meta with the provided data
+        // Map new job fields to legacy occupation for compatibility
+        if (!empty($_POST['job_title'])) {
+            $_POST['occupation'] = $_POST['job_title'];
+        }
         $this->update_customer_meta($customer_id, $_POST);
         
         // --- Inquiry Creation Logic START ---
@@ -462,7 +466,7 @@ class Maneli_Admin_Actions_Handler {
     private function update_customer_meta($user_id, $post_data) {
         $meta_fields = [
             'national_code', 'father_name', 'birth_date', 'mobile_number',
-            'occupation', 'income_level', 'phone_number', 'residency_status',
+            'occupation', 'job_type', 'job_title', 'income_level', 'phone_number', 'residency_status',
             'workplace_status', 'address', 'bank_name', 'account_number',
             'branch_code', 'branch_name'
         ];
@@ -494,7 +498,9 @@ class Maneli_Admin_Actions_Handler {
             'birth_date'                 => sanitize_text_field($post_data['birth_date'] ?? ''),
             'mobile_number'              => sanitize_text_field($post_data['mobile_number'] ?? ''),
             // Placeholder/Optional fields that exist in customer form but not always in expert form
-            'occupation'                 => sanitize_text_field($post_data['occupation'] ?? ''), 
+            'occupation'                 => sanitize_text_field(($post_data['job_title'] ?? '') !== '' ? $post_data['job_title'] : ($post_data['occupation'] ?? '')), 
+            'job_type'                   => sanitize_text_field($post_data['job_type'] ?? ''),
+            'job_title'                  => sanitize_text_field($post_data['job_title'] ?? ''), 
             'income_level'               => sanitize_text_field($post_data['income_level'] ?? ''), 
             'phone_number'               => sanitize_text_field($post_data['phone_number'] ?? ''), 
             'residency_status'           => sanitize_text_field($post_data['residency_status'] ?? ''), 
@@ -514,7 +520,9 @@ class Maneli_Admin_Actions_Handler {
              $meta_map['issuer_birth_date']       = sanitize_text_field($post_data['issuer_birth_date'] ?? '');
              $meta_map['issuer_mobile_number']    = sanitize_text_field($post_data['issuer_mobile_number'] ?? '');
              // Placeholder/Optional fields for Issuer
-             $meta_map['issuer_occupation']       = sanitize_text_field($post_data['issuer_occupation'] ?? '');
+             $meta_map['issuer_occupation']       = sanitize_text_field(($post_data['issuer_job_title'] ?? '') !== '' ? $post_data['issuer_job_title'] : ($post_data['issuer_occupation'] ?? ''));
+             $meta_map['issuer_job_type']         = sanitize_text_field($post_data['issuer_job_type'] ?? '');
+             $meta_map['issuer_job_title']        = sanitize_text_field($post_data['issuer_job_title'] ?? '');
              $meta_map['issuer_phone_number']     = sanitize_text_field($post_data['issuer_phone_number'] ?? '');
              $meta_map['issuer_address']          = sanitize_textarea_field($post_data['issuer_address'] ?? '');
              $meta_map['issuer_residency_status'] = sanitize_text_field($post_data['issuer_residency_status'] ?? '');

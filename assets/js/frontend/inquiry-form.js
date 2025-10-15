@@ -110,6 +110,35 @@ document.addEventListener('DOMContentLoaded', function() {
         // Run the function once on page load to set the initial state.
         toggleForms();
     }
+
+    // --- 2.1 Job type and conditional fields (buyer & issuer) ---
+    const buyerJobType = document.getElementById('buyer_job_type');
+    const buyerJobTitleWrapper = document.querySelector('.buyer-job-title-wrapper');
+    const buyerPropertyWrapper = document.querySelector('.buyer-property-wrapper');
+    function toggleBuyerJob() {
+        if (!buyerJobType) return;
+        const v = buyerJobType.value; // '' | self | employee
+        if (buyerJobTitleWrapper) buyerJobTitleWrapper.style.display = v ? 'block' : 'none';
+        if (buyerPropertyWrapper) buyerPropertyWrapper.style.display = (v === 'self') ? 'block' : 'none';
+    }
+    if (buyerJobType) {
+        buyerJobType.addEventListener('change', toggleBuyerJob);
+        toggleBuyerJob();
+    }
+
+    const issuerJobType = document.getElementById('issuer_job_type');
+    const issuerJobTitleWrapper = document.querySelector('.issuer-job-title-wrapper');
+    const issuerPropertyWrapper = document.querySelector('.issuer-property-wrapper');
+    function toggleIssuerJob() {
+        if (!issuerJobType) return;
+        const v = issuerJobType.value;
+        if (issuerJobTitleWrapper) issuerJobTitleWrapper.style.display = v ? 'block' : 'none';
+        if (issuerPropertyWrapper) issuerPropertyWrapper.style.display = (v === 'self') ? 'block' : 'none';
+    }
+    if (issuerJobType) {
+        issuerJobType.addEventListener('change', toggleIssuerJob);
+        toggleIssuerJob();
+    }
     
     // --- 3. Discount Code Toggle Logic (Step 3 of Inquiry Form) ---
     const showDiscountLink = document.getElementById('show-discount-form');
