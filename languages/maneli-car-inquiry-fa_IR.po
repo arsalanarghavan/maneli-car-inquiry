@@ -617,6 +617,9 @@ msgstr "ویرایش اطلاعات"
 msgid "Delete Request"
 msgstr "حذف درخواست"
 
+msgid "Assign"
+msgstr "تخصیص"
+
 msgid "Assign to Expert"
 msgstr "تخصیص به کارشناس"
 

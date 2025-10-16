@@ -418,7 +418,8 @@ class Maneli_Ajax_Handler {
         wp_send_json_success([
             'message' => sprintf(esc_html__('Request successfully assigned to %s.', 'maneli-car-inquiry'), $expert_data['name']),
             'expert_name' => $expert_data['name'],
-            'new_status_label' => Maneli_CPT_Handler::get_cash_inquiry_status_label('approved')
+            'new_status_label' => Maneli_CPT_Handler::get_cash_inquiry_status_label('approved'),
+            'new_status_key' => 'approved'
         ]);
     }
     
@@ -450,7 +451,8 @@ class Maneli_Ajax_Handler {
         wp_send_json_success([
             'message' => sprintf(esc_html__('Inquiry successfully assigned to %s.', 'maneli-car-inquiry'), $expert_data['name']),
             'expert_name' => $expert_data['name'],
-            'new_status_label' => Maneli_CPT_Handler::get_status_label('user_confirmed')
+            'new_status_label' => Maneli_CPT_Handler::get_status_label('user_confirmed'),
+            'new_status_key' => 'user_confirmed'
         ]);
     }
     

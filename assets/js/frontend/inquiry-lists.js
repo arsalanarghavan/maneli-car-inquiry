@@ -86,15 +86,19 @@ jQuery(document).ready(function($) {
                            } else {
                                // If on a list, update the table row directly.
                                const row = button.closest('tr');
-                               // Update Assigned Expert column: Find TD based on its class
-                               // Note: The helper uses class="assign-expert-cell" in its output (in a robust version).
-                               // For now, we update the button's parent TD.
+                               // Update Assigned Expert column: Replace button with expert name
                                button.parent().html(response.data.expert_name);
                                if (response.data.new_status_label) {
-                                   // Update Status column: Find TD with status-cell class
-                                   // This uses a robust way to find the status column's cell for either list.
+                                   // Update Status column: Find TD with status-cell class and update the status indicator
                                    const statusCell = row.find('.inquiry-status-cell-installment, .inquiry-status-cell-cash');
-                                   statusCell.text(response.data.new_status_label);
+                                   const statusIndicator = statusCell.find('.status-indicator');
+                                   if (statusIndicator.length) {
+                                       statusIndicator.text(response.data.new_status_label);
+                                       // Update the status class if available
+                                       if (response.data.new_status_key) {
+                                           statusIndicator.attr('class', 'status-indicator status-' + response.data.new_status_key);
+                                       }
+                                   }
                                }
                            }
                         });

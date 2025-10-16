@@ -239,7 +239,13 @@ class Maneli_Render_Helpers {
                 <?php endif; ?>
             </td>
             <?php if ($is_admin) : ?>
-                <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>"><?php echo esc_html($expert_name ?: '—'); ?></td>
+                <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
+                    <?php if (!empty($expert_name)) : ?>
+                        <?php echo esc_html($expert_name); ?>
+                    <?php else : ?>
+                        <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment"><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?></button>
+                    <?php endif; ?>
+                </td>
             <?php endif; ?>
             <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo self::maneli_gregorian_to_jalali($inquiry_post->post_date, 'Y/m/d'); ?></td>
             <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
@@ -291,7 +297,13 @@ class Maneli_Render_Helpers {
                 <?php endif; ?>
                 <?php if ($is_admin) echo $set_downpayment_button; ?>
             </td>
-            <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>"><?php echo esc_html($expert_name ?: '—'); ?></td>
+            <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
+                <?php if (!empty($expert_name)) : ?>
+                    <?php echo esc_html($expert_name); ?>
+                <?php else : ?>
+                    <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash"><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?></button>
+                <?php endif; ?>
+            </td>
             <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo self::maneli_gregorian_to_jalali($cash_post->post_date, 'Y/m/d'); ?></td>
             <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
                 <a href="<?php echo esc_url($report_url); ?>" class="button view"><?php esc_html_e('View Details', 'maneli-car-inquiry'); ?></a>
