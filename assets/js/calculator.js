@@ -192,7 +192,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 e.preventDefault();
 
                 actionBtn.disabled = true;
-                actionBtn.textContent = "در حال ارسال اطلاعات...";
+                const sendingText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.sending) 
+                                    ? maneli_ajax_object.text.sending 
+                                    : "در حال ارسال اطلاعات...";
+                actionBtn.textContent = sendingText;
 
                 const downPayment = parseMoney(document.getElementById('downPaymentInput').value);
                 const termMonths = installmentTab.querySelector('.term-btn.active').dataset.months;
@@ -215,16 +218,31 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (data.success) {
                             window.location.href = maneli_ajax_object.inquiry_page_url;
                         } else {
-                            alert("خطا در ارسال اطلاعات: " + (data.data.message || "خطای ناشناخته."));
+                            const errorText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.error_sending) 
+                                              ? maneli_ajax_object.text.error_sending 
+                                              : "خطا در ارسال اطلاعات: ";
+                            const unknownError = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.unknown_error) 
+                                                 ? maneli_ajax_object.text.unknown_error 
+                                                 : "خطای ناشناخته.";
+                            const buttonText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.credit_check) 
+                                               ? maneli_ajax_object.text.credit_check 
+                                               : "استعلام سنجی بانکی جهت خرید خودرو";
+                            alert(errorText + (data.data.message || unknownError));
                             actionBtn.disabled = false;
-                            actionBtn.textContent = "استعلام سنجی بانکی جهت خرید خودرو";
+                            actionBtn.textContent = buttonText;
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert("یک خطای ناشناخته در ارتباط با سرور رخ داد.");
+                        const serverError = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
+                                            ? maneli_ajax_object.text.server_error_connection 
+                                            : "یک خطای ناشناخته در ارتباط با سرور رخ داد.";
+                        const buttonText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.credit_check) 
+                                           ? maneli_ajax_object.text.credit_check 
+                                           : "استعلام سنجی بانکی جهت خرید خودرو";
+                        alert(serverError);
                         actionBtn.disabled = false;
-                        actionBtn.textContent = "استعلام سنجی بانکی جهت خرید خودرو";
+                        actionBtn.textContent = buttonText;
                     });
             });
         }

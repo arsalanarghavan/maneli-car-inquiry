@@ -225,8 +225,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, 
                 body: params.toString()
             }).then(r=>r.json()).then(res=>{
+                const errorMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.error_retrieving) 
+                                 ? maneli_meetings.text.error_retrieving 
+                                 : 'خطا در دریافت اطلاعات';
                 if (!res.success) { 
-                    slotsWrap.innerHTML = '<div class="status-box status-error"><p>'+(res.data && res.data.message || 'خطا در دریافت اطلاعات')+'</p></div>'; 
+                    slotsWrap.innerHTML = '<div class="status-box status-error"><p>'+(res.data && res.data.message || errorMsg)+'</p></div>'; 
                     return; 
                 }
                 const slots = res.data.slots || [];
@@ -249,7 +252,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
             }).catch(err => {
-                slotsWrap.innerHTML = '<div class="status-box status-error"><p>خطا در ارتباط با سرور</p></div>';
+                const serverError = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.server_error) 
+                                    ? maneli_meetings.text.server_error 
+                                    : 'خطا در ارتباط با سرور';
+                slotsWrap.innerHTML = '<div class="status-box status-error"><p>'+serverError+'</p></div>';
             });
         }
         
@@ -262,13 +268,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 const start = document.getElementById('meeting_start').value;
                 if (!start) {
-                    alert('لطفاً یک زمان را انتخاب کنید');
+                    const selectTimeMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.select_time) 
+                                          ? maneli_meetings.text.select_time 
+                                          : 'لطفاً یک زمان را انتخاب کنید';
+                    alert(selectTimeMsg);
                     return;
                 }
                 
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
-                submitBtn.textContent = 'در حال رزرو...';
+                const bookingText = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.booking) 
+                                    ? maneli_meetings.text.booking 
+                                    : 'در حال رزرو...';
+                submitBtn.textContent = bookingText;
                 submitBtn.disabled = true;
                 
                 const params = new URLSearchParams();
@@ -283,15 +295,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, 
                     body: params.toString()
                 }).then(r=>r.json()).then(res=>{
+                    const successMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.success) 
+                                       ? maneli_meetings.text.success 
+                                       : 'رزرو با موفقیت انجام شد';
+                    const errorMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.error_booking) 
+                                     ? maneli_meetings.text.error_booking 
+                                     : 'خطا در رزرو';
+                    const serverError = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.server_error) 
+                                        ? maneli_meetings.text.server_error 
+                                        : 'خطا در ارتباط با سرور';
                     if (res.success) { 
                         form.reset(); 
                         slotsWrap.innerHTML=''; 
-                        alert('رزرو با موفقیت انجام شد');
+                        alert(successMsg);
                     } else { 
-                        alert(res.data && res.data.message || 'خطا در رزرو'); 
+                        alert(res.data && res.data.message || errorMsg); 
                     }
                 }).catch(err => {
-                    alert('خطا در ارتباط با سرور');
+                    alert(serverError);
                 }).finally(() => {
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;

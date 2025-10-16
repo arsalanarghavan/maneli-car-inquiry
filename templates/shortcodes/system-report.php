@@ -605,6 +605,35 @@ jQuery(document).ready(function($) {
 </script>
 
 <style>
+/* Dashicons Font Face - برای اطمینان از بارگذاری */
+@font-face {
+    font-family: dashicons;
+    src: url(<?php echo includes_url('fonts/dashicons.woff2'); ?>) format("woff2"),
+         url(<?php echo includes_url('fonts/dashicons.woff'); ?>) format("woff"),
+         url(<?php echo includes_url('fonts/dashicons.ttf'); ?>) format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+.dashicons,
+.dashicons-before:before {
+    font-family: dashicons !important;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1;
+    text-align: center;
+    text-decoration: inherit;
+    text-transform: none;
+    vertical-align: top;
+    speak: never;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+
 .maneli-system-report-shortcode {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'IRANSans', sans-serif;
     padding: 20px;
