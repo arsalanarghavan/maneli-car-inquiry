@@ -78,7 +78,7 @@
         productSelect.hide();
         
         productSelect.select2({
-            placeholder: 'شروع به تایپ برای جستجوی خودرو... (حداقل 2 حرف)',
+            placeholder: getText('search_placeholder', 'شروع به تایپ برای جستجوی خودرو... (حداقل 2 حرف)'),
             dir: "rtl",
             width: '100%',
             allowClear: true,
@@ -89,16 +89,16 @@
             dropdownCssClass: 'maneli-select2-dropdown',
             language: {
                 inputTooShort: function() {
-                    return 'لطفاً حداقل 2 حرف وارد کنید...';
+                    return getText('input_too_short', 'لطفاً حداقل 2 حرف وارد کنید...');
                 },
                 searching: function() {
-                    return 'در حال جستجو...';
+                    return getText('searching', 'در حال جستجو...');
                 },
                 noResults: function() {
-                    return 'خودرویی یافت نشد';
+                    return getText('no_results', 'خودرویی یافت نشد');
                 },
                 loadingMore: function() {
-                    return 'در حال بارگذاری بیشتر...';
+                    return getText('loading_more', 'در حال بارگذاری بیشتر...');
                 }
             },
             ajax: {

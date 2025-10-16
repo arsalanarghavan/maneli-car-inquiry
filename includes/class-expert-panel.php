@@ -77,6 +77,11 @@ class Maneli_Expert_Panel {
                 'server_error'           => esc_html__('Server error:', 'maneli-car-inquiry'),
                 'unknown_error'          => esc_html__('Unknown error', 'maneli-car-inquiry'),
                 'datepicker_placeholder' => esc_html__('e.g., 1365/04/15', 'maneli-car-inquiry'),
+                'search_placeholder'     => esc_html__('Start typing to search for a car... (minimum 2 characters)', 'maneli-car-inquiry'),
+                'input_too_short'        => esc_html__('Please enter at least 2 characters...', 'maneli-car-inquiry'),
+                'searching'              => esc_html__('Searching...', 'maneli-car-inquiry'),
+                'no_results'             => esc_html__('No car found', 'maneli-car-inquiry'),
+                'loading_more'           => esc_html__('Loading more...', 'maneli-car-inquiry'),
             ]
         ]);
     }

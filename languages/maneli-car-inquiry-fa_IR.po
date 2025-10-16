@@ -1937,3 +1937,179 @@ msgstr "حالت ترکیب نشان وضعیت کارشناس"
 msgid "Expert status badge isolation"
 msgstr "جداسازی نشان وضعیت کارشناس"
 
+# JavaScript Hardcoded Persian Strings (calculator.js)
+msgid "Sending information..."
+msgstr "در حال ارسال اطلاعات..."
+
+msgid "Error sending information: "
+msgstr "خطا در ارسال اطلاعات: "
+
+msgid "Bank Credit Check for Car Purchase"
+msgstr "استعلام سنجی بانکی جهت خرید خودرو"
+
+msgid "An unknown error occurred while communicating with the server."
+msgstr "یک خطای ناشناخته در ارتباط با سرور رخ داد."
+
+# JavaScript Hardcoded Persian Strings (expert-panel.js)
+msgid "Start typing to search for a car... (minimum 2 characters)"
+msgstr "شروع به تایپ برای جستجوی خودرو... (حداقل 2 حرف)"
+
+msgid "Please enter at least 2 characters..."
+msgstr "لطفاً حداقل 2 حرف وارد کنید..."
+
+msgid "Searching..."
+msgstr "در حال جستجو..."
+
+msgid "No car found"
+msgstr "خودرویی یافت نشد"
+
+msgid "Loading more..."
+msgstr "در حال بارگذاری بیشتر..."
+
+# JavaScript Hardcoded Persian Strings (inquiry-form.js)
+msgid "Error retrieving information"
+msgstr "خطا در دریافت اطلاعات"
+
+msgid "Error communicating with server"
+msgstr "خطا در ارتباط با سرور"
+
+msgid "Booking..."
+msgstr "در حال رزرو..."
+
+msgid "Meeting booked successfully"
+msgstr "رزرو با موفقیت انجام شد"
+
+msgid "Booking error"
+msgstr "خطا در رزرو"
+
+msgid "Please select a time"
+msgstr "لطفاً یک زمان را انتخاب کنید"
+
+# JavaScript Hardcoded Persian Strings (reports-dashboard.js)
+msgid "Loading..."
+msgstr "در حال بارگذاری..."
+
+msgid "View"
+msgstr "مشاهده"
+
+msgid "In Progress"
+msgstr "در حال پیگیری"
+
+# Additional CPT Labels
+msgid "Meetings"
+msgstr "جلسات"
+
+msgid "Meeting"
+msgstr "جلسه"
+
+msgid "New"
+msgstr "جدید"
+
+msgid "Follow Up"
+msgstr "پیگیری"
+
+msgid "Inquiry for"
+msgstr "استعلام برای"
+
+msgid "Error: The field \"%s\" for the cheque issuer is required."
+msgstr "خطا: فیلد «%s» برای صادرکننده چک الزامی است."
+
+msgid "Cash"
+msgstr "نقدی"
+
+msgid "Invalid request."
+msgstr "درخواست نامعتبر."
+
+msgid "Access denied."
+msgstr "دسترسی رد شد."
+
+msgid "Please fill out all required fields."
+msgstr "لطفاً تمام فیلد‌های الزامی را پر کنید."
+
+msgid "You must be logged in to submit a request."
+msgstr "برای ثبت درخواست باید وارد شوید."
+
+msgid "An error occurred while creating your request. Please try again."
+msgstr "هنگام ایجاد درخواست شما خطایی رخ داد. لطفاً دوباره تلاش کنید."
+
+msgid "Invalid request or insufficient permissions."
+msgstr "درخواست نامعتبر یا عدم دسترسی کافی."
+
+msgid "Invalid schedule range."
+msgstr "بازه زمانی نامعتبر است."
+
+msgid "Selected slot is no longer available."
+msgstr "نوبت انتخابی دیگر موجود نیست."
+
+msgid "Meeting - %s"
+msgstr "جلسه - %s"
+
+msgid "Invalid request or insufficient permissions."
+msgstr "درخواست نامعتبر یا عدم دسترسی کافی."
+
+msgid "Invalid tracking status."
+msgstr "وضعیت پیگیری نامعتبر است."
+
+msgid "Tracking status updated to: %s"
+msgstr "وضعیت پیگیری به %s تغییر یافت"
+
+msgid "No follow-up inquiries found."
+msgstr "هیچ استعلام پیگیری یافت نشد."
+
+msgid "Cash Price"
+msgstr "قیمت نقدی"
+
+msgid "Installment Price"
+msgstr "قیمت اقساطی"
+
+msgid "Down Payment Amount"
+msgstr "مبلغ پیش پرداخت"
+
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Your request has been submitted. The result will be announced within the next 24 hours."
+msgstr "درخواست شما ثبت شد. نتیجه ظرف ۲۴ ساعت آینده اعلام خواهد شد."
+
+msgid "Your documents have been approved. Our team will contact you shortly for next steps."
+msgstr "مدارک شما تایید شد. تیم ما به زودی برای مراحل بعدی با شما تماس خواهد گرفت."
+
+msgid "Statuses (one per line: key|label|#color)"
+msgstr "وضعیت‌ها (هر خط: کلید|برچسب|#رنگ)"
+
+msgid "Example: unknown|Unknown|#999999"
+msgstr "مثال: unknown|ناشناخته|#999999"
+
+msgid "Default Expert Status Key"
+msgstr "کلید پیش‌فرض وضعیت کارشناس"
+
+msgid "Predefined Rejection Reasons"
+msgstr "دلایل از پیش تعریف شده برای رد"
+
+msgid "General Settings"
+msgstr "تنظیمات عمومی"
+
+msgid "Enable Meetings"
+msgstr "فعال‌سازی جلسات"
+
+msgid "Workday Start (HH:MM)"
+msgstr "شروع روز کاری (ساعت:دقیقه)"
+
+msgid "Workday End (HH:MM)"
+msgstr "پایان روز کاری (ساعت:دقیقه)"
+
+msgid "Slot Duration (minutes)"
+msgstr "مدت زمان هر نوبت (دقیقه)"
+
+msgid "Invalid request. Please log in and try again."
+msgstr "درخواست نامعتبر. لطفاً وارد شوید و دوباره تلاش کنید."
+
+msgid "Car selected. Redirecting..."
+msgstr "خودرو انتخاب شد. در حال انتقال..."
+
+msgid "Please confirm your selected car to continue."
+msgstr "لطفاً خودروی انتخابی خود را برای ادامه تأیید کنید."
+
+msgid "Error: The field \"%s\" is required."
+msgstr "خطا: فیلد «%s» الزامی است."
+
