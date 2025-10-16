@@ -10,7 +10,7 @@
 
 /* === 1. ROOT & GLOBAL VARIABLES === */
 :root {
-    --theme-blue: #2D89BE;      /* Main brand color */
+    --theme-blue: #3989BE;      /* Main brand color - سازمانی */
     --theme-green: #28a745;     /* Success color */
     --theme-red: #dc3545;       /* Error/Danger color */
     --theme-yellow: #ffc107;    /* Warning/Pending color */

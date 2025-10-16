@@ -172,21 +172,30 @@ class Maneli_Inquiry_Lists_Shortcode {
     /**
      * Helper function to enqueue scripts and localize data for admin/expert list views.
      * FIX: Added installment_rejection_reasons and localized all hardcoded JS strings.
+     * FIX: Ensure localization always runs even if script was already enqueued.
      */
     private function enqueue_admin_list_assets() {
         // توجه: MANELI_INQUIRY_PLUGIN_URL باید قبلاً در فایل اصلی پلاگین تعریف شده باشد.
+
+        // Enqueue Select2 for expert assignment modal
+        wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
 
         // Enqueue datepicker for tracking status modal
         wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
         wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
 
-        wp_enqueue_script(
-            'maneli-inquiry-lists-js',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js',
-            ['jquery', 'sweetalert2', 'maneli-jalali-datepicker'],
-            '1.0.0', // ورژن باید به صورت پویا یا ثابت تعریف شود
-            true
-        );
+        // Enqueue or register the main script
+        if (!wp_script_is('maneli-inquiry-lists-js', 'registered')) {
+            wp_register_script(
+                'maneli-inquiry-lists-js',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js',
+                ['jquery', 'sweetalert2', 'select2', 'maneli-jalali-datepicker'],
+                '1.0.0',
+                true
+            );
+        }
+        wp_enqueue_script('maneli-inquiry-lists-js');
 
         $options = get_option('maneli_inquiry_all_options', []);
         
@@ -198,8 +207,35 @@ class Maneli_Inquiry_Lists_Shortcode {
         $installment_rejection_reasons_raw = $options['installment_rejection_reasons'] ?? '';
         $installment_rejection_reasons = array_filter(array_map('trim', explode("\n", $installment_rejection_reasons_raw)));
 
+        // Get all experts for assignment (needed in report pages where filter doesn't exist)
+        $experts_list = [];
+        $experts_query = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
+        
+        // DEBUG: Log the number of experts found
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('=== Expert Assignment Debug (PHP) ===');
+            error_log('Total experts found: ' . count($experts_query));
+            error_log('Experts query result: ' . print_r($experts_query, true));
+        }
+        
+        foreach ($experts_query as $expert) {
+            $experts_list[] = [
+                'id' => $expert->ID,
+                'name' => $expert->display_name ?: $expert->user_login
+            ];
+        }
+        
+        // DEBUG: Log the final experts list
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Final experts_list count: ' . count($experts_list));
+            error_log('Final experts_list: ' . print_r($experts_list, true));
+        }
+
+        // IMPORTANT: Always set localization data, even if called multiple times
+        // Use a static flag to ensure we always update the data
         wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
             'ajax_url' => admin_url('admin-ajax.php'),
+            'experts' => $experts_list,
             'nonces' => [
                 'inquiry_filter' => wp_create_nonce('maneli_inquiry_filter_nonce'),
                 'cash_filter' => wp_create_nonce('maneli_cash_inquiry_filter_nonce'),
@@ -255,6 +291,8 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'select_meeting_date' => esc_html__('Select Meeting Date:', 'maneli-car-inquiry'),
                 'select_followup_date' => esc_html__('Select Follow-up Date:', 'maneli-car-inquiry'),
                 'date_required' => esc_html__('Please select a date.', 'maneli-car-inquiry'),
+                'no_experts_available' => esc_html__('No experts found for assignment.', 'maneli-car-inquiry'),
+                'select_expert_required' => esc_html__('Please select an expert.', 'maneli-car-inquiry'),
             ]
         ]);
     }

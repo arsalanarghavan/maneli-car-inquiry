@@ -34,21 +34,35 @@ jQuery(document).ready(function($) {
         const inquiryId = button.data('inquiry-id');
         const inquiryType = button.data('inquiry-type');
         
-        // Clone the appropriate expert filter dropdown from the page to use in the modal
-        const expertFilterSelector = (inquiryType === 'cash') ? '#cash-expert-filter' : '#expert-filter';
+        // Debug: Log the localized data
+        console.log('=== Expert Assignment Debug ===');
+        console.log('maneliInquiryLists exists:', typeof maneliInquiryLists !== 'undefined');
+        console.log('Full maneliInquiryLists:', window.maneliInquiryLists);
+        console.log('Experts array:', window.maneliInquiryLists?.experts);
+        console.log('Experts count:', window.maneliInquiryLists?.experts?.length || 0);
         
-        // Ensure expert filter exists (might be missing if user is expert and only sees their own list)
-        if (!$(expertFilterSelector).length) {
-            Swal.fire(getText('error'), getText('no_experts_available'), 'error');
+        // Build from localized experts data (for report pages and list pages)
+        const expertsData = (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.experts) 
+                            ? maneliInquiryLists.experts 
+                            : [];
+        
+        console.log('Processed expertsData:', expertsData);
+        console.log('Processed expertsData length:', expertsData.length);
+        
+        if (expertsData.length === 0) {
+            console.error('ERROR: No experts found!');
+            Swal.fire(getText('error'), getText('no_experts_available', 'هیچ کارشناسی یافت نشد.'), 'error');
             return;
         }
-
-        const expertOptionsHTML = $(expertFilterSelector)
-            .clone()
-            .prop('id', 'swal-expert-filter')
-            .prepend(`<option value="auto">${getText('auto_assign')}</option>`)
-            .val('auto')
-            .get(0).outerHTML;
+        
+        console.log('SUCCESS: Found', expertsData.length, 'experts');
+        
+        // Always build the select from experts data to ensure consistency
+        let optionsHtml = `<option value="auto">${getText('auto_assign')}</option>`;
+        expertsData.forEach(expert => {
+            optionsHtml += `<option value="${expert.id}">${expert.name}</option>`;
+        });
+        const expertOptionsHTML = `<select id="swal-expert-filter" class="swal2-input" style="width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">${optionsHtml}</select>`;
 
         const ajaxAction = (inquiryType === 'cash') ? 'maneli_assign_expert_to_cash_inquiry' : 'maneli_assign_expert_to_inquiry';
         const nonce = (inquiryType === 'cash') ? maneliInquiryLists.nonces.cash_assign_expert : maneliInquiryLists.nonces.assign_expert;
@@ -63,15 +77,22 @@ jQuery(document).ready(function($) {
             showCancelButton: true,
             cancelButtonText: getText('cancel_button'),
             didOpen: () => {
-                 // Initialize Select2 in the modal
-                 $('#swal-expert-filter').select2({
-                     placeholder: getText('select_expert_placeholder'),
-                     allowClear: false,
-                     width: '100%'
-                });
+                 // Initialize Select2 in the modal (if Select2 is available)
+                 if (typeof $.fn.select2 !== 'undefined') {
+                     $('#swal-expert-filter').select2({
+                         placeholder: getText('select_expert_placeholder'),
+                         allowClear: false,
+                         width: '100%',
+                         dropdownParent: $('.swal2-popup')
+                     });
+                 }
             },
             preConfirm: () => {
-                return $('#swal-expert-filter').val();
+                const selectedValue = $('#swal-expert-filter').val();
+                if (!selectedValue) {
+                    Swal.showValidationMessage(getText('select_expert_required', 'لطفاً یک کارشناس انتخاب کنید'));
+                }
+                return selectedValue;
             }
         }).then((result) => {
             if (result.isConfirmed && result.value) {
@@ -646,8 +667,8 @@ jQuery(document).ready(function($) {
 
         // Initialize datepicker if not already initialized
         if (!datePicker.data('kamadatepicker-initialized')) {
-            if (typeof kamaDatepicker === 'function') {
-                kamaDatepicker('tracking-date-picker', {
+            if (typeof kamadatepicker === 'function') {
+                kamadatepicker('tracking-date-picker', {
                     buttonsColor: "red",
                     forceFarsiDigits: true,
                     markToday: true,

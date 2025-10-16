@@ -2494,6 +2494,101 @@ msgstr "تخصیص داده نشده"
 msgid "Note (optional)"
 msgstr "یادداشت (اختیاری)"
 
+msgid "Buyer Information"
+msgstr "اطلاعات خریدار"
+
+msgid "Bank Information"
+msgstr "اطلاعات بانکی"
+
+msgid "Bank Information (Cheque Holder)"
+msgstr "اطلاعات بانکی (دارنده چک)"
+
+msgid "Issuer Last Name"
+msgstr "نام خانوادگی صادرکننده"
+
+msgid "Issuer Date of Birth"
+msgstr "تاریخ تولد صادرکننده"
+
+msgid "Set Tracking Status"
+msgstr "تعیین وضعیت پیگیری"
+
+msgid "Select Status:"
+msgstr "انتخاب وضعیت:"
+
+msgid "Select Date:"
+msgstr "انتخاب تاریخ:"
+
+msgid "Confirm Status"
+msgstr "تأیید وضعیت"
+
+msgid "Error"
+msgstr "خطا"
+
+msgid "Success"
+msgstr "موفقیت"
+
+msgid "Are you sure you want to delete this request?"
+msgstr "آیا مطمئن هستید که می‌خواهید این درخواست را حذف کنید؟"
+
+msgid "This action cannot be undone!"
+msgstr "این عمل قابل بازگشت نیست!"
+
+msgid "Select Expert"
+msgstr "انتخاب کارشناس"
+
+msgid "Edit Request"
+msgstr "ویرایش درخواست"
+
+msgid "Car Color"
+msgstr "رنگ خودرو"
+
+msgid "Deleted!"
+msgstr "حذف شد!"
+
+msgid "Down Payment Amount in Toman"
+msgstr "مبلغ پیش پرداخت به تومان"
+
+msgid "Confirm and Send to Customer"
+msgstr "تأیید و ارسال به مشتری"
+
+msgid "Please select a reason for rejection:"
+msgstr "لطفاً دلیل رد را انتخاب کنید:"
+
+msgid "Other reason (Custom)"
+msgstr "دلیل دیگر (سفارشی)"
+
+msgid "Write your custom reason here..."
+msgstr "دلیل خود را اینجا بنویسید..."
+
+msgid "Submit Rejection"
+msgstr "ثبت رد"
+
+msgid "A server error occurred."
+msgstr "خطای سرور رخ داد."
+
+msgid "Please select or enter a reason for rejection."
+msgstr "لطفاً دلیل رد را انتخاب یا وارد کنید."
+
+msgid "Select Meeting Date:"
+msgstr "انتخاب تاریخ جلسه:"
+
+msgid "Select Follow-up Date:"
+msgstr "انتخاب تاریخ پیگیری:"
+
+msgid "Please select a date."
+msgstr "لطفاً یک تاریخ انتخاب کنید."
+
+msgid "Meeting Date:"
+msgstr "تاریخ جلسه:"
+
+msgid "Follow-up Date:"
+msgstr "تاریخ پیگیری:"
+
+msgid "No experts available"
+msgstr "هیچ کارشناسی موجود نیست"
+
+msgid "Please select an expert"
+msgstr "لطفاً یک کارشناس انتخاب کنید"
 
 
 
@@ -2505,3 +2600,10 @@ msgstr "یادداشت (اختیاری)"
 
 
 
+
+
+msgid "No experts found for assignment."
+msgstr "هیچ کارشناسی برای تخصیص یافت نشد."
+
+msgid "Please select an expert."
+msgstr "لطفاً یک کارشناس انتخاب کنید."

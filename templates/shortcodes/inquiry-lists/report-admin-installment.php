@@ -163,36 +163,121 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
 
     <div class="maneli-report-sections-grid" style="display: flex; flex-wrap: wrap; gap: 20px;">
         
-        <div class="maneli-report-section inquiry-details" style="flex: 1 1 45%; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
+        <!-- جزئیات وام و خودرو با عکس -->
+        <div class="maneli-report-section inquiry-details" style="flex: 1 1 100%; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
             <h3><?php esc_html_e('Loan and Car Details', 'maneli-car-inquiry'); ?></h3>
-            <table class="summary-table form-table">
-                <tr><th><?php esc_html_e('Selected Car', 'maneli-car-inquiry'); ?>:</th><td><a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank"><?php echo esc_html($car_name); ?></a></td></tr>
-                <tr><th><?php esc_html_e('Total Price', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($total_price); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
-                <tr><th><?php esc_html_e('Down Payment', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($down_payment); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
-                <tr><th><?php esc_html_e('Loan Amount', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($loan_amount); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
-                <tr><th><?php esc_html_e('Installment Term', 'maneli-car-inquiry'); ?>:</th><td><?php echo absint($term_months); ?> <span><?php esc_html_e('Months', 'maneli-car-inquiry'); ?></span></td></tr>
-                <tr><th><?php esc_html_e('Monthly Installment', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($installment_amount); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
-                <tr><th><?php esc_html_e('Date Submitted', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::maneli_gregorian_to_jalali(date('Y', strtotime($post->post_date)), date('m', strtotime($post->post_date)), date('d', strtotime($post->post_date))); ?></td></tr>
-            </table>
+            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                <!-- عکس خودرو -->
+                <div style="flex: 0 0 250px;">
+                    <?php 
+                    $car_image = get_the_post_thumbnail($product_id, 'medium', ['style' => 'width:100%; height:auto; border-radius:8px; border:1px solid #ddd;']);
+                    if ($car_image) {
+                        echo $car_image;
+                    } else {
+                        echo '<div style="width:250px; height:180px; background:#f5f5f5; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#999; border:1px solid #ddd;">';
+                        esc_html_e('No image has been set for this product.', 'maneli-car-inquiry');
+                        echo '</div>';
+                    }
+                    ?>
+                </div>
+                <!-- جدول اطلاعات -->
+                <div style="flex: 1;">
+                    <table class="summary-table form-table">
+                        <tr><th><?php esc_html_e('Selected Car', 'maneli-car-inquiry'); ?>:</th><td><a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank"><?php echo esc_html($car_name); ?></a></td></tr>
+                        <tr><th><?php esc_html_e('Total Price', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($total_price); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
+                        <tr><th><?php esc_html_e('Down Payment', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($down_payment); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
+                        <tr><th><?php esc_html_e('Loan Amount', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($loan_amount); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
+                        <tr><th><?php esc_html_e('Installment Term', 'maneli-car-inquiry'); ?>:</th><td><?php echo absint($term_months); ?> <span><?php esc_html_e('Months', 'maneli-car-inquiry'); ?></span></td></tr>
+                        <tr><th><?php esc_html_e('Monthly Installment', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::format_money($installment_amount); ?> <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td></tr>
+                        <tr><th><?php esc_html_e('Date Submitted', 'maneli-car-inquiry'); ?>:</th><td><?php echo Maneli_Render_Helpers::maneli_gregorian_to_jalali(date('Y', strtotime($post->post_date)), date('m', strtotime($post->post_date)), date('d', strtotime($post->post_date))); ?></td></tr>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <div class="maneli-report-section customer-details" style="flex: 1 1 45%; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
-            <h3><?php esc_html_e('Applicant and Expert Details', 'maneli-car-inquiry'); ?></h3>
-            <table class="summary-table form-table">
-                <tr><th><?php esc_html_e('Customer Name', 'maneli-car-inquiry'); ?>:</th><td><?php echo esc_html($customer_name); ?></td></tr>
-                <tr><th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?>:</th><td><a href="tel:<?php echo esc_attr($post_meta['mobile_number'][0] ?? ''); ?>"><?php echo esc_html($post_meta['mobile_number'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></a></td></tr>
-                <tr><th><?php esc_html_e('National ID', 'maneli-car-inquiry'); ?>:</th><td><?php echo esc_html($post_meta['national_code'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></td></tr>
-                <tr><th><?php esc_html_e('Assigned Expert', 'maneli-car-inquiry'); ?>:</th><td><?php echo esc_html($expert_name ?: esc_html__('Not Assigned', 'maneli-car-inquiry')); ?></td></tr>
-                 <?php 
-                 $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
-                 if ($issuer_type === 'other') : ?>
-                    <tr><th colspan="2"><strong><?php esc_html_e('Cheque Issuer: Another Person', 'maneli-car-inquiry'); ?></strong></th></tr>
-                    <tr><th><?php esc_html_e('Issuer National ID', 'maneli-car-inquiry'); ?>:</th><td><?php echo esc_html($post_meta['issuer_national_code'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></td></tr>
-                 <?php else: ?>
-                    <tr><th><?php esc_html_e('Cheque Issuer', 'maneli-car-inquiry'); ?>:</th><td><?php esc_html_e('Same as Applicant', 'maneli-car-inquiry'); ?></td></tr>
-                 <?php endif; ?>
-            </table>
+        <!-- اطلاعات خریدار - دو ستونی -->
+        <div class="maneli-report-section customer-details" style="flex: 1 1 100%; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
+            <h3><?php esc_html_e('Buyer Information', 'maneli-car-inquiry'); ?></h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px;">
+                <div><strong><?php esc_html_e('First Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['first_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['last_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Father\'s Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['father_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('National Code', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['national_code'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Date of Birth', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['birth_date'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?>:</strong> <a href="tel:<?php echo esc_attr($post_meta['mobile_number'][0] ?? ''); ?>"><?php echo esc_html($post_meta['mobile_number'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></a></div>
+                
+                <div><strong><?php esc_html_e('Phone Number', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['phone_number'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Email', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['email'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['job_type'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Occupation', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['occupation'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Income Level', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['income_level'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Residency Status', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['residency_status'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Workplace Status', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['workplace_status'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Assigned Expert', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($expert_name ?: esc_html__('Not Assigned', 'maneli-car-inquiry')); ?></div>
+                
+                <div style="grid-column: 1 / -1;"><strong><?php esc_html_e('Address', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['address'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+            </div>
         </div>
+        
+        <?php 
+        // اطلاعات بانکی فقط برای دارنده چک نمایش داده می‌شود
+        $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
+        ?>
+        
+        <?php if ($issuer_type === 'self') : ?>
+        <!-- اطلاعات بانکی خریدار (که خود دارنده چک است) -->
+        <div class="maneli-report-section bank-details" style="flex: 1 1 100%; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
+            <h3><?php esc_html_e('Bank Information (Cheque Holder)', 'maneli-car-inquiry'); ?></h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px;">
+                <div><strong><?php esc_html_e('Bank Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['bank_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Account Number', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['account_number'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Branch Code', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['branch_code'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Branch Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['branch_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
+        <?php if ($issuer_type === 'other') : ?>
+        <!-- اطلاعات صادرکننده چک (شخص دیگر) - دو ستونی -->
+        <div class="maneli-report-section issuer-details" style="flex: 1 1 100%; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
+            <h3><?php esc_html_e('Cheque Issuer Information', 'maneli-car-inquiry'); ?></h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px;">
+                <div><strong><?php esc_html_e('First Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_full_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_last_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Father\'s Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_father_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('National Code', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_national_code'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Date of Birth', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_birth_date'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_mobile_number'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Phone Number', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_phone_number'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_job_type'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Occupation', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_occupation'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Residency Status', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_residency_status'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Workplace Status', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_workplace_status'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div style="grid-column: 1 / -1;"><strong><?php esc_html_e('Address', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_address'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+            </div>
+            
+            <!-- اطلاعات بانکی صادرکننده چک -->
+            <h4 style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;"><?php esc_html_e('Bank Information (Cheque Holder)', 'maneli-car-inquiry'); ?></h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px 30px;">
+                <div><strong><?php esc_html_e('Bank Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_bank_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Account Number', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_account_number'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                
+                <div><strong><?php esc_html_e('Branch Code', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_branch_code'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+                <div><strong><?php esc_html_e('Branch Name', 'maneli-car-inquiry'); ?>:</strong> <?php echo esc_html($post_meta['issuer_branch_name'][0] ?? esc_html__('N/A', 'maneli-car-inquiry')); ?></div>
+            </div>
+        </div>
+        <?php endif; ?>
         
         <div class="maneli-report-section cheque-inquiry" style="flex: 1 1 100%; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
             <h3><?php esc_html_e('Credit Verification Result (Finotex)', 'maneli-car-inquiry'); ?></h3>

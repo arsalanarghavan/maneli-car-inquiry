@@ -262,10 +262,10 @@
         toggleIssuerForm();
         
         // --- 5. Initialize Datepickers for Birth Date Fields ---
-        if (typeof kamaDatepicker === 'function') {
+        if (typeof kamadatepicker === 'function') {
             // Initialize datepicker for buyer birth date
             if ($('#expert_buyer_birth_date').length) {
-                kamaDatepicker('expert_buyer_birth_date', {
+                kamadatepicker('expert_buyer_birth_date', {
                     buttonsColor: "red",
                     forceFarsiDigits: true,
                     markToday: true,
@@ -277,7 +277,7 @@
             
             // Initialize datepicker for issuer birth date
             if ($('#expert_issuer_birth_date').length) {
-                kamaDatepicker('expert_issuer_birth_date', {
+                kamadatepicker('expert_issuer_birth_date', {
                     buttonsColor: "red",
                     forceFarsiDigits: true,
                     markToday: true,
