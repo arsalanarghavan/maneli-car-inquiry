@@ -70,32 +70,35 @@ if (!function_exists('maneli_get_current_url')) {
     function maneli_get_current_url($remove_params = [], $preserve_params = ['endp']) {
         global $wp;
         
-        // Get the base URL
-        $current_url = home_url(add_query_arg([], $wp->request));
+        // Get the base URL (without query string)
+        // Make sure we only get the path, not the query string
+        $path = $wp->request;
+        // Remove any query string if it exists
+        if (strpos($path, '?') !== false) {
+            $path = substr($path, 0, strpos($path, '?'));
+        }
+        $base_url = home_url($path);
         
-        // Parse current query string
+        // Build query parameters array
         $query_params = [];
         
-        // First, preserve the parameters that should always be kept
-        foreach ($preserve_params as $param) {
-            if (isset($_GET[$param])) {
-                $query_params[$param] = sanitize_text_field($_GET[$param]);
-            }
-        }
-        
-        // Then add other parameters that are not in the remove list
+        // Process all $_GET parameters
         foreach ($_GET as $key => $value) {
-            if (!in_array($key, $remove_params) && !isset($query_params[$key])) {
-                $query_params[$key] = sanitize_text_field($value);
+            // Skip if in remove list
+            if (in_array($key, $remove_params)) {
+                continue;
             }
+            
+            // Add parameter (preserve_params are automatically included if not in remove_params)
+            $query_params[$key] = sanitize_text_field($value);
         }
         
         // Build the URL with preserved parameters
         if (!empty($query_params)) {
-            return add_query_arg($query_params, $current_url);
+            return add_query_arg($query_params, $base_url);
         }
         
-        return $current_url;
+        return $base_url;
     }
 }
 
