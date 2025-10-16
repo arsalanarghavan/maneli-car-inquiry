@@ -41,6 +41,13 @@ class Maneli_Loan_Calculator_Shortcode {
         // Localize script with AJAX info and the configurable rate
         $localize_data = [
             'interestRate' => $interest_rate, // پاس دادن نرخ سود ماهانه
+            'text' => [
+                'sending' => esc_html__('Sending information...', 'maneli-car-inquiry'),
+                'error_sending' => esc_html__('Error sending information: ', 'maneli-car-inquiry'),
+                'unknown_error' => esc_html__('Unknown error.', 'maneli-car-inquiry'),
+                'credit_check' => esc_html__('Bank Credit Check for Car Purchase', 'maneli-car-inquiry'),
+                'server_error_connection' => esc_html__('An unknown error occurred while communicating with the server.', 'maneli-car-inquiry'),
+            ]
         ];
         
         if (is_user_logged_in()) {

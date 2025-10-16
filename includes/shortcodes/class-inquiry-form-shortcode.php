@@ -268,6 +268,20 @@ class Maneli_Inquiry_Form_Shortcode {
             ],
         ]);
         
+        // Localize meeting-related texts for inquiry-form.js
+        wp_localize_script('maneli-inquiry-form-js', 'maneli_meetings', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('maneli_meetings_nonce'),
+            'text' => [
+                'error_retrieving' => esc_html__('Error retrieving information', 'maneli-car-inquiry'),
+                'server_error' => esc_html__('Error communicating with server', 'maneli-car-inquiry'),
+                'booking' => esc_html__('Booking...', 'maneli-car-inquiry'),
+                'success' => esc_html__('Meeting booked successfully', 'maneli-car-inquiry'),
+                'error_booking' => esc_html__('Booking error', 'maneli-car-inquiry'),
+                'select_time' => esc_html__('Please select a time', 'maneli-car-inquiry'),
+            ],
+        ]);
+        
         $this->datepicker_loaded = true;
     }
 }
