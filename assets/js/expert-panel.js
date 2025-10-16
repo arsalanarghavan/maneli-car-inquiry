@@ -14,9 +14,14 @@
                                              : fallback;
 
     $(document).ready(function() {
+        console.log('Expert panel JS loaded!');
+        
         const expertForm = $('#expert-inquiry-form');
+        console.log('Expert form found:', expertForm.length);
+        
         if (!expertForm.length) {
             // If the expert form is not on the page, do nothing.
+            console.log('Expert form not found. Exiting...');
             return;
         }
 
@@ -46,13 +51,23 @@
         };
 
         // --- 3. Initialize Select2 for Car Search ---
-        // Check if Select2 is available
+        // Check if required libraries are available
+        console.log('Checking dependencies...');
+        console.log('jQuery available:', typeof $ !== 'undefined');
+        console.log('Select2 available:', typeof $.fn.select2 !== 'undefined');
+        console.log('maneli_expert_ajax available:', typeof maneli_expert_ajax !== 'undefined');
+        
+        if (typeof maneli_expert_ajax === 'undefined') {
+            console.error('maneli_expert_ajax is not defined! Script not localized properly.');
+            return;
+        }
+        
         if (typeof $.fn.select2 === 'undefined') {
             console.error('Select2 is not loaded! Cannot initialize car search.');
             return;
         }
         
-        console.log('Initializing Select2 for car search...', productSelect);
+        console.log('All dependencies OK. Initializing Select2 for car search...', productSelect);
         
         // Destroy any existing Select2 instance first
         if (productSelect.hasClass('select2-hidden-accessible')) {
@@ -69,6 +84,7 @@
             allowClear: true,
             minimumInputLength: 2, // Require at least 2 characters before searching
             dropdownAutoWidth: false,
+            dropdownParent: productSelect.parent(), // Attach dropdown to the parent element
             containerCssClass: 'maneli-select2-container',
             dropdownCssClass: 'maneli-select2-dropdown',
             language: {
@@ -91,6 +107,7 @@
                 delay: 250,
                 method: 'POST',
                 data: function(params) {
+                    console.log('Searching for:', params.term);
                     return {
                         action: 'maneli_search_cars',
                         nonce: maneli_expert_ajax.nonce,
@@ -98,7 +115,9 @@
                     };
                 },
                 processResults: function(data) {
+                    console.log('Search results:', data);
                     if (data.success) {
+                        console.log('Found', data.data.results.length, 'cars');
                         return { results: data.data.results };
                     } else {
                         console.error(getText('server_error', 'Server error:'), data.data ? data.data.message : getText('unknown_error', 'Unknown error'));

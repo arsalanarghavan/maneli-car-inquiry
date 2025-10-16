@@ -25,9 +25,18 @@ class Maneli_Expert_Panel {
      * This localizes the configurable loan interest rate and all necessary text strings.
      */
     public function enqueue_expert_panel_assets() {
-        // Only enqueue if user can create inquiries and if the shortcode is present.
-        if (!current_user_can('edit_posts')) {
-             return;
+        // Only enqueue if user is logged in and has permission to create inquiries (admin or expert)
+        if (!is_user_logged_in()) {
+            return;
+        }
+        
+        // Check if user is admin or expert
+        $current_user = wp_get_current_user();
+        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_expert = in_array('maneli_expert', $current_user->roles);
+        
+        if (!$is_admin && !$is_expert) {
+            return;
         }
         
         // Enqueue datepicker for birth date fields

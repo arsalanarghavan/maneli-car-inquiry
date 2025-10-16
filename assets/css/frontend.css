@@ -1553,6 +1553,13 @@ select.maneli-car-search-select {
 .select2-container {
     display: block !important;
     width: 100% !important;
+    position: relative !important;
+}
+
+/* Fix form-group container to allow dropdown to overflow */
+.maneli-inquiry-form .form-group {
+    position: relative !important;
+    overflow: visible !important;
 }
 
 /* Make the select2 container match our form styling */
@@ -1588,9 +1595,24 @@ select.maneli-car-search-select {
     border: 1px solid var(--border-color) !important;
     border-radius: 6px !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    z-index: 9999 !important;
+    margin-top: 2px !important;
+}
+
+/* Make sure dropdown appears correctly */
+.select2-dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    width: 100% !important;
 }
 
 /* Search box inside dropdown */
+.select2-container--default .select2-search--dropdown {
+    padding: 8px !important;
+    display: block !important;
+}
+
 .select2-container--default .select2-search--dropdown .select2-search__field {
     border: 1px solid var(--border-color) !important;
     border-radius: 4px !important;
@@ -1598,6 +1620,8 @@ select.maneli-car-search-select {
     font-size: 15px !important;
     direction: rtl !important;
     text-align: right !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .select2-container--default .select2-search--dropdown .select2-search__field:focus {
