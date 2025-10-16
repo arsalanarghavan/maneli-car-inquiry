@@ -19,6 +19,8 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
         add_action('wp_ajax_maneli_filter_inquiries_ajax', [$this, 'ajax_filter_inquiries']);
         add_action('wp_ajax_maneli_delete_inquiry', [$this, 'ajax_delete_inquiry']); // ADDED: Installment Inquiry Delete
+        add_action('wp_ajax_maneli_update_tracking_status', [$this, 'ajax_update_tracking_status']); // ADDED: Tracking Status Update
+        add_action('wp_ajax_maneli_filter_followup_inquiries', [$this, 'ajax_filter_followup_inquiries']); // ADDED: Follow-up List Filter
 
         // Cash Inquiry Actions & List Filtering
         add_action('wp_ajax_maneli_get_cash_inquiry_details', [$this, 'ajax_get_cash_inquiry_details']);
@@ -603,5 +605,142 @@ class Maneli_Ajax_Handler {
         }
         wc_delete_product_transients($product_id); // Clear caches
         wp_send_json_success(esc_html__('Updated.', 'maneli-car-inquiry'));
+    }
+
+    //======================================================================
+    // Tracking Status Handlers (for installment inquiries)
+    //======================================================================
+    
+    /**
+     * Updates the tracking status of an inquiry via AJAX.
+     * Handles calendar dates for 'approved' (meeting date) and 'follow_up' (follow-up date).
+     */
+    public function ajax_update_tracking_status() {
+        check_ajax_referer('maneli_tracking_status_nonce', 'nonce');
+        
+        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $new_status = isset($_POST['tracking_status']) ? sanitize_text_field($_POST['tracking_status']) : '';
+        $date_value = isset($_POST['date_value']) ? sanitize_text_field($_POST['date_value']) : '';
+
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        // Verify the status is valid
+        $valid_statuses = array_keys(Maneli_CPT_Handler::get_tracking_statuses());
+        if (!in_array($new_status, $valid_statuses)) {
+            wp_send_json_error(['message' => esc_html__('Invalid tracking status.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        // Update tracking status
+        update_post_meta($inquiry_id, 'tracking_status', $new_status);
+
+        // Handle date storage based on status
+        if ($new_status === 'approved' && !empty($date_value)) {
+            update_post_meta($inquiry_id, 'meeting_date', $date_value);
+            delete_post_meta($inquiry_id, 'follow_up_date'); // Clear follow-up date if exists
+        } elseif ($new_status === 'follow_up' && !empty($date_value)) {
+            update_post_meta($inquiry_id, 'follow_up_date', $date_value);
+            delete_post_meta($inquiry_id, 'meeting_date'); // Clear meeting date if exists
+        } else {
+            // For other statuses, clear both dates
+            delete_post_meta($inquiry_id, 'meeting_date');
+            delete_post_meta($inquiry_id, 'follow_up_date');
+        }
+
+        $status_label = Maneli_CPT_Handler::get_tracking_status_label($new_status);
+        
+        wp_send_json_success([
+            'message' => sprintf(esc_html__('Tracking status updated to: %s', 'maneli-car-inquiry'), $status_label),
+            'status_label' => $status_label,
+            'status_key' => $new_status,
+            'date_value' => $date_value
+        ]);
+    }
+
+    /**
+     * Filters follow-up inquiries (tracking_status = 'follow_up') via AJAX.
+     * Similar to ajax_filter_inquiries but only returns follow-up items.
+     */
+    public function ajax_filter_followup_inquiries() {
+        check_ajax_referer('maneli_followup_filter_nonce', '_ajax_nonce');
+        
+        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+    
+        $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
+        $search_query = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
+        $base_url = isset($_POST['base_url']) ? esc_url_raw($_POST['base_url']) : home_url();
+        
+        $args = [
+            'post_type' => 'inquiry',
+            'posts_per_page' => 50,
+            'paged' => $paged,
+            'orderby' => 'meta_value',
+            'meta_key' => 'follow_up_date',
+            'order' => 'ASC', // Show earliest follow-up dates first
+            'post_status' => 'publish'
+        ];
+        
+        $meta_query = ['relation' => 'AND'];
+        
+        // MUST have tracking_status = 'follow_up'
+        $meta_query[] = ['key' => 'tracking_status', 'value' => 'follow_up', 'compare' => '='];
+        
+        // Search functionality
+        if (!empty($search_query)) {
+            $user_ids = get_users(['fields' => 'ID', 'search' => '*' . esc_attr($search_query) . '*', 'search_columns' => ['user_login', 'user_email', 'display_name']]);
+            $product_ids = wc_get_products(['s' => $search_query, 'limit' => -1, 'return' => 'ids']);
+            $search_meta_query = ['relation' => 'OR'];
+            if(!empty($user_ids)) $search_meta_query[] = ['key' => 'post_author', 'value' => $user_ids, 'compare' => 'IN'];
+            if(!empty($product_ids)) $search_meta_query[] = ['key' => 'product_id', 'value' => $product_ids, 'compare' => 'IN'];
+            $search_meta_query[] = ['key' => 'national_code', 'value' => $search_query, 'compare' => 'LIKE'];
+            $search_meta_query[] = ['key' => 'mobile_number', 'value' => $search_query, 'compare' => 'LIKE'];
+            $meta_query[] = $search_meta_query;
+        }
+        
+        // Expert filter
+        if (current_user_can('manage_maneli_inquiries')) {
+            if (!empty($_POST['expert'])) $meta_query[] = ['key' => 'assigned_expert_id', 'value' => absint($_POST['expert'])];
+        } else {
+            $meta_query[] = ['key' => 'assigned_expert_id', 'value' => get_current_user_id()];
+        }
+        
+        if (count($meta_query) > 1) $args['meta_query'] = $meta_query;
+    
+        $inquiry_query = new WP_Query($args);
+        ob_start();
+        if ($inquiry_query->have_posts()) {
+            while ($inquiry_query->have_posts()) {
+                $inquiry_query->the_post();
+                Maneli_Render_Helpers::render_inquiry_row(get_the_ID(), $base_url, true); // Show follow-up date
+            }
+        } else {
+            $columns = current_user_can('manage_maneli_inquiries') ? 8 : 7; // Extra column for follow-up date
+            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No follow-up inquiries found.', 'maneli-car-inquiry') . '</td></tr>';
+        }
+        $html = ob_get_clean();
+        wp_reset_postdata();
+        
+        $pagination_html = paginate_links([
+            'base' => add_query_arg('paged', '%#%'), 
+            'format' => '?paged=%#%', 
+            'current' => $paged, 
+            'total' => $inquiry_query->max_num_pages, 
+            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'), 
+            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'), 
+            'type'  => 'plain'
+        ]);
+    
+        wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 }

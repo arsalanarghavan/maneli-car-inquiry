@@ -176,10 +176,14 @@ class Maneli_Inquiry_Lists_Shortcode {
     private function enqueue_admin_list_assets() {
         // توجه: MANELI_INQUIRY_PLUGIN_URL باید قبلاً در فایل اصلی پلاگین تعریف شده باشد.
 
+        // Enqueue datepicker for tracking status modal
+        wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
+        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
+
         wp_enqueue_script(
             'maneli-inquiry-lists-js',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js',
-            ['jquery', 'sweetalert2'],
+            ['jquery', 'sweetalert2', 'maneli-jalali-datepicker'],
             '1.0.0', // ورژن باید به صورت پویا یا ثابت تعریف شود
             true
         );
@@ -203,10 +207,11 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'cash_details' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
                 'cash_update' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
                 'cash_delete' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
-                'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'), // ADDED
+                'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'),
                 'cash_set_downpayment' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
                 'cash_assign_expert' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
                 'assign_expert' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
+                'tracking_status' => wp_create_nonce('maneli_tracking_status_nonce'), // ADDED for tracking status
             ],
             'cash_rejection_reasons' => $cash_rejection_reasons,
             'installment_rejection_reasons' => $installment_rejection_reasons, 
@@ -247,6 +252,9 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'unknown_error' => esc_html__('Unknown error.', 'maneli-car-inquiry'),
                 'server_error' => esc_html__('A server error occurred.', 'maneli-car-inquiry'),
                 'rejection_reason_required' => esc_html__('Please select or enter a reason for rejection.', 'maneli-car-inquiry'),
+                'select_meeting_date' => esc_html__('Select Meeting Date:', 'maneli-car-inquiry'),
+                'select_followup_date' => esc_html__('Select Follow-up Date:', 'maneli-car-inquiry'),
+                'date_required' => esc_html__('Please select a date.', 'maneli-car-inquiry'),
             ]
         ]);
     }

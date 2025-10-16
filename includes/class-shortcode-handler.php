@@ -28,6 +28,7 @@ class Maneli_Shortcode_Handler {
         require_once $shortcode_path . 'class-loan-calculator-shortcode.php';
         require_once $shortcode_path . 'class-inquiry-form-shortcode.php';
         require_once $shortcode_path . 'class-inquiry-lists-shortcode.php';
+        require_once $shortcode_path . 'class-followup-list-shortcode.php';
         require_once $shortcode_path . 'class-user-management-shortcodes.php';
         require_once $shortcode_path . 'class-admin-shortcodes.php';
         require_once $shortcode_path . 'class-system-report-shortcode.php';
@@ -36,6 +37,7 @@ class Maneli_Shortcode_Handler {
         new Maneli_Loan_Calculator_Shortcode();
         new Maneli_Inquiry_Form_Shortcode();
         new Maneli_Inquiry_Lists_Shortcode();
+        new Maneli_Followup_List_Shortcode();
         new Maneli_User_Management_Shortcodes();
         new Maneli_Admin_Shortcodes();
         new Maneli_System_Report_Shortcode();
@@ -80,6 +82,7 @@ class Maneli_Shortcode_Handler {
             'maneli_inquiry_list',
             'maneli_expert_inquiry_list',
             'maneli_cash_inquiry_list',
+            'maneli_followup_list',
             'maneli_product_editor',
             // Add 'car_inquiry_form' for expert panel which uses Select2
             'car_inquiry_form', 

@@ -30,12 +30,24 @@ class Maneli_Expert_Panel {
              return;
         }
         
+        // Enqueue datepicker for birth date fields
+        wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
+        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
+        
+        // Enqueue the expert panel JavaScript file
+        wp_enqueue_script(
+            'maneli-expert-panel-js',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js',
+            ['jquery', 'select2', 'maneli-jalali-datepicker'],
+            '1.0.2',
+            true
+        );
+        
         // Fetch configurable interest rate
         $options = get_option('maneli_inquiry_all_options', []);
         $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
         
-        // Note: expert-panel.js is loaded along with the form shortcode, 
-        // this ensures the localization object is available.
+        // Localize the script with necessary data
         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce'),

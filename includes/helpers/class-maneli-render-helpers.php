@@ -211,7 +211,7 @@ class Maneli_Render_Helpers {
      * @param int $inquiry_id شناسه پست استعلام.
      * @param string $base_url آدرس پایه برای لینک گزارش.
      */
-    public static function render_inquiry_row($inquiry_id, $base_url) {
+    public static function render_inquiry_row($inquiry_id, $base_url, $show_followup_date = false) {
         $inquiry_post      = get_post($inquiry_id);
         if (!$inquiry_post) return;
         // از آنجایی که در حالت فرانت‌اند تنها هستیم، از توابع عمومی وردپرس استفاده می‌کنیم.
@@ -225,17 +225,27 @@ class Maneli_Render_Helpers {
         $status_label      = Maneli_CPT_Handler::get_status_label($inquiry_status); 
         $is_admin          = current_user_can( 'manage_maneli_inquiries' );
         
-        // Get expert status info
+        // Get expert status info and tracking status
         $expert_status_info = self::get_expert_status_info($expert_status);
+        $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
+        $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
         ?>
         <tr>
             <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
             <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer->display_name ?? '—'); ?></td>
             <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
+            <?php if ($show_followup_date): ?>
+                <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">
+                    <strong style="color: #d63638;"><?php echo esc_html($follow_up_date ?: '—'); ?></strong>
+                </td>
+            <?php endif; ?>
             <td class="inquiry-status-cell-installment" data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
                 <span class="status-indicator status-<?php echo esc_attr($inquiry_status); ?>"><?php echo esc_html($status_label); ?></span>
                 <?php if ($expert_status_info): ?>
                     <br><span class="expert-status-badge" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html($expert_status_info['label']); ?></span>
+                <?php endif; ?>
+                <?php if ($tracking_status): ?>
+                    <br><span class="tracking-status-badge" style="background-color: #2271b1; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html(Maneli_CPT_Handler::get_tracking_status_label($tracking_status)); ?></span>
                 <?php endif; ?>
             </td>
             <?php if ($is_admin) : ?>

@@ -15,7 +15,12 @@ jQuery(document).ready(function($) {
     //======================================================================
     
     // Helper to get localized text, falling back to English/a default if missing (for robustness)
-    const getText = (key, fallback = '...') => maneliInquiryLists.text[key] || fallback;
+    const getText = (key, fallback = '...') => {
+        if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.text && maneliInquiryLists.text[key]) {
+            return maneliInquiryLists.text[key];
+        }
+        return fallback;
+    };
     
     //======================================================================
     //  EVENT DELEGATION FOR ADMIN/EXPERT ACTIONS
@@ -610,4 +615,133 @@ jQuery(document).ready(function($) {
             fetchInquiries(pageNum);
         });
     } // End of listType check
+
+    //======================================================================
+    //  TRACKING STATUS MODAL & CALENDAR INTEGRATION
+    //  (Outside listType check - needed on report pages too)
+    //======================================================================
+
+    /**
+     * Handles the 'Set Status' button click for tracking status changes
+     */
+    $(document.body).on('click', '.change-tracking-status-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        const currentStatus = button.data('current-status') || 'new';
+        
+        const modal = $('#tracking-status-modal');
+        const statusSelect = $('#tracking-status-select');
+        const calendarWrapper = $('#calendar-wrapper');
+        const datePicker = $('#tracking-date-picker');
+        const calendarLabel = $('#calendar-label');
+
+        console.log('Tracking Status Modal - Inquiry ID:', inquiryId, 'Current Status:', currentStatus);
+        console.log('Modal element found:', modal.length > 0);
+
+        // Set current status
+        statusSelect.val(currentStatus);
+
+        // Show modal
+        modal.fadeIn(300);
+
+        // Initialize datepicker if not already initialized
+        if (!datePicker.data('kamadatepicker-initialized')) {
+            if (typeof kamaDatepicker === 'function') {
+                kamaDatepicker('tracking-date-picker', {
+                    buttonsColor: "red",
+                    forceFarsiDigits: true,
+                    markToday: true,
+                    markHolidays: true,
+                    highlightSelectedDay: true,
+                    sync: true
+                });
+                datePicker.data('kamadatepicker-initialized', true);
+            }
+        }
+
+        // Handle status change to show/hide calendar
+        statusSelect.off('change').on('change', function() {
+            const selectedStatus = $(this).val();
+            
+            if (selectedStatus === 'approved') {
+                calendarLabel.text(getText('select_meeting_date', 'Select Meeting Date:'));
+                calendarWrapper.show();
+                datePicker.val('');
+            } else if (selectedStatus === 'follow_up') {
+                calendarLabel.text(getText('select_followup_date', 'Select Follow-up Date:'));
+                calendarWrapper.show();
+                datePicker.val('');
+            } else {
+                calendarWrapper.hide();
+                datePicker.val('');
+            }
+        });
+
+        // Trigger change to show/hide calendar based on current selection
+        statusSelect.trigger('change');
+
+        // Handle confirm button
+        $('#confirm-tracking-status-btn').off('click').on('click', function() {
+            const selectedStatus = statusSelect.val();
+            const dateValue = datePicker.val();
+
+            // Validate: if 'approved' or 'follow_up', date is required
+            if ((selectedStatus === 'approved' || selectedStatus === 'follow_up') && !dateValue) {
+                Swal.fire(
+                    getText('error'),
+                    getText('date_required', 'Please select a date.'),
+                    'error'
+                );
+                return;
+            }
+
+            // Send AJAX request
+            const confirmBtn = $(this);
+            const originalText = confirmBtn.text();
+            confirmBtn.prop('disabled', true).text('...');
+
+            const ajaxUrl = (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.ajax_url) 
+                ? maneliInquiryLists.ajax_url 
+                : '/wp-admin/admin-ajax.php';
+            
+            const ajaxNonce = (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces && maneliInquiryLists.nonces.tracking_status) 
+                ? maneliInquiryLists.nonces.tracking_status 
+                : '';
+            
+            $.post(ajaxUrl, {
+                action: 'maneli_update_tracking_status',
+                nonce: ajaxNonce,
+                inquiry_id: inquiryId,
+                tracking_status: selectedStatus,
+                date_value: dateValue
+            }, function(response) {
+                if (response.success) {
+                    Swal.fire(getText('success'), response.data.message, 'success').then(() => {
+                        location.reload(); // Reload to show updated status
+                    });
+                } else {
+                    Swal.fire(getText('error'), response.data.message || getText('unknown_error'), 'error');
+                    confirmBtn.prop('disabled', false).text(originalText);
+                }
+            }).fail(function() {
+                Swal.fire(getText('error'), getText('server_error'), 'error');
+                confirmBtn.prop('disabled', false).text(originalText);
+            });
+        });
+    });
+
+    /**
+     * Modal close button handler for tracking status modal
+     */
+    $(document.body).on('click', '#tracking-status-modal .modal-close', function() {
+        $('#tracking-status-modal').fadeOut(300);
+    });
+
+    // Close modal when clicking outside
+    $(document.body).on('click', '#tracking-status-modal', function(e) {
+        if ($(e.target).is('#tracking-status-modal')) {
+            $(this).fadeOut(300);
+        }
+    });
+    
 });

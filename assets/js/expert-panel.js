@@ -46,11 +46,45 @@
         };
 
         // --- 3. Initialize Select2 for Car Search ---
+        // Check if Select2 is available
+        if (typeof $.fn.select2 === 'undefined') {
+            console.error('Select2 is not loaded! Cannot initialize car search.');
+            return;
+        }
+        
+        console.log('Initializing Select2 for car search...', productSelect);
+        
+        // Destroy any existing Select2 instance first
+        if (productSelect.hasClass('select2-hidden-accessible')) {
+            productSelect.select2('destroy');
+        }
+        
+        // Hide the original select element explicitly
+        productSelect.hide();
+        
         productSelect.select2({
-            placeholder: getText('car_search_placeholder', 'نام خودرو را جستجو کنید...'),
+            placeholder: 'شروع به تایپ برای جستجوی خودرو... (حداقل 2 حرف)',
             dir: "rtl",
             width: '100%',
             allowClear: true,
+            minimumInputLength: 2, // Require at least 2 characters before searching
+            dropdownAutoWidth: false,
+            containerCssClass: 'maneli-select2-container',
+            dropdownCssClass: 'maneli-select2-dropdown',
+            language: {
+                inputTooShort: function() {
+                    return 'لطفاً حداقل 2 حرف وارد کنید...';
+                },
+                searching: function() {
+                    return 'در حال جستجو...';
+                },
+                noResults: function() {
+                    return 'خودرویی یافت نشد';
+                },
+                loadingMore: function() {
+                    return 'در حال بارگذاری بیشتر...';
+                }
+            },
             ajax: {
                 url: maneli_expert_ajax.ajax_url,
                 dataType: 'json',
@@ -74,6 +108,11 @@
                 cache: true
             }
         });
+        
+        // Ensure the original select stays hidden after Select2 initialization
+        productSelect.hide();
+        
+        console.log('Select2 initialized. Original select hidden:', productSelect.is(':hidden'));
 
         // --- 4. Event Handlers ---
 
@@ -201,7 +240,55 @@
         issuerRadios.on('change', toggleIssuerForm);
 
         // Initial check on page load
-        toggleIssuerForm(); 
+        toggleIssuerForm();
+        
+        // --- 5. Initialize Datepickers for Birth Date Fields ---
+        if (typeof kamaDatepicker === 'function') {
+            // Initialize datepicker for buyer birth date
+            if ($('#expert_buyer_birth_date').length) {
+                kamaDatepicker('expert_buyer_birth_date', {
+                    buttonsColor: "red",
+                    forceFarsiDigits: true,
+                    markToday: true,
+                    markHolidays: true,
+                    highlightSelectedDay: true,
+                    sync: true
+                });
+            }
+            
+            // Initialize datepicker for issuer birth date
+            if ($('#expert_issuer_birth_date').length) {
+                kamaDatepicker('expert_issuer_birth_date', {
+                    buttonsColor: "red",
+                    forceFarsiDigits: true,
+                    markToday: true,
+                    markHolidays: true,
+                    highlightSelectedDay: true,
+                    sync: true
+                });
+            }
+        }
+        
+        // --- 6. Job Type Toggles (Show/Hide Job Title Field) ---
+        $('#buyer_job_type').on('change', function() {
+            const jobType = $(this).val();
+            if (jobType === 'employee') {
+                $('.buyer-job-title-wrapper').show();
+                $('.buyer-property-wrapper').show();
+            } else {
+                $('.buyer-job-title-wrapper').hide();
+                $('.buyer-property-wrapper').hide();
+            }
+        });
+        
+        $('#issuer_job_type').on('change', function() {
+            const jobType = $(this).val();
+            if (jobType === 'employee') {
+                $('.issuer-job-title-wrapper').show();
+            } else {
+                $('.issuer-job-title-wrapper').hide();
+            }
+        });
     });
 
 })(jQuery);

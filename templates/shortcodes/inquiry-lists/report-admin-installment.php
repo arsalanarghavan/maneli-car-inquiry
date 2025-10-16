@@ -76,6 +76,39 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
         <?php echo esc_html($status_label); ?>
     </div>
 
+    <?php if ($is_admin_or_expert): 
+        $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true) ?: 'new';
+        $tracking_status_label = Maneli_CPT_Handler::get_tracking_status_label($tracking_status);
+        $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
+        $meeting_date = get_post_meta($inquiry_id, 'meeting_date', true);
+    ?>
+    <div class="maneli-tracking-status-box" style="background: #f9f9f9; border: 2px solid #ddd; padding: 15px; margin: 20px 0; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <strong style="font-size: 16px;"><?php esc_html_e('Tracking Status:', 'maneli-car-inquiry'); ?></strong>
+                <span class="tracking-status-indicator tracking-status-<?php echo esc_attr($tracking_status); ?>" style="background: var(--theme-primary, #007cba); color: white; padding: 5px 15px; border-radius: 20px; margin-left: 10px; font-weight: bold;">
+                    <?php echo esc_html($tracking_status_label); ?>
+                </span>
+                <?php if ($tracking_status === 'follow_up' && $follow_up_date): ?>
+                    <span style="margin-left: 10px; color: #d63638;">
+                        <strong><?php esc_html_e('Follow-up Date:', 'maneli-car-inquiry'); ?></strong> 
+                        <?php echo esc_html($follow_up_date); ?>
+                    </span>
+                <?php endif; ?>
+                <?php if ($tracking_status === 'approved' && $meeting_date): ?>
+                    <span style="margin-left: 10px; color: #00a32a;">
+                        <strong><?php esc_html_e('Meeting Date:', 'maneli-car-inquiry'); ?></strong> 
+                        <?php echo esc_html($meeting_date); ?>
+                    </span>
+                <?php endif; ?>
+            </div>
+            <button class="button button-primary change-tracking-status-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-current-status="<?php echo esc_attr($tracking_status); ?>">
+                <?php esc_html_e('Set Status', 'maneli-car-inquiry'); ?>
+            </button>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?php if ( !empty($rejection_reason) ) : ?>
         <div class="status-box status-rejected">
             <strong><?php esc_html_e('Reason for Rejection:', 'maneli-car-inquiry'); ?></strong> 
@@ -267,5 +300,29 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
         <input type="hidden" id="assigned-expert-input" name="assigned_expert_id" value="">
         <?php wp_nonce_field('maneli_admin_update_status_nonce'); ?>
     </form>
+
+    <div id="tracking-status-modal" class="maneli-modal-frontend" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3><?php esc_html_e('Set Tracking Status', 'maneli-car-inquiry'); ?></h3>
+            <div class="form-group">
+                <label for="tracking-status-select"><?php esc_html_e('Select Status:', 'maneli-car-inquiry'); ?></label>
+                <select id="tracking-status-select" style="width: 100%; padding: 8px; font-size: 14px;">
+                    <?php foreach (Maneli_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
+                        <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="form-group" id="calendar-wrapper" style="display:none; margin-top: 20px;">
+                <label id="calendar-label"><?php esc_html_e('Select Date:', 'maneli-car-inquiry'); ?></label>
+                <input type="text" id="tracking-date-picker" class="maneli-datepicker" style="width: 100%; padding: 8px; font-size: 14px;" readonly>
+            </div>
+            
+            <button type="button" id="confirm-tracking-status-btn" class="button button-primary" style="margin-top: 20px;">
+                <?php esc_html_e('Confirm Status', 'maneli-car-inquiry'); ?>
+            </button>
+        </div>
+    </div>
 
 </div>

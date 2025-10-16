@@ -116,6 +116,31 @@ class Maneli_CPT_Handler {
             'failed'         => esc_html__('Inquiry Failed', 'maneli-car-inquiry'),
         ];
     }
+
+    /**
+     * Returns an array of all possible statuses for installment inquiry tracking (static list).
+     * These are the 5 fixed statuses used by experts to track inquiry progress.
+     * @return array
+     */
+    public static function get_tracking_statuses() {
+        return [
+            'new'           => esc_html__('New', 'maneli-car-inquiry'),
+            'in_progress'   => esc_html__('In Progress', 'maneli-car-inquiry'),
+            'approved'      => esc_html__('Approved', 'maneli-car-inquiry'),
+            'rejected'      => esc_html__('Rejected', 'maneli-car-inquiry'),
+            'follow_up'     => esc_html__('Follow Up', 'maneli-car-inquiry'),
+        ];
+    }
+    
+    /**
+     * Gets the human-readable label for a given tracking status key.
+     * @param string $status_key The tracking status key.
+     * @return string The status label.
+     */
+    public static function get_tracking_status_label($status_key) {
+        $statuses = self::get_tracking_statuses();
+        return $statuses[$status_key] ?? esc_html__('Unknown', 'maneli-car-inquiry');
+    }
     
     /**
      * Gets the human-readable label for a given installment status key.

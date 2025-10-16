@@ -31,9 +31,12 @@ if (!defined('ABSPATH')) {
         <h3><?php esc_html_e('1. Select Car and Conditions', 'maneli-car-inquiry'); ?></h3>
         <div class="form-group">
             <label for="product_id_expert"><strong><?php esc_html_e('Search for a Car', 'maneli-car-inquiry'); ?></strong></label>
-            <select id="product_id_expert" name="product_id" style="width: 100%;" required>
-                <option value=""><?php esc_html_e('Start typing to search for a car...', 'maneli-car-inquiry'); ?></option>
+            <select id="product_id_expert" name="product_id" class="maneli-car-search-select" required>
+                <option value=""></option>
             </select>
+            <p class="description" style="margin-top: 8px; color: #666; font-size: 13px;">
+                <?php esc_html_e('Start typing the car name to search (at least 2 characters)', 'maneli-car-inquiry'); ?>
+            </p>
         </div>
         
         <?php if (current_user_can('manage_maneli_inquiries') && !empty($experts)): ?>
