@@ -82,4 +82,61 @@ class Maneli_SMS_Handler {
             return false;
         }
     }
+
+    /**
+     * Sends a simple SMS message.
+     *
+     * @param string $recipient The recipient's mobile number.
+     * @param string $message   The message to send.
+     * @return bool True on success, false on failure.
+     */
+    public function send_sms($recipient, $message) {
+        $username = $this->options['sms_username'] ?? '';
+        $password = $this->options['sms_password'] ?? '';
+
+        // Validate required credentials
+        if (empty($username) || empty($password) || empty($recipient) || empty($message)) {
+            error_log('Maneli SMS Error: Missing required parameters for sending SMS.');
+            return false;
+        }
+
+        // Check if the SOAP extension is enabled
+        if (!class_exists('SoapClient')) {
+            error_log('Maneli SMS Error: SoapClient class not found. Please enable the PHP SOAP extension on your server.');
+            return false;
+        }
+
+        try {
+            // Disable WSDL caching
+            ini_set("soap.wsdl_cache_enabled", "0");
+            
+            $sms_client = new SoapClient(MANELI_SMS_API_WSDL, ['encoding' => 'UTF-8']);
+
+            $data = [
+                "username" => $username,
+                "password" => $password,
+                "text"     => $message,
+                "to"       => $recipient,
+            ];
+
+            // Call the web service method
+            $result = $sms_client->SendSimpleSMS2($data);
+            $send_Result_code = $result->SendSimpleSMS2Result;
+            
+            // Interpret the result code
+            if (is_string($send_Result_code) && strlen($send_Result_code) > 10) {
+                return true;
+            } else {
+                error_log('Maneli SMS API Error: Failed to send SMS. API returned code: ' . $send_Result_code);
+                return false;
+            }
+
+        } catch (SoapFault $e) {
+            error_log('Maneli SMS SOAP Fault: ' . $e->getMessage());
+            return false;
+        } catch (Exception $e) {
+            error_log('Maneli SMS General Exception: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

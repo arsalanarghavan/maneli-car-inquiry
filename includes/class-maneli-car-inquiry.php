@@ -105,6 +105,9 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Frontend Features
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
+        
+        // Dashboard
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
     }
 
     /**
@@ -126,6 +129,9 @@ final class Maneli_Car_Inquiry_Plugin {
         if (!empty($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
             new Maneli_Grouped_Attributes();
         }
+        
+        // Initialize Dashboard Handler
+        new Maneli_Dashboard_Handler();
     }
 
     /**
