@@ -72,5 +72,30 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
             <!-- Pagination loaded via AJAX -->
         </div>
     </div>
+
+    <!-- Tracking Status Modal -->
+    <div id="tracking-status-modal" class="maneli-modal-frontend" style="display:none;">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3><?php esc_html_e('Set Tracking Status', 'maneli-car-inquiry'); ?></h3>
+            <div class="form-group">
+                <label for="tracking-status-select"><?php esc_html_e('Select Status:', 'maneli-car-inquiry'); ?></label>
+                <select id="tracking-status-select" style="width: 100%; padding: 8px; font-size: 14px;">
+                    <?php foreach (Maneli_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
+                        <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="form-group" id="calendar-wrapper" style="display:none; margin-top: 20px;">
+                <label id="calendar-label"><?php esc_html_e('Select Date:', 'maneli-car-inquiry'); ?></label>
+                <input type="text" id="tracking-date-picker" class="maneli-datepicker" style="width: 100%; padding: 8px; font-size: 14px;" readonly>
+            </div>
+            
+            <button type="button" id="confirm-tracking-status-btn" class="button button-primary" style="margin-top: 20px;">
+                <?php esc_html_e('Confirm Status', 'maneli-car-inquiry'); ?>
+            </button>
+        </div>
+    </div>
 </div>
 

@@ -62,11 +62,13 @@ class Maneli_Inquiry_Form_Shortcode {
         $active_step = 1;
         if ($latest_inquiry) {
             $status = get_post_meta($latest_inquiry[0]->ID, 'inquiry_status', true);
-            $active_step = in_array($status, ['user_confirmed', 'rejected']) ? 5 : 4;
+            $active_step = in_array($status, ['user_confirmed', 'rejected']) ? 6 : 5;
         } elseif ($inquiry_step_meta === 'form_pending') {
             $active_step = 2;
-        } elseif ($inquiry_step_meta === 'payment_pending') {
+        } elseif ($inquiry_step_meta === 'confirm_car_pending') {
             $active_step = 3;
+        } elseif ($inquiry_step_meta === 'payment_pending') {
+            $active_step = 4;
         }
         
         // Render the progress tracker

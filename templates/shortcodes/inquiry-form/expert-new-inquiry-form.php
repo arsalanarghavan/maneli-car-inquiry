@@ -101,21 +101,10 @@ if (!defined('ABSPATH')) {
                                 <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
                             </select>
                         </div>
-                    </div>
-                    <div class="form-row">
                         <div class="form-group"><label><?php esc_html_e('Income Level (Toman):', 'maneli-car-inquiry'); ?></label><input type="number" name="income_level"></div>
-                        <div class="form-group"><label><?php esc_html_e('Phone Number:', 'maneli-car-inquiry'); ?></label><input type="tel" name="phone_number"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label><?php esc_html_e('Workplace Status', 'maneli-car-inquiry'); ?>:</label>
-                            <select name="workplace_status">
-                                <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>
-                                <option value="permanent"><?php esc_html_e('Permanent', 'maneli-car-inquiry'); ?></option>
-                                <option value="contract"><?php esc_html_e('Contract', 'maneli-car-inquiry'); ?></option>
-                                <option value="freelance"><?php esc_html_e('Freelance', 'maneli-car-inquiry'); ?></option>
-                            </select>
-                        </div>
+                        <div class="form-group"><label><?php esc_html_e('Phone Number:', 'maneli-car-inquiry'); ?></label><input type="tel" name="phone_number"></div>
                         <div class="form-group"><label><?php esc_html_e('Address:', 'maneli-car-inquiry'); ?></label><textarea name="address"></textarea></div>
                     </div>
                     <div class="form-row">
@@ -153,9 +142,33 @@ if (!defined('ABSPATH')) {
                                 <option value="employee"><?php esc_html_e('کارمند', 'maneli-car-inquiry'); ?></option>
                             </select>
                         </div>
+                        <div class="form-group issuer-job-title-wrapper" style="display:none;">
+                            <label><?php esc_html_e('Issuer Job Title:', 'maneli-car-inquiry'); ?></label>
+                            <input type="text" name="issuer_job_title" id="issuer_job_title">
+                        </div>
                     </div>
-                    <div class="form-row issuer-job-title-wrapper" style="display:none;">
-                        <div class="form-group" style="width:100%"><label><?php esc_html_e('Issuer Job Title:', 'maneli-car-inquiry'); ?></label><input type="text" name="issuer_job_title" id="issuer_job_title"></div>
+                    <div class="form-row">
+                        <div class="form-group issuer-property-wrapper" style="display:none;">
+                            <label><?php esc_html_e('Issuer Residency Status', 'maneli-car-inquiry'); ?>:</label>
+                            <select name="issuer_residency_status" id="issuer_residency_status">
+                                <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>
+                                <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
+                                <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label><?php esc_html_e('Issuer Income Level (Toman):', 'maneli-car-inquiry'); ?></label><input type="number" name="issuer_income_level"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label><?php esc_html_e('Issuer Phone Number:', 'maneli-car-inquiry'); ?></label><input type="tel" name="issuer_phone_number"></div>
+                        <div class="form-group"><label><?php esc_html_e('Issuer Address:', 'maneli-car-inquiry'); ?></label><textarea name="issuer_address"></textarea></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label><?php esc_html_e('Issuer Bank Name:', 'maneli-car-inquiry'); ?></label><input type="text" name="issuer_bank_name"></div>
+                        <div class="form-group"><label><?php esc_html_e('Issuer Account Number:', 'maneli-car-inquiry'); ?></label><input type="text" name="issuer_account_number"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label><?php esc_html_e('Issuer Branch Code:', 'maneli-car-inquiry'); ?></label><input type="text" name="issuer_branch_code"></div>
+                        <div class="form-group"><label><?php esc_html_e('Issuer Branch Name:', 'maneli-car-inquiry'); ?></label><input type="text" name="issuer_branch_name"></div>
                     </div>
                 </div>
             </div>

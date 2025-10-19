@@ -340,9 +340,9 @@ class Maneli_Installment_Inquiry_Handler {
         $issuer_data = [];
         if ($issuer_type === 'other') {
             $issuer_fields = [
-                'issuer_full_name', 'issuer_national_code', 'issuer_bank_name', 'issuer_account_number',
+                'issuer_first_name', 'issuer_last_name', 'issuer_national_code', 'issuer_bank_name', 'issuer_account_number',
                 'issuer_branch_code', 'issuer_branch_name', 'issuer_residency_status', 
-                'issuer_workplace_status', 'issuer_address', 'issuer_phone_number', 'issuer_father_name',
+                'issuer_address', 'issuer_phone_number', 'issuer_father_name', 'issuer_income_level',
                 // occupation is populated from issuer_job_title below
                 'issuer_occupation', 'issuer_job_type', 'issuer_job_title'
             ];
@@ -351,29 +351,26 @@ class Maneli_Installment_Inquiry_Handler {
                 $issuer_data[$key] = isset($_POST[$key]) ? sanitize_textarea_field($_POST[$key]) : '';
             }
 
+            // Combine first and last name for backward compatibility
+            if (!empty($issuer_data['issuer_first_name']) || !empty($issuer_data['issuer_last_name'])) {
+                $issuer_data['issuer_full_name'] = trim($issuer_data['issuer_first_name'] . ' ' . $issuer_data['issuer_last_name']);
+            }
+
             // Map new issuer job title to legacy issuer_occupation field
             if (!empty($issuer_data['issuer_job_title'])) {
                 $issuer_data['issuer_occupation'] = $issuer_data['issuer_job_title'];
             }
         }
 
-        // Store sanitized data temporarily, waiting for payment (if any)
+        // Store sanitized data temporarily, waiting for car confirmation
         update_user_meta($user_id, 'maneli_temp_inquiry_data', [
             'buyer_data'  => $buyer_data,
             'issuer_data' => $issuer_data,
             'issuer_type' => $issuer_type,
         ]);
 
-        $options = get_option('maneli_inquiry_all_options', []);
-        $payment_enabled = !empty($options['payment_enabled']) && $options['payment_enabled'] == '1';
-        $inquiry_fee = !empty($options['inquiry_fee']) ? (int)$options['inquiry_fee'] : 0;
-
-        if ($payment_enabled && $inquiry_fee > 0) {
-            update_user_meta($user_id, 'maneli_inquiry_step', 'confirm_car_pending');
-        } else {
-            // No payment needed, finalize the inquiry right away by triggering the success hook
-            do_action('maneli_inquiry_payment_successful', $user_id);
-        }
+        // Always go to step 3 (confirm car) - user must confirm their selected car
+        update_user_meta($user_id, 'maneli_inquiry_step', 'confirm_car_pending');
 
         wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
         exit;
@@ -395,8 +392,19 @@ class Maneli_Installment_Inquiry_Handler {
             wp_die(esc_html__('Please confirm your selected car to continue.', 'maneli-car-inquiry'));
         }
 
-        // Move to payment step now
-        update_user_meta($user_id, 'maneli_inquiry_step', 'payment_pending');
+        // Check if payment is required
+        $options = get_option('maneli_inquiry_all_options', []);
+        $payment_enabled = !empty($options['payment_enabled']) && $options['payment_enabled'] == '1';
+        $inquiry_fee = !empty($options['inquiry_fee']) ? (int)$options['inquiry_fee'] : 0;
+
+        if ($payment_enabled && $inquiry_fee > 0) {
+            // Payment is required - move to payment step
+            update_user_meta($user_id, 'maneli_inquiry_step', 'payment_pending');
+        } else {
+            // No payment needed - finalize the inquiry right away
+            do_action('maneli_inquiry_payment_successful', $user_id);
+        }
+
         wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
         exit;
     }

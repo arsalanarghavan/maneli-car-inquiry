@@ -562,7 +562,7 @@ class Maneli_Admin_Actions_Handler {
              $meta_map['issuer_phone_number']     = sanitize_text_field($post_data['issuer_phone_number'] ?? '');
              $meta_map['issuer_address']          = sanitize_textarea_field($post_data['issuer_address'] ?? '');
              $meta_map['issuer_residency_status'] = sanitize_text_field($post_data['issuer_residency_status'] ?? '');
-             $meta_map['issuer_workplace_status'] = sanitize_text_field($post_data['issuer_workplace_status'] ?? '');
+             $meta_map['issuer_income_level']     = sanitize_text_field($post_data['issuer_income_level'] ?? '');
              $meta_map['issuer_bank_name']        = sanitize_text_field($post_data['issuer_bank_name'] ?? '');
              $meta_map['issuer_account_number']   = sanitize_text_field($post_data['issuer_account_number'] ?? '');
              $meta_map['issuer_branch_code']      = sanitize_text_field($post_data['issuer_branch_code'] ?? '');

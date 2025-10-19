@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         // AJAX submission for logged-in users
-        if (actionBtn && typeof maneli_ajax_object !== 'undefined') {
+        if (actionBtn && typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.ajax_url && maneli_ajax_object.nonce) {
             actionBtn.addEventListener("click", function (e) {
                 e.preventDefault();
 

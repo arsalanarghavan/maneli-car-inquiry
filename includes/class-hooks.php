@@ -70,6 +70,7 @@ class Maneli_Hooks {
 
     /**
      * Redirects non-administrator users from the WordPress backend (/wp-admin) to the frontend dashboard.
+     * Ensures that all plugin custom roles (maneli_admin, maneli_expert) are also blocked from wp-admin.
      */
     public function redirect_non_admins_from_backend() {
         // Do not redirect for AJAX, Cron, or admin-post.php requests
@@ -77,7 +78,25 @@ class Maneli_Hooks {
             return;
         }
 
-        if (!current_user_can('manage_options') && is_admin()) {
+        // Get current user
+        $current_user = wp_get_current_user();
+        
+        // Check if user is logged in and in wp-admin
+        if (!is_admin() || empty($current_user->ID)) {
+            return;
+        }
+
+        // Get user roles
+        $user_roles = (array) $current_user->roles;
+        
+        // Define plugin roles that should NOT have access to wp-admin
+        $blocked_roles = ['maneli_admin', 'maneli_expert', 'customer'];
+        
+        // Check if user has any of the blocked roles
+        $has_blocked_role = !empty(array_intersect($user_roles, $blocked_roles));
+        
+        // Redirect if user doesn't have manage_options capability OR has a blocked role
+        if (!current_user_can('manage_options') || $has_blocked_role) {
             wp_redirect(home_url('/dashboard/'));
             exit;
         }

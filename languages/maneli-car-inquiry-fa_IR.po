@@ -17,6 +17,18 @@ msgstr "درخواست نامعتبر یا عدم دسترسی کافی."
 msgid "Security check failed!"
 msgstr "بررسی امنیتی ناموفق بود!"
 
+
+msgid "Login Required"
+msgstr "ورود به سیستم لازم است"
+
+
+msgid "Please log in to start your inquiry."
+msgstr "برای شروع استعلام وارد شوید."
+
+
+msgid "Log In"
+msgstr "ورود"
+
 # User Roles
 
 msgid "Customer"
@@ -190,6 +202,10 @@ msgstr "قسط ماهانه"
 
 msgid "Approximate Installment Amount"
 msgstr "مبلغ تقریبی قسط"
+
+
+msgid "Approximate Installment Amount:"
+msgstr "مبلغ تقریبی قسط:"
 
 
 msgid "Available Colors"
@@ -2607,3 +2623,50 @@ msgstr "هیچ کارشناسی برای تخصیص یافت نشد."
 
 msgid "Please select an expert."
 msgstr "لطفاً یک کارشناس انتخاب کنید."
+
+# Form Labels (Step 2 - Identity Form)
+
+msgid "Father's Name:"
+msgstr "نام پدر:"
+
+msgid "Date of Birth:"
+msgstr "تاریخ تولد:"
+
+msgid "National Code:"
+msgstr "کد ملی:"
+
+msgid "Income Level (Toman):"
+msgstr "میزان درآمد (تومان):"
+
+msgid "Phone Number:"
+msgstr "شماره تلفن:"
+
+msgid "Address:"
+msgstr "آدرس:"
+
+msgid "Bank Name:"
+msgstr "نام بانک:"
+
+msgid "Account Number:"
+msgstr "شماره حساب:"
+
+msgid "Branch Code:"
+msgstr "کد شعبه:"
+
+msgid "Branch Name:"
+msgstr "نام شعبه:"
+
+msgid "Continue to Next Step"
+msgstr "ادامه به مرحله بعد"
+
+msgid "Workplace Status:"
+msgstr "وضعیت محل کار:"
+
+msgid "Issuer Income Level (Toman):"
+msgstr "میزان درآمد صادرکننده (تومان):"
+
+msgid "Issuer Workplace Status"
+msgstr "وضعیت محل کار صادرکننده"
+
+msgid "Issuer Workplace Status:"
+msgstr "وضعیت محل کار صادرکننده:"

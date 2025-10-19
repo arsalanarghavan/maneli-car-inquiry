@@ -650,14 +650,27 @@ jQuery(document).ready(function($) {
         const inquiryId = button.data('inquiry-id');
         const currentStatus = button.data('current-status') || 'new';
         
+        console.log('=== Tracking Status Button Clicked ===');
+        console.log('Button:', button);
+        console.log('Inquiry ID:', inquiryId);
+        console.log('Current Status:', currentStatus);
+        
         const modal = $('#tracking-status-modal');
         const statusSelect = $('#tracking-status-select');
         const calendarWrapper = $('#calendar-wrapper');
         const datePicker = $('#tracking-date-picker');
         const calendarLabel = $('#calendar-label');
 
-        console.log('Tracking Status Modal - Inquiry ID:', inquiryId, 'Current Status:', currentStatus);
         console.log('Modal element found:', modal.length > 0);
+        console.log('Status Select found:', statusSelect.length > 0);
+        console.log('Calendar Wrapper found:', calendarWrapper.length > 0);
+        console.log('Date Picker found:', datePicker.length > 0);
+        
+        if (modal.length === 0) {
+            console.error('ERROR: Modal not found in DOM!');
+            alert('خطا: مودال تنظیم وضعیت پیدا نشد. لطفاً به پشتیبانی اطلاع دهید.');
+            return;
+        }
 
         // Set current status
         statusSelect.val(currentStatus);
