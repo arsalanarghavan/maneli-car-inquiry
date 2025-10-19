@@ -1,0 +1,401 @@
+<?php
+/**
+ * Dashboard Handler Class
+ * 
+ * Handles dashboard pages, routing, and template rendering
+ * 
+ * @package Maneli_Car_Inquiry/Includes
+ * @author  Arsalan Arghavan
+ * @version 1.0.0
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Maneli_Dashboard_Handler {
+    
+    /**
+     * Instance of this class
+     */
+    private static $instance = null;
+    
+    /**
+     * Get instance
+     */
+    public static function instance() {
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    /**
+     * Constructor
+     */
+    private function __construct() {
+        $this->init_hooks();
+    }
+    
+    /**
+     * Initialize hooks
+     */
+    private function init_hooks() {
+        add_action('init', [$this, 'add_rewrite_rules']);
+        add_filter('query_vars', [$this, 'add_query_vars']);
+        add_action('template_redirect', [$this, 'handle_dashboard_requests']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_dashboard_assets']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_global_fonts'], 1);
+        add_action('wp_ajax_maneli_dashboard_login', [$this, 'handle_dashboard_login']);
+        add_action('wp_ajax_nopriv_maneli_dashboard_login', [$this, 'handle_dashboard_login']);
+        add_action('wp_ajax_maneli_dashboard_logout', [$this, 'handle_dashboard_logout']);
+        add_action('wp_ajax_maneli_send_sms_code', [$this, 'handle_send_sms_code']);
+        add_action('wp_ajax_nopriv_maneli_send_sms_code', [$this, 'handle_send_sms_code']);
+    }
+    
+    /**
+     * Enqueue global fonts for all plugin pages
+     */
+    public function enqueue_global_fonts() {
+        wp_enqueue_style('maneli-fonts', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-fonts.css', [], '1.0.0');
+    }
+    
+    /**
+     * Add rewrite rules for dashboard
+     */
+    public function add_rewrite_rules() {
+        add_rewrite_rule('^login/?$', 'index.php?maneli_dashboard=1&maneli_dashboard_page=login', 'top');
+        add_rewrite_rule('^logout/?$', 'index.php?maneli_dashboard=1&maneli_dashboard_page=logout', 'top');
+        add_rewrite_rule('^dashboard/?$', 'index.php?maneli_dashboard=1', 'top');
+        add_rewrite_rule('^dashboard/([^/]+)/?$', 'index.php?maneli_dashboard=1&maneli_dashboard_page=$matches[1]', 'top');
+        add_rewrite_rule('^dashboard/([^/]+)/([^/]+)/?$', 'index.php?maneli_dashboard=1&maneli_dashboard_page=$matches[1]&maneli_dashboard_subpage=$matches[2]', 'top');
+        
+        // Flush rewrite rules if needed
+        if (get_option('maneli_dashboard_rules_flushed') !== '2') {
+            flush_rewrite_rules();
+            update_option('maneli_dashboard_rules_flushed', '2');
+        }
+    }
+    
+    /**
+     * Add query vars
+     */
+    public function add_query_vars($vars) {
+        $vars[] = 'maneli_dashboard';
+        $vars[] = 'maneli_dashboard_page';
+        $vars[] = 'maneli_dashboard_subpage';
+        return $vars;
+    }
+    
+    /**
+     * Handle dashboard requests
+     */
+    public function handle_dashboard_requests() {
+        if (get_query_var('maneli_dashboard')) {
+            $this->render_dashboard();
+            exit;
+        }
+    }
+    
+    /**
+     * Enqueue dashboard assets
+     */
+    public function enqueue_dashboard_assets() {
+        if (get_query_var('maneli_dashboard')) {
+            // Enqueue CSS
+            wp_enqueue_style('maneli-fonts', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-fonts.css', [], '1.0.0');
+            wp_enqueue_style('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', ['maneli-fonts'], '5.3.0');
+            wp_enqueue_style('maneli-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/styles.css', ['maneli-bootstrap'], '1.0.0');
+            wp_enqueue_style('maneli-icons', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/icons.css', [], '1.0.0');
+            wp_enqueue_style('maneli-waves', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/node-waves/waves.min.css', [], '1.0.0');
+            wp_enqueue_style('maneli-simplebar', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/simplebar/simplebar.min.css', [], '1.0.0');
+            
+            // Enqueue JS
+            wp_enqueue_script('jquery');
+            wp_enqueue_script('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/js/bootstrap.bundle.min.js', ['jquery'], '5.3.0', true);
+            wp_enqueue_script('maneli-main', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/main.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-custom', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/custom.js', ['jquery', 'maneli-bootstrap'], '1.0.0', true);
+            wp_enqueue_script('maneli-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/dashboard.js', ['jquery'], '1.0.0', true);
+            
+            // Localize script for AJAX
+            wp_localize_script('maneli-dashboard', 'maneli_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('maneli_dashboard_nonce'),
+                'login_url' => home_url('/login'),
+                'dashboard_url' => home_url('/dashboard')
+            ]);
+        }
+    }
+    
+    /**
+     * Render dashboard
+     */
+    private function render_dashboard() {
+        $page = get_query_var('maneli_dashboard_page');
+        $subpage = get_query_var('maneli_dashboard_subpage');
+        
+        // Check if user is logged in
+        if (!$this->is_user_logged_in() && $page !== 'login') {
+            wp_redirect(home_url('/login'));
+            exit;
+        }
+        
+        // Route to appropriate page
+        if ($page === 'login') {
+            $this->render_login_page();
+        } elseif ($page === 'logout') {
+            $this->handle_logout();
+        } else {
+            $this->render_main_dashboard($page, $subpage);
+        }
+    }
+    
+    /**
+     * Check if user is logged in to dashboard
+     */
+    private function is_user_logged_in() {
+        // If user is logged in to WordPress, allow access
+        if (is_user_logged_in()) {
+            return true;
+        }
+        
+        // Otherwise check session
+        $this->maybe_start_session();
+        return isset($_SESSION['maneli_dashboard_logged_in']) && $_SESSION['maneli_dashboard_logged_in'] === true;
+    }
+    
+    /**
+     * Start session if not already started
+     */
+    private function maybe_start_session() {
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+    }
+    
+    /**
+     * Render login page
+     */
+    private function render_login_page() {
+        $this->maybe_start_session();
+        
+        $title = 'ورود به داشبورد';
+        $error_message = isset($_SESSION['maneli_error']) ? $_SESSION['maneli_error'] : '';
+        $success_message = isset($_SESSION['maneli_success']) ? $_SESSION['maneli_success'] : '';
+        
+        // Clear messages after displaying
+        unset($_SESSION['maneli_error']);
+        unset($_SESSION['maneli_success']);
+        
+        include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/login.php';
+    }
+    
+    /**
+     * Render main dashboard
+     */
+    private function render_main_dashboard($page = '', $subpage = '') {
+        $user = $this->get_current_user();
+        $menu_items = $this->get_menu_items();
+        
+        include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/main.php';
+    }
+    
+    /**
+     * Get current user
+     */
+    private function get_current_user() {
+        // If WordPress user is logged in, use their info
+        if (is_user_logged_in()) {
+            $wp_user = wp_get_current_user();
+            return [
+                'name' => $wp_user->display_name,
+                'phone' => get_user_meta($wp_user->ID, 'billing_phone', true) ?: '',
+                'role' => 'admin'
+            ];
+        }
+        
+        // Otherwise use session data
+        $this->maybe_start_session();
+        return [
+            'name' => $_SESSION['maneli_user_name'] ?? 'کاربر',
+            'phone' => $_SESSION['maneli_user_phone'] ?? '',
+            'role' => $_SESSION['maneli_user_role'] ?? 'user'
+        ];
+    }
+    
+    /**
+     * Get menu items
+     */
+    private function get_menu_items() {
+        return [
+            [
+                'title' => 'داشبورد',
+                'url' => home_url('/dashboard'),
+                'icon' => 'ri-dashboard-3-line',
+                'active' => true
+            ],
+            [
+                'title' => 'استعلامات',
+                'url' => home_url('/dashboard/inquiries'),
+                'icon' => 'ri-file-list-line',
+                'active' => false
+            ],
+            [
+                'title' => 'گزارشات',
+                'url' => home_url('/dashboard/reports'),
+                'icon' => 'ri-bar-chart-line',
+                'active' => false
+            ],
+            [
+                'title' => 'تنظیمات',
+                'url' => home_url('/dashboard/settings'),
+                'icon' => 'ri-settings-3-line',
+                'active' => false
+            ]
+        ];
+    }
+    
+    /**
+     * Handle dashboard login
+     */
+    public function handle_dashboard_login() {
+        check_ajax_referer('maneli_dashboard_nonce', 'nonce');
+        
+        $login_type = sanitize_text_field($_POST['login_type'] ?? '');
+        $phone = sanitize_text_field($_POST['phone'] ?? '');
+        $password = sanitize_text_field($_POST['password'] ?? '');
+        $sms_code = sanitize_text_field($_POST['sms_code'] ?? '');
+        
+        if ($login_type === 'sms') {
+            $this->handle_sms_login($phone, $sms_code);
+        } else {
+            $this->handle_password_login($phone, $password);
+        }
+    }
+    
+    /**
+     * Handle SMS login
+     */
+    private function handle_sms_login($phone, $sms_code) {
+        $this->maybe_start_session();
+        
+        // Verify SMS code
+        if ($this->verify_sms_code($phone, $sms_code)) {
+            $this->set_user_session($phone, 'کاربر');
+            wp_send_json_success(['redirect' => home_url('/dashboard')]);
+        } else {
+            wp_send_json_error(['message' => 'کد تایید نامعتبر است']);
+        }
+    }
+    
+    /**
+     * Handle password login
+     */
+    private function handle_password_login($phone, $password) {
+        // Verify password (implement your logic here)
+        if ($this->verify_password($phone, $password)) {
+            $this->set_user_session($phone, 'کاربر');
+            wp_send_json_success(['redirect' => home_url('/dashboard')]);
+        } else {
+            wp_send_json_error(['message' => 'رمز عبور نامعتبر است']);
+        }
+    }
+    
+    /**
+     * Send SMS code
+     */
+    public function handle_send_sms_code() {
+        check_ajax_referer('maneli_dashboard_nonce', 'nonce');
+        
+        $phone = sanitize_text_field($_POST['phone'] ?? '');
+        
+        // Validate phone number
+        if (!preg_match('/^09\d{9}$/', $phone)) {
+            wp_send_json_error(['message' => 'شماره موبایل نامعتبر است']);
+            return;
+        }
+        
+        $code = wp_rand(1000, 9999);
+        
+        $this->maybe_start_session();
+        
+        // Store code in session
+        $_SESSION['maneli_sms_code'] = $code;
+        $_SESSION['maneli_sms_phone'] = $phone;
+        $_SESSION['maneli_sms_time'] = time();
+        
+        // Send SMS using existing SMS handler
+        $sms_handler = new Maneli_SMS_Handler();
+        $message = "کد تایید شما: " . $code;
+        
+        if ($sms_handler->send_sms($phone, $message)) {
+            wp_send_json_success(['message' => 'کد تایید ارسال شد']);
+        } else {
+            wp_send_json_error(['message' => 'خطا در ارسال کد تایید']);
+        }
+    }
+    
+    /**
+     * Verify SMS code
+     */
+    private function verify_sms_code($phone, $code) {
+        $this->maybe_start_session();
+        
+        if (!isset($_SESSION['maneli_sms_code']) || 
+            !isset($_SESSION['maneli_sms_phone']) || 
+            !isset($_SESSION['maneli_sms_time'])) {
+            return false;
+        }
+        
+        // Check if code is expired (5 minutes)
+        if (time() - $_SESSION['maneli_sms_time'] > 300) {
+            return false;
+        }
+        
+        return $_SESSION['maneli_sms_code'] == $code && 
+               $_SESSION['maneli_sms_phone'] == $phone;
+    }
+    
+    /**
+     * Verify password
+     */
+    private function verify_password($phone, $password) {
+        // Implement your password verification logic here
+        // For now, using a simple check - you should replace this with proper authentication
+        $options = get_option('maneli_inquiry_all_options', []);
+        $saved_password = $options['dashboard_password'] ?? 'admin123';
+        return $password === $saved_password;
+    }
+    
+    /**
+     * Set user session
+     */
+    private function set_user_session($phone, $name) {
+        $this->maybe_start_session();
+        
+        $_SESSION['maneli_dashboard_logged_in'] = true;
+        $_SESSION['maneli_user_phone'] = $phone;
+        $_SESSION['maneli_user_name'] = $name;
+        $_SESSION['maneli_user_role'] = 'user';
+    }
+    
+    /**
+     * Handle logout
+     */
+    public function handle_logout() {
+        $this->maybe_start_session();
+        session_destroy();
+        wp_redirect(home_url('/login'));
+        exit;
+    }
+    
+    /**
+     * Handle AJAX logout
+     */
+    public function handle_dashboard_logout() {
+        $this->maybe_start_session();
+        session_destroy();
+        wp_send_json_success(['redirect' => home_url('/login')]);
+    }
+}
+

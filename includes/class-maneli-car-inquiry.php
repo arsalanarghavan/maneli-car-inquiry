@@ -131,7 +131,7 @@ final class Maneli_Car_Inquiry_Plugin {
         }
         
         // Initialize Dashboard Handler
-        new Maneli_Dashboard_Handler();
+        Maneli_Dashboard_Handler::instance();
     }
 
     /**
