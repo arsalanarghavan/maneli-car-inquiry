@@ -58,6 +58,9 @@ class Maneli_Dashboard_Handler {
      */
     public function enqueue_global_fonts() {
         wp_enqueue_style('maneli-fonts', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-fonts.css', [], '1.0.0');
+        wp_enqueue_style('maneli-rtl-force', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-rtl-force.css', ['maneli-fonts'], '1.0.0');
+        wp_enqueue_style('maneli-dashboard-fix', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-dashboard-fix.css', ['maneli-rtl-force'], '1.0.0');
+        wp_enqueue_style('maneli-loader-fix', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-loader-fix.css', ['maneli-dashboard-fix'], '1.0.0');
     }
     
     /**
@@ -109,12 +112,37 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_style('maneli-icons', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/icons.css', [], '1.0.0');
             wp_enqueue_style('maneli-waves', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/node-waves/waves.min.css', [], '1.0.0');
             wp_enqueue_style('maneli-simplebar', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/simplebar/simplebar.min.css', [], '1.0.0');
+            wp_enqueue_style('maneli-flatpickr', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/flatpickr/flatpickr.min.css', [], '1.0.0');
+            wp_enqueue_style('maneli-pickr', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@simonwep/pickr/themes/nano.min.css', [], '1.0.0');
+            wp_enqueue_style('maneli-choices', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/choices.js/public/assets/styles/choices.min.css', [], '1.0.0');
+            wp_enqueue_style('maneli-autocomplete', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@tarekraafat/autocomplete.js/css/autoComplete.css', [], '1.0.0');
+            wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+            // Force RTL and Persian Font
+            wp_enqueue_style('maneli-rtl-force', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-rtl-force.css', ['maneli-styles', 'maneli-bootstrap'], '1.0.0');
+            // Dashboard Additional Fixes
+            wp_enqueue_style('maneli-dashboard-fix', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-dashboard-fix.css', ['maneli-rtl-force'], '1.0.0');
+            // Loader Fix - Prevent infinite loading - MUST BE LAST!
+            wp_enqueue_style('maneli-loader-fix', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-loader-fix.css', ['maneli-dashboard-fix'], '1.0.0');
             
             // Enqueue JS
             wp_enqueue_script('jquery');
-            wp_enqueue_script('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/js/bootstrap.bundle.min.js', ['jquery'], '5.3.0', true);
-            wp_enqueue_script('maneli-main', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/main.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-choices', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/choices.js/public/assets/scripts/choices.min.js', ['jquery'], '1.0.0', false);
+            wp_enqueue_script('maneli-main', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/main.js', ['jquery'], '1.0.0', false);
+            wp_enqueue_script('maneli-popper', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@popperjs/core/umd/popper.min.js', ['jquery'], '2.11.0', true);
+            wp_enqueue_script('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/js/bootstrap.bundle.min.js', ['jquery', 'maneli-popper'], '5.3.0', true);
+            wp_enqueue_script('maneli-node-waves', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/node-waves/waves.min.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-simplebar-lib', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/simplebar/simplebar.min.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-simplebar', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/simplebar.js', ['maneli-simplebar-lib'], '1.0.0', true);
+            wp_enqueue_script('maneli-autocomplete', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-pickr', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@simonwep/pickr/pickr.es5.min.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-flatpickr', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/flatpickr/flatpickr.min.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-apexcharts', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-sales-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/sales-dashboard.js', ['maneli-apexcharts'], '1.0.0', true);
+            wp_enqueue_script('maneli-sticky', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/sticky.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-defaultmenu', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/defaultmenu.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-custom', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/custom.js', ['jquery', 'maneli-bootstrap'], '1.0.0', true);
+            wp_enqueue_script('maneli-custom-switcher', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/custom-switcher.min.js', ['jquery'], '1.0.0', true);
+            wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/dashboard.js', ['jquery'], '1.0.0', true);
             
             // Localize script for AJAX

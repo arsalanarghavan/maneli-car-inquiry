@@ -240,6 +240,113 @@ class Maneli_Settings_Page {
      */
     private function get_all_settings_fields() {
         return [
+            // THEME & STYLE TAB
+            'theme' => [
+                'title' => esc_html__('Theme & Style', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-palette',
+                'sections' => [
+                    'maneli_theme_logos_section' => [
+                        'title' => esc_html__('Logo Settings', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Upload different versions of your logo for various display modes.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'theme_logo_desktop',
+                                'label' => esc_html__('Desktop Logo (Light Mode)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Main logo for desktop view in light mode.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_logo_desktop-dark',
+                                'label' => esc_html__('Desktop Logo (Dark Mode)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Logo for desktop view in dark mode.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_logo_desktop-white',
+                                'label' => esc_html__('Desktop Logo (White)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('White version of logo for desktop.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_logo_toggle',
+                                'label' => esc_html__('Mobile/Toggle Logo (Light Mode)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Logo for collapsed sidebar/mobile view in light mode.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_logo_toggle-dark',
+                                'label' => esc_html__('Mobile/Toggle Logo (Dark Mode)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Logo for collapsed sidebar/mobile view in dark mode.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_logo_toggle-white',
+                                'label' => esc_html__('Mobile/Toggle Logo (White)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('White version of logo for mobile/toggle.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_theme_colors_section' => [
+                        'title' => esc_html__('Color Settings', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Customize the color scheme of your dashboard.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'theme_primary_color',
+                                'label' => esc_html__('Primary Color', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'default' => '#5c67f7',
+                                'desc' => esc_html__('Main theme color (hex format: #5c67f7)', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_secondary_color',
+                                'label' => esc_html__('Secondary Color', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'default' => '#9e5cf7',
+                                'desc' => esc_html__('Secondary theme color (hex format: #9e5cf7)', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_header_bg',
+                                'label' => esc_html__('Header Background Color', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'default' => '#ffffff',
+                                'desc' => esc_html__('Background color for header (hex format: #ffffff)', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_menu_bg',
+                                'label' => esc_html__('Menu Background Color', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'default' => '#ffffff',
+                                'desc' => esc_html__('Background color for sidebar menu (hex format: #ffffff)', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_menu_dark_mode',
+                                'label' => esc_html__('Menu Dark Mode', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Enable dark mode for sidebar menu', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_theme_general_section' => [
+                        'title' => esc_html__('General Theme Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'theme_site_title',
+                                'label' => esc_html__('Site Title', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Custom site title for dashboard (leave empty to use WordPress site name)', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'theme_footer_text',
+                                'label' => esc_html__('Footer Text', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'desc' => esc_html__('Custom footer text (HTML allowed)', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ]
+                ]
+            ],
             // NEW TAB
             'finance' => [
                 'title' => esc_html__('Finance & Calculator', 'maneli-car-inquiry'),

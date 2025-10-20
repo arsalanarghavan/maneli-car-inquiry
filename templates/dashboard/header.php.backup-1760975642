@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-nav-layout="vertical" data-theme-mode="light" data-header-styles="light" data-menu-styles="dark" data-toggled="close" loader="disable">
+
+<head>
+
+    <!-- Meta Data -->
+    <meta charset="UTF-8">
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="Description" content="داشبورد مدیریتی منلی کار">
+    <meta name="Author" content="منلی کار">
+    <meta name="keywords" content="داشبورد، استعلام خودرو، منلی کار">
+    
+    <!-- Title -->
+    <title><?php echo isset($page_title) ? esc_html($page_title) : 'داشبورد منلی کار'; ?></title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/favicon.ico" type="image/x-icon">
+
+    <!-- Start::Styles -->
+    
+    <!-- تنظیم مسیر پلاگین -->
+    <script>
+        window.MANELI_PLUGIN_URL = '<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>';
+    </script>
+    
+    <!-- Bootstrap Path Fix (باید قبل از همه لود شود) -->
+    <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/maneli-bootstrap-fix.js"></script>
+    
+    <!-- Maneli Xintra Init - فیکس مسیرها -->
+    <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/maneli-xintra-init.js"></script>
+    
+    <!-- Choices JS -->
+    <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <!-- Main Theme Js -->
+    <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/main.js"></script>
+    
+    <!-- Bootstrap Css -->
+    <link id="style" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+
+    <!-- Style Css -->
+    <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/styles.css" rel="stylesheet">
+
+    <!-- Icons Css -->
+    <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/icons.css" rel="stylesheet">
+
+    <!-- Node Waves Css -->
+    <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/node-waves/waves.min.css" rel="stylesheet"> 
+
+    <!-- Simplebar Css -->
+    <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/simplebar/simplebar.min.css" rel="stylesheet">
+    
+    <!-- Color Picker Css -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/flatpickr/flatpickr.min.css">
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/@simonwep/pickr/themes/nano.min.css">
+
+    <!-- Choices Css -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/choices.js/public/assets/styles/choices.min.css">
+
+    <!-- Auto Complete CSS -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/@tarekraafat/autocomplete.js/css/autoComplete.css">
+    
+    <!-- Persian Datepicker CSS -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/persianDatepicker-default.css">
+    
+    <!-- Persian Fonts -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-fonts.css">
+    
+    <!-- Force RTL and Persian Font -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-rtl-force.css">
+    
+    <!-- Dashboard Additional Fixes -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-dashboard-fix.css">
+    
+    <!-- Loader Fix - Prevent infinite loading -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-loader-fix.css">
+    <!-- End::Styles -->
+
+    <?php
+    // Output custom theme colors
+    $theme_handler = Maneli_Frontend_Theme_Handler::instance();
+    $theme_handler->output_custom_css();
+    ?>
+
+</head>
+
+<body class="">
+
+    <!-- Loader -->
+    <div id="loader" style="display: none;">
+        <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/media/loader.svg" alt="">
+    </div>
+    <!-- Loader -->
+    
+    <!-- Force Hide Loader Script -->
+    <script>
+    // Hide loader immediately and prevent it from showing
+    (function() {
+        // Remove loader attribute from HTML
+        if (document.querySelector('html')) {
+            document.querySelector('html').removeAttribute('loader');
+            document.querySelector('html').setAttribute('loader', 'disable');
+        }
+        
+        // Hide loader element
+        var loader = document.getElementById('loader');
+        if (loader) {
+            loader.style.display = 'none';
+            loader.classList.add('d-none');
+        }
+        
+        // Clear localStorage loader setting
+        localStorage.setItem('loaderEnable', 'false');
+        
+        // Backup: Force hide after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                var loader = document.getElementById('loader');
+                if (loader) {
+                    loader.style.display = 'none';
+                    loader.classList.add('d-none');
+                }
+            });
+        }
+        
+        // Extra backup: Force hide after a short delay
+        setTimeout(function() {
+            var loader = document.getElementById('loader');
+            if (loader) {
+                loader.style.display = 'none';
+                loader.classList.add('d-none');
+            }
+        }, 100);
+    })();
+    </script>
+
+    <!-- Switcher -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="switcher-canvas" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header border-bottom d-block p-0">
+            <div class="d-flex align-items-center justify-content-between p-3">
+                <h5 class="offcanvas-title text-default" id="offcanvasRightLabel">تنظیمات</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <nav class="border-top border-block-start-dashed">
+                <div class="nav nav-tabs nav-justified" id="switcher-main-tab" role="tablist">
+                    <button class="nav-link active" id="switcher-home-tab" data-bs-toggle="tab" data-bs-target="#switcher-home" type="button" role="tab" aria-controls="switcher-home" aria-selected="true">تنظیمات قالب</button>
+                    <button class="nav-link" id="switcher-profile-tab" data-bs-toggle="tab" data-bs-target="#switcher-profile" type="button" role="tab" aria-controls="switcher-profile" aria-selected="false">رنگ قالب</button>
+                </div>
+            </nav>
+        </div>
+        <div class="offcanvas-body">
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active border-0" id="switcher-home" role="tabpanel" aria-labelledby="switcher-home-tab" tabindex="0">
+                    <div class="">
+                        <p class="switcher-style-head">حالت رنگ قالب:</p>
+                        <div class="row switcher-style gx-0">
+                            <div class="col-4">
+                                <div class="form-check switch-select">
+                                    <label class="form-check-label" for="switcher-light-theme">
+                                        روشن
+                                    </label>
+                                    <input class="form-check-input" type="radio" name="theme-style" id="switcher-light-theme" checked="">
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check switch-select">
+                                    <label class="form-check-label" for="switcher-dark-theme">
+                                        تیره
+                                    </label>
+                                    <input class="form-check-input" type="radio" name="theme-style" id="switcher-dark-theme">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade border-0" id="switcher-profile" role="tabpanel" aria-labelledby="switcher-profile-tab" tabindex="0">
+                    <div>
+                        <div class="theme-colors">
+                            <p class="switcher-style-head">رنگ اصلی قالب:</p>
+                            <div class="d-flex flex-wrap align-items-center switcher-style">
+                                <div class="form-check switch-select me-3">
+                                    <input class="form-check-input color-input color-primary-1" type="radio" name="theme-primary" id="switcher-primary" checked="">
+                                </div>
+                                <div class="form-check switch-select me-3">
+                                    <input class="form-check-input color-input color-primary-2" type="radio" name="theme-primary" id="switcher-primary1">
+                                </div>
+                                <div class="form-check switch-select me-3">
+                                    <input class="form-check-input color-input color-primary-3" type="radio" name="theme-primary" id="switcher-primary2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between canvas-footer flex-nowrap gap-2">
+            <a href="javascript:void(0);" id="reset-all" class="btn btn-danger m-1 w-100">بازنشانی</a>
+        </div>
+    </div>
+    <!-- End Switcher -->
+
+    <div class="page">
+
+        <!-- Start::main-header -->
+        
+        <header class="app-header sticky" id="header">
+
+            <!-- Start::main-header-container -->
+            <div class="main-header-container container-fluid">
+
+                <!-- Start::header-content-left -->
+                <div class="header-content-left">
+
+                    <!-- Start::header-element -->
+                    <div class="header-element">
+                        <div class="horizontal-logo">
+                            <a href="<?php echo home_url('/dashboard'); ?>" class="header-logo">
+                                <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo">
+                                <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-dark.png" alt="logo" class="toggle-dark">
+                                <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
+                                <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
+                                <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-white.png" alt="logo" class="toggle-white">
+                                <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-white.png" alt="logo" class="desktop-white">
+                            </a>
+                        </div>
+                    </div>
+                    <!-- End::header-element -->
+
+                    <!-- Start::header-element -->
+                    <div class="header-element mx-lg-0 mx-2">
+                        <a aria-label="Hide Sidebar" class="sidemenu-toggle header-link animated-arrow hor-toggle horizontal-navtoggle" data-bs-toggle="sidebar" href="javascript:void(0);"><span></span></a>
+                    </div>
+                    <!-- End::header-element -->
+
+                    <!-- Start::header-element -->
+                    <div class="header-element header-search d-md-block d-none my-auto auto-complete-search">
+                        <!-- Start::header-link -->
+                        <input type="text" class="header-search-bar form-control" id="header-search" placeholder="جستجو" spellcheck="false" autocomplete="off" autocapitalize="off">
+                        <a href="javascript:void(0);" class="header-search-icon border-0">
+                            <i class="ri-search-line"></i>
+                        </a>
+                        <!-- End::header-link -->
+                    </div>
+                    <!-- End::header-element -->
+
+                </div>
+                <!-- End::header-content-left -->
+
+                <!-- Start::header-content-right -->
+                <ul class="header-content-right">
+
+                    <!-- Start::header-element -->
+                    <li class="header-element d-md-none d-block">
+                        <a href="javascript:void(0);" class="header-link" data-bs-toggle="modal" data-bs-target="#header-responsive-search">
+                            <!-- Start::header-link-icon -->
+                            <i class="bi bi-search header-link-icon d-flex"></i>
+                            <!-- End::header-link-icon -->
+                        </a>  
+                    </li>
+                    <!-- End::header-element -->
+
+                    <!-- Start::header-element -->
+                    <li class="header-element header-theme-mode">
+                        <!-- Start::header-link|layout-setting -->
+                        <a href="javascript:void(0);" class="header-link layout-setting">
+                            <span class="light-layout">
+                                <!-- Start::header-link-icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 header-link-icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z"></path>
+                                </svg>
+                                <!-- End::header-link-icon -->
+                            </span>
+                            <span class="dark-layout">
+                                <!-- Start::header-link-icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 header-link-icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"></path>
+                                </svg>
+                                <!-- End::header-link-icon -->
+                            </span>
+                        </a>
+                        <!-- End::header-link|layout-setting -->
+                    </li>
+                    <!-- End::header-element -->
+
+                    <!-- Start::header-element -->
+                    <li class="header-element notifications-dropdown d-xl-block d-none dropdown">
+                        <!-- Start::header-link|dropdown-toggle -->
+                        <a href="javascript:void(0);" class="header-link dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside" id="messageDropdown" aria-expanded="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 header-link-icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"></path>
+                            </svg>
+                            <span class="header-icon-pulse bg-primary2 rounded pulse pulse-secondary"></span>
+                        </a>
+                        <!-- End::header-link|dropdown-toggle -->
+                        <!-- Start::main-header-dropdown -->
+                        <div class="main-header-dropdown dropdown-menu dropdown-menu-end" data-popper-placement="none">
+                            <div class="p-3">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <p class="mb-0 fs-15 fw-medium">اعلان‌ها</p>
+                                    <span class="badge bg-secondary text-fixed-white" id="notifiation-data">5 خوانده نشده</span>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <ul class="list-unstyled mb-0" id="header-notification-scroll">
+                                <li class="dropdown-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="pe-2 lh-1">
+                                            <span class="avatar avatar-md avatar-rounded bg-primary">
+                                                <i class="ri-notification-3-line fs-18"></i>
+                                            </span>
+                                        </div>
+                                        <div class="flex-grow-1 d-flex align-items-center justify-content-between">
+                                            <div>
+                                                <p class="mb-0 fw-medium">اعلان جدید</p>
+                                                <div class="text-muted fw-normal fs-12 header-notification-text text-truncate">پیام تستی</div>
+                                                <div class="fw-normal fs-10 text-muted op-8">الان</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="p-3 empty-header-item1 border-top d-flex gap-2 align-items-center">
+                                <a href="javascript:void(0);" class="btn flex-fill btn-primary btn-wave">مشاهده همه</a>
+                            </div>
+                        </div>
+                        <!-- End::main-header-dropdown -->
+                    </li>
+                    <!-- End::header-element -->
+
+                    <!-- Start::header-element -->
+                    <li class="header-element dropdown">
+                        <!-- Start::header-link|dropdown-toggle -->
+                        <a href="javascript:void(0);" class="header-link dropdown-toggle" data-bs-auto-close="outside" data-bs-toggle="dropdown">
+                            <div class="d-flex align-items-center">
+                                <div class="me-sm-2 me-0">
+                                    <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/faces/9.jpg" alt="img" width="32" height="32" class="rounded-circle">
+                                </div>
+                                <div class="d-sm-block d-none">
+                                    <p class="fw-semibold mb-0 lh-1"><?php echo isset($user) ? esc_html($user['name']) : 'کاربر'; ?></p>
+                                    <span class="op-7 fw-normal d-block fs-11"><?php echo isset($user) ? esc_html($user['phone']) : ''; ?></span>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- End::header-link|dropdown-toggle -->
+                        <!-- Start::main-header-dropdown -->
+                        <div class="main-header-dropdown dropdown-menu dropdown-menu-end" data-popper-placement="none">
+                            <div class="p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/faces/9.jpg" alt="img" width="32" height="32" class="rounded-circle">
+                                    </div>
+                                    <div class="flex-fill">
+                                        <h6 class="mb-0 fw-semibold"><?php echo isset($user) ? esc_html($user['name']) : 'کاربر'; ?></h6>
+                                        <span class="fs-12 text-muted"><?php echo isset($user) ? esc_html($user['phone']) : ''; ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <ul class="list-unstyled mb-0">
+                                <li class="p-2">
+                                    <a class="dropdown-item d-flex align-items-center" href="<?php echo home_url('/dashboard/profile'); ?>">
+                                        <i class="ri-user-3-line me-2 fs-18"></i>پروفایل
+                                    </a>
+                                </li>
+                                <li class="p-2">
+                                    <a class="dropdown-item d-flex align-items-center" href="<?php echo home_url('/dashboard/settings'); ?>">
+                                        <i class="ri-settings-3-line me-2 fs-18"></i>تنظیمات
+                                    </a>
+                                </li>
+                                <li class="p-2">
+                                    <a class="dropdown-item d-flex align-items-center" href="<?php echo home_url('/logout'); ?>">
+                                        <i class="ri-logout-box-r-line me-2 fs-18"></i>خروج
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- End::main-header-dropdown -->
+                    </li>
+                    <!-- End::header-element -->
+
+                    <!-- Start::header-element -->
+                    <li class="header-element">
+                        <!-- Start::header-link|switcher-icon -->
+                        <a href="javascript:void(0);" class="header-link switcher-icon" data-bs-toggle="offcanvas" data-bs-target="#switcher-canvas">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 header-link-icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"></path>
+                            </svg>
+                        </a>
+                        <!-- End::header-link|switcher-icon -->
+                    </li>
+                    <!-- End::header-element -->
+
+                </ul>
+                <!-- End::header-content-right -->
+
+            </div>
+            <!-- End::main-header-container -->
+
+        </header>
+        <!-- End::main-header -->

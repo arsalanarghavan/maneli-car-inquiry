@@ -21,11 +21,20 @@ class Maneli_Shortcode_Handler {
 
     /**
      * Loads and initializes all the separate shortcode handler classes from the 'shortcodes' directory.
+     * 
+     * NOTE: Only loan_calculator shortcode is active. All other functionality
+     * has been moved to dashboard pages for better UX.
      */
     private function load_shortcode_classes() {
         $shortcode_path = MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/';
         
+        // Active Shortcodes
         require_once $shortcode_path . 'class-loan-calculator-shortcode.php';
+        new Maneli_Loan_Calculator_Shortcode();
+        
+        // Disabled Shortcodes - Functionality moved to dashboard pages
+        // These are kept for backward compatibility but not initialized
+        /*
         require_once $shortcode_path . 'class-inquiry-form-shortcode.php';
         require_once $shortcode_path . 'class-inquiry-lists-shortcode.php';
         require_once $shortcode_path . 'class-followup-list-shortcode.php';
@@ -34,7 +43,6 @@ class Maneli_Shortcode_Handler {
         require_once $shortcode_path . 'class-system-report-shortcode.php';
         require_once $shortcode_path . 'class-product-editor-shortcode.php';
 
-        new Maneli_Loan_Calculator_Shortcode();
         new Maneli_Inquiry_Form_Shortcode();
         new Maneli_Inquiry_Lists_Shortcode();
         new Maneli_Followup_List_Shortcode();
@@ -42,6 +50,7 @@ class Maneli_Shortcode_Handler {
         new Maneli_Admin_Shortcodes();
         new Maneli_System_Report_Shortcode();
         new Maneli_Product_Editor_Shortcode();
+        */
     }
 
     /**

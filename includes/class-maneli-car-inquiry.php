@@ -108,6 +108,7 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Dashboard
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
     }
 
     /**
@@ -132,6 +133,9 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Initialize Dashboard Handler
         Maneli_Dashboard_Handler::instance();
+        
+        // Initialize Frontend Theme Handler
+        Maneli_Frontend_Theme_Handler::instance();
     }
 
     /**

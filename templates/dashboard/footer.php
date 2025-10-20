@@ -5,9 +5,12 @@
         <!-- Start::Footer -->
         <footer class="footer mt-auto py-3 bg-white text-center">
             <div class="container">
-                <span class="text-muted"> <span id="year"></span>
-                    طراحی با  <span class="bi bi-heart-fill text-danger"></span> توسط 
-                    <span class="fw-medium text-primary">منلی کار</span>
+                <span class="text-muted">
+                    <span id="year"><?php echo date('Y'); ?></span>
+                    <?php 
+                    $theme_handler = Maneli_Frontend_Theme_Handler::instance();
+                    echo $theme_handler->get_footer_text();
+                    ?>
                 </span>
             </div>
         </footer>
@@ -24,11 +27,17 @@
      <div id="responsive-overlay"></div>
      <!-- Scroll To Top -->
 
+     <!-- jQuery - باید اول از همه لود شود -->
+     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
      <!-- Popper JS -->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
      <!-- Bootstrap JS -->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
+     
+     <!-- Bootstrap Config -->
+     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/maneli-bootstrap-config.js"></script>
 
      <!-- Node Waves JS-->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/node-waves/waves.min.js"></script>
@@ -47,12 +56,6 @@
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/flatpickr/flatpickr.min.js"></script>
     <!-- End::main-scripts -->
 
-    <!-- Apex Charts JS -->
-    <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/apexcharts/apexcharts.min.js"></script>
-
-    <!-- Sales Dashboard --> 
-    <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/sales-dashboard.js"></script>
-
     <!-- Sticky JS -->
     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/sticky.js"></script>
 
@@ -64,9 +67,6 @@
 
     <!-- Custom-Switcher JS -->
     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/custom-switcher.min.js"></script>
-
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     
     <!-- Persian Datepicker -->
     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/persianDatepicker.min.js"></script>

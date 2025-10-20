@@ -10,8 +10,14 @@ if (!defined('ABSPATH')) {
 // Set page title based on current page
 $page_title = 'داشبورد منلی کار';
 switch ($page) {
+    case 'new-inquiry':
+        $page_title = 'استعلام جدید - منلی کار';
+        break;
     case 'inquiries':
-        $page_title = 'استعلامات - منلی کار';
+        $page_title = 'لیست استعلامات - منلی کار';
+        break;
+    case 'followups':
+        $page_title = 'پیگیری‌ها - منلی کار';
         break;
     case 'reports':
         $page_title = 'گزارشات - منلی کار';
@@ -46,8 +52,14 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                     <h1 class="page-title fw-semibold fs-18 mb-0">
                         <?php
                         switch ($page) {
+                            case 'new-inquiry':
+                                echo 'استعلام جدید';
+                                break;
                             case 'inquiries':
-                                echo 'استعلامات';
+                                echo 'لیست استعلامات';
+                                break;
+                            case 'followups':
+                                echo 'پیگیری‌ها';
                                 break;
                             case 'reports':
                                 echo 'گزارشات';
@@ -78,8 +90,14 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                     <li class="breadcrumb-item active" aria-current="page">
                                         <?php
                                         switch ($page) {
+                                            case 'new-inquiry':
+                                                echo 'استعلام جدید';
+                                                break;
                                             case 'inquiries':
-                                                echo 'استعلامات';
+                                                echo 'لیست استعلامات';
+                                                break;
+                                            case 'followups':
+                                                echo 'پیگیری‌ها';
                                                 break;
                                             case 'reports':
                                                 echo 'گزارشات';
@@ -110,8 +128,14 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                 <?php
                 // Route to appropriate content based on page
                 switch ($page) {
+                    case 'new-inquiry':
+                        include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-inquiry.php';
+                        break;
                     case 'inquiries':
                         include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/inquiries.php';
+                        break;
+                    case 'followups':
+                        include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/followups.php';
                         break;
                     case 'reports':
                         include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/reports.php';

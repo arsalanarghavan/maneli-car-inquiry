@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa" data-nav-layout="vertical" data-vertical-style="overlay" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" data-toggled="close">
+<html lang="fa" dir="rtl" data-nav-layout="vertical" data-vertical-style="overlay" data-theme-mode="light" data-header-styles="light" data-menu-styles="light" data-toggled="close" loader="disable">
 
 <head>
 
@@ -33,6 +33,15 @@
     
     <!-- Fonts Css -->
     <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-fonts.css" rel="stylesheet">
+    
+    <!-- Force RTL and Persian Font -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-rtl-force.css">
+    
+    <!-- Dashboard Additional Fixes -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-dashboard-fix.css">
+    
+    <!-- Loader Fix - Prevent infinite loading -->
+    <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-loader-fix.css">
     <!-- End::custom-styles -->
 
 </head>

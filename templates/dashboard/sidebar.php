@@ -5,12 +5,15 @@
     <!-- Start::main-sidebar-header -->
     <div class="main-sidebar-header">
         <a href="<?php echo home_url('/dashboard'); ?>" class="header-logo">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-dark.png" alt="logo" class="toggle-dark">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-white.png" alt="logo" class="toggle-white">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-white.png" alt="logo" class="desktop-white">
+            <?php 
+            $theme_handler = Maneli_Frontend_Theme_Handler::instance();
+            ?>
+            <img src="<?php echo $theme_handler->get_logo('desktop'); ?>" alt="logo" class="desktop-logo">
+            <img src="<?php echo $theme_handler->get_logo('toggle-dark'); ?>" alt="logo" class="toggle-dark">
+            <img src="<?php echo $theme_handler->get_logo('desktop-dark'); ?>" alt="logo" class="desktop-dark">
+            <img src="<?php echo $theme_handler->get_logo('toggle'); ?>" alt="logo" class="toggle-logo">
+            <img src="<?php echo $theme_handler->get_logo('toggle-white'); ?>" alt="logo" class="toggle-white">
+            <img src="<?php echo $theme_handler->get_logo('desktop-white'); ?>" alt="logo" class="desktop-white">
         </a>
     </div>
     <!-- End::main-sidebar-header -->
@@ -43,11 +46,33 @@
 
                 <!-- Start::slide -->
                 <li class="slide">
+                    <a href="<?php echo home_url('/dashboard/new-inquiry'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'new-inquiry') ? 'active' : ''; ?>">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 side-menu__icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+                        </svg>
+                        <span class="side-menu__label">استعلام جدید</span>
+                    </a>
+                </li>
+                <!-- End::slide -->
+
+                <!-- Start::slide -->
+                <li class="slide">
                     <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries') ? 'active' : ''; ?>">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 side-menu__icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"></path>
                         </svg>
-                        <span class="side-menu__label">استعلامات</span>
+                        <span class="side-menu__label">لیست استعلامات</span>
+                    </a>
+                </li>
+                <!-- End::slide -->
+
+                <!-- Start::slide -->
+                <li class="slide">
+                    <a href="<?php echo home_url('/dashboard/followups'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'followups') ? 'active' : ''; ?>">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 side-menu__icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"></path>
+                        </svg>
+                        <span class="side-menu__label">پیگیری‌ها</span>
                     </a>
                 </li>
                 <!-- End::slide -->
