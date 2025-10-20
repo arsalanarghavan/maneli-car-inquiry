@@ -123,7 +123,7 @@ class Maneli_Payment_Handler {
         // If amount is zero, skip payment and finalize the inquiry
         if ($amount_toman <= 0) {
             do_action('maneli_inquiry_payment_successful', $user_id);
-            wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
+            wp_redirect(home_url('/dashboard/inquiries/installment'));
             exit;
         }
 
@@ -323,8 +323,8 @@ class Maneli_Payment_Handler {
         $payment_type = $payment_data['payment_type'] ?? '';
         
         $redirect_url = ($payment_type === 'cash_down_payment')
-            ? home_url('/dashboard/?endp=inf_menu_4')
-            : home_url('/dashboard/?endp=inf_menu_1');
+            ? home_url('/dashboard/inquiries/cash')
+            : home_url('/dashboard/inquiries/installment');
 
         // 2. SECURITY CHECK: Ensure the token is current for the logged-in user if available
         if (is_user_logged_in() && $current_user_id !== $user_id) {
@@ -470,8 +470,8 @@ class Maneli_Payment_Handler {
         $options = get_option('maneli_inquiry_all_options', []);
 
         $redirect_url = ($payment_type === 'cash_down_payment')
-            ? home_url('/dashboard/?endp=inf_menu_4')
-            : home_url('/dashboard/?endp=inf_menu_1');
+            ? home_url('/dashboard/inquiries/cash')
+            : home_url('/dashboard/inquiries/installment');
 
         // 2. SECURITY CHECK: Ensure token is current for the logged-in user and OrderId matches
         if (is_user_logged_in() && $current_user_id !== $user_id) {

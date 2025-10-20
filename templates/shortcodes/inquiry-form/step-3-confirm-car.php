@@ -158,7 +158,7 @@ $alert_msg = esc_html__('The inquiry will be performed for the car below and can
                     <?php wp_nonce_field('maneli_confirm_car_step_nonce'); ?>
                     
                     <div class="d-flex gap-2">
-                        <a href="<?php echo esc_url(home_url('/dashboard/?endp=inf_menu_1')); ?>" class="btn btn-light">
+                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries/installment')); ?>" class="btn btn-light">
                             <i class="la la-arrow-left me-1"></i>
                             <?php esc_html_e('Back', 'maneli-car-inquiry'); ?>
                         </a>

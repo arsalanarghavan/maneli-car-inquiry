@@ -372,7 +372,7 @@ class Maneli_Installment_Inquiry_Handler {
         // Always go to step 3 (confirm car) - user must confirm their selected car
         update_user_meta($user_id, 'maneli_inquiry_step', 'confirm_car_pending');
 
-        wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
+        wp_redirect(home_url('/dashboard/inquiries/installment'));
         exit;
     }
 
@@ -405,7 +405,7 @@ class Maneli_Installment_Inquiry_Handler {
             do_action('maneli_inquiry_payment_successful', $user_id);
         }
 
-        wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
+        wp_redirect(home_url('/dashboard/inquiries/installment'));
         exit;
     }
     
@@ -604,7 +604,7 @@ class Maneli_Installment_Inquiry_Handler {
         wp_delete_post($post_id, true);
         update_user_meta($user_id, 'maneli_inquiry_step', 'form_pending');
         
-        wp_redirect(home_url('/dashboard/?endp=inf_menu_1'));
+        wp_redirect(home_url('/dashboard/inquiries/installment'));
         exit;
     }
 

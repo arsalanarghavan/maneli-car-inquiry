@@ -52,7 +52,7 @@ class Maneli_Loan_Calculator_Shortcode {
         
         if (is_user_logged_in()) {
             $localize_data['ajax_url'] = admin_url('admin-ajax.php');
-            $localize_data['inquiry_page_url'] = home_url('/dashboard/?endp=inf_menu_1');
+            $localize_data['inquiry_page_url'] = home_url('/dashboard/inquiries/installment');
             $localize_data['nonce'] = wp_create_nonce('maneli_ajax_nonce');
         }
 

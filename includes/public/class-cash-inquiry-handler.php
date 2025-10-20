@@ -51,7 +51,7 @@ class Maneli_Cash_Inquiry_Handler {
 
         if ($post_id) {
             // Redirect to the cash inquiry list page with a success message
-            $redirect_url = add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/?endp=inf_menu_4'));
+            $redirect_url = add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/inquiries/cash'));
             wp_redirect($redirect_url);
             exit;
         } else {

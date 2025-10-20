@@ -45,7 +45,7 @@ class Maneli_Admin_Actions_Handler {
         $new_status_request = sanitize_text_field($_POST['new_status']);
         $valid_statuses = ['approved', 'rejected', 'more_docs'];
         
-        $redirect_url = home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id);
+        $redirect_url = add_query_arg('inquiry_id', $post_id, home_url('/dashboard/inquiries/installment'));
 
         if (!in_array($new_status_request, $valid_statuses, true)) {
             wp_die(esc_html__('Invalid status provided.', 'maneli-car-inquiry'));
@@ -432,7 +432,7 @@ class Maneli_Admin_Actions_Handler {
         $new_status = ($finotex_result['status'] === 'DONE' || $finotex_result['status'] === 'SKIPPED') ? 'pending' : 'failed';
         update_post_meta($post_id, 'inquiry_status', $new_status);
 
-        wp_redirect(home_url('/dashboard/?endp=inf_menu_4&inquiry_id=' . $post_id));
+        wp_redirect(add_query_arg('inquiry_id', $post_id, home_url('/dashboard/inquiries/installment')));
         exit;
     }
     

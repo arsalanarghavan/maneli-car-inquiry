@@ -1,91 +1,138 @@
 <!-- Start::row -->
+<?php
+// Load product data
+$paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
+$search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+
+// Get products
+$args = [
+    'limit' => 50,
+    'page' => $paged,
+    'orderby' => 'title',
+    'order' => 'ASC',
+    'paginate' => true
+];
+
+if (!empty($search)) {
+    $args['s'] = $search;
+}
+
+$products_query = wc_get_products($args);
+$products = $products_query->products;
+$total_products = $products_query->total;
+$max_num_pages = $products_query->max_num_pages;
+
+// Statistics
+$total_products_count = wp_count_posts('product');
+$published_count = $total_products_count->publish ?? 0;
+?>
+
 <div class="row">
     <div class="col-xl-12">
+        <!-- آمار محصولات -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-primary-transparent">
+                                    <i class="la la-car fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">مجموع محصولات</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($published_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card custom-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="card-title">مدیریت محصولات</div>
-                <button class="btn btn-primary">
+                <div class="card-title">
+                    <i class="la la-edit me-2"></i>
+                    ویرایش قیمت و وضعیت محصولات
+                </div>
+                <a href="<?php echo admin_url('post-new.php?post_type=product'); ?>" class="btn btn-primary btn-wave" target="_blank">
                     <i class="la la-plus me-1"></i>
                     محصول جدید
-                </button>
+                </a>
             </div>
             <div class="card-body">
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <select class="form-select" id="product-category">
-                            <option value="">همه دسته‌بندی‌ها</option>
-                            <option value="car">خودرو</option>
-                            <option value="motorcycle">موتورسیکلت</option>
-                            <option value="truck">کامیون</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="product-status">
-                            <option value="">همه وضعیت‌ها</option>
-                            <option value="active">فعال</option>
-                            <option value="inactive">غیرفعال</option>
-                            <option value="out-of-stock">ناموجود</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="product-search" placeholder="جستجوی محصول...">
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-primary w-100" onclick="filterProducts()">
-                            <i class="la la-search me-1"></i> فیلتر
-                        </button>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <form method="get" action="">
+                            <input type="hidden" name="page" value="products">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="la la-search"></i>
+                                </span>
+                                <input type="search" name="search" id="product-search-input" class="form-control" placeholder="جستجوی نام خودرو..." value="<?php echo esc_attr($search); ?>">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="la la-search me-1"></i>
+                                    جستجو
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <div class="row" id="products-container">
-                    <?php
-                    // Get WooCommerce products
-                    if (class_exists('WooCommerce')) {
-                        $products = wc_get_products([
-                            'limit' => 12,
-                            'status' => 'publish'
-                        ]);
-
-                        foreach ($products as $product) {
-                            $image_id = $product->get_image_id();
-                            $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : wc_placeholder_img_src();
-                            ?>
-                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 product-item" data-category="<?php echo esc_attr($product->get_category_ids() ? implode(',', $product->get_category_ids()) : ''); ?>">
-                                <div class="card border border-primary">
-                                    <div class="card-body text-center">
-                                        <div class="mb-3">
-                                            <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr($product->get_name()); ?>" class="img-fluid rounded">
-                                        </div>
-                                        <h6 class="card-title mb-2"><?php echo esc_html($product->get_name()); ?></h6>
-                                        <p class="text-muted fs-13 mb-3"><?php echo esc_html(wp_trim_words($product->get_short_description(), 10)); ?></p>
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <span class="fw-medium text-primary"><?php echo $product->get_price_html(); ?></span>
-                                            <span class="badge <?php echo $product->is_in_stock() ? 'bg-success' : 'bg-danger'; ?>">
-                                                <?php echo $product->is_in_stock() ? 'موجود' : 'ناموجود'; ?>
-                                            </span>
-                                        </div>
-                                        <div class="btn-list">
-                                            <a href="<?php echo get_edit_post_link($product->get_id()); ?>" class="btn btn-sm btn-primary-light" target="_blank">
-                                                <i class="la la-edit"></i> ویرایش
-                                            </a>
-                                            <a href="<?php echo get_permalink($product->get_id()); ?>" class="btn btn-sm btn-success-light" target="_blank">
-                                                <i class="la la-eye"></i> مشاهده
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover text-nowrap">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:25%;">نام خودرو</th>
+                                <th style="width:15%;">قیمت نقدی (تومان)</th>
+                                <th style="width:15%;">قیمت اقساطی (تومان)</th>
+                                <th style="width:15%;">حداقل پیش‌پرداخت (تومان)</th>
+                                <th style="width:15%;">رنگ‌های موجود</th>
+                                <th style="width:15%;">وضعیت فروش</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maneli-product-list-tbody">
                             <?php
-                        }
-                    } else {
-                        ?>
-                        <div class="col-12">
-                            <div class="alert alert-warning text-center">
-                                <i class="la la-info-circle me-2"></i>
-                                ووکامرس نصب نشده است. برای مدیریت محصولات، لطفاً ووکامرس را نصب و فعال کنید.
-                            </div>
-                        </div>
-                        <?php
+                            if (!empty($products)) {
+                                foreach ($products as $product) {
+                                    if ($product instanceof WC_Product) {
+                                        Maneli_Render_Helpers::render_product_editor_row($product);
+                                    }
+                                }
+                            } else {
+                                echo '<tr><td colspan="6" class="text-center">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="la la-info-circle me-2"></i>
+                                        محصولی یافت نشد.
+                                    </div>
+                                </td></tr>';
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="product-list-loader" style="display:none; text-align:center; padding: 40px;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">در حال بارگذاری...</span>
+                    </div>
+                </div>
+
+                <div class="maneli-pagination-wrapper mt-3 text-center">
+                    <?php
+                    if ($max_num_pages > 1) {
+                        echo paginate_links([
+                            'base'      => add_query_arg('paged', '%#%'),
+                            'format'    => '?paged=%#%',
+                            'current'   => $paged,
+                            'total'     => $max_num_pages,
+                            'prev_text' => '&laquo; قبلی',
+                            'next_text' => 'بعدی &raquo;',
+                            'type'      => 'plain',
+                        ]);
                     }
                     ?>
                 </div>
@@ -95,24 +142,70 @@
 </div>
 <!-- End::row -->
 
-<script>
-function filterProducts() {
-    const category = document.getElementById('product-category').value;
-    const status = document.getElementById('product-status').value;
-    const search = document.getElementById('product-search').value.toLowerCase();
-
-    const products = document.querySelectorAll('.product-item');
-
-    products.forEach(product => {
-        const productName = product.querySelector('.card-title').textContent.toLowerCase();
-        const shouldShow = (!search || productName.includes(search));
-
-        if (shouldShow) {
-            product.style.display = 'block';
-        } else {
-            product.style.display = 'none';
-        }
-    });
+<style>
+/* استایل‌های مخصوص Product Editor */
+.manli-data-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: all 0.3s ease;
 }
-</script>
 
+.manli-data-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #007cba);
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.1);
+}
+
+.manli-data-input.saving {
+    border-color: #f0ad4e;
+    background-color: #fff9f0;
+}
+
+.manli-data-input.saved {
+    border-color: #28a745;
+    background-color: #f0fff4;
+}
+
+.manli-data-input.error {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    vertical-align: middle;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.spinner.is-active {
+    opacity: 1;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007cba;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    .table-responsive table {
+        font-size: 12px;
+    }
+    
+    .manli-data-input {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}
+</style>

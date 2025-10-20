@@ -148,13 +148,18 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/dashboard.js', ['jquery'], '1.0.0', true);
             
-            // Product Editor Script (for product-editor page)
+            // Product Editor Script (for product-editor and products pages)
             $page = get_query_var('maneli_dashboard_page');
-            if ($page === 'product-editor') {
+            if ($page === 'product-editor' || $page === 'products') {
                 wp_enqueue_script('maneli-product-editor', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/product-editor.js', ['jquery'], '1.0.0', true);
                 wp_localize_script('maneli-product-editor', 'maneliAdminProductEditor', [
                     'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('maneli_product_editor_nonce'),
+                    'nonce' => wp_create_nonce('maneli_product_data_nonce'),
+                    'text' => [
+                        'ajax_error' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry'),
+                        'saved' => esc_html__('Saved', 'maneli-car-inquiry'),
+                        'error' => esc_html__('Error', 'maneli-car-inquiry'),
+                    ]
                 ]);
             }
             
