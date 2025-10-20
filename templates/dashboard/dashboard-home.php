@@ -12,11 +12,11 @@
                             </div>
                             <div class="lh-1">
                                 <span class="avatar avatar-md avatar-rounded bg-primary">
-                                    <i class="ti ti-file-text fs-5"></i>
+                                    <i class="la la-file-alt fs-5"></i>
                                 </span>
                             </div>
                         </div>
-                        <div class="text-muted fs-13">افزایش یافته <span class="text-success">2.56%<i class="ti ti-arrow-narrow-up fs-16"></i></span></div>
+                        <div class="text-muted fs-13">افزایش یافته <span class="text-success">2.56%<i class="la la-arrow-up fs-16"></i></span></div>
                     </div>
                 </div>
             </div>
@@ -30,11 +30,11 @@
                             </div>
                             <div class="lh-1">
                                 <span class="avatar avatar-md avatar-rounded bg-primary2">
-                                    <i class="ti ti-currency-dollar fs-5"></i>
+                                    <i class="la la-dollar fs-5"></i>
                                 </span>
                             </div>
                         </div>
-                        <div class="text-muted fs-13">افزایش یافته <span class="text-success">7.66%<i class="ti ti-arrow-narrow-up fs-16"></i></span></div>
+                        <div class="text-muted fs-13">افزایش یافته <span class="text-success">7.66%<i class="la la-arrow-up fs-16"></i></span></div>
                     </div>
                 </div>
             </div>
@@ -48,11 +48,11 @@
                             </div>
                             <div class="lh-1">
                                 <span class="avatar avatar-md avatar-rounded bg-primary3">
-                                    <i class="ti ti-check fs-5"></i>
+                                    <i class="la la-check fs-5"></i>
                                 </span>
                             </div>
                         </div>
-                        <div class="text-muted fs-13">افزایش یافته <span class="text-success">1.27%<i class="ti ti-arrow-narrow-up fs-16"></i></span></div>
+                        <div class="text-muted fs-13">افزایش یافته <span class="text-success">1.27%<i class="la la-arrow-up fs-16"></i></span></div>
                     </div>
                 </div>
             </div>
@@ -66,11 +66,11 @@
                             </div>
                             <div class="lh-1">
                                 <span class="avatar avatar-md avatar-rounded bg-secondary">
-                                    <i class="ti ti-clock fs-5"></i>
+                                    <i class="la la-clock fs-5"></i>
                                 </span>
                             </div>
                         </div>
-                        <div class="text-muted fs-13">کاهش یافته <span class="text-danger">1.46%<i class="ti ti-arrow-narrow-down fs-16"></i></span></div>
+                        <div class="text-muted fs-13">کاهش یافته <span class="text-danger">1.46%<i class="la la-arrow-down fs-16"></i></span></div>
                     </div>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                         <div class="d-flex flex-wrap gap-2"> 
                             <div> <input class="form-control form-control-sm" type="text" placeholder="جستجو" aria-label=".form-control-sm example"> </div>
                             <div class="dropdown"> 
-                                <a href="javascript:void(0);" class="btn btn-primary btn-sm btn-wave waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false"> مرتب‌سازی بر اساس<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i> </a> 
+                                <a href="javascript:void(0);" class="btn btn-primary btn-sm btn-wave waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false"> مرتب‌سازی بر اساس<i class="la la-angle-down align-middle ms-1 d-inline-block"></i> </a> 
                                 <ul class="dropdown-menu" role="menu"> 
                                     <li><a class="dropdown-item" href="javascript:void(0);">جدیدترین</a></li> 
                                     <li><a class="dropdown-item" href="javascript:void(0);">تاریخ سفارش</a></li> 
@@ -167,8 +167,8 @@
                                         </td>
                                         <td>
                                             <div class="btn-list">
-                                                <button class="btn btn-sm btn-icon btn-success-light"><i class="ri-pencil-line"></i></button>
-                                                <button class="btn btn-sm btn-icon btn-primary-light"><i class="ri-eye-line"></i></button>
+                                                <button class="btn btn-sm btn-icon btn-success-light"><i class="la la-pencil"></i></button>
+                                                <button class="btn btn-sm btn-icon btn-primary-light"><i class="la la-eye"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -206,8 +206,8 @@
                                         </td>
                                         <td>
                                             <div class="btn-list">
-                                                <button class="btn btn-sm btn-icon btn-success-light"><i class="ri-pencil-line"></i></button>
-                                                <button class="btn btn-sm btn-icon btn-primary-light"><i class="ri-eye-line"></i></button>
+                                                <button class="btn btn-sm btn-icon btn-success-light"><i class="la la-pencil"></i></button>
+                                                <button class="btn btn-sm btn-icon btn-primary-light"><i class="la la-eye"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -245,8 +245,8 @@
                                         </td>
                                         <td>
                                             <div class="btn-list">
-                                                <button class="btn btn-sm btn-icon btn-success-light"><i class="ri-pencil-line"></i></button>
-                                                <button class="btn btn-sm btn-icon btn-primary-light"><i class="ri-eye-line"></i></button>
+                                                <button class="btn btn-sm btn-icon btn-success-light"><i class="la la-pencil"></i></button>
+                                                <button class="btn btn-sm btn-icon btn-primary-light"><i class="la la-eye"></i></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -265,13 +265,13 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-start gap-3">
                             <div class="avatar avatar-md bg-primary-transparent">
-                                <i class="ti ti-trending-up fs-5"></i>
+                                <i class="la la-chart-line fs-5"></i>
                             </div>
                             <div class="flex-fill d-flex align-items-start justify-content-between">
                                 <div>
                                     <span class="fs-11 mb-1 d-block fw-medium">کل استعلامات</span> 
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <h4 class="mb-0 d-flex align-items-center">3,736<span class="text-success fs-12 ms-2 op-1"><i class="ti ti-trending-up align-middle me-1"></i>۰٫۵۷٪</span></h4>
+                                        <h4 class="mb-0 d-flex align-items-center">3,736<span class="text-success fs-12 ms-2 op-1"><i class="la la-chart-line align-middle me-1"></i>۰٫۵۷٪</span></h4>
                                     </div>
                                 </div>
                                 <a href="javascript:void(0);" class="text-success fs-12 text-decoration-underline">جزئیات</a>
@@ -284,7 +284,7 @@
                         <div class="d-grid">
                             <button class="btn btn-primary-ghost btn-wave fw-medium waves-effect waves-light">
                                 آمار کامل
-                                <i class="ti ti-arrow-narrow-left ms-2 fs-16 d-inline-block align-middle"></i>
+                                <i class="la la-arrow-left ms-2 fs-16 d-inline-block align-middle"></i>
                             </button>
                         </div>
                     </div>
@@ -317,7 +317,7 @@
                             </div>
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <div>مجموع فروش</div>
-                                <div class="h6 mb-0"><span class="text-success me-2 fs-11">2.74%<i class="ti ti-arrow-narrow-up"></i></span>1,25,875</div>
+                                <div class="h6 mb-0"><span class="text-success me-2 fs-11">2.74%<i class="la la-arrow-up"></i></span>1,25,875</div>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -334,7 +334,7 @@
                                             <span class="text-muted fs-12">25% ناخالص</span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="badge bg-success">0.45% <i class="ti ti-trending-up"></i></span>
+                                            <span class="badge bg-success">0.45% <i class="la la-chart-line"></i></span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -348,7 +348,7 @@
                                             <span class="text-muted fs-12">16% ناخالص</span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="badge bg-warning">0.27% <i class="ti ti-trending-up"></i></span>
+                                            <span class="badge bg-warning">0.27% <i class="la la-chart-line"></i></span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -362,7 +362,7 @@
                                             <span class="text-muted fs-12">22% ناخالص</span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="badge bg-secondary">0.63% <i class="ti ti-trending-up"></i></span>
+                                            <span class="badge bg-secondary">0.63% <i class="la la-chart-line"></i></span>
                                         </td>
                                     </tr>
                                     <tr>
@@ -376,7 +376,7 @@
                                             <span class="text-muted fs-12">18% ناخالص</span>
                                         </td>
                                         <td class="text-end">
-                                            <span class="badge bg-primary1">1.14% <i class="ti ti-trending-down"></i></span>
+                                            <span class="badge bg-primary1">1.14% <i class="la la-chart-line-down"></i></span>
                                         </td>
                                     </tr>
                                 </tbody>

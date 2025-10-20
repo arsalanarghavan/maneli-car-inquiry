@@ -24,18 +24,21 @@ if (empty($status)) {
 
 switch ($status) {
     case 'success':
-        $class = 'status-approved';
+        $alert_class = 'alert-success';
+        $icon = 'la la-check-circle';
         $message = esc_html__('Your payment was successful. Your request has been submitted to our experts.', 'maneli-car-inquiry');
         break;
     case 'failed':
-        $class = 'status-failed';
+        $alert_class = 'alert-danger';
+        $icon = 'la la-times-circle';
         $message = esc_html__('Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours.', 'maneli-car-inquiry');
         if (!empty($reason)) {
             $message .= '<br><strong>' . esc_html__('Reason:', 'maneli-car-inquiry') . '</strong> ' . esc_html($reason);
         }
         break;
     case 'cancelled':
-        $class = 'status-pending';
+        $alert_class = 'alert-warning';
+        $icon = 'ri-information-fill';
         $message = esc_html__('You have cancelled the payment. Your request has not been finalized yet.', 'maneli-car-inquiry');
         break;
     default:
@@ -43,6 +46,10 @@ switch ($status) {
 }
 ?>
 
-<div class="status-box <?php echo esc_attr($class); ?>" style="margin-bottom: 20px;">
-    <p><?php echo wp_kses_post($message); ?></p>
+<div class="alert <?php echo esc_attr($alert_class); ?> alert-dismissible fade show d-flex align-items-center" role="alert" style="margin-bottom: 20px;">
+    <i class="<?php echo esc_attr($icon); ?> fs-4 me-3"></i>
+    <div class="flex-fill">
+        <?php echo wp_kses_post($message); ?>
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>

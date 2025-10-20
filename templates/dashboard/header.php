@@ -55,11 +55,8 @@ $current_user = wp_get_current_user();
     <!-- Style Css -->
     <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/styles.css'); ?>" rel="stylesheet">
 
-    <!-- Icons Css -->
-    <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/icons.css'); ?>" rel="stylesheet">
-    
-    <!-- Icon Fonts -->
-    <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/icon-fonts/icons.css'); ?>" rel="stylesheet">
+    <!-- Line Awesome Complete - CSS کامل با font-face و content codes -->
+    <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css'); ?>" rel="stylesheet">
 
     <!-- Node Waves Css -->
     <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/node-waves/waves.min.css'); ?>" rel="stylesheet"> 

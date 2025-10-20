@@ -109,7 +109,10 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_style('maneli-fonts', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-fonts.css', [], '1.0.0');
             wp_enqueue_style('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', ['maneli-fonts'], '5.3.0');
             wp_enqueue_style('maneli-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/styles.css', ['maneli-bootstrap'], '1.0.0');
-            wp_enqueue_style('maneli-icons', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/icons.css', [], '1.0.0');
+            
+            // Line Awesome Complete - فایل CSS کامل و مستقل
+            wp_enqueue_style('maneli-line-awesome-complete', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css', [], '1.0.0');
+            
             wp_enqueue_style('maneli-waves', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/node-waves/waves.min.css', [], '1.0.0');
             wp_enqueue_style('maneli-simplebar', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/simplebar/simplebar.min.css', [], '1.0.0');
             wp_enqueue_style('maneli-flatpickr', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/flatpickr/flatpickr.min.css', [], '1.0.0');
@@ -121,7 +124,7 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_style('maneli-rtl-force', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-rtl-force.css', ['maneli-styles', 'maneli-bootstrap'], '1.0.0');
             // Dashboard Additional Fixes
             wp_enqueue_style('maneli-dashboard-fix', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-dashboard-fix.css', ['maneli-rtl-force'], '1.0.0');
-            // Loader Fix - Prevent infinite loading - MUST BE LAST!
+            // Loader Fix - Prevent infinite loading
             wp_enqueue_style('maneli-loader-fix', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-loader-fix.css', ['maneli-dashboard-fix'], '1.0.0');
             
             // Enqueue JS
@@ -144,6 +147,16 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_script('maneli-custom-switcher', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/custom-switcher.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/dashboard.js', ['jquery'], '1.0.0', true);
+            
+            // Product Editor Script (for product-editor page)
+            $page = get_query_var('maneli_dashboard_page');
+            if ($page === 'product-editor') {
+                wp_enqueue_script('maneli-product-editor', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/product-editor.js', ['jquery'], '1.0.0', true);
+                wp_localize_script('maneli-product-editor', 'maneliAdminProductEditor', [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('maneli_product_editor_nonce'),
+                ]);
+            }
             
             // Localize script for AJAX
             wp_localize_script('maneli-dashboard', 'maneli_ajax', [
@@ -424,6 +437,51 @@ class Maneli_Dashboard_Handler {
         $this->maybe_start_session();
         session_destroy();
         wp_send_json_success(['redirect' => home_url('/login')]);
+    }
+
+    /**
+     * Get total revenue from successful inquiries
+     */
+    public function get_total_revenue() {
+        global $wpdb;
+
+        $total = $wpdb->get_var("
+            SELECT SUM(CAST(meta_value AS UNSIGNED))
+            FROM {$wpdb->postmeta} pm
+            INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+            WHERE p.post_type = 'inquiry'
+            AND p.post_status = 'publish'
+            AND pm.meta_key = 'inquiry_price'
+        ");
+
+        return $total ? $total : 0;
+    }
+
+    /**
+     * Get count of successful inquiries
+     */
+    public function get_successful_inquiries_count() {
+        $count = wp_count_posts('inquiry');
+        return isset($count->publish) ? $count->publish : 0;
+    }
+
+    /**
+     * Get count of pending inquiries
+     */
+    public function get_pending_inquiries_count() {
+        global $wpdb;
+
+        $pending_count = $wpdb->get_var("
+            SELECT COUNT(*)
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            WHERE p.post_type = 'inquiry'
+            AND p.post_status = 'publish'
+            AND pm.meta_key = 'inquiry_status'
+            AND pm.meta_value = 'pending'
+        ");
+
+        return $pending_count ? $pending_count : 0;
     }
 }
 

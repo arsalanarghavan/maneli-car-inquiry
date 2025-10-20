@@ -31,6 +31,24 @@ html {
     scroll-behavior: smooth !important;
 }
 
+/* استثنا برای آیکون‌های Line Awesome */
+[class^="la-"],
+[class*=" la-"],
+.la, .las, .rar, .lab,
+i[class^="la-"],
+i[class*=" la-"],
+span[class^="la-"],
+span[class*=" la-"] {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
+[class^="la-"]::before,
+[class*=" la-"]::before {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
 body {
     font-family: IRANSans, Tahoma, Arial, sans-serif !important;
     direction: rtl !important;
@@ -1140,5 +1158,66 @@ html[data-theme-mode="dark"] .main-content {
     .responsive-overlay {
         transition: none !important;
     }
+}
+
+/* ===========================================
+   REMIXICON SIDEBAR FIX
+   فیکس نمایش آیکن‌های RemixIcon در Sidebar
+   =========================================== */
+
+/* تضمین نمایش صحیح آیکن‌های RemixIcon در منوی کناری */
+.app-sidebar .side-menu__icon {
+    font-size: 1.25rem !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-inline-end: 0.75rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* تضمین استفاده از فونت Line Awesome */
+.app-sidebar .side-menu__icon::before {
+    display: inline-block !important;
+    font-family: 'Line Awesome Free' !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    line-height: 1 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* فیکس برای حالت‌های مختلف منو */
+[data-vertical-style=detached] .app-sidebar .side-menu__icon,
+[data-vertical-style=doublemenu] .app-sidebar .side-menu__icon,
+[data-nav-layout=horizontal] .app-sidebar .side-menu__icon {
+    font-size: 1.25rem !important;
+    display: inline-flex !important;
+}
+
+/* تضمین وراثت رنگ از parent */
+.app-sidebar .side-menu__item .side-menu__icon {
+    color: inherit !important;
+}
+
+/* فیکس برای حالت active */
+.app-sidebar .side-menu__item.active .side-menu__icon {
+    opacity: 1 !important;
+}
+
+/* فیکس برای حالت hover */
+.app-sidebar .side-menu__item:hover .side-menu__icon {
+    opacity: 1 !important;
+}
+
+/* فیکس خاص برای حالت collapsed/icon only */
+[data-toggled="icon-overlay-close"] .app-sidebar .side-menu__icon,
+[data-toggled="detached-close"] .app-sidebar .side-menu__icon {
+    font-size: 1.5rem !important;
+    width: 2rem !important;
+    height: 2rem !important;
 }
 

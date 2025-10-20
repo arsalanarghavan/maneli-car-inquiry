@@ -19,10 +19,24 @@ body {
 }
 
 /* Force Persian Font on Everything */
-*,
-*::before,
-*::after {
+/* استثنا برای آیکون‌های Line Awesome - نباید فونت فارسی بگیرند */
+*:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.lar):not(.lab),
+*:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.lar):not(.lab)::before,
+*:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.rar):not(.lab)::after {
     font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+}
+
+/* اطمینان از اینکه آیکون‌های Line Awesome فونت خودشون رو دارن */
+[class^="la-"],
+[class*=" la-"],
+.la, .las, .lar, .lab {
+    font-family: 'Line Awesome Free' !important;
+}
+
+[class^="la-"]::before,
+[class*=" la-"]::before {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
 }
 
 html,
@@ -323,7 +337,7 @@ input, textarea, select, option {
 .maneli-shortcode,
 .maneli-shortcode *,
 [class*="maneli-"],
-[class*="maneli-"] * {
+[class*="maneli-"] *:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.rar):not(.lab) {
     font-family: IRANSans, Tahoma, Arial, sans-serif !important;
     direction: rtl !important;
 }
@@ -352,12 +366,25 @@ i[class*="ri-"],
 i[class*="bi-"],
 i[class*="fe-"],
 i[class*="bx-"],
+i[class^="la-"],
+i[class*=" la-"],
 .icon {
     direction: ltr !important;
     display: inline-block !important;
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
 }
 
 /* Body style */
+/* اطمینان نهایی برای آیکون‌های Line Awesome */
+i.la, i.las, i.lar, i.lab,
+span.la, span.las, span.rar, span.lab,
+i[class^="la-"], i[class*=" la-"],
+span[class^="la-"], span[class*=" la-"] {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
 body {
     font-family: IRANSans, Tahoma, Arial, sans-serif !important;
     direction: rtl !important;

@@ -46,7 +46,7 @@ $current_user = wp_get_current_user();
                 <!-- Start::header-link -->
                 <input type="text" class="header-search-bar form-control" id="header-search" placeholder="جستجو" spellcheck="false" autocomplete="off" autocapitalize="off">
                 <a href="javascript:void(0);" class="header-search-icon border-0">
-                    <i class="ri-search-line"></i>
+                    <i class="la la-search"></i>
                 </a>
                 <!-- End::header-link -->
             </div>
@@ -62,7 +62,7 @@ $current_user = wp_get_current_user();
             <li class="header-element d-md-none d-block">
                 <a href="javascript:void(0);" class="header-link" data-bs-toggle="modal" data-bs-target="#header-responsive-search">
                     <!-- Start::header-link-icon -->
-                    <i class="bi bi-search header-link-icon d-flex"></i>
+                    <i class="la la-search header-link-icon d-flex"></i>
                     <!-- End::header-link-icon -->
                 </a>  
             </li>
@@ -113,7 +113,7 @@ $current_user = wp_get_current_user();
                     <div class="p-5 empty-item1">
                         <div class="text-center">
                             <span class="avatar avatar-xl avatar-rounded bg-secondary-transparent">
-                                <i class="ri-notification-off-line fs-2"></i>
+                                <i class="la la-bell-slash fs-2"></i>
                             </span>
                             <h6 class="fw-medium mt-3">هشداری وجود ندارد</h6>
                         </div>
@@ -156,9 +156,9 @@ $current_user = wp_get_current_user();
                             <span class="d-block fs-12 text-muted"><?php echo esc_html($current_user->user_email); ?></span>
                         </div>
                     </li>
-                    <li><a class="dropdown-item d-flex align-items-center" href="<?php echo home_url('/dashboard'); ?>"><i class="fe fe-user p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>حساب کاربری</a></li>
-                    <li><a class="dropdown-item d-flex align-items-center" href="<?php echo home_url('/dashboard/settings'); ?>"><i class="fe fe-settings p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>تنظیمات</a></li>
-                    <li><a class="dropdown-item d-flex align-items-center" href="<?php echo wp_logout_url(home_url('/dashboard')); ?>"><i class="fe fe-lock p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>خروج</a></li>
+                    <li><a class="dropdown-item d-flex align-items-center" href="<?php echo home_url('/dashboard'); ?>"><i class="la la-user p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>حساب کاربری</a></li>
+                    <li><a class="dropdown-item d-flex align-items-center" href="<?php echo home_url('/dashboard/settings'); ?>"><i class="la la-cog p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>تنظیمات</a></li>
+                    <li><a class="dropdown-item d-flex align-items-center" href="<?php echo wp_logout_url(home_url('/dashboard')); ?>"><i class="la la-lock p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>خروج</a></li>
                 </ul>
             </li>  
             <!-- End::header-element -->

@@ -1,26 +1,26 @@
-<?php
-/**
- * Dashboard New Inquiry Page
- * Create new car inquiry (cash or installment)
- */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
-?>
-
+<!-- Start::row -->
 <div class="row">
-    <div class="col-12">
+    <div class="col-xl-12">
         <div class="card custom-card">
-            <div class="card-header justify-content-between">
-                <div class="card-title">
-                    ثبت استعلام جدید
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-title">ثبت استعلام جدید</div>
+                <div class="btn-list">
+                    <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="btn btn-light">
+                        <i class="la la-arrow-right me-1"></i>
+                        بازگشت به لیست
+                    </a>
                 </div>
             </div>
             <div class="card-body">
-                <div class="alert alert-info" role="alert">
-                    <i class="ri-information-line me-2"></i>
-                    برای ثبت استعلام خودرو، لطفاً اطلاعات زیر را با دقت تکمیل نمایید.
+                <div class="alert alert-info border-0" role="alert">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="la la-info-circle fs-20 text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <strong>راهنمایی:</strong> برای ثبت استعلام خودرو، لطفاً اطلاعات زیر را با دقت تکمیل نمایید.
+                        </div>
+                    </div>
                 </div>
 
                 <form id="new-inquiry-form" method="post" class="needs-validation" novalidate>
@@ -33,6 +33,9 @@ if (!defined('ABSPATH')) {
                                 <option value="cash">نقدی</option>
                                 <option value="installment">اقساطی</option>
                             </select>
+                            <div class="invalid-feedback">
+                                لطفاً نوع استعلام را انتخاب کنید.
+                            </div>
                         </div>
 
                         <!-- انتخاب محصول -->
@@ -41,24 +44,36 @@ if (!defined('ABSPATH')) {
                             <select class="form-select" id="product_id" name="product_id" required>
                                 <option value="">در حال بارگذاری...</option>
                             </select>
+                            <div class="invalid-feedback">
+                                لطفاً محصول را انتخاب کنید.
+                            </div>
                         </div>
 
                         <!-- نام -->
                         <div class="col-md-6">
                             <label for="customer_name" class="form-label">نام و نام خانوادگی <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                            <div class="invalid-feedback">
+                                لطفاً نام و نام خانوادگی را وارد کنید.
+                            </div>
                         </div>
 
                         <!-- کد ملی -->
                         <div class="col-md-6">
                             <label for="national_code" class="form-label">کد ملی <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="national_code" name="national_code" maxlength="10" required>
+                            <input type="text" class="form-control" id="national_code" name="national_code" maxlength="10" pattern="[0-9]{10}" required>
+                            <div class="invalid-feedback">
+                                لطفاً کد ملی معتبر وارد کنید.
+                            </div>
                         </div>
 
                         <!-- شماره تماس -->
                         <div class="col-md-6">
                             <label for="phone" class="form-label">شماره تماس <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="phone" name="phone" maxlength="11" required>
+                            <input type="text" class="form-control" id="phone" name="phone" maxlength="11" pattern="09[0-9]{9}" required>
+                            <div class="invalid-feedback">
+                                لطفاً شماره تماس معتبر وارد کنید.
+                            </div>
                         </div>
 
                         <!-- تاریخ تولد -->
@@ -70,7 +85,7 @@ if (!defined('ABSPATH')) {
                         <!-- آدرس -->
                         <div class="col-12">
                             <label for="address" class="form-label">آدرس</label>
-                            <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                            <textarea class="form-control" id="address" name="address" rows="3" placeholder="آدرس کامل مشتری را وارد کنید"></textarea>
                         </div>
 
                         <!-- توضیحات -->
@@ -80,14 +95,14 @@ if (!defined('ABSPATH')) {
                         </div>
                     </div>
 
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="ri-save-line me-2"></i>
+                    <div class="mt-4 pt-3 border-top">
+                        <button type="submit" class="btn btn-primary btn-wave">
+                            <i class="la la-save me-2"></i>
                             ثبت استعلام
                         </button>
-                        <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="btn btn-light">
-                            <i class="ri-arrow-right-line me-2"></i>
-                            بازگشت به لیست
+                        <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="btn btn-light btn-wave ms-2">
+                            <i class="la la-times me-2"></i>
+                            انصراف
                         </a>
                     </div>
                 </form>
@@ -95,6 +110,7 @@ if (!defined('ABSPATH')) {
         </div>
     </div>
 </div>
+<!-- End::row -->
 
 <script>
 jQuery(document).ready(function($) {

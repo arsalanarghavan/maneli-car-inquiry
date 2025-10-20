@@ -67,7 +67,22 @@ class Maneli_Frontend_Theme_Handler {
             return esc_url($options[$logo_key]);
         }
         
-        // Default logos
+        // Try to get WordPress custom logo first
+        $custom_logo_id = get_theme_mod('custom_logo');
+        if ($custom_logo_id) {
+            $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
+            if ($logo_url) {
+                return esc_url($logo_url);
+            }
+        }
+        
+        // Fallback to site icon (favicon) as logo for smaller versions
+        $site_icon_url = get_site_icon_url();
+        if ($site_icon_url && in_array($type, ['toggle', 'toggle-dark', 'toggle-white'])) {
+            return esc_url($site_icon_url);
+        }
+        
+        // Default logos as last resort
         $defaults = [
             'desktop' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/desktop-logo.png',
             'desktop_dark' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/desktop-dark.png',
@@ -79,6 +94,20 @@ class Maneli_Frontend_Theme_Handler {
         
         $key = str_replace('-', '_', $type);
         return isset($defaults[$key]) ? $defaults[$key] : $defaults['desktop'];
+    }
+    
+    /**
+     * Get favicon URL from WordPress
+     */
+    public function get_favicon() {
+        // Try to get WordPress site icon (favicon) first
+        $site_icon_url = get_site_icon_url();
+        if ($site_icon_url) {
+            return esc_url($site_icon_url);
+        }
+        
+        // Fallback to default favicon
+        return MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/favicon.ico';
     }
     
     /**

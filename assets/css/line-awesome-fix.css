@@ -1,0 +1,228 @@
+/*
+ * Line Awesome Complete Fix
+ * شامل تمام @font-face و کلاس‌های پایه و آیکون‌های مورد نیاز
+ * با !important برای جلوگیری از Override
+ */
+
+/* تعاریف Font Face */
+@font-face {
+  font-family: 'Line Awesome Brands';
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-brands-400.eot');
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-brands-400.eot?#iefix') format('embedded-opentype'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-brands-400.woff2') format('woff2'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-brands-400.woff') format('woff'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-brands-400.ttf') format('truetype'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-brands-400.svg#lineawesome') format('svg');
+}
+
+@font-face {
+  font-family: 'Line Awesome Free';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.eot');
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.eot?#iefix') format('embedded-opentype'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.woff2') format('woff2'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.woff') format('woff'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.ttf') format('truetype'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.svg#lineawesome') format('svg');
+}
+
+@font-face {
+  font-family: 'Line Awesome Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.eot');
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.eot?#iefix') format('embedded-opentype'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.woff2') format('woff2'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.woff') format('woff'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.ttf') format('truetype'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.svg#lineawesome') format('svg');
+}
+
+/* کلاس‌های پایه - با !important قوی */
+.la,
+.las,
+.lar,
+.lal,
+.lad,
+.lab {
+  -moz-osx-font-smoothing: grayscale !important;
+  -webkit-font-smoothing: antialiased !important;
+  display: inline-block !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  text-rendering: auto !important;
+  line-height: 1 !important;
+}
+
+[class^="la-"],
+[class*=" la-"] {
+  font-family: 'Line Awesome Free' !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.la,
+.las {
+  font-family: 'Line Awesome Free' !important;
+  font-weight: 900 !important;
+}
+
+.lar {
+  font-family: 'Line Awesome Free' !important;
+  font-weight: 400 !important;
+}
+
+.lab {
+  font-family: 'Line Awesome Brands' !important;
+  font-weight: normal !important;
+}
+
+/* اضافه کردن content برای :before */
+.la:before,
+.las:before,
+.lar:before,
+.lab:before,
+[class^="la-"]:before,
+[class*=" la-"]:before {
+  display: inline-block !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  text-rendering: auto !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* آیکون‌های استفاده شده در پروژه - با Content Codes صحیح */
+.la-home:before { content: "\f015"; }
+.la-user:before { content: "\f007"; }
+.la-users:before { content: "\f0c0"; }
+.la-car:before { content: "\f1b9"; }
+.la-dollar:before { content: "\f155"; }
+.la-dollar-sign:before { content: "\f155"; }
+.la-chart-bar:before { content: "\f080"; }
+.la-chart-line:before { content: "\f201"; }
+.la-chart-line-down:before { content: "\f03d"; }
+.la-cog:before { content: "\f013"; }
+.la-calendar:before { content: "\f133"; }
+.la-calendar-alt:before { content: "\f073"; }
+.la-calendar-check:before { content: "\f274"; }
+.la-search:before { content: "\f002"; }
+.la-envelope:before { content: "\f0e0"; }
+.la-lock:before { content: "\f023"; }
+.la-heart:before { content: "\f004"; }
+.la-star:before { content: "\f005"; }
+.la-plus:before { content: "\f067"; }
+.la-plus-circle:before { content: "\f055"; }
+.la-minus:before { content: "\f068"; }
+.la-times:before { content: "\f00d"; }
+.la-times-circle:before { content: "\f057"; }
+.la-check:before { content: "\f00c"; }
+.la-check-circle:before { content: "\f058"; }
+.la-exclamation-triangle:before { content: "\f071"; }
+.la-exclamation-circle:before { content: "\f06a"; }
+.la-info-circle:before { content: "\f05a"; }
+.la-eye:before { content: "\f06e"; }
+.la-eye-slash:before { content: "\f070"; }
+.la-edit:before { content: "\f044"; }
+.la-trash:before { content: "\f1f8"; }
+.la-save:before { content: "\f0c7"; }
+.la-sync:before { content: "\f021"; }
+.la-arrow-up:before { content: "\f062"; }
+.la-arrow-down:before { content: "\f063"; }
+.la-arrow-left:before { content: "\f060"; }
+.la-arrow-right:before { content: "\f061"; }
+.la-angle-down:before { content: "\f107"; }
+.la-filter:before { content: "\f0b0"; }
+.la-share:before { content: "\f064"; }
+.la-list:before { content: "\f03a"; }
+.la-list-alt:before { content: "\f022"; }
+.la-shopping-cart:before { content: "\f07a"; }
+.la-credit-card:before { content: "\f09d"; }
+.la-money-bill:before { content: "\f0d6"; }
+.la-file-alt:before { content: "\f15c"; }
+.la-inbox:before { content: "\f01c"; }
+.la-bell-slash:before { content: "\f1f6"; }
+.la-comment:before { content: "\f075"; }
+.la-paper-plane:before { content: "\f1d8"; }
+.la-sign-in-alt:before { content: "\f2f6"; }
+.la-sign-out-alt:before { content: "\f2f5"; }
+.la-mobile:before { content: "\f10b"; }
+.la-ticket-alt:before { content: "\f3ff"; }
+.la-calculator:before { content: "\f1ec"; }
+.la-user-plus:before { content: "\f234"; }
+.la-user-cog:before { content: "\f4fe"; }
+.la-user-alt:before { content: "\f406"; }
+.la-users-cog:before { content: "\f509"; }
+.la-toggle-on:before { content: "\f205"; }
+.la-toggle-off:before { content: "\f204"; }
+.la-id-card:before { content: "\f2c2"; }
+.la-pencil:before { content: "\f040"; }
+.la-clock:before { content: "\f017"; }
+.la-spinner:before { content: "\f110"; }
+.la-link:before { content: "\f0c1"; }
+
+/* Spinning Animation */
+.la-spin {
+  animation: la-spin 2s infinite linear !important;
+}
+
+@keyframes la-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(359deg); }
+}
+
+/* Size Classes */
+.la-lg { font-size: 1.33333em; line-height: 0.75em; vertical-align: -.0667em; }
+.la-xs { font-size: .75em; }
+.la-sm { font-size: .875em; }
+.la-1x { font-size: 1em; }
+.la-2x { font-size: 2em; }
+.la-3x { font-size: 3em; }
+.la-4x { font-size: 4em; }
+.la-5x { font-size: 5em; }
+
+/* CRITICAL FIXES - Override any other CSS trying to change icon fonts */
+
+/* Sidebar Icons - Force Line Awesome */
+.app-sidebar .side-menu__icon,
+.app-sidebar .side-menu__icon::before,
+.side-menu__icon,
+.side-menu__icon::before {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+}
+
+/* Header Icons - Force Line Awesome */
+.header-link-icon,
+.header-link-icon::before {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
+/* All LA Icons - Universal Override */
+i[class^="la-"],
+i[class*=" la-"],
+span[class^="la-"],
+span[class*=" la-"] {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+}
+
+i[class^="la-"]::before,
+i[class*=" la-"]::before,
+span[class^="la-"]::before,
+span[class*=" la-"]::before {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+    font-style: normal !important;
+}

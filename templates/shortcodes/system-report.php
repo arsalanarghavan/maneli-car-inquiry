@@ -22,7 +22,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
     <!-- هدر و فیلترها -->
     <div class="report-header">
         <div class="header-title">
-            <span class="dashicons dashicons-chart-bar"></span>
+            <span class="la la-chart-bar"></span>
             <h2><?php echo $is_expert ? 'گزارش عملکرد من' : 'گزارشات سیستم'; ?></h2>
         </div>
         
@@ -30,7 +30,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <div class="report-filters">
             <div class="filter-group">
                 <label>
-                    <span class="dashicons dashicons-calendar"></span>
+                    <span class="la la-calendar"></span>
                     بازه زمانی:
                 </label>
                 <select id="maneli-date-preset" class="filter-input">
@@ -47,7 +47,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="filter-group custom-dates" style="display: none;">
                 <label>
-                    <span class="dashicons dashicons-calendar-alt"></span>
+                    <span class="la la-calendar-alt"></span>
                     از تاریخ:
                 </label>
                 <input type="date" id="maneli-start-date" class="filter-input" value="<?php echo esc_attr($start_date); ?>">
@@ -59,7 +59,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             <?php if (current_user_can('manage_options') && !$is_expert): ?>
             <div class="filter-group">
                 <label>
-                    <span class="dashicons dashicons-admin-users"></span>
+                    <span class="la la-users-cog"></span>
                     کارشناس:
                 </label>
                 <select id="maneli-expert-filter" class="filter-input">
@@ -76,18 +76,18 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="filter-group">
                 <button type="button" id="maneli-apply-filter" class="btn-primary">
-                    <span class="dashicons dashicons-filter"></span>
+                    <span class="la la-filter"></span>
                     اعمال فیلتر
                 </button>
                 <button type="button" id="maneli-refresh-data" class="btn-secondary">
-                    <span class="dashicons dashicons-update"></span>
+                    <span class="la la-sync"></span>
                     بروزرسانی
                 </button>
             </div>
         </div>
         
         <div class="report-period-info">
-            <span class="dashicons dashicons-info"></span>
+            <span class="la la-info-circle"></span>
             <span id="period-text">بازه زمانی: <strong><?php echo esc_html($days); ?> روز گذشته</strong></span>
             <?php if ($is_expert): ?>
                 <span class="separator">|</span>
@@ -99,7 +99,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
     <!-- Loading -->
     <div id="maneli-loading" class="loading-overlay" style="display: none;">
         <div class="loading-spinner">
-            <span class="dashicons dashicons-update"></span>
+            <span class="la la-sync"></span>
             <p>در حال بارگذاری...</p>
         </div>
     </div>
@@ -110,13 +110,13 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <div class="stats-cards-grid">
             <div class="stat-card total">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-list-view"></span>
+                    <span class="la la-list"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="total_inquiries"><?php echo number_format($stats['total_inquiries']); ?></div>
                     <div class="stat-label">کل استعلام‌ها</div>
                     <div class="stat-meta">
-                        <span class="dashicons dashicons-calendar-alt"></span>
+                        <span class="la la-calendar-alt"></span>
                         امروز: <span data-stat="new_today"><?php echo number_format($stats['new_today']); ?></span>
                     </div>
                 </div>
@@ -124,7 +124,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card cash">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-money-alt"></span>
+                    <span class="la la-dollar-sign"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="cash_inquiries"><?php echo number_format($stats['cash_inquiries']); ?></div>
@@ -134,7 +134,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card installment">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-calculator"></span>
+                    <span class="la la-calculator"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="installment_inquiries"><?php echo number_format($stats['installment_inquiries']); ?></div>
@@ -144,7 +144,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card approved">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-yes-alt"></span>
+                    <span class="la la-check-circle"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="approved"><?php echo number_format($stats['approved']); ?></div>
@@ -154,7 +154,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card pending">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-clock"></span>
+                    <span class="la la-clock"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="pending"><?php echo number_format($stats['pending']); ?></div>
@@ -164,7 +164,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card rejected">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-dismiss"></span>
+                    <span class="la la-times-circle"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="rejected"><?php echo number_format($stats['rejected']); ?></div>
@@ -174,7 +174,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card following">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-visibility"></span>
+                    <span class="la la-eye"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="following"><?php echo number_format($stats['following']); ?></div>
@@ -184,7 +184,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card next-followup">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-calendar-alt"></span>
+                    <span class="la la-calendar-alt"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="next_followup"><?php echo number_format($stats['next_followup']); ?></div>
@@ -194,7 +194,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             
             <div class="stat-card revenue">
                 <div class="stat-icon">
-                    <span class="dashicons dashicons-cart"></span>
+                    <span class="la la-shopping-cart"></span>
                 </div>
                 <div class="stat-content">
                     <div class="stat-value" data-stat="revenue"><?php echo number_format($stats['revenue']); ?></div>
@@ -207,7 +207,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <!-- نمودار روند -->
         <div class="chart-section">
             <h3>
-                <span class="dashicons dashicons-chart-line"></span>
+                <span class="la la-chart-line"></span>
                 روند استعلام‌های روزانه
             </h3>
             <div class="chart-container">
@@ -220,7 +220,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <?php if (!empty($popular_products)): ?>
         <div class="popular-products-section">
             <h3>
-                <span class="dashicons dashicons-star-filled"></span>
+                <span class="la la-star"></span>
                 محصولات پرطرفدار
             </h3>
             <div class="products-list" id="products-list">
@@ -230,7 +230,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <div class="product-info">
                         <div class="product-name"><?php echo esc_html($product->product_name ?: 'نامشخص'); ?></div>
                         <div class="product-count">
-                            <span class="dashicons dashicons-chart-line"></span>
+                            <span class="la la-chart-line"></span>
                             <?php echo number_format($product->inquiry_count); ?> استعلام
                         </div>
                     </div>
@@ -244,7 +244,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <?php if ($show_experts && !empty($experts_stats)): ?>
         <div class="experts-section">
             <h3>
-                <span class="dashicons dashicons-groups"></span>
+                <span class="la la-users"></span>
                 عملکرد کارشناسان
             </h3>
             <div class="experts-table-wrapper">
@@ -252,35 +252,35 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <thead>
                         <tr>
                             <th>
-                                <span class="dashicons dashicons-admin-users"></span>
+                                <span class="la la-users-cog"></span>
                                 کارشناس
                             </th>
                             <th>
-                                <span class="dashicons dashicons-list-view"></span>
+                                <span class="la la-list"></span>
                                 کل استعلام‌ها
                             </th>
                             <th>
-                                <span class="dashicons dashicons-money-alt"></span>
+                                <span class="la la-dollar-sign"></span>
                                 نقدی
                             </th>
                             <th>
-                                <span class="dashicons dashicons-calculator"></span>
+                                <span class="la la-calculator"></span>
                                 اقساطی
                             </th>
                             <th>
-                                <span class="dashicons dashicons-yes-alt"></span>
+                                <span class="la la-check-circle"></span>
                                 تایید شده
                             </th>
                             <th>
-                                <span class="dashicons dashicons-dismiss"></span>
+                                <span class="la la-times-circle"></span>
                                 رد شده
                             </th>
                             <th>
-                                <span class="dashicons dashicons-groups"></span>
+                                <span class="la la-users"></span>
                                 مشتریان
                             </th>
                             <th>
-                                <span class="dashicons dashicons-cart"></span>
+                                <span class="la la-shopping-cart"></span>
                                 درآمد
                             </th>
                         </tr>
@@ -474,7 +474,7 @@ jQuery(document).ready(function($) {
                     <div class="product-info">
                         <div class="product-name">${product.product_name || 'نامشخص'}</div>
                         <div class="product-count">
-                            <span class="dashicons dashicons-chart-line"></span>
+                            <span class="la la-chart-line"></span>
                             ${formatNumber(product.inquiry_count)} استعلام
                         </div>
                     </div>

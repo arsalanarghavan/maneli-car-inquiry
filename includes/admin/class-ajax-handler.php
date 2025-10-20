@@ -40,6 +40,14 @@ class Maneli_Ajax_Handler {
         // Product Editor (from class-product-editor-shortcode.php & class-hooks.php)
         add_action('wp_ajax_maneli_filter_products_ajax', [$this, 'ajax_filter_products']);
         add_action('wp_ajax_maneli_update_product_data', [$this, 'ajax_update_product_data']);
+        
+        // Bulk Product Update (Dashboard)
+        add_action('wp_ajax_maneli_save_products_bulk', [$this, 'ajax_save_products_bulk']);
+        
+        // Expert Management (Dashboard)
+        add_action('wp_ajax_maneli_add_expert', [$this, 'ajax_add_expert']);
+        add_action('wp_ajax_maneli_toggle_expert_status', [$this, 'ajax_toggle_expert_status']);
+        add_action('wp_ajax_maneli_get_expert_stats', [$this, 'ajax_get_expert_stats']);
     }
 
     //======================================================================
@@ -742,5 +750,367 @@ class Maneli_Ajax_Handler {
         ]);
     
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
+    }
+
+    //======================================================================
+    // Bulk Product Update Handler
+    //======================================================================
+
+    /**
+     * Save multiple products data at once (dashboard bulk update)
+     */
+    public function ajax_save_products_bulk() {
+        // Security check
+        check_ajax_referer('maneli_save_products', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $products = isset($_POST['products']) ? $_POST['products'] : [];
+        
+        if (empty($products) || !is_array($products)) {
+            wp_send_json_error(['message' => esc_html__('No products data provided.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        $updated_count = 0;
+        $errors = [];
+
+        foreach ($products as $product_data) {
+            $product_id = isset($product_data['id']) ? intval($product_data['id']) : 0;
+            
+            if (!$product_id || get_post_type($product_id) !== 'product') {
+                $errors[] = sprintf(__('Invalid product ID: %d', 'maneli-car-inquiry'), $product_id);
+                continue;
+            }
+
+            // Update product meta fields
+            $fields = [
+                'cash_price' => '_cash_price',
+                'installment_price' => '_installment_price',
+                'min_down_payment' => '_min_down_payment',
+                'available_colors' => '_available_colors',
+                'sales_status' => '_sales_status'
+            ];
+
+            foreach ($fields as $key => $meta_key) {
+                if (isset($product_data[$key])) {
+                    $value = sanitize_text_field($product_data[$key]);
+                    update_post_meta($product_id, $meta_key, $value);
+                }
+            }
+
+            $updated_count++;
+        }
+
+        if ($updated_count > 0) {
+            wp_send_json_success([
+                'message' => sprintf(
+                    _n(
+                        '%d product updated successfully.',
+                        '%d products updated successfully.',
+                        $updated_count,
+                        'maneli-car-inquiry'
+                    ),
+                    $updated_count
+                ),
+                'updated_count' => $updated_count,
+                'errors' => $errors
+            ]);
+        } else {
+            wp_send_json_error([
+                'message' => esc_html__('No products were updated.', 'maneli-car-inquiry'),
+                'errors' => $errors
+            ]);
+        }
+    }
+
+    //======================================================================
+    // Expert Management Handlers
+    //======================================================================
+
+    /**
+     * Add a new expert user
+     */
+    public function ajax_add_expert() {
+        // Security check
+        check_ajax_referer('maneli_add_expert', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        // Get and sanitize input
+        $username = isset($_POST['username']) ? sanitize_user($_POST['username']) : '';
+        $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+        $first_name = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
+        $last_name = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+        $mobile = isset($_POST['mobile']) ? sanitize_text_field($_POST['mobile']) : '';
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
+        $send_credentials = isset($_POST['send_credentials']) && $_POST['send_credentials'] === 'true';
+
+        // Validation
+        if (empty($username) || empty($email) || empty($password)) {
+            wp_send_json_error(['message' => esc_html__('Username, email and password are required.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        if (username_exists($username)) {
+            wp_send_json_error(['message' => esc_html__('Username already exists.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        if (email_exists($email)) {
+            wp_send_json_error(['message' => esc_html__('Email already exists.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        // Create user
+        $user_id = wp_create_user($username, $password, $email);
+
+        if (is_wp_error($user_id)) {
+            wp_send_json_error(['message' => $user_id->get_error_message()]);
+            return;
+        }
+
+        // Update user data
+        wp_update_user([
+            'ID' => $user_id,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'display_name' => $first_name . ' ' . $last_name,
+            'role' => 'maneli_expert'
+        ]);
+
+        // Update user meta
+        if (!empty($mobile)) {
+            update_user_meta($user_id, 'mobile_number', $mobile);
+        }
+        update_user_meta($user_id, 'expert_active', 'yes');
+
+        // Send credentials email if requested
+        if ($send_credentials) {
+            wp_new_user_notification($user_id, null, 'both');
+        }
+
+        wp_send_json_success([
+            'message' => esc_html__('Expert added successfully.', 'maneli-car-inquiry'),
+            'user_id' => $user_id
+        ]);
+    }
+
+    /**
+     * Toggle expert active status
+     */
+    public function ajax_toggle_expert_status() {
+        // Security check
+        check_ajax_referer('maneli_toggle_expert', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        $active = isset($_POST['active']) && $_POST['active'] === 'true';
+
+        if (!$user_id) {
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        $user = get_userdata($user_id);
+        if (!$user || !in_array('maneli_expert', $user->roles)) {
+            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        // Update status
+        update_user_meta($user_id, 'expert_active', $active ? 'yes' : 'no');
+
+        wp_send_json_success([
+            'message' => $active 
+                ? esc_html__('Expert activated successfully.', 'maneli-car-inquiry')
+                : esc_html__('Expert deactivated successfully.', 'maneli-car-inquiry')
+        ]);
+    }
+
+    /**
+     * Get expert statistics
+     */
+    public function ajax_get_expert_stats() {
+        // Security check
+        check_ajax_referer('maneli_expert_stats', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+
+        if (!$user_id) {
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        $user = get_userdata($user_id);
+        if (!$user) {
+            wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+            return;
+        }
+
+        // Get inquiry counts
+        $total_inquiries = count(get_posts([
+            'post_type' => ['inquiry', 'cash_inquiry'],
+            'post_status' => 'any',
+            'author' => $user_id,
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ]));
+
+        // Get assigned inquiries count
+        global $wpdb;
+        $assigned_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->postmeta} 
+            WHERE meta_key = 'assigned_expert_id' AND meta_value = %d",
+            $user_id
+        ));
+
+        // Get status breakdown for assigned inquiries
+        $approved_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->postmeta} pm1
+            INNER JOIN {$wpdb->postmeta} pm2 ON pm1.post_id = pm2.post_id
+            WHERE pm1.meta_key = 'assigned_expert_id' AND pm1.meta_value = %d
+            AND pm2.meta_key = 'inquiry_status' AND pm2.meta_value = 'approved'",
+            $user_id
+        ));
+
+        $pending_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->postmeta} pm1
+            INNER JOIN {$wpdb->postmeta} pm2 ON pm1.post_id = pm2.post_id
+            WHERE pm1.meta_key = 'assigned_expert_id' AND pm1.meta_value = %d
+            AND pm2.meta_key = 'inquiry_status' AND pm2.meta_value = 'pending'",
+            $user_id
+        ));
+
+        $rejected_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->postmeta} pm1
+            INNER JOIN {$wpdb->postmeta} pm2 ON pm1.post_id = pm2.post_id
+            WHERE pm1.meta_key = 'assigned_expert_id' AND pm1.meta_value = %d
+            AND pm2.meta_key = 'inquiry_status' AND pm2.meta_value = 'rejected'",
+            $user_id
+        ));
+
+        // Build HTML
+        ob_start();
+        ?>
+        <div class="expert-stats-container">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary-transparent">
+                            <i class="ri-file-list-3-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4><?php echo number_format_i18n($total_inquiries); ?></h4>
+                            <p>مجموع استعلامات ثبت شده</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-info-transparent">
+                            <i class="ri-user-settings-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4><?php echo number_format_i18n($assigned_count); ?></h4>
+                            <p>استعلامات محول شده</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success-transparent">
+                            <i class="ri-checkbox-circle-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4><?php echo number_format_i18n($approved_count); ?></h4>
+                            <p>تایید شده</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning-transparent">
+                            <i class="ri-time-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4><?php echo number_format_i18n($pending_count); ?></h4>
+                            <p>در انتظار</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-danger-transparent">
+                            <i class="ri-close-circle-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h4><?php echo number_format_i18n($rejected_count); ?></h4>
+                            <p>رد شده</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3 text-center">
+                <p class="text-muted mb-0">
+                    <i class="ri-user-line me-1"></i>
+                    <strong><?php echo esc_html($user->display_name); ?></strong>
+                </p>
+                <p class="text-muted mb-0">
+                    <i class="ri-mail-line me-1"></i>
+                    <?php echo esc_html($user->user_email); ?>
+                </p>
+            </div>
+        </div>
+        
+        <style>
+        .expert-stats-container .stat-card {
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .expert-stats-container .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .expert-stats-container .stat-content h4 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .expert-stats-container .stat-content p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 13px;
+        }
+        </style>
+        <?php
+        $html = ob_get_clean();
+
+        wp_send_json_success(['html' => $html]);
     }
 }

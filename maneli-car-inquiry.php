@@ -3,7 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           0.2.09
+ * Version:           0.2.20
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -24,13 +24,11 @@ define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_DIR', plugin_dir_path(__FILE__)); // Alias for compatibility
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// --- Security Fix: Centralized API URLs with HTTPS ---
 /**
  * External API Endpoints (Centralized for Security and Maintenance)
  */
 define('MANELI_FINOTEX_API_URL', 'https://api.finnotech.ir/credit/v2/clients/%s/chequeColorInquiry');
 define('MANELI_SMS_API_WSDL', 'https://api.payamak-panel.com/post/send.asmx?wsdl'); // Enforced HTTPS
-                                                                                 // پروتکل HTTP به HTTPS تغییر یافت.
 
 // Zarinpal Gateway
 define('MANELI_ZARINPAL_REQUEST_URL', 'https://api.zarinpal.com/pg/v4/payment/request.json');

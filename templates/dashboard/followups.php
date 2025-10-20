@@ -1,65 +1,135 @@
-<?php
-/**
- * Dashboard Followups Page
- * List and manage follow-up tasks
- */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
-?>
-
+<!-- Start::row -->
 <div class="row">
-    <div class="col-12">
+    <div class="col-xl-12">
         <div class="card custom-card">
-            <div class="card-header justify-content-between">
-                <div class="card-title">
-                    لیست پیگیری‌ها
-                </div>
-                <div>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addFollowupModal">
-                        <i class="ri-add-line me-2"></i>
-                        افزودن پیگیری جدید
-                    </button>
-                </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-title">مدیریت پیگیری‌ها</div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFollowupModal">
+                    <i class="la la-plus me-1"></i>
+                    پیگیری جدید
+                </button>
             </div>
             <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <select class="form-select" id="followup-status-filter">
+                            <option value="">همه وضعیت‌ها</option>
+                            <option value="pending">در انتظار</option>
+                            <option value="completed">انجام شده</option>
+                            <option value="cancelled">لغو شده</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="followup-type-filter">
+                            <option value="">همه انواع</option>
+                            <option value="cash">نقدی</option>
+                            <option value="installment">اقساطی</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="followup-search" placeholder="جستجوی پیگیری...">
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100" onclick="filterFollowups()">
+                            <i class="la la-search me-1"></i> فیلتر
+                        </button>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
-                    <table class="table text-nowrap table-hover">
+                    <table id="followups-table" class="table table-bordered text-nowrap w-100">
                         <thead>
                             <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">مشتری</th>
-                                <th scope="col">محصول</th>
-                                <th scope="col">نوع</th>
-                                <th scope="col">تاریخ پیگیری</th>
-                                <th scope="col">وضعیت</th>
-                                <th scope="col">توضیحات</th>
-                                <th scope="col">عملیات</th>
+                                <th>شناسه</th>
+                                <th>مشتری</th>
+                                <th>محصول</th>
+                                <th>نوع استعلام</th>
+                                <th>تاریخ پیگیری</th>
+                                <th>وضعیت</th>
+                                <th>توضیحات</th>
+                                <th>عملیات</th>
                             </tr>
                         </thead>
-                        <tbody id="followups-table-body">
-                            <tr>
-                                <td colspan="8" class="text-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">در حال بارگذاری...</span>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tbody>
+                            <?php
+                            // Get followups from database
+                            global $wpdb;
+
+                            $followups = $wpdb->get_results("
+                                SELECT fm.*, p.post_title as inquiry_title, pm1.meta_value as customer_name, pm2.meta_value as product_name, pm3.meta_value as inquiry_type
+                                FROM {$wpdb->prefix}maneli_followups fm
+                                INNER JOIN {$wpdb->posts} p ON fm.inquiry_id = p.ID
+                                LEFT JOIN {$wpdb->postmeta} pm1 ON fm.inquiry_id = pm1.post_id AND pm1.meta_key = 'inquiry_name'
+                                LEFT JOIN {$wpdb->postmeta} pm2 ON fm.inquiry_id = pm2.post_id AND pm2.meta_key = 'inquiry_car_type'
+                                LEFT JOIN {$wpdb->postmeta} pm3 ON fm.inquiry_id = pm3.post_id AND pm3.meta_key = 'inquiry_type'
+                                ORDER BY fm.followup_date DESC
+                                LIMIT 20
+                            ");
+
+                            if (empty($followups)) {
+                                ?>
+                                <tr>
+                                    <td colspan="8" class="text-center">
+                                        <div class="py-4">
+                                            <i class="la la-inbox fs-1 text-muted mb-3 d-block"></i>
+                                            <p class="text-muted">هیچ پیگیری‌ای یافت نشد.</p>
+                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFollowupModal">
+                                                <i class="la la-plus me-1"></i>
+                                                ایجاد اولین پیگیری
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php
+                            } else {
+                                foreach ($followups as $followup) {
+                                    $status_badge = '';
+                                    switch ($followup->status) {
+                                        case 'completed':
+                                            $status_badge = '<span class="badge bg-success">انجام شده</span>';
+                                            break;
+                                        case 'cancelled':
+                                            $status_badge = '<span class="badge bg-danger">لغو شده</span>';
+                                            break;
+                                        default:
+                                            $status_badge = '<span class="badge bg-warning">در انتظار</span>';
+                                    }
+                                    ?>
+                                    <tr>
+                                        <td><?php echo $followup->id; ?></td>
+                                        <td><?php echo esc_html($followup->customer_name ?: 'نامشخص'); ?></td>
+                                        <td><?php echo esc_html($followup->product_name ?: 'نامشخص'); ?></td>
+                                        <td><?php echo esc_html($followup->inquiry_type === 'cash' ? 'نقدی' : ($followup->inquiry_type === 'installment' ? 'اقساطی' : 'نامشخص')); ?></td>
+                                        <td><?php echo esc_html($followup->followup_date); ?></td>
+                                        <td><?php echo $status_badge; ?></td>
+                                        <td>
+                                            <span class="text-truncate d-block" style="max-width: 200px;" title="<?php echo esc_attr($followup->notes); ?>">
+                                                <?php echo esc_html(wp_trim_words($followup->notes, 5)); ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-list">
+                                                <button class="btn btn-sm btn-primary-light" onclick="editFollowup(<?php echo $followup->id; ?>)">
+                                                    <i class="la la-edit"></i> ویرایش
+                                                </button>
+                                                <button class="btn btn-sm btn-danger-light" onclick="deleteFollowup(<?php echo $followup->id; ?>)">
+                                                    <i class="la la-trash"></i> حذف
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            ?>
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-end mb-0" id="pagination">
-                        <!-- Pagination will be loaded here -->
-                    </ul>
-                </nav>
             </div>
         </div>
     </div>
 </div>
+<!-- End::row -->
 
 <!-- Add Followup Modal -->
 <div class="modal fade" id="addFollowupModal" tabindex="-1" aria-labelledby="addFollowupModalLabel" aria-hidden="true">
@@ -144,8 +214,8 @@ jQuery(document).ready(function($) {
                             html += '<td>' + statusBadge + '</td>';
                             html += '<td>' + (followup.notes || '-') + '</td>';
                             html += '<td>';
-                            html += '<button class="btn btn-sm btn-info-light edit-followup" data-id="' + followup.id + '"><i class="ri-pencil-line"></i></button> ';
-                            html += '<button class="btn btn-sm btn-danger-light delete-followup" data-id="' + followup.id + '"><i class="ri-delete-bin-line"></i></button>';
+                            html += '<button class="btn btn-sm btn-info-light edit-followup" data-id="' + followup.id + '"><i class="la la-pencil"></i></button> ';
+                            html += '<button class="btn btn-sm btn-danger-light delete-followup" data-id="' + followup.id + '"><i class="la la-trash"></i></button>';
                             html += '</td>';
                             html += '</tr>';
                         });

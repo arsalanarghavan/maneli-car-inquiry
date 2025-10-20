@@ -30,10 +30,30 @@ if (!empty($_GET['status']) && $_GET['status'] === 'success' && !empty($options[
 }
 ?>
 
-<h3><?php esc_html_e('Step 4: Pending Review', 'maneli-car-inquiry'); ?></h3>
-
-<div class="status-box status-pending">
-    <p><?php esc_html_e('Thank you for your patience.', 'maneli-car-inquiry'); ?></p>
-    <p><?php echo esc_html($message); ?></p>
-    <p style="margin-top:8px; font-size: 12px; color: #666;">(<?php esc_html_e('Typically within 24 hours.', 'maneli-car-inquiry'); ?>)</p>
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card custom-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="la la-clock me-2"></i>
+                    <?php esc_html_e('Step 4: Pending Review', 'maneli-car-inquiry'); ?>
+                </div>
+            </div>
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <span class="avatar avatar-xxl bg-warning-transparent">
+                        <i class="la la-clock fs-1"></i>
+                    </span>
+                </div>
+                <h4 class="mb-3"><?php esc_html_e('Thank you for your patience.', 'maneli-car-inquiry'); ?></h4>
+                <div class="alert alert-warning d-inline-block" role="alert">
+                    <?php echo esc_html($message); ?>
+                </div>
+                <p class="text-muted fs-12 mt-3">
+                    <i class="la la-info-circle me-1"></i>
+                    <?php esc_html_e('Typically within 24 hours.', 'maneli-car-inquiry'); ?>
+                </p>
+            </div>
+        </div>
+    </div>
 </div>

@@ -22,138 +22,193 @@ $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
 $status_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($status);
 $expert_name = get_post_meta($inquiry_id, 'assigned_expert_name', true);
 $back_link = remove_query_arg('cash_inquiry_id');
-
-$status_classes = [
-    'pending'          => 'status-bg-pending',
-    'approved'         => 'status-bg-approved',
-    'rejected'         => 'status-bg-rejected',
-    'awaiting_payment' => 'status-bg-awaiting_payment',
-    'completed'        => 'status-bg-approved',
-];
-$status_class = $status_classes[$status] ?? 'status-bg-pending';
 ?>
 
-<div class="maneli-inquiry-wrapper frontend-expert-report" id="cash-inquiry-details" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
-    
-    <h2 class="report-main-title">
-        <?php esc_html_e('Cash Purchase Request Details', 'maneli-car-inquiry'); ?>
-        <small>(#<?php echo esc_html($inquiry_id); ?>)</small>
-    </h2>
-    
-    <div class="report-status-box <?php echo esc_attr($status_class); ?>">
-        <strong><?php esc_html_e('Current Status:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($status_label); ?>
-        <?php if ($expert_name): ?>
-            <br><strong><?php esc_html_e('Assigned Expert:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($expert_name); ?>
+<div class="row" id="cash-inquiry-details" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
+    <div class="col-xl-12">
+        <div class="card custom-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="la la-file-alt me-2"></i>
+                    <?php esc_html_e('Cash Purchase Request Details', 'maneli-car-inquiry'); ?>
+                    <small class="text-muted">(#<?php echo esc_html($inquiry_id); ?>)</small>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-<?php echo $status === 'completed' ? 'success' : ($status === 'approved' ? 'success' : ($status === 'rejected' ? 'danger' : ($status === 'awaiting_payment' ? 'warning' : 'secondary'))); ?>">
+                    <strong><?php esc_html_e('Current Status:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($status_label); ?>
+                    <?php if ($expert_name): ?>
+                        <br><strong><?php esc_html_e('Assigned Expert:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($expert_name); ?>
+                    <?php endif; ?>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <?php if ($product_id && has_post_thumbnail($product_id)): ?>
+                            <?php echo get_the_post_thumbnail($product_id, 'medium', ['class' => 'img-fluid rounded']); ?>
+                        <?php endif; ?>
+                    </div>
+                    <div class="col-md-8">
+                        <h5 class="mb-3"><?php esc_html_e('Request Information', 'maneli-car-inquiry'); ?></h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true)); ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></td>
+                                        <td><a href="tel:<?php echo esc_attr(get_post_meta($inquiry_id, 'mobile_number', true)); ?>"><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></a></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></td>
+                                        <td><a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank"><?php echo esc_html(get_the_title($product_id)); ?></a></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Requested Color', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td>
+                                    </tr>
+                                    <?php 
+                                    $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                                    if (!empty($down_payment)): ?>
+                                        <tr>
+                                            <td class="fw-semibold bg-light"><?php esc_html_e('Down Payment Amount', 'maneli-car-inquiry'); ?></td>
+                                            <td><span class="badge bg-success-transparent"><?php echo number_format_i18n($down_payment); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
+                                        </tr>
+                                    <?php endif; ?>
+                                    <?php 
+                                    $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
+                                    if (!empty($rejection_reason)): ?>
+                                        <tr>
+                                            <td class="fw-semibold bg-light"><?php esc_html_e('Rejection Reason', 'maneli-car-inquiry'); ?></td>
+                                            <td><?php echo esc_html($rejection_reason); ?></td>
+                                        </tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-top">
+                    <h5 class="mb-3"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></h5>
+                    <div class="d-flex gap-2 flex-wrap justify-content-center">
+                        <?php if (!$expert_name): ?>
+                            <button type="button" class="btn btn-info assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash">
+                                <i class="la la-user-plus me-1"></i>
+                                <?php esc_html_e('Assign to Expert', 'maneli-car-inquiry'); ?>
+                            </button>
+                        <?php endif; ?>
+                        
+                        <button type="button" class="btn btn-warning" id="edit-cash-inquiry-btn">
+                            <i class="la la-edit me-1"></i>
+                            <?php esc_html_e('Edit Information', 'maneli-car-inquiry'); ?>
+                        </button>
+                        
+                        <button type="button" class="btn btn-danger delete-inquiry-report-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash">
+                            <i class="la la-trash me-1"></i>
+                            <?php esc_html_e('Delete Request', 'maneli-car-inquiry'); ?>
+                        </button>
+
+                        <?php if ($status === 'pending' || $status === 'approved'): ?>
+                            <button type="button" class="btn btn-success" id="set-downpayment-btn">
+                                <i class="la la-dollar-sign me-1"></i>
+                                <?php esc_html_e('Set Down Payment', 'maneli-car-inquiry'); ?>
+                            </button>
+                            <button type="button" class="btn btn-danger" id="reject-cash-inquiry-btn">
+                                <i class="la la-times-circle me-1"></i>
+                                <?php esc_html_e('Reject Request', 'maneli-car-inquiry'); ?>
+                            </button>
+                        <?php endif; ?>
+                        
+                        <?php if ($status === 'awaiting_payment'): ?>
+                            <a href="<?php echo esc_url(add_query_arg(['cash_inquiry_id' => $inquiry_id, 'payment_link' => 'true'], home_url('/dashboard/?endp=inf_menu_4'))); ?>" target="_blank" class="btn btn-info">
+                                <i class="la la-link me-1"></i>
+                                <?php esc_html_e('View Customer Payment Link', 'maneli-car-inquiry'); ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a href="<?php echo esc_url($back_link); ?>" class="btn btn-light btn-wave">
+                        <i class="la la-arrow-left me-1"></i>
+                        <?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <?php if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true)) : ?>
+        <div class="card custom-card mt-3">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="la la-calendar-alt me-2"></i>
+                    <?php esc_html_e('Schedule In-Person Meeting', 'maneli-car-inquiry'); ?>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="meeting_form" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><?php esc_html_e('Select Date', 'maneli-car-inquiry'); ?>:</label>
+                            <input type="date" id="meeting_date" class="form-control" required>
+                            <input type="hidden" id="meeting_start" value="">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><?php esc_html_e('Available Slots', 'maneli-car-inquiry'); ?>:</label>
+                            <div id="meeting_slots"></div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="la la-calendar-check me-1"></i>
+                                <?php esc_html_e('Book Meeting', 'maneli-car-inquiry'); ?>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card custom-card mt-3">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="la la-user-cog me-2"></i>
+                    <?php esc_html_e('Expert Decision', 'maneli-car-inquiry'); ?>
+                </div>
+            </div>
+            <div class="card-body">
+                <?php $options = get_option('maneli_inquiry_all_options', []); $raw = $options['expert_statuses'] ?? ''; $lines = array_filter(array_map('trim', explode("\n", (string)$raw))); $default_key = $options['expert_default_status'] ?? 'unknown'; ?>
+                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                    <input type="hidden" name="action" value="maneli_expert_update_decision">
+                    <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
+                    <input type="hidden" name="inquiry_type" value="cash">
+                    <?php wp_nonce_field('maneli_expert_update_decision'); ?>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?>:</label>
+                            <select name="expert_status" class="form-select">
+                                <?php foreach ($lines as $line): list($key,$label) = array_pad(explode('|', $line), 3, ''); ?>
+                                    <option value="<?php echo esc_attr($key); ?>" <?php selected(get_post_meta($inquiry_id, 'expert_status', true) ?: $default_key, $key); ?>><?php echo esc_html($label ?: $key); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><?php esc_html_e('Note (optional)', 'maneli-car-inquiry'); ?>:</label>
+                            <textarea name="expert_note" rows="2" class="form-control"><?php echo esc_textarea(get_post_meta($inquiry_id, 'expert_status_note', true)); ?></textarea>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="la la-save me-1"></i>
+                                <?php esc_html_e('Save Decision', 'maneli-car-inquiry'); ?>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
         <?php endif; ?>
     </div>
-
-    <div class="report-box">
-        <h3 class="report-box-title"><?php esc_html_e('Request Information', 'maneli-car-inquiry'); ?></h3>
-        <div class="report-box-flex">
-             <div class="report-car-image">
-                <?php if ($product_id && has_post_thumbnail($product_id)): ?>
-                    <?php echo get_the_post_thumbnail($product_id, 'medium'); ?>
-                <?php endif; ?>
-            </div>
-            <div class="report-details-table">
-                <table class="summary-table">
-                    <tbody>
-                        <tr><th><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true)); ?></td></tr>
-                        <tr><th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?>:</th><td><a href="tel:<?php echo esc_attr(get_post_meta($inquiry_id, 'mobile_number', true)); ?>"><?php echo esc_html(get_post_meta($inquiry_id, 'mobile_number', true)); ?></a></td></tr>
-                        <tr><th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th><td><a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank"><?php echo esc_html(get_the_title($product_id)); ?></a></td></tr>
-                        <tr><th><?php esc_html_e('Requested Color', 'maneli-car-inquiry'); ?></th><td><?php echo esc_html(get_post_meta($inquiry_id, 'cash_car_color', true)); ?></td></tr>
-                        <?php 
-                        $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
-                        if (!empty($down_payment)): ?>
-                            <tr><th><?php esc_html_e('Down Payment Amount', 'maneli-car-inquiry'); ?></th><td><?php echo number_format_i18n($down_payment) . ' ' . esc_html__('Toman', 'maneli-car-inquiry'); ?></td></tr>
-                        <?php endif; ?>
-                         <?php 
-                        $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
-                        if (!empty($rejection_reason)): ?>
-                            <tr><th><?php esc_html_e('Rejection Reason', 'maneli-car-inquiry'); ?></th><td><?php echo esc_html($rejection_reason); ?></td></tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="admin-actions-box">
-        <h3 class="report-box-title"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></h3>
-        <div class="action-button-group" style="justify-content: center;">
-            
-            <?php if (!$expert_name): ?>
-                <button type="button" class="action-btn assign-expert-btn" style="background-color: #17a2b8;" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash"><?php esc_html_e('Assign to Expert', 'maneli-car-inquiry'); ?></button>
-            <?php endif; ?>
-            
-            <button type="button" class="action-btn" id="edit-cash-inquiry-btn" style="background-color: var(--theme-yellow); color: var(--text-dark);"><?php esc_html_e('Edit Information', 'maneli-car-inquiry'); ?></button>
-            
-            <?php // Note: The Delete button now uses the general JS handler for report pages ?>
-            <button type="button" class="action-btn delete-inquiry-report-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" style="background-color: var(--theme-red);"><?php esc_html_e('Delete Request', 'maneli-car-inquiry'); ?></button>
-
-            <?php if ($status === 'pending' || $status === 'approved'): ?>
-                <button type="button" class="action-btn approve" id="set-downpayment-btn"><?php esc_html_e('Set Down Payment', 'maneli-car-inquiry'); ?></button>
-                <button type="button" class="action-btn reject" id="reject-cash-inquiry-btn"><?php esc_html_e('Reject Request', 'maneli-car-inquiry'); ?></button>
-            <?php endif; ?>
-            
-            <?php if ($status === 'awaiting_payment'): ?>
-                <a href="<?php echo esc_url(add_query_arg(['cash_inquiry_id' => $inquiry_id, 'payment_link' => 'true'], home_url('/dashboard/?endp=inf_menu_4'))); ?>" target="_blank" class="action-btn" style="background-color: var(--theme-cyan);"><?php esc_html_e('View Customer Payment Link', 'maneli-car-inquiry'); ?></a>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <div class="report-back-button-wrapper">
-        <a href="<?php echo esc_url($back_link); ?>" class="loan-action-btn"><?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?></a>
-    </div>
-    <?php if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true)) : ?>
-    <div class="maneli-card meeting-schedule">
-        <h3><?php esc_html_e('Schedule In-Person Meeting', 'maneli-car-inquiry'); ?></h3>
-        <form id="meeting_form" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash">
-            <div class="form-row">
-                <div class="form-group">
-                    <label><?php esc_html_e('Select Date', 'maneli-car-inquiry'); ?>:</label>
-                    <input type="date" id="meeting_date" required>
-                    <input type="hidden" id="meeting_start" value="">
-                </div>
-                <div class="form-group" style="flex: 1; min-width: 260px;">
-                    <label><?php esc_html_e('Available Slots', 'maneli-car-inquiry'); ?>:</label>
-                    <div id="meeting_slots"></div>
-                </div>
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button type="submit" class="action-btn" style="background: linear-gradient(135deg, var(--theme-green) 0%, #4caf50 100%);">
-                        <?php esc_html_e('Book Meeting', 'maneli-car-inquiry'); ?>
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-    <?php endif; ?>
-    <?php if (current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true)) : ?>
-    <div class="maneli-report-section expert-decision" style="margin-top: 20px; border: 1px solid #eee; padding: 20px; border-radius: 4px;">
-        <h3><?php esc_html_e('Expert Decision', 'maneli-car-inquiry'); ?></h3>
-        <?php $options = get_option('maneli_inquiry_all_options', []); $raw = $options['expert_statuses'] ?? ''; $lines = array_filter(array_map('trim', explode("\n", (string)$raw))); $default_key = $options['expert_default_status'] ?? 'unknown'; ?>
-        <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:flex; gap:10px; flex-wrap: wrap;">
-            <input type="hidden" name="action" value="maneli_expert_update_decision">
-            <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
-            <input type="hidden" name="inquiry_type" value="cash">
-            <?php wp_nonce_field('maneli_expert_update_decision'); ?>
-            <div style="min-width:240px;">
-                <label style="display:block; margin-bottom:6px; "><?php esc_html_e('Status', 'maneli-car-inquiry'); ?>:</label>
-                <select name="expert_status" style="width:100%;">
-                    <?php foreach ($lines as $line): list($key,$label) = array_pad(explode('|', $line), 3, ''); ?>
-                        <option value="<?php echo esc_attr($key); ?>" <?php selected(get_post_meta($inquiry_id, 'expert_status', true) ?: $default_key, $key); ?>><?php echo esc_html($label ?: $key); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div style="flex:1; min-width:280px;">
-                <label style="display:block; margin-bottom:6px; "><?php esc_html_e('Note (optional)', 'maneli-car-inquiry'); ?>:</label>
-                <textarea name="expert_note" rows="2" style="width:100%;"><?php echo esc_textarea(get_post_meta($inquiry_id, 'expert_status_note', true)); ?></textarea>
-            </div>
-            <div style="align-self:flex-end;">
-                <button type="submit" class="action-btn" style="background-color: var(--theme-green); "><?php esc_html_e('Save Decision', 'maneli-car-inquiry'); ?></button>
-            </div>
-        </form>
-    </div>
-    <?php endif; ?>
 </div>

@@ -22,7 +22,7 @@
     
      <!-- Scroll To Top -->
      <div class="scrollToTop">
-        <span class="arrow"><i class="ti ti-arrow-narrow-up fs-20"></i></span>
+        <span class="arrow"><i class="la la-arrow-up fs-20"></i></span>
      </div>
      <div id="responsive-overlay"></div>
      <!-- Scroll To Top -->

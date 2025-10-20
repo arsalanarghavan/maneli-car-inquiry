@@ -74,3 +74,36 @@
     width: 100% !important;
     overflow-x: hidden !important;
 }
+
+/* Fix RemixIcon in Sidebar Menu */
+.app-sidebar .side-menu__icon {
+    font-size: 1.25rem !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-inline-end: 0.75rem !important;
+}
+
+.app-sidebar .side-menu__icon::before {
+    display: inline-block !important;
+    font-family: 'Line Awesome Free' !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Ensure icon visibility in all menu states */
+[data-vertical-style=detached] .app-sidebar .side-menu__icon,
+[data-vertical-style=doublemenu] .app-sidebar .side-menu__icon,
+[data-nav-layout=horizontal] .app-sidebar .side-menu__icon {
+    font-size: 1.25rem !important;
+    display: inline-flex !important;
+}
+
+/* Fix icon color inheritance */
+.app-sidebar .side-menu__item .side-menu__icon {
+    color: inherit !important;
+}

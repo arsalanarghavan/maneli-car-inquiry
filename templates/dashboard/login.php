@@ -7,15 +7,18 @@
     <meta charset="UTF-8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="Description" content="ورود به داشبورد منلی کار">
-    <meta name="Author" content="منلی کار">
-    <meta name="keywords" content="ورود، داشبورد، منلی کار">
+    <meta name="Description" content="ورود به داشبورد مانلی خودرو">
+    <meta name="Author" content="مانلی خودرو">
+    <meta name="keywords" content="ورود، داشبورد، مانلی خودرو">
     
     <!-- Title -->
-    <title>ورود - داشبورد منلی کار</title>
+    <title>ورود - داشبورد مانلی خودرو</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/favicon.ico" type="image/x-icon">
+    <?php 
+    $theme_handler_login = Maneli_Frontend_Theme_Handler::instance();
+    ?>
+    <link rel="icon" href="<?php echo $theme_handler_login->get_favicon(); ?>" type="image/x-icon">
 
     <!-- Start::custom-styles -->
         
@@ -28,8 +31,8 @@
     <!-- Style Css -->
     <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/styles.css" rel="stylesheet">
 
-    <!-- Icons Css -->
-    <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/icons.css" rel="stylesheet">
+    <!-- Line Awesome Complete - CSS کامل با font-face و content codes -->
+    <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-line-awesome-complete.css" rel="stylesheet">
     
     <!-- Fonts Css -->
     <link href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-fonts.css" rel="stylesheet">
@@ -42,6 +45,7 @@
     
     <!-- Loader Fix - Prevent infinite loading -->
     <link rel="stylesheet" href="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/css/maneli-loader-fix.css">
+    
     <!-- End::custom-styles -->
 
 </head>
@@ -141,11 +145,11 @@
                             
                             <div class="d-flex mb-3 justify-content-between gap-2">
                                 <button type="button" class="btn btn-lg btn-primary-light border flex-fill" id="sms-login-btn">
-                                    <i class="ri-message-3-line me-2"></i>
+                                    <i class="la la-comment me-2"></i>
                                     <span class="lh-1">ورود با پیامک</span>
                                 </button>
                                 <button type="button" class="btn btn-lg btn-light border flex-fill" id="password-login-btn">
-                                    <i class="ri-lock-line me-2"></i>
+                                    <i class="la la-lock me-2"></i>
                                     <span class="lh-1">ورود با رمز عبور</span>
                                 </button>
                             </div>
@@ -163,7 +167,7 @@
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="sms_code" name="sms_code" placeholder="کد 4 رقمی" maxlength="4">
                                             <button class="btn btn-primary" type="button" id="send_sms_btn">
-                                                <i class="ri-send-plane-line me-1"></i>
+                                                <i class="la la-paper-plane me-1"></i>
                                                 ارسال کد
                                             </button>
                                         </div>
@@ -174,7 +178,7 @@
                                         <label for="password" class="form-label text-default">رمز عبور</label>
                                         <div class="position-relative">
                                             <input type="password" class="form-control create-password-input" id="password" name="password" placeholder="رمز عبور">
-                                            <a href="javascript:void(0);" class="show-password-button text-muted" id="toggle-password"><i class="ri-eye-off-line align-middle"></i></a>
+                                            <a href="javascript:void(0);" class="show-password-button text-muted" id="toggle-password"><i class="la la-eye-slash align-middle"></i></a>
                                         </div>
                                     </div>
                                     
@@ -186,7 +190,7 @@
                                 <div class="text-center">
                                     <p class="text-muted mt-3 mb-0">
                                         <a href="<?php echo home_url(); ?>" class="text-primary">
-                                            <i class="ri-arrow-right-line me-1"></i>بازگشت به صفحه اصلی
+                                            <i class="la la-arrow-right me-1"></i>بازگشت به صفحه اصلی
                                         </a>
                                     </p>
                                 </div>
@@ -206,7 +210,7 @@
                 <div class="aunthentication-cover-content d-flex align-items-center justify-content-center">
                     <div>
                         <h3 class="text-fixed-white mb-1 fw-medium">خوش آمدید!</h3>
-                        <h6 class="text-fixed-white mb-3 fw-medium">ورود به داشبورد منلی کار</h6>
+                        <h6 class="text-fixed-white mb-3 fw-medium">ورود به داشبورد مانلی خودرو</h6>
                         <p class="text-fixed-white mb-1 op-6">به داشبورد مدیریت خوش آمدید. لطفاً برای مدیریت استعلامات و نظارت بر فعالیت‌ها وارد شوید.</p>
                     </div>
                 </div>
@@ -275,7 +279,7 @@
                     const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordInput.setAttribute('type', type);
                     const icon = this.querySelector('i');
-                    icon.classList.toggle('ri-eye-off-line');
+                    icon.classList.toggle('la la-eye-slash');
                     icon.classList.toggle('ri-eye-line');
                 });
             }
@@ -294,7 +298,7 @@
                 }
 
                 this.disabled = true;
-                this.innerHTML = '<i class="ri-loader-4-line me-1"></i>در حال ارسال...';
+                this.innerHTML = '<i class="la la-spinner la-spin me-1"></i>در حال ارسال...';
 
                 // Send AJAX request
                 fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
@@ -315,25 +319,25 @@
                         // Start countdown
                         let countdown = 60;
                         const interval = setInterval(() => {
-                            this.innerHTML = `<i class="ri-time-line me-1"></i>${countdown}`;
+                            this.innerHTML = `<i class="la la-clock me-1"></i>${countdown}`;
                             countdown--;
                             if (countdown < 0) {
                                 clearInterval(interval);
                                 this.disabled = false;
-                                this.innerHTML = '<i class="ri-send-plane-line me-1"></i>ارسال کد';
+                                this.innerHTML = '<i class="la la-paper-plane me-1"></i>ارسال کد';
                             }
                         }, 1000);
                     } else {
                         alert(data.data.message || 'خطا در ارسال کد تایید');
                         this.disabled = false;
-                        this.innerHTML = '<i class="ri-send-plane-line me-1"></i>ارسال کد';
+                        this.innerHTML = '<i class="la la-paper-plane me-1"></i>ارسال کد';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     alert('خطا در ارسال کد تایید');
                     this.disabled = false;
-                    this.innerHTML = '<i class="ri-send-plane-line me-1"></i>ارسال کد';
+                    this.innerHTML = '<i class="la la-paper-plane me-1"></i>ارسال کد';
                 });
             });
 
@@ -349,7 +353,7 @@
                 const submitBtn = this.querySelector('button[type="submit"]');
                 const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="ri-loader-4-line me-1"></i>در حال ورود...';
+                submitBtn.innerHTML = '<i class="la la-spinner la-spin me-1"></i>در حال ورود...';
 
                 fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
                     method: 'POST',
