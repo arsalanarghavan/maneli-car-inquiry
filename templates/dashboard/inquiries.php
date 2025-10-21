@@ -615,6 +615,11 @@ if ($count_type === 'installment' || $count_type === 'all') {
                         <i class="la la-plus me-1"></i>
                         استعلام نقدی جدید
                     </button>
+                <?php elseif ($count_type === 'installment'): ?>
+                    <a href="<?php echo home_url('/dashboard/new-installment-inquiry'); ?>" class="btn btn-primary">
+                        <i class="la la-plus me-1"></i>
+                        استعلام اقساطی جدید
+                    </a>
                 <?php else: ?>
                     <a href="<?php echo home_url('/dashboard/new-inquiry'); ?>" class="btn btn-primary">
                         <i class="la la-plus me-1"></i>

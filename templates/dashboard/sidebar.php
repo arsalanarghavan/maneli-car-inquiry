@@ -1,4 +1,5 @@
 <!-- Start::main-sidebar -->
+
 <aside class="app-sidebar sticky" id="sidebar">
 
     <!-- Start::main-sidebar-header -->
@@ -312,3 +313,4 @@
 
 </aside>
 <!-- End::main-sidebar -->
+

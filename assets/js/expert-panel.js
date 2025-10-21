@@ -150,35 +150,71 @@
                 
                 // Inject the calculator HTML into the wrapper using localized strings
                 const calculatorHTML = `
-                    <div class="form-grid" style="margin-top: 20px;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expert_down_payment">${getText('down_payment_label')}</label>
-                                <input type="text" id="expert_down_payment" name="down_payment" class="regular-text" required>
-                                <p class="description" style="margin-top: 5px;">${getText('min_down_payment_desc')}: ${formatMoney(minDownPayment)} ${tomanText}</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="expert_term_months">${getText('term_months_label')}</label>
-                                <select name="term_months" id="expert_term_months" class="regular-text">
-                                    <option value="12">${getText('term_12')}</option>
-                                    <option value="18" selected>${getText('term_18')}</option>
-                                    <option value="24">${getText('term_24')}</option>
-                                    <option value="36">${getText('term_36')}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row" style="border-top: 1px solid #eee; padding-top: 15px; margin-top: 15px;">
-                           <div class="form-group">
-                                <label>${getText('loan_amount_label')}</label>
-                                <div class="result-display"><span id="expert-loan-amount">-</span> <span>${tomanText}</span></div>
-                            </div>
-                             <div class="form-group">
-                                <label>${getText('total_repayment_label')}</label>
-                                <div class="result-display"><span id="expert-total-repayment">-</span> <span>${tomanText}</span></div>
-                            </div>
-                             <div class="form-group">
-                                <label>${getText('installment_amount_label')}</label>
-                                <div class="result-display" style="color: #3989BE; font-size: 1.3em;"><span id="expert-installment-amount">-</span> <span>${tomanText}</span></div>
+                    <div class="mb-4 pb-3 border-bottom">
+                        <h5 class="mb-3">
+                            <span class="avatar avatar-sm avatar-rounded bg-success-transparent me-2">
+                                <i class="la la-calculator fs-18"></i>
+                            </span>
+                            <span class="align-middle">محاسبه اقساط</span>
+                        </h5>
+                        
+                        <div class="card custom-card shadow-none border border-success mb-3">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="expert_down_payment" class="form-label fw-semibold">
+                                            <i class="la la-wallet text-success me-1"></i>
+                                            مبلغ پیش‌پرداخت (تومان) <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" id="expert_down_payment" name="down_payment" class="form-control form-control-lg" required>
+                                        <div class="form-text text-muted">
+                                            <i class="la la-info-circle me-1"></i>
+                                            حداقل پیش‌پرداخت: <strong class="text-success">${formatMoney(minDownPayment)}</strong> تومان
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">
+                                            <i class="la la-calendar text-info me-1"></i>
+                                            تعداد اقساط (ماه) <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="hidden" name="term_months" id="expert_term_months" value="18">
+                                        <div class="btn-group w-100" role="group">
+                                            <input type="radio" class="btn-check" name="expert_term_radio" id="term-12" value="12">
+                                            <label class="btn btn-outline-primary" for="term-12">12 ماه</label>
+                                            
+                                            <input type="radio" class="btn-check" name="expert_term_radio" id="term-18" value="18" checked>
+                                            <label class="btn btn-outline-primary" for="term-18">18 ماه</label>
+                                            
+                                            <input type="radio" class="btn-check" name="expert_term_radio" id="term-24" value="24">
+                                            <label class="btn btn-outline-primary" for="term-24">24 ماه</label>
+                                            
+                                            <input type="radio" class="btn-check" name="expert_term_radio" id="term-36" value="36">
+                                            <label class="btn btn-outline-primary" for="term-36">36 ماه</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3 mt-3">
+                                    <div class="col-md-4">
+                                        <div class="alert alert-primary mb-0">
+                                            <label class="fw-semibold mb-1">مبلغ وام</label>
+                                            <div class="fs-5"><span id="expert-loan-amount">-</span> تومان</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="alert alert-info mb-0">
+                                            <label class="fw-semibold mb-1">مجموع بازپرداخت</label>
+                                            <div class="fs-5"><span id="expert-total-repayment">-</span> تومان</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="alert alert-success mb-0">
+                                            <label class="fw-semibold mb-1">قسط ماهانه</label>
+                                            <div class="fs-4 fw-bold"><span id="expert-installment-amount">-</span> تومان</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>`;
@@ -188,11 +224,17 @@
 
                 // --- Calculator Live Update Logic ---
                 const downPaymentInput = $('#expert_down_payment');
-                const termSelect = $('#expert_term_months');
+                const termHiddenInput = $('#expert_term_months');
+                
+                // Handle term button clicks
+                $('input[name="expert_term_radio"]').on('change', function() {
+                    termHiddenInput.val($(this).val());
+                    calculateInstallment();
+                });
                 
                 const calculateInstallment = () => {
                     const dp = parseMoney(downPaymentInput.val());
-                    const months = parseInt(termSelect.val(), 10) || 12;
+                    const months = parseInt(termHiddenInput.val(), 10) || 18;
                     const loanAmount = price - dp;
 
                     if (loanAmount <= 0) {
@@ -228,8 +270,6 @@
                     }
                     calculateInstallment();
                 });
-
-                termSelect.on('change', calculateInstallment);
 
                 // Set initial value and trigger calculation
                 downPaymentInput.val(minDownPayment.toLocaleString('en-US')).trigger('input');

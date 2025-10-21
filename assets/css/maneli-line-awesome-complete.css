@@ -120,9 +120,7 @@
 .la.la-spinner:before, .las.la-spinner:before, .la-spinner:before { content: "\f110"; }
 .la.la-link:before, .las.la-link:before, .la-link:before { content: "\f0c1"; }
 
-/* Sidebar & Header specific */
-.app-sidebar .side-menu__icon, .side-menu__icon { font-family: 'Line Awesome Free' !important; font-weight: 900 !important; }
-.header-link-icon { font-family: 'Line Awesome Free' !important; font-weight: 900 !important; }
+/* Icon specific - removed header/sidebar specific code */
 
 i[class^="la-"], i[class*=" la-"], i.la, i.las, i.lar, i.lab,
 span[class^="la-"], span[class*=" la-"], span.la, span.las, span.rar, span.lab {

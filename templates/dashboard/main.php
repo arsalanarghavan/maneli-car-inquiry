@@ -13,6 +13,9 @@ switch ($page) {
     case 'new-inquiry':
         $page_title = 'استعلام جدید - مانلی خودرو';
         break;
+    case 'new-installment-inquiry':
+        $page_title = 'استعلام اقساطی جدید - مانلی خودرو';
+        break;
     case 'inquiries':
         $page_title = 'لیست استعلامات - مانلی خودرو';
         break;
@@ -68,13 +71,16 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                 <?php if ($page): ?>
                                     <li class="breadcrumb-item active" aria-current="page">
                                         <?php
-                                        switch ($page) {
-                                            case 'new-inquiry':
-                                                echo 'استعلام جدید';
-                                                break;
-                                            case 'inquiries':
-                                                echo 'لیست استعلامات';
-                                                break;
+                                switch ($page) {
+                                    case 'new-inquiry':
+                                        echo 'استعلام جدید';
+                                        break;
+                                    case 'new-installment-inquiry':
+                                        echo 'استعلام اقساطی جدید';
+                                        break;
+                                    case 'inquiries':
+                                        echo 'لیست استعلامات';
+                                        break;
                                             case 'followups':
                                                 echo 'پیگیری‌های اقساطی';
                                                 break;
@@ -109,6 +115,9 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                 switch ($page) {
                                     case 'new-inquiry':
                                         echo 'استعلام جدید - مانلی خودرو';
+                                        break;
+                                    case 'new-installment-inquiry':
+                                        echo 'استعلام اقساطی جدید - مانلی خودرو';
                                         break;
                                     case 'inquiries':
                                         echo 'لیست استعلامات - مانلی خودرو';
@@ -193,8 +202,15 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                         return false;
                     }
                     
+                    // Allow new-installment-inquiry for admins and experts
+                    if ($page === 'new-installment-inquiry' && ($is_admin || $is_expert)) {
+                        $can_access = true;
+                    } else {
+                        $can_access = maneli_can_access_page($page, $is_admin, $is_expert, $is_customer);
+                    }
+                    
                     // Check access before loading page
-                    if (!maneli_can_access_page($page, $is_admin, $is_expert, $is_customer)) {
+                    if (!$can_access) {
                         ?>
                         <div class="row">
                             <div class="col-12">
@@ -219,6 +235,9 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                         switch ($page) {
                             case 'new-inquiry':
                                 include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-inquiry.php';
+                                break;
+                            case 'new-installment-inquiry':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-installment-inquiry.php';
                                 break;
                             case 'inquiries':
                                 include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/inquiries.php';

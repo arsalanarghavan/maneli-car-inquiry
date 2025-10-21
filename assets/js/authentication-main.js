@@ -8,7 +8,10 @@
     if (localStorage.xintrartl) {
         let html = document.querySelector('html');
         html.setAttribute("dir", "rtl");
-        document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.rtl.min.css");
+        var pluginUrl = window.MANELI_PLUGIN_URL || '';
+        if (pluginUrl) {
+            document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css");
+        }
             // rtlFn();
     }
     if (localStorage.getItem("xintralayout") == "horizontal") {
@@ -47,7 +50,10 @@
         if (localStorage.xintrartl) {
             let html = document.querySelector('html');
             html.setAttribute('dir', 'rtl');
-            document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.rtl.min.css");
+            var pluginUrl = window.MANELI_PLUGIN_URL || '';
+            if (pluginUrl) {
+                document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css");
+            }
             setTimeout(() => {
                 rtlFn();
             }, 10);
@@ -60,8 +66,11 @@
 
 function ltrFn() {
     let html = document.querySelector('html')
+    var pluginUrl = window.MANELI_PLUGIN_URL || '';
     if(!document.querySelector("#style").href.includes('bootstrap.min.css')){
-        document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.min.css");
+        if (pluginUrl) {
+            document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.min.css");
+        }
     }
     html.setAttribute("dir", "ltr");
 }
@@ -69,5 +78,8 @@ function ltrFn() {
 function rtlFn() {
     let html = document.querySelector('html');
     html.setAttribute("dir", "rtl");
-    document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.rtl.min.css");
+    var pluginUrl = window.MANELI_PLUGIN_URL || '';
+    if (pluginUrl) {
+        document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css");
+    }
 }

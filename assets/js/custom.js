@@ -392,10 +392,14 @@
 
   /* header dropdowns scroll */
   var myHeadernotification = document.getElementById("header-notification-scroll");
-  new SimpleBar(myHeadernotification, { autoHide: true });
+  if (myHeadernotification) {
+    new SimpleBar(myHeadernotification, { autoHide: true });
+  }
 
   var myHeaderCart = document.getElementById("header-cart-items-scroll");
-  new SimpleBar(myHeaderCart, { autoHide: true });
+  if (myHeaderCart) {
+    new SimpleBar(myHeaderCart, { autoHide: true });
+  }
   /* header dropdowns scroll */
 
   const autoCompleteJS = new autoComplete({
@@ -500,9 +504,10 @@ headerbtn.forEach((button) => {
       } `;
     document.getElementById("cart-icon-badge").innerText = `${document.querySelectorAll(".dropdown-item-close").length
       }`;
-    console.log(
-      document.getElementById("header-cart-items-scroll").children.length
-    );
+    var headerCartScroll = document.getElementById("header-cart-items-scroll");
+    if (headerCartScroll) {
+      console.log(headerCartScroll.children.length);
+    }
     if (document.querySelectorAll(".dropdown-item-close").length == 0) {
       let elementHide = document.querySelector(".empty-header-item");
       let elementShow = document.querySelector(".empty-item");

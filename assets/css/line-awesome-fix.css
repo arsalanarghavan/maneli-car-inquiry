@@ -191,20 +191,7 @@
 
 /* CRITICAL FIXES - Override any other CSS trying to change icon fonts */
 
-/* Sidebar Icons - Force Line Awesome */
-.app-sidebar .side-menu__icon,
-.app-sidebar .side-menu__icon::before,
-.side-menu__icon,
-.side-menu__icon::before {
-    font-family: 'Line Awesome Free' !important;
-    font-weight: 900 !important;
-    font-style: normal !important;
-}
-
-/* Header Icons - Force Line Awesome */
-.header-link-icon,
-.header-link-icon::before {
-    font-family: 'Line Awesome Free' !important;
+/* Icons - Force Line Awesome - removed header/sidebar specific code */
     font-weight: 900 !important;
 }
 

@@ -77,9 +77,9 @@ class Maneli_Dashboard_Handler {
         add_rewrite_rule('^dashboard/([^/]+)/([^/]+)/?$', 'index.php?maneli_dashboard=1&maneli_dashboard_page=$matches[1]&maneli_dashboard_subpage=$matches[2]', 'top');
         
         // Flush rewrite rules if needed
-        if (get_option('maneli_dashboard_rules_flushed') !== '2') {
+        if (get_option('maneli_dashboard_rules_flushed') !== '3') {
             flush_rewrite_rules();
-            update_option('maneli_dashboard_rules_flushed', '2');
+            update_option('maneli_dashboard_rules_flushed', '3');
         }
     }
     
@@ -108,8 +108,20 @@ class Maneli_Dashboard_Handler {
      */
     public function hide_admin_bar_in_dashboard() {
         if (get_query_var('maneli_dashboard')) {
+            // غیرفعال کردن کامل Admin Bar
             show_admin_bar(false);
-            add_filter('show_admin_bar', '__return_false');
+            add_filter('show_admin_bar', '__return_false', 999);
+            
+            // حذف Admin Bar از DOM
+            remove_action('wp_head', '_admin_bar_bump_cb');
+            
+            // غیرفعال کردن اسکریپت‌های Admin Bar
+            add_action('wp_enqueue_scripts', function() {
+                wp_dequeue_style('admin-bar');
+                wp_deregister_style('admin-bar');
+                wp_dequeue_script('admin-bar');
+                wp_deregister_script('admin-bar');
+            }, 999);
         }
     }
     

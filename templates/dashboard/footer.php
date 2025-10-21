@@ -26,17 +26,14 @@
      <div id="responsive-overlay"></div>
      <!-- Scroll To Top -->
 
-     <!-- jQuery - باید اول از همه لود شود -->
-     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-
      <!-- Popper JS -->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/@popperjs/core/umd/popper.min.js"></script>
 
      <!-- Bootstrap JS -->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
      
-     <!-- Bootstrap Config -->
-     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/maneli-bootstrap-config.js"></script>
+     <!-- Choices JS -->
+     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/choices.js/public/assets/scripts/choices.min.js"></script>
 
      <!-- Node Waves JS-->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/node-waves/waves.min.js"></script>
@@ -44,6 +41,9 @@
      <!-- Simplebar JS -->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/simplebar/simplebar.min.js"></script>
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/simplebar.js"></script>
+     
+     <!-- Maneli Custom Fix - باید قبل از custom.js لود شود -->
+     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/maneli-custom-fix.js"></script>
 
      <!-- Auto Complete JS -->
      <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/libs/@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
@@ -86,6 +86,9 @@
     </script>
     
     <?php
+    // مطمئن شدن که Admin Bar نمایش داده نمی‌شه
+    add_filter('show_admin_bar', '__return_false', 9999);
+    
     // WordPress footer hook - allows plugins to add scripts
     if (function_exists('do_action')) {
         do_action('wp_footer');

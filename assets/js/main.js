@@ -8,12 +8,15 @@
   if (localStorage.xintrartl) {
     let html = document.querySelector("html");
     html.setAttribute("dir", "rtl");
-    document
-      .querySelector("#style")
-      ?.setAttribute(
-        "href",
-        "./assets/libs/bootstrap/css/bootstrap.rtl.min.css"
-      );
+    var pluginUrl = window.MANELI_PLUGIN_URL || '';
+    if (pluginUrl) {
+      document
+        .querySelector("#style")
+        ?.setAttribute(
+          "href",
+          pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css"
+        );
+    }
   }
   if (localStorage.xintralayout) {
     let html = document.querySelector("html");

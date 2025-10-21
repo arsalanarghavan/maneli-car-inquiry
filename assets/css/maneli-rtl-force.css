@@ -92,12 +92,6 @@ label,
 .offcanvas,
 .offcanvas-header,
 .offcanvas-body,
-.side-menu__item,
-.side-menu__label,
-.header-link,
-.main-menu,
-.app-header,
-.app-sidebar,
 .main-content,
 .page-header-breadcrumb,
 .breadcrumb-item {
@@ -140,31 +134,6 @@ label,
 
 .dropdown-item {
     text-align: right !important;
-}
-
-/* Fix sidebar */
-.app-sidebar {
-    right: auto !important;
-    left: 0 !important;
-}
-
-.main-sidebar-header {
-    direction: rtl !important;
-}
-
-/* Fix header */
-.app-header {
-    direction: rtl !important;
-}
-
-.header-content-left {
-    margin-right: 0 !important;
-    margin-left: auto !important;
-}
-
-.header-content-right {
-    margin-left: 0 !important;
-    margin-right: auto !important;
 }
 
 /* Fix forms */
@@ -327,8 +296,45 @@ input, textarea, select, option {
     text-align: center !important;
 }
 
+/* مخفی کردن کامل Admin Bar وردپرس در داشبورد */
+#wpadminbar {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+}
+
+/* حذف padding که Admin Bar اضافه می‌کنه */
+html.maneli-dashboard,
+html.maneli-dashboard body {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+body.maneli-dashboard {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* فورس کردن header به top صفحه */
+.maneli-dashboard .app-header,
+.maneli-dashboard #header {
+    top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* اطمینان از اینکه sidebar و page container هم padding ندارن */
+.maneli-dashboard .page,
+.maneli-dashboard .app-sidebar {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
 /* Force on WordPress specific elements too */
-#wpadminbar,
 #wpadminbar * {
     font-family: IRANSans, Tahoma, Arial, sans-serif !important;
 }
