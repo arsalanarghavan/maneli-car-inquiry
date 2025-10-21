@@ -331,21 +331,41 @@
         // --- 6. Job Type Toggles (Show/Hide Job Title Field) ---
         $('#buyer_job_type').on('change', function() {
             const jobType = $(this).val();
-            if (jobType === 'employee') {
-                $('.buyer-job-title-wrapper').show();
-                $('.buyer-property-wrapper').show();
+            const $jobTitleWrapper = $('.buyer-job-title-wrapper');
+            const $propertyWrapper = $('.buyer-property-wrapper');
+            
+            if (jobType === 'self') {
+                // آزاد: نیاز به عنوان شغلی و وضعیت مسکن دارد
+                $jobTitleWrapper.slideDown(200);
+                $propertyWrapper.slideDown(200);
+            } else if (jobType === 'employee') {
+                // کارمند: فقط درآمد لازم است، بقیه مخفی
+                $jobTitleWrapper.slideUp(200);
+                $propertyWrapper.slideUp(200);
             } else {
-                $('.buyer-job-title-wrapper').hide();
-                $('.buyer-property-wrapper').hide();
+                // هیچکدام انتخاب نشده
+                $jobTitleWrapper.slideUp(200);
+                $propertyWrapper.slideUp(200);
             }
         });
         
         $('#issuer_job_type').on('change', function() {
             const jobType = $(this).val();
-            if (jobType === 'employee') {
-                $('.issuer-job-title-wrapper').show();
+            const $jobTitleWrapper = $('.issuer-job-title-wrapper');
+            const $propertyWrapper = $('.issuer-property-wrapper');
+            
+            if (jobType === 'self') {
+                // آزاد: نیاز به عنوان شغلی و وضعیت مسکن دارد
+                $jobTitleWrapper.slideDown(200);
+                $propertyWrapper.slideDown(200);
+            } else if (jobType === 'employee') {
+                // کارمند: فقط درآمد لازم است، بقیه مخفی
+                $jobTitleWrapper.slideUp(200);
+                $propertyWrapper.slideUp(200);
             } else {
-                $('.issuer-job-title-wrapper').hide();
+                // هیچکدام انتخاب نشده
+                $jobTitleWrapper.slideUp(200);
+                $propertyWrapper.slideUp(200);
             }
         });
     });

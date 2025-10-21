@@ -537,14 +537,21 @@ jQuery(document).ready(function($) {
     if (!$form.length) return;
     
     // Handle issuer type radio buttons
-    $('input[name="issuer_type"]').on('change', function() {
+    function toggleIssuerForm() {
         const issuerFormWrapper = $('#issuer-form-wrapper');
-        if (this.value === 'other') {
+        const selectedValue = $('input[name="issuer_type"]:checked').val();
+        
+        if (selectedValue === 'other') {
             issuerFormWrapper.slideDown(300);
         } else {
             issuerFormWrapper.slideUp(300);
         }
-    });
+    }
+    
+    $('input[name="issuer_type"]').on('change', toggleIssuerForm);
+    
+    // Initial check on page load
+    toggleIssuerForm();
     
     // Handle buyer job type changes
     $('#buyer_job_type').on('change', function() {
@@ -553,12 +560,15 @@ jQuery(document).ready(function($) {
         const $propertyWrapper = $('.buyer-property-wrapper');
         
         if (jobValue === 'self') {
+            // آزاد: نیاز به عنوان شغلی و وضعیت مسکن دارد
             $jobTitleWrapper.slideDown(200);
             $propertyWrapper.slideDown(200);
         } else if (jobValue === 'employee') {
-            $jobTitleWrapper.slideDown(200);
+            // کارمند: فقط درآمد لازم است، بقیه مخفی
+            $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
         } else {
+            // هیچکدام انتخاب نشده
             $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
         }
@@ -571,12 +581,15 @@ jQuery(document).ready(function($) {
         const $propertyWrapper = $('.issuer-property-wrapper');
         
         if (jobValue === 'self') {
+            // آزاد: نیاز به عنوان شغلی و وضعیت مسکن دارد
             $jobTitleWrapper.slideDown(200);
             $propertyWrapper.slideDown(200);
         } else if (jobValue === 'employee') {
-            $jobTitleWrapper.slideDown(200);
+            // کارمند: فقط درآمد لازم است، بقیه مخفی
+            $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
         } else {
+            // هیچکدام انتخاب نشده
             $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
         }
