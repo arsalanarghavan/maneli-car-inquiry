@@ -5,15 +5,14 @@
         <!-- Start::Footer -->
         <footer class="footer mt-auto py-3 bg-white text-center">
             <div class="container">
-                <span class="text-muted">
-                    <span id="year"><?php echo date('Y'); ?></span>
+                <span class="text-muted"> <span id="year"><?php echo date('Y'); ?></span>
                     <?php 
                     $theme_handler = Maneli_Frontend_Theme_Handler::instance();
                     echo $theme_handler->get_footer_text();
                     ?>
                 </span>
             </div>
-        </footer>
+        </footer>            
         <!-- End::Footer -->
 
     </div>

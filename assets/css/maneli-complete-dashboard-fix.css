@@ -247,6 +247,38 @@ html[data-toggled="open"] .sidemenu-toggle.animated-arrow span::after {
     height: 1.25rem !important;
 }
 
+/* SVG Icons في Header */
+.header-link svg.header-link-icon,
+.header-link-icon.w-6.h-6 {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    stroke: currentColor !important;
+    fill: none !important;
+    transition: all 0.3s ease !important;
+}
+
+/* SVG Icon Hover Effect */
+.header-link:hover svg.header-link-icon {
+    transform: scale(1.05) !important;
+}
+
+/* Full Screen Icons Toggle */
+.header-fullscreen .full-screen-open {
+    display: block !important;
+}
+
+.header-fullscreen .full-screen-close {
+    display: none !important;
+}
+
+html.fullscreen .header-fullscreen .full-screen-open {
+    display: none !important;
+}
+
+html.fullscreen .header-fullscreen .full-screen-close {
+    display: block !important;
+}
+
 /* Notification Badge */
 .header-icon-pulse {
     position: absolute !important;
@@ -255,6 +287,27 @@ html[data-toggled="open"] .sidemenu-toggle.animated-arrow span::after {
     left: auto !important;
     width: 0.5rem !important;
     height: 0.5rem !important;
+}
+
+/* Pulse Animation for Notification Badge */
+.header-icon-pulse.pulse {
+    animation: pulse-animation 2s infinite !important;
+}
+
+@keyframes pulse-animation {
+    0% {
+        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.7) !important;
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0) !important;
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0) !important;
+    }
+}
+
+.pulse-secondary {
+    --primary-rgb: 99, 102, 241 !important;
 }
 
 /* Dropdown Menus in Header */
@@ -307,7 +360,7 @@ html[data-theme-mode="dark"] .horizontal-logo .header-logo img.desktop-dark {
 }
 
 /* ===========================================
-   SIDEBAR - باید بالاترین z-index رو داشته باشه
+   SIDEBAR - بالاترین z-index و ظرافت Xintra
    =========================================== */
 
 .app-sidebar {
@@ -319,20 +372,23 @@ html[data-theme-mode="dark"] .horizontal-logo .header-logo img.desktop-dark {
     width: 250px !important;
     background: #1e293b !important;
     z-index: var(--z-sidebar) !important; /* 1050 - بالاتر از header */
-    transition: all 0.3s ease !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     direction: rtl !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.15) !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
-/* Sidebar Header */
+/* Sidebar Header - مطابق Xintra */
 .main-sidebar-header {
     padding: 1rem !important;
     text-align: center !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     direction: ltr !important;
     min-height: 4rem !important;
+    height: 4rem !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -340,6 +396,7 @@ html[data-theme-mode="dark"] .horizontal-logo .header-logo img.desktop-dark {
     top: 0 !important;
     background: #1e293b !important;
     z-index: 10 !important;
+    flex-shrink: 0 !important;
 }
 
 /* Sidebar Logo Display */
@@ -362,13 +419,28 @@ html[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-dark 
     max-height: 2.5rem !important;
 }
 
-/* Sidebar Menu */
+/* Sidebar Menu Container - مطابق Xintra */
 .main-sidebar {
-    height: calc(100vh - 4rem) !important;
+    flex: 1 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     direction: rtl !important;
-    padding-bottom: 2rem !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.main-menu-container {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0.5rem 0 !important;
+}
+
+.main-menu {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 /* Custom Scrollbar for Sidebar */
@@ -395,34 +467,82 @@ html[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-dark 
     margin: 0 !important;
 }
 
-/* Menu Items */
+/* Category Names - طبق Xintra */
+.slide__category {
+    padding: 0.875rem 1.25rem 0.5rem !important;
+    margin-top: 0.75rem !important;
+}
+
+.slide__category:first-child {
+    margin-top: 0.25rem !important;
+}
+
+.category-name {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+    font-size: 0.6875rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    letter-spacing: 0.05em !important;
+    direction: rtl !important;
+    display: block !important;
+}
+
+/* Menu Items - ظرافت Xintra */
+.slide {
+    list-style: none !important;
+}
+
 .side-menu__item {
     display: flex !important;
     align-items: center !important;
     gap: 0.75rem !important;
-    padding: 0.75rem 1.5rem !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    transition: all 0.3s !important;
+    padding: 0.625rem 1.25rem !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
     text-decoration: none !important;
     direction: rtl !important;
-    border-right: 3px solid transparent !important;
+    border-radius: 0 !important;
+    position: relative !important;
     white-space: nowrap !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+}
+
+/* Elegant Hover Effect */
+.side-menu__item::before {
+    content: '' !important;
+    position: absolute !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    width: 3px !important;
+    background: transparent !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .side-menu__item:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
     color: #fff !important;
-    border-right-color: rgba(255, 255, 255, 0.3) !important;
     text-decoration: none !important;
+    transform: translateX(-2px) !important;
 }
 
+.side-menu__item:hover::before {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Active State - مطابق Xintra */
 .side-menu__item.active {
-    background-color: rgba(99, 102, 241, 0.15) !important;
-    color: #6366f1 !important;
-    border-right-color: #6366f1 !important;
+    background: rgba(99, 102, 241, 0.12) !important;
+    color: #818cf8 !important;
 }
 
-/* Fix Menu Item Focus State */
+.side-menu__item.active::before {
+    background: #818cf8 !important;
+}
+
+/* Focus State */
 .side-menu__item:focus,
 .side-menu__item:focus-visible {
     outline: none !important;
@@ -450,12 +570,25 @@ html[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-dark 
     transform: translateY(-50%) rotate(0deg) !important;
 }
 
-/* Menu Icons */
+/* Menu Icons - ظریف و دقیق */
 .side-menu__icon {
     width: 1.25rem !important;
     height: 1.25rem !important;
     flex-shrink: 0 !important;
     direction: ltr !important;
+    font-size: 1.125rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.side-menu__item:hover .side-menu__icon {
+    transform: scale(1.08) !important;
+}
+
+.side-menu__item.active .side-menu__icon {
+    color: #818cf8 !important;
 }
 
 /* Menu Labels */
@@ -464,21 +597,94 @@ html[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-dark 
     font-size: 0.875rem !important;
     direction: rtl !important;
     flex: 1 !important;
+    line-height: 1.5 !important;
+    font-weight: 500 !important;
 }
 
-/* Category Names */
-.slide__category {
-    padding: 1rem 1.5rem 0.5rem !important;
+/* Logout Special Style */
+.side-menu__item.text-danger {
+    color: rgba(239, 68, 68, 0.9) !important;
 }
 
-.category-name {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    letter-spacing: 0.05em !important;
-    direction: rtl !important;
+.side-menu__item.text-danger:hover {
+    background: rgba(239, 68, 68, 0.08) !important;
+    color: #ef4444 !important;
+}
+
+.side-menu__item.text-danger:hover::before {
+    background: #ef4444 !important;
+}
+
+.side-menu__item.text-danger .side-menu__icon {
+    color: inherit !important;
+}
+
+/* Slide Navigation Arrows */
+.slide-left,
+.slide-right {
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.5rem !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    opacity: 0.6 !important;
+}
+
+.slide-left:hover,
+.slide-right:hover {
+    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.slide-left svg,
+.slide-right svg {
+    transition: transform 0.25s ease !important;
+}
+
+.slide-left:hover svg {
+    transform: translateX(-2px) !important;
+}
+
+.slide-right:hover svg {
+    transform: translateX(2px) !important;
+}
+
+/* Dark Mode Sidebar Enhancements */
+[data-theme-mode="dark"] .app-sidebar {
+    background: #0f172a !important;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme-mode="dark"] .main-sidebar-header {
+    background: #0f172a !important;
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme-mode="dark"] .category-name {
+    color: rgba(255, 255, 255, 0.4) !important;
+}
+
+[data-theme-mode="dark"] .side-menu__item {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+[data-theme-mode="dark"] .side-menu__item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: #fff !important;
+}
+
+[data-theme-mode="dark"] .side-menu__item.active {
+    background: rgba(99, 102, 241, 0.15) !important;
+    color: #a5b4fc !important;
+}
+
+[data-theme-mode="dark"] .side-menu__item.active::before {
+    background: #a5b4fc !important;
+}
+
+[data-theme-mode="dark"] .side-menu__item.active .side-menu__icon {
+    color: #a5b4fc !important;
 }
 
 /* ===========================================
@@ -1105,19 +1311,45 @@ html[data-nav-layout] {
 html[data-theme-mode="dark"] .app-header {
     background-color: #1e293b !important;
     border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+html[data-theme-mode="dark"] .header-link {
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 html[data-theme-mode="dark"] .header-link:hover {
     background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+
+html[data-theme-mode="dark"] .header-link svg {
+    stroke: currentColor !important;
 }
 
 html[data-theme-mode="dark"] .dropdown-menu {
     background-color: #1e293b !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
+}
+
+html[data-theme-mode="dark"] .dropdown-item {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+html[data-theme-mode="dark"] .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
 }
 
 html[data-theme-mode="dark"] .main-content {
     background-color: #0f172a !important;
+}
+
+html[data-theme-mode="dark"] .footer {
+    background-color: #1e293b !important;
+    border-top-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* ===========================================

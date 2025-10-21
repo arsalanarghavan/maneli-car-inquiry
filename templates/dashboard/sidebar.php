@@ -37,7 +37,7 @@
                 ?>
                 
                 <!-- ═══════════════════════════════════════════════════ -->
-                <!-- بخش اصلی -->
+                <!-- بخش اصلی - برای همه -->
                 <!-- ═══════════════════════════════════════════════════ -->
                 <li class="slide__category"><span class="category-name">داشبورد</span></li>
 
@@ -48,17 +48,21 @@
                     </a>
                 </li>
                 
+                <?php if ($is_admin || $is_expert): ?>
+                <!-- تقویم جلسات فقط برای Admin و Expert -->
                 <li class="slide">
                     <a href="<?php echo home_url('/dashboard/calendar'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'calendar') ? 'active' : ''; ?>">
                         <i class="la la-calendar side-menu__icon"></i>
                         <span class="side-menu__label">تقویم جلسات</span>
                     </a>
                 </li>
+                <?php endif; ?>
 
                 <!-- ═══════════════════════════════════════════════════ -->
-                <!-- استعلامات -->
+                <!-- استعلامات - بر اساس رول -->
                 <!-- ═══════════════════════════════════════════════════ -->
                 <?php if ($is_customer): ?>
+                    <!-- منوی مشتری -->
                     <li class="slide__category"><span class="category-name">استعلامات من</span></li>
                     
                     <li class="slide">
@@ -74,7 +78,9 @@
                             <span class="side-menu__label">خرید اقساطی</span>
                         </a>
                     </li>
-                <?php else: ?>
+                    
+                <?php elseif ($is_expert): ?>
+                    <!-- منوی کارشناس - فقط استعلامات ارجاع شده -->
                     <li class="slide__category"><span class="category-name">استعلامات نقدی</span></li>
 
                     <li class="slide">
@@ -106,72 +112,109 @@
                             <span class="side-menu__label">پیگیری‌های اقساطی</span>
                         </a>
                     </li>
+                    
+                <?php elseif ($is_admin): ?>
+                    <!-- منوی مدیر - دسترسی کامل -->
+                    <li class="slide__category"><span class="category-name">استعلامات نقدی</span></li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'cash') ? 'active' : ''; ?>">
+                            <i class="la la-dollar-sign side-menu__icon"></i>
+                            <span class="side-menu__label">لیست استعلامات نقدی</span>
+                        </a>
+                    </li>
+                    
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/cash-followups'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'cash-followups') ? 'active' : ''; ?>">
+                            <i class="la la-clock side-menu__icon"></i>
+                            <span class="side-menu__label">پیگیری‌های نقدی</span>
+                        </a>
+                    </li>
+
+                    <li class="slide__category"><span class="category-name">استعلامات اقساطی</span></li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/inquiries/installment'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'installment') ? 'active' : ''; ?>">
+                            <i class="la la-credit-card side-menu__icon"></i>
+                            <span class="side-menu__label">لیست استعلامات اقساطی</span>
+                        </a>
+                    </li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/followups'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'followups') ? 'active' : ''; ?>">
+                            <i class="la la-tasks side-menu__icon"></i>
+                            <span class="side-menu__label">پیگیری‌های اقساطی</span>
+                        </a>
+                    </li>
+
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- مدیریت محصولات (فقط مدیر) -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <li class="slide__category"><span class="category-name">مدیریت محصولات</span></li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/products'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'products') ? 'active' : ''; ?>">
+                            <i class="la la-car side-menu__icon"></i>
+                            <span class="side-menu__label">ویرایش محصولات</span>
+                        </a>
+                    </li>
+
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- مدیریت مالی (فقط مدیر) -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <li class="slide__category"><span class="category-name">مدیریت مالی</span></li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/payments'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'payments') ? 'active' : ''; ?>">
+                            <i class="la la-money-bill-wave side-menu__icon"></i>
+                            <span class="side-menu__label">پرداخت‌ها</span>
+                        </a>
+                    </li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/reports'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'reports') ? 'active' : ''; ?>">
+                            <i class="la la-chart-line side-menu__icon"></i>
+                            <span class="side-menu__label">گزارشات مالی</span>
+                        </a>
+                    </li>
+
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- مدیریت کاربران (فقط مدیر) -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <li class="slide__category"><span class="category-name">کاربران و کارشناسان</span></li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/users'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'users') ? 'active' : ''; ?>">
+                            <i class="la la-users side-menu__icon"></i>
+                            <span class="side-menu__label">مدیریت کاربران</span>
+                        </a>
+                    </li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/experts'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'experts') ? 'active' : ''; ?>">
+                            <i class="la la-user-tie side-menu__icon"></i>
+                            <span class="side-menu__label">کارشناسان</span>
+                        </a>
+                    </li>
+
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <!-- تنظیمات سیستم (فقط مدیر) -->
+                    <!-- ═══════════════════════════════════════════════════ -->
+                    <li class="slide__category"><span class="category-name">تنظیمات</span></li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/settings'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'settings') ? 'active' : ''; ?>">
+                            <i class="la la-cog side-menu__icon"></i>
+                            <span class="side-menu__label">تنظیمات سیستم</span>
+                        </a>
+                    </li>
                 <?php endif; ?>
 
                 <!-- ═══════════════════════════════════════════════════ -->
-                <!-- مدیریت محصولات (فقط مدیر) -->
+                <!-- خروج - برای همه -->
                 <!-- ═══════════════════════════════════════════════════ -->
-                <?php if ($is_admin): ?>
-                <li class="slide__category"><span class="category-name">مدیریت محصولات</span></li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/products'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'products') ? 'active' : ''; ?>">
-                        <i class="la la-car side-menu__icon"></i>
-                        <span class="side-menu__label">ویرایش محصولات</span>
-                    </a>
-                </li>
-
-                <!-- ═══════════════════════════════════════════════════ -->
-                <!-- مالی (فقط مدیر) -->
-                <!-- ═══════════════════════════════════════════════════ -->
-                <li class="slide__category"><span class="category-name">مدیریت مالی</span></li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/payments'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'payments') ? 'active' : ''; ?>">
-                        <i class="la la-money-bill-wave side-menu__icon"></i>
-                        <span class="side-menu__label">پرداخت‌ها</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/reports'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'reports') ? 'active' : ''; ?>">
-                        <i class="la la-chart-line side-menu__icon"></i>
-                        <span class="side-menu__label">گزارشات مالی</span>
-                    </a>
-                </li>
-
-                <!-- ═══════════════════════════════════════════════════ -->
-                <!-- مدیریت کاربران (فقط مدیر) -->
-                <!-- ═══════════════════════════════════════════════════ -->
-                <li class="slide__category"><span class="category-name">کاربران و کارشناسان</span></li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/users'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'users') ? 'active' : ''; ?>">
-                        <i class="la la-users side-menu__icon"></i>
-                        <span class="side-menu__label">مدیریت کاربران</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/experts'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'experts') ? 'active' : ''; ?>">
-                        <i class="la la-user-tie side-menu__icon"></i>
-                        <span class="side-menu__label">کارشناسان</span>
-                    </a>
-                </li>
-                <?php endif; ?>
-
-                <!-- ═══════════════════════════════════════════════════ -->
-                <!-- تنظیمات و خروج -->
-                <!-- ═══════════════════════════════════════════════════ -->
+                <?php if (!$is_admin): ?>
                 <li class="slide__category"><span class="category-name">تنظیمات</span></li>
-
-                <?php if (current_user_can('manage_maneli_inquiries')): ?>
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/settings'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'settings') ? 'active' : ''; ?>">
-                        <i class="la la-cog side-menu__icon"></i>
-                        <span class="side-menu__label">تنظیمات سیستم</span>
-                    </a>
-                </li>
                 <?php endif; ?>
 
                 <li class="slide">
@@ -195,209 +238,3 @@
 
 </aside>
 <!-- End::main-sidebar -->
-
-<style>
-/* ═══════════════════════════════════════════════════════════
-   Sidebar Custom Enhancements - Compact Version
-   ═══════════════════════════════════════════════════════════ */
-
-/* Fix: المان‌ها از بالا شروع شوند */
-.main-sidebar {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding-top: 0 !important;
-}
-
-.main-menu-container {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding-top: 5px !important;
-}
-
-.main-menu {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-
-/* Category Styling - Compact */
-.slide__category {
-    padding: 8px 15px 4px;
-    margin-top: 8px;
-}
-
-.slide__category:first-child {
-    margin-top: 0;
-}
-
-.category-name {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    color: var(--text-muted);
-    opacity: 0.7;
-    display: flex;
-    align-items: center;
-}
-
-.category-name::before {
-    content: '';
-    display: inline-block;
-    width: 3px;
-    height: 3px;
-    background: var(--primary-color);
-    border-radius: 50%;
-    margin-left: 6px;
-}
-
-/* Menu Items - Compact */
-.side-menu__item {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    margin: 1px 6px;
-    border-radius: 6px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.side-menu__item::before {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: 0;
-    background: var(--primary-color);
-    transition: width 0.3s ease;
-    border-radius: 6px 0 0 6px;
-}
-
-.side-menu__item:hover::before {
-    width: 3px;
-}
-
-.side-menu__item.active::before {
-    width: 3px;
-}
-
-.side-menu__item.active {
-    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.1) 0%, transparent 100%);
-    color: var(--primary-color);
-}
-
-.side-menu__item:hover {
-    background: rgba(var(--primary-rgb), 0.05);
-    transform: translateX(-2px);
-}
-
-/* Icons - Smaller */
-.side-menu__icon {
-    font-size: 17px;
-    width: 17px;
-    text-align: center;
-    margin-left: 6px;
-    transition: all 0.3s ease;
-}
-
-.side-menu__item:hover .side-menu__icon {
-    transform: scale(1.05);
-    color: var(--primary-color);
-}
-
-.side-menu__item.active .side-menu__icon {
-    color: var(--primary-color);
-}
-
-/* Label - Smaller */
-.side-menu__label {
-    font-size: 13px;
-    font-weight: 500;
-    flex: 1;
-    line-height: 1.4;
-}
-
-/* Badge for Notifications */
-.menu-badge {
-    margin-right: auto;
-    background: var(--danger-color);
-    color: white;
-    font-size: 9px;
-    padding: 1px 5px;
-    border-radius: 8px;
-    font-weight: 700;
-}
-
-/* Logout Item Special Style */
-.side-menu__item.text-danger:hover {
-    background: rgba(220, 53, 69, 0.1);
-}
-
-.side-menu__item.text-danger .side-menu__icon {
-    color: #dc3545;
-}
-
-/* Scroll Customization */
-#sidebar-scroll::-webkit-scrollbar {
-    width: 5px;
-}
-
-#sidebar-scroll::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-#sidebar-scroll::-webkit-scrollbar-thumb {
-    background: rgba(var(--primary-rgb), 0.3);
-    border-radius: 3px;
-}
-
-#sidebar-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(var(--primary-rgb), 0.5);
-}
-
-/* Responsive */
-@media (max-width: 991.98px) {
-    .main-sidebar-header {
-        padding: 12px;
-    }
-    
-    .category-name {
-        font-size: 9px;
-    }
-    
-    .side-menu__item {
-        padding: 7px 12px;
-        margin: 1px 6px;
-    }
-    
-    .side-menu__label {
-        font-size: 12px;
-    }
-}
-
-/* Dark Mode Support */
-[data-theme-mode="dark"] .category-name {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-[data-theme-mode="dark"] .side-menu__item:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-
-[data-theme-mode="dark"] .side-menu__item.active {
-    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.2) 0%, transparent 100%);
-}
-
-/* Slide Arrows */
-.slide-left, .slide-right {
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.slide-left:hover, .slide-right:hover {
-    background: rgba(var(--primary-rgb), 0.1);
-}
-</style>

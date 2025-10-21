@@ -320,8 +320,8 @@ if ($count_type === 'installment' || $count_type === 'all') {
 }
 ?>
 
-<!-- Statistics Cards for Cash Inquiries -->
 <?php if ($count_type === 'cash'): ?>
+<!-- Statistics Cards for Cash Inquiries -->
 <div class="row mb-4">
     <div class="col-xl-3 col-lg-6">
         <div class="card custom-card">
@@ -467,8 +467,8 @@ if ($count_type === 'installment' || $count_type === 'all') {
 </div>
 <?php endif; ?>
 
-<!-- Statistics Cards for Installment Inquiries -->
 <?php if ($count_type === 'installment'): ?>
+<!-- Statistics Cards for Installment Inquiries -->
 <div class="row mb-4">
     <div class="col-xl-3 col-lg-6">
         <div class="card custom-card">
