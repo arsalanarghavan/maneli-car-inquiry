@@ -2670,3 +2670,21 @@ msgstr "وضعیت محل کار صادرکننده"
 
 msgid "Issuer Workplace Status:"
 msgstr "وضعیت محل کار صادرکننده:"
+
+# Cash Inquiry New Statuses and Translations
+
+msgid "Referred to Expert"
+msgstr "ارجاع داده شده"
+
+
+msgid "Awaiting Down Payment"
+msgstr "در انتظار پیش پرداخت"
+
+
+msgid "Down Payment Received"
+msgstr "پیش پرداخت دریافت شد"
+
+
+msgid "Meeting Scheduled"
+msgstr "مراجعه حضوری"
+

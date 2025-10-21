@@ -63,10 +63,12 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
 $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
 ?>
 
+<!-- Wrapper for report page detection -->
+<div class="frontend-expert-report">
 <div class="row" id="installment-inquiry-details" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">
     <div class="col-xl-12">
         <!-- Back Button -->
-        <div class="mb-3">
+        <div class="mb-3 report-back-button-wrapper">
             <a href="<?php echo esc_url($back_link); ?>" class="btn btn-light btn-wave">
                 <i class="la la-arrow-right me-1"></i>
                 <?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?>
@@ -692,4 +694,5 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
 }
 </style>
+</div><!-- End .frontend-expert-report -->
 <?php } // End of permission check ?>

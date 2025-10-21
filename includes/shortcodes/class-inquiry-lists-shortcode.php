@@ -159,6 +159,7 @@ class Maneli_Inquiry_Lists_Shortcode {
         
         if ($is_admin_or_expert) {
             $this->enqueue_admin_list_assets();
+            $this->enqueue_cash_report_assets();
             return maneli_get_template_part('shortcodes/inquiry-lists/report-admin-cash', ['inquiry_id' => $inquiry_id], false);
         } else {
             return maneli_get_template_part('shortcodes/inquiry-lists/report-customer-cash', ['inquiry_id' => $inquiry_id], false);
@@ -305,5 +306,33 @@ class Maneli_Inquiry_Lists_Shortcode {
         $inline_script .= 'window.maneliInquiryLists.experts = ' . wp_json_encode($experts_list) . ';';
         $inline_script .= 'window.maneliInquiryLists.ajax_url = ' . wp_json_encode(admin_url('admin-ajax.php')) . ';';
         wp_add_inline_script('maneli-inquiry-lists-js', $inline_script, 'before');
+    }
+
+    /**
+     * Enqueue assets specifically for cash inquiry report pages.
+     * This includes the script for handling meeting scheduling and expert decisions.
+     */
+    private function enqueue_cash_report_assets() {
+        // Register and enqueue the cash report script
+        if (!wp_script_is('maneli-cash-report-js', 'registered')) {
+            wp_register_script(
+                'maneli-cash-report-js',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/cash-report.js',
+                ['jquery', 'sweetalert2', 'maneli-jalali-datepicker'],
+                filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/cash-report.js'), // Cache busting
+                true
+            );
+        }
+        wp_enqueue_script('maneli-cash-report-js');
+
+        // Localize data for the cash report script
+        wp_localize_script('maneli-cash-report-js', 'maneliCashReport', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonces' => [
+                'save_meeting' => wp_create_nonce('maneli_save_meeting'),
+                'expert_decision' => wp_create_nonce('maneli_expert_decision'),
+                'admin_approve' => wp_create_nonce('maneli_admin_approve'),
+            ],
+        ]);
     }
 }

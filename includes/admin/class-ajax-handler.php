@@ -48,6 +48,19 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_add_expert', [$this, 'ajax_add_expert']);
         add_action('wp_ajax_maneli_toggle_expert_status', [$this, 'ajax_toggle_expert_status']);
         add_action('wp_ajax_maneli_get_expert_stats', [$this, 'ajax_get_expert_stats']);
+        
+        // Cash Inquiry Expert Actions
+        add_action('wp_ajax_maneli_save_meeting_schedule', [$this, 'ajax_save_meeting_schedule']);
+        add_action('wp_ajax_maneli_save_expert_decision_cash', [$this, 'ajax_save_expert_decision_cash']);
+        add_action('wp_ajax_maneli_admin_approve_cash', [$this, 'ajax_admin_approve_cash']);
+        add_action('wp_ajax_maneli_update_cash_status', [$this, 'ajax_update_cash_status']);
+        add_action('wp_ajax_maneli_save_expert_note', [$this, 'ajax_save_expert_note']);
+        
+        // Hook for when cash down payment is successfully received
+        add_action('maneli_cash_inquiry_payment_successful', [$this, 'handle_downpayment_received'], 10, 2);
+        
+        // Create cash inquiry from dashboard (admin/expert)
+        add_action('wp_ajax_maneli_create_cash_inquiry', [$this, 'ajax_create_cash_inquiry']);
     }
 
     //======================================================================
@@ -423,13 +436,14 @@ class Maneli_Ajax_Handler {
             return;
         }
         
-        update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
+        // تغییر وضعیت به "ارجاع داده شده"
+        update_post_meta($inquiry_id, 'cash_inquiry_status', 'referred');
 
         wp_send_json_success([
             'message' => sprintf(esc_html__('Request successfully assigned to %s.', 'maneli-car-inquiry'), $expert_data['name']),
             'expert_name' => $expert_data['name'],
-            'new_status_label' => Maneli_CPT_Handler::get_cash_inquiry_status_label('approved'),
-            'new_status_key' => 'approved'
+            'new_status_label' => Maneli_CPT_Handler::get_cash_inquiry_status_label('referred'),
+            'new_status_key' => 'referred'
         ]);
     }
     
@@ -1112,5 +1126,273 @@ class Maneli_Ajax_Handler {
         $html = ob_get_clean();
 
         wp_send_json_success(['html' => $html]);
+    }
+    
+    //======================================================================
+    // Cash Inquiry Expert/Admin Handlers
+    //======================================================================
+    
+    /**
+     * Save meeting schedule for cash inquiry
+     */
+    public function ajax_save_meeting_schedule() {
+        check_ajax_referer('maneli_save_meeting', 'nonce');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        }
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : '';
+        $meeting_date = isset($_POST['meeting_date']) ? sanitize_text_field($_POST['meeting_date']) : '';
+        $meeting_time = isset($_POST['meeting_time']) ? sanitize_text_field($_POST['meeting_time']) : '';
+        
+        if (!$inquiry_id || !$meeting_date || !$meeting_time) {
+            wp_send_json_error(['message' => 'اطلاعات ناقص است']);
+        }
+        
+        // Check permission
+        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        if (!$is_assigned && !current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        }
+        
+        // Save meeting data
+        update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
+        update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
+        
+        wp_send_json_success(['message' => 'زمان جلسه ذخیره شد']);
+    }
+    
+    /**
+     * Save expert decision for cash inquiry
+     */
+    public function ajax_save_expert_decision_cash() {
+        check_ajax_referer('maneli_expert_decision', 'nonce');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        }
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $decision = isset($_POST['decision']) ? sanitize_text_field($_POST['decision']) : '';
+        $downpayment = isset($_POST['downpayment']) ? intval($_POST['downpayment']) : 0;
+        $note = isset($_POST['note']) ? sanitize_textarea_field($_POST['note']) : '';
+        
+        if (!$inquiry_id || !$decision) {
+            wp_send_json_error(['message' => 'اطلاعات ناقص است']);
+        }
+        
+        // Check permission (must be assigned expert)
+        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        if (!$is_assigned) {
+            wp_send_json_error(['message' => 'فقط کارشناس محول شده می‌تواند تصمیم بگیرد']);
+        }
+        
+        // Save expert decision
+        update_post_meta($inquiry_id, 'expert_decision', $decision);
+        update_post_meta($inquiry_id, 'expert_note', $note);
+        
+        if ($downpayment > 0) {
+            update_post_meta($inquiry_id, 'cash_down_payment', $downpayment);
+        }
+        
+        // Update status based on decision
+        if ($decision === 'approved') {
+            update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
+        } elseif ($decision === 'rejected') {
+            update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
+        }
+        
+        wp_send_json_success(['message' => 'تصمیم شما ذخیره شد']);
+    }
+    
+    /**
+     * Admin final approval for cash inquiry
+     */
+    public function ajax_admin_approve_cash() {
+        check_ajax_referer('maneli_admin_approve', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'فقط مدیر می‌تواند تایید نهایی کند']);
+        }
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        
+        if (!$inquiry_id) {
+            wp_send_json_error(['message' => 'شناسه استعلام نامعتبر است']);
+        }
+        
+        // Check if expert has approved
+        $expert_decision = get_post_meta($inquiry_id, 'expert_decision', true);
+        if ($expert_decision !== 'approved') {
+            wp_send_json_error(['message' => 'کارشناس هنوز تایید نکرده است']);
+        }
+        
+        // Set to completed
+        update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
+        update_post_meta($inquiry_id, 'admin_approved', 'yes');
+        update_post_meta($inquiry_id, 'admin_approved_date', current_time('mysql'));
+        
+        wp_send_json_success(['message' => 'درخواست به صورت نهایی تایید شد']);
+    }
+    
+    /**
+     * Update cash inquiry status with workflow logic
+     */
+    public function ajax_update_cash_status() {
+        check_ajax_referer('maneli_update_cash_status', 'nonce');
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $new_status = isset($_POST['new_status']) ? sanitize_text_field($_POST['new_status']) : '';
+        
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            wp_send_json_error(['message' => 'شناسه استعلام نامعتبر است']);
+        }
+        
+        // Check permissions
+        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        
+        if (!$is_admin && !$is_assigned) {
+            wp_send_json_error(['message' => 'شما دسترسی ندارید']);
+        }
+        
+        // Validate status
+        $valid_statuses = ['in_progress', 'awaiting_downpayment', 'meeting_scheduled', 'approved', 'rejected'];
+        if (!in_array($new_status, $valid_statuses)) {
+            wp_send_json_error(['message' => 'وضعیت نامعتبر است']);
+        }
+        
+        // Update status
+        update_post_meta($inquiry_id, 'cash_inquiry_status', $new_status);
+        
+        // Handle additional data based on status
+        if ($new_status === 'awaiting_downpayment') {
+            $amount = isset($_POST['downpayment_amount']) ? intval($_POST['downpayment_amount']) : 0;
+            if ($amount > 0) {
+                update_post_meta($inquiry_id, 'cash_down_payment', $amount);
+                // TODO: Send SMS to customer with payment link
+            }
+        }
+        
+        if ($new_status === 'meeting_scheduled') {
+            $date = isset($_POST['meeting_date']) ? sanitize_text_field($_POST['meeting_date']) : '';
+            $time = isset($_POST['meeting_time']) ? sanitize_text_field($_POST['meeting_time']) : '';
+            if ($date) update_post_meta($inquiry_id, 'meeting_date', $date);
+            if ($time) update_post_meta($inquiry_id, 'meeting_time', $time);
+        }
+        
+        if ($new_status === 'rejected') {
+            $reason = isset($_POST['rejection_reason']) ? sanitize_text_field($_POST['rejection_reason']) : '';
+            if ($reason) {
+                update_post_meta($inquiry_id, 'cash_rejection_reason', $reason);
+                // TODO: Send SMS to customer
+            }
+        }
+        
+        wp_send_json_success(['message' => 'وضعیت با موفقیت تغییر یافت']);
+    }
+    
+    /**
+     * Save expert note
+     */
+    public function ajax_save_expert_note() {
+        check_ajax_referer('maneli_save_expert_note', 'nonce');
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $note = isset($_POST['note']) ? sanitize_textarea_field($_POST['note']) : '';
+        
+        if (!$inquiry_id) {
+            wp_send_json_error(['message' => 'شناسه استعلام نامعتبر است']);
+        }
+        
+        // Check permissions
+        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        
+        if (!$is_admin && !$is_assigned) {
+            wp_send_json_error(['message' => 'شما دسترسی ندارید']);
+        }
+        
+        update_post_meta($inquiry_id, 'expert_note', $note);
+        
+        wp_send_json_success(['message' => 'یادداشت ذخیره شد']);
+    }
+    
+    /**
+     * Handle successful down payment reception
+     * This is called when customer pays the down payment successfully
+     */
+    public function handle_downpayment_received($user_id, $inquiry_id) {
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            return;
+        }
+        
+        // تغییر وضعیت به "پیش پرداخت دریافت شد"
+        update_post_meta($inquiry_id, 'cash_inquiry_status', 'downpayment_received');
+        update_post_meta($inquiry_id, 'downpayment_paid_date', current_time('mysql'));
+        
+        // TODO: Send SMS to expert notifying them that payment is received
+    }
+    
+    /**
+     * Create a new cash inquiry from dashboard (by admin or expert)
+     */
+    public function ajax_create_cash_inquiry() {
+        check_ajax_referer('maneli_create_cash_inquiry', 'nonce');
+        
+        // بررسی دسترسی: فقط مدیر یا کارشناس
+        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => 'شما دسترسی ندارید']);
+        }
+        
+        // دریافت و اعتبارسنجی داده‌ها
+        $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+        $first_name = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
+        $last_name = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+        $mobile = isset($_POST['mobile']) ? sanitize_text_field($_POST['mobile']) : '';
+        $car_color = isset($_POST['car_color']) ? sanitize_text_field($_POST['car_color']) : '';
+        
+        if (!$product_id || !wc_get_product($product_id)) {
+            wp_send_json_error(['message' => 'محصول انتخاب شده معتبر نیست']);
+        }
+        
+        if (empty($first_name) || empty($last_name)) {
+            wp_send_json_error(['message' => 'نام و نام خانوادگی الزامی است']);
+        }
+        
+        if (empty($mobile) || !preg_match('/^09[0-9]{9}$/', $mobile)) {
+            wp_send_json_error(['message' => 'شماره موبایل معتبر نیست']);
+        }
+        
+        // ایجاد پست استعلام نقدی
+        $post_data = [
+            'post_type'    => 'cash_inquiry',
+            'post_title'   => $first_name . ' ' . $last_name . ' - ' . get_the_title($product_id),
+            'post_status'  => 'publish',
+            'post_author'  => get_current_user_id(), // ثبت کننده (مدیر یا کارشناس)
+        ];
+        
+        $inquiry_id = wp_insert_post($post_data, true);
+        
+        if (is_wp_error($inquiry_id)) {
+            wp_send_json_error(['message' => 'خطا در ایجاد استعلام']);
+        }
+        
+        // ذخیره اطلاعات استعلام
+        update_post_meta($inquiry_id, 'product_id', $product_id);
+        update_post_meta($inquiry_id, 'cash_first_name', $first_name);
+        update_post_meta($inquiry_id, 'cash_last_name', $last_name);
+        update_post_meta($inquiry_id, 'mobile_number', $mobile);
+        update_post_meta($inquiry_id, 'cash_car_color', $car_color);
+        update_post_meta($inquiry_id, 'cash_inquiry_status', 'new'); // وضعیت اولیه: جدید
+        update_post_meta($inquiry_id, 'created_by_admin', 'yes'); // ثبت شده توسط مدیر/کارشناس
+        update_post_meta($inquiry_id, 'created_at', current_time('mysql'));
+        
+        wp_send_json_success([
+            'message' => 'استعلام با موفقیت ثبت شد',
+            'inquiry_id' => $inquiry_id
+        ]);
     }
 }

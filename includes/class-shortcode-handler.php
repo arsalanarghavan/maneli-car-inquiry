@@ -73,7 +73,11 @@ class Maneli_Shortcode_Handler {
         wp_enqueue_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
         wp_enqueue_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
         
-        wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', [], null, true);
+        // Enqueue jQuery (required for all scripts)
+        wp_enqueue_script('jquery');
+        
+        // Enqueue SweetAlert2 with jQuery dependency
+        wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
 
         
         // Conditionally load assets for pages containing specific shortcodes that need Select2

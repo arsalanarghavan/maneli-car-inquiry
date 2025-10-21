@@ -28,6 +28,13 @@
                 </svg>
             </div>
             <ul class="main-menu">
+                <?php
+                // Get current user info
+                $current_user = wp_get_current_user();
+                $is_admin = current_user_can('manage_maneli_inquiries');
+                $is_expert = in_array('maneli_expert', $current_user->roles, true);
+                $is_customer = !$is_admin && !$is_expert;
+                ?>
                 
                 <!-- ═══════════════════════════════════════════════════ -->
                 <!-- بخش اصلی -->
@@ -42,46 +49,62 @@
                 </li>
 
                 <!-- ═══════════════════════════════════════════════════ -->
-                <!-- استعلامات نقدی -->
+                <!-- استعلامات -->
                 <!-- ═══════════════════════════════════════════════════ -->
-                <li class="slide__category"><span class="category-name">استعلامات نقدی</span></li>
+                <?php if ($is_customer): ?>
+                    <li class="slide__category"><span class="category-name">استعلامات من</span></li>
+                    
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'cash') ? 'active' : ''; ?>">
+                            <i class="la la-dollar-sign side-menu__icon"></i>
+                            <span class="side-menu__label">خرید نقدی</span>
+                        </a>
+                    </li>
+                    
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/inquiries/installment'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'installment') ? 'active' : ''; ?>">
+                            <i class="la la-credit-card side-menu__icon"></i>
+                            <span class="side-menu__label">خرید اقساطی</span>
+                        </a>
+                    </li>
+                <?php else: ?>
+                    <li class="slide__category"><span class="category-name">استعلامات نقدی</span></li>
 
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'cash') ? 'active' : ''; ?>">
-                        <i class="la la-dollar-sign side-menu__icon"></i>
-                        <span class="side-menu__label">لیست استعلامات نقدی</span>
-                    </a>
-                </li>
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'cash') ? 'active' : ''; ?>">
+                            <i class="la la-dollar-sign side-menu__icon"></i>
+                            <span class="side-menu__label">لیست استعلامات نقدی</span>
+                        </a>
+                    </li>
+
+                    <li class="slide__category"><span class="category-name">استعلامات اقساطی</span></li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/inquiries/installment'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'installment') ? 'active' : ''; ?>">
+                            <i class="la la-credit-card side-menu__icon"></i>
+                            <span class="side-menu__label">لیست استعلامات اقساطی</span>
+                        </a>
+                    </li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/followups'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'followups') ? 'active' : ''; ?>">
+                            <i class="la la-tasks side-menu__icon"></i>
+                            <span class="side-menu__label">پیگیری‌ها</span>
+                        </a>
+                    </li>
+
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/calendar'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'calendar') ? 'active' : ''; ?>">
+                            <i class="la la-calendar side-menu__icon"></i>
+                            <span class="side-menu__label">تقویم جلسات</span>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
                 <!-- ═══════════════════════════════════════════════════ -->
-                <!-- استعلامات اقساطی -->
+                <!-- مدیریت محصولات (فقط مدیر) -->
                 <!-- ═══════════════════════════════════════════════════ -->
-                <li class="slide__category"><span class="category-name">استعلامات اقساطی</span></li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/inquiries/installment'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'inquiries' && isset($subpage) && $subpage === 'installment') ? 'active' : ''; ?>">
-                        <i class="la la-credit-card side-menu__icon"></i>
-                        <span class="side-menu__label">لیست استعلامات اقساطی</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/followups'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'followups') ? 'active' : ''; ?>">
-                        <i class="la la-tasks side-menu__icon"></i>
-                        <span class="side-menu__label">پیگیری‌ها</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a href="<?php echo home_url('/dashboard/calendar'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'calendar') ? 'active' : ''; ?>">
-                        <i class="la la-calendar side-menu__icon"></i>
-                        <span class="side-menu__label">تقویم جلسات</span>
-                    </a>
-                </li>
-
-                <!-- ═══════════════════════════════════════════════════ -->
-                <!-- مدیریت محصولات -->
-                <!-- ═══════════════════════════════════════════════════ -->
+                <?php if ($is_admin): ?>
                 <li class="slide__category"><span class="category-name">مدیریت محصولات</span></li>
 
                 <li class="slide">
@@ -92,7 +115,7 @@
                 </li>
 
                 <!-- ═══════════════════════════════════════════════════ -->
-                <!-- مالی -->
+                <!-- مالی (فقط مدیر) -->
                 <!-- ═══════════════════════════════════════════════════ -->
                 <li class="slide__category"><span class="category-name">مدیریت مالی</span></li>
 
@@ -111,9 +134,8 @@
                 </li>
 
                 <!-- ═══════════════════════════════════════════════════ -->
-                <!-- مدیریت کاربران -->
+                <!-- مدیریت کاربران (فقط مدیر) -->
                 <!-- ═══════════════════════════════════════════════════ -->
-                <?php if (current_user_can('manage_maneli_inquiries')): ?>
                 <li class="slide__category"><span class="category-name">کاربران و کارشناسان</span></li>
 
                 <li class="slide">

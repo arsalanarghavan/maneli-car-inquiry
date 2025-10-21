@@ -292,8 +292,6 @@ class Maneli_Render_Helpers {
         // Get expert status info
         $expert_status_info = self::get_expert_status_info($expert_status);
 
-        $set_downpayment_button = ($inquiry_status === 'pending' || $inquiry_status === 'approved') ? 
-            '<a href="#" class="set-down-payment-btn" data-inquiry-id="' . esc_attr($inquiry_id) . '" style="display: block; font-size: 11px; margin-top: 5px;">' . esc_html__('Set Down Payment', 'maneli-car-inquiry') . '</a>' : '';
         ?>
         <tr>
             <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
@@ -305,7 +303,6 @@ class Maneli_Render_Helpers {
                 <?php if ($expert_status_info): ?>
                     <br><span class="expert-status-badge" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html($expert_status_info['label']); ?></span>
                 <?php endif; ?>
-                <?php if ($is_admin) echo $set_downpayment_button; ?>
             </td>
             <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
                 <?php if (!empty($expert_name)) : ?>

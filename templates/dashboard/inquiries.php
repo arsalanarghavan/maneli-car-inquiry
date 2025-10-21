@@ -7,6 +7,11 @@ $show_list = true;
 // Helper function to enqueue assets for inquiry reports
 if (!function_exists('maneli_enqueue_inquiry_report_assets')) {
     function maneli_enqueue_inquiry_report_assets() {
+        // Enqueue SweetAlert2 (CRITICAL - required for modals)
+        if (!wp_script_is('sweetalert2', 'enqueued')) {
+            wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+        }
+        
         // Enqueue Select2 for expert assignment modal
         if (!wp_style_is('select2', 'enqueued')) {
             wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
@@ -25,7 +30,7 @@ if (!function_exists('maneli_enqueue_inquiry_report_assets')) {
 
         // Enqueue inquiry lists script
         if (!wp_script_is('maneli-inquiry-lists-js', 'enqueued')) {
-            wp_enqueue_script('maneli-inquiry-lists-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js', ['jquery', 'select2', 'maneli-jalali-datepicker'], '1.0.0', true);
+            wp_enqueue_script('maneli-inquiry-lists-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js', ['jquery', 'sweetalert2', 'select2', 'maneli-jalali-datepicker'], '1.0.0', true);
             
             // Localize script
             $options = get_option('maneli_inquiry_all_options', []);
@@ -61,6 +66,9 @@ if (!function_exists('maneli_enqueue_inquiry_report_assets')) {
                     'server_error' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry'),
                     'unknown_error' => esc_html__('An unknown error occurred.', 'maneli-car-inquiry'),
                     'no_experts_available' => esc_html__('No experts available.', 'maneli-car-inquiry'),
+                    'select_expert_required' => esc_html__('Please select an expert.', 'maneli-car-inquiry'),
+                    'select_expert_placeholder' => esc_html__('Select Expert', 'maneli-car-inquiry'),
+                    'auto_assign' => esc_html__('-- Automatic Assignment (Round-robin) --', 'maneli-car-inquiry'),
                     'assign_title' => esc_html__('Assign to Expert', 'maneli-car-inquiry'),
                     'assign_label' => esc_html__('Select Expert:', 'maneli-car-inquiry'),
                     'assign_button' => esc_html__('Assign', 'maneli-car-inquiry'),
@@ -69,6 +77,8 @@ if (!function_exists('maneli_enqueue_inquiry_report_assets')) {
                     'delete_title' => esc_html__('Deleted', 'maneli-car-inquiry'),
                     'delete_list_title' => esc_html__('Delete this inquiry?', 'maneli-car-inquiry'),
                     'delete_list_text' => esc_html__('This action cannot be undone.', 'maneli-car-inquiry'),
+                    'confirm_delete_title' => esc_html__('Are you sure you want to delete this request?', 'maneli-car-inquiry'),
+                    'confirm_delete_text' => esc_html__('This action cannot be undone!', 'maneli-car-inquiry'),
                 ]
             ]);
         }
@@ -106,8 +116,33 @@ if ($inquiry_id > 0 && get_post_type($inquiry_id) === 'inquiry') {
         if ($is_admin_or_expert) {
             // Enqueue necessary assets
             maneli_enqueue_inquiry_report_assets();
+            
             // Set $inquiry_id for the template (cash report expects this variable)
             $inquiry_id = $cash_inquiry_id;
+            
+            // Add flag to load cash report scripts in footer
+            add_action('wp_footer', function() use ($cash_inquiry_id) {
+                ?>
+                <!-- SweetAlert2 for Cash Report -->
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                
+                <!-- Cash Report Script -->
+                <script>
+                var maneliCashReport = {
+                    ajax_url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    nonces: {
+                        save_meeting: '<?php echo wp_create_nonce('maneli_save_meeting'); ?>',
+                        expert_decision: '<?php echo wp_create_nonce('maneli_expert_decision'); ?>',
+                        admin_approve: '<?php echo wp_create_nonce('maneli_admin_approve'); ?>',
+                        update_status: '<?php echo wp_create_nonce('maneli_update_cash_status'); ?>',
+                        save_note: '<?php echo wp_create_nonce('maneli_save_expert_note'); ?>'
+                    }
+                };
+                </script>
+                <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/frontend/cash-report.js?ver=<?php echo filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/cash-report.js'); ?>"></script>
+                <?php
+            }, 999);
+            
             // Load the admin/expert cash report template
             include MANELI_INQUIRY_PLUGIN_PATH . 'templates/shortcodes/inquiry-lists/report-admin-cash.php';
         } else {
@@ -126,15 +161,422 @@ if ($inquiry_id > 0 && get_post_type($inquiry_id) === 'inquiry') {
 if ($show_list):
 ?>
 <!-- Start::row -->
+<?php
+// Get current user and role
+$current_user_id = get_current_user_id();
+$is_admin = current_user_can('manage_maneli_inquiries');
+$is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+
+// Determine which inquiries to count based on role and page
+$count_type = isset($subpage) ? $subpage : 'all';
+
+// Calculate statistics for cash inquiries
+$cash_stats = [
+    'total' => 0,
+    'pending' => 0,
+    'approved' => 0,
+    'awaiting_payment' => 0,
+    'completed' => 0,
+    'rejected' => 0,
+    'assigned' => 0,
+    'unassigned' => 0
+];
+
+if ($count_type === 'cash' || $count_type === 'all') {
+    $cash_args = [
+        'post_type' => 'cash_inquiry',
+        'post_status' => 'publish',
+        'posts_per_page' => -1
+    ];
+    
+    // Filter for expert
+    if ($is_expert && !$is_admin) {
+        $cash_args['meta_query'] = [
+            [
+                'key' => 'assigned_expert_id',
+                'value' => $current_user_id,
+                'compare' => '='
+            ]
+        ];
+    }
+    
+    $all_cash = get_posts($cash_args);
+    $cash_stats['total'] = count($all_cash);
+    
+    foreach ($all_cash as $inq) {
+        $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
+        $expert_id = get_post_meta($inq->ID, 'assigned_expert_id', true);
+        
+        // Count by status
+        if (isset($cash_stats[$status])) {
+            $cash_stats[$status]++;
+        }
+        
+        // Count assignments (only for admin)
+        if ($is_admin) {
+            if ($expert_id) {
+                $cash_stats['assigned']++;
+            } else {
+                $cash_stats['unassigned']++;
+            }
+        }
+    }
+}
+
+// Calculate statistics for installment inquiries
+$installment_stats = [
+    'total' => 0,
+    'pending' => 0,
+    'user_confirmed' => 0,
+    'approved' => 0,
+    'rejected' => 0,
+    'assigned' => 0,
+    'unassigned' => 0
+];
+
+if ($count_type === 'installment' || $count_type === 'all') {
+    $inst_args = [
+        'post_type' => 'inquiry',
+        'post_status' => 'publish',
+        'posts_per_page' => -1
+    ];
+    
+    // Filter for expert
+    if ($is_expert && !$is_admin) {
+        $inst_args['meta_query'] = [
+            [
+                'key' => 'assigned_expert_id',
+                'value' => $current_user_id,
+                'compare' => '='
+            ]
+        ];
+    }
+    
+    $all_installment = get_posts($inst_args);
+    $installment_stats['total'] = count($all_installment);
+    
+    foreach ($all_installment as $inq) {
+        $status = get_post_meta($inq->ID, 'inquiry_status', true);
+        $expert_id = get_post_meta($inq->ID, 'assigned_expert_id', true);
+        
+        // Count by status
+        if (isset($installment_stats[$status])) {
+            $installment_stats[$status]++;
+        }
+        
+        // Count assignments (only for admin)
+        if ($is_admin) {
+            if ($expert_id) {
+                $installment_stats['assigned']++;
+            } else {
+                $installment_stats['unassigned']++;
+            }
+        }
+    }
+}
+?>
+
+<!-- Statistics Cards for Cash Inquiries -->
+<?php if ($count_type === 'cash'): ?>
+<div class="row mb-4">
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-primary-transparent">
+                            <i class="la la-list-alt fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">مجموع</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($cash_stats['total']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <?php if ($is_admin): ?>
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-info-transparent">
+                            <i class="la la-user-check fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">ارجاع شده</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($cash_stats['assigned']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-danger-transparent">
+                            <i class="la la-exclamation-triangle fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">منتظر ارجاع</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($cash_stats['unassigned']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-warning-transparent">
+                            <i class="la la-clock fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">در انتظار</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($cash_stats['pending']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-success-transparent">
+                            <i class="la la-check-circle fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">تکمیل شده</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($cash_stats['completed']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-info-transparent">
+                            <i class="la la-money-bill fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">منتظر پرداخت</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($cash_stats['awaiting_payment']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-danger-transparent">
+                            <i class="la la-times-circle fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">رد شده</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($cash_stats['rejected']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Statistics Cards for Installment Inquiries -->
+<?php if ($count_type === 'installment'): ?>
+<div class="row mb-4">
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-primary-transparent">
+                            <i class="la la-list-alt fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">مجموع</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($installment_stats['total']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <?php if ($is_admin): ?>
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-info-transparent">
+                            <i class="la la-user-check fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">ارجاع شده</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($installment_stats['assigned']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-danger-transparent">
+                            <i class="la la-exclamation-triangle fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">منتظر ارجاع</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($installment_stats['unassigned']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-warning-transparent">
+                            <i class="la la-clock fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">در انتظار</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($installment_stats['pending']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-success-transparent">
+                            <i class="la la-check-circle fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">تایید شده</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($installment_stats['user_confirmed'] + $installment_stats['approved']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-lg-6">
+        <div class="card custom-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <span class="avatar avatar-md bg-danger-transparent">
+                            <i class="la la-times-circle fs-24"></i>
+                        </span>
+                    </div>
+                    <div class="flex-fill">
+                        <div class="mb-1">
+                            <span class="text-muted fs-13">رد شده</span>
+                        </div>
+                        <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($installment_stats['rejected']); ?></h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-xl-12">
         <div class="card custom-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="card-title">لیست استعلامات</div>
-                <a href="<?php echo home_url('/dashboard/new-inquiry'); ?>" class="btn btn-primary">
-                    <i class="la la-plus me-1"></i>
-                    استعلام جدید
-                </a>
+                <div class="card-title">
+                    <i class="la la-<?php echo $count_type === 'cash' ? 'dollar-sign' : 'credit-card'; ?> me-2"></i>
+                    <?php 
+                    if ($count_type === 'cash') {
+                        echo 'لیست استعلامات نقدی';
+                    } elseif ($count_type === 'installment') {
+                        echo 'لیست استعلامات اقساطی';
+                    } else {
+                        echo 'لیست همه استعلامات';
+                    }
+                    ?>
+                </div>
+                <?php if ($count_type === 'cash'): ?>
+                    <button type="button" class="btn btn-primary" id="open-new-cash-inquiry-modal">
+                        <i class="la la-plus me-1"></i>
+                        استعلام نقدی جدید
+                    </button>
+                <?php else: ?>
+                    <a href="<?php echo home_url('/dashboard/new-inquiry'); ?>" class="btn btn-primary">
+                        <i class="la la-plus me-1"></i>
+                        استعلام جدید
+                    </a>
+                <?php endif; ?>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -146,6 +588,9 @@ if ($show_list):
                                 <th>شماره موبایل</th>
                                 <th>نوع خودرو</th>
                                 <th>وضعیت</th>
+                                <?php if (current_user_can('manage_maneli_inquiries')): ?>
+                                    <th>کارشناس</th>
+                                <?php endif; ?>
                                 <th>تاریخ</th>
                                 <th>عملیات</th>
                             </tr>
@@ -222,23 +667,43 @@ if ($show_list):
                                     $car_type = $product_id ? get_the_title($product_id) : '';
                                     $inquiry_label = 'نقدی';
                                     
-                                    // Get status label for cash inquiry
+                                    // Get status label for cash inquiry using new statuses
+                                    $status_text = Maneli_CPT_Handler::get_cash_inquiry_status_label($status);
                                     $status_label = '';
                                     switch ($status) {
-                                        case 'pending':
-                                            $status_label = '<span class="badge bg-warning">در انتظار</span>';
+                                        case 'new':
+                                            $status_label = '<span class="badge bg-secondary">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'referred':
+                                            $status_label = '<span class="badge bg-info">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'in_progress':
+                                            $status_label = '<span class="badge bg-primary">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'awaiting_downpayment':
+                                            $status_label = '<span class="badge bg-warning">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'downpayment_received':
+                                            $status_label = '<span class="badge bg-success-light">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'meeting_scheduled':
+                                            $status_label = '<span class="badge bg-cyan">' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'approved':
-                                            $status_label = '<span class="badge bg-info">تایید شده</span>';
-                                            break;
-                                        case 'awaiting_payment':
-                                            $status_label = '<span class="badge bg-primary">در انتظار پرداخت</span>';
-                                            break;
-                                        case 'completed':
-                                            $status_label = '<span class="badge bg-success">تکمیل شده</span>';
+                                            $status_label = '<span class="badge bg-success">' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'rejected':
-                                            $status_label = '<span class="badge bg-danger">رد شده</span>';
+                                            $status_label = '<span class="badge bg-danger">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'completed':
+                                            $status_label = '<span class="badge bg-dark">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        // برای سازگاری با وضعیت‌های قدیمی
+                                        case 'pending':
+                                            $status_label = '<span class="badge bg-secondary">جدید</span>';
+                                            break;
+                                        case 'awaiting_payment':
+                                            $status_label = '<span class="badge bg-warning">در انتظار پیش پرداخت</span>';
                                             break;
                                         default:
                                             $status_label = '<span class="badge bg-secondary">نامشخص</span>';
@@ -287,6 +752,18 @@ if ($show_list):
                                     $date = get_the_date('Y/m/d', $inquiry->ID);
                                 }
                                 
+                                // Get assigned expert
+                                $expert_id = get_post_meta($inquiry->ID, 'assigned_expert_id', true);
+                                $expert_name = '';
+                                if ($expert_id) {
+                                    $expert = get_userdata($expert_id);
+                                    $expert_name = $expert ? $expert->display_name : '';
+                                }
+                                // Fallback to assigned_expert_name if no ID
+                                if (!$expert_name) {
+                                    $expert_name = get_post_meta($inquiry->ID, 'assigned_expert_name', true);
+                                }
+                                
                                 // Build view URL based on inquiry type
                                 if ($inquiry_type === 'cash') {
                                     $view_url = add_query_arg('cash_inquiry_id', $inquiry->ID, home_url('/dashboard/inquiries/cash'));
@@ -303,6 +780,21 @@ if ($show_list):
                                     <td><?php echo esc_html($user_phone ?: 'نامشخص'); ?></td>
                                     <td><?php echo esc_html($car_type ?: 'نامشخص'); ?></td>
                                     <td><?php echo $status_label; ?></td>
+                                    <?php if (current_user_can('manage_maneli_inquiries')): ?>
+                                        <td>
+                                            <?php if ($expert_name): ?>
+                                                <span class="badge bg-info">
+                                                    <i class="la la-user-tie me-1"></i>
+                                                    <?php echo esc_html($expert_name); ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="badge bg-danger">
+                                                    <i class="la la-exclamation-triangle me-1"></i>
+                                                    منتظر ارجاع
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                    <?php endif; ?>
                                     <td><?php echo esc_html($date); ?></td>
                                     <td>
                                         <div class="btn-list">
@@ -319,7 +811,7 @@ if ($show_list):
                             if (empty($all_inquiries)) {
                                 ?>
                                 <tr>
-                                    <td colspan="7" class="text-center">
+                                    <td colspan="<?php echo current_user_can('manage_maneli_inquiries') ? '8' : '7'; ?>" class="text-center">
                                         <div class="alert alert-info mb-0">
                                             <i class="la la-info-circle me-2"></i>
                                             هیچ استعلامی یافت نشد.
@@ -337,4 +829,144 @@ if ($show_list):
     </div>
 </div>
 <!-- End::row -->
+
 <?php endif; // End of $show_list check ?>
+
+<!-- Modal: ایجاد استعلام نقدی جدید -->
+<?php if ($count_type === 'cash'): ?>
+<div class="modal fade" id="new-cash-inquiry-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary-transparent">
+                <h6 class="modal-title text-primary">
+                    <i class="la la-dollar-sign me-2"></i>
+                    ثبت استعلام نقدی جدید
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="new-cash-inquiry-form">
+                    <!-- انتخاب خودرو -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="la la-car me-1"></i>
+                            انتخاب خودرو <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="cash-product-select" required>
+                            <option value="">انتخاب کنید...</option>
+                            <?php
+                            // بارگذاری محصولات برای انتخاب
+                            $products = wc_get_products(['status' => 'publish', 'limit' => -1, 'orderby' => 'title', 'order' => 'ASC']);
+                            foreach ($products as $product) {
+                                $price = $product->get_regular_price();
+                                echo '<option value="' . esc_attr($product->get_id()) . '" data-price="' . esc_attr($price) . '" data-image="' . esc_url(wp_get_attachment_url($product->get_image_id())) . '">';
+                                echo esc_html($product->get_name());
+                                echo '</option>';
+                            }
+                            ?>
+                        </select>
+                        
+                        <!-- نمایش اطلاعات خودرو -->
+                        <div id="product-info" class="mt-3" style="display: none;">
+                            <div class="card border">
+                                <div class="card-body p-3">
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <img id="product-image" src="" alt="" class="img-fluid rounded">
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h6 id="product-name" class="mb-2"></h6>
+                                            <p class="mb-1">
+                                                <strong>قیمت نقدی:</strong>
+                                                <span id="product-price" class="text-primary fs-16"></span> تومان
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <!-- نام -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                نام <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="cash-first-name" required>
+                        </div>
+                        
+                        <!-- نام خانوادگی -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                نام خانوادگی <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="cash-last-name" required>
+                        </div>
+                        
+                        <!-- شماره موبایل -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                شماره موبایل <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="cash-mobile" maxlength="11" pattern="09[0-9]{9}" placeholder="09XXXXXXXXX" required>
+                        </div>
+                        
+                        <!-- رنگ خودرو -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                رنگ خودرو
+                            </label>
+                            <input type="text" class="form-control" id="cash-car-color" placeholder="مثال: سفید">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    <i class="la la-times me-1"></i>
+                    لغو
+                </button>
+                <button type="button" class="btn btn-primary" id="submit-cash-inquiry-btn">
+                    <i class="la la-save me-1"></i>
+                    ثبت استعلام
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- استایل برای رفع مشکل z-index -->
+<style>
+#new-cash-inquiry-modal {
+    z-index: 99999 !important;
+}
+#new-cash-inquiry-modal .modal-dialog {
+    z-index: 100000 !important;
+}
+.modal-backdrop {
+    z-index: 99998 !important;
+}
+</style>
+
+<?php
+// Enqueue cash inquiry form script in footer (for modal functionality)
+if ($count_type === 'cash') {
+    add_action('wp_footer', function() {
+        ?>
+        <!-- SweetAlert2 for modals (if not already loaded) -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        
+        <!-- Cash Inquiry Form Script -->
+        <script>
+        var maneliCashInquiryForm = {
+            ajax_url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            nonce: '<?php echo wp_create_nonce('maneli_create_cash_inquiry'); ?>'
+        };
+        </script>
+        <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/frontend/cash-inquiry-form.js?ver=<?php echo filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/cash-inquiry-form.js'); ?>"></script>
+        <?php
+    }, 1000);
+}
+?>
+<?php endif; // End of cash type check for modal ?>

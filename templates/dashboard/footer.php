@@ -86,6 +86,13 @@
         });
     </script>
     
+    <?php
+    // WordPress footer hook - allows plugins to add scripts
+    if (function_exists('do_action')) {
+        do_action('wp_footer');
+    }
+    ?>
+    
 </body>
 
 </html>

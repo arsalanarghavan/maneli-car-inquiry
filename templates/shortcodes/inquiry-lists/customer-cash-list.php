@@ -1,17 +1,14 @@
 <?php
 /**
  * Template for the Customer's view of their Cash Inquiry List.
- *
- * This template displays a table of the current user's cash inquiries with their statuses and links to view details.
- * It also handles payment status feedback messages.
+ * Modern redesign with Bootstrap theme styling.
  *
  * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryLists
- * @author  Gemini
- * @version 1.0.0
+ * @version 2.0.0 (Modern redesign)
  *
  * @var WP_Query $inquiries_query The WP_Query object for the user's cash inquiries.
  * @var string   $current_url     The base URL for generating action links.
- * @var string|null $payment_status Status from a payment gateway redirect ('success', 'failed', 'cancelled').
+ * @var string|null $payment_status Status from a payment gateway redirect.
  */
 
 if (!defined('ABSPATH')) {
@@ -22,45 +19,60 @@ if (!defined('ABSPATH')) {
 <div class="row">
     <div class="col-xl-12">
         <div class="card custom-card">
-            <div class="card-header">
+            <div class="card-header bg-warning-transparent">
                 <div class="card-title">
-                    <i class="la la-dollar-sign me-2"></i>
-                    <?php esc_html_e('Your Cash Purchase Requests', 'maneli-car-inquiry'); ?>
+                    <i class="la la-dollar-sign me-2 fs-20"></i>
+                    استعلامات خرید نقدی من
                 </div>
             </div>
             <div class="card-body">
                 <?php
-                // Display payment status message if redirected from a payment gateway
+                // Display payment status message
                 if (isset($payment_status)) {
                     $reason = isset($_GET['reason']) ? sanitize_text_field(urldecode($_GET['reason'])) : '';
-                    maneli_get_template_part('shortcodes/inquiry-form/payment-status-message', ['status' => $payment_status, 'reason' => $reason]);
+                    if ($payment_status === 'success') {
+                        echo '<div class="alert alert-success border-success d-flex align-items-center"><i class="la la-check-circle fs-20 me-2"></i><div><strong>موفق!</strong> پرداخت با موفقیت انجام شد.</div></div>';
+                    } elseif ($payment_status === 'failed') {
+                        echo '<div class="alert alert-danger border-danger d-flex align-items-center"><i class="la la-times-circle fs-20 me-2"></i><div><strong>ناموفق!</strong> پرداخت انجام نشد. ' . esc_html($reason) . '</div></div>';
+                    }
                 }
                 ?>
 
-                <div class="alert alert-info" role="alert">
-                    <i class="la la-info-circle me-2"></i>
-                    <?php esc_html_e('Please note: Quoted prices are approximate. The final price will be determined based on the market rate at the time of the down payment.', 'maneli-car-inquiry'); ?>
+                <div class="alert alert-info border-info d-flex align-items-start" role="alert">
+                    <i class="la la-info-circle fs-20 me-2 mt-1"></i>
+                    <div>
+                        <strong>توجه:</strong>
+                        قیمت‌های اعلام شده تقریبی هستند. قیمت نهایی بر اساس نرخ روز بازار در زمان پرداخت پیش‌پرداخت تعیین خواهد شد.
+                    </div>
                 </div>
 
-                <?php if (!$inquiries_query->have_posts()) : ?>
-                    <div class="alert alert-warning" role="alert">
-                        <i class="la la-info-circle me-2"></i>
-                        <?php esc_html_e('You have not submitted any cash purchase requests yet.', 'maneli-car-inquiry'); ?>
+                <?php if (!$inquiries_query->have_posts()): ?>
+                    <!-- Empty State -->
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="la la-inbox" style="font-size: 80px; color: #dee2e6;"></i>
+                        </div>
+                        <h5 class="text-muted mb-2">هنوز استعلام نقدی ثبت نکرده‌اید</h5>
+                        <p class="text-muted mb-4">برای خرید نقدی خودرو، اولین استعلام خود را ثبت کنید.</p>
+                        <a href="<?php echo home_url('/cash-inquiry'); ?>" class="btn btn-primary btn-wave">
+                            <i class="la la-plus me-1"></i>
+                            ثبت درخواست نقدی جدید
+                        </a>
                     </div>
-                <?php else : ?>
+                <?php else: ?>
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover">
-                            <thead class="table-light">
+                            <thead class="table-warning">
                                 <tr>
-                                    <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                    <th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                                    <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                    <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
-                                    <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-hashtag me-1"></i>شناسه</th>
+                                    <th><i class="la la-car me-1"></i>خودرو</th>
+                                    <th><i class="la la-info-circle me-1"></i>وضعیت</th>
+                                    <th><i class="la la-calendar me-1"></i>تاریخ ثبت</th>
+                                    <th><i class="la la-wrench me-1"></i>عملیات</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php while ($inquiries_query->have_posts()) : $inquiries_query->the_post(); ?>
+                                <?php while ($inquiries_query->have_posts()): $inquiries_query->the_post(); ?>
                                     <?php
                                     $inquiry_id = get_the_ID();
                                     $product_id = get_post_meta($inquiry_id, 'product_id', true);
@@ -68,23 +80,52 @@ if (!defined('ABSPATH')) {
                                     $expert_status = get_post_meta($inquiry_id, 'expert_status', true);
                                     $report_url = add_query_arg('cash_inquiry_id', $inquiry_id, $current_url);
                                     $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
+                                    
+                                    $status_data = [
+                                        'pending' => ['label' => 'در انتظار بررسی', 'class' => 'warning'],
+                                        'approved' => ['label' => 'تایید شده', 'class' => 'success'],
+                                        'awaiting_payment' => ['label' => 'در انتظار پرداخت', 'class' => 'info'],
+                                        'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
+                                        'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
+                                    ];
+                                    $badge = $status_data[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
+                                    
+                                    // Convert to Jalali
+                                    $timestamp = strtotime(get_the_date('Y-m-d', $inquiry_id));
+                                    if (function_exists('maneli_gregorian_to_jalali')) {
+                                        $date = maneli_gregorian_to_jalali(
+                                            date('Y', $timestamp),
+                                            date('m', $timestamp),
+                                            date('d', $timestamp),
+                                            'Y/m/d'
+                                        );
+                                    } else {
+                                        $date = get_the_date('Y/m/d', $inquiry_id);
+                                    }
                                     ?>
                                     <tr>
-                                        <td>#<?php echo esc_html($inquiry_id); ?></td>
-                                        <td><?php echo esc_html(get_the_title($product_id)); ?></td>
+                                        <td><strong>#<?php echo esc_html($inquiry_id); ?></strong></td>
                                         <td>
-                                            <span class="badge bg-<?php echo $status === 'completed' ? 'success' : ($status === 'pending' ? 'warning' : 'secondary'); ?>">
-                                                <?php echo esc_html(Maneli_CPT_Handler::get_cash_inquiry_status_label($status)); ?>
+                                            <div class="d-flex align-items-center">
+                                                <i class="la la-car text-warning me-2 fs-18"></i>
+                                                <span><?php echo esc_html(get_the_title($product_id)); ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<?php echo $badge['class']; ?>">
+                                                <?php echo $badge['label']; ?>
                                             </span>
                                             <?php if ($expert_status_info): ?>
-                                                <br><span class="badge mt-1" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>;"><?php echo esc_html($expert_status_info['label']); ?></span>
+                                                <br><span class="badge mt-1" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white;">
+                                                    <?php echo esc_html($expert_status_info['label']); ?>
+                                                </span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?php echo esc_html(get_the_date('Y/m/d', $inquiry_id)); ?></td>
+                                        <td><?php echo esc_html($date); ?></td>
                                         <td>
                                             <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light">
                                                 <i class="la la-eye me-1"></i>
-                                                <?php esc_html_e('View Details', 'maneli-car-inquiry'); ?>
+                                                مشاهده جزئیات
                                             </a>
                                         </td>
                                     </tr>
@@ -93,17 +134,24 @@ if (!defined('ABSPATH')) {
                         </table>
                     </div>
 
-                    <div class="mt-3 text-center">
-                        <?php
-                        echo paginate_links([
-                            'total' => $inquiries_query->max_num_pages,
-                            'current' => max(1, get_query_var('paged')),
-                            'prev_text' => '&laquo; ' . esc_html__('Previous', 'maneli-car-inquiry'),
-                            'next_text' => esc_html__('Next', 'maneli-car-inquiry') . ' &raquo;',
-                            'type' => 'plain',
-                        ]);
-                        ?>
-                    </div>
+                    <!-- Pagination -->
+                    <?php if ($inquiries_query->max_num_pages > 1): ?>
+                        <div class="mt-4 text-center">
+                            <nav>
+                                <?php
+                                echo paginate_links([
+                                    'total' => $inquiries_query->max_num_pages,
+                                    'current' => max(1, get_query_var('paged')),
+                                    'prev_text' => '<i class="la la-angle-right"></i> قبلی',
+                                    'next_text' => 'بعدی <i class="la la-angle-left"></i>',
+                                    'type' => 'plain',
+                                    'before_page_number' => '<span class="btn btn-sm btn-light mx-1">',
+                                    'after_page_number' => '</span>',
+                                ]);
+                                ?>
+                            </nav>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <?php wp_reset_postdata(); ?>
             </div>
@@ -111,35 +159,25 @@ if (!defined('ABSPATH')) {
     </div>
 </div>
 
-<!-- Tracking Status Modal -->
-<div class="modal fade" id="tracking-status-modal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Set Tracking Status', 'maneli-car-inquiry'); ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="tracking-status-select" class="form-label"><?php esc_html_e('Select Status:', 'maneli-car-inquiry'); ?></label>
-                    <select id="tracking-status-select" class="form-select">
-                        <?php foreach (Maneli_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
-                            <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                
-                <div id="calendar-wrapper" style="display:none;">
-                    <label id="calendar-label" class="form-label"><?php esc_html_e('Select Date:', 'maneli-car-inquiry'); ?></label>
-                    <input type="text" id="tracking-date-picker" class="form-control maneli-datepicker" readonly>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
-                <button type="button" id="confirm-tracking-status-btn" class="btn btn-primary">
-                    <?php esc_html_e('Confirm Status', 'maneli-car-inquiry'); ?>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+.table-warning th {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 193, 7, 0.05);
+    transform: scale(1.005);
+    transition: all 0.3s ease;
+}
+
+.la-inbox {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+</style>

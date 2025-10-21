@@ -120,6 +120,7 @@ class Maneli_Reports_Dashboard {
                     $statistics['pending'] += $stat->count;
                     break;
                 case 'approved':
+                case 'user_confirmed':
                     $statistics['approved'] += $stat->count;
                     break;
                 case 'rejected':
@@ -383,7 +384,7 @@ class Maneli_Reports_Dashboard {
                 COUNT(*) as inquiry_count,
                 prod.post_title as product_name
             FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'selected_product'
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'product_id'
             LEFT JOIN {$wpdb->posts} prod ON pm.meta_value = prod.ID
             $expert_join
             WHERE p.post_type IN ('cash_inquiry', 'inquiry')
@@ -391,13 +392,24 @@ class Maneli_Reports_Dashboard {
             AND p.post_date >= %s AND p.post_date <= %s
             $expert_where
             AND pm.meta_value IS NOT NULL
+            AND pm.meta_value != ''
             GROUP BY pm.meta_value
             ORDER BY inquiry_count DESC
             LIMIT %d",
             $params
         ));
         
-        return $products;
+        // Format results
+        $formatted_products = [];
+        foreach ($products as $product) {
+            $formatted_products[] = [
+                'id' => $product->product_id,
+                'name' => $product->product_name ?: 'نامشخص',
+                'count' => (int)$product->inquiry_count
+            ];
+        }
+        
+        return $formatted_products;
     }
     
     /**

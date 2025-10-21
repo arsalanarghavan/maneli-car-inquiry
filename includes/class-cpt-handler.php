@@ -158,11 +158,15 @@ class Maneli_CPT_Handler {
      */
     public static function get_all_cash_inquiry_statuses() {
         return [
-            'pending'          => esc_html__('Follow-up in Progress', 'maneli-car-inquiry'),
-            'approved'         => esc_html__('Referred', 'maneli-car-inquiry'),
-            'rejected'         => esc_html__('Rejected', 'maneli-car-inquiry'),
-            'awaiting_payment' => esc_html__('Awaiting Payment', 'maneli-car-inquiry'),
-            'completed'        => esc_html__('Completed', 'maneli-car-inquiry'),
+            'new'                    => esc_html__('New', 'maneli-car-inquiry'), // جدید
+            'referred'               => esc_html__('Referred to Expert', 'maneli-car-inquiry'), // ارجاع داده شده
+            'in_progress'            => esc_html__('In Progress', 'maneli-car-inquiry'), // در حال پیگیری
+            'awaiting_downpayment'   => esc_html__('Awaiting Down Payment', 'maneli-car-inquiry'), // در انتظار پیش پرداخت
+            'downpayment_received'   => esc_html__('Down Payment Received', 'maneli-car-inquiry'), // پیش پرداخت دریافت شد
+            'meeting_scheduled'      => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), // مراجعه حضوری
+            'approved'               => esc_html__('Approved', 'maneli-car-inquiry'), // تایید شده
+            'rejected'               => esc_html__('Rejected', 'maneli-car-inquiry'), // رد شده
+            'completed'              => esc_html__('Completed', 'maneli-car-inquiry'), // تکمیل شده
         ];
     }
 

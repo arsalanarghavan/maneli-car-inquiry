@@ -113,7 +113,7 @@ class Maneli_Cash_Inquiry_Handler {
             'cash_last_name'      => $last_name,
             'mobile_number'       => $mobile,
             'cash_car_color'      => $inquiry_data['cash_car_color'],
-            'cash_inquiry_status' => 'pending', // Initial status
+            'cash_inquiry_status' => 'new', // Initial status: جدید
         ];
         foreach ($meta_data as $key => $value) {
             update_post_meta($post_id, $key, $value);
