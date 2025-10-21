@@ -17,7 +17,10 @@ switch ($page) {
         $page_title = 'لیست استعلامات - مانلی خودرو';
         break;
     case 'followups':
-        $page_title = 'پیگیری‌ها - مانلی خودرو';
+        $page_title = 'پیگیری‌های اقساطی - مانلی خودرو';
+        break;
+    case 'cash-followups':
+        $page_title = 'پیگیری‌های نقدی - مانلی خودرو';
         break;
     case 'reports':
         $page_title = 'گزارشات - مانلی خودرو';
@@ -73,7 +76,10 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                                 echo 'لیست استعلامات';
                                                 break;
                                             case 'followups':
-                                                echo 'پیگیری‌ها';
+                                                echo 'پیگیری‌های اقساطی';
+                                                break;
+                                            case 'cash-followups':
+                                                echo 'پیگیری‌های نقدی';
                                                 break;
                                             case 'reports':
                                                 echo 'گزارشات';
@@ -108,7 +114,10 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                         echo 'لیست استعلامات - مانلی خودرو';
                                         break;
                                     case 'followups':
-                                        echo 'پیگیری‌ها - مانلی خودرو';
+                                        echo 'پیگیری‌های اقساطی - مانلی خودرو';
+                                        break;
+                                    case 'cash-followups':
+                                        echo 'پیگیری‌های نقدی - مانلی خودرو';
                                         break;
                                     case 'reports':
                                         echo 'گزارشات - مانلی خودرو';
@@ -164,6 +173,9 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                             break;
                         case 'followups':
                             include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/followups.php';
+                            break;
+                        case 'cash-followups':
+                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/cash-followups.php';
                             break;
                         case 'reports':
                             include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/reports.php';

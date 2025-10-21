@@ -142,6 +142,7 @@ class Maneli_Inquiry_Lists_Shortcode {
 
         if ($is_admin_or_expert) {
             $this->enqueue_admin_list_assets(); // For modals and actions
+            $this->enqueue_installment_report_assets(); // For installment status management
             return maneli_get_template_part('shortcodes/inquiry-lists/report-admin-installment', ['inquiry_id' => $inquiry_id], false);
         } else {
             // Customers see the final step of the form process as their report.
@@ -329,9 +330,37 @@ class Maneli_Inquiry_Lists_Shortcode {
         wp_localize_script('maneli-cash-report-js', 'maneliCashReport', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonces' => [
+                'update_status' => wp_create_nonce('maneli_update_cash_status'),
+                'save_note' => wp_create_nonce('maneli_save_expert_note'),
                 'save_meeting' => wp_create_nonce('maneli_save_meeting'),
                 'expert_decision' => wp_create_nonce('maneli_expert_decision'),
                 'admin_approve' => wp_create_nonce('maneli_admin_approve'),
+            ],
+        ]);
+    }
+    
+    /**
+     * Enqueues scripts and localizes data specifically for installment report pages.
+     */
+    private function enqueue_installment_report_assets() {
+        // Register and enqueue the installment report script
+        if (!wp_script_is('maneli-installment-report-js', 'registered')) {
+            wp_register_script(
+                'maneli-installment-report-js',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/installment-report.js',
+                ['jquery', 'sweetalert2', 'maneli-jalali-datepicker'],
+                filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/installment-report.js'), // Cache busting
+                true
+            );
+        }
+        wp_enqueue_script('maneli-installment-report-js');
+
+        // Localize data for the installment report script
+        wp_localize_script('maneli-installment-report-js', 'maneliInstallmentReport', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonces' => [
+                'update_status' => wp_create_nonce('maneli_installment_status'),
+                'save_note' => wp_create_nonce('maneli_installment_note'),
             ],
         ]);
     }

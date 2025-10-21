@@ -13,11 +13,82 @@ if (!current_user_can('manage_maneli_inquiries')) {
         <div class="row mb-4">
             <?php
             global $wpdb;
+            
+            // Total payments count
+            $total_payments = $wpdb->get_var("SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status'");
+            
+            // Count by status
             $completed_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'completed'");
             $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'pending'");
+            $failed_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'failed'");
+            $cancelled_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'cancelled'");
+            $refunded_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'refunded'");
+            
+            // Amount calculations
             $total_amount = $wpdb->get_var("SELECT SUM(CAST(meta_value AS UNSIGNED)) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_amount'") ?: 0;
+            $completed_amount = $wpdb->get_var("
+                SELECT SUM(CAST(pm_amount.meta_value AS UNSIGNED)) 
+                FROM {$wpdb->postmeta} pm_status
+                INNER JOIN {$wpdb->postmeta} pm_amount ON pm_status.post_id = pm_amount.post_id 
+                WHERE pm_status.meta_key = 'payment_status' 
+                AND pm_status.meta_value = 'completed' 
+                AND pm_amount.meta_key = 'payment_amount'
+            ") ?: 0;
+            $pending_amount = $wpdb->get_var("
+                SELECT SUM(CAST(pm_amount.meta_value AS UNSIGNED)) 
+                FROM {$wpdb->postmeta} pm_status
+                INNER JOIN {$wpdb->postmeta} pm_amount ON pm_status.post_id = pm_amount.post_id 
+                WHERE pm_status.meta_key = 'payment_status' 
+                AND pm_status.meta_value = 'pending' 
+                AND pm_amount.meta_key = 'payment_amount'
+            ") ?: 0;
+            
+            // Today's payments
+            $today_start = date('Y-m-d 00:00:00');
+            $today_end = date('Y-m-d 23:59:59');
+            $today_payments = $wpdb->get_var($wpdb->prepare("
+                SELECT COUNT(DISTINCT p.ID)
+                FROM {$wpdb->posts} p
+                INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+                WHERE pm.meta_key = 'payment_status'
+                AND p.post_date >= %s
+                AND p.post_date <= %s
+            ", $today_start, $today_end));
+            
+            $today_amount = $wpdb->get_var($wpdb->prepare("
+                SELECT SUM(CAST(pm_amount.meta_value AS UNSIGNED))
+                FROM {$wpdb->posts} p
+                INNER JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id
+                INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id
+                WHERE pm_status.meta_key = 'payment_status'
+                AND pm_status.meta_value = 'completed'
+                AND pm_amount.meta_key = 'payment_amount'
+                AND p.post_date >= %s
+                AND p.post_date <= %s
+            ", $today_start, $today_end)) ?: 0;
             ?>
-            <div class="col-xl-3 col-lg-6">
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-primary-transparent">
+                                    <i class="la la-list-alt fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">کل پرداخت‌ها</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($total_payments); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -31,12 +102,16 @@ if (!current_user_can('manage_maneli_inquiries')) {
                                     <span class="text-muted fs-13">موفق</span>
                                 </div>
                                 <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($completed_count); ?></h4>
+                                <?php if ($completed_amount > 0): ?>
+                                    <small class="text-muted d-block mt-1"><?php echo number_format_i18n($completed_amount); ?> تومان</small>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6">
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -50,22 +125,112 @@ if (!current_user_can('manage_maneli_inquiries')) {
                                     <span class="text-muted fs-13">در انتظار</span>
                                 </div>
                                 <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($pending_count); ?></h4>
+                                <?php if ($pending_amount > 0): ?>
+                                    <small class="text-muted d-block mt-1"><?php echo number_format_i18n($pending_amount); ?> تومان</small>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-6">
-                <div class="card custom-card bg-gradient-success text-white">
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-danger-transparent">
+                                    <i class="la la-times-circle fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">ناموفق</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($failed_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-secondary-transparent">
+                                    <i class="la la-times-circle fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">لغو شده</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($cancelled_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-info-transparent">
+                                    <i class="la la-reply fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">برگشت داده شده</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($refunded_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-cyan-transparent">
+                                    <i class="la la-calendar-check fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">امروز</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-cyan"><?php echo number_format_i18n($today_payments); ?></h4>
+                                <?php if ($today_amount > 0): ?>
+                                    <small class="text-muted d-block mt-1"><?php echo number_format_i18n($today_amount); ?> تومان</small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-lg-4 col-md-6">
+                <div class="card custom-card bg-gradient-success">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div>
-                                <h6 class="text-white-50 mb-2">کل مبلغ پرداخت‌ها (تومان)</h6>
-                                <h3 class="fw-bold mb-0"><?php echo number_format_i18n($total_amount); ?></h3>
+                                <h6 class="text-white mb-2">
+                                    <i class="la la-wallet fs-20 me-1"></i>
+                                    کل مبلغ (تومان)
+                                </h6>
+                                <h3 class="fw-bold mb-0 text-white"><?php echo number_format_i18n($total_amount); ?></h3>
                             </div>
                             <div>
                                 <span class="avatar avatar-lg bg-white-transparent">
-                                    <i class="la la-money-bill-wave fs-32"></i>
+                                    <i class="la la-wallet fs-32"></i>
                                 </span>
                             </div>
                         </div>

@@ -25,13 +25,62 @@ $max_num_pages = $products_query->max_num_pages;
 // Statistics
 $total_products_count = wp_count_posts('product');
 $published_count = $total_products_count->publish ?? 0;
+$draft_count = $total_products_count->draft ?? 0;
+$pending_count = $total_products_count->pending ?? 0;
+$private_count = $total_products_count->private ?? 0;
+
+// Get all products (publish + draft)
+$all_products = wc_get_products([
+    'status' => ['publish', 'draft'],
+    'limit' => -1,
+]);
+
+$active_count = 0;      // car_status = special_sale (فروش ویژه/فعال)
+$on_sale_count = 0;     // car_status = special_sale (فروش ویژه)
+$unavailable_count = 0; // car_status = unavailable (ناموجود)
+$disabled_count = 0;    // car_status = disabled (غیرفعال)
+
+foreach ($all_products as $product) {
+    $product_id = $product->get_id();
+    $car_status = get_post_meta($product_id, '_maneli_car_status', true);
+    
+    // Count by car_status
+    switch ($car_status) {
+        case 'special_sale':
+            $active_count++;      // موجود و فعال
+            $on_sale_count++;     // فروش ویژه
+            break;
+        case 'unavailable':
+            $unavailable_count++; // ناموجود
+            break;
+        case 'disabled':
+            $disabled_count++;    // غیرفعال
+            break;
+        default:
+            // اگر وضعیت تنظیم نشده، به عنوان فعال حساب میشه
+            if (empty($car_status)) {
+                $active_count++;
+            }
+            break;
+    }
+}
+
+// Get most viewed products this month
+$popular_products_query = new WP_Query([
+    'post_type' => 'product',
+    'post_status' => 'publish',
+    'posts_per_page' => 5,
+    'meta_key' => 'total_sales',
+    'orderby' => 'meta_value_num',
+    'order' => 'DESC'
+]);
 ?>
 
 <div class="row">
     <div class="col-xl-12">
         <!-- آمار محصولات -->
         <div class="row mb-4">
-            <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="col-xl-2 col-lg-4 col-md-6">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -45,6 +94,66 @@ $published_count = $total_products_count->publish ?? 0;
                                     <span class="text-muted fs-13">مجموع محصولات</span>
                                 </div>
                                 <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($published_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-success-transparent">
+                                    <i class="la la-check-circle fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">فروش ویژه (فعال)</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($active_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-danger-transparent">
+                                    <i class="la la-times-circle fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">ناموجود</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($unavailable_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-secondary-transparent">
+                                    <i class="la la-eye-slash fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">غیرفعال</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($disabled_count); ?></h4>
                             </div>
                         </div>
                     </div>

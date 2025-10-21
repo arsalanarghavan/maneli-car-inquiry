@@ -67,16 +67,52 @@ class Maneli_Render_Helpers {
     public static function maneli_gregorian_to_jalali($gregorian_date_time, $format = 'Y/m/d H:i') {
         if (function_exists('maneli_gregorian_to_jalali')) {
             $timestamp = strtotime($gregorian_date_time);
-            return maneli_gregorian_to_jalali(
+            
+            // تبدیل تاریخ به شمسی
+            $jalali_date = maneli_gregorian_to_jalali(
                 date('Y', $timestamp), 
                 date('m', $timestamp), 
                 date('d', $timestamp), 
-                $format
+                'Y/m/d'
             );
+            
+            // اگر فرمت شامل ساعت باشد، آن را اضافه کن
+            if (strpos($format, 'H:i') !== false || strpos($format, 'H:i:s') !== false) {
+                $time = date('H:i', $timestamp);
+                return $jalali_date . ' ' . $time;
+            }
+            
+            return $jalali_date;
         }
         return date($format, strtotime($gregorian_date_time));
     }
 
+    /**
+     * Translate field values to Persian
+     * 
+     * @param string $field_name The field name (job_type, residency_status, workplace_status)
+     * @param string $value The English value
+     * @return string The Persian translation
+     */
+    public static function translate_field_value($field_name, $value) {
+        $translations = [
+            'job_type' => [
+                'self' => 'آزاد',
+                'employee' => 'کارمند',
+            ],
+            'residency_status' => [
+                'owner' => 'مالک',
+                'tenant' => 'مستأجر',
+            ],
+            'workplace_status' => [
+                'owned' => 'ملکی',
+                'rented' => 'استیجاری',
+            ],
+        ];
+        
+        return $translations[$field_name][$value] ?? $value;
+    }
+    
     /**
      * رندر نوار وضعیت رنگی چک صیادی و توضیحات مرتبط.
      * این تابع در گزارش‌های فرانت‌اند استفاده می‌شود.

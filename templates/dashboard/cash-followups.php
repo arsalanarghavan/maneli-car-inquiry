@@ -1,8 +1,8 @@
 <!-- Start::row -->
 <?php
 /**
- * Followups Dashboard Page - Direct Implementation
- * Shows inquiries with tracking_status = 'follow_up'
+ * Cash Followups Dashboard Page
+ * Shows cash inquiries with cash_inquiry_status = 'follow_up_scheduled'
  */
 
 // Check permission
@@ -18,9 +18,9 @@ $is_admin = current_user_can('manage_maneli_inquiries');
 // Get experts for filter (admin only)
 $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']) : [];
 
-// Query followup inquiries
+// Query followup cash inquiries
 $args = [
-    'post_type' => 'inquiry',
+    'post_type' => 'cash_inquiry',
     'posts_per_page' => 20,
     'orderby' => 'meta_value',
     'meta_key' => 'followup_date',
@@ -28,7 +28,7 @@ $args = [
     'post_status' => 'publish',
     'meta_query' => [
         [
-            'key' => 'tracking_status',
+            'key' => 'cash_inquiry_status',
             'value' => 'follow_up_scheduled',
             'compare' => '='
         ]
@@ -164,8 +164,8 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
         <div class="card custom-card">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="la la-tasks me-2"></i>
-                    لیست پیگیری‌های استعلامات اقساطی
+                    <i class="la la-dollar-sign me-2"></i>
+                    لیست پیگیری‌های استعلامات نقدی
                 </div>
             </div>
             <div class="card-body">
@@ -174,14 +174,14 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                     <i class="la la-info-circle fs-20 me-2"></i>
                     <div>
                         <strong>راهنما:</strong>
-                        استعلاماتی که نیاز به پیگیری در تاریخ‌های مشخص دارند، در اینجا نمایش داده می‌شوند.
+                        استعلامات نقدی که نیاز به پیگیری در تاریخ‌های مشخص دارند، در اینجا نمایش داده می‌شوند.
                     </div>
                 </div>
 
                 <!-- Table -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover text-nowrap">
-                        <thead class="table-primary">
+                        <thead class="table-light">
                             <tr>
                                 <th><i class="la la-hashtag me-1"></i>شناسه</th>
                                 <th><i class="la la-user me-1"></i>مشتری</th>
@@ -208,11 +208,13 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                             <?php else: ?>
                                 <?php foreach ($followups as $inquiry): 
                                     $inquiry_id = $inquiry->ID;
-                                    $customer = get_userdata($inquiry->post_author);
+                                    $first_name = get_post_meta($inquiry_id, 'cash_first_name', true);
+                                    $last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
+                                    $customer_name = trim($first_name . ' ' . $last_name);
                                     $product_id = get_post_meta($inquiry_id, 'product_id', true);
                                     $follow_up_date = get_post_meta($inquiry_id, 'followup_date', true);
-                                    $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
-                                    $tracking_status_label = Maneli_CPT_Handler::get_tracking_status_label($tracking_status);
+                                    $cash_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+                                    $cash_status_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($cash_status);
                                     $expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
                                     $expert = $expert_id ? get_userdata($expert_id) : null;
                                     
@@ -220,30 +222,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                     $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
                                     
                                     // Convert dates to Jalali
-                                    $created_timestamp = strtotime($inquiry->post_date);
-                                    if (function_exists('maneli_gregorian_to_jalali')) {
-                                        $created_date = maneli_gregorian_to_jalali(
-                                            date('Y', $created_timestamp),
-                                            date('m', $created_timestamp),
-                                            date('d', $created_timestamp),
-                                            'Y/m/d'
-                                        );
-                                    } else {
-                                        $created_date = date('Y/m/d', $created_timestamp);
-                                    }
-                                    
-                                    // Status badge color
-                                    $status_class_map = [
-                                        'new' => 'secondary',
-                                        'referred' => 'info',
-                                        'in_progress' => 'primary',
-                                        'meeting_scheduled' => 'cyan',
-                                        'follow_up_scheduled' => 'warning',
-                                        'cancelled' => 'danger',
-                                        'completed' => 'dark',
-                                        'rejected' => 'danger',
-                                    ];
-                                    $status_class = $status_class_map[$tracking_status] ?? 'secondary';
+                                    $created_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($inquiry->post_date, 'Y/m/d');
                                     
                                     // Overdue check
                                     $is_overdue = $follow_up_date && $follow_up_date < $today;
@@ -251,7 +230,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                 ?>
                                     <tr class="<?php echo $row_class; ?>">
                                         <td>#<?php echo $inquiry_id; ?></td>
-                                        <td><?php echo esc_html($customer ? $customer->display_name : 'نامشخص'); ?></td>
+                                        <td><?php echo esc_html($customer_name ?: 'نامشخص'); ?></td>
                                         <td><?php echo esc_html(get_the_title($product_id)); ?></td>
                                         <td>
                                             <?php if ($follow_up_date): ?>
@@ -266,8 +245,8 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <span class="badge bg-<?php echo $status_class; ?>">
-                                                <?php echo esc_html($tracking_status_label); ?>
+                                            <span class="badge bg-warning">
+                                                <?php echo esc_html($cash_status_label); ?>
                                             </span>
                                             <?php if (!empty($followup_history)): ?>
                                                 <br><small class="text-muted">
@@ -283,7 +262,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                         <td><?php echo esc_html($created_date); ?></td>
                                         <td>
                                             <div class="btn-list">
-                                                <a href="<?php echo add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/inquiries/installment')); ?>" 
+                                                <a href="<?php echo add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/inquiries/cash')); ?>" 
                                                    class="btn btn-sm btn-primary-light">
                                                     <i class="la la-eye"></i> مشاهده
                                                 </a>
@@ -303,19 +282,19 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
 
 <style>
 /* Follow-up List Custom Styles */
-.table-primary th {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+.table-warning th {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
     color: white;
     font-weight: 600;
     border: none;
 }
 
-.table-primary th i {
+.table-warning th i {
     opacity: 0.9;
 }
 
 .table-hover tbody tr:hover:not(.table-danger) {
-    background-color: rgba(var(--primary-rgb), 0.03);
+    background-color: rgba(var(--warning-rgb), 0.03);
     transform: scale(1.01);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
@@ -329,3 +308,4 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
     background-color: rgba(220, 53, 69, 0.1) !important;
 }
 </style>
+

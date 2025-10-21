@@ -2688,3 +2688,96 @@ msgstr "پیش پرداخت دریافت شد"
 msgid "Meeting Scheduled"
 msgstr "مراجعه حضوری"
 
+
+# Installment Inquiry New Statuses
+
+msgid "Follow Up Scheduled"
+msgstr "پیگیری بعدی"
+
+msgid "Cancelled"
+msgstr "لغو شده"
+
+# Installment Status Management
+
+msgid "Expert Status Control"
+msgstr "کنترل وضعیت کارشناس"
+
+msgid "Expert Notes"
+msgstr "یادداشت‌های کارشناس"
+
+msgid "Add a note..."
+msgstr "یادداشت خود را وارد کنید..."
+
+msgid "Save Note"
+msgstr "ذخیره یادداشت"
+
+msgid "Start Progress"
+msgstr "شروع پیگیری"
+
+msgid "Schedule Follow-up"
+msgstr "ثبت پیگیری بعدی"
+
+msgid "Complete"
+msgstr "تکمیل"
+
+msgid "Reject"
+msgstr "رد"
+
+msgid "Inquiry status updated to In Progress."
+msgstr "وضعیت استعلام به «در حال پیگیری» تغییر یافت."
+
+msgid "Meeting date and time are required."
+msgstr "تاریخ و ساعت جلسه الزامی است."
+
+msgid "Meeting scheduled successfully."
+msgstr "جلسه حضوری با موفقیت ثبت شد."
+
+msgid "Follow-up date is required."
+msgstr "تاریخ پیگیری بعدی الزامی است."
+
+msgid "Follow-up scheduled successfully."
+msgstr "پیگیری بعدی با موفقیت ثبت شد."
+
+msgid "Cancellation reason is required."
+msgstr "دلیل لغو الزامی است."
+
+msgid "Inquiry cancelled successfully."
+msgstr "استعلام با موفقیت لغو شد."
+
+msgid "Can only complete after meeting is scheduled."
+msgstr "فقط بعد از ثبت جلسه حضوری می‌توان تکمیل کرد."
+
+msgid "Inquiry completed successfully."
+msgstr "استعلام با موفقیت تکمیل شد."
+
+msgid "Can only reject after meeting is scheduled."
+msgstr "فقط بعد از ثبت جلسه حضوری می‌توان رد کرد."
+
+msgid "Rejection reason is required."
+msgstr "دلیل رد الزامی است."
+
+msgid "Inquiry rejected successfully."
+msgstr "استعلام با موفقیت رد شد."
+
+msgid "Note cannot be empty."
+msgstr "یادداشت نمی‌تواند خالی باشد."
+
+msgid "Note saved successfully."
+msgstr "یادداشت با موفقیت ذخیره شد."
+
+msgid "Cancellation Reason:"
+msgstr "دلیل لغو:"
+
+msgid "Note:"
+msgstr "یادداشت:"
+
+
+msgid "No notes have been recorded yet."
+msgstr "هیچ یادداشتی ثبت نشده است."
+
+msgid "Change Expert"
+msgstr "تغییر کارشناس"
+
+msgid "Request Journey"
+msgstr "مسیر درخواست"
+

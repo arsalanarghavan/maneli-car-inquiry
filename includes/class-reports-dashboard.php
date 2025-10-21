@@ -57,7 +57,7 @@ class Maneli_Reports_Dashboard {
             $cash_params
         ));
         
-        // آمار استعلام‌های اقساطی  
+        // آمار استعلام‌های اقساطی (با tracking_status)
         $installment_params = [$start_date . ' 00:00:00', $end_date . ' 23:59:59'];
         if ($expert_id) {
             $installment_params[] = $expert_id;
@@ -67,7 +67,7 @@ class Maneli_Reports_Dashboard {
                 pm.meta_value as status,
                 COUNT(*) as count
             FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'inquiry_status'
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'tracking_status'
             $expert_join
             WHERE p.post_type = 'inquiry'
             AND p.post_status = 'publish'
@@ -77,16 +77,17 @@ class Maneli_Reports_Dashboard {
             $installment_params
         ));
         
-        // پردازش آمار
+        // پردازش آمار با وضعیت‌های جدید
         $statistics = [
             'total_inquiries' => 0,
             'cash_inquiries' => 0,
             'installment_inquiries' => 0,
-            'pending' => 0,
-            'approved' => 0,
-            'rejected' => 0,
-            'following' => 0,
-            'next_followup' => 0,
+            'new' => 0,                      // جدید (منتظر ارجاع)
+            'referred' => 0,                 // ارجاع داده شده
+            'in_progress' => 0,              // در حال پیگیری
+            'completed' => 0,                // تکمیل شده
+            'rejected' => 0,                 // رد شده/لغو شده
+            'followup_scheduled' => 0,       // پیگیری بعدی
             'new_today' => 0,
             'revenue' => 0,
         ];
@@ -96,17 +97,24 @@ class Maneli_Reports_Dashboard {
             $statistics['total_inquiries'] += $stat->count;
             
             switch ($stat->status) {
-                case 'pending':
-                    $statistics['pending'] += $stat->count;
+                case 'new':
+                    $statistics['new'] += $stat->count;
                     break;
+                case 'referred':
+                    $statistics['referred'] += $stat->count;
+                    break;
+                case 'in_progress':
+                    $statistics['in_progress'] += $stat->count;
+                    break;
+                case 'follow_up_scheduled':
+                    $statistics['followup_scheduled'] += $stat->count;
+                    break;
+                case 'completed':
                 case 'approved':
-                    $statistics['approved'] += $stat->count;
+                    $statistics['completed'] += $stat->count;
                     break;
                 case 'rejected':
                     $statistics['rejected'] += $stat->count;
-                    break;
-                case 'following':
-                    $statistics['following'] += $stat->count;
                     break;
             }
         }
@@ -116,18 +124,24 @@ class Maneli_Reports_Dashboard {
             $statistics['total_inquiries'] += $stat->count;
             
             switch ($stat->status) {
-                case 'pending':
-                    $statistics['pending'] += $stat->count;
+                case 'new':
+                    $statistics['new'] += $stat->count;
                     break;
-                case 'approved':
-                case 'user_confirmed':
-                    $statistics['approved'] += $stat->count;
+                case 'referred':
+                    $statistics['referred'] += $stat->count;
+                    break;
+                case 'in_progress':
+                    $statistics['in_progress'] += $stat->count;
+                    break;
+                case 'follow_up_scheduled':
+                    $statistics['followup_scheduled'] += $stat->count;
+                    break;
+                case 'completed':
+                    $statistics['completed'] += $stat->count;
                     break;
                 case 'rejected':
+                case 'cancelled':
                     $statistics['rejected'] += $stat->count;
-                    break;
-                case 'following':
-                    $statistics['following'] += $stat->count;
                     break;
             }
         }

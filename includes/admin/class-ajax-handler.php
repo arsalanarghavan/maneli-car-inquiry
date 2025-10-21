@@ -61,6 +61,11 @@ class Maneli_Ajax_Handler {
         
         // Create cash inquiry from dashboard (admin/expert)
         add_action('wp_ajax_maneli_create_cash_inquiry', [$this, 'ajax_create_cash_inquiry']);
+        add_action('wp_ajax_maneli_get_products_for_cash', [$this, 'ajax_get_products_for_cash']);
+        
+        // Installment inquiry status management
+        add_action('wp_ajax_maneli_update_installment_status', [$this, 'ajax_update_installment_status']);
+        add_action('wp_ajax_maneli_save_installment_note', [$this, 'ajax_save_installment_note']);
     }
 
     //======================================================================
@@ -1259,7 +1264,7 @@ class Maneli_Ajax_Handler {
         }
         
         // Validate status
-        $valid_statuses = ['in_progress', 'awaiting_downpayment', 'meeting_scheduled', 'approved', 'rejected'];
+        $valid_statuses = ['in_progress', 'follow_up_scheduled', 'awaiting_downpayment', 'meeting_scheduled', 'approved', 'rejected'];
         if (!in_array($new_status, $valid_statuses)) {
             wp_send_json_error(['message' => 'وضعیت نامعتبر است']);
         }
@@ -1268,7 +1273,27 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'cash_inquiry_status', $new_status);
         
         // Handle additional data based on status
-        if ($new_status === 'awaiting_downpayment') {
+        if ($new_status === 'follow_up_scheduled') {
+            $followup_date = isset($_POST['followup_date']) ? sanitize_text_field($_POST['followup_date']) : '';
+            $followup_note = isset($_POST['followup_note']) ? sanitize_textarea_field($_POST['followup_note']) : '';
+            
+            if ($followup_date) {
+                // ذخیره تاریخ پیگیری قبلی در تاریخچه
+                $previous_followup = get_post_meta($inquiry_id, 'followup_date', true);
+                if ($previous_followup) {
+                    $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
+                    $followup_history[] = [
+                        'date' => $previous_followup,
+                        'completed_at' => current_time('mysql')
+                    ];
+                    update_post_meta($inquiry_id, 'followup_history', $followup_history);
+                }
+                
+                update_post_meta($inquiry_id, 'followup_date', $followup_date);
+                update_post_meta($inquiry_id, 'followup_note', $followup_note);
+                update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
+            }
+        } elseif ($new_status === 'awaiting_downpayment') {
             $amount = isset($_POST['downpayment_amount']) ? intval($_POST['downpayment_amount']) : 0;
             if ($amount > 0) {
                 update_post_meta($inquiry_id, 'cash_down_payment', $amount);
@@ -1307,6 +1332,12 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => 'شناسه استعلام نامعتبر است']);
         }
         
+        // Check post type (cash_inquiry or inquiry)
+        $post_type = get_post_type($inquiry_id);
+        if (!in_array($post_type, ['cash_inquiry', 'inquiry'])) {
+            wp_send_json_error(['message' => 'نوع استعلام نامعتبر است']);
+        }
+        
         // Check permissions
         $is_admin = current_user_can('manage_maneli_inquiries');
         $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
@@ -1315,9 +1346,20 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => 'شما دسترسی ندارید']);
         }
         
-        update_post_meta($inquiry_id, 'expert_note', $note);
+        if (empty($note)) {
+            wp_send_json_error(['message' => esc_html__('Note cannot be empty.', 'maneli-car-inquiry')]);
+        }
         
-        wp_send_json_success(['message' => 'یادداشت ذخیره شد']);
+        // ذخیره یادداشت در آرایه با timestamp و اطلاعات کارشناس
+        $notes = get_post_meta($inquiry_id, 'expert_notes', true) ?: [];
+        $notes[] = [
+            'note' => $note,
+            'expert_id' => get_current_user_id(),
+            'created_at' => current_time('mysql')
+        ];
+        update_post_meta($inquiry_id, 'expert_notes', $notes);
+        
+        wp_send_json_success(['message' => esc_html__('Note saved successfully.', 'maneli-car-inquiry')]);
     }
     
     /**
@@ -1394,5 +1436,199 @@ class Maneli_Ajax_Handler {
             'message' => 'استعلام با موفقیت ثبت شد',
             'inquiry_id' => $inquiry_id
         ]);
+    }
+    
+    /**
+     * Get products list for cash inquiry form
+     */
+    public function ajax_get_products_for_cash() {
+        check_ajax_referer('maneli_create_cash_inquiry', 'nonce');
+        
+        // بررسی دسترسی
+        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => 'شما دسترسی ندارید']);
+        }
+        
+        // دریافت لیست محصولات
+        $products = wc_get_products([
+            'status' => 'publish',
+            'limit' => -1,
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ]);
+        
+        $products_list = [];
+        foreach ($products as $product) {
+            $products_list[] = [
+                'id' => $product->get_id(),
+                'name' => $product->get_name(),
+                'price' => $product->get_regular_price(),
+                'image' => wp_get_attachment_url($product->get_image_id()) ?: ''
+            ];
+        }
+        
+        wp_send_json_success(['products' => $products_list]);
+    }
+    
+    //======================================================================
+    // Installment Status Management Handlers
+    //======================================================================
+    
+    /**
+     * Updates installment inquiry status based on expert action.
+     * Handles: in_progress, meeting_scheduled, follow_up_scheduled, cancelled, completed, rejected
+     */
+    public function ajax_update_installment_status() {
+        check_ajax_referer('maneli_installment_status', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        }
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
+        $action = isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : '';
+        
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+        }
+        
+        // Get current status
+        $current_status = get_post_meta($inquiry_id, 'tracking_status', true);
+        
+        switch ($action) {
+            case 'start_progress':
+                // کارشناس شروع به پیگیری می‌کند
+                update_post_meta($inquiry_id, 'tracking_status', 'in_progress');
+                wp_send_json_success(['message' => esc_html__('Inquiry status updated to In Progress.', 'maneli-car-inquiry')]);
+                break;
+                
+            case 'schedule_meeting':
+                // کارشناس جلسه حضوری ثبت می‌کند
+                $meeting_date = isset($_POST['meeting_date']) ? sanitize_text_field($_POST['meeting_date']) : '';
+                $meeting_time = isset($_POST['meeting_time']) ? sanitize_text_field($_POST['meeting_time']) : '';
+                
+                if (empty($meeting_date) || empty($meeting_time)) {
+                    wp_send_json_error(['message' => esc_html__('Meeting date and time are required.', 'maneli-car-inquiry')]);
+                }
+                
+                update_post_meta($inquiry_id, 'tracking_status', 'meeting_scheduled');
+                update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
+                update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
+                update_post_meta($inquiry_id, 'meeting_scheduled_at', current_time('mysql'));
+                
+                wp_send_json_success(['message' => esc_html__('Meeting scheduled successfully.', 'maneli-car-inquiry')]);
+                break;
+                
+            case 'schedule_followup':
+                // کارشناس پیگیری بعدی ثبت می‌کند
+                $followup_date = isset($_POST['followup_date']) ? sanitize_text_field($_POST['followup_date']) : '';
+                $followup_note = isset($_POST['followup_note']) ? sanitize_textarea_field($_POST['followup_note']) : '';
+                
+                if (empty($followup_date)) {
+                    wp_send_json_error(['message' => esc_html__('Follow-up date is required.', 'maneli-car-inquiry')]);
+                }
+                
+                // ذخیره تاریخ پیگیری قبلی (اگر وجود دارد)
+                $previous_followup = get_post_meta($inquiry_id, 'followup_date', true);
+                if ($previous_followup) {
+                    // ذخیره در آرایه تاریخ‌های پیگیری قبلی
+                    $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
+                    $followup_history[] = [
+                        'date' => $previous_followup,
+                        'completed_at' => current_time('mysql')
+                    ];
+                    update_post_meta($inquiry_id, 'followup_history', $followup_history);
+                }
+                
+                update_post_meta($inquiry_id, 'tracking_status', 'follow_up_scheduled');
+                update_post_meta($inquiry_id, 'followup_date', $followup_date);
+                update_post_meta($inquiry_id, 'followup_note', $followup_note);
+                update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
+                
+                wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
+                break;
+                
+            case 'cancel':
+                // کارشناس استعلام را لغو می‌کند
+                $cancel_reason = isset($_POST['cancel_reason']) ? sanitize_textarea_field($_POST['cancel_reason']) : '';
+                
+                if (empty($cancel_reason)) {
+                    wp_send_json_error(['message' => esc_html__('Cancellation reason is required.', 'maneli-car-inquiry')]);
+                }
+                
+                update_post_meta($inquiry_id, 'tracking_status', 'cancelled');
+                update_post_meta($inquiry_id, 'cancel_reason', $cancel_reason);
+                update_post_meta($inquiry_id, 'cancelled_at', current_time('mysql'));
+                
+                wp_send_json_success(['message' => esc_html__('Inquiry cancelled successfully.', 'maneli-car-inquiry')]);
+                break;
+                
+            case 'complete':
+                // کارشناس استعلام را تکمیل می‌کند (بعد از مراجعه حضوری)
+                if ($current_status !== 'meeting_scheduled') {
+                    wp_send_json_error(['message' => esc_html__('Can only complete after meeting is scheduled.', 'maneli-car-inquiry')]);
+                }
+                
+                update_post_meta($inquiry_id, 'tracking_status', 'completed');
+                update_post_meta($inquiry_id, 'completed_at', current_time('mysql'));
+                
+                wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'maneli-car-inquiry')]);
+                break;
+                
+            case 'reject':
+                // کارشناس استعلام را رد می‌کند (بعد از مراجعه حضوری)
+                $rejection_reason = isset($_POST['rejection_reason']) ? sanitize_textarea_field($_POST['rejection_reason']) : '';
+                
+                if (empty($rejection_reason)) {
+                    wp_send_json_error(['message' => esc_html__('Rejection reason is required.', 'maneli-car-inquiry')]);
+                }
+                
+                if ($current_status !== 'meeting_scheduled') {
+                    wp_send_json_error(['message' => esc_html__('Can only reject after meeting is scheduled.', 'maneli-car-inquiry')]);
+                }
+                
+                update_post_meta($inquiry_id, 'tracking_status', 'rejected');
+                update_post_meta($inquiry_id, 'rejection_reason', $rejection_reason);
+                update_post_meta($inquiry_id, 'rejected_at', current_time('mysql'));
+                
+                wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'maneli-car-inquiry')]);
+                break;
+                
+            default:
+                wp_send_json_error(['message' => esc_html__('Invalid action.', 'maneli-car-inquiry')]);
+        }
+    }
+    
+    /**
+     * Saves expert note for installment inquiry.
+     */
+    public function ajax_save_installment_note() {
+        check_ajax_referer('maneli_installment_note', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        }
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
+        $note = isset($_POST['note']) ? sanitize_textarea_field($_POST['note']) : '';
+        
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+        }
+        
+        if (empty($note)) {
+            wp_send_json_error(['message' => esc_html__('Note cannot be empty.', 'maneli-car-inquiry')]);
+        }
+        
+        // ذخیره یادداشت با timestamp
+        $notes = get_post_meta($inquiry_id, 'expert_notes', true) ?: [];
+        $notes[] = [
+            'note' => $note,
+            'expert_id' => get_current_user_id(),
+            'created_at' => current_time('mysql')
+        ];
+        update_post_meta($inquiry_id, 'expert_notes', $notes);
+        
+        wp_send_json_success(['message' => esc_html__('Note saved successfully.', 'maneli-car-inquiry')]);
     }
 }

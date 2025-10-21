@@ -107,6 +107,96 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
             <p class="mb-0 mt-2"><?php echo esc_html($rejection_reason); ?></p>
         </div>
         <?php endif; ?>
+        
+        <?php if ($is_admin || $is_assigned_expert): ?>
+        <!-- Status Roadmap -->
+        <div class="card custom-card mt-3">
+            <div class="card-header bg-light">
+                <div class="card-title">
+                    <i class="la la-route me-2"></i>
+                    مسیر درخواست
+                </div>
+            </div>
+            <div class="card-body">
+                <?php
+                        // Define all possible statuses in order
+                        $all_statuses = [
+                            'new' => ['label' => 'جدید', 'icon' => 'la-file-alt', 'color' => 'secondary'],
+                            'referred' => ['label' => 'ارجاع شده', 'icon' => 'la-share', 'color' => 'info'],
+                            'in_progress' => ['label' => 'در حال پیگیری', 'icon' => 'la-spinner', 'color' => 'primary'],
+                            'follow_up_scheduled' => ['label' => 'پیگیری بعدی', 'icon' => 'la-clock', 'color' => 'warning'],
+                            'awaiting_downpayment' => ['label' => 'انتظار پیش‌پرداخت', 'icon' => 'la-dollar-sign', 'color' => 'warning'],
+                            'downpayment_received' => ['label' => 'پیش‌پرداخت دریافت شد', 'icon' => 'la-check-double', 'color' => 'success-light'],
+                            'meeting_scheduled' => ['label' => 'جلسه حضوری', 'icon' => 'la-calendar-check', 'color' => 'cyan'],
+                            'completed' => ['label' => 'تکمیل شده', 'icon' => 'la-check-circle', 'color' => 'dark'],
+                        ];
+                        
+                        // Special end statuses (shown separately)
+                        $end_statuses = [
+                            'rejected' => ['label' => 'رد شده', 'icon' => 'la-times-circle', 'color' => 'danger'],
+                        ];
+                
+                $current_status = $status;
+                $status_reached = false;
+                ?>
+                
+                <!-- Main Flow -->
+                <div class="status-roadmap mb-3">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                        <?php foreach ($all_statuses as $status_key => $status_info): 
+                            $is_current = ($status_key === $current_status);
+                            $is_passed = !$is_current && !$status_reached;
+                            
+                            if ($is_current) {
+                                $status_reached = true;
+                            }
+                            
+                            $opacity = $is_passed ? '1' : ($is_current ? '1' : '0.3');
+                            $badge_class = $is_current ? 'bg-' . $status_info['color'] : ($is_passed ? 'bg-success-light' : 'bg-light text-muted');
+                        ?>
+                            <div class="status-step text-center" style="opacity: <?php echo $opacity; ?>; flex: 1; position: relative;">
+                                <?php if ($is_current): ?>
+                                    <div class="pulse-ring"></div>
+                                <?php endif; ?>
+                                <div class="mb-2">
+                                    <span class="avatar avatar-md <?php echo $badge_class; ?> rounded-circle">
+                                        <i class="la <?php echo $status_info['icon']; ?> fs-20"></i>
+                                    </span>
+                                </div>
+                                <small class="d-block fw-semibold <?php echo $is_current ? 'text-' . $status_info['color'] : ''; ?>">
+                                    <?php echo $status_info['label']; ?>
+                                </small>
+                                <?php if ($is_current): ?>
+                                    <div class="mt-1">
+                                        <span class="badge bg-<?php echo $status_info['color']; ?>-transparent fs-11">
+                                            <i class="la la-map-marker me-1"></i>وضعیت فعلی
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($status_key !== 'completed'): ?>
+                                <div class="status-arrow" style="opacity: <?php echo $opacity; ?>;">
+                                    <i class="la la-arrow-left fs-18 text-muted"></i>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <!-- End Statuses -->
+                <?php if ($current_status === 'rejected'): ?>
+                            <div class="alert alert-danger-transparent border-danger">
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar avatar-sm bg-danger me-2">
+                                        <i class="la la-times-circle"></i>
+                                    </span>
+                                    <strong>رد شده</strong>
+                                </div>
+                            </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Request Information -->
         <div class="card border mb-4">
@@ -192,23 +282,140 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
                     </h6>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info border-info mb-3">
-                        <strong>وضعیت فعلی:</strong> 
-                        <span class="badge bg-info"><?php echo esc_html($status_label); ?></span>
+                    <?php
+                    // Build activity timeline
+                    $timeline = [];
+                    
+                    // Initial creation
+                    $timeline[] = [
+                        'time' => $inquiry->post_date,
+                        'label' => 'ایجاد درخواست',
+                        'icon' => 'la-file-alt',
+                        'color' => 'secondary'
+                    ];
+                    
+                    // Assigned to expert
+                    if ($expert_name) {
+                        $timeline[] = [
+                            'time' => get_post_meta($inquiry_id, 'referred_at', true) ?: $inquiry->post_date,
+                            'label' => 'ارجاع به کارشناس: ' . $expert_name,
+                            'icon' => 'la-user-tie',
+                            'color' => 'info'
+                        ];
+                    }
+                    
+                    // In progress started
+                    if (in_array($status, ['in_progress', 'awaiting_downpayment', 'downpayment_received', 'meeting_scheduled', 'completed', 'rejected'])) {
+                        $timeline[] = [
+                            'time' => get_post_meta($inquiry_id, 'in_progress_at', true) ?: '',
+                            'label' => 'شروع پیگیری توسط کارشناس',
+                            'icon' => 'la-spinner',
+                            'color' => 'primary'
+                        ];
+                    }
+                    
+                    // Down payment requested
+                    if (in_array($status, ['awaiting_downpayment', 'downpayment_received', 'meeting_scheduled', 'completed', 'rejected'])) {
+                        $down_payment_amount = get_post_meta($inquiry_id, 'cash_down_payment', true);
+                        $timeline[] = [
+                            'time' => get_post_meta($inquiry_id, 'downpayment_requested_at', true) ?: '',
+                            'label' => 'درخواست پیش‌پرداخت: ' . number_format_i18n($down_payment_amount) . ' تومان',
+                            'icon' => 'la-dollar-sign',
+                            'color' => 'warning'
+                        ];
+                    }
+                    
+                    // Down payment received
+                    if (in_array($status, ['downpayment_received', 'meeting_scheduled', 'completed', 'rejected'])) {
+                        $timeline[] = [
+                            'time' => get_post_meta($inquiry_id, 'downpayment_received_at', true) ?: '',
+                            'label' => 'پیش‌پرداخت دریافت شد',
+                            'icon' => 'la-check-circle',
+                            'color' => 'success'
+                        ];
+                    }
+                    
+                    // Meeting scheduled
+                    if ($meeting_date && $meeting_time) {
+                        $timeline[] = [
+                            'time' => get_post_meta($inquiry_id, 'meeting_scheduled_at', true) ?: '',
+                            'label' => 'جلسه حضوری: ' . $meeting_date . ' - ' . $meeting_time,
+                            'icon' => 'la-handshake',
+                            'color' => 'cyan'
+                        ];
+                    }
+                    
+                    // Completed
+                    if ($status === 'completed') {
+                        $timeline[] = [
+                            'time' => get_post_meta($inquiry_id, 'completed_at', true) ?: '',
+                            'label' => 'تایید نهایی و تکمیل',
+                            'icon' => 'la-check-circle',
+                            'color' => 'dark'
+                        ];
+                    }
+                    
+                    // Rejected
+                    if ($status === 'rejected') {
+                        $timeline[] = [
+                            'time' => get_post_meta($inquiry_id, 'rejected_at', true) ?: '',
+                            'label' => 'رد شده',
+                            'icon' => 'la-times-circle',
+                            'color' => 'danger'
+                        ];
+                    }
+                    
+                    // Sort timeline by time (newest first)
+                    usort($timeline, function($a, $b) {
+                        return strtotime($b['time']) - strtotime($a['time']);
+                    });
+                    ?>
+                    
+                    <!-- Activity Timeline -->
+                    <div class="alert alert-light border mb-3">
+                        <h6 class="fw-semibold mb-3">
+                            <i class="la la-history me-2"></i>
+                            تایم‌لاین فعالیت‌ها
+                        </h6>
+                        <div class="activity-timeline">
+                            <?php foreach ($timeline as $activity): ?>
+                                <?php if (!empty($activity['time'])): 
+                                    // تبدیل تاریخ به شمسی
+                                    $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($activity['time'], 'Y/m/d H:i');
+                                ?>
+                                    <div class="timeline-item d-flex align-items-start mb-2">
+                                        <span class="avatar avatar-sm bg-<?php echo $activity['color']; ?>-transparent me-2">
+                                            <i class="la <?php echo $activity['icon']; ?>"></i>
+                                        </span>
+                                        <div class="flex-fill">
+                                            <strong class="d-block"><?php echo esc_html($activity['label']); ?></strong>
+                                            <small class="text-muted">
+                                                <?php echo esc_html($jalali_date); ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                     
                     <div class="d-flex gap-2 flex-wrap">
-                        <?php if (in_array($status, ['referred', 'new'])): ?>
+                        <?php if (in_array($status, ['referred', 'new']) && $is_assigned_expert && !$is_admin): ?>
                             <button type="button" class="btn btn-primary btn-wave" id="set-in-progress-btn">
                                 <i class="la la-play me-1"></i>
                                 شروع پیگیری
                             </button>
                         <?php endif; ?>
                         
-                        <?php if ($status === 'in_progress'): ?>
+                        <?php if (in_array($status, ['in_progress', 'follow_up_scheduled'])): ?>
                             <button type="button" class="btn btn-warning btn-wave" id="request-downpayment-btn">
                                 <i class="la la-money-bill me-1"></i>
                                 درخواست پیش‌پرداخت
+                            </button>
+                            
+                            <button type="button" class="btn btn-info btn-wave cash-status-btn" data-action="schedule_followup">
+                                <i class="la la-clock me-1"></i>
+                                ثبت پیگیری بعدی
                             </button>
                         <?php endif; ?>
                         
@@ -289,73 +496,98 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
             </div>
             <?php endif; ?>
 
-            <!-- Expert Note (Always visible for expert) -->
+            <!-- Expert Notes -->
             <div class="card border mb-4">
                 <div class="card-header bg-secondary-transparent">
                     <h6 class="card-title mb-0">
                         <i class="la la-sticky-note text-secondary me-2"></i>
-                        یادداشت کارشناس
+                        یادداشت‌های کارشناس
                     </h6>
                 </div>
                 <div class="card-body">
-                    <textarea class="form-control" id="expert-note" rows="4" placeholder="یادداشت‌های خود را اینجا بنویسید..."><?php echo esc_textarea($expert_note); ?></textarea>
-                    <button type="button" class="btn btn-secondary btn-wave mt-3" id="save-note-btn">
-                        <i class="la la-save me-1"></i>
-                        ذخیره یادداشت
-                    </button>
+                    <?php 
+                    $expert_notes = get_post_meta($inquiry_id, 'expert_notes', true) ?: [];
+                    if (!empty($expert_notes)): ?>
+                        <div class="mb-3">
+                            <?php foreach (array_reverse($expert_notes) as $note): 
+                                $note_expert = isset($note['expert_id']) ? get_userdata($note['expert_id']) : null;
+                                $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($note['created_at'], 'Y/m/d H:i');
+                            ?>
+                                <div class="alert alert-light border mb-2">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-fill">
+                                            <p class="mb-1"><?php echo esc_html($note['note']); ?></p>
+                                            <small class="text-muted">
+                                                <i class="la la-user me-1"></i>
+                                                <strong><?php echo $note_expert ? esc_html($note_expert->display_name) : 'کارشناس'; ?></strong>
+                                                <i class="la la-clock me-1 ms-2"></i>
+                                                <?php echo esc_html($jalali_date); ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <form id="cash-expert-note-form">
+                        <div class="input-group">
+                            <textarea id="cash-expert-note-input" class="form-control" rows="2" 
+                                      placeholder="یادداشت خود را وارد کنید..."></textarea>
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="la la-save me-1"></i>
+                                ذخیره یادداشت
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         <?php endif; ?>
 
-        <!-- Admin View - Expert's Work -->
+        <!-- Admin View - Expert's Notes -->
         <?php if ($is_admin): ?>
-            <!-- Expert's Decision (Read-only for Admin) -->
-            <?php if ($meeting_date || $meeting_time || $expert_note || $expert_decision): ?>
-                <div class="card border mb-4">
-                    <div class="card-header bg-secondary-transparent">
-                        <h6 class="card-title mb-0">
-                            <i class="la la-eye text-secondary me-2"></i>
-                            گزارش کارشناس (فقط مشاهده)
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <?php if ($meeting_date || $meeting_time): ?>
-                                <div class="col-md-12">
-                                    <div class="alert alert-info border-info">
-                                        <strong><i class="la la-calendar me-1"></i>زمان جلسه:</strong>
-                                        <?php echo $meeting_date ? esc_html($meeting_date) : 'تعیین نشده'; ?>
-                                        <?php echo $meeting_time ? ' ساعت ' . esc_html($meeting_time) : ''; ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if ($expert_decision): ?>
-                                <div class="col-md-12">
-                                    <div class="alert alert-<?php echo $expert_decision === 'approved' ? 'success' : ($expert_decision === 'rejected' ? 'danger' : 'warning'); ?> border-<?php echo $expert_decision === 'approved' ? 'success' : ($expert_decision === 'rejected' ? 'danger' : 'warning'); ?>">
-                                        <strong><i class="la la-gavel me-1"></i>تصمیم کارشناس:</strong>
-                                        <span class="badge bg-<?php echo $expert_decision === 'approved' ? 'success' : ($expert_decision === 'rejected' ? 'danger' : 'warning'); ?> ms-2">
-                                            <?php 
-                                            echo $expert_decision === 'approved' ? 'تایید شده' : ($expert_decision === 'rejected' ? 'رد شده' : 'در حال بررسی');
-                                            ?>
-                                        </span>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                            
-                            <?php if ($expert_note): ?>
-                                <div class="col-md-12">
-                                    <label class="form-label fw-semibold">یادداشت کارشناس:</label>
-                                    <div class="alert alert-light border">
-                                        <i class="la la-sticky-note me-2"></i>
-                                        <?php echo nl2br(esc_html($expert_note)); ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+            <!-- Expert's Notes (Read-only for Admin) -->
+            <div class="card border mb-4">
+                <div class="card-header bg-secondary-transparent">
+                    <h6 class="card-title mb-0">
+                        <i class="la la-sticky-note text-secondary me-2"></i>
+                        یادداشت‌های کارشناس
+                    </h6>
                 </div>
-            <?php endif; ?>
+                <div class="card-body">
+                    <?php 
+                    $expert_notes = get_post_meta($inquiry_id, 'expert_notes', true) ?: [];
+                    if (!empty($expert_notes)): ?>
+                        <div>
+                            <?php foreach (array_reverse($expert_notes) as $note): 
+                                $note_expert = isset($note['expert_id']) ? get_userdata($note['expert_id']) : null;
+                                $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($note['created_at'], 'Y/m/d H:i');
+                            ?>
+                                <div class="alert alert-light border mb-2">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-fill">
+                                            <p class="mb-1"><?php echo esc_html($note['note']); ?></p>
+                                            <small class="text-muted">
+                                                <i class="la la-user me-1"></i>
+                                                <strong><?php echo $note_expert ? esc_html($note_expert->display_name) : 'کارشناس'; ?></strong>
+                                                <i class="la la-clock me-1 ms-2"></i>
+                                                <?php echo esc_html($jalali_date); ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-info-transparent border-info">
+                            <div class="d-flex align-items-center">
+                                <i class="la la-info-circle me-2 fs-18"></i>
+                                <span>هیچ یادداشتی ثبت نشده است.</span>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <!-- Admin Actions -->
             <div class="card border-primary">
@@ -415,6 +647,77 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+/* Status Roadmap Styles */
+.status-roadmap {
+    padding: 20px 10px;
+}
+
+.status-step {
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.status-arrow {
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* Make inactive statuses more visible */
+.status-step[style*="opacity: 0.3"] {
+    opacity: 0.5 !important;
+}
+
+.status-step[style*="opacity: 0.3"] .avatar {
+    background-color: #e9ecef !important;
+}
+
+/* Pulse Animation for Current Status */
+.pulse-ring {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    z-index: -1;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: translateX(-50%) scale(0.9);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-50%) scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(-50%) scale(0.9);
+        opacity: 1;
+    }
+}
+
+/* Responsive roadmap for mobile */
+@media (max-width: 768px) {
+    .status-roadmap .d-flex {
+        flex-direction: column !important;
+    }
+    
+    .status-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+}
+</style>
 </div><!-- End .frontend-expert-report -->
 
 <style>

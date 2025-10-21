@@ -47,6 +47,13 @@
                         <span class="side-menu__label">صفحه اصلی</span>
                     </a>
                 </li>
+                
+                <li class="slide">
+                    <a href="<?php echo home_url('/dashboard/calendar'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'calendar') ? 'active' : ''; ?>">
+                        <i class="la la-calendar side-menu__icon"></i>
+                        <span class="side-menu__label">تقویم جلسات</span>
+                    </a>
+                </li>
 
                 <!-- ═══════════════════════════════════════════════════ -->
                 <!-- استعلامات -->
@@ -76,6 +83,13 @@
                             <span class="side-menu__label">لیست استعلامات نقدی</span>
                         </a>
                     </li>
+                    
+                    <li class="slide">
+                        <a href="<?php echo home_url('/dashboard/cash-followups'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'cash-followups') ? 'active' : ''; ?>">
+                            <i class="la la-clock side-menu__icon"></i>
+                            <span class="side-menu__label">پیگیری‌های نقدی</span>
+                        </a>
+                    </li>
 
                     <li class="slide__category"><span class="category-name">استعلامات اقساطی</span></li>
 
@@ -89,14 +103,7 @@
                     <li class="slide">
                         <a href="<?php echo home_url('/dashboard/followups'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'followups') ? 'active' : ''; ?>">
                             <i class="la la-tasks side-menu__icon"></i>
-                            <span class="side-menu__label">پیگیری‌ها</span>
-                        </a>
-                    </li>
-
-                    <li class="slide">
-                        <a href="<?php echo home_url('/dashboard/calendar'); ?>" class="side-menu__item <?php echo (isset($page) && $page === 'calendar') ? 'active' : ''; ?>">
-                            <i class="la la-calendar side-menu__icon"></i>
-                            <span class="side-menu__label">تقویم جلسات</span>
+                            <span class="side-menu__label">پیگیری‌های اقساطی</span>
                         </a>
                     </li>
                 <?php endif; ?>

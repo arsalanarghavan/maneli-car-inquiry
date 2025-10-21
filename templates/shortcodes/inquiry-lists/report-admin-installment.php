@@ -33,7 +33,9 @@ $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
 
 $back_link = remove_query_arg('inquiry_id');
 $status_label = Maneli_CPT_Handler::get_status_label($inquiry_status);
-$is_admin_or_expert = current_user_can('manage_maneli_inquiries') || Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+$is_admin = current_user_can('manage_maneli_inquiries');
+$is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+$is_admin_or_expert = $is_admin || $is_assigned_expert;
 
 // Loan Details
 $down_payment = (int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0);
@@ -110,29 +112,377 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 <?php endif; ?>
 
                 <?php if ($is_admin_or_expert): ?>
-                <!-- Tracking Status Box -->
-                <div class="alert alert-info border-info">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div>
-                            <strong class="fs-15"><?php esc_html_e('Tracking Status:', 'maneli-car-inquiry'); ?></strong>
-                            <span class="badge bg-primary-gradient ms-2 fs-13"><?php echo esc_html($tracking_status_label); ?></span>
-                            <?php if ($tracking_status === 'follow_up' && $follow_up_date): ?>
-                                <br><small class="text-danger mt-1 d-inline-block">
-                                    <i class="la la-calendar me-1"></i>
-                                    <strong><?php esc_html_e('Follow-up Date:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($follow_up_date); ?>
-                                </small>
-                            <?php endif; ?>
-                            <?php if ($tracking_status === 'approved' && $meeting_date): ?>
-                                <br><small class="text-success mt-1 d-inline-block">
-                                    <i class="la la-calendar-check me-1"></i>
-                                    <strong><?php esc_html_e('Meeting Date:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($meeting_date); ?>
-                                </small>
+                <!-- Status Roadmap -->
+                <div class="card custom-card mt-3">
+                    <div class="card-header bg-light">
+                        <div class="card-title">
+                            <i class="la la-route me-2"></i>
+                            <?php esc_html_e('Request Journey', 'maneli-car-inquiry'); ?>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <?php
+                        // Define all possible statuses in order
+                        $all_statuses = [
+                            'new' => ['label' => 'جدید', 'icon' => 'la-file-alt', 'color' => 'secondary'],
+                            'referred' => ['label' => 'ارجاع شده', 'icon' => 'la-share', 'color' => 'info'],
+                            'in_progress' => ['label' => 'در حال پیگیری', 'icon' => 'la-spinner', 'color' => 'primary'],
+                            'meeting_scheduled' => ['label' => 'جلسه حضوری', 'icon' => 'la-calendar-check', 'color' => 'cyan'],
+                            'follow_up_scheduled' => ['label' => 'پیگیری بعدی', 'icon' => 'la-clock', 'color' => 'warning'],
+                            'completed' => ['label' => 'تکمیل شده', 'icon' => 'la-check-circle', 'color' => 'success'],
+                        ];
+                        
+                        // Special end statuses (shown separately)
+                        $end_statuses = [
+                            'cancelled' => ['label' => 'لغو شده', 'icon' => 'la-ban', 'color' => 'danger'],
+                            'rejected' => ['label' => 'رد شده', 'icon' => 'la-times-circle', 'color' => 'danger'],
+                        ];
+                        
+                        $current_status = $tracking_status;
+                        $status_reached = false;
+                        ?>
+                        
+                        <!-- Main Flow -->
+                        <div class="status-roadmap mb-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                <?php foreach ($all_statuses as $status_key => $status_info): 
+                                    $is_current = ($status_key === $current_status);
+                                    $is_passed = !$is_current && !$status_reached;
+                                    
+                                    if ($is_current) {
+                                        $status_reached = true;
+                                    }
+                                    
+                                    $opacity = $is_passed ? '1' : ($is_current ? '1' : '0.3');
+                                    $badge_class = $is_current ? 'bg-' . $status_info['color'] : ($is_passed ? 'bg-success-light' : 'bg-light text-muted');
+                                ?>
+                                    <div class="status-step text-center" style="opacity: <?php echo $opacity; ?>; flex: 1; position: relative;">
+                                        <?php if ($is_current): ?>
+                                            <div class="pulse-ring"></div>
+                                        <?php endif; ?>
+                                        <div class="mb-2">
+                                            <span class="avatar avatar-md <?php echo $badge_class; ?> rounded-circle">
+                                                <i class="la <?php echo $status_info['icon']; ?> fs-20"></i>
+                                            </span>
+                                        </div>
+                                        <small class="d-block fw-semibold <?php echo $is_current ? 'text-' . $status_info['color'] : ''; ?>">
+                                            <?php echo $status_info['label']; ?>
+                                        </small>
+                                        <?php if ($is_current): ?>
+                                            <div class="mt-1">
+                                                <span class="badge bg-<?php echo $status_info['color']; ?>-transparent fs-11">
+                                                    <i class="la la-map-marker me-1"></i>وضعیت فعلی
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if ($status_key !== 'completed'): ?>
+                                        <div class="status-arrow" style="opacity: <?php echo $opacity; ?>;">
+                                            <i class="la la-arrow-left fs-18 text-muted"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- End Statuses -->
+                        <?php if (in_array($current_status, ['cancelled', 'rejected'])): ?>
+                            <div class="alert alert-danger-transparent border-danger">
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar avatar-sm bg-danger me-2">
+                                        <i class="la <?php echo $end_statuses[$current_status]['icon']; ?>"></i>
+                                    </span>
+                                    <strong><?php echo $end_statuses[$current_status]['label']; ?></strong>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <!-- Expert Status Control -->
+                <div class="card custom-card mt-3">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <div class="card-title text-white d-flex align-items-center justify-content-between">
+                            <span>
+                                <i class="la la-user-cog me-2"></i>
+                                <?php esc_html_e('Expert Status Control', 'maneli-car-inquiry'); ?>
+                            </span>
+                            <span class="badge bg-white text-primary"><?php echo esc_html($tracking_status_label); ?></span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <?php
+                        // نمایش اطلاعات مربوط به وضعیت فعلی
+                        $meeting_date = get_post_meta($inquiry_id, 'meeting_date', true);
+                        $meeting_time = get_post_meta($inquiry_id, 'meeting_time', true);
+                        $followup_date = get_post_meta($inquiry_id, 'followup_date', true);
+                        $cancel_reason = get_post_meta($inquiry_id, 'cancel_reason', true);
+                        $rejection_reason_exp = get_post_meta($inquiry_id, 'rejection_reason', true);
+                        $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
+                        
+                        // Build activity timeline
+                        $timeline = [];
+                        
+                        // Initial creation
+                        $timeline[] = [
+                            'time' => $post->post_date,
+                            'label' => 'ایجاد درخواست',
+                            'icon' => 'la-file-alt',
+                            'color' => 'secondary'
+                        ];
+                        
+                        // Assigned to expert
+                        if ($expert_name) {
+                            $timeline[] = [
+                                'time' => get_post_meta($inquiry_id, 'referred_at', true) ?: $post->post_date,
+                                'label' => 'ارجاع به کارشناس: ' . $expert_name,
+                                'icon' => 'la-user-tie',
+                                'color' => 'info'
+                            ];
+                        }
+                        
+                        // In progress started
+                        if (in_array($tracking_status, ['in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'completed', 'rejected'])) {
+                            $timeline[] = [
+                                'time' => get_post_meta($inquiry_id, 'in_progress_at', true) ?: '',
+                                'label' => 'شروع پیگیری توسط کارشناس',
+                                'icon' => 'la-spinner',
+                                'color' => 'primary'
+                            ];
+                        }
+                        
+                        // Followup history
+                        if (!empty($followup_history)) {
+                            foreach ($followup_history as $idx => $fh) {
+                                $timeline[] = [
+                                    'time' => $fh['completed_at'] ?? '',
+                                    'label' => 'پیگیری انجام شد (تاریخ: ' . ($fh['date'] ?? '') . ')',
+                                    'icon' => 'la-check',
+                                    'color' => 'success'
+                                ];
+                            }
+                        }
+                        
+                        // Current followup scheduled
+                        if ($followup_date && $tracking_status === 'follow_up_scheduled') {
+                            $timeline[] = [
+                                'time' => get_post_meta($inquiry_id, 'followup_scheduled_at', true) ?: '',
+                                'label' => 'پیگیری بعدی برنامه‌ریزی شد برای: ' . $followup_date,
+                                'icon' => 'la-calendar',
+                                'color' => 'warning'
+                            ];
+                        }
+                        
+                        // Meeting scheduled
+                        if ($meeting_date && $meeting_time) {
+                            $timeline[] = [
+                                'time' => get_post_meta($inquiry_id, 'meeting_scheduled_at', true) ?: '',
+                                'label' => 'جلسه حضوری: ' . $meeting_date . ' - ' . $meeting_time,
+                                'icon' => 'la-handshake',
+                                'color' => 'cyan'
+                            ];
+                        }
+                        
+                        // Completed
+                        if ($tracking_status === 'completed') {
+                            $timeline[] = [
+                                'time' => get_post_meta($inquiry_id, 'completed_at', true) ?: '',
+                                'label' => 'تکمیل شده',
+                                'icon' => 'la-check-circle',
+                                'color' => 'success'
+                            ];
+                        }
+                        
+                        // Rejected or Cancelled
+                        if ($tracking_status === 'rejected') {
+                            $timeline[] = [
+                                'time' => get_post_meta($inquiry_id, 'rejected_at', true) ?: '',
+                                'label' => 'رد شده',
+                                'icon' => 'la-times-circle',
+                                'color' => 'danger'
+                            ];
+                        }
+                        
+                        if ($tracking_status === 'cancelled') {
+                            $timeline[] = [
+                                'time' => get_post_meta($inquiry_id, 'cancelled_at', true) ?: '',
+                                'label' => 'لغو شده',
+                                'icon' => 'la-ban',
+                                'color' => 'danger'
+                            ];
+                        }
+                        
+                        // Sort timeline by time (newest first)
+                        usort($timeline, function($a, $b) {
+                            return strtotime($b['time']) - strtotime($a['time']);
+                        });
+                        ?>
+                        
+                        <!-- Activity Timeline -->
+                        <div class="alert alert-light border mb-3">
+                            <h6 class="fw-semibold mb-3">
+                                <i class="la la-history me-2"></i>
+                                تایم‌لاین فعالیت‌ها
+                            </h6>
+                            <div class="activity-timeline">
+                                <?php foreach ($timeline as $activity): ?>
+                                    <?php if (!empty($activity['time'])): 
+                                        // تبدیل تاریخ به شمسی
+                                        $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($activity['time'], 'Y/m/d H:i');
+                                    ?>
+                                        <div class="timeline-item d-flex align-items-start mb-2">
+                                            <span class="avatar avatar-sm bg-<?php echo $activity['color']; ?>-transparent me-2">
+                                                <i class="la <?php echo $activity['icon']; ?>"></i>
+                                            </span>
+                                            <div class="flex-fill">
+                                                <strong class="d-block"><?php echo esc_html($activity['label']); ?></strong>
+                                                <small class="text-muted">
+                                                    <?php echo esc_html($jalali_date); ?>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        
+                        <?php if ($meeting_date && $meeting_time): ?>
+                        <div class="alert alert-info">
+                            <strong><i class="la la-calendar-check me-1"></i><?php esc_html_e('Meeting Scheduled:', 'maneli-car-inquiry'); ?></strong>
+                            <p class="mb-0"><?php echo esc_html($meeting_date); ?> - <?php echo esc_html($meeting_time); ?></p>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($followup_date): ?>
+                        <div class="alert alert-warning">
+                            <strong><i class="la la-clock me-1"></i><?php esc_html_e('Follow-up Date:', 'maneli-car-inquiry'); ?></strong>
+                            <p class="mb-0"><?php echo esc_html($followup_date); ?></p>
+                            <?php 
+                            $followup_note = get_post_meta($inquiry_id, 'followup_note', true);
+                            if ($followup_note):
+                            ?>
+                                <small class="d-block mt-2"><strong><?php esc_html_e('Note:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($followup_note); ?></small>
                             <?php endif; ?>
                         </div>
-                        <button class="btn btn-sm btn-primary-light change-tracking-status-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-current-status="<?php echo esc_attr($tracking_status); ?>">
-                            <i class="la la-edit me-1"></i>
-                            <?php esc_html_e('Set Status', 'maneli-car-inquiry'); ?>
-                        </button>
+                        <?php endif; ?>
+                        
+                        <?php if ($cancel_reason): ?>
+                        <div class="alert alert-danger">
+                            <strong><i class="la la-ban me-1"></i><?php esc_html_e('Cancellation Reason:', 'maneli-car-inquiry'); ?></strong>
+                            <p class="mb-0"><?php echo esc_html($cancel_reason); ?></p>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($rejection_reason_exp): ?>
+                        <div class="alert alert-danger">
+                            <strong><i class="la la-times-circle me-1"></i><?php esc_html_e('Rejection Reason:', 'maneli-car-inquiry'); ?></strong>
+                            <p class="mb-0"><?php echo esc_html($rejection_reason_exp); ?></p>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <!-- دکمه‌های اقدام بر اساس وضعیت -->
+                        <div class="d-flex gap-2 flex-wrap justify-content-center mt-3">
+                            <?php if (($tracking_status === 'new' || $tracking_status === 'referred') && $is_assigned_expert && !$is_admin): ?>
+                                <button type="button" class="btn btn-primary btn-wave installment-status-btn" 
+                                        data-action="start_progress">
+                                    <i class="la la-play-circle me-1"></i>
+                                    <?php esc_html_e('Start Progress', 'maneli-car-inquiry'); ?>
+                                </button>
+                            <?php endif; ?>
+                            
+                            <?php if ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled'): ?>
+                                <button type="button" class="btn btn-success btn-wave installment-status-btn" 
+                                        data-action="schedule_meeting">
+                                    <i class="la la-calendar-check me-1"></i>
+                                    <?php esc_html_e('Schedule Meeting', 'maneli-car-inquiry'); ?>
+                                </button>
+                                
+                                <button type="button" class="btn btn-warning btn-wave installment-status-btn" 
+                                        data-action="schedule_followup">
+                                    <i class="la la-clock me-1"></i>
+                                    <?php esc_html_e('Schedule Follow-up', 'maneli-car-inquiry'); ?>
+                                </button>
+                                
+                                <button type="button" class="btn btn-danger btn-wave installment-status-btn" 
+                                        data-action="cancel">
+                                    <i class="la la-ban me-1"></i>
+                                    <?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>
+                                </button>
+                            <?php endif; ?>
+                            
+                            <?php if ($tracking_status === 'meeting_scheduled'): ?>
+                                <button type="button" class="btn btn-success btn-wave installment-status-btn" 
+                                        data-action="complete">
+                                    <i class="la la-check-circle me-1"></i>
+                                    <?php esc_html_e('Complete', 'maneli-car-inquiry'); ?>
+                                </button>
+                                
+                                <button type="button" class="btn btn-danger btn-wave installment-status-btn" 
+                                        data-action="reject">
+                                    <i class="la la-times-circle me-1"></i>
+                                    <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Expert Notes Card -->
+                <div class="card custom-card mt-3">
+                    <div class="card-header bg-secondary-transparent">
+                        <div class="card-title">
+                            <i class="la la-sticky-note me-2"></i>
+                            <?php esc_html_e('Expert Notes', 'maneli-car-inquiry'); ?>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <?php 
+                        $expert_notes = get_post_meta($inquiry_id, 'expert_notes', true) ?: [];
+                        $is_manager = current_user_can('manage_maneli_inquiries');
+                        $is_expert_role = in_array('maneli_expert', wp_get_current_user()->roles, true);
+                        
+                        if (!empty($expert_notes)): ?>
+                            <div class="<?php echo $is_manager ? '' : 'mb-3'; ?>">
+                                <?php foreach (array_reverse($expert_notes) as $note): 
+                                    $note_expert = isset($note['expert_id']) ? get_userdata($note['expert_id']) : null;
+                                ?>
+                                    <div class="alert alert-light border mb-2">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-fill">
+                                                <p class="mb-1"><?php echo esc_html($note['note']); ?></p>
+                                                <small class="text-muted">
+                                                    <i class="la la-user me-1"></i>
+                                                    <strong><?php echo $note_expert ? esc_html($note_expert->display_name) : 'کارشناس'; ?></strong>
+                                                    <i class="la la-clock me-1 ms-2"></i>
+                                                    <?php echo esc_html($note['created_at']); ?>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-info-transparent border-info <?php echo $is_manager ? '' : 'mb-3'; ?>">
+                                <div class="d-flex align-items-center">
+                                    <i class="la la-info-circle me-2 fs-18"></i>
+                                    <span><?php esc_html_e('No notes have been recorded yet.', 'maneli-car-inquiry'); ?></span>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($is_expert_role && !$is_manager): ?>
+                            <!-- فقط کارشناس می‌تواند یادداشت ثبت کند -->
+                            <form id="installment-expert-note-form">
+                                <div class="input-group">
+                                    <textarea id="installment-expert-note-input" class="form-control" rows="2" 
+                                              placeholder="<?php esc_attr_e('Add a note...', 'maneli-car-inquiry'); ?>"></textarea>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="la la-save me-1"></i>
+                                        <?php esc_html_e('Save Note', 'maneli-car-inquiry'); ?>
+                                    </button>
+                                </div>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -218,6 +568,11 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                             <button type="button" class="btn btn-info btn-wave assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">
                                 <i class="la la-user-plus me-1"></i>
                                 <?php esc_html_e('Assign Expert', 'maneli-car-inquiry'); ?>
+                            </button>
+                        <?php elseif (current_user_can('manage_maneli_inquiries') && $expert_name): ?>
+                            <button type="button" class="btn btn-warning btn-wave assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">
+                                <i class="la la-exchange-alt me-1"></i>
+                                <?php esc_html_e('Change Expert', 'maneli-car-inquiry'); ?>
                             </button>
                         <?php endif; ?>
 
@@ -322,7 +677,7 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
                             <small class="text-muted"><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['job_type'][0] ?? '—'); ?></p>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('job_type', $post_meta['job_type'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -340,13 +695,13 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
                             <small class="text-muted"><?php esc_html_e('Residency Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['residency_status'][0] ?? '—'); ?></p>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('residency_status', $post_meta['residency_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
                             <small class="text-muted"><?php esc_html_e('Workplace Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['workplace_status'][0] ?? '—'); ?></p>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('workplace_status', $post_meta['workplace_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-12">
@@ -459,7 +814,7 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
                             <small class="text-muted"><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_job_type'][0] ?? '—'); ?></p>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('job_type', $post_meta['issuer_job_type'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -471,13 +826,13 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
                             <small class="text-muted"><?php esc_html_e('Residency Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_residency_status'][0] ?? '—'); ?></p>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('residency_status', $post_meta['issuer_residency_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
                             <small class="text-muted"><?php esc_html_e('Workplace Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_workplace_status'][0] ?? '—'); ?></p>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('workplace_status', $post_meta['issuer_workplace_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-12">
@@ -542,87 +897,6 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 <?php endif; ?>
             </div>
         </div>
-
-        <?php if ($is_admin_or_expert): ?>
-        <!-- Meeting Schedule Card -->
-        <div class="card custom-card mt-3">
-            <div class="card-header bg-info-transparent">
-                <div class="card-title">
-                    <i class="la la-calendar-alt me-2"></i>
-                    <?php esc_html_e('Schedule In-Person Meeting', 'maneli-car-inquiry'); ?>
-                </div>
-            </div>
-            <div class="card-body">
-                <form id="meeting_form" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label"><?php esc_html_e('Select Date', 'maneli-car-inquiry'); ?>:</label>
-                            <input type="date" id="meeting_date" class="form-control" required>
-                            <input type="hidden" id="meeting_start" value="">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"><?php esc_html_e('Available Slots', 'maneli-car-inquiry'); ?>:</label>
-                            <div id="meeting_slots" class="border rounded p-2 bg-light"></div>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-success btn-wave w-100">
-                                <i class="la la-calendar-check me-1"></i>
-                                <?php esc_html_e('Book', 'maneli-car-inquiry'); ?>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Expert Decision Card -->
-        <div class="card custom-card mt-3">
-            <div class="card-header bg-secondary-transparent">
-                <div class="card-title">
-                    <i class="la la-user-cog me-2"></i>
-                    <?php esc_html_e('Expert Decision', 'maneli-car-inquiry'); ?>
-                </div>
-            </div>
-            <div class="card-body">
-                <?php 
-                $raw = $options['expert_statuses'] ?? ''; 
-                $lines = array_filter(array_map('trim', explode("\n", (string)$raw))); 
-                $default_key = $options['expert_default_status'] ?? 'unknown'; 
-                ?>
-                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-                    <input type="hidden" name="action" value="maneli_expert_update_decision">
-                    <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
-                    <input type="hidden" name="inquiry_type" value="installment">
-                    <?php wp_nonce_field('maneli_expert_update_decision'); ?>
-                    
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?>:</label>
-                            <select name="expert_status" class="form-select">
-                                <?php foreach ($lines as $line): 
-                                    list($key, $label) = array_pad(explode('|', $line), 3, ''); 
-                                ?>
-                                    <option value="<?php echo esc_attr($key); ?>" <?php selected(get_post_meta($inquiry_id, 'expert_status', true) ?: $default_key, $key); ?>>
-                                        <?php echo esc_html($label ?: $key); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label"><?php esc_html_e('Note (optional)', 'maneli-car-inquiry'); ?>:</label>
-                            <textarea name="expert_note" rows="2" class="form-control"><?php echo esc_textarea(get_post_meta($inquiry_id, 'expert_status_note', true)); ?></textarea>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-success btn-wave w-100">
-                                <i class="la la-save me-1"></i>
-                                <?php esc_html_e('Save', 'maneli-car-inquiry'); ?>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <?php endif; ?>
     </div>
 </div>
 
@@ -671,6 +945,63 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
 </div>
 
 <style>
+/* Status Roadmap Styles */
+.status-roadmap {
+    padding: 20px 10px;
+}
+
+.status-step {
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.status-arrow {
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* Make inactive statuses more visible */
+.status-step[style*="opacity: 0.3"] {
+    opacity: 0.5 !important;
+}
+
+.status-step[style*="opacity: 0.3"] .avatar {
+    background-color: #e9ecef !important;
+}
+
+/* Pulse Animation for Current Status */
+.pulse-ring {
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    z-index: -1;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: translateX(-50%) scale(0.9);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-50%) scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(-50%) scale(0.9);
+        opacity: 1;
+    }
+}
+
 /* Modal backdrop for tracking status */
 #tracking-status-modal {
     background: rgba(0, 0, 0, 0.5);
@@ -692,6 +1023,22 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
 #tracking-status-modal .modal-content {
     border-radius: 8px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+/* Responsive roadmap for mobile */
+@media (max-width: 768px) {
+    .status-roadmap .d-flex {
+        flex-direction: column !important;
+    }
+    
+    .status-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+    
+    .status-arrow i {
+        transform: rotate(-90deg);
+    }
 }
 </style>
 </div><!-- End .frontend-expert-report -->

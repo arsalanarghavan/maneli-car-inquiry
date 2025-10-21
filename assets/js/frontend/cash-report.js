@@ -244,10 +244,84 @@ jQuery(document).ready(function($) {
         });
     });
     
-    // 6. ذخیره یادداشت
-    $('#save-note-btn').on('click', function() {
+    // 5.5 ثبت پیگیری بعدی برای نقدی
+    $(document).on('click', '.cash-status-btn[data-action="schedule_followup"]', function() {
+        Swal.fire({
+            title: 'ثبت پیگیری بعدی',
+            html: `
+                <div class="text-start">
+                    <label class="form-label">تاریخ پیگیری بعدی:</label>
+                    <input type="text" id="swal-cash-followup-date" class="form-control mb-3 maneli-datepicker" placeholder="انتخاب تاریخ">
+                    
+                    <label class="form-label">یادداشت (اختیاری):</label>
+                    <textarea id="swal-cash-followup-note" class="form-control" rows="3" placeholder="یادداشت خود را وارد کنید..."></textarea>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'ثبت پیگیری',
+            cancelButtonText: 'لغو',
+            confirmButtonColor: '#17a2b8',
+            width: '600px',
+            didOpen: () => {
+                // راه‌اندازی تاریخ‌یار فارسی
+                if (typeof $.fn.persianDatepicker !== 'undefined') {
+                    $('#swal-cash-followup-date').persianDatepicker({
+                        format: 'YYYY/MM/DD',
+                        initialValue: false,
+                        autoClose: true
+                    });
+                }
+            },
+            preConfirm: () => {
+                const followupDate = $('#swal-cash-followup-date').val();
+                const followupNote = $('#swal-cash-followup-note').val();
+                
+                if (!followupDate) {
+                    Swal.showValidationMessage('لطفاً تاریخ پیگیری بعدی را وارد کنید');
+                    return false;
+                }
+                
+                return { followup_date: followupDate, followup_note: followupNote };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                updateInquiryStatus('follow_up_scheduled', result.value)
+                    .done(function(response) {
+                        Swal.fire({
+                            title: 'موفق!',
+                            text: 'پیگیری بعدی با موفقیت ثبت شد.',
+                            icon: 'success',
+                            confirmButtonText: 'باشه'
+                        }).then(() => location.reload());
+                    })
+                    .fail(function(xhr) {
+                        Swal.fire({
+                            title: 'خطا!',
+                            text: xhr.responseJSON?.data?.message || 'خطایی رخ داد.',
+                            icon: 'error',
+                            confirmButtonText: 'باشه'
+                        });
+                    });
+            }
+        });
+    });
+    
+    // 6. ذخیره یادداشت (فرم جدید)
+    $('#cash-expert-note-form').on('submit', function(e) {
+        e.preventDefault();
+        
         const inquiryId = $('.frontend-expert-report').data('inquiry-id');
-        const note = $('#expert-note').val();
+        const note = $('#cash-expert-note-input').val().trim();
+        
+        if (!note) {
+            Swal.fire({
+                title: 'توجه!',
+                text: 'لطفاً یادداشت خود را وارد کنید.',
+                icon: 'warning',
+                confirmButtonText: 'باشه'
+            });
+            return;
+        }
         
         $.ajax({
             url: maneliCashReport.ajax_url,
@@ -257,24 +331,22 @@ jQuery(document).ready(function($) {
                 inquiry_id: inquiryId,
                 note: note,
                 nonce: maneliCashReport.nonces.save_note
-            },
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        title: 'ذخیره شد',
-                        text: 'یادداشت شما ذخیره شد',
-                        icon: 'success',
-                        confirmButtonText: 'باشه'
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'خطا',
-                        text: response.data.message || 'خطا در ذخیره',
-                        icon: 'error',
-                        confirmButtonText: 'باشه'
-                    });
-                }
             }
+        }).done(function(response) {
+            Swal.fire({
+                title: 'موفق!',
+                text: 'یادداشت با موفقیت ذخیره شد.',
+                icon: 'success',
+                confirmButtonText: 'باشه',
+                timer: 1500
+            }).then(() => location.reload());
+        }).fail(function(xhr) {
+            Swal.fire({
+                title: 'خطا!',
+                text: xhr.responseJSON?.data?.message || 'خطایی رخ داد.',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
         });
     });
     

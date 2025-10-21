@@ -47,16 +47,16 @@ if ($is_customer) {
     
     foreach ($cash_inquiries as $inq) {
         $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
-        if ($status === 'pending') $pending_count++;
+        if ($status === 'new' || $status === 'pending') $pending_count++;
         elseif ($status === 'approved' || $status === 'completed') $approved_count++;
         elseif ($status === 'rejected') $rejected_count++;
     }
     
     foreach ($installment_inquiries as $inq) {
-        $status = get_post_meta($inq->ID, 'inquiry_status', true);
-        if ($status === 'pending') $pending_count++;
-        elseif ($status === 'approved' || $status === 'user_confirmed') $approved_count++;
-        elseif ($status === 'rejected') $rejected_count++;
+        $tracking_status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
+        if ($tracking_status === 'new' || $tracking_status === 'referred' || $tracking_status === 'in_progress') $pending_count++;
+        elseif ($tracking_status === 'completed') $approved_count++;
+        elseif ($tracking_status === 'rejected' || $tracking_status === 'cancelled') $rejected_count++;
     }
     
     // Get recent inquiries (both types, last 5)
@@ -355,7 +355,7 @@ if ($is_customer) {
                 ],
                 [
                     'key' => 'tracking_status',
-                    'value' => 'follow_up',
+                    'value' => 'follow_up_scheduled',
                     'compare' => '='
                 ],
                 [
@@ -413,17 +413,38 @@ if ($is_customer) {
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                     <div>
-                                        <span class="text-muted d-block mb-1">تایید شده</span>
-                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['approved']); ?></h4>
+                                        <span class="text-muted d-block mb-1">در حال پیگیری</span>
+                                        <h4 class="fw-semibold mb-0 text-primary"><?php echo number_format_i18n($stats['in_progress']); ?></h4>
+                                    </div>
+                                    <div class="lh-1">
+                                        <span class="avatar avatar-md avatar-rounded bg-primary">
+                                            <i class="la la-spinner fs-20"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-muted fs-12">
+                                    در حال بررسی توسط شما
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xxl-3 col-xl-6">
+                        <div class="card custom-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div>
+                                        <span class="text-muted d-block mb-1">تکمیل شده</span>
+                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['completed']); ?></h4>
                                     </div>
                                     <div class="lh-1">
                                         <span class="avatar avatar-md avatar-rounded bg-success">
-                                            <i class="la la-check fs-20"></i>
+                                            <i class="la la-check-circle fs-20"></i>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="text-muted fs-12">
-                                    نرخ موفقیت: <span class="text-success"><?php echo $stats['total_inquiries'] > 0 ? round(($stats['approved'] / $stats['total_inquiries']) * 100, 1) : 0; ?>%</span>
+                                    نرخ موفقیت: <span class="text-success"><?php echo $stats['total_inquiries'] > 0 ? round(($stats['completed'] / $stats['total_inquiries']) * 100, 1) : 0; ?>%</span>
                                 </div>
                             </div>
                         </div>
@@ -434,38 +455,17 @@ if ($is_customer) {
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                     <div>
-                                        <span class="text-muted d-block mb-1">رد شده</span>
-                                        <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($stats['rejected']); ?></h4>
+                                        <span class="text-muted d-block mb-1">پیگیری امروز</span>
+                                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($today_followups); ?></h4>
                                     </div>
                                     <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-danger">
-                                            <i class="la la-times fs-20"></i>
+                                        <span class="avatar avatar-md avatar-rounded bg-warning">
+                                            <i class="la la-calendar-day fs-20"></i>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="text-muted fs-12">
-                                    رد شده توسط شما
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">پیگیری بعدی</span>
-                                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n(count($upcoming_followups)); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-info">
-                                            <i class="la la-calendar-check fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    پیگیری‌های آتی
+                                    نیاز به پیگیری امروز
                                 </div>
                             </div>
                         </div>
@@ -502,17 +502,17 @@ if ($is_customer) {
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                     <div>
-                                        <span class="text-muted d-block mb-1">تایید شده</span>
-                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['approved']); ?></h4>
+                                        <span class="text-muted d-block mb-1">جدید</span>
+                                        <h4 class="fw-semibold mb-0 text-secondary"><?php echo number_format_i18n($stats['new']); ?></h4>
                                     </div>
                                     <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-success">
-                                            <i class="la la-check fs-20"></i>
+                                        <span class="avatar avatar-md avatar-rounded bg-secondary">
+                                            <i class="la la-file-alt fs-20"></i>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="text-muted fs-12">
-                                    نرخ موفقیت: <span class="text-success"><?php echo $stats['total_inquiries'] > 0 ? round(($stats['approved'] / $stats['total_inquiries']) * 100, 1) : 0; ?>%</span>
+                                    منتظر ارجاع به کارشناس
                                 </div>
                             </div>
                         </div>
@@ -523,38 +523,59 @@ if ($is_customer) {
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                     <div>
-                                        <span class="text-muted d-block mb-1">در انتظار</span>
-                                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($stats['pending']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-warning">
-                                            <i class="la la-clock fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    نیاز به بررسی
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">پیگیری آینده</span>
-                                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($stats['next_followup']); ?></h4>
+                                        <span class="text-muted d-block mb-1">ارجاع شده</span>
+                                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($stats['referred']); ?></h4>
                                     </div>
                                     <div class="lh-1">
                                         <span class="avatar avatar-md avatar-rounded bg-info">
-                                            <i class="la la-calendar-check fs-20"></i>
+                                            <i class="la la-share fs-20"></i>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="text-muted fs-12">
-                                    جلسات برنامه‌ریزی شده
+                                    ارجاع داده شده به کارشناس
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xxl-3 col-xl-6">
+                        <div class="card custom-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div>
+                                        <span class="text-muted d-block mb-1">در حال پیگیری</span>
+                                        <h4 class="fw-semibold mb-0 text-primary"><?php echo number_format_i18n($stats['in_progress']); ?></h4>
+                                    </div>
+                                    <div class="lh-1">
+                                        <span class="avatar avatar-md avatar-rounded bg-primary">
+                                            <i class="la la-spinner fs-20"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-muted fs-12">
+                                    در حال پیگیری توسط کارشناس
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xxl-3 col-xl-6">
+                        <div class="card custom-card overflow-hidden">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div>
+                                        <span class="text-muted d-block mb-1">تکمیل شده</span>
+                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['completed']); ?></h4>
+                                    </div>
+                                    <div class="lh-1">
+                                        <span class="avatar avatar-md avatar-rounded bg-success">
+                                            <i class="la la-check-circle fs-20"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-muted fs-12">
+                                    نرخ موفقیت: <span class="text-success"><?php echo $stats['total_inquiries'] > 0 ? round(($stats['completed'] / $stats['total_inquiries']) * 100, 1) : 0; ?>%</span>
                                 </div>
                             </div>
                         </div>
@@ -823,7 +844,7 @@ if ($is_customer) {
                     'meta_query' => [
                         [
                             'key' => 'tracking_status',
-                            'value' => 'follow_up',
+                            'value' => 'follow_up_scheduled',
                             'compare' => '='
                         ],
                         [

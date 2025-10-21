@@ -168,14 +168,22 @@ $is_admin = current_user_can('manage_maneli_inquiries');
 $is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
 
 // Determine which inquiries to count based on role and page
-$count_type = isset($subpage) ? $subpage : 'all';
+// Get subpage from query var or variable
+if (!isset($subpage) || $subpage === '') {
+    $subpage = get_query_var('maneli_dashboard_subpage', '');
+}
+$count_type = (!empty($subpage)) ? $subpage : 'all';
 
 // Calculate statistics for cash inquiries
 $cash_stats = [
     'total' => 0,
-    'pending' => 0,
-    'approved' => 0,
-    'awaiting_payment' => 0,
+    'new' => 0,
+    'referred' => 0,
+    'in_progress' => 0,
+    'follow_up_scheduled' => 0,
+    'awaiting_downpayment' => 0,
+    'downpayment_received' => 0,
+    'meeting_scheduled' => 0,
     'completed' => 0,
     'rejected' => 0,
     'assigned' => 0,
@@ -204,12 +212,32 @@ if ($count_type === 'cash' || $count_type === 'all') {
     $cash_stats['total'] = count($all_cash);
     
     foreach ($all_cash as $inq) {
-        $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
+        $status = get_post_meta($inq->ID, 'cash_inquiry_status', true) ?: 'new';
         $expert_id = get_post_meta($inq->ID, 'assigned_expert_id', true);
         
         // Count by status
-        if (isset($cash_stats[$status])) {
-            $cash_stats[$status]++;
+        switch ($status) {
+            case 'new':
+            case 'referred':
+            case 'in_progress':
+            case 'follow_up_scheduled':
+            case 'awaiting_downpayment':
+            case 'downpayment_received':
+            case 'meeting_scheduled':
+            case 'completed':
+            case 'rejected':
+                $cash_stats[$status]++;
+                break;
+            // Compatibility with old statuses
+            case 'pending':
+                $cash_stats['new']++;
+                break;
+            case 'awaiting_payment':
+                $cash_stats['awaiting_downpayment']++;
+                break;
+            case 'approved':
+                $cash_stats['completed']++;
+                break;
         }
         
         // Count assignments (only for admin)
@@ -223,12 +251,16 @@ if ($count_type === 'cash' || $count_type === 'all') {
     }
 }
 
-// Calculate statistics for installment inquiries
+// Calculate statistics for installment inquiries  
 $installment_stats = [
     'total' => 0,
-    'pending' => 0,
-    'user_confirmed' => 0,
-    'approved' => 0,
+    'new' => 0,
+    'referred' => 0,
+    'in_progress' => 0,
+    'meeting_scheduled' => 0,
+    'follow_up_scheduled' => 0,
+    'cancelled' => 0,
+    'completed' => 0,
     'rejected' => 0,
     'assigned' => 0,
     'unassigned' => 0
@@ -256,12 +288,21 @@ if ($count_type === 'installment' || $count_type === 'all') {
     $installment_stats['total'] = count($all_installment);
     
     foreach ($all_installment as $inq) {
-        $status = get_post_meta($inq->ID, 'inquiry_status', true);
+        $tracking_status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
         $expert_id = get_post_meta($inq->ID, 'assigned_expert_id', true);
         
-        // Count by status
-        if (isset($installment_stats[$status])) {
-            $installment_stats[$status]++;
+        // Count by tracking status
+        switch ($tracking_status) {
+            case 'new':
+            case 'referred':
+            case 'in_progress':
+            case 'meeting_scheduled':
+            case 'follow_up_scheduled':
+            case 'cancelled':
+            case 'completed':
+            case 'rejected':
+                $installment_stats[$tracking_status]++;
+                break;
         }
         
         // Count assignments (only for admin)
@@ -269,7 +310,10 @@ if ($count_type === 'installment' || $count_type === 'all') {
             if ($expert_id) {
                 $installment_stats['assigned']++;
             } else {
-                $installment_stats['unassigned']++;
+                // Only count unassigned if status is 'new'
+                if ($tracking_status === 'new') {
+                    $installment_stats['unassigned']++;
+                }
             }
         }
     }
@@ -306,7 +350,7 @@ if ($count_type === 'installment' || $count_type === 'all') {
                 <div class="d-flex align-items-center">
                     <div class="me-3">
                         <span class="avatar avatar-md bg-info-transparent">
-                            <i class="la la-user-check fs-24"></i>
+                            <i class="la la-share fs-24"></i>
                         </span>
                     </div>
                     <div class="flex-fill">
@@ -352,9 +396,9 @@ if ($count_type === 'installment' || $count_type === 'all') {
                     </div>
                     <div class="flex-fill">
                         <div class="mb-1">
-                            <span class="text-muted fs-13">در انتظار</span>
+                            <span class="text-muted fs-13">انتظار پیش‌پرداخت</span>
                         </div>
-                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($cash_stats['pending']); ?></h4>
+                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($cash_stats['awaiting_downpayment']); ?></h4>
                     </div>
                 </div>
             </div>
@@ -386,15 +430,15 @@ if ($count_type === 'installment' || $count_type === 'all') {
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="me-3">
-                        <span class="avatar avatar-md bg-info-transparent">
-                            <i class="la la-money-bill fs-24"></i>
+                        <span class="avatar avatar-md bg-cyan-transparent">
+                            <i class="la la-handshake fs-24"></i>
                         </span>
                     </div>
                     <div class="flex-fill">
                         <div class="mb-1">
-                            <span class="text-muted fs-13">منتظر پرداخت</span>
+                            <span class="text-muted fs-13">جلسه حضوری</span>
                         </div>
-                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($cash_stats['awaiting_payment']); ?></h4>
+                        <h4 class="fw-semibold mb-0 text-cyan"><?php echo number_format_i18n($cash_stats['meeting_scheduled']); ?></h4>
                     </div>
                 </div>
             </div>
@@ -453,7 +497,7 @@ if ($count_type === 'installment' || $count_type === 'all') {
                 <div class="d-flex align-items-center">
                     <div class="me-3">
                         <span class="avatar avatar-md bg-info-transparent">
-                            <i class="la la-user-check fs-24"></i>
+                            <i class="la la-share fs-24"></i>
                         </span>
                     </div>
                     <div class="flex-fill">
@@ -499,9 +543,9 @@ if ($count_type === 'installment' || $count_type === 'all') {
                     </div>
                     <div class="flex-fill">
                         <div class="mb-1">
-                            <span class="text-muted fs-13">در انتظار</span>
+                            <span class="text-muted fs-13">در حال پیگیری</span>
                         </div>
-                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($installment_stats['pending']); ?></h4>
+                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($installment_stats['in_progress']); ?></h4>
                     </div>
                 </div>
             </div>
@@ -519,9 +563,9 @@ if ($count_type === 'installment' || $count_type === 'all') {
                     </div>
                     <div class="flex-fill">
                         <div class="mb-1">
-                            <span class="text-muted fs-13">تایید شده</span>
+                            <span class="text-muted fs-13">تکمیل شده</span>
                         </div>
-                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($installment_stats['user_confirmed'] + $installment_stats['approved']); ?></h4>
+                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($installment_stats['completed']); ?></h4>
                     </div>
                 </div>
             </div>
@@ -598,7 +642,7 @@ if ($count_type === 'installment' || $count_type === 'all') {
                         <tbody>
                             <?php
                             // Determine which type of inquiries to show based on subpage
-                            $show_type = isset($subpage) ? $subpage : 'all'; // 'cash', 'installment', or 'all'
+                            $show_type = (!empty($subpage)) ? $subpage : 'all'; // 'cash', 'installment', or 'all'
                             $all_inquiries = [];
                             
                             // Get installment inquiries (if needed)
@@ -675,19 +719,22 @@ if ($count_type === 'installment' || $count_type === 'all') {
                                             $status_label = '<span class="badge bg-secondary">' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'referred':
-                                            $status_label = '<span class="badge bg-info">' . esc_html($status_text) . '</span>';
+                                            $status_label = '<span class="badge bg-info"><i class="la la-share me-1"></i>' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'in_progress':
                                             $status_label = '<span class="badge bg-primary">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'follow_up_scheduled':
+                                            $status_label = '<span class="badge bg-warning">' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'awaiting_downpayment':
                                             $status_label = '<span class="badge bg-warning">' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'downpayment_received':
-                                            $status_label = '<span class="badge bg-success-light">' . esc_html($status_text) . '</span>';
+                                            $status_label = '<span class="badge bg-success-light"><i class="la la-check-double me-1"></i>' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'meeting_scheduled':
-                                            $status_label = '<span class="badge bg-cyan">' . esc_html($status_text) . '</span>';
+                                            $status_label = '<span class="badge bg-cyan"><i class="la la-calendar-check me-1"></i>' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'approved':
                                             $status_label = '<span class="badge bg-success">' . esc_html($status_text) . '</span>';
@@ -710,7 +757,7 @@ if ($count_type === 'installment' || $count_type === 'all') {
                                     }
                                 } else {
                                     // Installment inquiry data
-                                    $status = get_post_meta($inquiry->ID, 'inquiry_status', true);
+                                    $tracking_status = get_post_meta($inquiry->ID, 'tracking_status', true) ?: 'new';
                                     $first_name = get_post_meta($inquiry->ID, 'first_name', true);
                                     $last_name = get_post_meta($inquiry->ID, 'last_name', true);
                                     $user_name = trim($first_name . ' ' . $last_name);
@@ -719,20 +766,33 @@ if ($count_type === 'installment' || $count_type === 'all') {
                                     $car_type = $product_id ? get_the_title($product_id) : '';
                                     $inquiry_label = 'اقساطی';
                                     
-                                    // Get status label for installment inquiry
+                                    // Get status label for installment inquiry using tracking_status
+                                    $status_text = Maneli_CPT_Handler::get_tracking_status_label($tracking_status);
                                     $status_label = '';
-                                    switch ($status) {
-                                        case 'pending':
-                                            $status_label = '<span class="badge bg-warning">در انتظار</span>';
+                                    switch ($tracking_status) {
+                                        case 'new':
+                                            $status_label = '<span class="badge bg-secondary">' . esc_html($status_text) . '</span>';
                                             break;
-                                        case 'user_confirmed':
-                                            $status_label = '<span class="badge bg-info">تایید کاربر</span>';
+                                        case 'referred':
+                                            $status_label = '<span class="badge bg-info"><i class="la la-share me-1"></i>' . esc_html($status_text) . '</span>';
                                             break;
-                                        case 'approved':
-                                            $status_label = '<span class="badge bg-success">تایید شده</span>';
+                                        case 'in_progress':
+                                            $status_label = '<span class="badge bg-primary">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'meeting_scheduled':
+                                            $status_label = '<span class="badge bg-cyan"><i class="la la-calendar-check me-1"></i>' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'follow_up_scheduled':
+                                            $status_label = '<span class="badge bg-warning">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'cancelled':
+                                            $status_label = '<span class="badge bg-danger">' . esc_html($status_text) . '</span>';
+                                            break;
+                                        case 'completed':
+                                            $status_label = '<span class="badge bg-dark">' . esc_html($status_text) . '</span>';
                                             break;
                                         case 'rejected':
-                                            $status_label = '<span class="badge bg-danger">رد شده</span>';
+                                            $status_label = '<span class="badge bg-danger">' . esc_html($status_text) . '</span>';
                                             break;
                                         default:
                                             $status_label = '<span class="badge bg-secondary">نامشخص</span>';
@@ -832,123 +892,7 @@ if ($count_type === 'installment' || $count_type === 'all') {
 
 <?php endif; // End of $show_list check ?>
 
-<!-- Modal: ایجاد استعلام نقدی جدید -->
-<?php if ($count_type === 'cash'): ?>
-<div class="modal fade" id="new-cash-inquiry-modal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary-transparent">
-                <h6 class="modal-title text-primary">
-                    <i class="la la-dollar-sign me-2"></i>
-                    ثبت استعلام نقدی جدید
-                </h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="new-cash-inquiry-form">
-                    <!-- انتخاب خودرو -->
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">
-                            <i class="la la-car me-1"></i>
-                            انتخاب خودرو <span class="text-danger">*</span>
-                        </label>
-                        <select class="form-select" id="cash-product-select" required>
-                            <option value="">انتخاب کنید...</option>
-                            <?php
-                            // بارگذاری محصولات برای انتخاب
-                            $products = wc_get_products(['status' => 'publish', 'limit' => -1, 'orderby' => 'title', 'order' => 'ASC']);
-                            foreach ($products as $product) {
-                                $price = $product->get_regular_price();
-                                echo '<option value="' . esc_attr($product->get_id()) . '" data-price="' . esc_attr($price) . '" data-image="' . esc_url(wp_get_attachment_url($product->get_image_id())) . '">';
-                                echo esc_html($product->get_name());
-                                echo '</option>';
-                            }
-                            ?>
-                        </select>
-                        
-                        <!-- نمایش اطلاعات خودرو -->
-                        <div id="product-info" class="mt-3" style="display: none;">
-                            <div class="card border">
-                                <div class="card-body p-3">
-                                    <div class="row g-3">
-                                        <div class="col-md-4">
-                                            <img id="product-image" src="" alt="" class="img-fluid rounded">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <h6 id="product-name" class="mb-2"></h6>
-                                            <p class="mb-1">
-                                                <strong>قیمت نقدی:</strong>
-                                                <span id="product-price" class="text-primary fs-16"></span> تومان
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row g-3">
-                        <!-- نام -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                نام <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control" id="cash-first-name" required>
-                        </div>
-                        
-                        <!-- نام خانوادگی -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                نام خانوادگی <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control" id="cash-last-name" required>
-                        </div>
-                        
-                        <!-- شماره موبایل -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                شماره موبایل <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control" id="cash-mobile" maxlength="11" pattern="09[0-9]{9}" placeholder="09XXXXXXXXX" required>
-                        </div>
-                        
-                        <!-- رنگ خودرو -->
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                رنگ خودرو
-                            </label>
-                            <input type="text" class="form-control" id="cash-car-color" placeholder="مثال: سفید">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                    <i class="la la-times me-1"></i>
-                    لغو
-                </button>
-                <button type="button" class="btn btn-primary" id="submit-cash-inquiry-btn">
-                    <i class="la la-save me-1"></i>
-                    ثبت استعلام
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- استایل برای رفع مشکل z-index -->
-<style>
-#new-cash-inquiry-modal {
-    z-index: 99999 !important;
-}
-#new-cash-inquiry-modal .modal-dialog {
-    z-index: 100000 !important;
-}
-.modal-backdrop {
-    z-index: 99998 !important;
-}
-</style>
-
+<!-- Modal حذف شد - استفاده از SweetAlert2 -->
 <?php
 // Enqueue cash inquiry form script in footer (for modal functionality)
 if ($count_type === 'cash') {
@@ -969,4 +913,3 @@ if ($count_type === 'cash') {
     }, 1000);
 }
 ?>
-<?php endif; // End of cash type check for modal ?>

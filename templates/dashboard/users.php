@@ -23,8 +23,57 @@ $users = get_users([
             $admin_count = isset($role_counts['avail_roles']['administrator']) ? $role_counts['avail_roles']['administrator'] : 0;
             $customer_count = isset($role_counts['avail_roles']['customer']) ? $role_counts['avail_roles']['customer'] : 0;
             $expert_count = isset($role_counts['avail_roles']['maneli_expert']) ? $role_counts['avail_roles']['maneli_expert'] : 0;
+            $shop_manager_count = isset($role_counts['avail_roles']['shop_manager']) ? $role_counts['avail_roles']['shop_manager'] : 0;
+            
+            // Active users (logged in last 7 days)
+            $active_users_query = new WP_User_Query([
+                'meta_query' => [
+                    [
+                        'key' => 'last_login',
+                        'value' => date('Y-m-d H:i:s', strtotime('-7 days')),
+                        'compare' => '>',
+                        'type' => 'DATETIME'
+                    ]
+                ]
+            ]);
+            $active_users_count = $active_users_query->get_total();
+            
+            // New users today
+            $today_users_query = new WP_User_Query([
+                'date_query' => [
+                    [
+                        'after' => date('Y-m-d') . ' 00:00:00',
+                        'before' => date('Y-m-d') . ' 23:59:59',
+                        'inclusive' => true
+                    ]
+                ]
+            ]);
+            $today_users_count = $today_users_query->get_total();
+            
+            // Users with inquiries
+            global $wpdb;
+            $users_with_inquiries = $wpdb->get_var("
+                SELECT COUNT(DISTINCT post_author)
+                FROM {$wpdb->posts}
+                WHERE post_type IN ('inquiry', 'cash_inquiry')
+                AND post_status = 'publish'
+            ");
+            
+            // Experts with active inquiries
+            $experts_with_active = $wpdb->get_var("
+                SELECT COUNT(DISTINCT meta_value)
+                FROM {$wpdb->postmeta}
+                WHERE meta_key = 'assigned_expert_id'
+                AND meta_value != ''
+                AND post_id IN (
+                    SELECT ID FROM {$wpdb->posts} 
+                    WHERE post_type IN ('inquiry', 'cash_inquiry') 
+                    AND post_status = 'publish'
+                )
+            ");
             ?>
-            <div class="col-xl-3 col-lg-6">
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -43,7 +92,8 @@ $users = get_users([
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6">
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -62,7 +112,8 @@ $users = get_users([
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6">
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -76,12 +127,16 @@ $users = get_users([
                                     <span class="text-muted fs-13">کارشناسان</span>
                                 </div>
                                 <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($expert_count); ?></h4>
+                                <?php if ($experts_with_active > 0): ?>
+                                    <small class="text-muted d-block mt-1 fs-11"><?php echo number_format_i18n($experts_with_active); ?> فعال</small>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6">
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -95,6 +150,49 @@ $users = get_users([
                                     <span class="text-muted fs-13">مشتری‌ها</span>
                                 </div>
                                 <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($customer_count); ?></h4>
+                                <?php if ($users_with_inquiries > 0): ?>
+                                    <small class="text-muted d-block mt-1 fs-11"><?php echo number_format_i18n($users_with_inquiries); ?> با استعلام</small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-cyan-transparent">
+                                    <i class="la la-user-check fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">فعال (7 روز)</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-cyan"><?php echo number_format_i18n($active_users_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-secondary-transparent">
+                                    <i class="la la-user-plus fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">جدید امروز</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($today_users_count); ?></h4>
                             </div>
                         </div>
                     </div>

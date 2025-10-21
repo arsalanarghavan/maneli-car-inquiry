@@ -1,9 +1,229 @@
 <!-- Start::row -->
+<?php
+// Statistics for experts
+global $wpdb;
+
+// Total experts
+$total_experts = count(get_users(['role' => 'maneli_expert']));
+
+// Active/Inactive experts
+$active_experts = 0;
+$inactive_experts = 0;
+$experts = get_users(['role' => 'maneli_expert']);
+foreach ($experts as $exp) {
+    $is_active = get_user_meta($exp->ID, 'expert_active', true) !== 'no';
+    if ($is_active) {
+        $active_experts++;
+    } else {
+        $inactive_experts++;
+    }
+}
+
+// Experts with inquiries
+$experts_with_inquiries = $wpdb->get_var("
+    SELECT COUNT(DISTINCT meta_value)
+    FROM {$wpdb->postmeta}
+    WHERE meta_key = 'assigned_expert_id'
+    AND meta_value != ''
+");
+
+// Total inquiries assigned to experts
+$total_assigned = $wpdb->get_var("
+    SELECT COUNT(*)
+    FROM {$wpdb->posts} p
+    INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+    WHERE p.post_type IN ('inquiry', 'cash_inquiry')
+    AND p.post_status = 'publish'
+    AND pm.meta_key = 'assigned_expert_id'
+    AND pm.meta_value != ''
+");
+
+// Completed by experts
+$completed_by_experts = $wpdb->get_var("
+    SELECT COUNT(*)
+    FROM {$wpdb->posts} p
+    INNER JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id
+    INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id
+    WHERE p.post_type = 'inquiry'
+    AND pm_status.meta_key = 'tracking_status'
+    AND pm_status.meta_value = 'completed'
+    AND pm_expert.meta_key = 'assigned_expert_id'
+    AND pm_expert.meta_value != ''
+");
+
+$cash_completed_by_experts = $wpdb->get_var("
+    SELECT COUNT(*)
+    FROM {$wpdb->posts} p
+    INNER JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id
+    INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id
+    WHERE p.post_type = 'cash_inquiry'
+    AND pm_status.meta_key = 'cash_inquiry_status'
+    AND pm_status.meta_value = 'completed'
+    AND pm_expert.meta_key = 'assigned_expert_id'
+    AND pm_expert.meta_value != ''
+");
+
+$total_completed = $completed_by_experts + $cash_completed_by_experts;
+
+// In progress
+$in_progress_count = $wpdb->get_var("
+    SELECT COUNT(*)
+    FROM {$wpdb->posts} p
+    INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+    WHERE p.post_type IN ('inquiry', 'cash_inquiry')
+    AND p.post_status = 'publish'
+    AND pm.meta_key IN ('tracking_status', 'cash_inquiry_status')
+    AND pm.meta_value = 'in_progress'
+    AND p.ID IN (
+        SELECT post_id FROM {$wpdb->postmeta} 
+        WHERE meta_key = 'assigned_expert_id' AND meta_value != ''
+    )
+");
+
+// Today's assignments
+$today_assigned = $wpdb->get_var($wpdb->prepare("
+    SELECT COUNT(*)
+    FROM {$wpdb->posts} p
+    INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+    WHERE p.post_type IN ('inquiry', 'cash_inquiry')
+    AND pm.meta_key = 'assigned_expert_id'
+    AND pm.meta_value != ''
+    AND p.post_date >= %s
+    AND p.post_date <= %s
+", date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')));
+?>
+
 <div class="row">
     <div class="col-xl-12">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-primary-transparent">
+                                    <i class="la la-user-tie fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">کل کارشناسان</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($total_experts); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-success-transparent">
+                                    <i class="la la-user-check fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">فعال</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($active_experts); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-danger-transparent">
+                                    <i class="la la-user-slash fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">غیرفعال</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($inactive_experts); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-info-transparent">
+                                    <i class="la la-tasks fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">کل ارجاعات</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($total_assigned); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-warning-transparent">
+                                    <i class="la la-spinner fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">در حال پیگیری</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($in_progress_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-2 col-lg-4 col-md-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-cyan-transparent">
+                                    <i class="la la-check-circle fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">تکمیل شده</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-cyan"><?php echo number_format_i18n($total_completed); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="card custom-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="card-title">مدیریت کارشناسان</div>
+                <div class="card-title">
+                    <i class="la la-user-tie me-2"></i>
+                    مدیریت کارشناسان
+                </div>
                 <div>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addExpertModal">
                         <i class="la la-user-plus me-1"></i>
@@ -27,12 +247,6 @@
                             <option value="active">فعال</option>
                             <option value="inactive">غیرفعال</option>
                         </select>
-                    </div>
-                    <div class="col-md-5 text-end">
-                        <span class="text-muted">
-                            <i class="la la-users me-1"></i>
-                            تعداد کارشناسان: <strong><?php echo count(get_users(['role' => 'maneli_expert'])); ?></strong>
-                        </span>
                     </div>
                 </div>
 
