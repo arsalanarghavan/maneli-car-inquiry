@@ -97,11 +97,6 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="<?php echo get_edit_user_link($expert->ID); ?>" 
-                                                   class="btn btn-sm btn-primary-light" 
-                                                   title="ویرایش">
-                                                    <i class="la la-edit"></i>
-                                                </a>
                                                 <button type="button" 
                                                         class="btn btn-sm btn-info-light" 
                                                         onclick="viewExpertStats(<?php echo $expert->ID; ?>)"

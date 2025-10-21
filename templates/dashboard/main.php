@@ -183,6 +183,9 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                         case 'experts':
                             include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/experts.php';
                             break;
+                        case 'calendar':
+                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/calendar.php';
+                            break;
                         case 'settings':
                             include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/settings.php';
                             break;

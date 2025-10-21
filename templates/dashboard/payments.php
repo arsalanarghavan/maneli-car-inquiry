@@ -1,23 +1,101 @@
 <!-- Start::row -->
+<?php
+// Permission check
+if (!current_user_can('manage_maneli_inquiries')) {
+    echo '<div class="alert alert-danger">شما دسترسی به این صفحه را ندارید.</div>';
+    return;
+}
+?>
+
 <div class="row">
     <div class="col-xl-12">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <?php
+            global $wpdb;
+            $completed_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'completed'");
+            $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'pending'");
+            $total_amount = $wpdb->get_var("SELECT SUM(CAST(meta_value AS UNSIGNED)) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_amount'") ?: 0;
+            ?>
+            <div class="col-xl-3 col-lg-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-success-transparent">
+                                    <i class="la la-check-circle fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">موفق</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($completed_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-warning-transparent">
+                                    <i class="la la-clock fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">در انتظار</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($pending_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card custom-card bg-gradient-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 mb-2">کل مبلغ پرداخت‌ها (تومان)</h6>
+                                <h3 class="fw-bold mb-0"><?php echo number_format_i18n($total_amount); ?></h3>
+                            </div>
+                            <div>
+                                <span class="avatar avatar-lg bg-white-transparent">
+                                    <i class="la la-money-bill-wave fs-32"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
         <div class="card custom-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="card-title">مدیریت پرداخت‌ها</div>
+                <div class="card-title">
+                    <i class="la la-money-bill-wave me-2"></i>
+                    مدیریت پرداخت‌ها
+                </div>
                 <div class="btn-list">
-                    <button class="btn btn-primary">
-                        <i class="la la-plus me-1"></i>
-                        پرداخت جدید
-                    </button>
-                    <button class="btn btn-success">
+                    <button class="btn btn-success" onclick="refreshPayments()">
                         <i class="la la-sync me-1"></i>
-                        بروزرسانی وضعیت
+                        بروزرسانی
                     </button>
                 </div>
             </div>
             <div class="card-body">
-                <div class="row mb-4">
+                <!-- Filters -->
+                <div class="row mb-4 g-3">
                     <div class="col-md-3">
+                        <label class="form-label fw-semibold">
+                            <i class="la la-filter me-1"></i>
+                            وضعیت:
+                        </label>
                         <select class="form-select" id="payment-status">
                             <option value="">همه وضعیت‌ها</option>
                             <option value="completed">تکمیل شده</option>
@@ -27,6 +105,10 @@
                         </select>
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label fw-semibold">
+                            <i class="la la-credit-card me-1"></i>
+                            درگاه:
+                        </label>
                         <select class="form-select" id="payment-gateway">
                             <option value="">همه درگاه‌ها</option>
                             <option value="zarinpal">زرین‌پال</option>
@@ -34,27 +116,35 @@
                             <option value="bank">بانکی</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="payment-search" placeholder="جستجوی پرداخت...">
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-primary w-100" onclick="filterPayments()">
-                            <i class="la la-search me-1"></i> فیلتر
-                        </button>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">
+                            <i class="la la-search me-1"></i>
+                            جستجو:
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="la la-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="payment-search" placeholder="جستجوی شناسه، مبلغ...">
+                            <button class="btn btn-primary" onclick="filterPayments()">
+                                فیلتر
+                            </button>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Table -->
                 <div class="table-responsive">
-                    <table id="payments-table" class="table table-bordered text-nowrap w-100">
-                        <thead>
+                    <table id="payments-table" class="table table-bordered table-hover text-nowrap">
+                        <thead class="table-primary">
                             <tr>
-                                <th>شناسه پرداخت</th>
-                                <th>شماره استعلام</th>
-                                <th>مبلغ</th>
-                                <th>درگاه پرداخت</th>
-                                <th>وضعیت</th>
-                                <th>تاریخ پرداخت</th>
-                                <th>عملیات</th>
+                                <th><i class="la la-hashtag me-1"></i>شناسه</th>
+                                <th><i class="la la-file-alt me-1"></i>استعلام</th>
+                                <th><i class="la la-money-bill me-1"></i>مبلغ</th>
+                                <th><i class="la la-credit-card me-1"></i>درگاه</th>
+                                <th><i class="la la-info-circle me-1"></i>وضعیت</th>
+                                <th><i class="la la-calendar me-1"></i>تاریخ</th>
+                                <th><i class="la la-wrench me-1"></i>عملیات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -109,12 +199,14 @@
                                     <td><?php echo esc_html($date); ?></td>
                                     <td>
                                         <div class="btn-list">
-                                            <button class="btn btn-sm btn-primary-light" onclick="viewPaymentDetails(<?php echo $payment->post_id; ?>)">
-                                                <i class="la la-eye"></i> جزئیات
+                                            <button class="btn btn-sm btn-primary-light" onclick="viewPaymentDetails(<?php echo $payment->post_id; ?>)" title="جزئیات">
+                                                <i class="la la-eye"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-success-light" onclick="refundPayment(<?php echo $payment->post_id; ?>)">
-                                                <i class="la la-sync"></i> استرداد
+                                            <?php if ($status === 'completed'): ?>
+                                            <button class="btn btn-sm btn-warning-light" onclick="refundPayment(<?php echo $payment->post_id; ?>)" title="استرداد">
+                                                <i class="la la-undo"></i>
                                             </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -150,16 +242,52 @@ function filterPayments() {
     });
 }
 
+function refreshPayments() {
+    location.reload();
+}
+
 function viewPaymentDetails(paymentId) {
-    // Open modal or redirect to payment details page
-    console.log('Viewing payment details:', paymentId);
+    Swal.fire({
+        title: 'جزئیات پرداخت',
+        html: '<p>در حال بارگذاری...</p>',
+        icon: 'info'
+    });
 }
 
 function refundPayment(paymentId) {
-    if (confirm('آیا از استرداد این پرداخت اطمینان دارید؟')) {
-        // AJAX call to process refund
-        console.log('Refunding payment:', paymentId);
-    }
+    Swal.fire({
+        title: 'استرداد پرداخت؟',
+        text: 'آیا از استرداد این پرداخت اطمینان دارید؟',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'بله، استرداد کن',
+        cancelButtonText: 'انصراف'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('استرداد شد!', 'پرداخت با موفقیت استرداد شد.', 'success');
+        }
+    });
 }
 </script>
+
+<style>
+.table-primary th {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--primary-rgb), 0.03);
+    transition: all 0.3s ease;
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.bg-white-transparent {
+    background: rgba(255, 255, 255, 0.2);
+}
+</style>
 

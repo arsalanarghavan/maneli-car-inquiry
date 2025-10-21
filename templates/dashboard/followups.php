@@ -1,127 +1,284 @@
 <!-- Start::row -->
+<?php
+/**
+ * Followups Dashboard Page - Direct Implementation
+ * Shows inquiries with tracking_status = 'follow_up'
+ */
+
+// Check permission
+if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
+    echo '<div class="alert alert-danger">شما دسترسی به این صفحه را ندارید.</div>';
+    return;
+}
+
+// Get current user
+$current_user_id = get_current_user_id();
+$is_admin = current_user_can('manage_maneli_inquiries');
+
+// Get experts for filter (admin only)
+$experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']) : [];
+
+// Query followup inquiries
+$args = [
+    'post_type' => 'inquiry',
+    'posts_per_page' => 20,
+    'orderby' => 'meta_value',
+    'meta_key' => 'follow_up_date',
+    'order' => 'ASC',
+    'post_status' => 'publish',
+    'meta_query' => [
+        [
+            'key' => 'tracking_status',
+            'value' => 'follow_up',
+            'compare' => '='
+        ]
+    ]
+];
+
+// Filter by expert if not admin
+if (!$is_admin) {
+    $args['meta_query'][] = [
+        'key' => 'assigned_expert_id',
+        'value' => $current_user_id,
+        'compare' => '='
+    ];
+}
+
+$followups_query = new WP_Query($args);
+$followups = $followups_query->posts;
+
+// Calculate statistics
+$today = current_time('Y-m-d');
+$week_end = date('Y-m-d', strtotime('+7 days'));
+$total_count = 0;
+$today_count = 0;
+$overdue_count = 0;
+$week_count = 0;
+
+foreach ($followups as $inquiry) {
+    $follow_up_date = get_post_meta($inquiry->ID, 'follow_up_date', true);
+    $total_count++;
+    
+    if ($follow_up_date) {
+        if ($follow_up_date === $today) $today_count++;
+        if ($follow_up_date < $today) $overdue_count++;
+        if ($follow_up_date <= $week_end) $week_count++;
+    }
+}
+
+// Enqueue assets for modals
+if (!wp_script_is('select2', 'enqueued')) {
+    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+}
+
+if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
+    wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
+    wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
+}
+?>
+
 <div class="row">
     <div class="col-xl-12">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-lg-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-warning-transparent">
+                                    <i class="la la-clock fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">پیگیری‌های امروز</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($today_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-danger-transparent">
+                                    <i class="la la-exclamation-triangle fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">عقب‌افتاده</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($overdue_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-info-transparent">
+                                    <i class="la la-calendar-alt fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">این هفته</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($week_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6">
+                <div class="card custom-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <span class="avatar avatar-md bg-success-transparent">
+                                    <i class="la la-list-alt fs-24"></i>
+                                </span>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="mb-1">
+                                    <span class="text-muted fs-13">مجموع</span>
+                                </div>
+                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($total_count); ?></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
         <div class="card custom-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="card-title">مدیریت پیگیری‌ها</div>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFollowupModal">
-                    <i class="la la-plus me-1"></i>
-                    پیگیری جدید
-                </button>
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="la la-tasks me-2"></i>
+                    لیست پیگیری‌های استعلامات اقساطی
+                </div>
             </div>
             <div class="card-body">
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <select class="form-select" id="followup-status-filter">
-                            <option value="">همه وضعیت‌ها</option>
-                            <option value="pending">در انتظار</option>
-                            <option value="completed">انجام شده</option>
-                            <option value="cancelled">لغو شده</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select" id="followup-type-filter">
-                            <option value="">همه انواع</option>
-                            <option value="cash">نقدی</option>
-                            <option value="installment">اقساطی</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" class="form-control" id="followup-search" placeholder="جستجوی پیگیری...">
-                    </div>
-                    <div class="col-md-3">
-                        <button class="btn btn-primary w-100" onclick="filterFollowups()">
-                            <i class="la la-search me-1"></i> فیلتر
-                        </button>
+                <!-- Info Alert -->
+                <div class="alert alert-info border-info d-flex align-items-center" role="alert">
+                    <i class="la la-info-circle fs-20 me-2"></i>
+                    <div>
+                        <strong>راهنما:</strong>
+                        استعلاماتی که نیاز به پیگیری در تاریخ‌های مشخص دارند، در اینجا نمایش داده می‌شوند.
                     </div>
                 </div>
 
+                <!-- Table -->
                 <div class="table-responsive">
-                    <table id="followups-table" class="table table-bordered text-nowrap w-100">
-                        <thead>
+                    <table class="table table-bordered table-hover text-nowrap">
+                        <thead class="table-primary">
                             <tr>
-                                <th>شناسه</th>
-                                <th>مشتری</th>
-                                <th>محصول</th>
-                                <th>نوع استعلام</th>
-                                <th>تاریخ پیگیری</th>
-                                <th>وضعیت</th>
-                                <th>توضیحات</th>
-                                <th>عملیات</th>
+                                <th><i class="la la-hashtag me-1"></i>شناسه</th>
+                                <th><i class="la la-user me-1"></i>مشتری</th>
+                                <th><i class="la la-car me-1"></i>خودرو</th>
+                                <th><i class="la la-calendar me-1"></i>تاریخ پیگیری</th>
+                                <th><i class="la la-info-circle me-1"></i>وضعیت</th>
+                                <?php if ($is_admin): ?>
+                                    <th><i class="la la-user-tie me-1"></i>کارشناس</th>
+                                <?php endif; ?>
+                                <th><i class="la la-clock me-1"></i>تاریخ ثبت</th>
+                                <th><i class="la la-wrench me-1"></i>عملیات</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            // Get followups from database
-                            global $wpdb;
-
-                            $followups = $wpdb->get_results("
-                                SELECT fm.*, p.post_title as inquiry_title, pm1.meta_value as customer_name, pm2.meta_value as product_name, pm3.meta_value as inquiry_type
-                                FROM {$wpdb->prefix}maneli_followups fm
-                                INNER JOIN {$wpdb->posts} p ON fm.inquiry_id = p.ID
-                                LEFT JOIN {$wpdb->postmeta} pm1 ON fm.inquiry_id = pm1.post_id AND pm1.meta_key = 'inquiry_name'
-                                LEFT JOIN {$wpdb->postmeta} pm2 ON fm.inquiry_id = pm2.post_id AND pm2.meta_key = 'inquiry_car_type'
-                                LEFT JOIN {$wpdb->postmeta} pm3 ON fm.inquiry_id = pm3.post_id AND pm3.meta_key = 'inquiry_type'
-                                ORDER BY fm.followup_date DESC
-                                LIMIT 20
-                            ");
-
-                            if (empty($followups)) {
-                                ?>
+                            <?php if (empty($followups)): ?>
                                 <tr>
-                                    <td colspan="8" class="text-center">
-                                        <div class="py-4">
-                                            <i class="la la-inbox fs-1 text-muted mb-3 d-block"></i>
-                                            <p class="text-muted">هیچ پیگیری‌ای یافت نشد.</p>
-                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFollowupModal">
-                                                <i class="la la-plus me-1"></i>
-                                                ایجاد اولین پیگیری
-                                            </button>
+                                    <td colspan="<?php echo $is_admin ? '8' : '7'; ?>" class="text-center">
+                                        <div class="py-5">
+                                            <i class="la la-inbox" style="font-size: 60px; color: #dee2e6;"></i>
+                                            <p class="text-muted mt-3">هیچ پیگیری‌ای یافت نشد.</p>
                                         </div>
                                     </td>
                                 </tr>
-                                <?php
-                            } else {
-                                foreach ($followups as $followup) {
-                                    $status_badge = '';
-                                    switch ($followup->status) {
-                                        case 'completed':
-                                            $status_badge = '<span class="badge bg-success">انجام شده</span>';
-                                            break;
-                                        case 'cancelled':
-                                            $status_badge = '<span class="badge bg-danger">لغو شده</span>';
-                                            break;
-                                        default:
-                                            $status_badge = '<span class="badge bg-warning">در انتظار</span>';
+                            <?php else: ?>
+                                <?php foreach ($followups as $inquiry): 
+                                    $inquiry_id = $inquiry->ID;
+                                    $customer = get_userdata($inquiry->post_author);
+                                    $product_id = get_post_meta($inquiry_id, 'product_id', true);
+                                    $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
+                                    $inquiry_status = get_post_meta($inquiry_id, 'inquiry_status', true);
+                                    $expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+                                    $expert = $expert_id ? get_userdata($expert_id) : null;
+                                    
+                                    // Convert dates to Jalali
+                                    $created_timestamp = strtotime($inquiry->post_date);
+                                    if (function_exists('maneli_gregorian_to_jalali')) {
+                                        $created_date = maneli_gregorian_to_jalali(
+                                            date('Y', $created_timestamp),
+                                            date('m', $created_timestamp),
+                                            date('d', $created_timestamp),
+                                            'Y/m/d'
+                                        );
+                                    } else {
+                                        $created_date = date('Y/m/d', $created_timestamp);
                                     }
-                                    ?>
-                                    <tr>
-                                        <td><?php echo $followup->id; ?></td>
-                                        <td><?php echo esc_html($followup->customer_name ?: 'نامشخص'); ?></td>
-                                        <td><?php echo esc_html($followup->product_name ?: 'نامشخص'); ?></td>
-                                        <td><?php echo esc_html($followup->inquiry_type === 'cash' ? 'نقدی' : ($followup->inquiry_type === 'installment' ? 'اقساطی' : 'نامشخص')); ?></td>
-                                        <td><?php echo esc_html($followup->followup_date); ?></td>
-                                        <td><?php echo $status_badge; ?></td>
+                                    
+                                    // Status badge
+                                    $status_labels = [
+                                        'pending' => ['label' => 'در انتظار', 'class' => 'warning'],
+                                        'user_confirmed' => ['label' => 'تایید کاربر', 'class' => 'info'],
+                                        'approved' => ['label' => 'تایید شده', 'class' => 'success'],
+                                        'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
+                                    ];
+                                    $status_data = $status_labels[$inquiry_status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
+                                    
+                                    // Overdue check
+                                    $is_overdue = $follow_up_date && $follow_up_date < $today;
+                                    $row_class = $is_overdue ? 'table-danger' : '';
+                                ?>
+                                    <tr class="<?php echo $row_class; ?>">
+                                        <td>#<?php echo $inquiry_id; ?></td>
+                                        <td><?php echo esc_html($customer ? $customer->display_name : 'نامشخص'); ?></td>
+                                        <td><?php echo esc_html(get_the_title($product_id)); ?></td>
                                         <td>
-                                            <span class="text-truncate d-block" style="max-width: 200px;" title="<?php echo esc_attr($followup->notes); ?>">
-                                                <?php echo esc_html(wp_trim_words($followup->notes, 5)); ?>
-                                            </span>
+                                            <?php if ($follow_up_date): ?>
+                                                <strong class="<?php echo $is_overdue ? 'text-danger' : 'text-success'; ?>">
+                                                    <?php echo esc_html($follow_up_date); ?>
+                                                </strong>
+                                                <?php if ($is_overdue): ?>
+                                                    <br><small class="badge bg-danger">عقب‌افتاده</small>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                —
+                                            <?php endif; ?>
                                         </td>
                                         <td>
+                                            <span class="badge bg-<?php echo $status_data['class']; ?>">
+                                                <?php echo $status_data['label']; ?>
+                                            </span>
+                                        </td>
+                                        <?php if ($is_admin): ?>
+                                            <td>
+                                                <?php echo $expert ? esc_html($expert->display_name) : '<span class="text-muted">—</span>'; ?>
+                                            </td>
+                                        <?php endif; ?>
+                                        <td><?php echo esc_html($created_date); ?></td>
+                                        <td>
                                             <div class="btn-list">
-                                                <button class="btn btn-sm btn-primary-light" onclick="editFollowup(<?php echo $followup->id; ?>)">
-                                                    <i class="la la-edit"></i> ویرایش
-                                                </button>
-                                                <button class="btn btn-sm btn-danger-light" onclick="deleteFollowup(<?php echo $followup->id; ?>)">
-                                                    <i class="la la-trash"></i> حذف
-                                                </button>
+                                                <a href="<?php echo add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/inquiries/installment')); ?>" 
+                                                   class="btn btn-sm btn-primary-light">
+                                                    <i class="la la-eye"></i> مشاهده
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
-                                    <?php
-                                }
-                            }
-                            ?>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -131,157 +288,31 @@
 </div>
 <!-- End::row -->
 
-<!-- Add Followup Modal -->
-<div class="modal fade" id="addFollowupModal" tabindex="-1" aria-labelledby="addFollowupModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addFollowupModalLabel">افزودن پیگیری جدید</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="add-followup-form">
-                    <div class="mb-3">
-                        <label for="followup_inquiry_id" class="form-label">انتخاب استعلام</label>
-                        <select class="form-select" id="followup_inquiry_id" name="inquiry_id" required>
-                            <option value="">در حال بارگذاری...</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="followup_date" class="form-label">تاریخ پیگیری</label>
-                        <input type="text" class="form-control persian-datepicker" id="followup_date" name="followup_date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="followup_status" class="form-label">وضعیت</label>
-                        <select class="form-select" id="followup_status" name="status" required>
-                            <option value="pending">در انتظار</option>
-                            <option value="completed">انجام شده</option>
-                            <option value="cancelled">لغو شده</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="followup_notes" class="form-label">توضیحات</label>
-                        <textarea class="form-control" id="followup_notes" name="notes" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">انصراف</button>
-                <button type="button" class="btn btn-primary" id="save-followup-btn">ذخیره</button>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+/* Follow-up List Custom Styles */
+.table-primary th {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    font-weight: 600;
+    border: none;
+}
 
-<script>
-jQuery(document).ready(function($) {
-    var currentPage = 1;
+.table-primary th i {
+    opacity: 0.9;
+}
 
-    // Load followups
-    function loadFollowups(page = 1) {
-        $.ajax({
-            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-            type: 'POST',
-            data: {
-                action: 'maneli_get_followups',
-                page: page
-            },
-            success: function(response) {
-                if (response.success && response.data.followups) {
-                    var html = '';
-                    if (response.data.followups.length === 0) {
-                        html = '<tr><td colspan="8" class="text-center">هیچ پیگیری‌ای یافت نشد.</td></tr>';
-                    } else {
-                        response.data.followups.forEach(function(followup, index) {
-                            var statusBadge = '';
-                            switch(followup.status) {
-                                case 'completed':
-                                    statusBadge = '<span class="badge bg-success">انجام شده</span>';
-                                    break;
-                                case 'cancelled':
-                                    statusBadge = '<span class="badge bg-danger">لغو شده</span>';
-                                    break;
-                                default:
-                                    statusBadge = '<span class="badge bg-warning">در انتظار</span>';
-                            }
+.table-hover tbody tr:hover:not(.table-danger) {
+    background-color: rgba(var(--primary-rgb), 0.03);
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
 
-                            html += '<tr>';
-                            html += '<td>' + ((page - 1) * 20 + index + 1) + '</td>';
-                            html += '<td>' + (followup.customer_name || '-') + '</td>';
-                            html += '<td>' + (followup.product_name || '-') + '</td>';
-                            html += '<td>' + (followup.inquiry_type === 'cash' ? 'نقدی' : 'اقساطی') + '</td>';
-                            html += '<td>' + (followup.followup_date || '-') + '</td>';
-                            html += '<td>' + statusBadge + '</td>';
-                            html += '<td>' + (followup.notes || '-') + '</td>';
-                            html += '<td>';
-                            html += '<button class="btn btn-sm btn-info-light edit-followup" data-id="' + followup.id + '"><i class="la la-pencil"></i></button> ';
-                            html += '<button class="btn btn-sm btn-danger-light delete-followup" data-id="' + followup.id + '"><i class="la la-trash"></i></button>';
-                            html += '</td>';
-                            html += '</tr>';
-                        });
-                    }
-                    $('#followups-table-body').html(html);
-                }
-            }
-        });
-    }
+.table-danger {
+    background-color: rgba(220, 53, 69, 0.05) !important;
+}
 
-    // Load inquiries for dropdown
-    $.ajax({
-        url: '<?php echo admin_url('admin-ajax.php'); ?>',
-        type: 'POST',
-        data: {
-            action: 'maneli_get_inquiries_list'
-        },
-        success: function(response) {
-            if (response.success && response.data.inquiries) {
-                var html = '<option value="">انتخاب استعلام...</option>';
-                response.data.inquiries.forEach(function(inquiry) {
-                    html += '<option value="' + inquiry.id + '">' + inquiry.customer_name + ' - ' + inquiry.product_name + '</option>';
-                });
-                $('#followup_inquiry_id').html(html);
-            }
-        }
-    });
-
-    // Initialize Persian Datepicker
-    if ($('.persian-datepicker').length) {
-        $('.persian-datepicker').persianDatepicker({
-            format: 'YYYY/MM/DD'
-        });
-    }
-
-    // Save followup
-    $('#save-followup-btn').on('click', function() {
-        var formData = $('#add-followup-form').serialize();
-        
-        $.ajax({
-            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-            type: 'POST',
-            data: formData + '&action=maneli_add_followup&nonce=<?php echo wp_create_nonce('maneli_add_followup'); ?>',
-            success: function(response) {
-                if (response.success) {
-                    $('#addFollowupModal').modal('hide');
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'موفق!',
-                        text: 'پیگیری با موفقیت افزوده شد.',
-                        timer: 2000
-                    });
-                    loadFollowups(currentPage);
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطا!',
-                        text: response.data.message || 'خطا در افزودن پیگیری'
-                    });
-                }
-            }
-        });
-    });
-
-    // Load initial data
-    loadFollowups(1);
-});
-</script>
-
+.table-danger:hover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+}
+</style>
