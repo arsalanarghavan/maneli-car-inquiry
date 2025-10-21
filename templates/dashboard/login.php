@@ -240,10 +240,31 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     
-    <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 with fallback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js" 
+            integrity="sha512-2+7kd6YLZeJzc1KJ5TLRWLOWCNvjNPJRvhgUo5C0Xk4L1KEkR5WlEMzNDDUJLCfvnDhdSQz3IBXq8U8kHRmXSQ==" 
+            crossorigin="anonymous" 
+            referrerpolicy="no-referrer"
+            onerror="console.error('Failed to load SweetAlert2 from CDN')"></script>
 
     <script>
+        // Fallback for SweetAlert2 if not loaded
+        if (typeof Swal === 'undefined') {
+            console.warn('SweetAlert2 failed to load, using native alerts');
+            window.Swal = {
+                fire: function(options) {
+                    if (typeof options === 'string') {
+                        alert(options);
+                    } else if (options.text) {
+                        alert(options.text);
+                    } else if (options.title) {
+                        alert(options.title);
+                    }
+                    return Promise.resolve({});
+                }
+            };
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const smsLoginBtn = document.getElementById('sms-login-btn');
             const passwordLoginBtn = document.getElementById('password-login-btn');
