@@ -1,5 +1,11 @@
 <!-- Start::row -->
 <?php
+// Permission check - Only Admin can access
+if (!current_user_can('manage_maneli_inquiries')) {
+    echo '<div class="alert alert-danger">شما دسترسی به این صفحه را ندارید.</div>';
+    return;
+}
+
 // Load product data
 $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';

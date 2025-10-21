@@ -48,7 +48,7 @@ $current_user = wp_get_current_user();
                 <!-- Start::header-link -->
                 <input type="text" class="header-search-bar form-control" id="header-search" placeholder="جستجو" spellcheck="false" autocomplete="off" autocapitalize="off">
                 <a href="javascript:void(0);" class="header-search-icon border-0">
-                    <i class="ri-search-line"></i>
+                    <i class="bi bi-search"></i>
                 </a>
                 <!-- End::header-link -->
             </div>

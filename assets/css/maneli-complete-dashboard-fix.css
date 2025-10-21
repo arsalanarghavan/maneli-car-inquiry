@@ -1,1455 +1,470 @@
 /**
- * Maneli Dashboard - Complete Layout Fix
- * فیکس کامل و جامع برای تمام مشکلات layout داشبورد
- * 
- * نسخه: 3.0 - Final Fix
- * تاریخ: 1403/07/28
+ * Maneli Dashboard - Xintra Compatible CSS
+ * کپی دقیق از قالب Xintra با Layout صحیح
  */
+
+/* ===========================================
+   HIDE WORDPRESS ADMIN BAR
+   =========================================== */
+
+#wpadminbar {
+    display: none !important;
+}
+
+html {
+    margin-top: 0 !important;
+}
+
+body {
+    margin-top: 0 !important;
+}
 
 /* ===========================================
    Z-INDEX LAYERS (مهم‌ترین بخش!)
    =========================================== */
 
 :root {
-    --z-sidebar: 1050;
-    --z-header: 1040;
-    --z-dropdown: 1060;
-    --z-modal: 1070;
-    --z-tooltip: 1080;
-    --z-loader: 9999;
+    --z-sidebar: 105;
+    --z-header: 104;
+    --z-dropdown: 106;
+    --z-modal: 107;
 }
 
 /* ===========================================
-   RESET & BASE STYLES
-   =========================================== */
-
-* {
-    box-sizing: border-box !important;
-}
-
-html {
-    scroll-behavior: smooth !important;
-}
-
-/* استثنا برای آیکون‌های Line Awesome */
-[class^="la-"],
-[class*=" la-"],
-.la, .las, .rar, .lab,
-i[class^="la-"],
-i[class*=" la-"],
-span[class^="la-"],
-span[class*=" la-"] {
-    font-family: 'Line Awesome Free' !important;
-    font-weight: 900 !important;
-}
-
-[class^="la-"]::before,
-[class*=" la-"]::before {
-    font-family: 'Line Awesome Free' !important;
-    font-weight: 900 !important;
-}
-
-body {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    direction: rtl !important;
-    overflow-x: hidden !important;
-}
-
-/* Prevent body scroll when sidebar is open on mobile */
-@media (max-width: 992px) {
-    html[data-toggled="open"] body {
-        overflow: hidden !important;
-        position: fixed !important;
-        width: 100% !important;
-    }
-}
-
-/* ===========================================
-   HEADER - باید زیر Sidebar باشه
+   HEADER STYLES
    =========================================== */
 
 .app-header {
-    position: fixed !important;
-    top: 0 !important;
-    right: 0 !important;
-    left: 0 !important;
-    z-index: var(--z-header) !important; /* 1040 */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    padding: 0.75rem 1.5rem !important;
-    background-color: #fff !important;
-    border-bottom: 1px solid rgba(227, 227, 227, 0.7) !important;
-    direction: rtl !important;
-    height: 4rem !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
-    width: 100% !important;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-header);
+    background: var(--custom-white, #fff);
+    border-bottom: 1px solid rgba(227, 227, 227, 0.7);
+    margin-right: 15rem; /* فاصله برای sidebar */
+    transition: margin-right 0.3s ease;
+}
+
+[data-toggled="close"] .app-header {
+    margin-right: 0;
 }
 
 .main-header-container {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-    direction: rtl !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 3.75rem;
 }
 
-/* Header Left Content */
-.header-content-left {
-    display: flex !important;
-    align-items: center !important;
-    gap: 1rem !important;
-    order: 1 !important;
-    direction: rtl !important;
-}
-
-/* Header Right Content */
+.header-content-left,
 .header-content-right {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.5rem !important;
-    order: 2 !important;
-    list-style: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    direction: rtl !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-/* Header Logo */
-.horizontal-logo {
-    display: flex !important;
-    align-items: center !important;
-    direction: ltr !important;
+.header-content-right {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-.header-logo {
-    display: flex !important;
-    align-items: center !important;
-}
-
-.header-logo img {
-    height: 2rem !important;
-    width: auto !important;
-}
-
-/* Sidebar Toggle Button */
-.sidemenu-toggle {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 2.5rem !important;
-    height: 2.5rem !important;
-    border-radius: 0.375rem !important;
-    transition: all 0.3s !important;
-    background: transparent !important;
-    border: none !important;
-    cursor: pointer !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-.sidemenu-toggle:hover {
-    background-color: rgba(0, 0, 0, 0.05) !important;
-}
-
-.sidemenu-toggle:active {
-    transform: scale(0.95) !important;
-}
-
-/* Animated Toggle Icon */
-.sidemenu-toggle.animated-arrow span {
-    display: block !important;
-    width: 20px !important;
-    height: 2px !important;
-    background-color: currentColor !important;
-    position: relative !important;
-    transition: all 0.3s ease !important;
-}
-
-.sidemenu-toggle.animated-arrow span::before,
-.sidemenu-toggle.animated-arrow span::after {
-    content: "" !important;
-    position: absolute !important;
-    width: 100% !important;
-    height: 100% !important;
-    background-color: currentColor !important;
-    transition: all 0.3s ease !important;
-}
-
-.sidemenu-toggle.animated-arrow span::before {
-    top: -6px !important;
-}
-
-.sidemenu-toggle.animated-arrow span::after {
-    top: 6px !important;
-}
-
-/* Toggle Icon Animation when Sidebar is Open */
-html[data-toggled="open"] .sidemenu-toggle.animated-arrow span {
-    background-color: transparent !important;
-}
-
-html[data-toggled="open"] .sidemenu-toggle.animated-arrow span::before {
-    top: 0 !important;
-    transform: rotate(45deg) !important;
-}
-
-html[data-toggled="open"] .sidemenu-toggle.animated-arrow span::after {
-    top: 0 !important;
-    transform: rotate(-45deg) !important;
-}
-
-/* Header Search */
-.header-search {
-    position: relative !important;
-    direction: rtl !important;
-}
-
-.header-search-bar {
-    padding-right: 2.5rem !important;
-    padding-left: 1rem !important;
-    text-align: right !important;
-    direction: rtl !important;
-    border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    border-radius: 0.375rem !important;
-    min-width: 200px !important;
-}
-
-.header-search-icon {
-    position: absolute !important;
-    right: 0.75rem !important;
-    left: auto !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-}
-
-/* Header Icons and Links */
+/* Header Links */
 .header-link {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 2.5rem !important;
-    height: 2.5rem !important;
-    border-radius: 0.375rem !important;
-    transition: all 0.3s !important;
-    position: relative !important;
-    background: transparent !important;
-    border: none !important;
-    cursor: pointer !important;
-}
-
-.header-link:hover {
-    background-color: rgba(0, 0, 0, 0.05) !important;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .header-link-icon {
-    width: 1.25rem !important;
-    height: 1.25rem !important;
+    font-size: 1rem;
+    position: relative;
+    padding: 0.4rem;
+    transition: all ease 0.05s;
 }
 
-/* SVG Icons في Header */
-.header-link svg.header-link-icon,
-.header-link-icon.w-6.h-6 {
-    width: 1.25rem !important;
-    height: 1.25rem !important;
-    stroke: currentColor !important;
-    fill: none !important;
-    transition: all 0.3s ease !important;
+/* SVG Icons in Header */
+.header-link-icon.w-6.h-6,
+svg.w-6.h-6.header-link-icon {
+    width: 1.5rem;
+    height: 1.5rem;
 }
 
-/* SVG Icon Hover Effect */
-.header-link:hover svg.header-link-icon {
-    transform: scale(1.05) !important;
-}
-
-/* Full Screen Icons Toggle */
-.header-fullscreen .full-screen-open {
-    display: block !important;
-}
-
-.header-fullscreen .full-screen-close {
-    display: none !important;
-}
-
-html.fullscreen .header-fullscreen .full-screen-open {
-    display: none !important;
-}
-
-html.fullscreen .header-fullscreen .full-screen-close {
-    display: block !important;
-}
-
-/* Notification Badge */
-.header-icon-pulse {
-    position: absolute !important;
-    top: 0.25rem !important;
-    right: 0.25rem !important;
-    left: auto !important;
-    width: 0.5rem !important;
-    height: 0.5rem !important;
-}
-
-/* Pulse Animation for Notification Badge */
-.header-icon-pulse.pulse {
-    animation: pulse-animation 2s infinite !important;
-}
-
-@keyframes pulse-animation {
-    0% {
-        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.7) !important;
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0) !important;
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0) !important;
-    }
-}
-
-.pulse-secondary {
-    --primary-rgb: 99, 102, 241 !important;
-}
-
-/* Dropdown Menus in Header */
-.header-element .dropdown-menu {
-    right: 0 !important;
-    left: auto !important;
-    text-align: right !important;
-    direction: rtl !important;
-    z-index: var(--z-dropdown) !important; /* 1060 */
-    margin-top: 0.5rem !important;
-    transform: none !important;
-    position: absolute !important;
-}
-
-.header-element .dropdown-menu.show {
-    display: block !important;
-}
-
-/* User Avatar in Header */
-.header-element img {
-    border-radius: 50% !important;
-}
-
-/* Fix Header Logo Display */
-.horizontal-logo .header-logo img:not(.desktop-logo) {
-    display: none !important;
-}
-
-.horizontal-logo .header-logo img.desktop-logo {
-    display: block !important;
-}
-
-/* Dark Theme Logo Display */
-html[data-theme-mode="dark"] .horizontal-logo .header-logo img.desktop-logo {
-    display: none !important;
-}
-
-html[data-theme-mode="dark"] .horizontal-logo .header-logo img.desktop-dark {
-    display: block !important;
-}
-
-/* Header Elements Alignment */
-.header-element {
-    display: flex !important;
-    align-items: center !important;
-}
-
-.header-element.dropdown {
-    position: relative !important;
+.header-link:hover .header-link-icon,
+.header-link.show .header-link-icon {
+    color: var(--primary-color, #6366f1);
 }
 
 /* ===========================================
-   SIDEBAR - بالاترین z-index و ظرافت Xintra
+   SIDEBAR STYLES
    =========================================== */
 
 .app-sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    right: 0 !important;
-    left: auto !important;
-    height: 100vh !important;
-    width: 250px !important;
-    background: #1e293b !important;
-    z-index: var(--z-sidebar) !important; /* 1050 - بالاتر از header */
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    direction: rtl !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.15) !important;
-    display: flex !important;
-    flex-direction: column !important;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 15rem;
+    height: 100vh;
+    background: var(--menu-bg, #1e293b);
+    z-index: var(--z-sidebar);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-/* Sidebar Header - مطابق Xintra */
+[data-toggled="close"] .app-sidebar {
+    transform: translateX(100%);
+}
+
+[data-toggled="open"] .app-sidebar {
+    transform: translateX(0);
+}
+
+/* Sidebar Header */
 .main-sidebar-header {
-    padding: 1rem !important;
-    text-align: center !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    direction: ltr !important;
-    min-height: 4rem !important;
-    height: 4rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    position: sticky !important;
-    top: 0 !important;
-    background: #1e293b !important;
-    z-index: 10 !important;
-    flex-shrink: 0 !important;
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    min-height: 3.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Sidebar Logo Display */
+.main-sidebar-header .header-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-sidebar-header .header-logo img {
+    max-height: 2rem;
+}
+
+/* فقط لوگوی desktop نمایش داده شود */
 .main-sidebar-header .header-logo img:not(.desktop-logo) {
-    display: none !important;
+    display: none;
 }
 
 .main-sidebar-header .header-logo img.desktop-logo {
-    display: block !important;
-    max-height: 2.5rem !important;
+    display: block;
 }
 
-/* Dark Theme Sidebar Logo */
-html[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-logo {
-    display: none !important;
-}
-
-html[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-dark {
-    display: block !important;
-    max-height: 2.5rem !important;
-}
-
-/* Sidebar Menu Container - مطابق Xintra */
+/* Main Sidebar Content */
 .main-sidebar {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    direction: rtl !important;
-    padding: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .main-menu-container {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding: 0.5rem 0 !important;
+    padding: 0;
 }
 
 .main-menu {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    list-style: none;
+    padding: 0.5rem 0;
+    margin: 0;
 }
 
-/* Custom Scrollbar for Sidebar */
-.main-sidebar::-webkit-scrollbar {
-    width: 6px !important;
-}
-
-.main-sidebar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05) !important;
-}
-
-.main-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2) !important;
-    border-radius: 3px !important;
-}
-
-.main-sidebar::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3) !important;
-}
-
-.main-menu {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* Category Names - طبق Xintra */
+/* Category Names */
 .slide__category {
-    padding: 0.875rem 1.25rem 0.5rem !important;
-    margin-top: 0.75rem !important;
+    padding: 0.875rem 1.25rem 0.5rem;
+    margin-top: 0.75rem;
 }
 
 .slide__category:first-child {
-    margin-top: 0.25rem !important;
+    margin-top: 0.25rem;
 }
 
 .category-name {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    font-size: 0.6875rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    color: rgba(255, 255, 255, 0.5) !important;
-    letter-spacing: 0.05em !important;
-    direction: rtl !important;
-    display: block !important;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.05em;
 }
 
-/* Menu Items - ظرافت Xintra */
-.slide {
-    list-style: none !important;
-}
-
+/* Menu Items */
 .side-menu__item {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0.75rem !important;
-    padding: 0.625rem 1.25rem !important;
-    color: rgba(255, 255, 255, 0.85) !important;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    text-decoration: none !important;
-    direction: rtl !important;
-    border-radius: 0 !important;
-    position: relative !important;
-    white-space: nowrap !important;
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1.25rem;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border-radius: 0;
 }
 
-/* Elegant Hover Effect */
 .side-menu__item::before {
-    content: '' !important;
-    position: absolute !important;
-    right: 0 !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    width: 3px !important;
-    background: transparent !important;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .side-menu__item:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: #fff !important;
-    text-decoration: none !important;
-    transform: translateX(-2px) !important;
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    transform: translateX(-2px);
 }
 
 .side-menu__item:hover::before {
-    background: rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.3);
 }
 
-/* Active State - مطابق Xintra */
 .side-menu__item.active {
-    background: rgba(99, 102, 241, 0.12) !important;
-    color: #818cf8 !important;
+    background: rgba(99, 102, 241, 0.12);
+    color: #818cf8;
 }
 
 .side-menu__item.active::before {
-    background: #818cf8 !important;
+    background: #818cf8;
 }
 
-/* Focus State */
-.side-menu__item:focus,
-.side-menu__item:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-/* Sub-menu Items */
-.slide.has-sub .side-menu__item {
-    position: relative !important;
-}
-
-.slide.has-sub .side-menu__item::after {
-    content: "" !important;
-    position: absolute !important;
-    left: 1rem !important;
-    top: 50% !important;
-    transform: translateY(-50%) rotate(90deg) !important;
-    border-style: solid !important;
-    border-width: 5px 4px 0 4px !important;
-    border-color: rgba(255, 255, 255, 0.5) transparent transparent transparent !important;
-    transition: transform 0.3s !important;
-}
-
-.slide.has-sub.open .side-menu__item::after {
-    transform: translateY(-50%) rotate(0deg) !important;
-}
-
-/* Menu Icons - ظریف و دقیق */
+/* Menu Icons */
 .side-menu__icon {
-    width: 1.25rem !important;
-    height: 1.25rem !important;
-    flex-shrink: 0 !important;
-    direction: ltr !important;
-    font-size: 1.125rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: inherit;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-menu__icon.w-6.h-6,
+svg.w-6.h-6.side-menu__icon {
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 .side-menu__item:hover .side-menu__icon {
-    transform: scale(1.08) !important;
+    transform: scale(1.08);
 }
 
 .side-menu__item.active .side-menu__icon {
-    color: #818cf8 !important;
+    color: #818cf8;
 }
 
-/* Menu Labels */
 .side-menu__label {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    font-size: 0.875rem !important;
-    direction: rtl !important;
-    flex: 1 !important;
-    line-height: 1.5 !important;
-    font-weight: 500 !important;
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 /* Logout Special Style */
 .side-menu__item.text-danger {
-    color: rgba(239, 68, 68, 0.9) !important;
+    color: rgba(239, 68, 68, 0.9);
 }
 
 .side-menu__item.text-danger:hover {
-    background: rgba(239, 68, 68, 0.08) !important;
-    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
 }
 
 .side-menu__item.text-danger:hover::before {
-    background: #ef4444 !important;
-}
-
-.side-menu__item.text-danger .side-menu__icon {
-    color: inherit !important;
+    background: #ef4444;
 }
 
 /* Slide Navigation Arrows */
 .slide-left,
 .slide-right {
-    display: none !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0.5rem !important;
-    cursor: pointer !important;
-    transition: all 0.25s ease !important;
-    opacity: 0.6 !important;
+    display: none;
 }
 
-.slide-left:hover,
-.slide-right:hover {
-    opacity: 1 !important;
-    background: rgba(255, 255, 255, 0.05) !important;
+/* ===========================================
+   MAIN CONTENT
+   =========================================== */
+
+.main-content {
+    margin-right: 15rem;
+    margin-top: 3.75rem;
+    padding: 1.5rem;
+    min-height: calc(100vh - 3.75rem);
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
 }
 
-.slide-left svg,
-.slide-right svg {
-    transition: transform 0.25s ease !important;
+[data-toggled="close"] .main-content {
+    margin-right: 0;
 }
 
-.slide-left:hover svg {
-    transform: translateX(-2px) !important;
+/* ===========================================
+   RESPONSIVE
+   =========================================== */
+
+@media (max-width: 991.98px) {
+    .app-sidebar {
+        transform: translateX(100%);
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-toggled="open"] .app-sidebar {
+        transform: translateX(0);
+    }
+    
+    .app-header {
+        margin-right: 0;
+    }
+    
+    .main-content {
+        margin-right: 0;
+    }
+    
+    /* Overlay for mobile */
+    body::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 103;
+        display: none;
+        transition: opacity 0.3s ease;
+    }
+    
+    [data-toggled="open"] body::after {
+        display: block;
+    }
 }
 
-.slide-right:hover svg {
-    transform: translateX(2px) !important;
+@media (max-width: 768px) {
+    .app-header {
+        height: 3.5rem;
+    }
+    
+    .main-header-container {
+        height: 3.5rem;
+        padding: 0 1rem;
+    }
+    
+    .app-sidebar {
+        width: 280px;
+    }
+    
+    .main-sidebar-header {
+        min-height: 3.5rem;
+    }
+    
+    .main-content {
+        margin-top: 3.5rem;
+        padding: 1rem;
+        min-height: calc(100vh - 3.5rem);
+    }
 }
 
-/* Dark Mode Sidebar Enhancements */
+/* ===========================================
+   DARK MODE
+   =========================================== */
+
+[data-theme-mode="dark"] .app-header {
+    background: #1e293b;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
 [data-theme-mode="dark"] .app-sidebar {
-    background: #0f172a !important;
-    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3) !important;
+    background: #0f172a;
 }
 
 [data-theme-mode="dark"] .main-sidebar-header {
-    background: #0f172a !important;
-    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+    background: #0f172a;
+    border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
 [data-theme-mode="dark"] .category-name {
-    color: rgba(255, 255, 255, 0.4) !important;
+    color: rgba(255, 255, 255, 0.4);
 }
 
 [data-theme-mode="dark"] .side-menu__item {
-    color: rgba(255, 255, 255, 0.75) !important;
+    color: rgba(255, 255, 255, 0.75);
 }
 
 [data-theme-mode="dark"] .side-menu__item:hover {
-    background: rgba(255, 255, 255, 0.03) !important;
-    color: #fff !important;
+    background: rgba(255, 255, 255, 0.03);
+    color: #fff;
 }
 
 [data-theme-mode="dark"] .side-menu__item.active {
-    background: rgba(99, 102, 241, 0.15) !important;
-    color: #a5b4fc !important;
+    background: rgba(99, 102, 241, 0.15);
+    color: #a5b4fc;
 }
 
 [data-theme-mode="dark"] .side-menu__item.active::before {
-    background: #a5b4fc !important;
+    background: #a5b4fc;
 }
 
 [data-theme-mode="dark"] .side-menu__item.active .side-menu__icon {
-    color: #a5b4fc !important;
+    color: #a5b4fc;
+}
+
+[data-theme-mode="dark"] .main-content {
+    background-color: #0f172a;
+}
+
+/* Dark Mode Logo */
+[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-logo {
+    display: none;
+}
+
+[data-theme-mode="dark"] .main-sidebar-header .header-logo img.desktop-dark {
+    display: block;
 }
 
 /* ===========================================
-   MAIN CONTENT - باید زیر header و sidebar باشه
+   MENU STYLES
    =========================================== */
 
-.page {
-    min-height: 100vh !important;
-    display: flex !important;
-    flex-direction: column !important;
-    direction: rtl !important;
+[data-menu-styles="dark"] .app-sidebar {
+    background: #1e293b;
 }
 
-.main-content {
-    margin-right: 250px !important;
-    margin-left: 0 !important;
-    margin-top: 4rem !important;
-    min-height: calc(100vh - 4rem) !important;
-    background-color: #f8f9fa !important;
-    transition: all 0.3s ease !important;
-    direction: rtl !important;
-    padding: 1.5rem !important;
-    position: relative !important;
-    z-index: 1 !important; /* پایین‌ترین z-index */
+[data-menu-styles="dark"] .side-menu__item.active .side-menu__icon,
+[data-menu-styles="dark"] .side-menu__item.active .side-menu__label,
+[data-menu-styles="dark"] .side-menu__item:hover .side-menu__icon,
+[data-menu-styles="dark"] .side-menu__item:hover .side-menu__label {
+    color: #fff;
 }
 
-/* Page Header */
-.page-header-breadcrumb {
-    padding: 1rem 0 !important;
-    direction: rtl !important;
-    margin-bottom: 1.5rem !important;
+[data-menu-styles="dark"] .side-menu__item.active::before,
+[data-menu-styles="dark"] .side-menu__item:hover::before {
+    background: var(--primary-color, #6366f1);
 }
 
-.page-title {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    font-size: 1.75rem !important;
-    font-weight: 700 !important;
-    color: #1e293b !important;
-    margin: 0 !important;
-    direction: rtl !important;
+/* Scrollbar */
+.main-sidebar::-webkit-scrollbar {
+    width: 6px;
 }
 
-/* Breadcrumb */
-.breadcrumb {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: transparent !important;
-    direction: rtl !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
+.main-sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.breadcrumb-item {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    direction: rtl !important;
-    color: #64748b !important;
+.main-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
 }
 
-.breadcrumb-item.active {
-    color: #1e293b !important;
-}
-
-.breadcrumb-item + .breadcrumb-item::before {
-    float: right !important;
-    padding-left: 0.5rem !important;
-    padding-right: 0 !important;
-    content: "/" !important;
-    color: #94a3b8 !important;
-}
-
-.breadcrumb-item a {
-    color: #6366f1 !important;
-    text-decoration: none !important;
-}
-
-.breadcrumb-item a:hover {
-    color: #4f46e5 !important;
-    text-decoration: underline !important;
+.main-sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 /* ===========================================
-   CARDS
+   DROPDOWN IN HEADER
    =========================================== */
 
-.card {
-    border-radius: 0.5rem !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
-    direction: rtl !important;
-    background: #fff !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    margin-bottom: 1.5rem !important;
+.header-element .dropdown-menu {
+    z-index: var(--z-dropdown);
 }
-
-.card-header {
-    background-color: transparent !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-    padding: 1rem 1.5rem !important;
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    direction: rtl !important;
-}
-
-.card-title {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    font-size: 1.125rem !important;
-    font-weight: 600 !important;
-    margin: 0 !important;
-    direction: rtl !important;
-    color: #1e293b !important;
-}
-
-.card-body {
-    padding: 1.5rem !important;
-    direction: rtl !important;
-}
-
-.card-footer {
-    padding: 1rem 1.5rem !important;
-    background-color: rgba(0, 0, 0, 0.02) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
-    direction: rtl !important;
-}
-
-/* ===========================================
-   RESPONSIVE - Mobile & Tablet
-   =========================================== */
-
-/* Sidebar Toggle States */
-html[data-toggled="close"] .app-sidebar {
-    transform: translateX(100%) !important;
-}
-
-html[data-toggled="open"] .app-sidebar {
-    transform: translateX(0) !important;
-}
-
-html[data-toggled="close"] .main-content {
-    margin-right: 0 !important;
-}
-
-/* Mobile Overlay */
-.responsive-overlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background: rgba(0, 0, 0, 0.5) !important;
-    z-index: 1045 !important;
-    display: none !important;
-    transition: opacity 0.3s ease !important;
-    opacity: 0 !important;
-}
-
-html[data-toggled="open"] .responsive-overlay {
-    display: block !important;
-    opacity: 1 !important;
-}
-
-.responsive-overlay:hover {
-    cursor: pointer !important;
-}
-
-/* Tablet View (768px - 992px) */
-@media (max-width: 992px) {
-    .app-sidebar {
-        transform: translateX(100%) !important;
-        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2) !important;
-    }
-    
-    html[data-toggled="open"] .app-sidebar {
-        transform: translateX(0) !important;
-    }
-    
-    .main-content {
-        margin-right: 0 !important;
-        margin-left: 0 !important;
-    }
-    
-    .header-search {
-        display: none !important;
-    }
-    
-    /* Header Adjustments for Tablet */
-    .app-header {
-        padding: 0.5rem 1rem !important;
-    }
-    
-    .header-content-left {
-        gap: 0.5rem !important;
-    }
-    
-    .header-content-right {
-        gap: 0.25rem !important;
-    }
-    
-    /* Sidebar toggle button more prominent on tablet */
-    .sidemenu-toggle {
-        width: 2.25rem !important;
-        height: 2.25rem !important;
-    }
-}
-
-/* Mobile View (< 768px) */
-@media (max-width: 768px) {
-    .app-header {
-        padding: 0.5rem 0.75rem !important;
-        height: 3.5rem !important;
-    }
-    
-    .app-sidebar {
-        width: 280px !important;
-        transform: translateX(100%) !important;
-        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3) !important;
-    }
-    
-    html[data-toggled="open"] .app-sidebar {
-        transform: translateX(0) !important;
-    }
-    
-    .main-content {
-        margin-right: 0 !important;
-        margin-left: 0 !important;
-        margin-top: 3.5rem !important;
-        padding: 1rem 0.75rem !important;
-        min-height: calc(100vh - 3.5rem) !important;
-    }
-    
-    .page-title {
-        font-size: 1.25rem !important;
-    }
-    
-    .header-content-left .d-md-block {
-        display: none !important;
-    }
-    
-    .d-sm-block {
-        display: none !important;
-    }
-    
-    /* Mobile Header Logo */
-    .horizontal-logo .header-logo {
-        max-width: 100px !important;
-    }
-    
-    .horizontal-logo .header-logo img {
-        max-height: 1.75rem !important;
-    }
-    
-    /* Mobile Sidebar Header */
-    .main-sidebar-header {
-        min-height: 3.5rem !important;
-        padding: 0.75rem !important;
-    }
-    
-    .main-sidebar-header .header-logo img {
-        max-height: 2rem !important;
-    }
-    
-    /* Mobile Menu Items */
-    .side-menu__item {
-        padding: 0.625rem 1rem !important;
-        font-size: 0.875rem !important;
-    }
-    
-    .side-menu__icon {
-        width: 1.125rem !important;
-        height: 1.125rem !important;
-    }
-    
-    /* Category Names on Mobile */
-    .category-name {
-        font-size: 0.688rem !important;
-        padding: 0.75rem 1rem 0.375rem !important;
-    }
-    
-    /* Header Elements on Mobile */
-    .header-link {
-        width: 2.25rem !important;
-        height: 2.25rem !important;
-    }
-    
-    .header-link-icon {
-        width: 1.125rem !important;
-        height: 1.125rem !important;
-    }
-    
-    /* Mobile Dropdown Menus */
-    .header-element .dropdown-menu {
-        min-width: 250px !important;
-        max-width: calc(100vw - 2rem) !important;
-        right: 0.5rem !important;
-    }
-}
-
-/* ===========================================
-   FORM ELEMENTS
-   =========================================== */
-
-.form-control,
-.form-select {
-    text-align: right !important;
-    direction: rtl !important;
-    padding-right: 0.75rem !important;
-    padding-left: 0.75rem !important;
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    border: 1px solid #cbd5e1 !important;
-    border-radius: 0.375rem !important;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: #6366f1 !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-}
-
-.form-label {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    direction: rtl !important;
-    text-align: right !important;
-    margin-bottom: 0.5rem !important;
-    font-weight: 500 !important;
-    color: #334155 !important;
-}
-
-.input-group {
-    direction: rtl !important;
-}
-
-/* ===========================================
-   TABLES
-   =========================================== */
-
-.table-responsive {
-    direction: rtl !important;
-}
-
-.table {
-    direction: rtl !important;
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-}
-
-.table th,
-.table td {
-    text-align: right !important;
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    padding: 0.75rem !important;
-    vertical-align: middle !important;
-}
-
-.table thead th {
-    background-color: #f8fafc !important;
-    font-weight: 600 !important;
-    color: #1e293b !important;
-    border-bottom: 2px solid #e2e8f0 !important;
-}
-
-.table tbody tr:hover {
-    background-color: #f8fafc !important;
-}
-
-/* ===========================================
-   BUTTONS
-   =========================================== */
-
-.btn {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    direction: rtl !important;
-    padding: 0.5rem 1rem !important;
-    border-radius: 0.375rem !important;
-    font-weight: 500 !important;
-    transition: all 0.3s !important;
-}
-
-.btn i {
-    margin-left: 0 !important;
-    margin-right: 0.25rem !important;
-}
-
-.btn-primary {
-    background-color: #6366f1 !important;
-    border-color: #6366f1 !important;
-    color: #fff !important;
-}
-
-.btn-primary:hover {
-    background-color: #4f46e5 !important;
-    border-color: #4f46e5 !important;
-}
-
-/* ===========================================
-   MODALS & DROPDOWNS
-   =========================================== */
-
-.modal {
-    z-index: var(--z-modal) !important; /* 1070 */
-    direction: rtl !important;
-}
-
-.modal-dialog {
-    direction: rtl !important;
-}
-
-.modal-header,
-.modal-body,
-.modal-footer {
-    text-align: right !important;
-    direction: rtl !important;
-}
-
-.modal-title {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-}
-
-.dropdown-menu {
-    text-align: right !important;
-    direction: rtl !important;
-    z-index: var(--z-dropdown) !important;
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-}
-
-.dropdown-item {
-    text-align: right !important;
-    direction: rtl !important;
-}
-
-/* ===========================================
-   OFFCANVAS (Switcher)
-   =========================================== */
-
-.offcanvas {
-    direction: rtl !important;
-    z-index: var(--z-modal) !important;
-}
-
-.offcanvas-header,
-.offcanvas-body {
-    text-align: right !important;
-    direction: rtl !important;
-}
-
-.offcanvas-title {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-}
-
-/* ===========================================
-   ALERTS & BADGES
-   =========================================== */
-
-.alert {
-    text-align: right !important;
-    direction: rtl !important;
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    border-radius: 0.375rem !important;
-}
-
-.badge {
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    direction: rtl !important;
-}
-
-/* ===========================================
-   FOOTER
-   =========================================== */
-
-.footer {
-    direction: rtl !important;
-    text-align: center !important;
-    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
-    padding: 1.5rem !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
-}
-
-/* ===========================================
-   UTILITIES
-   =========================================== */
-
-/* Text Alignment */
-.text-start {
-    text-align: right !important;
-}
-
-.text-end {
-    text-align: left !important;
-}
-
-/* Margins */
-.ms-auto {
-    margin-right: auto !important;
-    margin-left: 0 !important;
-}
-
-.me-auto {
-    margin-left: auto !important;
-    margin-right: 0 !important;
-}
-
-/* Direction Override for Icons */
-svg,
-i[class*="ri-"],
-i[class*="ti-"],
-i[class*="bi-"],
-i[class*="fe-"] {
-    direction: ltr !important;
-}
-
-/* ===========================================
-   LOADER
-   =========================================== */
-
-#loader {
-    z-index: var(--z-loader) !important; /* 9999 - بالاترین */
-}
-
-/* ===========================================
-   PERFORMANCE OPTIMIZATIONS
-   =========================================== */
-
-.app-sidebar,
-.app-header,
-.main-content {
-    will-change: transform !important;
-}
-
-/* Hardware Acceleration */
-.app-sidebar,
-.app-header,
-.responsive-overlay,
-.dropdown-menu {
-    backface-visibility: hidden !important;
-    -webkit-backface-visibility: hidden !important;
-    transform: translateZ(0) !important;
-    -webkit-transform: translateZ(0) !important;
-}
-
-/* Smooth Transitions */
-.app-sidebar {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.main-content {
-    transition: margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* ===========================================
-   ACCESSIBILITY IMPROVEMENTS
-   =========================================== */
-
-/* Focus Visible States */
-.header-link:focus-visible,
-.side-menu__item:focus-visible,
-.sidemenu-toggle:focus-visible {
-    outline: 2px solid #6366f1 !important;
-    outline-offset: 2px !important;
-}
-
-/* Skip Navigation Link */
-.skip-navigation {
-    position: absolute !important;
-    top: -9999px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    background: #6366f1 !important;
-    color: white !important;
-    padding: 0.5rem 1rem !important;
-    border-radius: 0.25rem !important;
-    z-index: 99999 !important;
-}
-
-.skip-navigation:focus {
-    top: 1rem !important;
-}
-
-/* ===========================================
-   FIX COMMON CONFLICTS
-   =========================================== */
-
-/* Prevent WordPress Admin Bar Conflicts */
-html[data-nav-layout] {
-    margin-top: 0 !important;
-}
-
-.admin-bar .app-header {
-    top: 32px !important;
-}
-
-@media screen and (max-width: 782px) {
-    .admin-bar .app-header {
-        top: 46px !important;
-    }
-}
-
-/* Prevent WooCommerce Style Conflicts */
-.app-sidebar .woocommerce,
-.app-header .woocommerce {
-    all: unset !important;
-}
-
-/* ===========================================
-   PRINT STYLES
-   =========================================== */
-
-@media print {
-    .app-header,
-    .app-sidebar,
-    .footer,
-    .responsive-overlay {
-        display: none !important;
-    }
-    
-    .main-content {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    .page {
-        width: 100% !important;
-    }
-}
-
-/* ===========================================
-   DARK MODE SPECIFIC FIXES
-   =========================================== */
-
-html[data-theme-mode="dark"] .app-header {
-    background-color: #1e293b !important;
-    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
-    color: #fff !important;
-}
-
-html[data-theme-mode="dark"] .header-link {
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-html[data-theme-mode="dark"] .header-link:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #fff !important;
-}
-
-html[data-theme-mode="dark"] .header-link svg {
-    stroke: currentColor !important;
-}
-
-html[data-theme-mode="dark"] .dropdown-menu {
-    background-color: #1e293b !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    color: #fff !important;
-}
-
-html[data-theme-mode="dark"] .dropdown-item {
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-html[data-theme-mode="dark"] .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #fff !important;
-}
-
-html[data-theme-mode="dark"] .main-content {
-    background-color: #0f172a !important;
-}
-
-html[data-theme-mode="dark"] .footer {
-    background-color: #1e293b !important;
-    border-top-color: rgba(255, 255, 255, 0.1) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-/* ===========================================
-   HIGH CONTRAST MODE
-   =========================================== */
-
-@media (prefers-contrast: high) {
-    .app-header {
-        border-bottom-width: 2px !important;
-    }
-    
-    .side-menu__item {
-        border-right-width: 4px !important;
-    }
-    
-    .header-link:hover,
-    .side-menu__item:hover {
-        outline: 2px solid currentColor !important;
-    }
-}
-
-/* ===========================================
-   REDUCED MOTION
-   =========================================== */
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-    
-    .app-sidebar,
-    .main-content,
-    .responsive-overlay {
-        transition: none !important;
-    }
-}
-
-/* ===========================================
-   REMIXICON SIDEBAR FIX
-   فیکس نمایش آیکن‌های RemixIcon در Sidebar
-   =========================================== */
-
-/* تضمین نمایش صحیح آیکن‌های RemixIcon در منوی کناری */
-.app-sidebar .side-menu__icon {
-    font-size: 1.25rem !important;
-    width: 1.5rem !important;
-    height: 1.5rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-inline-end: 0.75rem !important;
-    flex-shrink: 0 !important;
-}
-
-/* تضمین استفاده از فونت Line Awesome */
-.app-sidebar .side-menu__icon::before {
-    display: inline-block !important;
-    font-family: 'Line Awesome Free' !important;
-    font-style: normal !important;
-    font-weight: 900 !important;
-    font-variant: normal !important;
-    text-transform: none !important;
-    line-height: 1 !important;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-}
-
-/* فیکس برای حالت‌های مختلف منو */
-[data-vertical-style=detached] .app-sidebar .side-menu__icon,
-[data-vertical-style=doublemenu] .app-sidebar .side-menu__icon,
-[data-nav-layout=horizontal] .app-sidebar .side-menu__icon {
-    font-size: 1.25rem !important;
-    display: inline-flex !important;
-}
-
-/* تضمین وراثت رنگ از parent */
-.app-sidebar .side-menu__item .side-menu__icon {
-    color: inherit !important;
-}
-
-/* فیکس برای حالت active */
-.app-sidebar .side-menu__item.active .side-menu__icon {
-    opacity: 1 !important;
-}
-
-/* فیکس برای حالت hover */
-.app-sidebar .side-menu__item:hover .side-menu__icon {
-    opacity: 1 !important;
-}
-
-/* فیکس خاص برای حالت collapsed/icon only */
-[data-toggled="icon-overlay-close"] .app-sidebar .side-menu__icon,
-[data-toggled="detached-close"] .app-sidebar .side-menu__icon {
-    font-size: 1.5rem !important;
-    width: 2rem !important;
-    height: 2rem !important;
-}
-

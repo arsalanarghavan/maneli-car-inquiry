@@ -70,7 +70,8 @@ class Maneli_Hooks {
 
     /**
      * Redirects non-administrator users from the WordPress backend (/wp-admin) to the frontend dashboard.
-     * Ensures that all plugin custom roles (maneli_admin, maneli_expert) are also blocked from wp-admin.
+     * تنها مدیرکل (Administrator) به پیشخوان دسترسی دارد.
+     * همه نقش‌های دیگر (maneli_admin, maneli_expert, customer) به داشبورد frontend هدایت می‌شوند.
      */
     public function redirect_non_admins_from_backend() {
         // Do not redirect for AJAX, Cron, or admin-post.php requests
@@ -89,14 +90,9 @@ class Maneli_Hooks {
         // Get user roles
         $user_roles = (array) $current_user->roles;
         
-        // Define plugin roles that should NOT have access to wp-admin
-        $blocked_roles = ['maneli_admin', 'maneli_expert', 'customer'];
-        
-        // Check if user has any of the blocked roles
-        $has_blocked_role = !empty(array_intersect($user_roles, $blocked_roles));
-        
-        // Redirect if user doesn't have manage_options capability OR has a blocked role
-        if (!current_user_can('manage_options') || $has_blocked_role) {
+        // فقط مدیرکل (Administrator) به wp-admin دسترسی دارد
+        // اگر کاربر Administrator نیست، به داشبورد frontend هدایت شود
+        if (!in_array('administrator', $user_roles, true)) {
             wp_redirect(home_url('/dashboard/'));
             exit;
         }

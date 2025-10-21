@@ -163,47 +163,100 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
 
                     <!-- Start::row -->
                     <?php
-                    // Route to appropriate content based on page
-                    switch ($page) {
-                        case 'new-inquiry':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-inquiry.php';
-                            break;
-                        case 'inquiries':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/inquiries.php';
-                            break;
-                        case 'followups':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/followups.php';
-                            break;
-                        case 'cash-followups':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/cash-followups.php';
-                            break;
-                        case 'reports':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/reports.php';
-                            break;
-                        case 'products':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/products.php';
-                            break;
-                        case 'product-editor':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/product-editor.php';
-                            break;
-                        case 'payments':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/payments.php';
-                            break;
-                        case 'users':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/users.php';
-                            break;
-                        case 'experts':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/experts.php';
-                            break;
-                        case 'calendar':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/calendar.php';
-                            break;
-                        case 'settings':
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/settings.php';
-                            break;
-                        default:
-                            include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/dashboard-home.php';
-                            break;
+                    // Get current user info for permission checks
+                    $current_user = wp_get_current_user();
+                    $is_admin = current_user_can('manage_maneli_inquiries');
+                    $is_expert = in_array('maneli_expert', $current_user->roles, true);
+                    $is_customer = !$is_admin && !$is_expert;
+                    
+                    /**
+                     * Check if current user has access to requested page
+                     */
+                    function maneli_can_access_page($page, $is_admin, $is_expert, $is_customer) {
+                        // Admin has access to everything
+                        if ($is_admin) {
+                            return true;
+                        }
+                        
+                        // Expert access
+                        if ($is_expert) {
+                            $expert_allowed = ['', 'calendar', 'inquiries', 'followups', 'cash-followups'];
+                            return in_array($page, $expert_allowed, true);
+                        }
+                        
+                        // Customer access
+                        if ($is_customer) {
+                            $customer_allowed = ['', 'new-inquiry', 'inquiries'];
+                            return in_array($page, $customer_allowed, true);
+                        }
+                        
+                        return false;
+                    }
+                    
+                    // Check access before loading page
+                    if (!maneli_can_access_page($page, $is_admin, $is_expert, $is_customer)) {
+                        ?>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card custom-card">
+                                    <div class="card-body text-center py-5">
+                                        <div class="mb-4">
+                                            <i class="la la-lock fs-1 text-danger"></i>
+                                        </div>
+                                        <h3 class="mb-3">دسترسی محدود</h3>
+                                        <p class="text-muted mb-4">شما به این صفحه دسترسی ندارید.</p>
+                                        <a href="<?php echo home_url('/dashboard'); ?>" class="btn btn-primary">
+                                            <i class="la la-home me-2"></i>
+                                            بازگشت به داشبورد
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php
+                    } else {
+                        // Route to appropriate content based on page
+                        switch ($page) {
+                            case 'new-inquiry':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-inquiry.php';
+                                break;
+                            case 'inquiries':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/inquiries.php';
+                                break;
+                            case 'followups':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/followups.php';
+                                break;
+                            case 'cash-followups':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/cash-followups.php';
+                                break;
+                            case 'reports':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/reports.php';
+                                break;
+                            case 'products':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/products.php';
+                                break;
+                            case 'product-editor':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/product-editor.php';
+                                break;
+                            case 'payments':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/payments.php';
+                                break;
+                            case 'users':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/users.php';
+                                break;
+                            case 'experts':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/experts.php';
+                                break;
+                            case 'calendar':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/calendar.php';
+                                break;
+                            case 'settings':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/settings.php';
+                                break;
+                            default:
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/dashboard-home.php';
+                                break;
+                        }
                     }
                     ?>
                     <!-- End::row -->

@@ -1,4 +1,18 @@
 <!-- Start::row -->
+<?php
+// Permission check - Only customers can create new inquiries
+// Admins and experts should create inquiries directly from inquiry list
+$is_admin = current_user_can('manage_maneli_inquiries');
+$is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+
+if ($is_admin || $is_expert) {
+    echo '<div class="alert alert-info">
+        <i class="la la-info-circle me-2"></i>
+        برای ثبت استعلام جدید، لطفاً از صفحه لیست استعلامات اقدام نمایید.
+    </div>';
+    return;
+}
+?>
 <div class="row">
     <div class="col-xl-12">
         <div class="card custom-card">

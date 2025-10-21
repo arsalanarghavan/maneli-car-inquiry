@@ -1,5 +1,11 @@
 <!-- Start::row -->
 <?php
+// Permission check - Only Admin can access
+if (!current_user_can('manage_maneli_inquiries')) {
+    echo '<div class="alert alert-danger">شما دسترسی به این صفحه را ندارید.</div>';
+    return;
+}
+
 $settings_page_handler = new Maneli_Settings_Page();
 $all_settings = $settings_page_handler->get_all_settings_public();
 $options = get_option('maneli_inquiry_all_options', []);

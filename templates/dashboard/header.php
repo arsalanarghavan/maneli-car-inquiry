@@ -55,6 +55,9 @@ $current_user = wp_get_current_user();
     <!-- Style Css -->
     <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/styles.css'); ?>" rel="stylesheet">
 
+    <!-- Icons Css - Bootstrap Icons, Feather, RemixIcon -->
+    <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/icons.css'); ?>" rel="stylesheet">
+    
     <!-- Line Awesome Complete - CSS کامل با font-face و content codes -->
     <link href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css'); ?>" rel="stylesheet">
 

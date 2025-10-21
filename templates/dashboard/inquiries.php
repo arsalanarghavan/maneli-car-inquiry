@@ -647,13 +647,30 @@ if ($count_type === 'installment' || $count_type === 'all') {
                             
                             // Get installment inquiries (if needed)
                             if ($show_type === 'installment' || $show_type === 'all') {
-                                $installment_inquiries = get_posts([
+                                $installment_args = [
                                     'post_type' => 'inquiry',
                                     'post_status' => 'publish',
                                     'numberposts' => 20,
                                     'orderby' => 'date',
                                     'order' => 'DESC'
-                                ]);
+                                ];
+                                
+                                // SECURITY: Filter by user role
+                                if ($is_expert && !$is_admin) {
+                                    // Expert sees only assigned inquiries
+                                    $installment_args['meta_query'] = [
+                                        [
+                                            'key' => 'assigned_expert_id',
+                                            'value' => $current_user_id,
+                                            'compare' => '='
+                                        ]
+                                    ];
+                                } elseif ($is_customer) {
+                                    // Customer sees only their own inquiries
+                                    $installment_args['author'] = $current_user_id;
+                                }
+                                
+                                $installment_inquiries = get_posts($installment_args);
                                 
                                 // Add to combined list
                                 foreach ($installment_inquiries as $inquiry) {
@@ -667,13 +684,30 @@ if ($count_type === 'installment' || $count_type === 'all') {
                             
                             // Get cash inquiries (if needed)
                             if ($show_type === 'cash' || $show_type === 'all') {
-                                $cash_inquiries = get_posts([
+                                $cash_args = [
                                     'post_type' => 'cash_inquiry',
                                     'post_status' => 'publish',
                                     'numberposts' => 20,
                                     'orderby' => 'date',
                                     'order' => 'DESC'
-                                ]);
+                                ];
+                                
+                                // SECURITY: Filter by user role
+                                if ($is_expert && !$is_admin) {
+                                    // Expert sees only assigned inquiries
+                                    $cash_args['meta_query'] = [
+                                        [
+                                            'key' => 'assigned_expert_id',
+                                            'value' => $current_user_id,
+                                            'compare' => '='
+                                        ]
+                                    ];
+                                } elseif ($is_customer) {
+                                    // Customer sees only their own inquiries
+                                    $cash_args['author'] = $current_user_id;
+                                }
+                                
+                                $cash_inquiries = get_posts($cash_args);
                                 
                                 // Add to combined list
                                 foreach ($cash_inquiries as $inquiry) {

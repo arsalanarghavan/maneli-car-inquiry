@@ -1148,7 +1148,7 @@ class Maneli_Ajax_Handler {
         }
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
-        $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : '';
+        $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : 'cash';
         $meeting_date = isset($_POST['meeting_date']) ? sanitize_text_field($_POST['meeting_date']) : '';
         $meeting_time = isset($_POST['meeting_time']) ? sanitize_text_field($_POST['meeting_time']) : '';
         
@@ -1162,11 +1162,82 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
         }
         
-        // Save meeting data
+        // Combine date and time
+        $meeting_datetime = $meeting_date . ' ' . $meeting_time;
+        
+        // SECURITY: Check for duplicate meeting time (prevent conflict with other experts)
+        $existing_meetings = get_posts([
+            'post_type' => 'maneli_meeting',
+            'posts_per_page' => 1,
+            'post_status' => 'publish',
+            'meta_query' => [
+                [
+                    'key' => 'meeting_start',
+                    'value' => $meeting_datetime,
+                    'compare' => '='
+                ]
+            ]
+        ]);
+        
+        if (!empty($existing_meetings)) {
+            // Check if all slots for this day are taken
+            $date_only = date('Y-m-d', strtotime($meeting_datetime));
+            $all_day_meetings = get_posts([
+                'post_type' => 'maneli_meeting',
+                'posts_per_page' => -1,
+                'post_status' => 'publish',
+                'date_query' => [
+                    [
+                        'after' => $date_only . ' 00:00:00',
+                        'before' => $date_only . ' 23:59:59',
+                        'inclusive' => true
+                    ]
+                ]
+            ]);
+            
+            // Get settings
+            $options = get_option('maneli_inquiry_all_options', []);
+            $start_hour = $options['meetings_start_hour'] ?? '10:00';
+            $end_hour = $options['meetings_end_hour'] ?? '20:00';
+            $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
+            
+            // Calculate total possible slots
+            $start_ts = strtotime($date_only . ' ' . $start_hour);
+            $end_ts = strtotime($date_only . ' ' . $end_hour);
+            $total_slots = ($end_ts - $start_ts) / ($slot_minutes * 60);
+            
+            if (count($all_day_meetings) >= $total_slots) {
+                wp_send_json_error(['message' => 'متأسفانه امروز همه تایم‌ها پر است. لطفاً روز دیگری انتخاب کنید.']);
+            } else {
+                wp_send_json_error(['message' => 'این تایم قبلاً رزرو شده است. لطفاً تایم دیگری انتخاب کنید.']);
+            }
+            return;
+        }
+        
+        // Create meeting post
+        $title = sprintf('جلسه - %s', date_i18n('Y/m/d H:i', strtotime($meeting_datetime)));
+        $meeting_post_id = wp_insert_post([
+            'post_type' => 'maneli_meeting',
+            'post_title' => $title,
+            'post_status' => 'publish',
+            'post_author' => get_current_user_id(),
+        ]);
+        
+        if (is_wp_error($meeting_post_id)) {
+            wp_send_json_error(['message' => 'خطا در ذخیره جلسه: ' . $meeting_post_id->get_error_message()]);
+            return;
+        }
+        
+        // Save meeting metadata
+        update_post_meta($meeting_post_id, 'meeting_start', $meeting_datetime);
+        update_post_meta($meeting_post_id, 'meeting_inquiry_id', $inquiry_id);
+        update_post_meta($meeting_post_id, 'meeting_inquiry_type', $inquiry_type);
+        
+        // Save meeting data in inquiry meta (for backward compatibility)
         update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
         update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
         
-        wp_send_json_success(['message' => 'زمان جلسه ذخیره شد']);
+        wp_send_json_success(['message' => 'زمان جلسه با موفقیت ذخیره شد']);
     }
     
     /**

@@ -8,7 +8,11 @@ if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', w
 
 // Get meetings data
 $today = current_time('Y-m-d');
-$meetings = get_posts([
+$current_user_id = get_current_user_id();
+$is_admin = current_user_can('manage_maneli_inquiries');
+$is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+
+$meetings_args = [
     'post_type' => 'maneli_meeting',
     'posts_per_page' => -1,
     'post_status' => 'publish',
@@ -21,7 +25,10 @@ $meetings = get_posts([
             'inclusive' => true
         ]
     ],
-]);
+];
+
+// همه کارشناسا همه meeting ها رو میبینن تا از تداخل جلوگیری بشه
+$meetings = get_posts($meetings_args);
 
 // Group by day
 $by_day = [];
@@ -37,16 +44,34 @@ foreach ($meetings as $m) {
     $customer_name = '';
     $product_name = '';
     $customer_mobile = '';
+    $show_customer_info = true;
+    
+    // SECURITY: Check if expert can see customer info
+    if ($is_expert && !$is_admin && $inquiry_id) {
+        $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+        // Expert can only see customer info for their own inquiries
+        $show_customer_info = ($assigned_expert_id == $current_user_id);
+    }
     
     if ($inquiry_type === 'cash' && get_post_type($inquiry_id) === 'cash_inquiry') {
-        $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
-        $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+        if ($show_customer_info) {
+            $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
+            $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+        } else {
+            $customer_name = 'رزرو شده';
+            $customer_mobile = '---';
+        }
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $product_name = get_the_title($product_id);
     } elseif (get_post_type($inquiry_id) === 'inquiry') {
-        $customer = get_userdata(get_post_field('post_author', $inquiry_id));
-        $customer_name = $customer ? $customer->display_name : '';
-        $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+        if ($show_customer_info) {
+            $customer = get_userdata(get_post_field('post_author', $inquiry_id));
+            $customer_name = $customer ? $customer->display_name : '';
+            $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+        } else {
+            $customer_name = 'رزرو شده';
+            $customer_mobile = '---';
+        }
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $product_name = get_the_title($product_id);
     }
@@ -59,7 +84,8 @@ foreach ($meetings as $m) {
         'product' => $product_name,
         'inquiry_id' => $inquiry_id,
         'inquiry_type' => $inquiry_type,
-        'meeting_id' => $m->ID
+        'meeting_id' => $m->ID,
+        'can_view_details' => $show_customer_info  // برای استفاده در نمایش
     ];
     
     $total_meetings++;
@@ -206,12 +232,17 @@ foreach ($meetings as $m) {
                                                 </div>
                                             </div>
                                             <div class="event-actions">
-                                                <?php if ($event['inquiry_id']): ?>
+                                                <?php if ($event['inquiry_id'] && $event['can_view_details']): ?>
                                                     <a href="<?php echo home_url('/dashboard/inquiries/' . ($event['inquiry_type'] === 'cash' ? 'cash' : 'installment') . '?' . ($event['inquiry_type'] === 'cash' ? 'cash_inquiry_id' : 'inquiry_id') . '=' . $event['inquiry_id']); ?>" 
                                                        class="btn btn-sm btn-primary-light">
                                                         <i class="la la-eye"></i>
                                                         مشاهده
                                                     </a>
+                                                <?php elseif ($event['inquiry_id'] && !$event['can_view_details']): ?>
+                                                    <span class="badge bg-secondary-transparent">
+                                                        <i class="la la-lock me-1"></i>
+                                                        رزرو شده
+                                                    </span>
                                                 <?php endif; ?>
                                             </div>
                                         </div>

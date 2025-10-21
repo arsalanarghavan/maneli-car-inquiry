@@ -51,6 +51,9 @@ class Maneli_Dashboard_Handler {
         add_action('wp_ajax_maneli_dashboard_logout', [$this, 'handle_dashboard_logout']);
         add_action('wp_ajax_maneli_send_sms_code', [$this, 'handle_send_sms_code']);
         add_action('wp_ajax_nopriv_maneli_send_sms_code', [$this, 'handle_send_sms_code']);
+        
+        // مخفی کردن Admin Bar در داشبورد
+        add_action('template_redirect', [$this, 'hide_admin_bar_in_dashboard']);
     }
     
     /**
@@ -97,6 +100,16 @@ class Maneli_Dashboard_Handler {
         if (get_query_var('maneli_dashboard')) {
             $this->render_dashboard();
             exit;
+        }
+    }
+    
+    /**
+     * مخفی کردن Admin Bar در صفحات داشبورد
+     */
+    public function hide_admin_bar_in_dashboard() {
+        if (get_query_var('maneli_dashboard')) {
+            show_admin_bar(false);
+            add_filter('show_admin_bar', '__return_false');
         }
     }
     
