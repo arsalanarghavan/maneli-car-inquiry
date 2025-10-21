@@ -204,7 +204,17 @@
             <div class="authentication-cover overflow-hidden">
                 <div class="authentication-cover-logo">
                     <a href="<?php echo home_url(); ?>">
-                        <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-white.png" alt="" class="authentication-brand desktop-white">
+                        <?php
+                        // دریافت لوگوی سفارشی وردپرس
+                        $custom_logo_id = get_theme_mod('custom_logo');
+                        if ($custom_logo_id) {
+                            $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
+                            echo '<img src="' . esc_url($logo_url) . '" alt="' . get_bloginfo('name') . '" class="authentication-brand desktop-white" style="max-height: 80px; width: auto;">';
+                        } else {
+                            // Fallback به لوگوی پیش‌فرض اگر لوگو تنظیم نشده باشد
+                            echo '<img src="' . MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/desktop-white.png" alt="' . get_bloginfo('name') . '" class="authentication-brand desktop-white">';
+                        }
+                        ?>
                     </a>
                 </div>
                 <div class="aunthentication-cover-content d-flex align-items-center justify-content-center">

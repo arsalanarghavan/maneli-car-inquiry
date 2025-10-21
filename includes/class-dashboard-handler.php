@@ -373,7 +373,7 @@ class Maneli_Dashboard_Handler {
     }
     
     /**
-     * Send SMS code
+     * Send SMS code (OTP)
      */
     public function handle_send_sms_code() {
         check_ajax_referer('maneli_dashboard_nonce', 'nonce');
@@ -386,20 +386,49 @@ class Maneli_Dashboard_Handler {
             return;
         }
         
-        $code = wp_rand(1000, 9999);
-        
         $this->maybe_start_session();
+        
+        // Check resend delay
+        $options = get_option('maneli_inquiry_all_options', []);
+        $resend_delay = intval($options['otp_resend_delay'] ?? 60);
+        
+        if (isset($_SESSION['maneli_sms_time'])) {
+            $time_elapsed = time() - $_SESSION['maneli_sms_time'];
+            if ($time_elapsed < $resend_delay) {
+                $wait_time = $resend_delay - $time_elapsed;
+                wp_send_json_error(['message' => "لطفاً $wait_time ثانیه صبر کنید"]);
+                return;
+            }
+        }
+        
+        // Generate 4-digit OTP code
+        $code = wp_rand(1000, 9999);
         
         // Store code in session
         $_SESSION['maneli_sms_code'] = $code;
         $_SESSION['maneli_sms_phone'] = $phone;
         $_SESSION['maneli_sms_time'] = time();
         
+        // Get OTP pattern code from settings
+        $otp_pattern = $options['otp_pattern_code'] ?? '';
+        
         // Send SMS using existing SMS handler
         $sms_handler = new Maneli_SMS_Handler();
-        $message = "کد تایید شما: " . $code;
         
-        if ($sms_handler->send_sms($phone, $message)) {
+        if (!empty($otp_pattern)) {
+            // Use pattern-based SMS
+            $result = $sms_handler->send_pattern_sms(
+                $phone,
+                $otp_pattern,
+                [$code] // OTP code as first variable
+            );
+        } else {
+            // Fallback to regular SMS if pattern not configured
+            $message = "کد تایید شما: " . $code;
+            $result = $sms_handler->send_sms($phone, $message);
+        }
+        
+        if ($result) {
             wp_send_json_success(['message' => 'کد تایید ارسال شد']);
         } else {
             wp_send_json_error(['message' => 'خطا در ارسال کد تایید']);
@@ -407,7 +436,7 @@ class Maneli_Dashboard_Handler {
     }
     
     /**
-     * Verify SMS code
+     * Verify SMS code (OTP)
      */
     private function verify_sms_code($phone, $code) {
         $this->maybe_start_session();
@@ -418,8 +447,13 @@ class Maneli_Dashboard_Handler {
             return false;
         }
         
-        // Check if code is expired (5 minutes)
-        if (time() - $_SESSION['maneli_sms_time'] > 300) {
+        // Get OTP expiry time from settings
+        $options = get_option('maneli_inquiry_all_options', []);
+        $expiry_minutes = intval($options['otp_expiry_minutes'] ?? 5);
+        $expiry_seconds = $expiry_minutes * 60;
+        
+        // Check if code is expired
+        if (time() - $_SESSION['maneli_sms_time'] > $expiry_seconds) {
             return false;
         }
         

@@ -405,6 +405,45 @@ class Maneli_Settings_Page {
                     ],
                 ]
             ],
+            'authentication' => [
+                'title' => esc_html__('Authentication', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-shield-alt',
+                'sections' => [
+                    'maneli_otp_settings_section' => [
+                        'title' => esc_html__('OTP Authentication Settings', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure One-Time Password (OTP) settings for login authentication.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'otp_enabled',
+                                'label' => esc_html__('Enable OTP Login', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Allow users to login using OTP sent via SMS.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'otp_pattern_code',
+                                'label' => esc_html__('OTP Pattern Code (Body ID)', 'maneli-car-inquiry'),
+                                'type' => 'number',
+                                'desc' => esc_html__('Pattern code for OTP SMS. Variables: 1. OTP Code (4-digit)', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'otp_expiry_minutes',
+                                'label' => esc_html__('OTP Expiry Time (minutes)', 'maneli-car-inquiry'),
+                                'type' => 'number',
+                                'default' => '5',
+                                'desc' => esc_html__('How long the OTP code remains valid (in minutes).', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'otp_resend_delay',
+                                'label' => esc_html__('Resend Delay (seconds)', 'maneli-car-inquiry'),
+                                'type' => 'number',
+                                'default' => '60',
+                                'desc' => esc_html__('Minimum time between OTP resend requests (in seconds).', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                ]
+            ],
             'sms' => [
                 'title' => esc_html__('SMS', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-mobile-alt',

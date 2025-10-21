@@ -29,8 +29,6 @@
         const productSelect = $('#product_id_expert');
         const detailsWrapper = $('#expert-form-details');
         const calculatorWrapper = $('#loan-calculator-wrapper');
-        const issuerRadios = expertForm.find('input[name="issuer_type"]');
-        const issuerForm = $('#issuer-form-wrapper');
 
         // --- 2. Helper Functions ---
         const formatMoney = (num) => {
@@ -286,20 +284,18 @@
         });
 
         /**
-         * Toggles the visibility of the cheque issuer's form fields.
+         * Toggles the visibility of the cheque issuer's form fields using event delegation.
          */
-        const toggleIssuerForm = () => {
-            const selectedValue = expertForm.find('input[name="issuer_type"]:checked').val();
-            const isOther = selectedValue === 'other';
+        $(document).on('change', 'input[name="issuer_type"]', function() {
+            const issuerFormWrapper = $('#issuer-form-wrapper');
+            const selectedValue = $(this).val();
             
-            // Use jQuery's slideToggle for smooth transition in the expert panel.
-            issuerForm.slideToggle(isOther);
-        };
-
-        issuerRadios.on('change', toggleIssuerForm);
-
-        // Initial check on page load
-        toggleIssuerForm();
+            if (selectedValue === 'other') {
+                issuerFormWrapper.slideDown(300);
+            } else {
+                issuerFormWrapper.slideUp(300);
+            }
+        });
         
         // --- 5. Initialize Datepickers for Birth Date Fields ---
         if (typeof kamadatepicker === 'function') {
@@ -328,8 +324,8 @@
             }
         }
         
-        // --- 6. Job Type Toggles (Show/Hide Job Title Field) ---
-        $('#buyer_job_type').on('change', function() {
+        // --- 6. Job Type Toggles (Show/Hide Job Title Field) - Using Event Delegation ---
+        $(document).on('change', '#buyer_job_type', function() {
             const jobType = $(this).val();
             const $jobTitleWrapper = $('.buyer-job-title-wrapper');
             const $propertyWrapper = $('.buyer-property-wrapper');
@@ -349,7 +345,7 @@
             }
         });
         
-        $('#issuer_job_type').on('change', function() {
+        $(document).on('change', '#issuer_job_type', function() {
             const jobType = $(this).val();
             const $jobTitleWrapper = $('.issuer-job-title-wrapper');
             const $propertyWrapper = $('.issuer-property-wrapper');

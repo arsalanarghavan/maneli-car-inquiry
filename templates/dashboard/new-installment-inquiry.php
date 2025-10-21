@@ -536,25 +536,20 @@ jQuery(document).ready(function($) {
     const $form = $('#expert-inquiry-form');
     if (!$form.length) return;
     
-    // Handle issuer type radio buttons
-    function toggleIssuerForm() {
+    // Handle issuer type radio buttons using event delegation
+    $(document).on('change', 'input[name="issuer_type"]', function() {
         const issuerFormWrapper = $('#issuer-form-wrapper');
-        const selectedValue = $('input[name="issuer_type"]:checked').val();
+        const selectedValue = $(this).val();
         
         if (selectedValue === 'other') {
             issuerFormWrapper.slideDown(300);
         } else {
             issuerFormWrapper.slideUp(300);
         }
-    }
+    });
     
-    $('input[name="issuer_type"]').on('change', toggleIssuerForm);
-    
-    // Initial check on page load
-    toggleIssuerForm();
-    
-    // Handle buyer job type changes
-    $('#buyer_job_type').on('change', function() {
+    // Handle buyer job type changes using event delegation
+    $(document).on('change', '#buyer_job_type', function() {
         const jobValue = $(this).val();
         const $jobTitleWrapper = $('.buyer-job-title-wrapper');
         const $propertyWrapper = $('.buyer-property-wrapper');
@@ -574,8 +569,8 @@ jQuery(document).ready(function($) {
         }
     });
     
-    // Handle issuer job type changes
-    $('#issuer_job_type').on('change', function() {
+    // Handle issuer job type changes using event delegation
+    $(document).on('change', '#issuer_job_type', function() {
         const jobValue = $(this).val();
         const $jobTitleWrapper = $('.issuer-job-title-wrapper');
         const $propertyWrapper = $('.issuer-property-wrapper');
