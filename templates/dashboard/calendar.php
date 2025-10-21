@@ -1,8 +1,23 @@
 <!-- Start::row -->
 <?php
+/**
+ * Calendar Page - Meeting Management
+ * Accessible by: Admin, Expert
+ */
+
 // Check permission
 if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
-    echo '<div class="alert alert-danger">شما دسترسی به این صفحه را ندارید.</div>';
+    ?>
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="la la-exclamation-triangle me-2"></i>
+                <strong>دسترسی محدود!</strong> شما به این صفحه دسترسی ندارید.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+    <?php
     return;
 }
 

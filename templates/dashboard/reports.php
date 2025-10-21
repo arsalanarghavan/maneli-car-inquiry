@@ -3,11 +3,28 @@
 /**
  * Reports Dashboard Page - Direct Implementation
  * Shows system statistics and charts
+ * Admin: All reports
+ * Expert: Only their own reports
+ * Customer: No access
  */
 
 // Check permission
-if (!current_user_can('manage_maneli_inquiries')) {
-    echo '<div class="alert alert-danger">شما دسترسی به این صفحه را ندارید.</div>';
+$current_user = wp_get_current_user();
+$is_admin = current_user_can('manage_maneli_inquiries');
+$is_expert = in_array('maneli_expert', $current_user->roles, true);
+
+if (!$is_admin && !$is_expert) {
+    ?>
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="la la-exclamation-triangle me-2"></i>
+                <strong>دسترسی محدود!</strong> شما به این صفحه دسترسی ندارید.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+    <?php
     return;
 }
 
@@ -19,12 +36,10 @@ $days = 30;
 $start_date = date('Y-m-d', strtotime("-{$days} days"));
 $end_date = date('Y-m-d');
 
-// Determine expert
+// Determine expert filter
 $expert_id = null;
-$current_user = wp_get_current_user();
-
-if (in_array('maneli_expert', $current_user->roles)) {
-    $expert_id = $current_user->ID;
+if ($is_expert) {
+    $expert_id = $current_user->ID; // Expert فقط گزارشات خودش را می‌بیند
 }
 
 // Get statistics

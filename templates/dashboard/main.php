@@ -11,7 +11,10 @@ if (!defined('ABSPATH')) {
 $page_title = 'داشبورد مانلی خودرو';
 switch ($page) {
     case 'new-inquiry':
-        $page_title = 'استعلام جدید - مانلی خودرو';
+        $page_title = 'استعلام اقساطی جدید - مانلی خودرو';
+        break;
+    case 'new-cash-inquiry':
+        $page_title = 'درخواست نقدی جدید - مانلی خودرو';
         break;
     case 'new-installment-inquiry':
         $page_title = 'استعلام اقساطی جدید - مانلی خودرو';
@@ -73,7 +76,10 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                         <?php
                                 switch ($page) {
                                     case 'new-inquiry':
-                                        echo 'استعلام جدید';
+                                        echo 'استعلام اقساطی جدید';
+                                        break;
+                                    case 'new-cash-inquiry':
+                                        echo 'درخواست نقدی جدید';
                                         break;
                                     case 'new-installment-inquiry':
                                         echo 'استعلام اقساطی جدید';
@@ -114,7 +120,10 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                 <?php
                                 switch ($page) {
                                     case 'new-inquiry':
-                                        echo 'استعلام جدید - مانلی خودرو';
+                                        echo 'استعلام اقساطی جدید - مانلی خودرو';
+                                        break;
+                                    case 'new-cash-inquiry':
+                                        echo 'درخواست نقدی جدید - مانلی خودرو';
                                         break;
                                     case 'new-installment-inquiry':
                                         echo 'استعلام اقساطی جدید - مانلی خودرو';
@@ -187,15 +196,15 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                             return true;
                         }
                         
-                        // Expert access
+                        // Expert access - محدود به استعلامات و پیگیری‌های خودش
                         if ($is_expert) {
-                            $expert_allowed = ['', 'calendar', 'inquiries', 'followups', 'cash-followups'];
+                            $expert_allowed = ['', 'calendar', 'inquiries', 'followups', 'cash-followups', 'reports'];
                             return in_array($page, $expert_allowed, true);
                         }
                         
-                        // Customer access
+                        // Customer access - فقط استعلامات خودش
                         if ($is_customer) {
-                            $customer_allowed = ['', 'new-inquiry', 'inquiries'];
+                            $customer_allowed = ['', 'new-inquiry', 'new-cash-inquiry', 'inquiries'];
                             return in_array($page, $customer_allowed, true);
                         }
                         
@@ -235,6 +244,9 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                         switch ($page) {
                             case 'new-inquiry':
                                 include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-inquiry.php';
+                                break;
+                            case 'new-cash-inquiry':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-cash-inquiry.php';
                                 break;
                             case 'new-installment-inquiry':
                                 include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/new-installment-inquiry.php';

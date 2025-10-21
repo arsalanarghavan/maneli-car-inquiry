@@ -133,9 +133,15 @@ class Maneli_Frontend_Theme_Handler {
             return wp_kses_post($options['theme_footer_text']);
         }
         
+        // Get current Jalali year
+        $current_year = '۱۴۰۴'; // یا می‌تونی از تابع تبدیل تاریخ استفاده کنی
+        if (function_exists('maneli_gregorian_to_jalali')) {
+            $current_year = maneli_gregorian_to_jalali(date('Y'), date('m'), date('d'), 'Y');
+        }
+        
         return sprintf(
-            'طراحی با <span class="bi bi-heart-fill text-danger"></span> توسط <span class="fw-medium text-primary">%s</span>',
-            get_bloginfo('name')
+            '%s طراحی با <i class="la la-heart text-danger"></i> توسط <a href="https://pazling.ir" target="_blank" class="text-primary fw-medium">موسسه پازلینگ</a>',
+            $current_year
         );
     }
     

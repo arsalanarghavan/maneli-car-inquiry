@@ -171,15 +171,18 @@ if ($is_customer) {
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
-                                    <h5 class="text-white mb-2">خرید نقدی خودرو</h5>
-                                    <p class="text-white-50 mb-3">سریع‌ترین راه خرید خودرو</p>
-                                    <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="btn btn-light btn-sm">
-                                        <i class="la la-plus me-1"></i>
-                                        ثبت درخواست نقدی
+                                    <h5 class="text-white mb-2">
+                                        <i class="la la-dollar-sign me-2"></i>
+                                        خرید نقدی خودرو
+                                    </h5>
+                                    <p class="text-white-50 mb-3">سریع‌ترین راه برای خرید خودرو نقدی</p>
+                                    <a href="<?php echo home_url('/dashboard/new-cash-inquiry'); ?>" class="btn btn-light btn-sm btn-wave">
+                                        <i class="la la-plus-circle me-1"></i>
+                                        ثبت درخواست نقدی جدید
                                     </a>
                                 </div>
                                 <div>
-                                    <i class="la la-dollar-sign" style="font-size: 60px; opacity: 0.3;"></i>
+                                    <i class="la la-hand-holding-usd" style="font-size: 60px; opacity: 0.3;"></i>
                                 </div>
                             </div>
                         </div>
@@ -190,15 +193,18 @@ if ($is_customer) {
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div>
-                                    <h5 class="text-white mb-2">خرید اقساطی خودرو</h5>
-                                    <p class="text-white-50 mb-3">خودرو رویایی خود را اقساطی بخرید</p>
-                                    <a href="<?php echo home_url('/dashboard/inquiries/installment'); ?>" class="btn btn-light btn-sm">
-                                        <i class="la la-plus me-1"></i>
-                                        ثبت درخواست اقساطی
+                                    <h5 class="text-white mb-2">
+                                        <i class="la la-credit-card me-2"></i>
+                                        خرید اقساطی خودرو
+                                    </h5>
+                                    <p class="text-white-50 mb-3">خودرو رویایی خود را با اقساط راحت بخرید</p>
+                                    <a href="<?php echo home_url('/dashboard/new-inquiry'); ?>" class="btn btn-light btn-sm btn-wave">
+                                        <i class="la la-plus-circle me-1"></i>
+                                        ثبت درخواست اقساطی جدید
                                     </a>
                                 </div>
                                 <div>
-                                    <i class="la la-credit-card" style="font-size: 60px; opacity: 0.3;"></i>
+                                    <i class="la la-calendar-check" style="font-size: 60px; opacity: 0.3;"></i>
                                 </div>
                             </div>
                         </div>

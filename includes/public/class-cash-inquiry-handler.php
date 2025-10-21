@@ -17,6 +17,61 @@ class Maneli_Cash_Inquiry_Handler {
         // Hooks for handling the cash inquiry form submission.
         add_action('admin_post_nopriv_maneli_submit_cash_inquiry', '__return_false');
         add_action('admin_post_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
+        
+        // AJAX handler for customer cash inquiry creation
+        add_action('wp_ajax_maneli_create_customer_cash_inquiry', [$this, 'ajax_create_customer_cash_inquiry']);
+        add_action('wp_ajax_nopriv_maneli_create_customer_cash_inquiry', '__return_false');
+    }
+    
+    /**
+     * AJAX handler for creating cash inquiry from customer dashboard
+     */
+    public function ajax_create_customer_cash_inquiry() {
+        check_ajax_referer('maneli_customer_cash_inquiry', 'nonce');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => 'لطفاً ابتدا وارد سیستم شوید.']);
+            return;
+        }
+        
+        // Validate required fields
+        $required_fields = ['product_id', 'first_name', 'last_name', 'mobile_number'];
+        foreach ($required_fields as $field) {
+            if (empty($_POST[$field])) {
+                wp_send_json_error(['message' => 'لطفاً تمام فیلدهای ضروری را پر کنید.']);
+                return;
+            }
+        }
+        
+        $inquiry_data = [
+            'product_id'         => intval($_POST['product_id']),
+            'cash_first_name'    => sanitize_text_field($_POST['first_name']),
+            'cash_last_name'     => sanitize_text_field($_POST['last_name']),
+            'cash_mobile_number' => sanitize_text_field($_POST['mobile_number']),
+            'cash_car_color'     => sanitize_text_field($_POST['car_color'] ?? ''),
+        ];
+        
+        // Optional description
+        if (!empty($_POST['description'])) {
+            $inquiry_data['description'] = sanitize_textarea_field($_POST['description']);
+        }
+        
+        $user_id = get_current_user_id();
+        $post_id = self::create_cash_inquiry_post($inquiry_data, $user_id);
+        
+        if ($post_id) {
+            // Add description as meta if provided
+            if (!empty($inquiry_data['description'])) {
+                update_post_meta($post_id, 'customer_description', $inquiry_data['description']);
+            }
+            
+            wp_send_json_success([
+                'message' => 'درخواست نقدی شما با موفقیت ثبت شد. به زودی کارشناس با شما تماس خواهد گرفت.',
+                'inquiry_id' => $post_id
+            ]);
+        } else {
+            wp_send_json_error(['message' => 'خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.']);
+        }
     }
 
     /**
