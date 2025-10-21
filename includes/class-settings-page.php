@@ -424,7 +424,7 @@ class Maneli_Settings_Page {
                                 'name' => 'otp_pattern_code',
                                 'label' => esc_html__('OTP Pattern Code (Body ID)', 'maneli-car-inquiry'),
                                 'type' => 'number',
-                                'desc' => esc_html__('Pattern code for OTP SMS. Variables: 1. OTP Code (4-digit)', 'maneli-car-inquiry')
+                                'desc' => esc_html__('Pattern code for OTP SMS. Variable: {0} = OTP Code (4-digit)', 'maneli-car-inquiry')
                             ],
                             [
                                 'name' => 'otp_expiry_minutes',

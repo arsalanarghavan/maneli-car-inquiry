@@ -415,23 +415,51 @@ class Maneli_Dashboard_Handler {
         // Send SMS using existing SMS handler
         $sms_handler = new Maneli_SMS_Handler();
         
+        // Debug logging
+        error_log('OTP Send Attempt - Phone: ' . $phone . ', Code: ' . $code);
+        error_log('OTP Pattern: ' . ($otp_pattern ? $otp_pattern : 'NOT SET'));
+        
         if (!empty($otp_pattern)) {
-            // Use pattern-based SMS
-            $result = $sms_handler->send_pattern_sms(
-                $phone,
-                $otp_pattern,
-                [$code] // OTP code as first variable
+            // Use pattern-based SMS (MeliPayamak)
+            // متغیرها در پترن: {0} = کد OTP
+            error_log('Sending OTP via Pattern - Body ID: ' . $otp_pattern);
+            error_log('Pattern Parameters: ' . json_encode([$code]));
+            
+            $result = $sms_handler->send_pattern(
+                $otp_pattern,      // bodyId (Pattern Code)
+                $phone,            // recipient
+                [$code]            // parameters - {0} = OTP code
             );
+            
+            // اگر پترن کار نکرد، fallback به SMS معمولی
+            if (!$result) {
+                error_log('Pattern failed, trying regular SMS as fallback...');
+                $message = "کد تایید مانلی خودرو: " . $code;
+                $result = $sms_handler->send_sms($phone, $message);
+            }
         } else {
             // Fallback to regular SMS if pattern not configured
+            error_log('Sending OTP via Regular SMS (Pattern not configured)');
             $message = "کد تایید شما: " . $code;
             $result = $sms_handler->send_sms($phone, $message);
         }
         
+        error_log('OTP Send Result: ' . ($result ? 'SUCCESS' : 'FAILED'));
+        
         if ($result) {
             wp_send_json_success(['message' => 'کد تایید ارسال شد']);
         } else {
-            wp_send_json_error(['message' => 'خطا در ارسال کد تایید']);
+            // بررسی اینکه آیا تنظیمات SMS وجود دارد یا نه
+            $sms_username = $options['sms_username'] ?? '';
+            $sms_password = $options['sms_password'] ?? '';
+            
+            if (empty($sms_username) || empty($sms_password)) {
+                wp_send_json_error(['message' => 'تنظیمات SMS پیکربندی نشده است. لطفاً از بخش تنظیمات، اطلاعات پنل پیامک را وارد کنید.']);
+            } elseif (empty($otp_pattern)) {
+                wp_send_json_error(['message' => 'پترن OTP تنظیم نشده است. لطفاً از بخش تنظیمات → احراز هویت، کد پترن را وارد کنید.']);
+            } else {
+                wp_send_json_error(['message' => 'خطا در ارسال پیامک. لطفاً اطلاعات پنل پیامک و پترن را بررسی کنید.']);
+            }
         }
     }
     

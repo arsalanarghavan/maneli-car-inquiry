@@ -239,6 +239,9 @@
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -298,12 +301,22 @@
             sendSmsBtn.addEventListener('click', function() {
                 const phone = phoneInput.value.trim();
                 if (!phone) {
-                    alert('لطفاً شماره موبایل را وارد کنید');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'توجه',
+                        text: 'لطفاً شماره موبایل را وارد کنید',
+                        confirmButtonText: 'متوجه شدم'
+                    });
                     return;
                 }
 
                 if (!/^09\d{9}$/.test(phone)) {
-                    alert('لطفاً شماره موبایل معتبر وارد کنید');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا',
+                        text: 'لطفاً شماره موبایل معتبر وارد کنید',
+                        confirmButtonText: 'متوجه شدم'
+                    });
                     return;
                 }
 
@@ -325,7 +338,14 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('کد تایید ارسال شد');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'موفق!',
+                            text: 'کد تایید ارسال شد',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        
                         // Start countdown
                         let countdown = 60;
                         const interval = setInterval(() => {
@@ -338,14 +358,24 @@
                             }
                         }, 1000);
                     } else {
-                        alert(data.data.message || 'خطا در ارسال کد تایید');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطا',
+                            text: data.data.message || 'خطا در ارسال کد تایید',
+                            confirmButtonText: 'متوجه شدم'
+                        });
                         this.disabled = false;
                         this.innerHTML = '<i class="la la-paper-plane me-1"></i>ارسال کد';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('خطا در ارسال کد تایید');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا',
+                        text: 'خطا در ارسال کد تایید',
+                        confirmButtonText: 'متوجه شدم'
+                    });
                     this.disabled = false;
                     this.innerHTML = '<i class="la la-paper-plane me-1"></i>ارسال کد';
                 });
@@ -372,16 +402,35 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.href = data.data.redirect;
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'ورود موفق!',
+                            text: 'در حال انتقال به داشبورد...',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.href = data.data.redirect;
+                        });
                     } else {
-                        alert(data.data.message || 'خطا در ورود');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'خطا در ورود',
+                            text: data.data.message || 'اطلاعات ورود نامعتبر است',
+                            confirmButtonText: 'متوجه شدم'
+                        });
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = originalText;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('خطا در ورود');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'خطا',
+                        text: 'خطا در برقراری ارتباط با سرور',
+                        confirmButtonText: 'متوجه شدم'
+                    });
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalText;
                 });
