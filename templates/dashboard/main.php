@@ -46,6 +46,9 @@ switch ($page) {
     case 'experts':
         $page_title = 'کارشناسان - مانلی خودرو';
         break;
+    case 'calendar':
+        $page_title = 'تقویم جلسات - مانلی خودرو';
+        break;
     case 'settings':
         $page_title = 'تنظیمات - مانلی خودرو';
         break;
@@ -105,12 +108,15 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                             case 'users':
                                                 echo 'کاربران';
                                                 break;
-                                            case 'settings':
-                                                echo 'تنظیمات';
-                                                break;
-                                            default:
-                                                echo 'داشبورد';
-                                                break;
+                                    case 'calendar':
+                                        echo 'تقویم جلسات';
+                                        break;
+                                    case 'settings':
+                                        echo 'تنظیمات';
+                                        break;
+                                    default:
+                                        echo 'داشبورد';
+                                        break;
                                         }
                                         ?>
                                     </li>
@@ -149,10 +155,13 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                     case 'users':
                                         echo 'کاربران - مانلی خودرو';
                                         break;
-                                    case 'settings':
-                                        echo 'تنظیمات - مانلی خودرو';
-                                        break;
-                                    default:
+                            case 'calendar':
+                                echo 'تقویم جلسات - مانلی خودرو';
+                                break;
+                            case 'settings':
+                                echo 'تنظیمات - مانلی خودرو';
+                                break;
+                            default:
                                         echo 'داشبورد اصلی - مانلی خودرو';
                                         break;
                                 }
@@ -279,7 +288,13 @@ include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/sidebar.php';
                                 include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/experts.php';
                                 break;
                             case 'calendar':
-                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/calendar.php';
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/calendar-meetings.php';
+                                break;
+                            case 'calendar-test':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/calendar-test.php';
+                                break;
+                            case 'calendar-debug':
+                                include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/calendar-debug.php';
                                 break;
                             case 'settings':
                                 include MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/settings.php';

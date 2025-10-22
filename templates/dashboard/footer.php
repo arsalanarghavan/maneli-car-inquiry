@@ -5,7 +5,7 @@
         <!-- Start::Footer -->
         <footer class="footer mt-auto py-3 bg-white text-center">
             <div class="container">
-                <span class="text-muted"> <span id="year"><?php echo date('Y'); ?></span>
+                <span class="text-muted">
                     <?php 
                     $theme_handler = Maneli_Frontend_Theme_Handler::instance();
                     echo $theme_handler->get_footer_text();
@@ -71,9 +71,6 @@
     <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/persianDatepicker.min.js"></script>
 
     <script>
-        // Set current year
-        document.getElementById('year').innerHTML = new Date().getFullYear();
-        
         $(document).ready(function() {
             // Initialize Persian Datepicker if element exists
             if ($('#daterange').length) {

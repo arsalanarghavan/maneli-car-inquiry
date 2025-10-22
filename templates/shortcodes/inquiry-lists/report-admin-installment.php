@@ -490,19 +490,25 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 <!-- Loan & Car Information -->
                 <div class="row mt-4">
                     <div class="col-md-4 mb-3">
-                        <?php 
-                        $car_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'img-fluid rounded shadow-sm']);
-                        if ($car_image) {
-                            echo $car_image;
-                        } else {
-                            echo '<div class="bg-light rounded d-flex align-items-center justify-content-center text-muted" style="height: 200px; border: 2px dashed #dee2e6;">
-                                <div class="text-center">
-                                    <i class="la la-image fs-40"></i>
-                                    <p class="mb-0 mt-2">بدون تصویر</p>
-                                </div>
-                            </div>';
-                        }
-                        ?>
+                        <h5 class="mb-3 fw-semibold">
+                            <i class="la la-car text-primary me-1"></i>
+                            <?php esc_html_e('Product Image', 'maneli-car-inquiry'); ?>
+                        </h5>
+                        <div class="product-image-container">
+                            <?php 
+                            $car_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'img-fluid rounded shadow-sm product-image']);
+                            if ($car_image) {
+                                echo $car_image;
+                            } else {
+                                echo '<div class="bg-light rounded d-flex align-items-center justify-content-center text-muted product-image-placeholder">
+                                    <div class="text-center">
+                                        <i class="la la-image fs-40"></i>
+                                        <p class="mb-0 mt-2">بدون تصویر</p>
+                                    </div>
+                                </div>';
+                            }
+                            ?>
+                        </div>
                     </div>
                     <div class="col-md-8">
                         <h5 class="mb-3 fw-semibold">
@@ -510,7 +516,7 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                             <?php esc_html_e('Loan and Car Details', 'maneli-car-inquiry'); ?>
                         </h5>
                         <div class="table-responsive">
-                            <table class="table table-bordered table-striped mb-0">
+                            <table class="table table-bordered table-striped mb-0 product-details-table">
                                 <tbody>
                                     <tr>
                                         <td class="fw-semibold bg-light" width="40%"><?php esc_html_e('Selected Car', 'maneli-car-inquiry'); ?></td>
@@ -1025,6 +1031,35 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
 }
 
+/* Product Image and Table Layout */
+.product-image-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-image,
+.product-image-placeholder {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.product-image-placeholder {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #dee2e6;
+    background: #f8f9fa;
+}
+
+/* Make image height match table height dynamically */
+.product-image {
+    height: auto;
+    max-height: 100%;
+}
+
 /* Responsive roadmap for mobile */
 @media (max-width: 768px) {
     .status-roadmap .d-flex {
@@ -1039,7 +1074,39 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
     .status-arrow i {
         transform: rotate(-90deg);
     }
+    
+    /* On mobile, stack image and table vertically */
+    .product-image-container {
+        margin-bottom: 20px;
+    }
+    
+    .product-image,
+    .product-image-placeholder {
+        height: 200px;
+    }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Match image height with table height
+    const imageContainer = document.querySelector('.product-image-container');
+    const tableContainer = document.querySelector('.product-details-table');
+    
+    if (imageContainer && tableContainer) {
+        function matchHeights() {
+            const tableHeight = tableContainer.offsetHeight;
+            const image = imageContainer.querySelector('.product-image');
+            if (image) {
+                image.style.height = tableHeight + 'px';
+            }
+        }
+        
+        // Match heights on load and resize
+        matchHeights();
+        window.addEventListener('resize', matchHeights);
+    }
+});
+</script>
 </div><!-- End .frontend-expert-report -->
 <?php } // End of permission check ?>

@@ -82,65 +82,66 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
             </div>
             <div class="card-body">
                 <div class="row">
-                    <?php if ($product_image): ?>
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr(get_the_title($product_id)); ?>" class="img-fluid rounded shadow-sm">
-                        </div>
-                    <?php endif; ?>
-                    <div class="col-md-<?php echo $product_image ? '8' : '12'; ?>">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="border rounded p-3 bg-light">
-                                    <div class="text-muted fs-12 mb-1">
-                                        <i class="la la-car me-1"></i>
-                                        خودرو
-                                    </div>
-                                    <strong class="fs-16"><?php echo esc_html(get_the_title($product_id)); ?></strong>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="border rounded p-3 bg-light">
-                                    <div class="text-muted fs-12 mb-1">
-                                        <i class="la la-palette me-1"></i>
-                                        رنگ درخواستی
-                                    </div>
-                                    <strong class="fs-16"><?php echo esc_html($car_color ?: 'نامشخص'); ?></strong>
-                                </div>
-                            </div>
-                            <?php if ($down_payment): ?>
-                                <div class="col-md-6">
-                                    <div class="border rounded p-3 bg-success-transparent">
-                                        <div class="text-muted fs-12 mb-1">
-                                            <i class="la la-money-bill me-1"></i>
-                                            مبلغ پیش‌پرداخت
-                                        </div>
-                                        <strong class="fs-16 text-success"><?php echo number_format_i18n($down_payment); ?> تومان</strong>
+                    <div class="col-md-4 mb-3">
+                        <h6 class="mb-3 fw-semibold">
+                            <i class="la la-car text-primary me-1"></i>
+                            تصویر محصول
+                        </h6>
+                        <div class="product-image-container">
+                            <?php if ($product_image): ?>
+                                <img src="<?php echo esc_url($product_image); ?>" alt="<?php echo esc_attr(get_the_title($product_id)); ?>" class="img-fluid rounded shadow-sm product-image">
+                            <?php else: ?>
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center text-muted product-image-placeholder">
+                                    <div class="text-center">
+                                        <i class="la la-image fs-40"></i>
+                                        <p class="mb-0 mt-2">بدون تصویر</p>
                                     </div>
                                 </div>
                             <?php endif; ?>
-                            <div class="col-md-6">
-                                <div class="border rounded p-3 bg-light">
-                                    <div class="text-muted fs-12 mb-1">
-                                        <i class="la la-calendar me-1"></i>
-                                        تاریخ ثبت
-                                    </div>
-                                    <strong class="fs-16">
-                                        <?php 
-                                        $timestamp = strtotime($inquiry->post_date);
-                                        if (function_exists('maneli_gregorian_to_jalali')) {
-                                            echo maneli_gregorian_to_jalali(
-                                                date('Y', $timestamp),
-                                                date('m', $timestamp),
-                                                date('d', $timestamp),
-                                                'Y/m/d'
-                                            );
-                                        } else {
-                                            echo date('Y/m/d', $timestamp);
-                                        }
-                                        ?>
-                                    </strong>
-                                </div>
-                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h6 class="mb-3 fw-semibold">
+                            <i class="la la-info-circle text-primary me-1"></i>
+                            جزئیات درخواست
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped mb-0 product-details-table">
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-semibold bg-light" width="40%">خودرو</td>
+                                        <td><strong><?php echo esc_html(get_the_title($product_id)); ?></strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-semibold bg-light">رنگ درخواستی</td>
+                                        <td><strong><?php echo esc_html($car_color ?: 'نامشخص'); ?></strong></td>
+                                    </tr>
+                                    <?php if ($down_payment): ?>
+                                        <tr>
+                                            <td class="fw-semibold bg-light">مبلغ پیش‌پرداخت</td>
+                                            <td><strong class="text-success fs-16"><?php echo number_format_i18n($down_payment); ?> تومان</strong></td>
+                                        </tr>
+                                    <?php endif; ?>
+                                    <tr>
+                                        <td class="fw-semibold bg-light">تاریخ ثبت</td>
+                                        <td>
+                                            <?php 
+                                            $timestamp = strtotime($inquiry->post_date);
+                                            if (function_exists('maneli_gregorian_to_jalali')) {
+                                                echo maneli_gregorian_to_jalali(
+                                                    date('Y', $timestamp),
+                                                    date('m', $timestamp),
+                                                    date('d', $timestamp),
+                                                    'Y/m/d'
+                                                );
+                                            } else {
+                                                echo date('Y/m/d', $timestamp);
+                                            }
+                                            ?>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -203,4 +204,68 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
 .bg-success-transparent {
     background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, transparent 100%);
 }
+
+/* Product Image and Table Layout */
+.product-image-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-image,
+.product-image-placeholder {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.product-image-placeholder {
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #dee2e6;
+    background: #f8f9fa;
+}
+
+/* Make image height match table height dynamically */
+.product-image {
+    height: auto;
+    max-height: 100%;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    /* On mobile, stack image and table vertically */
+    .product-image-container {
+        margin-bottom: 20px;
+    }
+    
+    .product-image,
+    .product-image-placeholder {
+        height: 200px;
+    }
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Match image height with table height
+    const imageContainer = document.querySelector('.product-image-container');
+    const tableContainer = document.querySelector('.product-details-table');
+    
+    if (imageContainer && tableContainer) {
+        function matchHeights() {
+            const tableHeight = tableContainer.offsetHeight;
+            const image = imageContainer.querySelector('.product-image');
+            if (image) {
+                image.style.height = tableHeight + 'px';
+            }
+        }
+        
+        // Match heights on load and resize
+        matchHeights();
+        window.addEventListener('resize', matchHeights);
+    }
+});
+</script>
