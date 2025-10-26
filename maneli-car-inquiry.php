@@ -4,11 +4,7 @@
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
 <<<<<<< HEAD
-<<<<<<< HEAD
  * Version:           0.2.20
-=======
- * Version:           0.1.56
->>>>>>> parent of 7d04676 (.)
 =======
  * Version:           0.1.56
 >>>>>>> parent of 7d04676 (.)

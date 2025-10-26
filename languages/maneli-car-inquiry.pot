@@ -1,0 +1,2477 @@
+# Copyright (C) 2024 Maneli Car Inquiry Core
+# This file is distributed under the same license as the Maneli Car Inquiry Core package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Maneli Car Inquiry Core 1.0.3\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/maneli-car-inquiry\n"
+"POT-Creation-Date: 2025-10-12 05:46:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: Poedit 3.3.1\n"
+"X-Domain: maneli-car-inquiry\n"
+
+#: includes/admin/class-admin-actions-handler.php:40
+msgid "Invalid request or insufficient permissions."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:47
+msgid "Invalid status provided."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:110
+#: includes/admin/class-ajax-handler.php:571
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:115
+msgid "Please select a car."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:121
+msgid "Error: The field \"%s\" for the buyer is required."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:132
+msgid "Error creating new user: "
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:151
+msgid "Error creating inquiry post."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:164
+msgid "User ID not specified."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:171
+msgid "You cannot change your own administrative role to a lower-level role."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:204
+msgid "Mobile number and password are required."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:211
+msgid "A user with this mobile number already exists."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:215
+msgid "An email associated with this mobile number already exists."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:382
+#: includes/admin/class-ajax-handler.php:407
+#: includes/admin/class-ajax-handler.php:427
+msgid "No experts found for automatic assignment."
+msgstr ""
+
+#: includes/admin/class-admin-actions-handler.php:390
+#: includes/admin/class-ajax-handler.php:415
+#: includes/admin/class-ajax-handler.php:435
+msgid "The selected expert is not valid."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:46
+#: includes/admin/class-ajax-handler.php:84
+#: includes/admin/class-ajax-handler.php:461
+#: includes/admin/class-ajax-handler.php:484
+#: includes/admin/class-ajax-handler.php:530
+#: includes/admin/class-ajax-handler.php:550
+#: includes/admin/class-ajax-handler.php:571
+#: includes/admin/class-ajax-handler.php:627
+msgid "Unauthorized access."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:51
+#: includes/admin/class-ajax-handler.php:382
+msgid "Invalid inquiry ID."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:59
+msgid "You do not have permission to view this report."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:89
+#: includes/admin/class-ajax-handler.php:260
+#: includes/admin/class-ajax-handler.php:280
+#: includes/admin/class-ajax-handler.php:301
+#: includes/admin/class-ajax-handler.php:403
+msgid "Invalid request ID."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:163
+msgid "No inquiries found matching your criteria."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:168
+msgid "&laquo; Previous"
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:168
+msgid "Next &raquo;"
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:193
+msgid "Inquiry deleted successfully."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:195
+msgid "Error deleting inquiry."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:218
+msgid "No requests found."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:264
+msgid "Request updated successfully."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:284
+msgid "Request deleted successfully."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:286
+msgid "Error deleting request."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:306
+msgid "Please enter a valid amount."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:322
+msgid "A reason for rejection is required."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:333
+msgid "Invalid data submitted."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:336
+msgid "Status changed successfully."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:386
+msgid "Inquiry successfully assigned to %s."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:446
+msgid "Request successfully assigned to %s."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:465
+msgid "No users found matching your criteria."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:488
+msgid "User ID not specified."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:492
+msgid "You cannot delete your own account."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:497
+msgid "An error occurred while deleting the user."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:518
+msgid "No products found matching your criteria."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:534
+#: includes/admin/class-ajax-handler.php:596
+msgid "Invalid data sent."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:538
+msgid "Product not found."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:549
+msgid "Invalid field type."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:555
+msgid "Updated."
+msgstr ""
+
+#: includes/admin/class-ajax-handler.php:600
+msgid "Invalid inquiry type."
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:58
+msgid "Installment Inquiry Statistics"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:64
+msgid "Cash Inquiry Statistics"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:70
+msgid "User Statistics"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:75
+msgid "Product Statistics"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:107
+msgid "Total Inquiries"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:109
+msgid "Docs Req."
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:130
+msgid "Total Cash Requests"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:152
+msgid "Total Users"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:153
+msgid "Maneli Experts"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:154
+msgid "Managers"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:175
+msgid "Total Products"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:176
+msgid "Active for Sale"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:177
+msgid "Unavailable"
+msgstr ""
+
+#: includes/class-admin-dashboard-widgets.php:178
+msgid "Hidden Products"
+msgstr ""
+
+#: includes/class-cpt-handler.php:54
+msgid "Installment Inquiries"
+msgstr ""
+
+#: includes/class-cpt-handler.php:55
+msgid "Installment Inquiry"
+msgstr ""
+
+#: includes/class-cpt-handler.php:56
+msgid "Bank Inquiries"
+msgstr ""
+
+#: includes/class-cpt-handler.php:57
+msgid "All Inquiries"
+msgstr ""
+
+#: includes/class-cpt-handler.php:76
+msgid "Cash Requests"
+msgstr ""
+
+#: includes/class-cpt-handler.php:77
+msgid "Cash Request"
+msgstr ""
+
+#: includes/class-cpt-handler.php:79
+msgid "All Cash Requests"
+msgstr ""
+
+#: includes/class-cpt-handler.php:97
+msgid "Pending Review"
+msgstr ""
+
+#: includes/class-cpt-handler.php:98
+msgid "Approved and Referred"
+msgstr ""
+
+#: includes/class-cpt-handler.php:99
+msgid "More Documents Required"
+msgstr ""
+
+#: includes/class-cpt-handler.php:100
+msgid "Rejected"
+msgstr ""
+
+#: includes/class-cpt-handler.php:101
+msgid "Inquiry Failed"
+msgstr ""
+
+#: includes/class-cpt-handler.php:108
+msgid "Unknown"
+msgstr ""
+
+#: includes/class-cpt-handler.php:116
+msgid "Follow-up in Progress"
+msgstr ""
+
+#: includes/class-cpt-handler.php:117
+msgid "Referred"
+msgstr ""
+
+#: includes/class-cpt-handler.php:119
+msgid "Awaiting Payment"
+msgstr ""
+
+#: includes/class-cpt-handler.php:120
+msgid "Completed"
+msgstr ""
+
+#: includes/class-expert-panel.php:17
+msgid "Search for a car name..."
+msgstr ""
+
+#: includes/class-expert-panel.php:18
+msgid "Down Payment Amount (Toman)"
+msgstr ""
+
+#: includes/class-expert-panel.php:19
+msgid "Minimum recommended down payment:"
+msgstr ""
+
+#: includes/class-expert-panel.php:20
+msgid "Repayment Period (Months)"
+msgstr ""
+
+#: includes/class-expert-panel.php:21
+msgid "Total Loan Amount"
+msgstr ""
+
+#: includes/class-expert-panel.php:22
+msgid "Total Repayment Amount"
+msgstr ""
+
+#: includes/class-expert-panel.php:23
+msgid "Approximate Installment Amount"
+msgstr ""
+
+#: includes/class-expert-panel.php:24
+#: includes/helpers/class-maneli-render-helpers.php:258
+#: includes/helpers/class-maneli-render-helpers.php:267
+#: includes/helpers/class-maneli-render-helpers.php:309
+#: includes/helpers/class-maneli-render-helpers.php:321
+#: templates/admin/credit-report-page.php:45
+#: templates/admin/credit-report-page.php:47
+#: templates/admin/credit-report-page.php:51
+#: templates/admin/product-editor-page.php:32
+#: templates/admin/product-editor-page.php:37
+#: templates/admin/product-editor-page.php:42
+#: templates/shortcodes/calculator/main-container.php:103
+#: templates/shortcodes/calculator/main-container.php:128
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:31
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:67
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:68
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:69
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:137
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:139
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:141
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:142
+msgid "Toman"
+msgstr ""
+
+#: includes/class-expert-panel.php:25
+#: includes/shortcodes/calculator/main-container.php:118
+#: includes/shortcodes/inquiry-lists/report-admin-installment.php:143
+msgid "12 Months"
+msgstr ""
+
+#: includes/class-expert-panel.php:26
+msgid "18 Months"
+msgstr ""
+
+#: includes/class-expert-panel.php:27
+#: includes/shortcodes/calculator/main-container.php:119
+msgid "24 Months"
+msgstr ""
+
+#: includes/class-expert-panel.php:28
+#: includes/shortcodes/calculator/main-container.php:120
+msgid "36 Months"
+msgstr ""
+
+#: includes/class-expert-panel.php:29
+msgid "Server error:"
+msgstr ""
+
+#: includes/class-expert-panel.php:30
+msgid "Unknown error"
+msgstr ""
+
+#: includes/class-expert-panel.php:31
+msgid "e.g., 1365/04/15"
+msgstr ""
+
+#: includes/class-form-handler.php:61
+msgid "Security check failed!"
+msgstr ""
+
+#: includes/class-hooks.php:97
+msgid "Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue."
+msgstr ""
+
+#: includes/class-product-editor-page.php:29
+msgid "Car Price & Status"
+msgstr ""
+
+#: includes/class-product-editor-page.php:80
+#: templates/admin/product-editor-page.php:21
+msgid "On this page, you can quickly change the price and sales status of products. Changes are saved automatically."
+msgstr ""
+
+#: includes/class-product-editor-page.php:86
+#: templates/admin/product-editor-page.php:26
+msgid "Car Name"
+msgstr ""
+
+#: includes/class-product-editor-page.php:87
+#: templates/admin/product-editor-page.php:27
+msgid "Cash Price (Toman)"
+msgstr ""
+
+#: includes/class-product-editor-page.php:88
+#: templates/admin/product-editor-page.php:28
+msgid "Installment Price (Toman)"
+msgstr ""
+
+#: includes/class-product-editor-page.php:89
+#: templates/admin/product-editor-page.php:29
+msgid "Min. Down Payment (Toman)"
+msgstr ""
+
+#: includes/class-product-editor-page.php:90
+#: templates/admin/product-editor-page.php:30
+msgid "Available Colors (comma-separated)"
+msgstr ""
+
+#: includes/class-product-editor-page.php:91
+#: templates/admin/product-editor-page.php:31
+msgid "Sales Status"
+msgstr ""
+
+#: includes/class-product-editor-page.php:96
+#: templates/admin/product-editor-page.php:68
+msgid "No products found."
+msgstr ""
+
+#: includes/class-product-editor-page.php:111
+msgid "Error:"
+msgstr ""
+
+#: includes/class-product-editor-page.php:127
+msgid "To use this plugin, please install and activate WooCommerce first."
+msgstr ""
+
+#: includes/class-roles-caps.php:73
+#: templates/shortcodes/user-management/user-list.php:83
+msgid "Maneli Manager"
+msgstr ""
+
+#: includes/class-roles-caps.php:74
+#: includes/shortcodes/class-user-management-shortcodes.php:154
+#: templates/shortcodes/user-management/user-list.php:82
+msgid "Maneli Expert"
+msgstr ""
+
+#: includes/class-roles-caps.php:75
+#: templates/shortcodes/user-management/user-list.php:81
+msgid "Customer"
+msgstr ""
+
+#: includes/class-roles-caps.php:76
+#: templates/shortcodes/user-management/user-list.php:84
+msgid "General Manager"
+msgstr ""
+
+#: includes/class-settings-page.php:191
+msgid "Finance & Calculator"
+msgstr ""
+
+#: includes/class-settings-page.php:192
+msgid "Installment Loan Settings"
+msgstr ""
+
+#: includes/class-settings-page.php:195
+msgid "Monthly Interest Rate (Decimal)"
+msgstr ""
+
+#: includes/class-settings-page.php:197
+msgid "Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in all installment calculations."
+msgstr ""
+
+#: includes/class-settings-page.php:203
+msgid "Payment Gateway"
+msgstr ""
+
+#: includes/class-settings-page.php:205
+msgid "General Payment Settings"
+msgstr ""
+
+#: includes/class-settings-page.php:207
+msgid "Enable Payment Gateway"
+msgstr ""
+
+#: includes/class-settings-page.php:207
+msgid "If enabled, the inquiry fee payment step will be shown to users."
+msgstr ""
+
+#: includes/class-settings-page.php:208
+msgid "Inquiry Fee (Toman)"
+msgstr ""
+
+#: includes/class-settings-page.php:208
+msgid "Enter 0 for free inquiries."
+msgstr ""
+
+#: includes/class-settings-page.php:209
+msgid "Message for Free Inquiry"
+msgstr ""
+
+#: includes/class-settings-page.php:209
+msgid "The inquiry fee is waived for you. Please click the button below to continue."
+msgstr ""
+
+#: includes/class-settings-page.php:212
+msgid "Discount Code Settings"
+msgstr ""
+
+#: includes/class-settings-page.php:214
+msgid "Discount Code"
+msgstr ""
+
+#: includes/class-settings-page.php:214
+msgid "Enter a code for 100% off the inquiry fee."
+msgstr ""
+
+#: includes/class-settings-page.php:215
+msgid "Discount Code Success Message"
+msgstr ""
+
+#: includes/class-settings-page.php:215
+msgid "100% discount applied successfully."
+msgstr ""
+
+#: includes/class-settings-page.php:218
+msgid "Sadad (Melli Bank) Settings"
+msgstr ""
+
+#: includes/class-settings-page.php:220
+msgid "Enable Sadad"
+msgstr ""
+
+#: includes/class-settings-page.php:221
+msgid "Terminal ID"
+msgstr ""
+
+#: includes/class-settings-page.php:222
+msgid "Merchant ID"
+msgstr ""
+
+#: includes/class-settings-page.php:224
+msgid "Sadad Encryption Key"
+msgstr ""
+
+#: includes/class-settings-page.php:224
+msgid "The encryption key (TDes key) provided by Sadad. Stored securely encrypted."
+msgstr ""
+
+#: includes/class-settings-page.php:227
+msgid "Zarinpal Settings"
+msgstr ""
+
+#: includes/class-settings-page.php:229
+msgid "Enable Zarinpal"
+msgstr ""
+
+#: includes/class-settings-page.php:230
+msgid "Merchant ID"
+msgstr ""
+
+#: includes/class-settings-page.php:234
+msgid "SMS"
+msgstr ""
+
+#: includes/class-settings-page.php:236
+msgid "MeliPayamak Panel Information"
+msgstr ""
+
+#: includes/class-settings-page.php:238
+msgid "Username"
+msgstr ""
+
+#: includes/class-settings-page.php:239
+msgid "Password"
+msgstr ""
+
+#: includes/class-settings-page.php:242
+msgid "SMS Pattern Codes (Body ID) - General & Installment"
+msgstr ""
+
+#: includes/class-settings-page.php:243
+msgid "Enter only the approved Pattern Code (Body ID) from your SMS panel. Variable order must match the descriptions."
+msgstr ""
+
+#: includes/class-settings-page.php:245
+msgid "Admin Mobile Number"
+msgstr ""
+
+#: includes/class-settings-page.php:245
+msgid "Mobile number to receive new request notifications."
+msgstr ""
+
+#: includes/class-settings-page.php:246
+msgid "Pattern: \"New Request for Admin\""
+msgstr ""
+
+#: includes/class-settings-page.php:246
+msgid "Variables: 1. Customer Name 2. Car Name"
+msgstr ""
+
+#: includes/class-settings-page.php:247
+msgid "Pattern: \"Pending Review\" (Installment)"
+msgstr ""
+
+#: includes/class-settings-page.php:248
+msgid "Pattern: \"Approved\" (Installment)"
+msgstr ""
+
+#: includes/class-settings-page.php:249
+msgid "Pattern: \"Rejected\" (Installment)"
+msgstr ""
+
+#: includes/class-settings-page.php:249
+msgid "Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
+msgstr ""
+
+#: includes/class-settings-page.php:250
+msgid "Pattern: \"Referral to Expert\" (Installment)"
+msgstr ""
+
+#: includes/class-settings-page.php:250
+msgid "Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
+msgstr ""
+
+#: includes/class-settings-page.php:253
+msgid "SMS Pattern Codes - Cash Request"
+msgstr ""
+
+#: includes/class-settings-page.php:255
+msgid "Pattern: \"Cash Request Approved\""
+msgstr ""
+
+#: includes/class-settings-page.php:255
+msgid "Sent to customer after down payment is set. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount"
+msgstr ""
+
+#: includes/class-settings-page.php:256
+msgid "Pattern: \"Cash Request Rejected\""
+msgstr ""
+
+#: includes/class-settings-page.php:256
+msgid "Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
+msgstr ""
+
+#: includes/class-settings-page.php:257
+msgid "Pattern: \"Cash Request Referral to Expert\""
+msgstr ""
+
+#: includes/class-settings-page.php:257
+msgid "Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
+msgstr ""
+
+#: includes/class-settings-page.php:262
+msgid "Cash Request"
+msgstr ""
+
+#: includes/class-settings-page.php:264
+msgid "Cash Request Process Settings"
+msgstr ""
+
+#: includes/class-settings-page.php:266
+msgid "Predefined Rejection Reasons"
+msgstr ""
+
+#: includes/class-settings-page.php:266
+msgid "Enter one reason per line. These will be shown as a list to the admin when rejecting a request."
+msgstr ""
+
+#: includes/class-settings-page.php:271
+msgid "Installment Request"
+msgstr ""
+
+#: includes/class-settings-page.php:273
+msgid "Installment Rejection Reasons"
+msgstr ""
+
+#: includes/class-settings-page.php:275
+msgid "Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request."
+msgstr ""
+
+#: includes/class-settings-page.php:280
+msgid "Experts"
+msgstr ""
+
+#: includes/class-settings-page.php:282
+msgid "Expert Management"
+msgstr ""
+
+#: includes/class-settings-page.php:283
+msgid "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
+msgstr ""
+
+#: includes/class-settings-page.php:288
+msgid "Finotex"
+msgstr ""
+
+#: includes/class-settings-page.php:290
+msgid "Cheque Color Inquiry Service"
+msgstr ""
+
+#: includes/class-settings-page.php:292
+msgid "Enable Finotex Inquiry"
+msgstr ""
+
+#: includes/class-settings-page.php:292
+msgid "Enable the cheque color inquiry via the Finotex service."
+msgstr ""
+
+#: includes/class-settings-page.php:294
+msgid "Finotex Client ID"
+msgstr ""
+
+#: includes/class-settings-page.php:294
+msgid "Client ID provided by Finotex. Stored securely encrypted."
+msgstr ""
+
+#: includes/class-settings-page.php:295
+msgid "Finotex API Key"
+msgstr ""
+
+#: includes/class-settings-page.php:295
+msgid "API Key (Access Token) provided by Finotex. Stored securely encrypted."
+msgstr ""
+
+#: includes/class-shortcode-handler.php:127
+msgid "car_inquiry_form"
+msgstr ""
+
+#: includes/shortcodes/class-admin-shortcodes.php:33
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: includes/shortcodes/class-user-management-shortcodes.php:33
+msgid "The requested user was not found."
+msgstr ""
+
+#: includes/shortcodes/class-user-management-shortcodes.php:150
+msgid "User information updated successfully."
+msgstr ""
+
+#: includes/shortcodes/class-user-management-shortcodes.php:153
+msgid "New user created successfully."
+msgstr ""
+
+#: includes/shortcodes/class-user-management-shortcodes.php:156
+msgid "User deleted successfully."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:27
+msgid "Full Credit Report"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:28
+msgid "for Inquiry #%d"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:32
+msgid "Requested Car"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:40
+msgid "No image has been set for this product."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:44
+msgid "Selected Car"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:45
+msgid "Total Price"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:47
+msgid "Down Payment"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:49
+msgid "Installment Term"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:51
+msgid "Months"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:52
+msgid "Installment Amount"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:58
+msgid "Personal Information"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:60
+msgid "Buyer Name"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:60
+msgid "Buyer Last Name"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:61
+msgid "Buyer National Code"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:61
+msgid "Buyer Father's Name"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:62
+msgid "Buyer Date of Birth"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:62
+msgid "Buyer Mobile Number"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:73
+msgid "Cheque Issuer Information"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:76
+msgid "First Name"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:76
+msgid "Last Name"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:77
+msgid "National Code"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:77
+msgid "Father's Name"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:78
+msgid "Date of Birth"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:78
+msgid "Mobile Number"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:87
+msgid "Cheque Status Inquiry Result (Sayadi)"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:92
+msgid "White"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:92
+msgid "Yellow"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:93
+msgid "Orange"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:93
+msgid "Brown"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:94
+msgid "Red"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:100
+msgid "Credit Status"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:100
+msgid "Description"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:104
+msgid "No history of bounced cheques."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:105
+msgid "One bounced cheque or a maximum of 50 million Rials in returned commitments."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:106
+msgid "Two to four bounced cheques or a maximum of 200 million Rials in returned commitments."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:107
+msgid "Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:108
+msgid "More than ten bounced cheques or more than 500 million Rials in returned commitments."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:109
+msgid "Undetermined"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:109
+msgid "Information was not received from Finotex or the inquiry was unsuccessful."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:115
+msgid "Raw Service Response:"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:121
+msgid "Final Decision"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:122
+msgid "After reviewing the information above, specify the final status of this request."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:128
+msgid "Approve and Assign to Expert"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:129
+msgid "Final Rejection of Request"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:137
+msgid "Reason for Rejection"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:138
+msgid "Please specify the reason for rejecting this request. This reason will be shown to the user."
+msgstr ""
+
+#: templates/admin/credit-report-page.php:140
+msgid "Select a reason:"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:142
+msgid "-- Select a reason --"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:147
+msgid "Other reason (write in the box below)"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:150
+msgid "Custom Text:"
+msgstr ""
+
+#: templates/admin/credit-report-page.php:154
+msgid "Submit Reason and Reject Request"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:33
+msgid "Applicant Information"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:35
+msgid "First Name"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:36
+msgid "Last Name"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:37
+msgid "Father's Name"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:38
+msgid "National Code"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:39
+msgid "Occupation"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:40
+msgid "Income Level"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:41
+msgid "Mobile Number"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:42
+msgid "Phone Number"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:43
+msgid "Residency Status"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:44
+msgid "Workplace Status"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:45
+msgid "Address"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:46
+msgid "Date of Birth"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:47
+msgid "Bank Name"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:48
+msgid "Account Number"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:49
+msgid "Branch Code"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:50
+msgid "Branch Name"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:61
+msgid "Cheque Issuer Information"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:64
+msgid "Issuer Name"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:65
+msgid "Issuer National Code"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:77
+msgid "Car and Installment Details"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:83
+msgid "Car Name"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:84
+msgid "Car Model"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:85
+msgid "Total Price"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:86
+msgid "Down Payment"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:87
+msgid "Loan Amount"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:88
+msgid "Installment Term"
+msgstr ""
+
+#: templates/admin/meta-box-inquiry-details.php:89
+msgid "Monthly Installment"
+msgstr ""
+
+#: templates/admin/product-editor-page.php:20
+msgid "Car Price & Status"
+msgstr ""
+
+#: templates/admin/product-editor-page.php:37
+msgid "Installment Price (Toman)"
+msgstr ""
+
+#: templates/admin/product-editor-page.php:42
+msgid "Down Payment Amount"
+msgstr ""
+
+#: templates/admin/product-editor-page.php:54
+msgid "e.g., White, Black, Silver"
+msgstr ""
+
+#: templates/admin/product-editor-page.php:60
+msgid "Special Sale (Active)"
+msgstr ""
+
+#: templates/admin/product-editor-page.php:61
+msgid "Unavailable (Show in site)"
+msgstr ""
+
+#: templates/admin/product-editor-page.php:62
+msgid "Disabled (Hide from site)"
+msgstr ""
+
+#: templates/public/cash-inquiry-success-message.php:17
+msgid "Your request has been successfully submitted. We will contact you soon."
+msgstr ""
+
+#: templates/public/grouped-attributes-table.php:17
+msgid "Specifications"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:24
+msgid "Settings saved successfully."
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:33
+msgid "Save Changes"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:56
+msgid "Expert Name"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:56
+msgid "Email"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:56
+msgid "Mobile Number"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:62
+msgid "Name"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:63
+msgid "Mobile"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:65
+msgid "Not set"
+msgstr ""
+
+#: templates/shortcodes/admin-settings.php:69
+msgid "No experts are currently registered."
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:30
+msgid "Installment Sale"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:31
+msgid "Cash Sale"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:39
+msgid "Cash Purchase Request"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:48
+msgid "First Name:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:52
+msgid "Last Name:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:58
+msgid "Mobile Number:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:62
+msgid "Car Color:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:65
+msgid "-- Select a color --"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:69
+msgid "Enter your desired color"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:73
+msgid "The listed price is approximate. Due to market fluctuations, the final price will be determined upon down payment."
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:75
+msgid "Approximate Price:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:79
+msgid "Submit Price Inquiry Request"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:83
+msgid "To submit a cash purchase request, please log in to your account first."
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:84
+msgid "Login and Submit Request"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:94
+msgid "Budgeting and Installment Calculation"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:96
+msgid "Down Payment Amount:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:101
+msgid "Minimum Down Payment:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:107
+msgid "Required Conditions"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:109
+msgid "1. ID Card - National ID Card"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:110
+msgid "2. Chequebook"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:111
+msgid "3. Last 3-month bank statement (cheque owner)"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:112
+msgid "4. Payslip or business license (applicant and cheque owner)"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:116
+msgid "Repayment Period:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:125
+msgid "Approximate Installment Amount:"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:129
+msgid "Bank Credit Check for Car Purchase"
+msgstr ""
+
+#: templates/shortcodes/calculator/main-container.php:131
+msgid "Log in to Start Inquiry"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:23
+msgid "This car is currently unavailable for purchase."
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:26
+msgid "Budgeting and Installment Calculation"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:28
+msgid "Down Payment Amount:"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:30
+msgid "Minimum Down Payment:"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:34
+msgid "Repayment Period:"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:36
+msgid "12 Months"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:37
+msgid "24 Months"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:41
+msgid "Approximate Installment Amount:"
+msgstr ""
+
+#: templates/shortcodes/calculator/unavailable-product-overlay.php:45
+msgid "Bank Credit Check for Car Purchase"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:20
+msgid "New inquiry has been successfully created for the customer."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:24
+msgid "1. Select Car and Conditions"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:27
+msgid "Search for a Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:29
+msgid "Start typing to search for a car..."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:35
+msgid "Assign Responsible Expert"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:37
+msgid "-- Automatic Assignment (Round-robin) --"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:41
+msgid "If not selected, the system will automatically assign an expert."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:46
+msgid "2. Identity Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:50
+msgid "Buyer and cheque issuer are the same person."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:51
+msgid "The cheque issuer is another person."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:55
+msgid "Buyer Information Form"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:59
+msgid "First Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:60
+msgid "Last Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:63
+msgid "Father's Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:64
+msgid "Date of Birth:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:67
+msgid "National Code:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:67
+msgid "10-digit national ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:68
+msgid "Mobile Number (Username):"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:68
+msgid "e.g., 09123456789"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:74
+msgid "Cheque Issuer Information Form"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:78
+msgid "Issuer First Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:79
+msgid "Issuer Last Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:82
+msgid "Issuer Father's Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:83
+msgid "Issuer Date of Birth:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:86
+msgid "Issuer Mobile Number:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:86
+msgid "e.g., 09129876543"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:87
+msgid "Issuer National Code:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/expert-new-inquiry-form.php:92
+msgid "Submit Inquiry and Create User"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/payment-status-message.php:24
+msgid "Your payment was successful. Your request has been submitted to our experts."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/payment-status-message.php:27
+msgid "Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/payment-status-message.php:28
+msgid "Reason:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/payment-status-message.php:33
+msgid "You have cancelled the payment. Your request has not been finalized yet."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/progress-tracker.php:24
+msgid "Select Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/progress-tracker.php:25
+msgid "Complete Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/progress-tracker.php:26
+msgid "Payment"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/progress-tracker.php:27
+msgid "Pending Review"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/progress-tracker.php:28
+msgid "Final Result"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/progress-tracker.php:44
+msgid "Step %s"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-1-car-selection.php:18
+msgid "Step 1: Select a Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:57
+msgid "Your Request Summary"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:59
+msgid "Selected Car:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:60
+msgid "Car Model:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:61
+msgid "Total Price:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:63
+msgid "Down Payment:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:65
+msgid "Loan Amount:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:67
+msgid "Installment Term:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:69
+msgid "Approx. Installment:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:79
+msgid "Cheque Issuer Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:80
+msgid "I am both the buyer and the cheque issuer."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:81
+msgid "The cheque issuer is another person."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:85
+msgid "Applicant Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:88
+msgid "First Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:89
+msgid "Last Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:92
+msgid "Father's Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:93
+msgid "Date of Birth:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:96
+msgid "National Code:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:96
+msgid "10-digit national ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:97
+msgid "Mobile Number:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:97
+msgid "e.g., 09123456789"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:100
+msgid "Occupation:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:101
+msgid "Income Level (Toman):"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:104
+msgid "Phone Number:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:106
+msgid "Residency Status"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:109
+msgid "-- Select --"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:110
+msgid "Owner"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:111
+msgid "Tenant"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:115
+msgid "Workplace Status"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:119
+msgid "Permanent"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:120
+msgid "Contract"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:121
+msgid "Freelance"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:123
+msgid "Address:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:126
+msgid "Bank Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:127
+msgid "Account Number:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:130
+msgid "Branch Code:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:131
+msgid "Branch Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:137
+msgid "Cheque Issuer Information Form"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:140
+msgid "Issuer Full Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:141
+msgid "Issuer National Code:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:144
+msgid "Issuer Father's Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:145
+msgid "Issuer Date of Birth:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:148
+msgid "Issuer Mobile Number:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:149
+msgid "Issuer Occupation:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:152
+msgid "Issuer Phone Number:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:164
+msgid "Issuer Address:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:167
+msgid "Issuer Bank Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:168
+msgid "Issuer Account Number:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:171
+msgid "Issuer Branch Code:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:172
+msgid "Issuer Branch Name:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-2-identity-form.php:177
+msgid "Continue to Next Step"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-3-payment.php:38
+msgid "Step 3: Payment of Inquiry Fee"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-3-payment.php:44
+msgid "To finalize your request and send it to our experts, please pay the inquiry fee of %s Toman."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-3-payment.php:57
+msgid "Have a discount code?"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-3-payment.php:60
+msgid "Enter discount code:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-3-payment.php:61
+msgid "Discount Code"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-3-payment.php:65
+msgid "Pay and Finalize Request"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-3-payment.php:65
+msgid "Finalize Request"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-4-wait-message.php:24
+msgid "Our experts require additional documents to complete the process. Please wait for our team to contact you."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-4-wait-message.php:27
+msgid "Your inquiry request has been successfully submitted. You will be notified of the result after it has been reviewed by our experts (usually within 24 business hours)."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-4-wait-message.php:31
+msgid "Step 4: Pending Review"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-4-wait-message.php:34
+msgid "Thank you for your patience."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:34
+msgid "Step 5: Final Result"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:38
+msgid "Final Result: Your request has been approved."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:39
+msgid "Your request has been approved by our experts and referred to the sales unit. One of our colleagues will contact you soon for final coordination."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:43
+msgid "Final Result: Your request has been rejected."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:45
+msgid "Reason:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:51
+msgid "Request Summary"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:56
+msgid "Credit Verification Result"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:59
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:62
+msgid "Sayad Cheque Status:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:60
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:63
+msgid "Status Explanation:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-5-final-report.php:60
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:63
+msgid "Bank inquiry was not performed."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-failed.php:17
+msgid "Inquiry Unsuccessful"
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-failed.php:20
+msgid "Unfortunately, an error occurred while attempting to retrieve your inquiry from the banking system. This issue could be due to incorrect identity information or temporary system problems."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-failed.php:26
+msgid "You can edit your information and try again."
+msgstr ""
+
+#: templates/shortcodes/inquiry-form/step-failed.php:28
+msgid "Retry and Correct Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:25
+msgid "Cash Purchase Requests List"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:29
+msgid "Search by customer name, car name, or mobile..."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:34
+msgid "Status:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:36
+msgid "All Statuses"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:41
+msgid "Assigned Expert:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:43
+msgid "All Experts"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:53
+msgid "ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:54
+msgid "Customer"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:55
+msgid "Mobile"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:56
+msgid "Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:57
+msgid "Status"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:58
+msgid "Assigned"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:59
+msgid "Date"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-cash-list.php:60
+msgid "Actions"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:28
+msgid "Complete List of Inquiries"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:32
+msgid "Search by customer name, car name, national ID or mobile..."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:37
+msgid "Status:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:39
+msgid "All Statuses"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:46
+msgid "Assigned Expert:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:48
+msgid "All Experts"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:58
+msgid "ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:59
+msgid "Customer"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:60
+msgid "Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:61
+msgid "Status"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:62
+msgid "Assigned"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:63
+msgid "Date"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/admin-installment-list.php:64
+msgid "Actions"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:24
+msgid "Your Cash Purchase Requests"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:33
+msgid "Please note: Quoted prices are approximate. The final price will be determined based on the market rate at the time of the down payment."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:37
+msgid "You have not submitted any cash purchase requests yet."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:45
+msgid "ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:46
+msgid "Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:47
+msgid "Status"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:48
+msgid "Date"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-cash-list.php:59
+msgid "View Details"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-installment-list.php:24
+msgid "Your Installment Inquiries List"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-installment-list.php:28
+msgid "You have not submitted any installment inquiries yet."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-installment-list.php:36
+msgid "ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-installment-list.php:37
+msgid "Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-installment-list.php:38
+msgid "Status"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/customer-installment-list.php:39
+msgid "Date"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:38
+msgid "Cash Purchase Request Details"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:43
+msgid "Current Status:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:45
+msgid "Assigned Expert:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:51
+msgid "Request Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:61
+msgid "Customer"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:62
+msgid "Mobile Number"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:63
+msgid "Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:64
+msgid "Requested Color"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:67
+msgid "Down Payment Amount"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:71
+msgid "Rejection Reason"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:79
+msgid "Actions"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:81
+msgid "Assign to Expert"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:83
+msgid "Edit Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:86
+msgid "Delete Request"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:89
+msgid "Set Down Payment"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:90
+msgid "Reject Request"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:93
+msgid "View Customer Payment Link"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-cash.php:99
+msgid "Back to List"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:42
+msgid "Inquiry not found or you do not have permission to view it."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:64
+msgid "Back to Inquiry List"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:68
+msgid "Installment Request Report #%d - %s"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:71
+msgid "Current Status:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:76
+msgid "Reason for Rejection:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:81
+msgid "Final Approval & Refer to Sales"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:84
+msgid "Assign Expert"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:92
+msgid "Retry Finotex Inquiry"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:99
+msgid "Request More Documents"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:104
+msgid "Delete Request"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:111
+msgid "Loan and Car Details"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:113
+msgid "Selected Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:114
+msgid "Total Price"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:115
+msgid "Down Payment"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:116
+msgid "Loan Amount"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:117
+msgid "Installment Term"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:118
+msgid "Monthly Installment"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:119
+msgid "Date Submitted"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:127
+msgid "Applicant and Expert Details"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:129
+msgid "Customer Name"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:130
+msgid "Mobile Number"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:131
+msgid "National ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:132
+msgid "Assigned Expert"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:134
+msgid "Cheque Issuer: Another Person"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:135
+msgid "Issuer National ID"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:136
+msgid "Cheque Issuer"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:136
+msgid "Same as Applicant"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:142
+msgid "Credit Verification Result (Finotex)"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:146
+msgid "Bank inquiry was not performed or failed to return data."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:154
+msgid "Reason for Rejection"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:155
+msgid "Please specify the reason for rejecting this request. This reason will be sent to the user via SMS."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:157
+msgid "Select a reason:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:159
+msgid "-- Select a reason --"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:164
+msgid "Other reason (write in the box below)"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:167
+msgid "Custom Text:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php:171
+msgid "Submit Reason and Reject Request"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:33
+msgid "Cash Purchase Request Details"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:38
+msgid "Please note: Quoted prices are approximate. The final price will be determined based on the market rate at the time of the down payment."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:41
+msgid "Current Status:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:47
+msgid "Request Information"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:57
+msgid "Car"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:58
+msgid "Requested Color"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:61
+msgid "Down Payment Amount"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:65
+msgid "Notes"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:74
+msgid "Action Required"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:75
+msgid "Please note: Prices are approximate and the final price of the car will be determined by the daily rate at the time the down payment is made."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:76
+msgid "Your down payment has been set. To finalize your purchase, please proceed to the payment gateway via the button below."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:80
+msgid "Proceed to Payment Gateway"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-cash.php:85
+msgid "Back to Requests List"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:44
+msgid "Final Result: Your request has been approved."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:45
+msgid "Your request has been approved by our experts and referred to the sales unit. One of our colleagues will contact you soon for final coordination."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:49
+msgid "Final Result: Your request has been rejected."
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:51
+msgid "Reason:"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:57
+msgid "Request Summary"
+msgstr ""
+
+#: templates/shortcodes/inquiry-lists/report-customer-installment.php:61
+msgid "Credit Verification Result"
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:21
+msgid "Car Price & Status List"
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:25
+msgid "Search car name..."
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:29
+msgid "Car Name"
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:30
+msgid "Cash Price (Toman)"
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:31
+msgid "Installment Price (Toman)"
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:32
+msgid "Min. Down Payment (Toman)"
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:33
+msgid "Available Colors"
+msgstr ""
+
+#: templates/shortcodes/product-editor.php:34
+msgid "Sales Status"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:17
+msgid "General System Reports"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:24
+msgid "Latest Registered Inquiries"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:26
+msgid "No inquiries found."
+msgstr ""
+
+#: templates/shortcodes/system-report.php:31
+msgid "ID"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:32
+msgid "Customer"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:33
+msgid "Car"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:34
+msgid "Status"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:35
+msgid "Date"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:40
+msgid "N/A"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:52
+msgid "Latest Registered Users"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:54
+msgid "No users found."
+msgstr ""
+
+#: templates/shortcodes/system-report.php:59
+msgid "Display Name"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:60
+msgid "Username"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:61
+msgid "Email"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:62
+msgid "Role"
+msgstr ""
+
+#: templates/shortcodes/system-report.php:63
+msgid "Registration Date"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:18
+msgid "Add New User"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:19
+msgid "The new user will be created with the default \"Customer\" role. The username and email will be automatically generated based on the mobile number."
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:27
+msgid "Mobile Number (Required):"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:31
+msgid "Password (Required):"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:35
+msgid "Supplementary Information"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:38
+msgid "First Name:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:42
+msgid "Last Name:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:49
+msgid "Create User"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-add-user.php:50
+msgid "Cancel"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:18
+msgid "Editing User: %s"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:29
+msgid "First Name:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:33
+msgid "Last Name:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:40
+msgid "Email:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:44
+msgid "Mobile Number:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:51
+msgid "Father's Name:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:55
+msgid "Date of Birth:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:62
+msgid "National Code:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:66
+msgid "User Role:"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:77
+msgid "Save Changes"
+msgstr ""
+
+#: templates/shortcodes/user-management/form-edit-user.php:78
+msgid "Cancel"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:45
+msgid "Complete User List"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:46
+msgid "Add New User"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:53
+msgid "Search by name, email, mobile, or national ID..."
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:58
+msgid "User Role:"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:60
+msgid "All Roles"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:67
+msgid "Order By:"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:69
+msgid "Display Name"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:70
+msgid "Registration Date"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:71
+msgid "Username"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:74
+msgid "Order:"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:76
+msgid "Ascending"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:77
+msgid "Descending"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:84
+msgid "Display Name"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:85
+msgid "Username"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:86
+msgid "Email"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:87
+msgid "Role"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:88
+msgid "Actions"
+msgstr ""
+
+#: templates/shortcodes/user-management/user-list.php:101
+msgid "No users found."
+msgstr ""

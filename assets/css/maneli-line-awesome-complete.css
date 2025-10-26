@@ -1,0 +1,138 @@
+/*!
+ * Line Awesome Complete CSS
+ * فایل کامل و مستقل برای پلاگین منلی
+ */
+
+@font-face {
+  font-family: 'Line Awesome Free';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.eot');
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.eot?#iefix') format('embedded-opentype'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.woff2') format('woff2'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.woff') format('woff'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-solid-900.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Line Awesome Free';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.woff2') format('woff2'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.woff') format('woff'),
+       url('../icon-fonts/line-awesome/1.3.0/fonts/la-regular-400.ttf') format('truetype');
+}
+
+.la, .las, .lar, .lab {
+  display: inline-block !important;
+  font-style: normal !important;
+  font-variant: normal !important;
+  text-rendering: auto !important;
+  line-height: 1 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.la, .las { font-family: 'Line Awesome Free' !important; font-weight: 900 !important; }
+.lar { font-family: 'Line Awesome Free' !important; font-weight: 400 !important; }
+.lab { font-family: 'Line Awesome Brands' !important; font-weight: normal !important; }
+
+[class^="la-"], [class*=" la-"] {
+  font-family: 'Line Awesome Free' !important;
+  font-weight: 900 !important;
+  display: inline-block !important;
+}
+
+[class^="la-"]::before, [class*=" la-"]::before {
+  display: inline-block !important;
+  font-family: 'Line Awesome Free' !important;
+  font-weight: 900 !important;
+}
+
+/* Icons */
+.la.la-home:before, .las.la-home:before, .la-home:before { content: "\f015"; }
+.la.la-user:before, .las.la-user:before, .la-user:before { content: "\f007"; }
+.la.la-users:before, .las.la-users:before, .la-users:before { content: "\f0c0"; }
+.la.la-car:before, .las.la-car:before, .la-car:before { content: "\f1b9"; }
+.la.la-dollar:before, .las.la-dollar:before, .la-dollar:before { content: "\f155"; }
+.la.la-dollar-sign:before, .las.la-dollar-sign:before, .la-dollar-sign:before { content: "\f155"; }
+.la.la-chart-bar:before, .las.la-chart-bar:before, .la-chart-bar:before { content: "\f080"; }
+.la.la-chart-line:before, .las.la-chart-line:before, .la-chart-line:before { content: "\f201"; }
+.la.la-chart-line-down:before, .las.la-chart-line-down:before, .la-chart-line-down:before { content: "\f03d"; }
+.la.la-cog:before, .las.la-cog:before, .la-cog:before { content: "\f013"; }
+.la.la-calendar:before, .las.la-calendar:before, .la-calendar:before { content: "\f133"; }
+.la.la-calendar-alt:before, .las.la-calendar-alt:before, .la-calendar-alt:before { content: "\f073"; }
+.la.la-calendar-check:before, .las.la-calendar-check:before, .la-calendar-check:before { content: "\f274"; }
+.la.la-search:before, .las.la-search:before, .la-search:before { content: "\f002"; }
+.la.la-envelope:before, .las.la-envelope:before, .la-envelope:before { content: "\f0e0"; }
+.la.la-lock:before, .las.la-lock:before, .la-lock:before { content: "\f023"; }
+.la.la-heart:before, .las.la-heart:before, .la-heart:before { content: "\f004"; }
+.la.la-star:before, .las.la-star:before, .la-star:before { content: "\f005"; }
+.la.la-plus:before, .las.la-plus:before, .la-plus:before { content: "\f067"; }
+.la.la-plus-circle:before, .las.la-plus-circle:before, .la-plus-circle:before { content: "\f055"; }
+.la.la-minus:before, .las.la-minus:before, .la-minus:before { content: "\f068"; }
+.la.la-times:before, .las.la-times:before, .la-times:before { content: "\f00d"; }
+.la.la-times-circle:before, .las.la-times-circle:before, .la-times-circle:before { content: "\f057"; }
+.la.la-check:before, .las.la-check:before, .la-check:before { content: "\f00c"; }
+.la.la-check-circle:before, .las.la-check-circle:before, .la-check-circle:before { content: "\f058"; }
+.la.la-exclamation-triangle:before, .las.la-exclamation-triangle:before, .la-exclamation-triangle:before { content: "\f071"; }
+.la.la-exclamation-circle:before, .las.la-exclamation-circle:before, .la-exclamation-circle:before { content: "\f06a"; }
+.la.la-info-circle:before, .las.la-info-circle:before, .la-info-circle:before { content: "\f05a"; }
+.la.la-eye:before, .las.la-eye:before, .la-eye:before { content: "\f06e"; }
+.la.la-eye-slash:before, .las.la-eye-slash:before, .la-eye-slash:before { content: "\f070"; }
+.la.la-edit:before, .las.la-edit:before, .la-edit:before { content: "\f044"; }
+.la.la-trash:before, .las.la-trash:before, .la-trash:before { content: "\f1f8"; }
+.la.la-save:before, .las.la-save:before, .la-save:before { content: "\f0c7"; }
+.la.la-sync:before, .las.la-sync:before, .la-sync:before { content: "\f021"; }
+.la.la-arrow-up:before, .las.la-arrow-up:before, .la-arrow-up:before { content: "\f062"; }
+.la.la-arrow-down:before, .las.la-arrow-down:before, .la-arrow-down:before { content: "\f063"; }
+.la.la-arrow-left:before, .las.la-arrow-left:before, .la-arrow-left:before { content: "\f060"; }
+.la.la-arrow-right:before, .las.la-arrow-right:before, .la-arrow-right:before { content: "\f061"; }
+.la.la-angle-down:before, .las.la-angle-down:before, .la-angle-down:before { content: "\f107"; }
+.la.la-filter:before, .las.la-filter:before, .la-filter:before { content: "\f0b0"; }
+.la.la-share:before, .las.la-share:before, .la-share:before { content: "\f064"; }
+.la.la-list:before, .las.la-list:before, .la-list:before { content: "\f03a"; }
+.la.la-list-alt:before, .las.la-list-alt:before, .la-list-alt:before { content: "\f022"; }
+.la.la-shopping-cart:before, .las.la-shopping-cart:before, .la-shopping-cart:before { content: "\f07a"; }
+.la.la-credit-card:before, .las.la-credit-card:before, .la-credit-card:before { content: "\f09d"; }
+.la.la-money-bill:before, .las.la-money-bill:before, .la-money-bill:before { content: "\f0d6"; }
+.la.la-file-alt:before, .las.la-file-alt:before, .la-file-alt:before { content: "\f15c"; }
+.la.la-inbox:before, .las.la-inbox:before, .la-inbox:before { content: "\f01c"; }
+.la.la-bell-slash:before, .las.la-bell-slash:before, .la-bell-slash:before { content: "\f1f6"; }
+.la.la-comment:before, .las.la-comment:before, .la-comment:before { content: "\f075"; }
+.la.la-paper-plane:before, .las.la-paper-plane:before, .la-paper-plane:before { content: "\f1d8"; }
+.la.la-sign-in-alt:before, .las.la-sign-in-alt:before, .la-sign-in-alt:before { content: "\f2f6"; }
+.la.la-sign-out-alt:before, .las.la-sign-out-alt:before, .la-sign-out-alt:before { content: "\f2f5"; }
+.la.la-mobile:before, .las.la-mobile:before, .la-mobile:before { content: "\f10b"; }
+.la.la-ticket-alt:before, .las.la-ticket-alt:before, .la-ticket-alt:before { content: "\f3ff"; }
+.la.la-calculator:before, .las.la-calculator:before, .la-calculator:before { content: "\f1ec"; }
+.la.la-user-plus:before, .las.la-user-plus:before, .la-user-plus:before { content: "\f234"; }
+.la.la-user-cog:before, .las.la-user-cog:before, .la-user-cog:before { content: "\f4fe"; }
+.la.la-user-alt:before, .las.la-user-alt:before, .la-user-alt:before { content: "\f406"; }
+.la.la-users-cog:before, .las.la-users-cog:before, .la-users-cog:before { content: "\f509"; }
+.la.la-toggle-on:before, .las.la-toggle-on:before, .la-toggle-on:before { content: "\f205"; }
+.la.la-toggle-off:before, .las.la-toggle-off:before, .la-toggle-off:before { content: "\f204"; }
+.la.la-id-card:before, .las.la-id-card:before, .la-id-card:before { content: "\f2c2"; }
+.la.la-pencil:before, .las.la-pencil:before, .la-pencil:before { content: "\f040"; }
+.la.la-clock:before, .las.la-clock:before, .la-clock:before { content: "\f017"; }
+.la.la-spinner:before, .las.la-spinner:before, .la-spinner:before { content: "\f110"; }
+.la.la-link:before, .las.la-link:before, .la-link:before { content: "\f0c1"; }
+
+/* Icon specific - removed header/sidebar specific code */
+
+i[class^="la-"], i[class*=" la-"], i.la, i.las, i.lar, i.lab,
+span[class^="la-"], span[class*=" la-"], span.la, span.las, span.rar, span.lab {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
+/* Size Classes */
+.la-lg { font-size: 1.33333em; }
+.la-2x { font-size: 2em; }
+.la-3x { font-size: 3em; }
+
+/* Spin */
+.la-spin { animation: la-spin 2s infinite linear; }
+@keyframes la-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(359deg); } }

@@ -1,0 +1,404 @@
+/**
+ * Maneli Car Inquiry - Force RTL and Persian Font
+ * این فایل اطمینان می‌دهد که همه چیز راست چین و با فونت فارسی نمایش داده می‌شود
+ */
+
+/* Force RTL Direction on Everything */
+* {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+html {
+    direction: rtl !important;
+}
+
+body {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Force Persian Font on Everything */
+/* استثنا برای آیکون‌های Line Awesome - نباید فونت فارسی بگیرند */
+*:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.lar):not(.lab),
+*:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.lar):not(.lab)::before,
+*:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.rar):not(.lab)::after {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+}
+
+/* اطمینان از اینکه آیکون‌های Line Awesome فونت خودشون رو دارن */
+[class^="la-"],
+[class*=" la-"],
+.la, .las, .lar, .lab {
+    font-family: 'Line Awesome Free' !important;
+}
+
+[class^="la-"]::before,
+[class*=" la-"]::before {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
+html,
+body,
+div,
+span,
+h1, h2, h3, h4, h5, h6,
+p,
+a,
+button,
+input,
+textarea,
+select,
+option,
+label,
+.form-control,
+.form-select,
+.form-label,
+.btn,
+.card,
+.card-title,
+.card-body,
+.card-header,
+.card-footer,
+.table,
+.modal,
+.modal-title,
+.modal-body,
+.modal-header,
+.modal-footer,
+.alert,
+.badge,
+.breadcrumb,
+.nav,
+.navbar,
+.sidebar,
+.dropdown,
+.dropdown-menu,
+.dropdown-item,
+.list-group,
+.list-group-item,
+.pagination,
+.page-link,
+.tooltip,
+.popover,
+.toast,
+.progress,
+.spinner,
+.accordion,
+.collapse,
+.tab-content,
+.tab-pane,
+.offcanvas,
+.offcanvas-header,
+.offcanvas-body,
+.main-content,
+.page-header-breadcrumb,
+.breadcrumb-item {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+    direction: rtl !important;
+}
+
+/* Override any LTR specific styles */
+.text-start {
+    text-align: right !important;
+}
+
+.text-end {
+    text-align: left !important;
+}
+
+.ms-auto {
+    margin-right: auto !important;
+    margin-left: 0 !important;
+}
+
+.me-auto {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+}
+
+/* Fix icon positions in RTL */
+.btn i,
+.badge i,
+.alert i {
+    margin-left: 0.25rem !important;
+    margin-right: 0 !important;
+}
+
+/* Fix dropdown menus */
+.dropdown-menu {
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+.dropdown-item {
+    text-align: right !important;
+}
+
+/* Fix forms */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+textarea,
+select,
+.form-control,
+.form-select {
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+/* Fix tables */
+table {
+    direction: rtl !important;
+}
+
+th,
+td {
+    text-align: right !important;
+}
+
+/* Fix cards */
+.card {
+    direction: rtl !important;
+}
+
+.card-header,
+.card-body,
+.card-footer {
+    text-align: right !important;
+}
+
+/* Fix breadcrumbs */
+.breadcrumb {
+    direction: rtl !important;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    float: right !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0 !important;
+}
+
+/* Fix modals */
+.modal {
+    direction: rtl !important;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+    text-align: right !important;
+}
+
+/* Fix offcanvas */
+.offcanvas {
+    direction: rtl !important;
+}
+
+.offcanvas-header,
+.offcanvas-body {
+    text-align: right !important;
+}
+
+/* Fix list groups */
+.list-group {
+    direction: rtl !important;
+}
+
+.list-group-item {
+    text-align: right !important;
+}
+
+/* Fix navs */
+.nav {
+    direction: rtl !important;
+}
+
+.nav-link {
+    text-align: right !important;
+}
+
+/* Fix pagination */
+.pagination {
+    direction: rtl !important;
+}
+
+/* Fix alerts */
+.alert {
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+/* Fix toasts */
+.toast {
+    direction: rtl !important;
+}
+
+.toast-header,
+.toast-body {
+    text-align: right !important;
+}
+
+/* Fix accordions */
+.accordion {
+    direction: rtl !important;
+}
+
+.accordion-button {
+    text-align: right !important;
+}
+
+/* Fix progress bars */
+.progress {
+    direction: ltr !important; /* Progress bars should be LTR for proper animation */
+}
+
+/* Fix specific plugin elements */
+.switcher-style-head,
+.category-name,
+.slide__category {
+    text-align: right !important;
+}
+
+/* Force font on all text elements */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+}
+
+/* Force font on buttons and links */
+a, button, .btn {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+}
+
+/* Force font on form elements */
+input, textarea, select, option {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+}
+
+/* Fix any inline-block elements */
+.d-inline-block {
+    direction: rtl !important;
+}
+
+/* Fix flex containers to respect RTL */
+.d-flex,
+.flex-row {
+    direction: rtl !important;
+}
+
+/* Fix text center elements (they should still be centered) */
+.text-center {
+    text-align: center !important;
+}
+
+/* مخفی کردن کامل Admin Bar وردپرس در داشبورد */
+#wpadminbar {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+}
+
+/* حذف padding که Admin Bar اضافه می‌کنه */
+html.maneli-dashboard,
+html.maneli-dashboard body {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+body.maneli-dashboard {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* فورس کردن header به top صفحه */
+.maneli-dashboard .app-header,
+.maneli-dashboard #header {
+    top: 0 !important;
+    margin-top: 0 !important;
+}
+
+/* اطمینان از اینکه sidebar و page container هم padding ندارن */
+.maneli-dashboard .page,
+.maneli-dashboard .app-sidebar {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Force on WordPress specific elements too */
+#wpadminbar * {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+}
+
+/* Force on all shortcode elements */
+.maneli-shortcode,
+.maneli-shortcode *,
+[class*="maneli-"],
+[class*="maneli-"] *:not([class^="la-"]):not([class*=" la-"]):not(.la):not(.las):not(.rar):not(.lab) {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+    direction: rtl !important;
+}
+
+/* Force on all form elements specifically */
+input[type="text"]:not([dir="ltr"]),
+input[type="email"]:not([dir="ltr"]),
+input[type="password"]:not([dir="ltr"]),
+input[type="number"]:not([dir="ltr"]),
+input[type="tel"]:not([dir="ltr"]),
+input[type="search"]:not([dir="ltr"]),
+textarea:not([dir="ltr"]),
+select:not([dir="ltr"]) {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+    direction: rtl !important;
+}
+
+/* Ensure SVG icons don't inherit RTL direction (causes icon rotation issues) */
+svg {
+    direction: ltr !important;
+}
+
+/* Ensure icon fonts display correctly */
+i[class*="ti-"],
+i[class*="ri-"],
+i[class*="bi-"],
+i[class*="fe-"],
+i[class*="bx-"],
+i[class^="la-"],
+i[class*=" la-"],
+.icon {
+    direction: ltr !important;
+    display: inline-block !important;
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
+/* Body style */
+/* اطمینان نهایی برای آیکون‌های Line Awesome */
+i.la, i.las, i.lar, i.lab,
+span.la, span.las, span.rar, span.lab,
+i[class^="la-"], i[class*=" la-"],
+span[class^="la-"], span[class*=" la-"] {
+    font-family: 'Line Awesome Free' !important;
+    font-weight: 900 !important;
+}
+
+body {
+    font-family: IRANSans, Tahoma, Arial, sans-serif !important;
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Override any framework defaults */
+:root {
+    direction: rtl !important;
+}
+

@@ -297,7 +297,6 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'select_expert_required' => esc_html__('Please select an expert.', 'maneli-car-inquiry'),
             ]
         ]);
-<<<<<<< HEAD
     }
 
     /**
@@ -354,7 +353,5 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'save_note' => wp_create_nonce('maneli_installment_note'),
             ],
         ]);
-=======
->>>>>>> parent of 7d04676 (.)
     }
 }
