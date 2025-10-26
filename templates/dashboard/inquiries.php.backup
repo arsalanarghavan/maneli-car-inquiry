@@ -707,6 +707,79 @@ if ($count_type === 'installment' || $count_type === 'all') {
                 </div>
                 <?php endif; ?>
 
+                <?php if ($count_type === 'installment'): ?>
+                <!-- Installment Inquiry Filters -->
+                <form id="maneli-installment-inquiry-filter-form" onsubmit="return false;">
+                    <!-- Search Field -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="la la-search"></i>
+                                </span>
+                                <input type="search" id="installment-inquiry-search-input" class="form-control" placeholder="جستجو بر اساس نام مشتری، نام خودرو یا شماره موبایل...">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Controls -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">وضعیت:</label>
+                            <select id="installment-inquiry-status-filter" class="form-select">
+                                <option value="">همه وضعیت‌ها</option>
+                                <option value="new">جدید</option>
+                                <option value="referred">ارجاع شده</option>
+                                <option value="in_progress">در حال پیگیری</option>
+                                <option value="meeting_scheduled">جلسه تعیین شده</option>
+                                <option value="follow_up_scheduled">پیگیری تعیین شده</option>
+                                <option value="cancelled">لغو شده</option>
+                                <option value="completed">تکمیل شده</option>
+                                <option value="rejected">رد شده</option>
+                            </select>
+                        </div>
+                        
+                        <?php if (current_user_can('manage_maneli_inquiries') && !empty($experts)) : ?>
+                            <div class="col-md-4">
+                                <label class="form-label">کارشناس:</label>
+                                <select id="installment-expert-filter" class="form-select maneli-select2">
+                                    <option value="">همه کارشناسان</option>
+                                    <?php foreach ($experts as $expert) : ?>
+                                        <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label">مرتب‌سازی:</label>
+                            <select id="installment-inquiry-sort-filter" class="form-select">
+                                <option value="default">پیش‌فرض (جدیدترین قدیمی)</option>
+                                <option value="date_desc">جدیدترین</option>
+                                <option value="date_asc">قدیمی‌ترین</option>
+                                <option value="status">بر اساس وضعیت</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Actions -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-12">
+                            <div class="d-flex gap-2">
+                                <button type="button" id="installment-inquiry-reset-filters" class="btn btn-outline-secondary btn-sm">
+                                    <i class="la la-refresh me-1"></i>
+                                    پاک کردن فیلترها
+                                </button>
+                                <button type="button" id="installment-inquiry-apply-filters" class="btn btn-primary btn-sm">
+                                    <i class="la la-filter me-1"></i>
+                                    اعمال فیلتر
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <?php endif; ?>
+
                 <div class="table-responsive">
                     <table id="datatable-basic" class="table table-bordered text-nowrap w-100">
                         <thead>
@@ -723,50 +796,14 @@ if ($count_type === 'installment' || $count_type === 'all') {
                                 <th>عملیات</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php
-                            // Determine which type of inquiries to show based on subpage
-                            $show_type = (!empty($subpage)) ? $subpage : 'all'; // 'cash', 'installment', or 'all'
-                            $all_inquiries = [];
-                            
-                            // Get installment inquiries (if needed)
-                            if ($show_type === 'installment' || $show_type === 'all') {
-                                $installment_args = [
-                                    'post_type' => 'inquiry',
-                                    'post_status' => 'publish',
-                                    'numberposts' => 20,
-                                    'orderby' => 'date',
-                                    'order' => 'DESC'
-                                ];
-                                
-                                // SECURITY: Filter by user role
-                                if ($is_expert && !$is_admin) {
-                                    // Expert sees only assigned inquiries
-                                    $installment_args['meta_query'] = [
-                                        [
-                                            'key' => 'assigned_expert_id',
-                                            'value' => $current_user_id,
-                                            'compare' => '='
-                                        ]
-                                    ];
-                                } elseif ($is_customer) {
-                                    // Customer sees only their own inquiries
-                                    $installment_args['author'] = $current_user_id;
-                                }
-                                
-                                $installment_inquiries = get_posts($installment_args);
-                                
-                                // Add to combined list
-                                foreach ($installment_inquiries as $inquiry) {
-                                    $all_inquiries[] = [
-                                        'object' => $inquiry,
-                                        'type' => 'installment',
-                                        'timestamp' => strtotime($inquiry->post_date)
-                                    ];
-                                }
-                            }
-                            
-                            // Get cash inquiries (if needed)
+                        <tbody id="maneli-inquiry-list-tbody">
+                            <tr>
+                                <td colspan="<?php echo current_user_can('manage_maneli_inquiries') ? '8' : '7'; ?>" class="text-center py-4">
+                                    <i class="la la-spinner la-spin fs-24 text-muted"></i>
+                                    <p class="mt-2 text-muted">در حال بارگذاری...</p>
+                                </td>
+                            </tr>
+                        </tbody>
                             if ($show_type === 'cash' || $show_type === 'all') {
                                 $cash_args = [
                                     'post_type' => 'cash_inquiry',
@@ -1129,6 +1166,10 @@ if ($count_type === 'installment' || $count_type === 'all') {
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                <div id="maneli-inquiry-pagination" class="d-flex justify-content-center mt-3">
+                </div>
             </div>
         </div>
     </div>
@@ -1247,6 +1288,98 @@ if ($count_type === 'cash') {
             if (urlParams.get('status')) $('#cash-inquiry-status-filter').val(urlParams.get('status'));
             if (urlParams.get('expert')) $('#cash-expert-filter').val(urlParams.get('expert'));
             if (urlParams.get('sort')) $('#cash-inquiry-sort-filter').val(urlParams.get('sort'));
+        });
+        </script>
+        
+        <!-- Installment Inquiry Filters JavaScript -->
+        <script>
+        jQuery(document).ready(function($) {
+            // Initialize Select2 for expert filter
+            if ($('#installment-expert-filter').length) {
+                $('#installment-expert-filter').select2({
+                    placeholder: 'همه کارشناسان',
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+            
+            // Function to fetch installment inquiries via AJAX
+            function fetchInstallmentInquiries(page = 1) {
+                var search = $('#installment-inquiry-search-input').val();
+                var status = $('#installment-inquiry-status-filter').val();
+                var expert = $('#installment-expert-filter').val();
+                var sort = $('#installment-inquiry-sort-filter').val();
+                
+                // Show loading
+                $('#maneli-inquiry-list-tbody').html('<tr><td colspan="' + ($('#maneli-inquiry-list-tbody tr:first td').length) + '" class="text-center py-4"><i class="la la-spinner la-spin fs-24 text-muted"></i><p class="mt-2 text-muted">در حال بارگذاری...</p></td></tr>');
+                
+                $.ajax({
+                    url: maneliInquiryLists.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_filter_installment_inquiries_ajax',
+                        nonce: maneliInquiryLists.nonces.inquiry_filter,
+                        page: page,
+                        search: search,
+                        status: status,
+                        expert: expert,
+                        sort: sort
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $('#maneli-inquiry-list-tbody').html(response.data.html);
+                            $('#maneli-inquiry-pagination').html(response.data.pagination);
+                        } else {
+                            $('#maneli-inquiry-list-tbody').html('<tr><td colspan="' + ($('#maneli-inquiry-list-tbody tr:first td').length) + '" class="text-center py-4 text-danger">خطا در بارگذاری داده‌ها</td></tr>');
+                        }
+                    },
+                    error: function() {
+                        $('#maneli-inquiry-list-tbody').html('<tr><td colspan="' + ($('#maneli-inquiry-list-tbody tr:first td').length) + '" class="text-center py-4 text-danger">خطا در ارتباط با سرور</td></tr>');
+                    }
+                });
+            }
+            
+            // Apply filters button
+            $('#installment-inquiry-apply-filters').on('click', function(e) {
+                e.preventDefault();
+                fetchInstallmentInquiries();
+            });
+            
+            // Reset filters button
+            $('#installment-inquiry-reset-filters').on('click', function(e) {
+                e.preventDefault();
+                $('#installment-inquiry-search-input').val('');
+                $('#installment-inquiry-status-filter').val('');
+                $('#installment-expert-filter').val('').trigger('change');
+                $('#installment-inquiry-sort-filter').val('default');
+                fetchInstallmentInquiries();
+            });
+            
+            // Auto-apply on filter change
+            $('#installment-inquiry-status-filter, #installment-expert-filter, #installment-inquiry-sort-filter').on('change', function() {
+                fetchInstallmentInquiries();
+            });
+            
+            // Search with debounce
+            var searchTimeout;
+            $('#installment-inquiry-search-input').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    fetchInstallmentInquiries();
+                }, 500);
+            });
+            
+            // Pagination click handler
+            $(document).on('click', '#maneli-inquiry-pagination a', function(e) {
+                e.preventDefault();
+                var page = $(this).data('page');
+                if (page) {
+                    fetchInstallmentInquiries(page);
+                }
+            });
+            
+            // Initial load
+            fetchInstallmentInquiries();
         });
         </script>
         

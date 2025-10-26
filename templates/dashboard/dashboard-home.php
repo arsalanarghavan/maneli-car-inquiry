@@ -47,6 +47,11 @@ if ($is_customer) {
     
     foreach ($cash_inquiries as $inq) {
         $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
+        // Convert 'pending' to 'new' automatically
+        if ($status === 'pending') {
+            $status = 'new';
+            update_post_meta($inq->ID, 'cash_inquiry_status', 'new');
+        }
         if ($status === 'new' || $status === 'pending') $pending_count++;
         elseif ($status === 'approved' || $status === 'completed') $approved_count++;
         elseif ($status === 'rejected') $rejected_count++;
@@ -247,16 +252,35 @@ if ($is_customer) {
                                     <?php foreach ($recent_inquiries as $inq):
                                         $post_type = get_post_type($inq);
                                         $is_cash = ($post_type === 'cash_inquiry');
-                                        $status = get_post_meta($inq->ID, $is_cash ? 'cash_inquiry_status' : 'inquiry_status', true);
+                                        if ($is_cash) {
+                                            $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
+                                        } else {
+                                            $status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
+                                        }
                                         $product_id = get_post_meta($inq->ID, 'product_id', true);
                                         
-                                        $status_badge = [
-                                            'pending' => ['label' => 'در انتظار', 'class' => 'warning'],
-                                            'approved' => ['label' => 'تایید شده', 'class' => 'success'],
-                                            'user_confirmed' => ['label' => 'تایید شده', 'class' => 'success'],
-                                            'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                            'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
-                                        ];
+                                        // تعریف وضعیت‌های مختلف برای نقدی و اقساطی
+                                        if ($is_cash) {
+                                            $status_badge = [
+                                                'new' => ['label' => 'جدید', 'class' => 'primary'],
+                                                'pending' => ['label' => 'در انتظار', 'class' => 'warning'],
+                                                'approved' => ['label' => 'تایید شده', 'class' => 'success'],
+                                                'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
+                                                'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
+                                                'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
+                                            ];
+                                        } else {
+                                            $status_badge = [
+                                                'new' => ['label' => 'جدید', 'class' => 'primary'],
+                                                'referred' => ['label' => 'ارجاع شده', 'class' => 'info'],
+                                                'in_progress' => ['label' => 'در حال پیگیری', 'class' => 'warning'],
+                                                'user_confirmed' => ['label' => 'تایید شده', 'class' => 'success'],
+                                                'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
+                                                'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
+                                                'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
+                                                'follow_up_scheduled' => ['label' => 'پیگیری برنامه‌ریزی', 'class' => 'info'],
+                                            ];
+                                        }
                                         $badge = $status_badge[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
                                         
                                         $timestamp = strtotime($inq->post_date);
@@ -320,6 +344,10 @@ if ($is_customer) {
     $stats = Maneli_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
     $daily_stats = Maneli_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id, 7); // Last 7 days
     $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
+    
+    // Get separate statistics for cash and installment inquiries
+    $cash_stats = get_separate_cash_statistics($start_date, $end_date, $expert_id);
+    $installment_stats = get_separate_installment_statistics($start_date, $end_date, $expert_id);
     
     // Get recent inquiries (both types)
     $recent_args = [
@@ -385,10 +413,111 @@ if ($is_customer) {
     
     // Enqueue Chart.js
     wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', [], '4.4.0', true);
+    
+    // اضافه کردن Chart.js به صورت inline برای اطمینان
+    wp_add_inline_script('chartjs', '
+        window.addEventListener("load", function() {
+            if (typeof Chart === "undefined") {
+                console.log("Chart.js CDN failed, loading from local...");
+                var script = document.createElement("script");
+                script.src = "' . MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.min.js";
+                script.onload = function() {
+                    console.log("Chart.js loaded from local");
+                };
+                document.head.appendChild(script);
+            }
+        });
+    ');
     ?>
     
     <div class="row">
         <div class="col-xl-8">
+            <!-- Detailed Statistics for Admin -->
+            <?php if ($is_admin): ?>
+            
+            <div class="row mb-4">
+                <!-- Cash Inquiry Detailed Stats -->
+                <div class="col-xl-6">
+                    <div class="card custom-card">
+                        <div class="card-header bg-warning-transparent">
+                            <div class="card-title">
+                                <i class="la la-dollar-sign me-2"></i>
+                                آمار تفصیلی استعلامات نقدی
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-warning"><?php echo number_format_i18n($cash_stats['total']); ?></h4>
+                                        <small class="text-muted">کل نقدی</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-success"><?php echo number_format_i18n($cash_stats['completed']); ?></h4>
+                                        <small class="text-muted">تکمیل شده</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-secondary"><?php echo number_format_i18n($cash_stats['pending']); ?></h4>
+                                        <small class="text-muted">در انتظار</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-danger"><?php echo number_format_i18n($cash_stats['rejected']); ?></h4>
+                                        <small class="text-muted">رد شده</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Installment Inquiry Detailed Stats -->
+                <div class="col-xl-6">
+                    <div class="card custom-card">
+                        <div class="card-header bg-info-transparent">
+                            <div class="card-title">
+                                <i class="la la-credit-card me-2"></i>
+                                آمار تفصیلی استعلامات اقساطی
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-info"><?php echo number_format_i18n($installment_stats['total']); ?></h4>
+                                        <small class="text-muted">کل اقساطی</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-success"><?php echo number_format_i18n($installment_stats['user_confirmed']); ?></h4>
+                                        <small class="text-muted">تایید شده</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-secondary"><?php echo number_format_i18n($installment_stats['pending']); ?></h4>
+                                        <small class="text-muted">در انتظار</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <div class="text-center p-3 border rounded">
+                                        <h4 class="fw-bold text-danger"><?php echo number_format_i18n($installment_stats['rejected']); ?></h4>
+                                        <small class="text-muted">رد شده</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
             <!-- Statistics Cards -->
             <div class="row">
                 <?php if ($is_expert): ?>
@@ -477,111 +606,89 @@ if ($is_customer) {
                         </div>
                     </div>
                 <?php else: ?>
-                    <!-- Admin stats -->
+                    <!-- Cash Inquiry Stats -->
                     <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
+                        <div class="card custom-card overflow-hidden border-warning">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div>
+                                        <span class="text-muted d-block mb-1">استعلامات نقدی</span>
+                                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($cash_stats['total']); ?></h4>
+                                    </div>
+                                    <div class="lh-1">
+                                        <span class="avatar avatar-md avatar-rounded bg-warning">
+                                            <i class="la la-dollar-sign fs-20"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-muted fs-12">
+                                    تکمیل شده: <span class="text-success"><?php echo number_format_i18n($cash_stats['completed']); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Installment Inquiry Stats -->
+                    <div class="col-xxl-3 col-xl-6">
+                        <div class="card custom-card overflow-hidden border-info">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div>
+                                        <span class="text-muted d-block mb-1">استعلامات اقساطی</span>
+                                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($installment_stats['total']); ?></h4>
+                                    </div>
+                                    <div class="lh-1">
+                                        <span class="avatar avatar-md avatar-rounded bg-info">
+                                            <i class="la la-credit-card fs-20"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-muted fs-12">
+                                    تایید شده: <span class="text-success"><?php echo number_format_i18n($installment_stats['user_confirmed']); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Inquiries Stats -->
+                    <div class="col-xxl-3 col-xl-6">
+                        <div class="card custom-card overflow-hidden border-primary">
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                     <div>
                                         <span class="text-muted d-block mb-1">مجموع استعلامات</span>
-                                        <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($stats['total_inquiries']); ?></h4>
+                                        <h4 class="fw-semibold mb-0 text-primary"><?php echo number_format_i18n($stats['total_inquiries']); ?></h4>
                                     </div>
                                     <div class="lh-1">
                                         <span class="avatar avatar-md avatar-rounded bg-primary">
-                                            <i class="la la-file-alt fs-20"></i>
+                                            <i class="la la-list-alt fs-20"></i>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="text-muted fs-12">
-                                    <?php if ($total_growth >= 0): ?>
-                                        افزایش <span class="text-success"><?php echo $total_growth; ?>%<i class="la la-arrow-up"></i></span>
-                                    <?php else: ?>
-                                        کاهش <span class="text-danger"><?php echo abs($total_growth); ?>%<i class="la la-arrow-down"></i></span>
-                                    <?php endif; ?>
+                                    امروز: <span class="text-info"><?php echo number_format_i18n($stats['new_today']); ?></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
+                    <!-- Revenue Stats -->
                     <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
+                        <div class="card custom-card overflow-hidden border-success">
                             <div class="card-body">
                                 <div class="d-flex align-items-start justify-content-between mb-2">
                                     <div>
-                                        <span class="text-muted d-block mb-1">جدید</span>
-                                        <h4 class="fw-semibold mb-0 text-secondary"><?php echo number_format_i18n($stats['new']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-secondary">
-                                            <i class="la la-file-alt fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    منتظر ارجاع به کارشناس
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">ارجاع شده</span>
-                                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($stats['referred']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-info">
-                                            <i class="la la-share fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    ارجاع داده شده به کارشناس
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">در حال پیگیری</span>
-                                        <h4 class="fw-semibold mb-0 text-primary"><?php echo number_format_i18n($stats['in_progress']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-primary">
-                                            <i class="la la-spinner fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    در حال پیگیری توسط کارشناس
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">تکمیل شده</span>
-                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['completed']); ?></h4>
+                                        <span class="text-muted d-block mb-1">درآمد کل</span>
+                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['revenue']); ?></h4>
                                     </div>
                                     <div class="lh-1">
                                         <span class="avatar avatar-md avatar-rounded bg-success">
-                                            <i class="la la-check-circle fs-20"></i>
+                                            <i class="la la-money-bill-wave fs-20"></i>
                                         </span>
                                     </div>
                                 </div>
                                 <div class="text-muted fs-12">
-                                    نرخ موفقیت: <span class="text-success"><?php echo $stats['total_inquiries'] > 0 ? round(($stats['completed'] / $stats['total_inquiries']) * 100, 1) : 0; ?>%</span>
+                                    تومان
                                 </div>
                             </div>
                         </div>
@@ -643,17 +750,33 @@ if ($is_customer) {
                                     } else {
                                         $author = get_userdata($inq->post_author);
                                         $customer_name = $author ? $author->display_name : 'نامشخص';
-                                        $status = get_post_meta($inq->ID, 'inquiry_status', true);
+                                        $status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
                                     }
                                     
                                     $product_id = get_post_meta($inq->ID, 'product_id', true);
                                     
-                                    $status_badges = [
-                                        'pending' => ['label' => 'در انتظار', 'class' => 'warning'],
-                                        'approved' => ['label' => 'تایید', 'class' => 'success'],
-                                        'user_confirmed' => ['label' => 'تایید', 'class' => 'info'],
-                                        'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                    ];
+                                    // تعریف وضعیت‌های مختلف برای نقدی و اقساطی
+                                    if ($is_cash) {
+                                        $status_badges = [
+                                            'new' => ['label' => 'جدید', 'class' => 'primary'],
+                                            'pending' => ['label' => 'در انتظار', 'class' => 'warning'],
+                                            'approved' => ['label' => 'تایید شده', 'class' => 'success'],
+                                            'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
+                                            'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
+                                            'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
+                                        ];
+                                    } else {
+                                        $status_badges = [
+                                            'new' => ['label' => 'جدید', 'class' => 'primary'],
+                                            'referred' => ['label' => 'ارجاع شده', 'class' => 'info'],
+                                            'in_progress' => ['label' => 'در حال پیگیری', 'class' => 'warning'],
+                                            'user_confirmed' => ['label' => 'تایید شده', 'class' => 'success'],
+                                            'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
+                                            'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
+                                            'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
+                                            'follow_up_scheduled' => ['label' => 'پیگیری برنامه‌ریزی', 'class' => 'info'],
+                                        ];
+                                    }
                                     $badge = $status_badges[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
                                     
                                     $timestamp = strtotime($inq->post_date);
@@ -782,8 +905,8 @@ if ($is_customer) {
                     'meta_query' => [
                         'relation' => 'AND',
                         [
-                            'key' => 'inquiry_status',
-                            'value' => 'pending',
+                            'key' => 'tracking_status',
+                            'value' => 'new',
                             'compare' => '='
                         ],
                         [
@@ -1120,10 +1243,62 @@ if ($is_customer) {
     </div>
     
     <script>
+    // تابع تبدیل تاریخ میلادی به شمسی
+    function maneli_gregorian_to_jalali(gy, gm, gd, format) {
+        const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let jy = gy <= 1600 ? 0 : 979;
+        gy -= gy <= 1600 ? 621 : 1600;
+        const gy2 = (gm > 2) ? (gy + 1) : gy;
+        let days = (365 * gy) + (parseInt((gy2 + 3) / 4)) - (parseInt((gy2 + 99) / 100)) + (parseInt((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+        jy += 33 * (parseInt(days / 12053));
+        days %= 12053;
+        let jm = 1;
+        let jd = 1;
+        if (days >= 365) {
+            jy += parseInt((days - 1) / 365);
+            days = (days - 1) % 365;
+        }
+        if (days < 186) {
+            jm = 1 + parseInt(days / 31);
+            jd = 1 + (days % 31);
+        } else {
+            jm = 7 + parseInt((days - 186) / 30);
+            jd = 1 + ((days - 186) % 30);
+        }
+        
+        if (format === 'Y/m/d') {
+            return jy + '/' + (jm < 10 ? '0' : '') + jm + '/' + (jd < 10 ? '0' : '') + jd;
+        }
+        return jy + '/' + jm + '/' + jd;
+    }
+    
+    // تابع ساده‌تر برای تبدیل تاریخ
+    function convertToJalali(dateString) {
+        try {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return maneli_gregorian_to_jalali(year, month, day, 'Y/m/d');
+        } catch (e) {
+            console.log('Error converting date:', e);
+            return dateString;
+        }
+    }
+    
     jQuery(document).ready(function($) {
+        // تست تابع تبدیل تاریخ
+        console.log('Testing date conversion:');
+        console.log('2024-12-05 ->', convertToJalali('2024-12-05'));
+        console.log('2024-12-04 ->', convertToJalali('2024-12-04'));
+        
         // Wait for Chart.js to load
         function initChart() {
+            console.log('Initializing chart...');
+            console.log('Chart.js available:', typeof Chart !== 'undefined');
+            
             if (typeof Chart === 'undefined') {
+                console.log('Chart.js not loaded, retrying...');
                 setTimeout(initChart, 100);
                 return;
             }
@@ -1134,129 +1309,138 @@ if ($is_customer) {
                 return;
             }
             
-            <?php if (!empty($daily_stats)): ?>
+            // ایجاد نمودار ساده
+            try {
                 const dailyData = <?php echo json_encode(array_values($daily_stats)); ?>;
+                console.log('Daily stats data:', dailyData);
                 
-                if (!dailyData || dailyData.length === 0) {
-                    console.warn('No daily stats data');
-                    return;
+                let labels, totalData, cashData, installmentData;
+                
+                if (dailyData && dailyData.length > 0) {
+                    // تبدیل تاریخ میلادی به شمسی
+                    labels = dailyData.map(item => {
+                        console.log('Converting date:', item.date);
+                        const jalaliDate = convertToJalali(item.date);
+                        console.log('Converted to:', jalaliDate);
+                        return jalaliDate;
+                    });
+                    totalData = dailyData.map(item => parseInt(item.total) || 0);
+                    cashData = dailyData.map(item => parseInt(item.cash) || 0);
+                    installmentData = dailyData.map(item => parseInt(item.installment) || 0);
+                } else {
+                    // داده‌های پیش‌فرض
+                    labels = ['امروز', 'دیروز', '2 روز قبل', '3 روز قبل', '4 روز قبل', '5 روز قبل', '6 روز قبل'];
+                    totalData = [0, 0, 0, 0, 0, 0, 0];
+                    cashData = [0, 0, 0, 0, 0, 0, 0];
+                    installmentData = [0, 0, 0, 0, 0, 0, 0];
                 }
-                
-                const labels = dailyData.map(item => item.date);
-                const totalData = dailyData.map(item => parseInt(item.total) || 0);
-                const cashData = dailyData.map(item => parseInt(item.cash) || 0);
-                const installmentData = dailyData.map(item => parseInt(item.installment) || 0);
                 
                 console.log('Chart data:', { labels, totalData, cashData, installmentData });
                 
-                try {
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'کل استعلامات',
-                                    data: totalData,
-                                    borderColor: 'rgb(75, 192, 192)',
-                                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                                    borderWidth: 3,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 5,
-                                    pointHoverRadius: 7
-                                },
-                                {
-                                    label: 'نقدی',
-                                    data: cashData,
-                                    borderColor: 'rgb(255, 159, 64)',
-                                    backgroundColor: 'rgba(255, 159, 64, 0.1)',
-                                    borderWidth: 2,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 4,
-                                    pointHoverRadius: 6
-                                },
-                                {
-                                    label: 'اقساطی',
-                                    data: installmentData,
-                                    borderColor: 'rgb(54, 162, 235)',
-                                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                                    borderWidth: 2,
-                                    tension: 0.4,
-                                    fill: true,
-                                    pointRadius: 4,
-                                    pointHoverRadius: 6
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'کل استعلامات',
+                                data: totalData,
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 5,
+                                pointHoverRadius: 7
+                            },
+                            {
+                                label: 'نقدی',
+                                data: cashData,
+                                borderColor: 'rgb(255, 159, 64)',
+                                backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'اقساطی',
+                                data: installmentData,
+                                borderColor: 'rgb(54, 162, 235)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    font: {
+                                        family: 'IRANSans, Arial, sans-serif',
+                                        size: 13
+                                    }
                                 }
-                            ]
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: {
+                                    family: 'IRANSans, Arial, sans-serif'
+                                },
+                                bodyFont: {
+                                    family: 'IRANSans, Arial, sans-serif'
+                                }
+                            }
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                    labels: {
-                                        usePointStyle: true,
-                                        padding: 15,
-                                        font: {
-                                            family: 'IRANSans, Arial, sans-serif',
-                                            size: 13
-                                        }
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        family: 'IRANSans, Arial, sans-serif'
                                     }
                                 },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                    titleFont: {
-                                        family: 'IRANSans, Arial, sans-serif'
-                                    },
-                                    bodyFont: {
-                                        family: 'IRANSans, Arial, sans-serif'
-                                    }
+                                grid: {
+                                    drawBorder: false,
+                                    color: 'rgba(0, 0, 0, 0.05)'
                                 }
                             },
-                            interaction: {
-                                mode: 'nearest',
-                                axis: 'x',
-                                intersect: false
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        stepSize: 1,
-                                        font: {
-                                            family: 'IRANSans, Arial, sans-serif'
-                                        }
-                                    },
-                                    grid: {
-                                        drawBorder: false,
-                                        color: 'rgba(0, 0, 0, 0.05)'
-                                    }
+                            x: {
+                                grid: {
+                                    display: false
                                 },
-                                x: {
-                                    grid: {
-                                        display: false
-                                    },
-                                    ticks: {
-                                        font: {
-                                            family: 'IRANSans, Arial, sans-serif'
-                                        }
+                                ticks: {
+                                    font: {
+                                        family: 'IRANSans, Arial, sans-serif'
                                     }
                                 }
                             }
                         }
-                    });
-                    console.log('Chart initialized successfully');
-                } catch (error) {
-                    console.error('Chart initialization error:', error);
-                }
-            <?php else: ?>
-                console.warn('daily_stats is empty');
-                ctx.parentElement.innerHTML = '<div class="text-center py-5"><i class="la la-chart-line text-muted" style="font-size: 60px;"></i><p class="text-muted mt-3">داده‌ای برای نمایش نمودار موجود نیست</p></div>';
-            <?php endif; ?>
+                    }
+                });
+                console.log('Chart initialized successfully');
+            } catch (error) {
+                console.error('Chart creation failed:', error);
+                ctx.parentElement.innerHTML = '<div class="text-center py-5"><i class="la la-chart-line text-muted" style="font-size: 60px;"></i><p class="text-muted mt-3">خطا در بارگذاری نمودار</p></div>';
+            }
         }
         
         // Start initialization
@@ -1284,3 +1468,107 @@ if ($is_customer) {
     min-height: 300px;
 }
 </style>
+
+<?php
+/**
+ * Helper function to get separate cash inquiry statistics
+ */
+function get_separate_cash_statistics($start_date, $end_date, $expert_id = null) {
+    global $wpdb;
+    
+    $expert_join = '';
+    $expert_where = '';
+    $params = [$start_date . ' 00:00:00', $end_date . ' 23:59:59'];
+    
+    if ($expert_id) {
+        $expert_join = "INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
+        $expert_where = "AND pm_expert.meta_value = %d";
+        $params[] = $expert_id;
+    }
+    
+    $counts = $wpdb->get_results($wpdb->prepare("
+        SELECT 
+            COALESCE(pm.meta_value, 'new') as status,
+            COUNT(*) as count
+        FROM {$wpdb->posts} p
+        LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'cash_inquiry_status'
+        $expert_join
+        WHERE p.post_type = 'cash_inquiry'
+        AND p.post_status = 'publish'
+        AND p.post_date >= %s AND p.post_date <= %s
+        $expert_where
+        GROUP BY COALESCE(pm.meta_value, 'new')
+    ", $params), ARRAY_A);
+    
+    $stats = [
+        'total' => 0,
+        'new' => 0,
+        'pending' => 0,
+        'approved' => 0,
+        'completed' => 0,
+        'rejected' => 0,
+        'cancelled' => 0,
+    ];
+    
+    foreach ($counts as $count) {
+        $stats[$count['status']] = (int)$count['count'];
+        $stats['total'] += (int)$count['count'];
+    }
+    
+    return $stats;
+}
+
+/**
+ * Helper function to get separate installment inquiry statistics
+ */
+function get_separate_installment_statistics($start_date, $end_date, $expert_id = null) {
+    global $wpdb;
+    
+    $expert_join = '';
+    $expert_where = '';
+    $params = [$start_date . ' 00:00:00', $end_date . ' 23:59:59'];
+    
+    if ($expert_id) {
+        $expert_join = "INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
+        $expert_where = "AND pm_expert.meta_value = %d";
+        $params[] = $expert_id;
+    }
+    
+    $counts = $wpdb->get_results($wpdb->prepare("
+        SELECT 
+            COALESCE(pm.meta_value, 'new') as status,
+            COUNT(*) as count
+        FROM {$wpdb->posts} p
+        LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'tracking_status'
+        $expert_join
+        WHERE p.post_type = 'inquiry'
+        AND p.post_status = 'publish'
+        AND p.post_date >= %s AND p.post_date <= %s
+        $expert_where
+        GROUP BY COALESCE(pm.meta_value, 'new')
+    ", $params), ARRAY_A);
+    
+    $stats = [
+        'total' => 0,
+        'new' => 0,
+        'referred' => 0,
+        'in_progress' => 0,
+        'user_confirmed' => 0,
+        'completed' => 0,
+        'rejected' => 0,
+        'cancelled' => 0,
+        'follow_up_scheduled' => 0,
+        'pending' => 0, // برای سازگاری با نمایش
+    ];
+    
+    foreach ($counts as $count) {
+        $stats[$count['status']] = (int)$count['count'];
+        $stats['total'] += (int)$count['count'];
+    }
+    
+    // نگاشت pending به new برای سازگاری
+    $stats['pending'] = $stats['new'];
+    
+    return $stats;
+}
+?>

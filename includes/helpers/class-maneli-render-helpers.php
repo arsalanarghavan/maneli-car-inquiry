@@ -316,6 +316,12 @@ class Maneli_Render_Helpers {
         
         $product_id     = get_post_meta( $inquiry_id, 'product_id', true );
         $inquiry_status = get_post_meta( $inquiry_id, 'cash_inquiry_status', true );
+        // Handle empty status or 'pending' status - default to 'new' for display purposes
+        if (empty($inquiry_status) || $inquiry_status === 'pending') {
+            $inquiry_status = 'new';
+            // Update the database to use 'new' instead of 'pending'
+            update_post_meta($inquiry_id, 'cash_inquiry_status', 'new');
+        }
         $expert_status  = get_post_meta( $inquiry_id, 'expert_status', true );
         $customer_name  = get_post_meta( $inquiry_id, 'cash_first_name', true ) . ' ' . get_post_meta( $inquiry_id, 'cash_last_name', true );
         $customer_mobile= get_post_meta( $inquiry_id, 'mobile_number', true );

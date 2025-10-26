@@ -66,6 +66,7 @@ class Maneli_Ajax_Handler {
         // Installment inquiry status management
         add_action('wp_ajax_maneli_update_installment_status', [$this, 'ajax_update_installment_status']);
         add_action('wp_ajax_maneli_save_installment_note', [$this, 'ajax_save_installment_note']);
+        
     }
 
     //======================================================================
@@ -368,26 +369,134 @@ class Maneli_Ajax_Handler {
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
         $search_query = isset($_POST['search']) ? sanitize_text_field(wp_unslash($_POST['search'])) : '';
         $status_query = isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : '';
+        $sort_query = isset($_POST['sort']) ? sanitize_text_field(wp_unslash($_POST['sort'])) : 'default';
         $base_url = isset($_POST['base_url']) ? esc_url_raw($_POST['base_url']) : home_url();
+        
+        // Fix: Convert 'pending' status to 'new' for backward compatibility
+        if ($status_query === 'pending') {
+            $status_query = 'new';
+        }
 
-        $args = ['post_type' => 'cash_inquiry', 'posts_per_page' => 50, 'paged' => $paged, 'orderby' => 'date', 'order' => 'DESC', 'post_status' => 'publish'];
-		$meta_query = ['relation' => 'AND'];
+        $args = [
+            'post_type' => 'cash_inquiry', 
+            'posts_per_page' => 50, 
+            'paged' => $paged, 
+            'post_status' => 'publish'
+        ];
+        
+        // Determine default sorting based on user role
+        $current_user = wp_get_current_user();
+        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_expert = in_array('maneli_expert', $current_user->roles, true);
+        
+        // Set default sorting logic
+        if ($sort_query === 'default') {
+            if ($is_admin) {
+                // Admin: Show oldest new inquiries first, then by date
+                $args['orderby'] = ['meta_value' => 'ASC', 'date' => 'ASC'];
+                $args['meta_key'] = 'cash_inquiry_status';
+            } elseif ($is_expert) {
+                // Expert: Show oldest new/referred inquiries first
+                $args['orderby'] = ['meta_value' => 'ASC', 'date' => 'ASC'];
+                $args['meta_key'] = 'cash_inquiry_status';
+            } else {
+                $args['orderby'] = 'date';
+                $args['order'] = 'DESC';
+            }
+        } else {
+            // Custom sorting
+            switch ($sort_query) {
+                case 'date_desc':
+                    $args['orderby'] = 'date';
+                    $args['order'] = 'DESC';
+                    break;
+                case 'date_asc':
+                    $args['orderby'] = 'date';
+                    $args['order'] = 'ASC';
+                    break;
+                case 'status':
+                    $args['orderby'] = 'meta_value date';
+                    $args['order'] = 'ASC';
+                    $args['meta_key'] = 'cash_inquiry_status';
+                    break;
+                default:
+                    $args['orderby'] = 'date';
+                    $args['order'] = 'DESC';
+            }
+        }
+        
+        $meta_query = ['relation' => 'AND'];
 
-        if (!current_user_can('manage_maneli_inquiries')) {
+        // Expert filter: Only show assigned inquiries for experts
+        if ($is_expert && !$is_admin) {
             $meta_query[] = ['key' => 'assigned_expert_id', 'value' => get_current_user_id()];
-        } elseif (!empty($_POST['expert'])) {
+        } elseif ($is_admin && !empty($_POST['expert'])) {
             $meta_query[] = ['key' => 'assigned_expert_id', 'value' => absint($_POST['expert'])];
         }
 
+        // Search functionality
         if (!empty($search_query)) {
             $product_ids = wc_get_products(['s' => $search_query, 'limit' => -1, 'return' => 'ids']);
-            $search_meta_query = ['relation' => 'OR', ['key' => 'cash_first_name', 'value' => $search_query, 'compare' => 'LIKE'], ['key' => 'cash_last_name', 'value' => $search_query, 'compare' => 'LIKE'], ['key' => 'mobile_number', 'value' => $search_query, 'compare' => 'LIKE']];
-            if(!empty($product_ids)) $search_meta_query[] = ['key' => 'product_id', 'value' => $product_ids, 'compare' => 'IN'];
+            $search_meta_query = [
+                'relation' => 'OR', 
+                ['key' => 'cash_first_name', 'value' => $search_query, 'compare' => 'LIKE'], 
+                ['key' => 'cash_last_name', 'value' => $search_query, 'compare' => 'LIKE'], 
+                ['key' => 'mobile_number', 'value' => $search_query, 'compare' => 'LIKE']
+            ];
+            if(!empty($product_ids)) {
+                $search_meta_query[] = ['key' => 'product_id', 'value' => $product_ids, 'compare' => 'IN'];
+            }
             $meta_query[] = $search_meta_query;
         }
-		
-		if (!empty($status_query)) $meta_query[] = ['key' => 'cash_inquiry_status', 'value' => $status_query, 'compare' => '='];
-        if (count($meta_query) > 1) $args['meta_query'] = $meta_query;
+        
+        // Status filter
+        if (!empty($status_query)) {
+            if ($status_query === 'new') {
+                // Handle 'new' status - include 'new', 'pending', empty status values, and missing status
+                // We need to create a separate meta query for this OR condition
+                $new_status_query = [
+                    'relation' => 'OR',
+                    ['key' => 'cash_inquiry_status', 'value' => 'new', 'compare' => '='],
+                    ['key' => 'cash_inquiry_status', 'value' => 'pending', 'compare' => '='],
+                    ['key' => 'cash_inquiry_status', 'value' => '', 'compare' => '='],
+                    ['key' => 'cash_inquiry_status', 'compare' => 'NOT EXISTS']
+                ];
+                $meta_query[] = $new_status_query;
+            } else {
+                $meta_query[] = ['key' => 'cash_inquiry_status', 'value' => $status_query, 'compare' => '='];
+            }
+        }
+        
+        // Apply meta query if we have conditions
+        if (count($meta_query) > 1 || (!empty($status_query) && $status_query === 'new')) {
+            // If we have a status filter with OR conditions, we need to restructure
+            if (!empty($status_query) && $status_query === 'new') {
+                // Create a new meta query structure that handles the OR condition properly
+                $final_meta_query = [
+                    'relation' => 'AND'
+                ];
+                
+                // Add all non-status conditions
+                foreach ($meta_query as $query) {
+                    if (!isset($query['relation']) || $query['relation'] !== 'OR') {
+                        $final_meta_query[] = $query;
+                    }
+                }
+                
+                // Add the status OR condition
+                $final_meta_query[] = [
+                    'relation' => 'OR',
+                    ['key' => 'cash_inquiry_status', 'value' => 'new', 'compare' => '='],
+                    ['key' => 'cash_inquiry_status', 'value' => 'pending', 'compare' => '='],
+                    ['key' => 'cash_inquiry_status', 'value' => '', 'compare' => '='],
+                    ['key' => 'cash_inquiry_status', 'compare' => 'NOT EXISTS']
+                ];
+                
+                $args['meta_query'] = $final_meta_query;
+            } else {
+                $args['meta_query'] = $meta_query;
+            }
+        }
         
         $inquiry_query = new WP_Query($args);
         ob_start();
@@ -1702,4 +1811,5 @@ class Maneli_Ajax_Handler {
         
         wp_send_json_success(['message' => esc_html__('Note saved successfully.', 'maneli-car-inquiry')]);
     }
+    
 }

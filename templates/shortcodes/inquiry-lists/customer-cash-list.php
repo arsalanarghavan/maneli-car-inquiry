@@ -82,11 +82,17 @@ if (!defined('ABSPATH')) {
                                     $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
                                     
                                     $status_data = [
+                                        'new' => ['label' => 'جدید', 'class' => 'primary'],
                                         'pending' => ['label' => 'در انتظار بررسی', 'class' => 'warning'],
+                                        'referred' => ['label' => 'ارجاع داده شده', 'class' => 'info'],
+                                        'in_progress' => ['label' => 'در حال پیگیری', 'class' => 'warning'],
+                                        'follow_up_scheduled' => ['label' => 'پیگیری بعدی', 'class' => 'info'],
+                                        'awaiting_downpayment' => ['label' => 'در انتظار پیش پرداخت', 'class' => 'info'],
+                                        'downpayment_received' => ['label' => 'پیش پرداخت دریافت شد', 'class' => 'success'],
+                                        'meeting_scheduled' => ['label' => 'مراجعه حضوری', 'class' => 'info'],
                                         'approved' => ['label' => 'تایید شده', 'class' => 'success'],
-                                        'awaiting_payment' => ['label' => 'در انتظار پرداخت', 'class' => 'info'],
-                                        'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
                                         'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
+                                        'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
                                     ];
                                     $badge = $status_data[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
                                     

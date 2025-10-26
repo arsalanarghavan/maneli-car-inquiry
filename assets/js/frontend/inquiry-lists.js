@@ -517,8 +517,11 @@ jQuery(document).ready(function($) {
         const searchInput = (listType === 'installment') ? $('#inquiry-search-input') : $('#cash-inquiry-search-input');
         const statusFilter = (listType === 'installment') ? $('#status-filter') : $('#cash-inquiry-status-filter');
         const expertFilter = (listType === 'installment') ? $('#expert-filter') : $('#cash-expert-filter');
-        const loader = (listType === 'installment') ? $('#inquiry-list-loader') : $('#cash-inquiry-list-loader');
-        const paginationWrapper = (listType === 'installment') ? $('.maneli-pagination-wrapper') : $('.maneli-cash-pagination-wrapper');
+        const sortFilter = (listType === 'installment') ? $('#inquiry-sort-filter') : $('#cash-inquiry-sort-filter');
+        const loader = (listType === 'installment') ? $('#inquiry-list-loader') : $('#cash-inquiry-loading');
+        const paginationWrapper = (listType === 'installment') ? $('.maneli-pagination-wrapper') : $('#cash-inquiry-pagination');
+        const resetButton = (listType === 'installment') ? $('#inquiry-reset-filters') : $('#cash-inquiry-reset-filters');
+        const applyButton = (listType === 'installment') ? $('#inquiry-apply-filters') : $('#cash-inquiry-apply-filters');
 
         let xhr;
         let searchTimeout;
@@ -553,6 +556,7 @@ jQuery(document).ready(function($) {
                 search: searchInput.val(),
                 status: statusFilter.val(),
                 expert: expertFilter.val(),
+                sort: sortFilter.val(),
                 page: page,
                 base_url: baseUrl
             };
@@ -610,6 +614,23 @@ jQuery(document).ready(function($) {
         
         // Handle expert filter change (using change event on the original select element)
         expertFilter.on('change', function() { fetchInquiries(1); });
+        
+        // Handle sort filter change
+        sortFilter.on('change', function() { fetchInquiries(1); });
+        
+        // Handle reset filters button
+        resetButton.on('click', function() {
+            searchInput.val('');
+            statusFilter.val('');
+            expertFilter.val('');
+            sortFilter.val('default');
+            fetchInquiries(1);
+        });
+        
+        // Handle apply filters button (for manual trigger)
+        applyButton.on('click', function() {
+            fetchInquiries(1);
+        });
 
         // Handle pagination clicks using event delegation
         paginationWrapper.on('click', 'a.page-numbers', function(e) {

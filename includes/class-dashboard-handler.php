@@ -159,6 +159,7 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_script('maneli-choices', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/choices.js/public/assets/scripts/choices.min.js', ['jquery'], '1.0.0', false);
             wp_enqueue_script('maneli-main', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/main.js', ['jquery'], '1.0.0', false);
             wp_enqueue_script('maneli-popper', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@popperjs/core/umd/popper.min.js', ['jquery'], '2.11.0', true);
+            
             wp_enqueue_script('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/js/bootstrap.bundle.min.js', ['jquery', 'maneli-popper'], '5.3.0', true);
             wp_enqueue_script('maneli-node-waves', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/node-waves/waves.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-simplebar-lib', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/simplebar/simplebar.min.js', ['jquery'], '1.0.0', true);

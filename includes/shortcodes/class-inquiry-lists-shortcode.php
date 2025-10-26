@@ -233,9 +233,9 @@ class Maneli_Inquiry_Lists_Shortcode {
             error_log('Final experts_list: ' . print_r($experts_list, true));
         }
 
-        // IMPORTANT: Force localization data to be set even if called multiple times
-        // WordPress caches wp_localize_script, so we use wp_add_inline_script to ensure data is always fresh
-        $localized_data = [
+        // IMPORTANT: Always set localization data, even if called multiple times
+        // Use a static flag to ensure we always update the data
+        wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'experts' => $experts_list,
             'nonces' => [
@@ -296,17 +296,7 @@ class Maneli_Inquiry_Lists_Shortcode {
                 'no_experts_available' => esc_html__('No experts found for assignment.', 'maneli-car-inquiry'),
                 'select_expert_required' => esc_html__('Please select an expert.', 'maneli-car-inquiry'),
             ]
-        ];
-        
-        // Use both methods to ensure data is always available:
-        // 1. Standard wp_localize_script (works if script hasn't been localized yet)
-        wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', $localized_data);
-        
-        // 2. Force update using inline script (ensures data is always fresh even on report pages)
-        $inline_script = 'window.maneliInquiryLists = window.maneliInquiryLists || {};';
-        $inline_script .= 'window.maneliInquiryLists.experts = ' . wp_json_encode($experts_list) . ';';
-        $inline_script .= 'window.maneliInquiryLists.ajax_url = ' . wp_json_encode(admin_url('admin-ajax.php')) . ';';
-        wp_add_inline_script('maneli-inquiry-lists-js', $inline_script, 'before');
+        ]);
     }
 
     /**
