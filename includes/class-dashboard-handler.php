@@ -130,8 +130,6 @@ class Maneli_Dashboard_Handler {
      */
     public function enqueue_dashboard_assets() {
         if (get_query_var('maneli_dashboard')) {
-            // Debug: Log that we're in dashboard
-            error_log('Dashboard assets being loaded for page: ' . get_query_var('maneli_dashboard_page'));
             // Enqueue CSS
             wp_enqueue_style('maneli-fonts', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-fonts.css', [], '1.0.0');
             wp_enqueue_style('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', ['maneli-fonts'], '5.3.0');
@@ -176,11 +174,8 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/dashboard.js', ['jquery'], '1.0.0', true);
             
-            // Get current page
-            $page = get_query_var('maneli_dashboard_page');
-            error_log('Current dashboard page: ' . $page);
-            
             // Product Editor Script (for product-editor and products pages)
+            $page = get_query_var('maneli_dashboard_page');
             if ($page === 'product-editor' || $page === 'products') {
                 wp_enqueue_script('maneli-product-editor', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/product-editor.js', ['jquery'], '1.0.0', true);
                 wp_localize_script('maneli-product-editor', 'maneliAdminProductEditor', [
@@ -192,69 +187,6 @@ class Maneli_Dashboard_Handler {
                         'error' => esc_html__('Error', 'maneli-car-inquiry'),
                     ]
                 ]);
-            }
-            
-            // Calendar Scripts (for calendar page)
-            if ($page === 'calendar') {
-                // Debug: Log that we're trying to load calendar scripts
-                error_log('Loading calendar scripts for page: ' . $page);
-                error_log('MANELI_INQUIRY_PLUGIN_URL: ' . MANELI_INQUIRY_PLUGIN_URL);
-                
-                // Disable custom.js for calendar page to prevent conflicts
-                wp_dequeue_script('maneli-custom');
-                
-                // FullCalendar CSS - Try local file first, then CDN
-                $fullcalendar_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/fullcalendar/main.min.css';
-                if (file_exists($fullcalendar_css_path)) {
-                    wp_enqueue_style('fullcalendar-css', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/fullcalendar/main.min.css', [], '6.1.8');
-                } else {
-                    wp_enqueue_style('fullcalendar-css', 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css', [], '6.1.8');
-                }
-                wp_enqueue_style('maneli-calendar-meetings', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/calendar-meetings.css', ['fullcalendar-css'], '1.0.0');
-                
-                // FullCalendar JS - Force load from CDN with fallback
-                wp_enqueue_script('fullcalendar-js', 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js', ['jquery'], '6.1.8', true);
-                
-                // Add fallback if CDN fails
-                wp_add_inline_script('fullcalendar-js', '
-                    window.addEventListener("load", function() {
-                        if (typeof FullCalendar === "undefined") {
-                            console.log("FullCalendar CDN failed, trying local file...");
-                            var script = document.createElement("script");
-                            script.src = "' . MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/fullcalendar/index.global.min.js";
-                            script.onload = function() {
-                                console.log("FullCalendar loaded from local file");
-                                if (typeof window.initCalendarManually === "function") {
-                                    window.initCalendarManually();
-                                }
-                            };
-                            document.head.appendChild(script);
-                        }
-                    });
-                ');
-                wp_enqueue_script('maneli-calendar-meetings', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calendar-meetings.js', ['fullcalendar-js'], '1.0.0', true);
-                
-                // Add debug information
-                wp_add_inline_script('maneli-calendar-meetings', '
-                    console.log("Calendar scripts loaded");
-                    console.log("jQuery version:", typeof jQuery !== "undefined" ? jQuery.fn.jquery : "Not loaded");
-                    console.log("FullCalendar version:", typeof FullCalendar !== "undefined" ? "Loaded" : "Not loaded");
-                    console.log("Calendar data:", window.meetingsCalendarData);
-                    
-                    // Force load FullCalendar if not loaded
-                    if (typeof FullCalendar === "undefined") {
-                        console.log("FullCalendar not loaded, trying to load manually...");
-                        var script = document.createElement("script");
-                        script.src = "https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js";
-                        script.onload = function() {
-                            console.log("FullCalendar loaded manually");
-                            if (typeof window.initCalendarManually === "function") {
-                                window.initCalendarManually();
-                            }
-                        };
-                        document.head.appendChild(script);
-                    }
-                ');
             }
             
             // Localize script for AJAX

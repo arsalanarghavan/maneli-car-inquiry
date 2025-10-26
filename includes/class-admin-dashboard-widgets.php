@@ -240,10 +240,6 @@ class Maneli_Admin_Dashboard_Widgets {
             $stats = Maneli_Reports_Dashboard::get_overall_statistics(null, null, $current_user->ID);
         }
         
-        // دریافت آمار جداگانه برای نقدی و اقساطی
-        $cash_stats = self::get_separate_cash_statistics();
-        $installment_stats = self::get_separate_installment_statistics();
-        
         ?>
         <div class="maneli-advanced-reports-widget">
             <style>
@@ -253,12 +249,6 @@ class Maneli_Admin_Dashboard_Widgets {
                 .reports-stats-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 12px;
-                    margin-bottom: 15px;
-                }
-                .reports-stats-grid-2 {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
                     gap: 12px;
                     margin-bottom: 15px;
                 }
@@ -292,8 +282,6 @@ class Maneli_Admin_Dashboard_Widgets {
                 .report-stat-box.rejected .number { color: #d63638; }
                 .report-stat-box.following .number { color: #8c6d1f; }
                 .report-stat-box.revenue .number { color: #2271b1; }
-                .report-stat-box.cash .number { color: #155724; }
-                .report-stat-box.installment .number { color: #6c5a11; }
                 .reports-quick-links {
                     display: flex;
                     gap: 8px;
@@ -326,14 +314,6 @@ class Maneli_Admin_Dashboard_Widgets {
                     background: #fff3cd;
                     border-radius: 4px;
                 }
-                .section-title {
-                    font-size: 16px;
-                    font-weight: bold;
-                    margin: 15px 0 10px 0;
-                    color: #333;
-                    border-bottom: 2px solid #2271b1;
-                    padding-bottom: 5px;
-                }
             </style>
             
             <div class="report-period-info">
@@ -343,8 +323,6 @@ class Maneli_Admin_Dashboard_Widgets {
                 <?php endif; ?>
             </div>
             
-            <!-- آمار کلی -->
-            <div class="section-title">📊 آمار کلی</div>
             <div class="reports-stats-grid">
                 <div class="report-stat-box total">
                     <span class="number"><?php echo number_format($stats['total_inquiries']); ?></span>
@@ -352,13 +330,13 @@ class Maneli_Admin_Dashboard_Widgets {
                 </div>
                 
                 <div class="report-stat-box approved">
-                    <span class="number"><?php echo number_format($stats['completed']); ?></span>
-                    <span class="label">تکمیل شده</span>
+                    <span class="number"><?php echo number_format($stats['approved']); ?></span>
+                    <span class="label">تایید شده</span>
                 </div>
                 
                 <div class="report-stat-box pending">
-                    <span class="number"><?php echo number_format($stats['new']); ?></span>
-                    <span class="label">جدید</span>
+                    <span class="number"><?php echo number_format($stats['pending']); ?></span>
+                    <span class="label">در انتظار</span>
                 </div>
                 
                 <div class="report-stat-box rejected">
@@ -367,8 +345,8 @@ class Maneli_Admin_Dashboard_Widgets {
                 </div>
                 
                 <div class="report-stat-box following">
-                    <span class="number"><?php echo number_format($stats['in_progress']); ?></span>
-                    <span class="label">در حال پیگیری</span>
+                    <span class="number"><?php echo number_format($stats['following']); ?></span>
+                    <span class="label">پیگیری</span>
                 </div>
                 
                 <div class="report-stat-box revenue">
@@ -377,51 +355,15 @@ class Maneli_Admin_Dashboard_Widgets {
                 </div>
             </div>
             
-            <!-- آمار استعلام‌های نقدی -->
-            <div class="section-title">💰 استعلام‌های نقدی</div>
-            <div class="reports-stats-grid-2">
-                <div class="report-stat-box cash">
-                    <span class="number"><?php echo number_format($cash_stats['total']); ?></span>
-                    <span class="label">کل نقدی</span>
+            <div class="reports-stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="report-stat-box" style="background: #d4edda;">
+                    <span class="number" style="color: #155724;"><?php echo number_format($stats['cash_inquiries']); ?></span>
+                    <span class="label">استعلام نقدی</span>
                 </div>
                 
-                <div class="report-stat-box approved">
-                    <span class="number"><?php echo number_format($cash_stats['completed']); ?></span>
-                    <span class="label">تکمیل شده</span>
-                </div>
-                
-                <div class="report-stat-box pending">
-                    <span class="number"><?php echo number_format($cash_stats['pending']); ?></span>
-                    <span class="label">در انتظار</span>
-                </div>
-                
-                <div class="report-stat-box rejected">
-                    <span class="number"><?php echo number_format($cash_stats['rejected']); ?></span>
-                    <span class="label">رد شده</span>
-                </div>
-            </div>
-            
-            <!-- آمار استعلام‌های اقساطی -->
-            <div class="section-title">🧾 استعلام‌های اقساطی</div>
-            <div class="reports-stats-grid-2">
-                <div class="report-stat-box installment">
-                    <span class="number"><?php echo number_format($installment_stats['total']); ?></span>
-                    <span class="label">کل اقساطی</span>
-                </div>
-                
-                <div class="report-stat-box approved">
-                    <span class="number"><?php echo number_format($installment_stats['user_confirmed']); ?></span>
-                    <span class="label">تایید شده</span>
-                </div>
-                
-                <div class="report-stat-box pending">
-                    <span class="number"><?php echo number_format($installment_stats['pending']); ?></span>
-                    <span class="label">در انتظار</span>
-                </div>
-                
-                <div class="report-stat-box rejected">
-                    <span class="number"><?php echo number_format($installment_stats['rejected']); ?></span>
-                    <span class="label">رد شده</span>
+                <div class="report-stat-box" style="background: #ffeaa7;">
+                    <span class="number" style="color: #6c5a11;"><?php echo number_format($stats['installment_inquiries']); ?></span>
+                    <span class="label">استعلام اقساطی</span>
                 </div>
             </div>
             
@@ -432,81 +374,11 @@ class Maneli_Admin_Dashboard_Widgets {
                 <a href="<?php echo admin_url('edit.php?post_type=cash_inquiry'); ?>">
                     💰 استعلام‌های نقدی
                 </a>
-                <a href="<?php echo admin_url('edit.php?post_type=inquiry'); ?>">
+                <a href="<?php echo admin_url('edit.php?post_type=installment_inquiry'); ?>">
                     🧾 استعلام‌های اقساطی
                 </a>
             </div>
         </div>
         <?php
-    }
-    
-    /**
-     * دریافت آمار جداگانه استعلام‌های نقدی
-     */
-    private static function get_separate_cash_statistics() {
-        global $wpdb;
-        
-        $counts = $wpdb->get_results("
-            SELECT 
-                pm.meta_value as status,
-                COUNT(*) as count
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'cash_inquiry_status'
-            WHERE p.post_type = 'cash_inquiry'
-            AND p.post_status = 'publish'
-            AND p.post_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-            GROUP BY pm.meta_value
-        ", ARRAY_A);
-        
-        $stats = [
-            'total' => 0,
-            'pending' => 0,
-            'approved' => 0,
-            'awaiting_payment' => 0,
-            'completed' => 0,
-            'rejected' => 0,
-        ];
-        
-        foreach ($counts as $count) {
-            $stats[$count['status']] = (int)$count['count'];
-            $stats['total'] += (int)$count['count'];
-        }
-        
-        return $stats;
-    }
-    
-    /**
-     * دریافت آمار جداگانه استعلام‌های اقساطی
-     */
-    private static function get_separate_installment_statistics() {
-        global $wpdb;
-        
-        $counts = $wpdb->get_results("
-            SELECT 
-                pm.meta_value as status,
-                COUNT(*) as count
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'inquiry_status'
-            WHERE p.post_type = 'inquiry'
-            AND p.post_status = 'publish'
-            AND p.post_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-            GROUP BY pm.meta_value
-        ", ARRAY_A);
-        
-        $stats = [
-            'total' => 0,
-            'pending' => 0,
-            'user_confirmed' => 0,
-            'more_docs' => 0,
-            'rejected' => 0,
-            'failed' => 0,
-        ];
-        
-        foreach ($counts as $count) {
-            $stats[$count['status']] = (int)$count['count'];
-            $stats['total'] += (int)$count['count'];
-        }
-        
-        return $stats;
     }
 }

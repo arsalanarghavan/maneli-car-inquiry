@@ -119,7 +119,9 @@ if (document.querySelector("#switcher-canvas")) {
   nanoButtons[0].click();
   /* for theme primary */
 }
-/* footer year - removed to show only Persian year */
+/* footer year */
+document.getElementById("year").innerHTML = new Date().getFullYear();
+/* footer year */
 
 let mainContent;
 (function () {

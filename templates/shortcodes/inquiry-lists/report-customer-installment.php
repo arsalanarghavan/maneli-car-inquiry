@@ -59,52 +59,23 @@ $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
                 
                 <div class="mt-4">
                     <h5 class="mb-3"><?php esc_html_e('Request Summary', 'maneli-car-inquiry'); ?></h5>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <h6 class="mb-3 fw-semibold">
-                                <i class="la la-car text-primary me-1"></i>
-                                <?php esc_html_e('Product Image', 'maneli-car-inquiry'); ?>
-                            </h6>
-                            <div class="product-image-container">
-                                <?php 
-                                $car_image = get_the_post_thumbnail($product_id, 'medium', ['class' => 'img-fluid rounded shadow-sm product-image']);
-                                if ($car_image) {
-                                    echo $car_image;
-                                } else {
-                                    echo '<div class="bg-light rounded d-flex align-items-center justify-content-center text-muted product-image-placeholder">
-                                        <div class="text-center">
-                                            <i class="la la-image fs-40"></i>
-                                            <p class="mb-0 mt-2">بدون تصویر</p>
-                                        </div>
-                                    </div>';
-                                }
-                                ?>
-                            </div>
-                        </div>
-                        <div class="col-md-8">
-                            <h6 class="mb-3 fw-semibold">
-                                <i class="la la-info-circle text-primary me-1"></i>
-                                <?php esc_html_e('Request Details', 'maneli-car-inquiry'); ?>
-                            </h6>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped mb-0 product-details-table">
-                                    <tbody>
-                                        <tr>
-                                            <td class="fw-semibold bg-light" width="40%"><?php esc_html_e('Selected Car:', 'maneli-car-inquiry'); ?></td>
-                                            <td><?php echo esc_html($car_name); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-semibold bg-light"><?php esc_html_e('Down Payment:', 'maneli-car-inquiry'); ?></td>
-                                            <td><?php echo esc_html(number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0))); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-semibold bg-light"><?php esc_html_e('Installment Term:', 'maneli-car-inquiry'); ?></td>
-                                            <td><?php echo esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-semibold bg-light"><?php esc_html_e('Selected Car:', 'maneli-car-inquiry'); ?></td>
+                                    <td><?php echo esc_html($car_name); ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold bg-light"><?php esc_html_e('Down Payment:', 'maneli-car-inquiry'); ?></td>
+                                    <td><?php echo esc_html(number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0))); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold bg-light"><?php esc_html_e('Installment Term:', 'maneli-car-inquiry'); ?></td>
+                                    <td><?php echo esc_html($post_meta['maneli_inquiry_term_months'][0] ?? 0); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -134,69 +105,3 @@ $cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
         </div>
     </div>
 </div>
-
-<style>
-/* Product Image and Table Layout */
-.product-image-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.product-image,
-.product-image-placeholder {
-    width: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.product-image-placeholder {
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px dashed #dee2e6;
-    background: #f8f9fa;
-}
-
-/* Make image height match table height dynamically */
-.product-image {
-    height: auto;
-    max-height: 100%;
-}
-
-/* Responsive design for mobile */
-@media (max-width: 768px) {
-    /* On mobile, stack image and table vertically */
-    .product-image-container {
-        margin-bottom: 20px;
-    }
-    
-    .product-image,
-    .product-image-placeholder {
-        height: 200px;
-    }
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Match image height with table height
-    const imageContainer = document.querySelector('.product-image-container');
-    const tableContainer = document.querySelector('.product-details-table');
-    
-    if (imageContainer && tableContainer) {
-        function matchHeights() {
-            const tableHeight = tableContainer.offsetHeight;
-            const image = imageContainer.querySelector('.product-image');
-            if (image) {
-                image.style.height = tableHeight + 'px';
-            }
-        }
-        
-        // Match heights on load and resize
-        matchHeights();
-        window.addEventListener('resize', matchHeights);
-    }
-});
-</script>

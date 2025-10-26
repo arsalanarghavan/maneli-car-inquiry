@@ -1,104 +1,22 @@
 (function () {
   "use strict";
-  
-  // Completely disable custom.js if it causes errors
-  try {
-    
-    // Global error handler for innerHTML errors
-    window.addEventListener('error', function(e) {
-      if (e.message && e.message.includes('Cannot set properties of null (setting \'innerHTML\')')) {
-        console.warn('innerHTML error caught and ignored:', e.message);
-        e.preventDefault();
-        e.stopPropagation();
-        return true;
-      }
-    });
-    
-    // Override innerHTML setter to prevent null errors
-    const originalInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-    if (originalInnerHTML) {
-      Object.defineProperty(Element.prototype, 'innerHTML', {
-        set: function(value) {
-          if (this && this.nodeType === 1) {
-            try {
-              originalInnerHTML.set.call(this, value);
-            } catch (e) {
-              console.warn('innerHTML setter error:', e);
-            }
-          } else {
-            console.warn('Attempted to set innerHTML on null element');
-          }
-        },
-        get: function() {
-          if (this && this.nodeType === 1) {
-            return originalInnerHTML.get.call(this);
-          }
-          return '';
-        }
-      });
-    }
-    
-    // Safe innerHTML function
-    function safeInnerHTML(element, value) {
-      try {
-        if (element && element.nodeType === 1) {
-          element.innerHTML = value;
-        }
-      } catch (e) {
-        console.warn('innerHTML error:', e);
-      }
-    }
 
   /* page loader */
   function hideLoader() {
-    try {
-      const loader = document.getElementById("loader");
-      if (loader) {
-        loader.classList.add("d-none");
-      }
-    } catch (e) {
-      console.warn('hideLoader error:', e);
-    }
+    const loader = document.getElementById("loader");
+    loader.classList.add("d-none")
   }
 
   window.addEventListener("load", hideLoader);
   /* page loader */
-  
-  // Global error handler for all innerHTML operations
-  const originalQuerySelector = document.querySelector;
-  const originalQuerySelectorAll = document.querySelectorAll;
-  
-  document.querySelector = function(selector) {
-    try {
-      return originalQuerySelector.call(this, selector);
-    } catch (e) {
-      console.warn('querySelector error:', e);
-      return null;
-    }
-  };
-  
-  document.querySelectorAll = function(selector) {
-    try {
-      return originalQuerySelectorAll.call(this, selector);
-    } catch (e) {
-      console.warn('querySelectorAll error:', e);
-      return [];
-    }
-  };
 
   /* tooltip */
-  try {
-    const tooltipTriggerList = document.querySelectorAll(
-      '[data-bs-toggle="tooltip"]'
-    );
-    if (tooltipTriggerList && tooltipTriggerList.length > 0) {
-      const tooltipList = [...tooltipTriggerList].map(
-        (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-      );
-    }
-  } catch (e) {
-    console.warn('Tooltip error:', e);
-  }
+  const tooltipTriggerList = document.querySelectorAll(
+    '[data-bs-toggle="tooltip"]'
+  );
+  const tooltipList = [...tooltipTriggerList].map(
+    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+  );
 
   /* popover  */
   const popoverTriggerList = document.querySelectorAll(
@@ -401,24 +319,13 @@
   });
   /* Choices JS */
 
-  /* footer year - removed to show only Persian year */
-  
-  // Fix for null element error
-  function safeSetInnerHTML(element, content) {
-    if (element && element.innerHTML !== undefined) {
-      element.innerHTML = content;
-    }
-  }
+  /* footer year */
+  document.getElementById("year").innerHTML = new Date().getFullYear();
+  /* footer year */
 
   /* node waves */
-  try {
-    if (typeof Waves !== 'undefined') {
-      Waves.attach(".btn-wave", ["waves-light"]);
-      Waves.init();
-    }
-  } catch (e) {
-    console.warn('Waves initialization failed:', e);
-  }
+  Waves.attach(".btn-wave", ["waves-light"]);
+  Waves.init();
   /* node waves */
 
   /* card with close button */
@@ -524,16 +431,6 @@
       }
     }
   });
-  
-  } catch (error) {
-    console.warn('Custom.js error:', error);
-    // Don't let custom.js errors break the calendar
-    if (error.message && error.message.includes('innerHTML')) {
-      console.warn('innerHTML error ignored to prevent calendar breakage');
-    }
-    // Return early to prevent further execution
-    return;
-  }
 })();
 
 /* full screen */
