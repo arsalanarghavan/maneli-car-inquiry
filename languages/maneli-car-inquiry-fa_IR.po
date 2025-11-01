@@ -5020,3 +5020,35 @@ msgstr "متأسفانه، مشکلی در سرور رخ داده است. لطف
 
 msgid "No inquiries have been registered in the system yet."
 msgstr "هنوز استعلامی در سیستم ثبت نشده است."
+
+
+msgid "Inquiries"
+msgstr "استعلام‌ها"
+
+
+msgid "Management"
+msgstr "مدیریت"
+
+
+msgid "Users"
+msgstr "کاربران"
+
+
+msgid "Settings"
+msgstr "تنظیمات"
+
+
+msgid "Logout"
+msgstr "خروج"
+
+
+msgid "Performance Reports"
+msgstr "گزارش‌های عملکرد"
+
+
+msgid "Referred to Expert"
+msgstr "ارجاع داده شده به کارشناس"
+
+
+msgid "Follow Up Scheduled"
+msgstr "پیگیری برنامه‌ریزی شده"

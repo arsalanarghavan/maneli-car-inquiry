@@ -864,290 +864,315 @@ if (file_exists($chartjs_path)) {
 <!-- End::row -->
 
 <script>
-// Wait for Chart.js to load
-(function() {
-    function initCharts() {
-        if (typeof Chart === 'undefined') {
-            console.log('Chart.js not loaded yet, retrying...');
-            setTimeout(initCharts, 100);
-            return;
-        }
+// Helper function to convert Gregorian date to Jalali
+function convertToJalali(dateString) {
+    try {
+        if (!dateString) return '';
+        const date = new Date(dateString + 'T00:00:00');
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
         
-        jQuery(document).ready(function($) {
-    // Helper function to convert Gregorian date to Jalali
-    function convertToJalali(dateString) {
-        try {
-            if (!dateString) return '';
-            const date = new Date(dateString + 'T00:00:00');
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
-            const day = date.getDate();
-            
-            // Convert to Jalali (simplified - using Persian Date library if available)
-            if (typeof maneli_gregorian_to_jalali === 'function') {
-                return maneli_gregorian_to_jalali(year, month, day, 'Y/m/d');
-            }
-            // Fallback: simple conversion
-            return dateString;
-        } catch (e) {
-            console.error('Date conversion error:', e);
-            return dateString;
+        // Convert to Jalali (simplified - using Persian Date library if available)
+        if (typeof maneli_gregorian_to_jalali === 'function') {
+            return maneli_gregorian_to_jalali(year, month, day, 'Y/m/d');
         }
+        // Fallback: simple conversion
+        return dateString;
+    } catch (e) {
+        console.error('Date conversion error:', e);
+        return dateString;
+    }
+}
+
+// Wait for both jQuery and Chart.js to load
+function waitForDependencies() {
+    if (typeof jQuery === 'undefined' || typeof Chart === 'undefined') {
+        console.log('Waiting for dependencies... jQuery:', typeof jQuery !== 'undefined', 'Chart:', typeof Chart !== 'undefined');
+        setTimeout(waitForDependencies, 100);
+        return;
     }
     
-    // Translation object for charts
-    const chartTexts = {
-        totalInquiries: <?php echo json_encode(esc_html__('Total Inquiries', 'maneli-car-inquiry')); ?>,
-        cash: <?php echo json_encode(esc_html__('Cash', 'maneli-car-inquiry')); ?>,
-        installment: <?php echo json_encode(esc_html__('Installment', 'maneli-car-inquiry')); ?>,
-        inquiryCount: <?php echo json_encode(esc_html__('Inquiry Count', 'maneli-car-inquiry')); ?>,
-        profit: <?php echo json_encode(esc_html__('Profit (Toman)', 'maneli-car-inquiry')); ?>,
-        revenue: <?php echo json_encode(esc_html__('Revenue (Toman)', 'maneli-car-inquiry')); ?>
-    };
-    
-    // Daily Trend Chart
-    <?php if (!empty($daily_stats)): 
-        // Convert dates to Jalali in PHP
-        $daily_stats_jalali = [];
-        foreach ($daily_stats as $key => $stat) {
-            $jalali_date = $stat['date'];
-            if (function_exists('maneli_gregorian_to_jalali') && isset($stat['date']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $stat['date'], $matches)) {
-                $jalali_date = maneli_gregorian_to_jalali($matches[1], $matches[2], $matches[3], 'Y/m/d');
-            }
-            $daily_stats_jalali[] = [
-                'date' => $jalali_date,
-                'total' => isset($stat['total']) ? (int)$stat['total'] : 0,
-                'cash' => isset($stat['cash']) ? (int)$stat['cash'] : 0,
-                'installment' => isset($stat['installment']) ? (int)$stat['installment'] : 0,
-            ];
-        }
-    ?>
-    const ctx = document.getElementById('dailyTrendChart');
-    if (ctx && typeof Chart !== 'undefined') {
-        const dailyData = <?php echo json_encode($daily_stats_jalali); ?>;
-        const labels = dailyData.map(item => item.date);
-        const totalData = dailyData.map(item => parseInt(item.total) || 0);
-        const cashData = dailyData.map(item => parseInt(item.cash) || 0);
-        const installmentData = dailyData.map(item => parseInt(item.installment) || 0);
+    // Both are loaded, now initialize charts
+    jQuery(document).ready(function($) {
+        console.log('Initializing reports charts...');
+        console.log('Chart.js available:', typeof Chart !== 'undefined');
         
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: chartTexts.totalInquiries,
-                        data: totalData,
-                        borderColor: 'rgb(75, 192, 192)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: chartTexts.cash,
-                        data: cashData,
-                        borderColor: 'rgb(255, 159, 64)',
-                        backgroundColor: 'rgba(255, 159, 64, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    },
-                    {
-                        label: chartTexts.installment,
-                        data: installmentData,
-                        borderColor: 'rgb(54, 162, 235)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
+        // Translation object for charts
+        const chartTexts = {
+            totalInquiries: <?php echo json_encode(esc_html__('Total Inquiries', 'maneli-car-inquiry')); ?>,
+            cash: <?php echo json_encode(esc_html__('Cash', 'maneli-car-inquiry')); ?>,
+            installment: <?php echo json_encode(esc_html__('Installment', 'maneli-car-inquiry')); ?>,
+            inquiryCount: <?php echo json_encode(esc_html__('Inquiry Count', 'maneli-car-inquiry')); ?>,
+            profit: <?php echo json_encode(esc_html__('Profit (Toman)', 'maneli-car-inquiry')); ?>,
+            revenue: <?php echo json_encode(esc_html__('Revenue (Toman)', 'maneli-car-inquiry')); ?>
+        };
+        
+        // Daily Trend Chart
+        <?php if (!empty($daily_stats)): 
+            // Convert dates to Jalali in PHP
+            $daily_stats_jalali = [];
+            foreach ($daily_stats as $key => $stat) {
+                $jalali_date = $stat['date'];
+                if (function_exists('maneli_gregorian_to_jalali') && isset($stat['date']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $stat['date'], $matches)) {
+                    $jalali_date = maneli_gregorian_to_jalali($matches[1], $matches[2], $matches[3], 'Y/m/d');
                 }
+                $daily_stats_jalali[] = [
+                    'date' => $jalali_date,
+                    'total' => isset($stat['total']) ? (int)$stat['total'] : 0,
+                    'cash' => isset($stat['cash']) ? (int)$stat['cash'] : 0,
+                    'installment' => isset($stat['installment']) ? (int)$stat['installment'] : 0,
+                ];
             }
-        });
-    }
-    <?php endif; ?>
-    
-    // Status Distribution Pie Chart
-    <?php if (!empty($status_distribution)): ?>
-    const pieCtx = document.getElementById('statusPieChart');
-    if (pieCtx && typeof Chart !== 'undefined') {
-        const statusData = <?php echo json_encode($status_distribution); ?>;
-        const labels = statusData.map(item => item.status);
-        const counts = statusData.map(item => parseInt(item.count) || 0);
-        const colors = statusData.map(item => item.color);
-        
-        new Chart(pieCtx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: counts,
-                    backgroundColor: colors,
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
+        ?>
+        const ctx = document.getElementById('dailyTrendChart');
+        if (ctx && typeof Chart !== 'undefined') {
+            try {
+                const dailyData = <?php echo json_encode($daily_stats_jalali); ?>;
+                const labels = dailyData.map(item => item.date);
+                const totalData = dailyData.map(item => parseInt(item.total) || 0);
+                const cashData = dailyData.map(item => parseInt(item.cash) || 0);
+                const installmentData = dailyData.map(item => parseInt(item.installment) || 0);
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: chartTexts.totalInquiries,
+                                data: totalData,
+                                borderColor: 'rgb(75, 192, 192)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: chartTexts.cash,
+                                data: cashData,
+                                borderColor: 'rgb(255, 159, 64)',
+                                backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: chartTexts.installment,
+                                data: installmentData,
+                                borderColor: 'rgb(54, 162, 235)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
                                 }
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percent = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
-                                // Convert to Persian digits
-                                const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                                const percentStr = percent.toString().replace(/\d/g, d => persianDigits[d]);
-                                label += context.parsed + ' (' + percentStr + '%)';
-                                return label;
                             }
                         }
                     }
-                }
+                });
+                console.log('Daily trend chart initialized');
+            } catch (error) {
+                console.error('Error initializing daily trend chart:', error);
             }
-        });
-    }
-    <?php endif; ?>
-    
-    // Monthly Revenue Chart
-    <?php if ($is_admin && !$expert_id && !empty($monthly_stats)): ?>
-    const monthlyCtx = document.getElementById('monthlyRevenueChart');
-    if (monthlyCtx && typeof Chart !== 'undefined') {
-        const monthlyData = <?php echo json_encode($monthly_stats); ?>;
-        const monthlyLabels = monthlyData.map(item => {
-            // Convert month label to Persian/Jalali if needed
-            return item.month_persian || item.month || '';
-        });
-        const monthlyTotals = monthlyData.map(item => parseInt(item.total) || 0);
+        }
+        <?php endif; ?>
         
-        new Chart(monthlyCtx, {
-            type: 'bar',
-            data: {
-                labels: monthlyLabels,
-                datasets: [{
-                    label: chartTexts.inquiryCount,
-                    data: monthlyTotals,
-                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                    borderColor: 'rgb(59, 130, 246)',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
+        // Status Distribution Pie Chart
+        <?php if (!empty($status_distribution)): ?>
+        const pieCtx = document.getElementById('statusPieChart');
+        if (pieCtx && typeof Chart !== 'undefined') {
+            try {
+                const statusData = <?php echo json_encode($status_distribution); ?>;
+                const labels = statusData.map(item => item.status);
+                const counts = statusData.map(item => parseInt(item.count) || 0);
+                const colors = statusData.map(item => item.color);
+                
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percent = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
+                                        // Convert to Persian digits
+                                        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                                        const percentStr = percent.toString().replace(/\d/g, d => persianDigits[d]);
+                                        label += context.parsed + ' (' + percentStr + '%)';
+                                        return label;
+                                    }
+                                }
+                            }
                         }
                     }
-                }
+                });
+                console.log('Status pie chart initialized');
+            } catch (error) {
+                console.error('Error initializing status pie chart:', error);
             }
-        });
-    }
-    <?php endif; ?>
-    
-    // Experts Comparison Chart
-    <?php if ($is_admin && !$expert_id && !empty($experts_detailed)): ?>
-    const expertsCtx = document.getElementById('expertsComparisonChart');
-    if (expertsCtx && typeof Chart !== 'undefined') {
-        const expertsData = <?php echo json_encode(array_slice($experts_detailed, 0, 10)); ?>;
-        const expertNames = expertsData.map(e => e.name || <?php echo json_encode(esc_html__('Unknown', 'maneli-car-inquiry')); ?>);
-        const expertProfits = expertsData.map(e => parseFloat(e.profit) || 0);
-        const expertRevenues = expertsData.map(e => parseFloat(e.revenue) || 0);
-        const expertInquiries = expertsData.map(e => parseInt(e.total_inquiries) || 0);
+        }
+        <?php endif; ?>
         
-        new Chart(expertsCtx, {
-            type: 'bar',
-            data: {
-                labels: expertNames,
-                datasets: [
-                    {
-                        label: chartTexts.profit,
-                        data: expertProfits,
-                        backgroundColor: 'rgba(34, 197, 94, 0.6)',
-                        borderColor: 'rgb(34, 197, 94)',
-                        borderWidth: 1
+        // Monthly Revenue Chart
+        <?php if ($is_admin && !$expert_id && !empty($monthly_stats)): ?>
+        const monthlyCtx = document.getElementById('monthlyRevenueChart');
+        if (monthlyCtx && typeof Chart !== 'undefined') {
+            try {
+                const monthlyData = <?php echo json_encode($monthly_stats); ?>;
+                const monthlyLabels = monthlyData.map(item => {
+                    // Convert month label to Persian/Jalali if needed
+                    return item.month_persian || item.month || '';
+                });
+                const monthlyTotals = monthlyData.map(item => parseInt(item.total) || 0);
+                
+                new Chart(monthlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: monthlyLabels,
+                        datasets: [{
+                            label: chartTexts.inquiryCount,
+                            data: monthlyTotals,
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 2
+                        }]
                     },
-                    {
-                        label: chartTexts.revenue,
-                        data: expertRevenues,
-                        backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: chartTexts.inquiryCount,
-                        data: expertInquiries,
-                        backgroundColor: 'rgba(251, 191, 36, 0.6)',
-                        borderColor: 'rgb(251, 191, 36)',
-                        borderWidth: 1,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        position: 'left',
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        beginAtZero: true,
-                        grid: {
-                            drawOnChartArea: false,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                            }
                         },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
                     }
-                }
+                });
+                console.log('Monthly revenue chart initialized');
+            } catch (error) {
+                console.error('Error initializing monthly revenue chart:', error);
             }
-        });
-    }
-    <?php endif; ?>
-    
-    // Start initialization
-    initCharts();
-});
-})();
+        }
+        <?php endif; ?>
+        
+        // Experts Comparison Chart
+        <?php if ($is_admin && !$expert_id && !empty($experts_detailed)): ?>
+        const expertsCtx = document.getElementById('expertsComparisonChart');
+        if (expertsCtx && typeof Chart !== 'undefined') {
+            try {
+                const expertsData = <?php echo json_encode(array_slice($experts_detailed, 0, 10)); ?>;
+                const expertNames = expertsData.map(e => e.name || <?php echo json_encode(esc_html__('Unknown', 'maneli-car-inquiry')); ?>);
+                const expertProfits = expertsData.map(e => parseFloat(e.profit) || 0);
+                const expertRevenues = expertsData.map(e => parseFloat(e.revenue) || 0);
+                const expertInquiries = expertsData.map(e => parseInt(e.total_inquiries) || 0);
+                
+                new Chart(expertsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: expertNames,
+                        datasets: [
+                            {
+                                label: chartTexts.profit,
+                                data: expertProfits,
+                                backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                                borderColor: 'rgb(34, 197, 94)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: chartTexts.revenue,
+                                data: expertRevenues,
+                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                borderColor: 'rgb(59, 130, 246)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: chartTexts.inquiryCount,
+                                data: expertInquiries,
+                                backgroundColor: 'rgba(251, 191, 36, 0.6)',
+                                borderColor: 'rgb(251, 191, 36)',
+                                borderWidth: 1,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                position: 'left',
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                beginAtZero: true,
+                                grid: {
+                                    drawOnChartArea: false,
+                                },
+                            }
+                        }
+                    }
+                });
+                console.log('Experts comparison chart initialized');
+            } catch (error) {
+                console.error('Error initializing experts comparison chart:', error);
+            }
+        }
+        <?php endif; ?>
+        
+        console.log('All charts initialization completed');
+    });
+}
+
+// Start waiting for dependencies
+waitForDependencies();
 
 // Show/hide custom date fields
 document.getElementById('period-filter')?.addEventListener('change', function() {
