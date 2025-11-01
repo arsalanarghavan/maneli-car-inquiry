@@ -5274,3 +5274,23 @@ msgstr "لیست مدارک"
 
 msgid "Enter one document name per line. These will be shown to the manager when requesting additional documents from customers."
 msgstr "نام هر مدرک را در یک سطر وارد کنید. این مدارک زمانی به مدیر نمایش داده می‌شوند که بخواهد مدارک اضافی از مشتری درخواست کند."
+
+
+msgid "Scheduled Session:"
+msgstr "جلسه برنامه‌ریزی شده:"
+
+
+msgid "Mobile:"
+msgstr "موبایل:"
+
+
+msgid "Car:"
+msgstr "خودرو:"
+
+
+msgid "Time:"
+msgstr "ساعت:"
+
+
+msgid "Close"
+msgstr "بستن"

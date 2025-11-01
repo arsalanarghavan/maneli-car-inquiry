@@ -418,17 +418,29 @@ if ($is_customer) {
         $expert_detailed = Maneli_Reports_Dashboard::get_expert_detailed_statistics($expert_id, $start_date, $end_date);
     }
     
-    // Calculate growth percentages
+    // Calculate growth percentages (only if previous period has data)
     $prev_start = date('Y-m-d', strtotime('-60 days'));
     $prev_end = date('Y-m-d', strtotime('-31 days'));
     $prev_stats = Maneli_Reports_Dashboard::get_overall_statistics($prev_start, $prev_end, $expert_id);
     
-    $total_growth = $prev_stats['total_inquiries'] > 0 
-        ? round((($stats['total_inquiries'] - $prev_stats['total_inquiries']) / $prev_stats['total_inquiries']) * 100, 1)
-        : 0;
-    $revenue_growth = $prev_stats['revenue'] > 0
-        ? round((($stats['revenue'] - $prev_stats['revenue']) / $prev_stats['revenue']) * 100, 1)
-        : 0;
+    // Only show growth if previous period had inquiries and growth is reasonable (max 999%)
+    $total_growth = 0;
+    if ($prev_stats['total_inquiries'] > 0) {
+        $growth_calc = (($stats['total_inquiries'] ?? 0) - $prev_stats['total_inquiries']) / $prev_stats['total_inquiries'] * 100;
+        $total_growth = round($growth_calc, 1);
+        // Limit growth display to reasonable range
+        if ($total_growth > 999) $total_growth = 999;
+        if ($total_growth < -99) $total_growth = -99;
+    }
+    
+    $revenue_growth = 0;
+    if ($prev_stats['revenue'] > 0) {
+        $revenue_growth_calc = (($stats['revenue'] ?? 0) - $prev_stats['revenue']) / $prev_stats['revenue'] * 100;
+        $revenue_growth = round($revenue_growth_calc, 1);
+        // Limit growth display to reasonable range
+        if ($revenue_growth > 999) $revenue_growth = 999;
+        if ($revenue_growth < -99) $revenue_growth = -99;
+    }
     
     // Get today's followups count for expert
     $today_followups = 0;
@@ -555,14 +567,7 @@ if ($is_customer) {
         $action_needed_inquiries = array_slice($action_needed_inquiries, 0, 5);
     }
     
-    // Calculate growth percentages (compare with previous period)
-    $prev_start = date('Y-m-d', strtotime('-60 days'));
-    $prev_end = date('Y-m-d', strtotime('-31 days'));
-    $prev_stats = Maneli_Reports_Dashboard::get_overall_statistics($prev_start, $prev_end, $expert_id);
-    
-    $total_growth = $prev_stats['total_inquiries'] > 0 
-        ? round((($stats['total_inquiries'] - $prev_stats['total_inquiries']) / $prev_stats['total_inquiries']) * 100, 1)
-        : 0;
+    // Growth percentages already calculated above (lines 421-443)
     
     // Enqueue Chart.js - Use local version if available
     $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
@@ -610,7 +615,8 @@ if ($is_customer) {
             $business_stats_data = isset($business_stats) ? $business_stats : null;
             $total_profit = $business_stats_data && isset($business_stats_data['total_profit']) ? $business_stats_data['total_profit'] : 0;
             $total_experts = $business_stats_data && isset($business_stats_data['total_experts']) ? $business_stats_data['total_experts'] : 0;
-            $total_customers = $business_stats_data && isset($business_stats_data['total_customers']) ? $business_stats_data['total_customers'] : 0;
+            // Use same method as users page: count_users() for consistency
+            $total_customers = isset($business_stats_data['total_customers']) ? $business_stats_data['total_customers'] : (count_users()['avail_roles']['customer'] ?? 0);
             ?>
             <div class="col-md-6 col-lg-4 col-xl">
                 <div class="card custom-card crm-card overflow-hidden">
@@ -624,10 +630,12 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries'] ?? 0); ?></h4>
-                            <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
-                                <i class="la la-arrow-up fs-11"></i><?php echo maneli_number_format_persian($total_growth, 1); ?>%
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers_no_separator($stats['total_inquiries'] ?? 0); ?></h4>
+                            <?php if ($total_growth != 0): ?>
+                            <span class="text-<?php echo $total_growth > 0 ? 'success' : 'danger'; ?> badge bg-<?php echo $total_growth > 0 ? 'success' : 'danger'; ?>-transparent rounded-pill d-flex align-items-center fs-11">
+                                <i class="la la-arrow-<?php echo $total_growth > 0 ? 'up' : 'down'; ?> fs-11"></i><?php echo persian_numbers_no_separator($total_growth); ?>%
                             </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -644,10 +652,12 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Revenue', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo maneli_number_format_persian($stats['revenue'] ?? 0); ?></h4>
-                            <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
-                                <i class="la la-arrow-up fs-11"></i><?php echo maneli_number_format_persian($revenue_growth, 1); ?>%
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo persian_numbers_no_separator($stats['revenue'] ?? 0); ?></h4>
+                            <?php if ($revenue_growth != 0): ?>
+                            <span class="text-<?php echo $revenue_growth > 0 ? 'success' : 'danger'; ?> badge bg-<?php echo $revenue_growth > 0 ? 'success' : 'danger'; ?>-transparent rounded-pill d-flex align-items-center fs-11">
+                                <i class="la la-arrow-<?php echo $revenue_growth > 0 ? 'up' : 'down'; ?> fs-11"></i><?php echo persian_numbers_no_separator($revenue_growth); ?>%
                             </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -664,7 +674,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Profit', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-primary"><?php echo maneli_number_format_persian($total_profit); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-primary"><?php echo persian_numbers_no_separator($total_profit); ?></h4>
                             <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -682,7 +692,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Experts', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_experts); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers_no_separator($total_experts); ?></h4>
                             <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Staff', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -700,7 +710,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Customers', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_customers); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers_no_separator($total_customers); ?></h4>
                             <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -711,7 +721,13 @@ if ($is_customer) {
             <!-- Expert Dashboard - Personal Performance -->
             <?php 
             $expert_profit = $expert_detailed && isset($expert_detailed['profit']) ? $expert_detailed['profit'] : 0;
-            $success_rate = $expert_detailed && isset($expert_detailed['success_rate']) ? $expert_detailed['success_rate'] : 0;
+            // Calculate success rate from stats if expert_detailed is not available
+            $success_rate = 0;
+            if ($expert_detailed && isset($expert_detailed['success_rate'])) {
+                $success_rate = $expert_detailed['success_rate'];
+            } elseif (($stats['total_inquiries'] ?? 0) > 0) {
+                $success_rate = round((($stats['completed'] ?? 0) / ($stats['total_inquiries'] ?? 1)) * 100, 1);
+            }
             $total_customers_expert = $expert_detailed && isset($expert_detailed['total_customers']) ? $expert_detailed['total_customers'] : 0;
             ?>
             <div class="col-md-6 col-lg-4 col-xl">
@@ -726,7 +742,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Assigned to Me', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries'] ?? 0); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers_no_separator($stats['total_inquiries'] ?? 0); ?></h4>
                             <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -744,10 +760,12 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo maneli_number_format_persian($stats['completed'] ?? 0); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo persian_numbers_no_separator($stats['completed'] ?? 0); ?></h4>
+                            <?php if ($stats['total_inquiries'] > 0 && $success_rate > 0): ?>
                             <span class="text-success badge bg-success-transparent rounded-pill fs-11">
-                                <?php echo maneli_number_format_persian($success_rate, 1); ?>%
+                                <?php echo persian_numbers_no_separator($success_rate); ?>%
                             </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -764,7 +782,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('My Profit', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-primary"><?php echo maneli_number_format_persian($expert_profit); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-primary"><?php echo persian_numbers_no_separator($expert_profit); ?></h4>
                             <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -782,7 +800,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('My Customers', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_customers_expert); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers_no_separator($total_customers_expert); ?></h4>
                             <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -800,7 +818,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Today Follow-ups', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo maneli_number_format_persian($today_followups); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo persian_numbers_no_separator($today_followups); ?></h4>
                             <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Items', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -1218,8 +1236,8 @@ if ($is_customer) {
                         'relation' => 'AND',
                         [
                             'key' => 'tracking_status',
-                            'value' => 'new',
-                            'compare' => '='
+                            'value' => ['new', 'referred'],
+                            'compare' => 'IN'
                         ],
                         [
                             'relation' => 'OR',
@@ -1244,8 +1262,8 @@ if ($is_customer) {
                         'relation' => 'AND',
                         [
                             'key' => 'cash_inquiry_status',
-                            'value' => 'pending',
-                            'compare' => '='
+                            'value' => ['new', 'pending'],
+                            'compare' => 'IN'
                         ],
                         [
                             'relation' => 'OR',
@@ -1262,23 +1280,51 @@ if ($is_customer) {
                     ]
                 ]);
                 
-                // Today's meetings
-                $today_meetings = get_posts([
-                    'post_type' => 'maneli_meeting',
+                // Today's meetings - Check for inquiries with meeting_scheduled status and meeting_date today
+                $today_date = date('Y-m-d');
+                $today_meetings_installment = get_posts([
+                    'post_type' => 'inquiry',
                     'post_status' => 'publish',
                     'posts_per_page' => -1,
                     'meta_query' => [
                         [
-                            'key' => 'meeting_start',
-                            'value' => [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')],
-                            'compare' => 'BETWEEN',
-                            'type' => 'DATETIME'
+                            'key' => 'tracking_status',
+                            'value' => 'meeting_scheduled',
+                            'compare' => '='
+                        ],
+                        [
+                            'key' => 'meeting_date',
+                            'value' => $today_date,
+                            'compare' => '=',
+                            'type' => 'DATE'
                         ]
                     ]
                 ]);
                 
-                // Overdue followups
-                $overdue_followups = get_posts([
+                $today_meetings_cash = get_posts([
+                    'post_type' => 'cash_inquiry',
+                    'post_status' => 'publish',
+                    'posts_per_page' => -1,
+                    'meta_query' => [
+                        [
+                            'key' => 'cash_inquiry_status',
+                            'value' => 'meeting_scheduled',
+                            'compare' => '='
+                        ],
+                        [
+                            'key' => 'meeting_date',
+                            'value' => $today_date,
+                            'compare' => '=',
+                            'type' => 'DATE'
+                        ]
+                    ]
+                ]);
+                
+                $today_meetings = array_merge($today_meetings_installment, $today_meetings_cash);
+                
+                // Overdue followups - Check both followup_date and follow_up_date for compatibility
+                $today_date = date('Y-m-d');
+                $overdue_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
                     'posts_per_page' => -1,
@@ -1289,13 +1335,52 @@ if ($is_customer) {
                             'compare' => '='
                         ],
                         [
-                            'key' => 'follow_up_date',
-                            'value' => date('Y-m-d'),
-                            'compare' => '<',
-                            'type' => 'DATE'
+                            'relation' => 'OR',
+                            [
+                                'key' => 'followup_date',
+                                'value' => $today_date,
+                                'compare' => '<',
+                                'type' => 'DATE'
+                            ],
+                            [
+                                'key' => 'follow_up_date',
+                                'value' => $today_date,
+                                'compare' => '<',
+                                'type' => 'DATE'
+                            ]
                         ]
                     ]
                 ]);
+                
+                $overdue_cash = get_posts([
+                    'post_type' => 'cash_inquiry',
+                    'post_status' => 'publish',
+                    'posts_per_page' => -1,
+                    'meta_query' => [
+                        [
+                            'key' => 'cash_inquiry_status',
+                            'value' => 'follow_up_scheduled',
+                            'compare' => '='
+                        ],
+                        [
+                            'relation' => 'OR',
+                            [
+                                'key' => 'followup_date',
+                                'value' => $today_date,
+                                'compare' => '<',
+                                'type' => 'DATE'
+                            ],
+                            [
+                                'key' => 'follow_up_date',
+                                'value' => $today_date,
+                                'compare' => '<',
+                                'type' => 'DATE'
+                            ]
+                        ]
+                    ]
+                ]);
+                
+                $overdue_followups = array_merge($overdue_installment, $overdue_cash);
                 
                 // Awaiting payment
                 $awaiting_payment = get_posts([
@@ -1331,7 +1416,7 @@ if ($is_customer) {
                                         <small class="text-muted"><?php esc_html_e('Need expert assignment', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-danger"><?php echo maneli_number_format_persian(count($pending_installment)); ?></span>
+                                <span class="badge bg-danger"><?php echo persian_numbers_no_separator(count($pending_installment)); ?></span>
                             </a>
                             
                             <!-- Pending Cash Assignments -->
@@ -1345,7 +1430,7 @@ if ($is_customer) {
                                         <small class="text-muted"><?php esc_html_e('Need expert assignment', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-warning"><?php echo maneli_number_format_persian(count($pending_cash)); ?></span>
+                                <span class="badge bg-warning"><?php echo persian_numbers_no_separator(count($pending_cash)); ?></span>
                             </a>
                             
                             <!-- Today's Meetings -->
@@ -1359,7 +1444,7 @@ if ($is_customer) {
                                         <small class="text-muted"><?php esc_html_e('In-person appointments', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-info"><?php echo maneli_number_format_persian(count($today_meetings)); ?></span>
+                                <span class="badge bg-info"><?php echo persian_numbers_no_separator(count($today_meetings)); ?></span>
                             </a>
                             
                             <!-- Overdue Followups -->
@@ -1373,7 +1458,7 @@ if ($is_customer) {
                                         <small class="text-muted"><?php esc_html_e('Requires urgent action', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-danger"><?php echo maneli_number_format_persian(count($overdue_followups)); ?></span>
+                                <span class="badge bg-danger"><?php echo persian_numbers_no_separator(count($overdue_followups)); ?></span>
                             </a>
                             
                             <!-- Awaiting Payment -->
@@ -1387,7 +1472,7 @@ if ($is_customer) {
                                         <small class="text-muted"><?php esc_html_e('Cash inquiries', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-success"><?php echo maneli_number_format_persian(count($awaiting_payment)); ?></span>
+                                <span class="badge bg-success"><?php echo persian_numbers_no_separator(count($awaiting_payment)); ?></span>
                             </a>
                         </div>
                     </div>

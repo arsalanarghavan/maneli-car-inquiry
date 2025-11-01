@@ -283,6 +283,17 @@ class Maneli_Dashboard_Handler {
             $page = get_query_var('maneli_dashboard_page');
             $subpage = get_query_var('maneli_dashboard_subpage');
             
+            // Reports page - Chart.js for charts
+            if ($page === 'reports') {
+                $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
+                if (file_exists($chartjs_path)) {
+                    wp_enqueue_script('chartjs', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', ['jquery'], '4.4.0', false);
+                } else {
+                    // Fallback to CDN
+                    wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', ['jquery'], '4.4.0', false);
+                }
+            }
+            
             // Sales dashboard scripts (charts) - only for home page
             if ($page === 'home' || empty($page)) {
                 wp_enqueue_script('maneli-apexcharts', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js', ['jquery'], '1.0.0', true);
@@ -400,7 +411,9 @@ class Maneli_Dashboard_Handler {
                 
                 wp_enqueue_script('maneli-inquiry-lists-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js', $inquiry_lists_deps, '1.0.2', true);
                 
-                // Enqueue report-specific scripts
+                // Enqueue report-specific scripts - DISABLED: All handlers are now in inquiry-lists.js
+                // These files create duplicate handlers and conflicts. Removed to fix expert note save button.
+                /*
                 if (isset($_GET['inquiry_id']) && !isset($_GET['cash_inquiry_id'])) {
                     // Installment report page
                     wp_enqueue_script('maneli-installment-report-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/installment-report.js', ['jquery', 'sweetalert2'], '1.0.0', true);
@@ -408,13 +421,23 @@ class Maneli_Dashboard_Handler {
                     // Cash report page
                     wp_enqueue_script('maneli-cash-report-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/cash-report.js', ['jquery', 'sweetalert2'], '1.0.0', true);
                 }
+                */
             }
             
             // Calendar Page Scripts (for calendar page)
             if ($page === 'calendar') {
                 wp_enqueue_style('maneli-fullcalendar', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/fullcalendar/full-calendar.css', [], '6.1.10');
-                wp_enqueue_script('maneli-fullcalendar', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/fullcalendar/index.global.min.js', ['jquery'], '6.1.10', true);
-                wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+                // Load FullCalendar in header (false) so it's available when scripts run
+                wp_enqueue_script('maneli-fullcalendar', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/fullcalendar/index.global.min.js', ['jquery'], '6.1.10', false);
+                
+                // Use local SweetAlert2 if available
+                $sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+                if (file_exists($sweetalert2_path)) {
+                    wp_enqueue_style('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+                    wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', false);
+                } else {
+                    wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, false);
+                }
             }
             
             // Inquiry Lists localization - ALWAYS localize
@@ -491,6 +514,20 @@ class Maneli_Dashboard_Handler {
                         'ok_button' => esc_html__('OK', 'maneli-car-inquiry'),
                         'status_updated' => esc_html__('Status updated successfully', 'maneli-car-inquiry'),
                         'status_update_error' => esc_html__('Error updating status', 'maneli-car-inquiry'),
+                        // Expert note specific text
+                        'attention' => esc_html__('Attention!', 'maneli-car-inquiry'),
+                        'please_enter_note' => esc_html__('Please enter your note.', 'maneli-car-inquiry'),
+                        'note_saved_success' => esc_html__('Note saved successfully.', 'maneli-car-inquiry'),
+                        'error_occurred' => esc_html__('An error occurred.', 'maneli-car-inquiry'),
+                        // Status action text
+                        'complete_title' => esc_html__('Complete Inquiry', 'maneli-car-inquiry'),
+                        'complete_confirm' => esc_html__('Are you sure you want to complete this inquiry?', 'maneli-car-inquiry'),
+                        'followup_date_required' => esc_html__('Please enter follow-up date', 'maneli-car-inquiry'),
+                        'cancel_inquiry_title' => esc_html__('Cancel Inquiry', 'maneli-car-inquiry'),
+                        'rejection_reason_label' => esc_html__('Rejection Reason', 'maneli-car-inquiry'),
+                        'cancel_reason_label' => esc_html__('Cancellation Reason', 'maneli-car-inquiry'),
+                        'enter_reason' => esc_html__('Please enter reason...', 'maneli-car-inquiry'),
+                        'reason_required' => esc_html__('Please enter reason with at least 10 characters', 'maneli-car-inquiry'),
                     ]
                 ];
                 
@@ -560,7 +597,20 @@ class Maneli_Dashboard_Handler {
                             error: '" . esc_js(__('Error', 'maneli-car-inquiry')) . "',
                             success: '" . esc_js(__('Success', 'maneli-car-inquiry')) . "',
                             server_error: '" . esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')) . "',
-                            unknown_error: '" . esc_js(__('Unknown error', 'maneli-car-inquiry')) . "'
+                            unknown_error: '" . esc_js(__('Unknown error', 'maneli-car-inquiry')) . "',
+                            attention: '" . esc_js(__('Attention!', 'maneli-car-inquiry')) . "',
+                            please_enter_note: '" . esc_js(__('Please enter your note.', 'maneli-car-inquiry')) . "',
+                            note_saved_success: '" . esc_js(__('Note saved successfully.', 'maneli-car-inquiry')) . "',
+                            error_occurred: '" . esc_js(__('An error occurred.', 'maneli-car-inquiry')) . "',
+                            ok_button: '" . esc_js(__('OK', 'maneli-car-inquiry')) . "',
+                            complete_title: '" . esc_js(__('Complete Inquiry', 'maneli-car-inquiry')) . "',
+                            complete_confirm: '" . esc_js(__('Are you sure you want to complete this inquiry?', 'maneli-car-inquiry')) . "',
+                            followup_date_required: '" . esc_js(__('Please enter follow-up date', 'maneli-car-inquiry')) . "',
+                            cancel_inquiry_title: '" . esc_js(__('Cancel Inquiry', 'maneli-car-inquiry')) . "',
+                            rejection_reason_label: '" . esc_js(__('Rejection Reason', 'maneli-car-inquiry')) . "',
+                            cancel_reason_label: '" . esc_js(__('Cancellation Reason', 'maneli-car-inquiry')) . "',
+                            enter_reason: '" . esc_js(__('Please enter reason...', 'maneli-car-inquiry')) . "',
+                            reason_required: '" . esc_js(__('Please enter reason with at least 10 characters', 'maneli-car-inquiry')) . "'
                         }
                     };
                     console.log('maneliInquiryLists fallback initialized for " . esc_js($page) . "', window.maneliInquiryLists);
@@ -651,7 +701,9 @@ class Maneli_Dashboard_Handler {
                     <?php
                 }, 999);
                 
-                // Localize report-specific scripts
+                // Localize report-specific scripts - DISABLED: Scripts are no longer enqueued
+                // All handlers are now in inquiry-lists.js
+                /*
                 if (isset($_GET['inquiry_id']) && !isset($_GET['cash_inquiry_id'])) {
                     // Installment report localization
                     wp_localize_script('maneli-installment-report-js', 'maneliInstallmentReport', [
@@ -680,6 +732,7 @@ class Maneli_Dashboard_Handler {
                         ]
                     ]);
                 }
+                */
             }
             
             // Localize script for AJAX

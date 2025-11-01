@@ -1627,6 +1627,13 @@ function toPersianNumber(num) {
         const inquiryId = $('#installment-inquiry-details').data('inquiry-id');
         const note = $('#installment-expert-note-input').val().trim();
         
+        console.log('🔵 SAVE INSTALLMENT NOTE:', {
+            inquiryId: inquiryId,
+            noteLength: note.length,
+            maneliInquiryLists: typeof maneliInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED',
+            save_note_nonce: maneliInquiryLists?.nonces?.save_installment_note || 'MISSING'
+        });
+        
         if (!note) {
             Swal.fire({
                 title: getText('attention', 'Attention!'),
@@ -1637,16 +1644,20 @@ function toPersianNumber(num) {
             return;
         }
         
+        const nonce = maneliInquiryLists.nonces.save_installment_note || maneliInquiryLists.nonces.tracking_status || '';
+        console.log('🔵 Using nonce:', nonce ? 'PRESENT' : 'EMPTY');
+        
         $.ajax({
             url: maneliInquiryLists.ajax_url,
             type: 'POST',
             data: {
                 action: 'maneli_save_installment_note',
-                nonce: maneliInquiryLists.nonces.save_installment_note || maneliInquiryLists.nonces.tracking_status || '',
+                nonce: nonce,
                 inquiry_id: inquiryId,
                 note: note
             }
         }).done(function(response) {
+            console.log('🔵 AJAX Response:', response);
             if (response.success) {
                 Swal.fire({
                     title: getText('success', 'Success') + '!',
@@ -1664,6 +1675,7 @@ function toPersianNumber(num) {
                 });
             }
         }).fail(function(xhr) {
+            console.error('🔵 AJAX Error:', xhr.responseJSON);
             Swal.fire({
                 title: getText('error', 'Error') + '!',
                 text: xhr.responseJSON?.data?.message || getText('error_occurred', 'An error occurred.'),
@@ -1739,41 +1751,120 @@ function toPersianNumber(num) {
         
         // Handle different actions
         if (action === 'schedule_meeting') {
-            Swal.fire({
-                title: getText('schedule_meeting_title', 'Schedule Meeting'),
-                html: `
-                    <div class="text-start">
-                        <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
-                        <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
-                        <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
-                        <input type="time" id="swal-meeting-time" class="form-control">
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: getText('schedule_button', 'Schedule'),
-                cancelButtonText: getText('cancel_button', 'Cancel'),
-                confirmButtonColor: '#28a745',
-                didOpen: () => {
-                    if (typeof $.fn.persianDatepicker !== 'undefined') {
-                        $('#swal-meeting-date').persianDatepicker({
-                            formatDate: 'YYYY/MM/DD',
-                            persianNumbers: true,
-                            autoClose: true
+            // Get meeting settings first
+            jQuery.ajax({
+                url: maneli_ajax_object.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'maneli_get_meeting_settings',
+                    nonce: maneli_ajax_object.nonce || ''
+                },
+                success: function(response) {
+                    if (response.success) {
+                        const settings = response.data;
+                        const startHour = settings.start_hour || '10:00';
+                        const endHour = settings.end_hour || '20:00';
+                        
+                        Swal.fire({
+                            title: getText('schedule_meeting_title', 'Schedule Meeting'),
+                            html: `
+                                <div class="text-start">
+                                    <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
+                                    <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                    <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
+                                    <input type="time" id="swal-meeting-time" class="form-control" min="${startHour}" max="${endHour}" step="1800">
+                                    <small class="text-muted d-block mt-1">${getText('time_range_hint', 'Time must be between')} ${startHour} ${getText('and', 'and')} ${endHour}</small>
+                                </div>
+                            `,
+                            showCancelButton: true,
+                            confirmButtonText: getText('schedule_button', 'Schedule'),
+                            cancelButtonText: getText('cancel_button', 'Cancel'),
+                            confirmButtonColor: '#28a745',
+                            didOpen: () => {
+                                if (typeof $.fn.persianDatepicker !== 'undefined') {
+                                    $('#swal-meeting-date').persianDatepicker({
+                                        formatDate: 'YYYY/MM/DD',
+                                        persianNumbers: true,
+                                        autoClose: true
+                                    });
+                                }
+                            },
+                            preConfirm: () => {
+                                const meetingDate = $('#swal-meeting-date').val();
+                                const meetingTime = $('#swal-meeting-time').val();
+                                if (!meetingDate || !meetingTime) {
+                                    Swal.showValidationMessage(getText('meeting_required', 'Please enter meeting date and time'));
+                                    return false;
+                                }
+                                
+                                // Validate time range
+                                const [timeHour, timeMin] = meetingTime.split(':').map(Number);
+                                const [startHourNum, startMinNum] = startHour.split(':').map(Number);
+                                const [endHourNum, endMinNum] = endHour.split(':').map(Number);
+                                
+                                const timeMinutes = timeHour * 60 + timeMin;
+                                const startMinutes = startHourNum * 60 + startMinNum;
+                                const endMinutes = endHourNum * 60 + endMinNum;
+                                
+                                if (timeMinutes < startMinutes || timeMinutes >= endMinutes) {
+                                    Swal.showValidationMessage(getText('time_outside_range', 'Selected time is outside allowed working hours.') + ' (' + startHour + ' - ' + endHour + ')');
+                                    return false;
+                                }
+                                
+                                return { meeting_date: meetingDate, meeting_time: meetingTime };
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                updateInstallmentStatus(inquiryId, action, result.value);
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: getText('error_title', 'Error'),
+                            text: response.data?.message || getText('unknown_error', 'Unknown error occurred')
                         });
                     }
                 },
-                preConfirm: () => {
-                    const meetingDate = $('#swal-meeting-date').val();
-                    const meetingTime = $('#swal-meeting-time').val();
-                    if (!meetingDate || !meetingTime) {
-                        Swal.showValidationMessage(getText('meeting_required', 'Please enter meeting date and time'));
-                        return false;
-                    }
-                    return { meeting_date: meetingDate, meeting_time: meetingTime };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    updateInstallmentStatus(inquiryId, action, result.value);
+                error: function() {
+                    // Fallback without restrictions if AJAX fails
+                    Swal.fire({
+                        title: getText('schedule_meeting_title', 'Schedule Meeting'),
+                        html: `
+                            <div class="text-start">
+                                <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
+                                <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
+                                <input type="time" id="swal-meeting-time" class="form-control">
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: getText('schedule_button', 'Schedule'),
+                        cancelButtonText: getText('cancel_button', 'Cancel'),
+                        confirmButtonColor: '#28a745',
+                        didOpen: () => {
+                            if (typeof $.fn.persianDatepicker !== 'undefined') {
+                                $('#swal-meeting-date').persianDatepicker({
+                                    formatDate: 'YYYY/MM/DD',
+                                    persianNumbers: true,
+                                    autoClose: true
+                                });
+                            }
+                        },
+                        preConfirm: () => {
+                            const meetingDate = $('#swal-meeting-date').val();
+                            const meetingTime = $('#swal-meeting-time').val();
+                            if (!meetingDate || !meetingTime) {
+                                Swal.showValidationMessage(getText('meeting_required', 'Please enter meeting date and time'));
+                                return false;
+                            }
+                            return { meeting_date: meetingDate, meeting_time: meetingTime };
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            updateInstallmentStatus(inquiryId, action, result.value);
+                        }
+                    });
                 }
             });
         } else if (action === 'schedule_followup') {
@@ -2156,41 +2247,120 @@ function toPersianNumber(num) {
                 }
             });
         } else if (action === 'schedule_meeting') {
-            Swal.fire({
-                title: getText('schedule_meeting_title', 'Schedule Meeting'),
-                html: `
-                    <div class="text-start">
-                        <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
-                        <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
-                        <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
-                        <input type="time" id="swal-meeting-time" class="form-control">
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: getText('schedule_button', 'Schedule'),
-                cancelButtonText: getText('cancel_button', 'Cancel'),
-                confirmButtonColor: '#28a745',
-                didOpen: () => {
-                    if (typeof $.fn.persianDatepicker !== 'undefined') {
-                        $('#swal-meeting-date').persianDatepicker({
-                            formatDate: 'YYYY/MM/DD',
-                            persianNumbers: true,
-                            autoClose: true
+            // Get meeting settings first
+            jQuery.ajax({
+                url: maneli_ajax_object.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'maneli_get_meeting_settings',
+                    nonce: maneli_ajax_object.nonce || ''
+                },
+                success: function(response) {
+                    if (response.success) {
+                        const settings = response.data;
+                        const startHour = settings.start_hour || '10:00';
+                        const endHour = settings.end_hour || '20:00';
+                        
+                        Swal.fire({
+                            title: getText('schedule_meeting_title', 'Schedule Meeting'),
+                            html: `
+                                <div class="text-start">
+                                    <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
+                                    <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                    <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
+                                    <input type="time" id="swal-meeting-time" class="form-control" min="${startHour}" max="${endHour}" step="1800">
+                                    <small class="text-muted d-block mt-1">${getText('time_range_hint', 'Time must be between')} ${startHour} ${getText('and', 'and')} ${endHour}</small>
+                                </div>
+                            `,
+                            showCancelButton: true,
+                            confirmButtonText: getText('schedule_button', 'Schedule'),
+                            cancelButtonText: getText('cancel_button', 'Cancel'),
+                            confirmButtonColor: '#28a745',
+                            didOpen: () => {
+                                if (typeof $.fn.persianDatepicker !== 'undefined') {
+                                    $('#swal-meeting-date').persianDatepicker({
+                                        formatDate: 'YYYY/MM/DD',
+                                        persianNumbers: true,
+                                        autoClose: true
+                                    });
+                                }
+                            },
+                            preConfirm: () => {
+                                const meetingDate = $('#swal-meeting-date').val();
+                                const meetingTime = $('#swal-meeting-time').val();
+                                if (!meetingDate || !meetingTime) {
+                                    Swal.showValidationMessage(getText('meeting_required', 'Please enter meeting date and time'));
+                                    return false;
+                                }
+                                
+                                // Validate time range
+                                const [timeHour, timeMin] = meetingTime.split(':').map(Number);
+                                const [startHourNum, startMinNum] = startHour.split(':').map(Number);
+                                const [endHourNum, endMinNum] = endHour.split(':').map(Number);
+                                
+                                const timeMinutes = timeHour * 60 + timeMin;
+                                const startMinutes = startHourNum * 60 + startMinNum;
+                                const endMinutes = endHourNum * 60 + endMinNum;
+                                
+                                if (timeMinutes < startMinutes || timeMinutes >= endMinutes) {
+                                    Swal.showValidationMessage(getText('time_outside_range', 'Selected time is outside allowed working hours.') + ' (' + startHour + ' - ' + endHour + ')');
+                                    return false;
+                                }
+                                
+                                return { meeting_date: meetingDate, meeting_time: meetingTime };
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                updateCashStatusAction(inquiryId, action, result.value);
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: getText('error_title', 'Error'),
+                            text: response.data?.message || getText('unknown_error', 'Unknown error occurred')
                         });
                     }
                 },
-                preConfirm: () => {
-                    const meetingDate = $('#swal-meeting-date').val();
-                    const meetingTime = $('#swal-meeting-time').val();
-                    if (!meetingDate || !meetingTime) {
-                        Swal.showValidationMessage(getText('meeting_required', 'Please enter meeting date and time'));
-                        return false;
-                    }
-                    return { meeting_date: meetingDate, meeting_time: meetingTime };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    updateCashStatusAction(inquiryId, action, result.value);
+                error: function() {
+                    // Fallback without restrictions if AJAX fails
+                    Swal.fire({
+                        title: getText('schedule_meeting_title', 'Schedule Meeting'),
+                        html: `
+                            <div class="text-start">
+                                <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
+                                <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
+                                <input type="time" id="swal-meeting-time" class="form-control">
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: getText('schedule_button', 'Schedule'),
+                        cancelButtonText: getText('cancel_button', 'Cancel'),
+                        confirmButtonColor: '#28a745',
+                        didOpen: () => {
+                            if (typeof $.fn.persianDatepicker !== 'undefined') {
+                                $('#swal-meeting-date').persianDatepicker({
+                                    formatDate: 'YYYY/MM/DD',
+                                    persianNumbers: true,
+                                    autoClose: true
+                                });
+                            }
+                        },
+                        preConfirm: () => {
+                            const meetingDate = $('#swal-meeting-date').val();
+                            const meetingTime = $('#swal-meeting-time').val();
+                            if (!meetingDate || !meetingTime) {
+                                Swal.showValidationMessage(getText('meeting_required', 'Please enter meeting date and time'));
+                                return false;
+                            }
+                            return { meeting_date: meetingDate, meeting_time: meetingTime };
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            updateCashStatusAction(inquiryId, action, result.value);
+                        }
+                    });
                 }
             });
         } else if (action === 'approve') {

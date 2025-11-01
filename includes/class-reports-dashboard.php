@@ -247,14 +247,13 @@ class Maneli_Reports_Dashboard {
         global $wpdb;
         
         return $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(DISTINCT pm.meta_value)
+            "SELECT COUNT(DISTINCT p.post_author)
             FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'customer_national_id'
             INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'
             WHERE p.post_type IN ('cash_inquiry', 'inquiry')
             AND p.post_status = 'publish'
             AND pm_expert.meta_value = %d
-            AND pm.meta_value != ''",
+            AND p.post_author > 0",
             $expert_id
         ));
     }
@@ -278,15 +277,14 @@ class Maneli_Reports_Dashboard {
         }
         
         return $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(DISTINCT pm.meta_value)
+            "SELECT COUNT(DISTINCT p.post_author)
             FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'customer_national_id'
             INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'
             WHERE p.post_type IN ('cash_inquiry', 'inquiry')
             AND p.post_status = 'publish'
             AND pm_expert.meta_value = %d
             AND p.post_date >= %s AND p.post_date <= %s
-            AND pm.meta_value != ''",
+            AND p.post_author > 0",
             $expert_id,
             $start_date . ' 00:00:00',
             $end_date . ' 23:59:59'
@@ -910,16 +908,7 @@ class Maneli_Reports_Dashboard {
             'monthly' => $monthly_stats,
             'total_profit' => $total_profit,
             'total_experts' => count($experts),
-            'total_customers' => $wpdb->get_var(
-                "SELECT COUNT(DISTINCT pm.meta_value)
-                FROM {$wpdb->posts} p
-                LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'customer_national_id'
-                WHERE p.post_type IN ('cash_inquiry', 'inquiry')
-                AND p.post_status = 'publish'
-                AND p.post_date >= '{$start_date} 00:00:00'
-                AND p.post_date <= '{$end_date} 23:59:59'
-                AND pm.meta_value != ''"
-            ),
+            'total_customers' => count_users()['avail_roles']['customer'] ?? 0,
         ];
     }
     

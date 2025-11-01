@@ -2,6 +2,7 @@
 <?php
 /**
  * Calendar Page - Meeting Management
+ * Custom-built calendar without external dependencies
  * Accessible by: Admin, Expert
  * Three tabs: Daily (list), Weekly (calendar), Monthly (calendar)
  */
@@ -34,12 +35,57 @@ $meetings_args = [
 
 $meetings = get_posts($meetings_args);
 
+// Get scheduled sessions from cash inquiries
+$cash_inquiries = get_posts([
+    'post_type' => 'cash_inquiry',
+    'posts_per_page' => -1,
+    'post_status' => 'publish',
+    'meta_query' => [
+        'relation' => 'AND',
+        [
+            'key' => 'cash_inquiry_status',
+            'value' => 'meeting_scheduled',
+            'compare' => '='
+        ],
+        [
+            'key' => 'meeting_date',
+            'compare' => 'EXISTS'
+        ],
+        [
+            'key' => 'meeting_time',
+            'compare' => 'EXISTS'
+        ]
+    ]
+]);
+
+// Get scheduled sessions from installment inquiries
+$installment_inquiries = get_posts([
+    'post_type' => 'inquiry',
+    'posts_per_page' => -1,
+    'post_status' => 'publish',
+    'meta_query' => [
+        'relation' => 'AND',
+        [
+            'key' => 'tracking_status',
+            'value' => 'meeting_scheduled',
+            'compare' => '='
+        ],
+        [
+            'key' => 'meeting_date',
+            'compare' => 'EXISTS'
+        ],
+        [
+            'key' => 'meeting_time',
+            'compare' => 'EXISTS'
+        ]
+    ]
+]);
+
 // Process meetings data
 $meetings_data = [];
 $today = current_time('Y-m-d');
 $today_meetings = 0;
 $week_meetings = 0;
-$total_meetings = count($meetings);
 
 // Jalali month names
 $jalali_months = [
@@ -66,12 +112,120 @@ $jalali_days = [
     esc_html__('Friday', 'maneli-car-inquiry')
 ];
 
-foreach ($meetings as $m) {
-    $start = get_post_meta($m->ID, 'meeting_start', true);
-    if (empty($start)) continue;
+// Helper function to convert Jalali to Gregorian (based on FullCalendar algorithm)
+if (!function_exists('maneli_jalali_to_gregorian')) {
+    function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+        $j_y = (int)$j_y;
+        $j_m = (int)$j_m;
+        $j_d = (int)$j_d;
+        
+        $jy = $j_y - 979;
+        $jm = $j_m - 1;
+        $jd = $j_d - 1;
+        
+        // Jalali days in month array
+        $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+        
+        $j_day_no = 365 * $jy + (int)($jy / 33) * 8 + (int)(($jy % 33 + 3) / 4);
+        for ($i = 0; $i < $jm; ++$i) {
+            $j_day_no += $j_days_in_month[$i];
+        }
+        
+        $j_day_no += $jd;
+        
+        $g_day_no = $j_day_no + 79;
+        
+        // Gregorian days in month array
+        $g_days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        
+        $gy = 1600 + 400 * (int)($g_day_no / 146097);
+        $g_day_no = $g_day_no % 146097;
+        
+        $leap = true;
+        if ($g_day_no >= 36525) {
+            $g_day_no--;
+            $gy += 100 * (int)($g_day_no / 36524);
+            $g_day_no = $g_day_no % 36524;
+            
+            if ($g_day_no >= 365) {
+                $g_day_no++;
+            } else {
+                $leap = false;
+            }
+        }
+        
+        $gy += 4 * (int)($g_day_no / 1461);
+        $g_day_no = $g_day_no % 1461;
+        
+        if ($g_day_no >= 366) {
+            $leap = false;
+            $g_day_no--;
+            $gy += (int)($g_day_no / 365);
+            $g_day_no = $g_day_no % 365;
+        }
+        
+        for ($i = 0; $g_day_no >= ($g_days_in_month[$i] + ($i == 1 && $leap ? 1 : 0)); $i++) {
+            $g_day_no -= $g_days_in_month[$i] + ($i == 1 && $leap ? 1 : 0);
+        }
+        $gm = $i + 1;
+        $gd = $g_day_no + 1;
+        
+        return [$gy, $gm, $gd];
+    }
+}
+
+// Helper function to detect and convert Jalali date string to Gregorian
+function convert_date_to_gregorian($date_str) {
+    if (empty($date_str)) return null;
     
-    $inquiry_id = get_post_meta($m->ID, 'meeting_inquiry_id', true);
-    $inquiry_type = get_post_meta($m->ID, 'meeting_inquiry_type', true);
+    // Check if it's already in Gregorian format (YYYY-MM-DD)
+    if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date_str, $matches)) {
+        return $date_str; // Already Gregorian
+    }
+    
+    // Check if it's Jalali format (Y/m/d or Y/m/d)
+    if (preg_match('/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/', $date_str, $matches)) {
+        $year = (int)$matches[1];
+        $month = (int)$matches[2];
+        $day = (int)$matches[3];
+        
+        // If year is between 1300-1500, it's likely Jalali
+        if ($year >= 1300 && $year <= 1500) {
+            list($gy, $gm, $gd) = maneli_jalali_to_gregorian($year, $month, $day);
+            return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
+        }
+    }
+    
+    // Try to parse as-is (might be other format)
+    $timestamp = strtotime($date_str);
+    if ($timestamp !== false) {
+        return date('Y-m-d', $timestamp);
+    }
+    
+    return null;
+}
+
+// Helper function to process meeting data
+function process_meeting_data($start, $inquiry_id, $inquiry_type, $is_scheduled_session, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user_id, $today) {
+    if (empty($start)) return null;
+    
+    // Ensure inquiry_id is an integer
+    $inquiry_id = $inquiry_id ? absint($inquiry_id) : 0;
+    
+    // Check if $start contains a Jalali date (for scheduled sessions)
+    // Format might be "1403/05/20 09:00" or "2024-08-11 09:00"
+    $parts = explode(' ', $start, 2);
+    $date_part = $parts[0];
+    $time_part = isset($parts[1]) ? $parts[1] : '';
+    
+    // Convert date to Gregorian if needed
+    $greg_date = convert_date_to_gregorian($date_part);
+    if (!$greg_date) {
+        return null; // Invalid date
+    }
+    
+    // Combine with time
+    $start_gregorian = $greg_date . ($time_part ? ' ' . $time_part : '');
     
     // Security: Check if expert can see customer info
     $show_customer_info = true;
@@ -81,7 +235,7 @@ foreach ($meetings as $m) {
     
     if ($is_expert && !$is_admin && $inquiry_id) {
         $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
-        $show_customer_info = ($assigned_expert_id == $current_user->ID);
+        $show_customer_info = ($assigned_expert_id == $current_user_id);
     }
     
     // Get customer info
@@ -108,8 +262,10 @@ foreach ($meetings as $m) {
         $product_name = get_the_title($product_id);
     }
     
-    // Parse date
-    $start_timestamp = strtotime($start);
+    // Parse date (now guaranteed to be Gregorian)
+    $start_timestamp = strtotime($start_gregorian);
+    if ($start_timestamp === false) return null;
+    
     $date_str = date('Y-m-d', $start_timestamp);
     $time_str = date('H:i', $start_timestamp);
     
@@ -125,7 +281,10 @@ foreach ($meetings as $m) {
         $jalali_month = (int)$jalali_parts[1];
         $jalali_day = (int)$jalali_parts[2];
         $jalali_month_name = $jalali_months[$jalali_month - 1] ?? '';
-        $jalali_day_name = $jalali_days[date('w', $start_timestamp)] ?? '';
+        // Map date('w') (0=Sunday, 6=Saturday) to jalali_days array (0=Saturday, 6=Friday)
+        $day_of_week = date('w', $start_timestamp);
+        $jalali_day_index = ($day_of_week + 1) % 7;
+        $jalali_day_name = $jalali_days[$jalali_day_index] ?? '';
     } else {
         $jalali_date = $date_str;
         $jalali_year = $year;
@@ -135,12 +294,7 @@ foreach ($meetings as $m) {
         $jalali_day_name = '';
     }
     
-    // Count statistics
-    if ($date_str === $today) $today_meetings++;
-    if (strtotime($date_str) <= strtotime('+7 days')) $week_meetings++;
-    
-    $meetings_data[] = [
-        'id' => $m->ID,
+    return [
         'start' => $start,
         'date' => $date_str,
         'time' => $time_str,
@@ -154,11 +308,85 @@ foreach ($meetings as $m) {
         'customer_name' => $customer_name,
         'customer_mobile' => $customer_mobile,
         'product_name' => $product_name,
-        'inquiry_id' => $inquiry_id,
+        'inquiry_id' => (int) $inquiry_id, // Ensure it's an integer, not a string with Persian digits
         'inquiry_type' => $inquiry_type,
         'can_view_details' => $show_customer_info,
+        'is_scheduled_session' => $is_scheduled_session,
     ];
 }
+
+// Process regular meetings
+foreach ($meetings as $m) {
+    $start = get_post_meta($m->ID, 'meeting_start', true);
+    $inquiry_id = absint(get_post_meta($m->ID, 'meeting_inquiry_id', true));
+    $inquiry_type = get_post_meta($m->ID, 'meeting_inquiry_type', true);
+    
+    $meeting_data = process_meeting_data($start, $inquiry_id, $inquiry_type, false, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today);
+    if ($meeting_data) {
+        $meeting_data['id'] = $m->ID;
+        $meetings_data[] = $meeting_data;
+        
+        // Count statistics
+        if ($meeting_data['date'] === $today) $today_meetings++;
+        if (strtotime($meeting_data['date']) >= strtotime($today) && strtotime($meeting_data['date']) <= strtotime('+7 days')) $week_meetings++;
+    }
+}
+
+// Process scheduled sessions from cash inquiries
+foreach ($cash_inquiries as $inquiry) {
+    $inquiry_id = absint($inquiry->ID);
+    $meeting_date_raw = get_post_meta($inquiry_id, 'meeting_date', true);
+    $meeting_time = get_post_meta($inquiry_id, 'meeting_time', true);
+    
+    if (empty($meeting_date_raw) || empty($meeting_time)) continue;
+    
+    // Convert Jalali date to Gregorian if needed
+    $meeting_date_gregorian = convert_date_to_gregorian($meeting_date_raw);
+    if (!$meeting_date_gregorian) continue;
+    
+    $start = $meeting_date_gregorian . ' ' . $meeting_time;
+    $meeting_data = process_meeting_data($start, $inquiry_id, 'cash', true, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today);
+    if ($meeting_data) {
+        $meeting_data['id'] = 'cash_' . $inquiry_id;
+        $meetings_data[] = $meeting_data;
+        
+        // Count statistics
+        if ($meeting_data['date'] === $today) $today_meetings++;
+        if (strtotime($meeting_data['date']) >= strtotime($today) && strtotime($meeting_data['date']) <= strtotime('+7 days')) $week_meetings++;
+    }
+}
+
+// Process scheduled sessions from installment inquiries
+foreach ($installment_inquiries as $inquiry) {
+    $inquiry_id = absint($inquiry->ID);
+    $meeting_date_raw = get_post_meta($inquiry_id, 'meeting_date', true);
+    $meeting_time = get_post_meta($inquiry_id, 'meeting_time', true);
+    
+    if (empty($meeting_date_raw) || empty($meeting_time)) continue;
+    
+    // Convert Jalali date to Gregorian if needed
+    $meeting_date_gregorian = convert_date_to_gregorian($meeting_date_raw);
+    if (!$meeting_date_gregorian) continue;
+    
+    $start = $meeting_date_gregorian . ' ' . $meeting_time;
+    $meeting_data = process_meeting_data($start, $inquiry_id, 'installment', true, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today);
+    if ($meeting_data) {
+        $meeting_data['id'] = 'installment_' . $inquiry_id;
+        $meetings_data[] = $meeting_data;
+        
+        // Count statistics
+        if ($meeting_data['date'] === $today) $today_meetings++;
+        if (strtotime($meeting_data['date']) >= strtotime($today) && strtotime($meeting_data['date']) <= strtotime('+7 days')) $week_meetings++;
+    }
+}
+
+// Sort all meetings by date and time
+usort($meetings_data, function($a, $b) {
+    if ($a['date'] !== $b['date']) {
+        return strcmp($a['date'], $b['date']);
+    }
+    return strcmp($a['time'], $b['time']);
+});
 
 // Group by day for daily view
 $daily_grouped = [];
@@ -169,33 +397,60 @@ foreach ($meetings_data as $meeting) {
     }
     $daily_grouped[$day_key][] = $meeting;
 }
-// Sort by time within each day
 foreach ($daily_grouped as &$day_meetings) {
     usort($day_meetings, function($a, $b) {
         return strcmp($a['time'], $b['time']);
     });
 }
 
-// Prepare FullCalendar events (for weekly and monthly views)
-$fc_events = [];
+// Group by date for weekly/monthly views
+$meetings_by_date = [];
 foreach ($meetings_data as $meeting) {
-    $fc_events[] = [
-        'id' => $meeting['id'],
-        'title' => $meeting['customer_name'] . ($meeting['product_name'] ? ' - ' . $meeting['product_name'] : ''),
-        'start' => $meeting['start'],
-        'allDay' => false,
-        'className' => $meeting['can_view_details'] ? 'meeting-visible' : 'meeting-reserved',
-        'extendedProps' => [
-            'customer_name' => $meeting['customer_name'],
-            'customer_mobile' => $meeting['customer_mobile'],
-            'product_name' => $meeting['product_name'],
-            'time' => $meeting['time'],
-            'inquiry_id' => $meeting['inquiry_id'],
-            'inquiry_type' => $meeting['inquiry_type'],
-            'can_view_details' => $meeting['can_view_details'],
-        ],
-    ];
+    // Ensure date is in Y-m-d format
+    $date_key = $meeting['date'];
+    if (!isset($meetings_by_date[$date_key])) {
+        $meetings_by_date[$date_key] = [];
+    }
+    $meetings_by_date[$date_key][] = $meeting;
 }
+
+// Create date mapping for calendar (Gregorian to Jalali)
+$date_mapping = [];
+$current_date = strtotime('-1 year');
+$end_date = strtotime('+2 years');
+while ($current_date <= $end_date) {
+    $greg_date = date('Y-m-d', $current_date);
+    $year = (int)date('Y', $current_date);
+    $month = (int)date('m', $current_date);
+    $day = (int)date('d', $current_date);
+    
+    if (function_exists('maneli_gregorian_to_jalali')) {
+        $jalali = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d');
+        $jalali_parts = explode('/', $jalali);
+        $date_mapping[$greg_date] = [
+            'jalali_date' => $jalali,
+            'jalali_year' => (int)$jalali_parts[0],
+            'jalali_month' => (int)$jalali_parts[1],
+            'jalali_day' => (int)$jalali_parts[2],
+            'jalali_month_name' => $jalali_months[(int)$jalali_parts[1] - 1] ?? '',
+            // Map date('w') (0=Sunday, 6=Saturday) to jalali_days array (0=Saturday, 6=Friday)
+            'jalali_day_name' => $jalali_days[((date('w', $current_date) + 1) % 7)] ?? '',
+        ];
+    } else {
+        $date_mapping[$greg_date] = [
+            'jalali_date' => $greg_date,
+            'jalali_year' => $year,
+            'jalali_month' => $month,
+            'jalali_day' => $day,
+            'jalali_month_name' => '',
+            'day_of_week' => date('w', $current_date),
+            'jalali_day_name' => '',
+        ];
+    }
+    $current_date = strtotime('+1 day', $current_date);
+}
+
+$total_meetings = count($meetings_data);
 ?>
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -231,7 +486,7 @@ foreach ($meetings_data as $meeting) {
                                 <div class="mb-1">
                                     <span class="text-muted fs-13"><?php esc_html_e("Today's Meetings", 'maneli-car-inquiry'); ?></span>
                                 </div>
-                                <h4 class="fw-semibold mb-0"><?php echo maneli_number_format_persian($today_meetings); ?></h4>
+                                <h4 class="fw-semibold mb-0"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($today_meetings) : maneli_number_format_persian($today_meetings); ?></h4>
                             </div>
                         </div>
                     </div>
@@ -250,7 +505,7 @@ foreach ($meetings_data as $meeting) {
                                 <div class="mb-1">
                                     <span class="text-muted fs-13"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></span>
                                 </div>
-                                <h4 class="fw-semibold mb-0"><?php echo maneli_number_format_persian($week_meetings); ?></h4>
+                                <h4 class="fw-semibold mb-0"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($week_meetings) : maneli_number_format_persian($week_meetings); ?></h4>
                             </div>
                         </div>
                     </div>
@@ -269,7 +524,7 @@ foreach ($meetings_data as $meeting) {
                                 <div class="mb-1">
                                     <span class="text-muted fs-13"><?php esc_html_e('Total Meetings', 'maneli-car-inquiry'); ?></span>
                                 </div>
-                                <h4 class="fw-semibold mb-0"><?php echo maneli_number_format_persian($total_meetings); ?></h4>
+                                <h4 class="fw-semibold mb-0"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($total_meetings) : maneli_number_format_persian($total_meetings); ?></h4>
                             </div>
                         </div>
                     </div>
@@ -327,18 +582,28 @@ foreach ($meetings_data as $meeting) {
                                     $timestamp = strtotime($day);
                                     $is_today = ($day === $today);
                                     $first_meeting = $items[0];
+                                    // Convert Jalali date to Persian numbers (format: Y/m/d)
+                                    $jalali_date_parts = explode('/', $first_meeting['jalali_date']);
+                                    $jalali_date_display = '';
+                                    if (count($jalali_date_parts) === 3) {
+                                        $conv = function_exists('persian_numbers_no_separator') ? 'persian_numbers_no_separator' : 'maneli_number_format_persian';
+                                        $jalali_date_display = $conv($jalali_date_parts[0]) . '/' . 
+                                                              $conv($jalali_date_parts[1]) . '/' . 
+                                                              $conv($jalali_date_parts[2]);
+                                    } else {
                                     $jalali_date_display = $first_meeting['jalali_date'];
+                                    }
                                     $day_name_display = $first_meeting['jalali_day_name'];
                                 ?>
                                     <div class="calendar-day-section mb-4">
                                         <div class="day-header d-flex align-items-center mb-3 <?php echo $is_today ? 'today' : ''; ?>">
                                             <div class="day-badge">
-                                                <div class="day-number"><?php echo maneli_number_format_persian($first_meeting['jalali_day']); ?></div>
+                                                <div class="day-number"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($first_meeting['jalali_day']) : maneli_number_format_persian($first_meeting['jalali_day']); ?></div>
                                                 <div class="day-month"><?php echo esc_html($first_meeting['jalali_month_name']); ?></div>
                                             </div>
                                             <div class="day-info me-3">
                                                 <h5 class="mb-0 fw-semibold"><?php echo esc_html($day_name_display); ?></h5>
-                                                <small class="text-muted"><?php echo esc_html($jalali_date_display); ?></small>
+                                                <small class="day-date-display"><?php echo esc_html($jalali_date_display); ?></small>
                                             </div>
                                             <?php if ($is_today): ?>
                                                 <span class="badge bg-danger-gradient"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></span>
@@ -350,9 +615,26 @@ foreach ($meetings_data as $meeting) {
                                                 <div class="calendar-event-card">
                                                     <div class="event-time">
                                                         <i class="la la-clock"></i>
-                                                        <?php echo esc_html($event['time']); ?>
+                                                        <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['time']) : maneli_number_format_persian($event['time']); ?>
                                                     </div>
                                                     <div class="event-details">
+                                                        <?php if ($event['is_scheduled_session'] ?? false): ?>
+                                                            <div class="event-scheduled-badge mb-2">
+                                                                <i class="la la-calendar-check text-info me-1"></i>
+                                                                <strong><?php esc_html_e('Scheduled Session:', 'maneli-car-inquiry'); ?></strong>
+                                                                <span><?php 
+                                                                    $jalali_parts = explode('/', $event['jalali_date']);
+                                                                    if (count($jalali_parts) === 3) {
+                                                                        $conv = function_exists('persian_numbers_no_separator') ? 'persian_numbers_no_separator' : 'maneli_number_format_persian';
+                                                                        echo $conv($jalali_parts[0]) . '/' . 
+                                                                             $conv($jalali_parts[1]) . '/' . 
+                                                                             $conv($jalali_parts[2]);
+                                                                    } else {
+                                                                        echo esc_html($event['jalali_date']);
+                                                                    }
+                                                                ?> - <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['time']) : maneli_number_format_persian($event['time']); ?></span>
+                                                            </div>
+                                                        <?php endif; ?>
                                                         <div class="event-customer">
                                                             <i class="la la-user text-primary me-1"></i>
                                                             <strong><?php echo esc_html($event['customer_name']); ?></strong>
@@ -360,7 +642,7 @@ foreach ($meetings_data as $meeting) {
                                                         <?php if ($event['can_view_details']): ?>
                                                             <div class="event-info">
                                                                 <i class="la la-phone text-success me-1"></i>
-                                                                <?php echo esc_html($event['customer_mobile']); ?>
+                                                                <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['customer_mobile']) : maneli_number_format_persian($event['customer_mobile']); ?>
                                                             </div>
                                                             <div class="event-info">
                                                                 <i class="la la-car text-info me-1"></i>
@@ -370,7 +652,7 @@ foreach ($meetings_data as $meeting) {
                                                     </div>
                                                     <div class="event-actions">
                                                         <?php if ($event['inquiry_id'] && $event['can_view_details']): ?>
-                                                            <a href="<?php echo home_url('/dashboard/inquiries/' . ($event['inquiry_type'] === 'cash' ? 'cash' : 'installment') . '?' . ($event['inquiry_type'] === 'cash' ? 'cash_inquiry_id' : 'inquiry_id') . '=' . $event['inquiry_id']); ?>" 
+                                                            <a href="<?php echo home_url('/dashboard/inquiries/' . ($event['inquiry_type'] === 'cash' ? 'cash' : 'installment') . '?' . ($event['inquiry_type'] === 'cash' ? 'cash_inquiry_id' : 'inquiry_id') . '=' . (int) $event['inquiry_id']); ?>" 
                                                                class="btn btn-sm btn-primary-light">
                                                                 <i class="la la-eye"></i>
                                                                 <?php esc_html_e('View', 'maneli-car-inquiry'); ?>
@@ -393,12 +675,44 @@ foreach ($meetings_data as $meeting) {
 
                     <!-- Weekly Tab -->
                     <div class="tab-pane fade" id="weekly" role="tabpanel" aria-labelledby="weekly-tab">
-                        <div id="weekly-calendar"></div>
+                        <div class="custom-calendar-wrapper">
+                            <div class="calendar-header mb-3 d-flex justify-content-between align-items-center">
+                                <div class="calendar-nav">
+                                    <button class="btn btn-sm btn-primary-light me-2" id="prev-week">
+                                        <i class="la la-arrow-right"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary-light" id="next-week">
+                                        <i class="la la-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <h5 class="mb-0 fw-semibold" id="week-title"></h5>
+                                <button class="btn btn-sm btn-primary-light" id="today-week">
+                                    <?php esc_html_e('Today', 'maneli-car-inquiry'); ?>
+                                </button>
+                            </div>
+                            <div id="weekly-calendar-container" class="weekly-calendar-container"></div>
+                        </div>
                     </div>
 
                     <!-- Monthly Tab -->
                     <div class="tab-pane fade show active" id="monthly" role="tabpanel" aria-labelledby="monthly-tab">
-                        <div id="monthly-calendar"></div>
+                        <div class="custom-calendar-wrapper">
+                            <div class="calendar-header mb-3 d-flex justify-content-between align-items-center">
+                                <div class="calendar-nav">
+                                    <button class="btn btn-sm btn-primary-light me-2" id="prev-month">
+                                        <i class="la la-arrow-right"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-primary-light" id="next-month">
+                                        <i class="la la-arrow-left"></i>
+                                    </button>
+                                </div>
+                                <h5 class="mb-0 fw-semibold" id="month-title"></h5>
+                                <button class="btn btn-sm btn-primary-light" id="today-month">
+                                    <?php esc_html_e('Today', 'maneli-car-inquiry'); ?>
+                                </button>
+                            </div>
+                            <div id="monthly-calendar-container" class="monthly-calendar-container"></div>
+                        </div>
                     </div>
 
                 </div>
@@ -409,248 +723,474 @@ foreach ($meetings_data as $meeting) {
 </div>
 <!-- End::main-content -->
 
-<!-- FullCalendar CSS and JS will be enqueued via dashboard-handler -->
 <script>
 (function() {
     'use strict';
     
-    // Localized strings
-    const calendarTexts = {
+    // Calendar data from PHP
+    // Ensure inquiry_id values are numbers (not strings with Persian digits)
+    const meetingsData = <?php echo json_encode($meetings_data, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK); ?>;
+    const meetingsByDate = <?php echo json_encode($meetings_by_date, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK); ?>;
+    const dateMapping = <?php echo json_encode($date_mapping, JSON_UNESCAPED_UNICODE); ?>;
+    const jalaliMonths = <?php echo json_encode($jalali_months, JSON_UNESCAPED_UNICODE); ?>;
+    const jalaliDays = <?php echo json_encode($jalali_days, JSON_UNESCAPED_UNICODE); ?>;
+    const startHour = '<?php echo esc_js($start_hour); ?>';
+    const endHour = '<?php echo esc_js($end_hour); ?>';
+    const todayGreg = '<?php echo esc_js($today); ?>';
+    
+    // Calendar texts
+    const texts = {
+        scheduledSession: '<?php echo esc_js(__('Scheduled Session:', 'maneli-car-inquiry')); ?>',
         mobile: '<?php echo esc_js(__('Mobile:', 'maneli-car-inquiry')); ?>',
         car: '<?php echo esc_js(__('Car:', 'maneli-car-inquiry')); ?>',
         time: '<?php echo esc_js(__('Time:', 'maneli-car-inquiry')); ?>',
-        view_details: '<?php echo esc_js(__('View Details', 'maneli-car-inquiry')); ?>',
+        viewDetails: '<?php echo esc_js(__('View Details', 'maneli-car-inquiry')); ?>',
         reserved: '<?php echo esc_js(__('Reserved', 'maneli-car-inquiry')); ?>',
-        meeting_details: '<?php echo esc_js(__('Meeting Details', 'maneli-car-inquiry')); ?>',
-        close: '<?php echo esc_js(__('Close', 'maneli-car-inquiry')); ?>'
+        meetingDetails: '<?php echo esc_js(__('Meeting Details', 'maneli-car-inquiry')); ?>',
+        close: '<?php echo esc_js(__('Close', 'maneli-car-inquiry')); ?>',
+        noMeetings: '<?php echo esc_js(__('No meetings', 'maneli-car-inquiry')); ?>'
     };
     
-    // FullCalendar events data
-    const calendarEvents = <?php echo json_encode($fc_events, JSON_UNESCAPED_UNICODE); ?>;
-    
-    console.log('Calendar events:', calendarEvents);
-    
-    // Helper: Convert English digits to Persian
-    function toPersianDigits(str) {
-        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        return String(str).replace(/[0-9]/g, function(w) {
-            return persianDigits[englishDigits.indexOf(w)];
-        });
+    // Helper: Convert to Persian digits
+    function toPersian(str) {
+        const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        return String(str).replace(/[0-9]/g, (w) => persian[parseInt(w)]);
     }
     
-    // Helper: Convert Gregorian to Jalali (simplified - for display only)
-    function gregorianToJalali(date) {
-        // This is a simplified version - for production use a proper library
-        // Return date as-is for now, server handles conversion
-        return date;
+    // Helper: Convert Persian digits to English (for URLs)
+    function toEnglish(str) {
+        const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        let result = String(str);
+        for (let i = 0; i < 10; i++) {
+            result = result.split(persian[i]).join(english[i]);
+        }
+        return result;
     }
     
-    // Wait for FullCalendar to load (v6 uses different global)
-    function waitForFullCalendar(callback) {
-        // FullCalendar v6 can be accessed via window.FullCalendar or just FullCalendar
-        if (typeof FullCalendar !== 'undefined' || (typeof window !== 'undefined' && typeof window.FullCalendar !== 'undefined')) {
-            callback();
-        } else if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(() => waitForFullCalendar(callback), 100);
+    // Helper: Format time
+    function formatTime(timeStr) {
+        return timeStr.substring(0, 5);
+    }
+    
+    // Helper: Get meetings for a date
+    function getMeetingsForDate(dateStr) {
+        return meetingsByDate[dateStr] || [];
+    }
+    
+    // Debug: Log meetings data (after functions are defined)
+    console.log('Total meetings:', meetingsData.length);
+    console.log('Meetings by date:', Object.keys(meetingsByDate).length, 'dates');
+    console.log('Today Gregorian:', todayGreg);
+    console.log('Meetings today:', getMeetingsForDate(todayGreg));
+    console.log('Sample meetings:', meetingsData.slice(0, 3));
+    
+    // Helper: Show meeting modal
+    function showMeetingModal(meeting) {
+        let html = '';
+        
+        if (meeting.is_scheduled_session) {
+            html += `<div class="alert alert-info mb-3">
+                <i class="la la-calendar-check me-2"></i>
+                <strong>${texts.scheduledSession}</strong> ${toPersian(meeting.jalali_date)} - ${toPersian(meeting.time)}
+            </div>`;
+        }
+        
+        html += `<div class="meeting-modal-content">
+            <div class="mb-3">
+                <strong class="d-block mb-2">${meeting.customer_name}</strong>
+                ${meeting.can_view_details ? `
+                    <div class="text-muted small mb-1"><i class="la la-phone me-1"></i>${texts.mobile} ${toPersian(meeting.customer_mobile)}</div>
+                    <div class="text-muted small mb-1"><i class="la la-car me-1"></i>${texts.car} ${meeting.product_name}</div>
+                    <div class="text-muted small"><i class="la la-clock me-1"></i>${texts.time} ${toPersian(meeting.time)}</div>
+                ` : `<div class="text-muted">${texts.reserved}</div>`}
+            </div>
+            ${meeting.inquiry_id && meeting.can_view_details ? `
+                <a href="/dashboard/inquiries/${meeting.inquiry_type === 'cash' ? 'cash?cash_inquiry_id=' : 'installment?inquiry_id='}${Number(meeting.inquiry_id)}" 
+                   class="btn btn-sm btn-primary w-100">
+                    ${texts.viewDetails}
+                </a>
+            ` : ''}
+        </div>`;
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: texts.meetingDetails,
+                html: html,
+                icon: 'info',
+                confirmButtonText: texts.close,
+                width: '400px'
             });
         } else {
-            setTimeout(() => waitForFullCalendar(callback), 100);
+            alert(html.replace(/<[^>]*>/g, ''));
         }
     }
     
-    // Initialize Weekly Calendar
-    let weeklyCalendarEl = document.getElementById('weekly-calendar');
-    let weeklyCalendar = null;
+    // Helper: Get Jalali date info from Gregorian date string
+    function getJalaliInfo(dateStr) {
+        return dateMapping[dateStr] || null;
+    }
     
-    // Wait for DOM and FullCalendar
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            waitForFullCalendar(function() {
-                initCalendars();
+    // Helper: Format date string YYYY-MM-DD
+    function formatDateStr(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    // Weekly Calendar
+    let currentWeekStart = new Date();
+    // Find Saturday of current week (Saturday = first day of week)
+    // getDay(): 0=Sunday, 1=Monday, ..., 6=Saturday
+    // We want Saturday (6) to be the first day
+    const dayOfWeek = currentWeekStart.getDay();
+    if (dayOfWeek === 6) {
+        // Already Saturday, no change needed
+        currentWeekStart.setDate(currentWeekStart.getDate());
+    } else if (dayOfWeek === 0) {
+        // Sunday, go back 1 day
+        currentWeekStart.setDate(currentWeekStart.getDate() - 1);
+                } else {
+        // Monday-Friday, go back to Saturday
+        currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek + 1));
+    }
+    // Set to start of day
+    currentWeekStart.setHours(0, 0, 0, 0);
+    
+    function renderWeeklyCalendar() {
+        const container = document.getElementById('weekly-calendar-container');
+        if (!container) return;
+        
+        const weekDays = [];
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(currentWeekStart);
+            date.setDate(date.getDate() + i);
+            weekDays.push(date);
+        }
+        
+        // Update title with Jalali dates
+        const firstDateStr = formatDateStr(weekDays[0]);
+        const lastDateStr = formatDateStr(weekDays[6]);
+        const firstJalali = getJalaliInfo(firstDateStr);
+        const lastJalali = getJalaliInfo(lastDateStr);
+            const titleEl = document.getElementById('week-title');
+        if (titleEl && firstJalali && lastJalali) {
+            titleEl.innerHTML = `${toPersian(firstJalali.jalali_date)} - ${toPersian(lastJalali.jalali_date)}`;
+        }
+        
+        // Generate time slots
+        const timeSlots = [];
+        const [startH, startM] = startHour.split(':').map(Number);
+        const [endH, endM] = endHour.split(':').map(Number);
+        
+        let currentHour = startH;
+        let currentMin = startM;
+        while (currentHour < endH || (currentHour === endH && currentMin < endM)) {
+            timeSlots.push({
+                hour: currentHour,
+                minute: currentMin,
+                display: String(currentHour).padStart(2, '0') + ':' + String(currentMin).padStart(2, '0')
             });
-        });
-    } else {
-        waitForFullCalendar(function() {
-            initCalendars();
-        });
-    }
-    
-    function initCalendars() {
-        const FC = typeof FullCalendar !== 'undefined' ? FullCalendar : (typeof window !== 'undefined' && window.FullCalendar ? window.FullCalendar : null);
-        if (!FC) {
-            console.error('FullCalendar not found!');
-            return;
-        }
-        
-        if (weeklyCalendarEl) {
-            console.log('Initializing weekly calendar');
-            weeklyCalendar = new FC.Calendar(weeklyCalendarEl, {
-            initialView: 'timeGridWeek',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'timeGridWeek,timeGridDay'
-            },
-            locale: 'fa',
-            direction: 'rtl',
-            rtl: true,
-            firstDay: 6, // Saturday
-            height: 'auto',
-            events: calendarEvents,
-            eventClick: function(info) {
-                const props = info.event.extendedProps;
-                let details = `<strong>${props.customer_name}</strong><br>`;
-                if (props.can_view_details) {
-                    details += `${calendarTexts.mobile} ${props.customer_mobile}<br>`;
-                    details += `${calendarTexts.car} ${props.product_name}<br>`;
-                    details += `${calendarTexts.time} ${props.time}`;
-                    if (props.inquiry_id) {
-                        details += `<br><br><a href="${props.inquiry_type === 'cash' ? '/dashboard/inquiries/cash?cash_inquiry_id=' : '/dashboard/inquiries/installment?inquiry_id='}${props.inquiry_id}" class="btn btn-sm btn-primary">${calendarTexts.view_details}</a>`;
-                    }
-                } else {
-                    details += `<span class="text-muted">${calendarTexts.reserved}</span>`;
-                }
-                
-                // Show modal or alert
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: calendarTexts.meeting_details,
-                        html: details,
-                        icon: 'info',
-                        confirmButtonText: calendarTexts.close
-                    });
-                } else {
-                    alert(details);
-                }
-            },
-            eventContent: function(arg) {
-                const props = arg.event.extendedProps;
-                const time = props.time || '';
-                
-                // Show customer name if can_view_details, otherwise just time
-                if (props.can_view_details && props.customer_name) {
-                    return {
-                        html: `<div class="fc-event-title">${props.customer_name}</div><div class="fc-event-time">${time}</div>`
-                    };
-                } else {
-                    return {
-                        html: `<div class="fc-event-time">${time}</div>`
-                    };
-                }
-            },
-            slotMinTime: '<?php echo esc_js($start_hour); ?>',
-            slotMaxTime: '<?php echo esc_js($end_hour); ?>',
-            slotDuration: '00:<?php echo esc_js(str_pad($slot_minutes, 2, '0', STR_PAD_LEFT)); ?>:00',
-            allDaySlot: false,
-        });
-            console.log('Rendering weekly calendar');
-            weeklyCalendar.render();
-        }
-        
-        // Initialize Monthly Calendar
-        let monthlyCalendarEl = document.getElementById('monthly-calendar');
-        if (monthlyCalendarEl) {
-            console.log('Initializing monthly calendar');
-            monthlyCalendar = new FC.Calendar(monthlyCalendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            },
-            locale: 'fa',
-            direction: 'rtl',
-            rtl: true,
-            firstDay: 6, // Saturday
-            height: 'auto',
-            events: calendarEvents,
-            eventClick: function(info) {
-                const props = info.event.extendedProps;
-                let details = `<strong>${props.customer_name}</strong><br>`;
-                if (props.can_view_details) {
-                    details += `${calendarTexts.mobile} ${props.customer_mobile}<br>`;
-                    details += `${calendarTexts.car} ${props.product_name}<br>`;
-                    details += `${calendarTexts.time} ${props.time}`;
-                    if (props.inquiry_id) {
-                        details += `<br><br><a href="${props.inquiry_type === 'cash' ? '/dashboard/inquiries/cash?cash_inquiry_id=' : '/dashboard/inquiries/installment?inquiry_id='}${props.inquiry_id}" class="btn btn-sm btn-primary">${calendarTexts.view_details}</a>`;
-                    }
-                } else {
-                    details += `<span class="text-muted">${calendarTexts.reserved}</span>`;
-                }
-                
-                // Show modal or alert
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: calendarTexts.meeting_details,
-                        html: details,
-                        icon: 'info',
-                        confirmButtonText: calendarTexts.close
-                    });
-                } else {
-                    alert(details);
-                }
-            },
-            eventDisplay: 'block',
-            dayMaxEvents: 3,
-            moreLinkClick: 'popover',
-            eventContent: function(arg) {
-                const props = arg.event.extendedProps;
-                const time = props.time || '';
-                
-                // Show customer name if can_view_details, otherwise just time
-                if (props.can_view_details && props.customer_name) {
-                    return {
-                        html: `<div class="fc-event-title">${props.customer_name}</div><div class="fc-event-time">${time}</div>`
-                    };
-                } else {
-                    return {
-                        html: `<div class="fc-event-time">${time}</div>`
-                    };
-                }
-            },
-        });
-            console.log('Rendering monthly calendar');
-            monthlyCalendar.render();
-        }
-        
-        // Render calendars when tab is shown and ensure calendars render even if no events
-        const weeklyTab = document.getElementById('weekly-tab');
-        const monthlyTab = document.getElementById('monthly-tab');
-        
-        // Render monthly calendar immediately since it's the default active tab
-        const monthlyTabContent = document.getElementById('monthly');
-        if (monthlyCalendar && monthlyTabContent) {
-            // Check if tab is active or visible
-            const isActive = monthlyTabContent.classList.contains('show') || monthlyTabContent.classList.contains('active');
-            if (isActive) {
-                setTimeout(() => {
-                    console.log('Re-rendering monthly calendar (default tab)');
-                    monthlyCalendar.render();
-                }, 300);
+            currentMin += 30;
+            if (currentMin >= 60) {
+                currentMin = 0;
+                currentHour++;
             }
         }
         
-        if (weeklyTab) {
-            weeklyTab.addEventListener('shown.bs.tab', function() {
-                if (weeklyCalendar) {
-                    setTimeout(() => {
-                        weeklyCalendar.render();
-                    }, 100);
-                }
+        let html = '<div class="weekly-calendar-grid">';
+        html += '<div class="weekly-time-column">';
+        html += '<div class="weekly-time-header"></div>';
+        timeSlots.forEach(slot => {
+            html += `<div class="weekly-time-slot">${toPersian(slot.display)}</div>`;
+        });
+        html += '</div>';
+        
+        weekDays.forEach((day) => {
+            const dateStr = formatDateStr(day);
+            const jalaliInfo = getJalaliInfo(dateStr);
+            const meetings = getMeetingsForDate(dateStr);
+            const isToday = dateStr === todayGreg;
+            
+            if (!jalaliInfo) return;
+            
+            // Debug log for today
+            if (isToday) {
+                console.log('Weekly - Today:', dateStr, 'Meetings:', meetings.length, meetings);
+                meetings.forEach(m => {
+                    console.log('  - Meeting:', m.time, m.customer_name);
+                });
+            }
+            
+            html += `<div class="weekly-day-column ${isToday ? 'today-column' : ''}">`;
+            html += `<div class="weekly-day-header">
+                <div class="day-name">${jalaliInfo.jalali_day_name}</div>
+                <div class="day-number ${isToday ? 'today' : ''}">${toPersian(jalaliInfo.jalali_day)}</div>
+                <div class="day-month-small">${jalaliInfo.jalali_month_name}</div>
+            </div>`;
+            
+            timeSlots.forEach(slot => {
+                const slotTime = slot.display;
+                // Match meetings that fall within this time slot
+                const slotMeetings = meetings.filter(m => {
+                    if (!m.time) return false;
+                    const timeParts = m.time.split(':');
+                    if (timeParts.length < 2) return false;
+                    const meetingHour = parseInt(timeParts[0], 10);
+                    const meetingMin = parseInt(timeParts[1], 10);
+                    // Exact match with time slot
+                    return meetingHour === slot.hour && meetingMin === slot.minute;
+                });
+                
+                html += `<div class="weekly-time-cell" data-date="${dateStr}" data-time="${slotTime}">`;
+                
+                slotMeetings.forEach(meeting => {
+                    const bgClass = meeting.is_scheduled_session 
+                        ? (meeting.can_view_details ? 'meeting-scheduled' : 'meeting-scheduled-reserved')
+                        : (meeting.can_view_details ? 'meeting-normal' : 'meeting-reserved');
+                    
+                            const meetingTime = toPersian(meeting.time || '');
+                    html += `<div class="weekly-meeting-item ${bgClass}" 
+                        data-meeting='${JSON.stringify(meeting)}'
+                        title="${meeting.customer_name} - ${meeting.time}">
+                        <div class="meeting-time-small">${meetingTime}</div>
+                        <div class="meeting-name-small">${meeting.customer_name}</div>
+                    </div>`;
+                });
+                
+                html += '</div>';
             });
+            
+            html += '</div>';
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+        
+        // Add click handlers
+        container.querySelectorAll('.weekly-meeting-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const meetingData = JSON.parse(this.dataset.meeting);
+                showMeetingModal(meetingData);
+            });
+        });
+    }
+    
+    // Monthly Calendar
+    let currentMonth = new Date();
+    
+    function renderMonthlyCalendar() {
+        const container = document.getElementById('monthly-calendar-container');
+        if (!container) return;
+        
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+        
+        // Get a reference date to determine Jalali month
+        const referenceDate = new Date(year, month, 15); // Use middle of month for accuracy
+        const referenceDateStr = formatDateStr(referenceDate);
+        const referenceJalali = getJalaliInfo(referenceDateStr);
+        
+        if (!referenceJalali) return;
+        
+        // Update title with Jalali month
+        const titleEl = document.getElementById('month-title');
+        if (titleEl) {
+            titleEl.innerHTML = `${referenceJalali.jalali_month_name} ${toPersian(referenceJalali.jalali_year)}`;
         }
         
-        if (monthlyTab) {
-            monthlyTab.addEventListener('shown.bs.tab', function() {
-                if (monthlyCalendar) {
+        // Find all dates that belong to this Jalali month
+        const jalaliYear = referenceJalali.jalali_year;
+        const jalaliMonth = referenceJalali.jalali_month;
+        const monthDays = [];
+        
+        // Search through dateMapping to find all days in this Jalali month
+        for (const [gregDate, jalaliInfo] of Object.entries(dateMapping)) {
+            if (jalaliInfo.jalali_year === jalaliYear && jalaliInfo.jalali_month === jalaliMonth) {
+                monthDays.push({
+                    gregDate: gregDate,
+                    jalaliDay: jalaliInfo.jalali_day,
+                    jalaliInfo: jalaliInfo,
+                    date: new Date(gregDate + 'T00:00:00')
+                });
+            }
+        }
+        
+        // Sort by Jalali day
+        monthDays.sort((a, b) => a.jalaliDay - b.jalaliDay);
+        
+        if (monthDays.length === 0) return;
+        
+        // Get first day of Jalali month
+        const firstDay = monthDays[0].date;
+        
+        // Get starting day (adjust for Saturday = first day of week)
+        // getDay(): 0=Sunday, 1=Monday, ..., 6=Saturday
+        // jalaliDays array: [0]=Saturday, [1]=Sunday, [2]=Monday, ..., [6]=Friday
+        let startDay = (firstDay.getDay() + 1) % 7;
+        
+        let html = '<div class="monthly-calendar-grid">';
+        
+        // Week day headers (Saturday to Friday)
+        for (let i = 0; i < 7; i++) {
+            html += '<div class="monthly-weekday-header">' + jalaliDays[i] + '</div>';
+        }
+        
+        // Empty cells for days before month starts
+        for (let i = 0; i < startDay; i++) {
+            html += '<div class="monthly-day-cell empty"></div>';
+        }
+        
+        // Days of the Jalali month
+        monthDays.forEach(dayData => {
+            const dateStr = dayData.gregDate;
+            const jalaliInfo = dayData.jalaliInfo;
+            const meetings = getMeetingsForDate(dateStr);
+            const isToday = dateStr === todayGreg;
+            
+            html += `<div class="monthly-day-cell ${isToday ? 'today' : ''}" data-date="${dateStr}">`;
+            html += `<div class="monthly-day-number">${toPersian(jalaliInfo.jalali_day)}</div>`;
+            
+            if (meetings.length > 0) {
+                html += '<div class="monthly-meetings">';
+                meetings.slice(0, 3).forEach(meeting => {
+                    const bgClass = meeting.is_scheduled_session 
+                        ? (meeting.can_view_details ? 'meeting-dot-scheduled' : 'meeting-dot-scheduled-reserved')
+                        : (meeting.can_view_details ? 'meeting-dot' : 'meeting-dot-reserved');
+                    
+                    html += `<div class="meeting-dot-item ${bgClass}" 
+                        data-meeting='${JSON.stringify(meeting)}'
+                        title="${meeting.customer_name} - ${meeting.time}"></div>`;
+                });
+                if (meetings.length > 3) {
+                    html += `<div class="meeting-more">+${toPersian(meetings.length - 3)}</div>`;
+                }
+                html += '</div>';
+            }
+            
+            html += '</div>';
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+        
+        // Add click handlers
+        container.querySelectorAll('.monthly-day-cell:not(.empty)').forEach(cell => {
+            cell.addEventListener('click', function() {
+                const dateStr = this.dataset.date;
+                const jalaliInfo = getJalaliInfo(dateStr);
+                const meetings = getMeetingsForDate(dateStr);
+                
+                if (meetings.length > 0) {
+                    if (meetings.length === 1) {
+                        showMeetingModal(meetings[0]);
+                    } else {
+                        // Show list of meetings
+                        let listHtml = '<div class="meeting-list-modal">';
+                        meetings.forEach(meeting => {
+                            listHtml += `<div class="meeting-list-item" data-meeting='${JSON.stringify(meeting)}'>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>${meeting.customer_name}</strong>
+                                        <div class="text-muted small">${toPersian(meeting.jalali_date)} - ${toPersian(meeting.time)}</div>
+                                    </div>
+                                    ${meeting.inquiry_id && meeting.can_view_details ? `
+                                        <a href="/dashboard/inquiries/${meeting.inquiry_type === 'cash' ? 'cash?cash_inquiry_id=' : 'installment?inquiry_id='}${Number(meeting.inquiry_id)}" 
+                                           class="btn btn-sm btn-primary-light">${texts.viewDetails}</a>
+                                    ` : `<button class="btn btn-sm btn-primary-light" disabled>${texts.viewDetails}</button>`}
+                                </div>
+                            </div>`;
+                        });
+                        listHtml += '</div>';
+                        
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: jalaliInfo ? toPersian(jalaliInfo.jalali_date) : dateStr,
+                                html: listHtml,
+                                icon: 'info',
+                                confirmButtonText: texts.close,
+                                width: '500px'
+                            });
+                            
+                            // Add click handlers to list items
                     setTimeout(() => {
-                        monthlyCalendar.render();
+                                document.querySelectorAll('.meeting-list-item').forEach(item => {
+                                    item.addEventListener('click', function() {
+                                        const meeting = JSON.parse(this.dataset.meeting);
+                                        showMeetingModal(meeting);
+                                    });
+                                });
                     }, 100);
+                        }
+                    }
                 }
             });
+        });
+        
+        container.querySelectorAll('.meeting-dot-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const meeting = JSON.parse(this.dataset.meeting);
+                showMeetingModal(meeting);
+            });
+        });
+    }
+    
+    // Navigation handlers
+    document.getElementById('prev-week')?.addEventListener('click', function() {
+        currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+        renderWeeklyCalendar();
+    });
+    
+    document.getElementById('next-week')?.addEventListener('click', function() {
+        currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+        renderWeeklyCalendar();
+    });
+    
+    document.getElementById('today-week')?.addEventListener('click', function() {
+        currentWeekStart = new Date();
+        // Find Saturday of current week
+        const dayOfWeek = currentWeekStart.getDay();
+        if (dayOfWeek === 6) {
+            currentWeekStart.setDate(currentWeekStart.getDate());
+        } else if (dayOfWeek === 0) {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 1);
+        } else {
+            currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek + 1));
         }
+        currentWeekStart.setHours(0, 0, 0, 0);
+        renderWeeklyCalendar();
+    });
+    
+    document.getElementById('prev-month')?.addEventListener('click', function() {
+        currentMonth.setMonth(currentMonth.getMonth() - 1);
+        renderMonthlyCalendar();
+    });
+    
+    document.getElementById('next-month')?.addEventListener('click', function() {
+        currentMonth.setMonth(currentMonth.getMonth() + 1);
+        renderMonthlyCalendar();
+    });
+    
+    document.getElementById('today-month')?.addEventListener('click', function() {
+        currentMonth = new Date();
+        renderMonthlyCalendar();
+    });
+    
+    // Initialize on tab switch
+    document.getElementById('weekly-tab')?.addEventListener('shown.bs.tab', function() {
+        setTimeout(renderWeeklyCalendar, 100);
+    });
+    
+    document.getElementById('monthly-tab')?.addEventListener('shown.bs.tab', function() {
+        setTimeout(renderMonthlyCalendar, 100);
+    });
+    
+    // Initial render
+    if (document.getElementById('monthly').classList.contains('active') || 
+        document.getElementById('monthly').classList.contains('show')) {
+        setTimeout(renderMonthlyCalendar, 300);
     }
     
 })();
@@ -684,6 +1224,7 @@ foreach ($meetings_data as $meeting) {
     border-radius: 12px;
     border: 2px solid #e9ecef;
     margin-bottom: 20px;
+    color: #495057 !important;
 }
 
 .day-header.today {
@@ -694,17 +1235,39 @@ foreach ($meetings_data as $meeting) {
 .day-badge {
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    background: linear-gradient(135deg, #5e72e4 0%, #4c63d2 100%) !important;
     border-radius: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: white !important;
     margin-left: 15px;
-    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+    box-shadow: 0 4px 12px rgba(94, 114, 228, 0.3);
 }
 
+/* Force white color for all badge content */
+.day-badge .day-number {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    color: white !important;
+    text-shadow: none !important;
+}
+
+.day-badge .day-month {
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: 1 !important;
+    color: white !important;
+    text-shadow: none !important;
+}
+
+.day-badge * {
+    color: white !important;
+}
+
+/* General day-number and day-month (outside badge) */
 .day-number {
     font-size: 28px;
     font-weight: 700;
@@ -714,11 +1277,28 @@ foreach ($meetings_data as $meeting) {
 .day-month {
     font-size: 11px;
     text-transform: uppercase;
-    opacity: 0.9;
+    opacity: 0.95;
+}
+
+.day-info {
+    color: #495057 !important;
+}
+
+.day-info * {
+    color: inherit;
 }
 
 .day-info h5 {
-    color: var(--primary-color);
+    color: var(--primary-color) !important;
+    margin-bottom: 0;
+}
+
+.day-info .day-date-display {
+    color: #495057 !important;
+    font-size: 13px;
+    display: block;
+    margin-top: 4px;
+    font-weight: 500;
 }
 
 .calendar-events {
@@ -796,33 +1376,297 @@ foreach ($meetings_data as $meeting) {
     font-size: 14px;
 }
 
+.event-scheduled-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(13, 110, 253, 0.05) 100%);
+    border: 1px solid rgba(13, 110, 253, 0.2);
+    border-radius: 6px;
+    color: #0d6efd;
+    font-size: 13px;
+}
+
+.event-scheduled-badge i {
+    font-size: 16px;
+}
+
 .event-actions {
     display: flex;
     gap: 8px;
 }
 
-/* FullCalendar Customization */
-#weekly-calendar, #monthly-calendar {
-    margin-top: 20px;
+/* Weekly Calendar Styles */
+.weekly-calendar-container {
+    overflow-x: auto;
 }
 
-.fc-event.meeting-visible {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
+.weekly-calendar-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    min-width: 1000px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.fc-event.meeting-reserved {
-    background-color: #6c757d !important;
-    border-color: #6c757d !important;
+.weekly-time-column {
+    background: #f8f9fa;
+    border-right: 2px solid #dee2e6;
 }
 
-.fc-event-title {
+.weekly-time-header {
+    height: 60px;
+    border-bottom: 2px solid #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.weekly-time-slot {
+    height: 60px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.weekly-day-column {
+    border-right: 1px solid #e9ecef;
+    position: relative;
+}
+
+.weekly-day-column:last-child {
+    border-right: none;
+}
+
+.weekly-day-column.today-column {
+    background: rgba(var(--primary-rgb), 0.02);
+}
+
+.weekly-day-header {
+    height: 60px;
+    border-bottom: 2px solid #dee2e6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
     font-weight: 600;
 }
 
-.fc-event-time {
+.weekly-day-header .day-name {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+.weekly-day-header .day-number {
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+.weekly-day-header .day-number.today {
+    width: 32px;
+    height: 32px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weekly-day-header .day-month-small {
+    font-size: 10px;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+.weekly-time-cell {
+    height: 60px;
+    border-bottom: 1px solid #e9ecef;
+    position: relative;
+    padding: 2px;
+    transition: background 0.2s;
+}
+
+.weekly-time-cell:hover {
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+.weekly-meeting-item {
+    padding: 4px 6px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
     font-size: 11px;
-    opacity: 0.9;
+    line-height: 1.3;
+    color: white;
+}
+
+.weekly-meeting-item:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.meeting-normal {
+    background: var(--primary-color);
+}
+
+.meeting-reserved {
+    background: #6c757d;
+}
+
+.meeting-scheduled {
+    background: #0d6efd;
+}
+
+.meeting-scheduled-reserved {
+    background: #5a6268;
+}
+
+.meeting-time-small {
+    font-weight: 600;
+    font-size: 10px;
+}
+
+.meeting-name-small {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Monthly Calendar Styles */
+.monthly-calendar-container {
+    overflow-x: auto;
+}
+
+.monthly-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 500px;
+}
+
+.monthly-weekday-header {
+    padding: 15px;
+    background: var(--primary-color);
+    color: white;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.monthly-weekday-header:last-child {
+    border-right: none;
+}
+
+.monthly-day-cell {
+    min-height: 100px;
+    padding: 10px;
+    border-right: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.monthly-day-cell.empty {
+    background: #f8f9fa;
+    cursor: default;
+}
+
+.monthly-day-cell:hover:not(.empty) {
+    background: rgba(var(--primary-rgb), 0.05);
+}
+
+.monthly-day-cell.today {
+    background: rgba(var(--primary-rgb), 0.08);
+}
+
+.monthly-day-cell.today .monthly-day-number {
+    background: var(--primary-color);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.monthly-day-number {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.monthly-meetings {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.meeting-dot-item {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.meeting-dot-item:hover {
+    transform: scale(1.5);
+}
+
+.meeting-dot {
+    background: var(--primary-color);
+}
+
+.meeting-dot-reserved {
+    background: #6c757d;
+}
+
+.meeting-dot-scheduled {
+    background: #0d6efd;
+}
+
+.meeting-dot-scheduled-reserved {
+    background: #5a6268;
+}
+
+.meeting-more {
+    font-size: 10px;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.meeting-list-item {
+    padding: 12px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.meeting-list-item:hover {
+    background: rgba(var(--primary-rgb), 0.05);
+    border-color: var(--primary-color);
 }
 
 /* Badge Gradient */
@@ -839,6 +1683,15 @@ foreach ($meetings_data as $meeting) {
     50% {
         box-shadow: 0 4px 16px rgba(220, 53, 69, 0.5);
     }
+}
+
+/* Calendar Header */
+.calendar-header {
+    padding: 10px 0;
+}
+
+.calendar-nav .btn {
+    border-radius: 6px;
 }
 
 /* Responsive */
@@ -872,6 +1725,28 @@ foreach ($meetings_data as $meeting) {
     
     .day-number {
         font-size: 24px;
+    }
+    
+    .weekly-calendar-grid {
+        min-width: 800px;
+    }
+    
+    .weekly-time-column {
+        width: 60px;
+    }
+    
+    .weekly-time-slot {
+        height: 50px;
+        font-size: 11px;
+    }
+    
+    .weekly-time-cell {
+        height: 50px;
+    }
+    
+    .monthly-day-cell {
+        min-height: 80px;
+        padding: 8px;
     }
 }
 </style>

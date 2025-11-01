@@ -14,7 +14,69 @@ if (!defined('ABSPATH')) {
 
 class Maneli_Ajax_Handler {
 
+    /**
+     * Convert Jalali date to Gregorian date
+     * 
+     * @param string $date_str Date string in Jalali format (Y/m/d) or Gregorian format (Y-m-d)
+     * @return string|null Gregorian date in Y-m-d format or null if invalid
+     */
+    private function convert_jalali_to_gregorian($date_str) {
+        if (empty($date_str)) return null;
+        
+        // Check if it's already in Gregorian format (YYYY-MM-DD)
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date_str)) {
+            return $date_str; // Already Gregorian
+        }
+        
+        // Check if it's Jalali format (Y/m/d)
+        if (preg_match('/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/', $date_str, $matches)) {
+            $year = (int)$matches[1];
+            $month = (int)$matches[2];
+            $day = (int)$matches[3];
+            
+            // If year is between 1300-1500, it's likely Jalali
+            if ($year >= 1300 && $year <= 1500) {
+                if (function_exists('maneli_jalali_to_gregorian')) {
+                    list($gy, $gm, $gd) = maneli_jalali_to_gregorian($year, $month, $day);
+                    return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
+                }
+            }
+        }
+        
+        // Try to parse as-is (might be other format)
+        $timestamp = strtotime($date_str);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get meeting settings for frontend
+     */
+    public function ajax_get_meeting_settings() {
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+        
+        $options = get_option('maneli_inquiry_all_options', []);
+        $start_hour = $options['meetings_start_hour'] ?? '10:00';
+        $end_hour = $options['meetings_end_hour'] ?? '20:00';
+        $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
+        
+        wp_send_json_success([
+            'start_hour' => $start_hour,
+            'end_hour' => $end_hour,
+            'slot_minutes' => $slot_minutes
+        ]);
+    }
+
     public function __construct() {
+        // Meeting Settings
+        add_action('wp_ajax_maneli_get_meeting_settings', [$this, 'ajax_get_meeting_settings']);
+        
         // Inquiry Details, List Filtering & Actions (Installment)
         add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
         add_action('wp_ajax_maneli_filter_inquiries_ajax', [$this, 'ajax_filter_inquiries']);
@@ -1929,6 +1991,62 @@ class Maneli_Ajax_Handler {
                     wp_send_json_error(['message' => esc_html__('Meeting date and time are required.', 'maneli-car-inquiry')]);
                 }
                 
+                // Validate time against settings
+                $options = get_option('maneli_inquiry_all_options', []);
+                $settings_start = $options['meetings_start_hour'] ?? '10:00';
+                $settings_end = $options['meetings_end_hour'] ?? '20:00';
+                $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
+                
+                // Convert Jalali date to Gregorian if needed
+                $meeting_date_gregorian = $this->convert_jalali_to_gregorian($meeting_date);
+                if (!$meeting_date_gregorian) {
+                    wp_send_json_error(['message' => esc_html__('Invalid date format.', 'maneli-car-inquiry')]);
+                }
+                
+                // Build datetime string
+                $meeting_datetime_str = $meeting_date_gregorian . ' ' . $meeting_time;
+                $meeting_timestamp = strtotime($meeting_datetime_str);
+                
+                if ($meeting_timestamp === false) {
+                    wp_send_json_error(['message' => esc_html__('Invalid time format.', 'maneli-car-inquiry')]);
+                }
+                
+                // Check if the selected date is an excluded day
+                $excluded_days = isset($options['meetings_excluded_days']) && is_array($options['meetings_excluded_days']) 
+                    ? $options['meetings_excluded_days'] 
+                    : [];
+                
+                if (!empty($excluded_days)) {
+                    $day_of_week = strtolower(date('l', $meeting_timestamp));
+                    if (in_array($day_of_week, $excluded_days)) {
+                        wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'maneli-car-inquiry')]);
+                        break;
+                    }
+                }
+                
+                // Validate time range
+                $workday_start_ts = strtotime($meeting_date_gregorian . ' ' . $settings_start);
+                $workday_end_ts = strtotime($meeting_date_gregorian . ' ' . $settings_end);
+                
+                if ($workday_end_ts <= $workday_start_ts) {
+                    wp_send_json_error(['message' => esc_html__('Invalid schedule range in settings.', 'maneli-car-inquiry')]);
+                    break;
+                }
+                
+                // Check if time is within allowed range
+                if ($meeting_timestamp < $workday_start_ts || $meeting_timestamp >= $workday_end_ts) {
+                    wp_send_json_error(['message' => esc_html__('Selected time is outside allowed working hours.', 'maneli-car-inquiry')]);
+                    break;
+                }
+                
+                // Check if time aligns with slot intervals
+                $time_diff = $meeting_timestamp - $workday_start_ts;
+                $slot_seconds = $slot_minutes * 60;
+                if ($time_diff % $slot_seconds !== 0) {
+                    wp_send_json_error(['message' => esc_html__('Selected time does not match available slot intervals.', 'maneli-car-inquiry')]);
+                    break;
+                }
+                
                 update_post_meta($inquiry_id, 'cash_inquiry_status', 'meeting_scheduled');
                 update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
                 update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
@@ -2269,6 +2387,62 @@ class Maneli_Ajax_Handler {
                 
                 if (empty($meeting_date) || empty($meeting_time)) {
                     wp_send_json_error(['message' => esc_html__('Meeting date and time are required.', 'maneli-car-inquiry')]);
+                }
+                
+                // Validate time against settings
+                $options = get_option('maneli_inquiry_all_options', []);
+                $settings_start = $options['meetings_start_hour'] ?? '10:00';
+                $settings_end = $options['meetings_end_hour'] ?? '20:00';
+                $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
+                
+                // Convert Jalali date to Gregorian if needed
+                $meeting_date_gregorian = $this->convert_jalali_to_gregorian($meeting_date);
+                if (!$meeting_date_gregorian) {
+                    wp_send_json_error(['message' => esc_html__('Invalid date format.', 'maneli-car-inquiry')]);
+                }
+                
+                // Build datetime string
+                $meeting_datetime_str = $meeting_date_gregorian . ' ' . $meeting_time;
+                $meeting_timestamp = strtotime($meeting_datetime_str);
+                
+                if ($meeting_timestamp === false) {
+                    wp_send_json_error(['message' => esc_html__('Invalid time format.', 'maneli-car-inquiry')]);
+                }
+                
+                // Check if the selected date is an excluded day
+                $excluded_days = isset($options['meetings_excluded_days']) && is_array($options['meetings_excluded_days']) 
+                    ? $options['meetings_excluded_days'] 
+                    : [];
+                
+                if (!empty($excluded_days)) {
+                    $day_of_week = strtolower(date('l', $meeting_timestamp));
+                    if (in_array($day_of_week, $excluded_days)) {
+                        wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'maneli-car-inquiry')]);
+                        break;
+                    }
+                }
+                
+                // Validate time range
+                $workday_start_ts = strtotime($meeting_date_gregorian . ' ' . $settings_start);
+                $workday_end_ts = strtotime($meeting_date_gregorian . ' ' . $settings_end);
+                
+                if ($workday_end_ts <= $workday_start_ts) {
+                    wp_send_json_error(['message' => esc_html__('Invalid schedule range in settings.', 'maneli-car-inquiry')]);
+                    break;
+                }
+                
+                // Check if time is within allowed range
+                if ($meeting_timestamp < $workday_start_ts || $meeting_timestamp >= $workday_end_ts) {
+                    wp_send_json_error(['message' => esc_html__('Selected time is outside allowed working hours.', 'maneli-car-inquiry')]);
+                    break;
+                }
+                
+                // Check if time aligns with slot intervals
+                $time_diff = $meeting_timestamp - $workday_start_ts;
+                $slot_seconds = $slot_minutes * 60;
+                if ($time_diff % $slot_seconds !== 0) {
+                    wp_send_json_error(['message' => esc_html__('Selected time does not match available slot intervals.', 'maneli-car-inquiry')]);
+                    break;
                 }
                 
                 update_post_meta($inquiry_id, 'tracking_status', 'meeting_scheduled');

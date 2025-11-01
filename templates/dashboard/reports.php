@@ -96,14 +96,16 @@ $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, 
     $status_distribution = Maneli_Reports_Dashboard::get_status_distribution($start_date, $end_date, $expert_id);
 }
 
-// Enqueue Chart.js
-// Use local Chart.js if available
-$chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
-if (file_exists($chartjs_path)) {
-    wp_enqueue_script('chartjs', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', [], '4.4.0', true);
-} else {
-    // Fallback to CDN
-    wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', [], '4.4.0', true);
+// Chart.js is enqueued in class-dashboard-handler.php for reports page
+// Make sure it's loaded before our script
+if (!wp_script_is('chartjs', 'enqueued')) {
+    $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
+    if (file_exists($chartjs_path)) {
+        wp_enqueue_script('chartjs', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', ['jquery'], '4.4.0', false);
+    } else {
+        // Fallback to CDN
+        wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', ['jquery'], '4.4.0', false);
+    }
 }
 ?>
 <div class="main-content app-content">
@@ -346,7 +348,7 @@ if (file_exists($chartjs_path)) {
                             </div>
                             <div>
                                 <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Total Customers', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($business_stats && isset($business_stats['total_customers']) ? $business_stats['total_customers'] : 0); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo persian_numbers_no_separator($business_stats && isset($business_stats['total_customers']) ? $business_stats['total_customers'] : 0); ?></div>
                                 </div>
                             <div class="ms-auto">
                                 <span class="badge bg-primary-transparent text-primary fs-10">
@@ -889,24 +891,64 @@ function convertToJalali(dateString) {
 function waitForDependencies() {
     if (typeof jQuery === 'undefined' || typeof Chart === 'undefined') {
         console.log('Waiting for dependencies... jQuery:', typeof jQuery !== 'undefined', 'Chart:', typeof Chart !== 'undefined');
+        // Increase timeout limit and add max retries
+        if (typeof waitForDependencies.retries === 'undefined') {
+            waitForDependencies.retries = 0;
+        }
+        waitForDependencies.retries++;
+        if (waitForDependencies.retries > 100) {
+            console.error('Timeout waiting for Chart.js. Trying to load from CDN...');
+            // Try to load Chart.js from CDN if local version failed
+            if (typeof Chart === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+                script.onload = function() {
+                    console.log('Chart.js loaded from CDN');
+                    initCharts();
+                };
+                script.onerror = function() {
+                    console.error('Failed to load Chart.js from CDN');
+                };
+                document.head.appendChild(script);
+            }
+            return;
+        }
         setTimeout(waitForDependencies, 100);
         return;
     }
     
+    // Reset retries on success
+    waitForDependencies.retries = 0;
+    
     // Both are loaded, now initialize charts
+    initCharts();
+}
+
+function initCharts() {
+    if (typeof jQuery === 'undefined') {
+        console.error('jQuery is not loaded!');
+        return;
+    }
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded!');
+        return;
+    }
+    
     jQuery(document).ready(function($) {
         console.log('Initializing reports charts...');
         console.log('Chart.js available:', typeof Chart !== 'undefined');
         
         // Translation object for charts
         const chartTexts = {
-            totalInquiries: <?php echo json_encode(esc_html__('Total Inquiries', 'maneli-car-inquiry')); ?>,
-            cash: <?php echo json_encode(esc_html__('Cash', 'maneli-car-inquiry')); ?>,
-            installment: <?php echo json_encode(esc_html__('Installment', 'maneli-car-inquiry')); ?>,
-            inquiryCount: <?php echo json_encode(esc_html__('Inquiry Count', 'maneli-car-inquiry')); ?>,
-            profit: <?php echo json_encode(esc_html__('Profit (Toman)', 'maneli-car-inquiry')); ?>,
-            revenue: <?php echo json_encode(esc_html__('Revenue (Toman)', 'maneli-car-inquiry')); ?>
+            totalInquiries: <?php echo wp_json_encode(esc_html__('Total Inquiries', 'maneli-car-inquiry')); ?>,
+            cash: <?php echo wp_json_encode(esc_html__('Cash', 'maneli-car-inquiry')); ?>,
+            installment: <?php echo wp_json_encode(esc_html__('Installment', 'maneli-car-inquiry')); ?>,
+            inquiryCount: <?php echo wp_json_encode(esc_html__('Inquiry Count', 'maneli-car-inquiry')); ?>,
+            profit: <?php echo wp_json_encode(esc_html__('Profit (Toman)', 'maneli-car-inquiry')); ?>,
+            revenue: <?php echo wp_json_encode(esc_html__('Revenue (Toman)', 'maneli-car-inquiry')); ?>
         };
+        
+        console.log('Chart initialization started. Chart.js loaded:', typeof Chart !== 'undefined');
         
         // Daily Trend Chart
         <?php if (!empty($daily_stats)): 
@@ -917,77 +959,96 @@ function waitForDependencies() {
                 if (function_exists('maneli_gregorian_to_jalali') && isset($stat['date']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $stat['date'], $matches)) {
                     $jalali_date = maneli_gregorian_to_jalali($matches[1], $matches[2], $matches[3], 'Y/m/d');
                 }
+                // Ensure all values are integers (convert from any format including Persian numbers)
                 $daily_stats_jalali[] = [
                     'date' => $jalali_date,
-                    'total' => isset($stat['total']) ? (int)$stat['total'] : 0,
-                    'cash' => isset($stat['cash']) ? (int)$stat['cash'] : 0,
-                    'installment' => isset($stat['installment']) ? (int)$stat['installment'] : 0,
+                    'total' => isset($stat['total']) ? absint($stat['total']) : 0,
+                    'cash' => isset($stat['cash']) ? absint($stat['cash']) : 0,
+                    'installment' => isset($stat['installment']) ? absint($stat['installment']) : 0,
                 ];
             }
         ?>
         const ctx = document.getElementById('dailyTrendChart');
         if (ctx && typeof Chart !== 'undefined') {
             try {
-                const dailyData = <?php echo json_encode($daily_stats_jalali); ?>;
-                const labels = dailyData.map(item => item.date);
-                const totalData = dailyData.map(item => parseInt(item.total) || 0);
-                const cashData = dailyData.map(item => parseInt(item.cash) || 0);
-                const installmentData = dailyData.map(item => parseInt(item.installment) || 0);
+                const dailyData = <?php echo wp_json_encode($daily_stats_jalali); ?>;
+                console.log('Daily stats data:', dailyData);
+                if (!dailyData || dailyData.length === 0) {
+                    console.warn('Daily stats is empty!');
+                } else {
+                    const labels = dailyData.map(item => String(item.date || ''));
+                    const totalData = dailyData.map(item => {
+                        const val = item.total || item['total'] || 0;
+                        return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
+                    });
+                    const cashData = dailyData.map(item => {
+                        const val = item.cash || item['cash'] || 0;
+                        return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
+                    });
+                    const installmentData = dailyData.map(item => {
+                        const val = item.installment || item['installment'] || 0;
+                        return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
+                    });
                 
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: chartTexts.totalInquiries,
-                                data: totalData,
-                                borderColor: 'rgb(75, 192, 192)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            },
-                            {
-                                label: chartTexts.cash,
-                                data: cashData,
-                                borderColor: 'rgb(255, 159, 64)',
-                                backgroundColor: 'rgba(255, 159, 64, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            },
-                            {
-                                label: chartTexts.installment,
-                                data: installmentData,
-                                borderColor: 'rgb(54, 162, 235)',
-                                backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'top',
-                            }
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: chartTexts.totalInquiries,
+                                    data: totalData,
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                },
+                                {
+                                    label: chartTexts.cash,
+                                    data: cashData,
+                                    borderColor: 'rgb(255, 159, 64)',
+                                    backgroundColor: 'rgba(255, 159, 64, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                },
+                                {
+                                    label: chartTexts.installment,
+                                    data: installmentData,
+                                    borderColor: 'rgb(54, 162, 235)',
+                                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                                }
+                            ]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
                                 }
                             }
                         }
-                    }
-                });
-                console.log('Daily trend chart initialized');
+                    });
+                    console.log('Daily trend chart initialized successfully');
+                }
             } catch (error) {
                 console.error('Error initializing daily trend chart:', error);
             }
+        } else {
+            console.warn('Daily trend chart canvas not found or Chart.js not loaded');
         }
+        <?php else: ?>
+        console.log('Daily stats is empty, skipping daily trend chart');
         <?php endif; ?>
         
         // Status Distribution Pie Chart
@@ -995,10 +1056,17 @@ function waitForDependencies() {
         const pieCtx = document.getElementById('statusPieChart');
         if (pieCtx && typeof Chart !== 'undefined') {
             try {
-                const statusData = <?php echo json_encode($status_distribution); ?>;
-                const labels = statusData.map(item => item.status);
-                const counts = statusData.map(item => parseInt(item.count) || 0);
-                const colors = statusData.map(item => item.color);
+                const statusData = <?php echo wp_json_encode($status_distribution); ?>;
+                console.log('Status distribution data:', statusData);
+                if (!statusData || statusData.length === 0) {
+                    console.warn('Status distribution is empty!');
+                }
+                const labels = statusData.map(item => String(item.status || ''));
+                const counts = statusData.map(item => {
+                    const val = item.count || item['count'] || 0;
+                    return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
+                });
+                const colors = statusData.map(item => String(item.color || '#cccccc'));
                 
                 new Chart(pieCtx, {
                     type: 'pie',
@@ -1050,12 +1118,16 @@ function waitForDependencies() {
         const monthlyCtx = document.getElementById('monthlyRevenueChart');
         if (monthlyCtx && typeof Chart !== 'undefined') {
             try {
-                const monthlyData = <?php echo json_encode($monthly_stats); ?>;
-                const monthlyLabels = monthlyData.map(item => {
-                    // Convert month label to Persian/Jalali if needed
-                    return item.month_persian || item.month || '';
+                const monthlyData = <?php echo wp_json_encode($monthly_stats); ?>;
+                console.log('Monthly stats data:', monthlyData);
+                if (!monthlyData || monthlyData.length === 0) {
+                    console.warn('Monthly stats is empty!');
+                }
+                const monthlyLabels = monthlyData.map(item => String(item.month_persian || item.month || ''));
+                const monthlyTotals = monthlyData.map(item => {
+                    const val = item.total || item['total'] || 0;
+                    return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
                 });
-                const monthlyTotals = monthlyData.map(item => parseInt(item.total) || 0);
                 
                 new Chart(monthlyCtx, {
                     type: 'bar',
@@ -1100,11 +1172,24 @@ function waitForDependencies() {
         const expertsCtx = document.getElementById('expertsComparisonChart');
         if (expertsCtx && typeof Chart !== 'undefined') {
             try {
-                const expertsData = <?php echo json_encode(array_slice($experts_detailed, 0, 10)); ?>;
-                const expertNames = expertsData.map(e => e.name || <?php echo json_encode(esc_html__('Unknown', 'maneli-car-inquiry')); ?>);
-                const expertProfits = expertsData.map(e => parseFloat(e.profit) || 0);
-                const expertRevenues = expertsData.map(e => parseFloat(e.revenue) || 0);
-                const expertInquiries = expertsData.map(e => parseInt(e.total_inquiries) || 0);
+                const expertsData = <?php echo wp_json_encode(array_slice($experts_detailed, 0, 10)); ?>;
+                console.log('Experts data:', expertsData);
+                if (!expertsData || expertsData.length === 0) {
+                    console.warn('Experts data is empty!');
+                }
+                const expertNames = expertsData.map(e => String(e.name || <?php echo wp_json_encode(esc_html__('Unknown', 'maneli-car-inquiry')); ?>));
+                const expertProfits = expertsData.map(e => {
+                    const val = e.profit || e['profit'] || 0;
+                    return typeof val === 'string' ? parseFloat(val.replace(/[^0-9.-]/g, '')) || 0 : Number(val) || 0;
+                });
+                const expertRevenues = expertsData.map(e => {
+                    const val = e.revenue || e['revenue'] || 0;
+                    return typeof val === 'string' ? parseFloat(val.replace(/[^0-9.-]/g, '')) || 0 : Number(val) || 0;
+                });
+                const expertInquiries = expertsData.map(e => {
+                    const val = e.total_inquiries || e['total_inquiries'] || 0;
+                    return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
+                });
                 
                 new Chart(expertsCtx, {
                     type: 'bar',
@@ -1171,8 +1256,12 @@ function waitForDependencies() {
     });
 }
 
-// Start waiting for dependencies
-waitForDependencies();
+// Start waiting for dependencies when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', waitForDependencies);
+} else {
+    waitForDependencies();
+}
 
 // Show/hide custom date fields
 document.getElementById('period-filter')?.addEventListener('change', function() {
