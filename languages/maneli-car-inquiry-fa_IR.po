@@ -3626,7 +3626,7 @@ msgstr "کد ۴ رقمی ارسال شده به شماره موبایل %s را 
 
 
 msgid "Enter your father\\"
-msgstr ""
+msgstr "وارد کردن نام پدر"
 
 
 msgid "Enter your first name"
@@ -3634,151 +3634,151 @@ msgstr ""
 
 
 msgid "Enter your last name"
-msgstr ""
+msgstr "وارد کردن نام خانوادگی"
 
 
 msgid "Enter your mobile number"
-msgstr ""
+msgstr "وارد کردن شماره موبایل"
 
 
 msgid "Enter your note..."
-msgstr ""
+msgstr "وارد کردن یادداشت شما..."
 
 
 msgid "Error"
-msgstr ""
+msgstr "خطا"
 
 
 msgid "Error adding expert"
-msgstr ""
+msgstr "خطا در افزودن کارشناس"
 
 
 msgid "Error loading data"
-msgstr ""
+msgstr "خطا در بارگذاری داده‌ها"
 
 
 msgid "Error loading permissions"
-msgstr ""
+msgstr "خطا در بارگذاری مجوزها"
 
 
 msgid "Error saving product. Please try again."
-msgstr ""
+msgstr "خطا در ذخیره محصول. لطفاً دوباره تلاش کنید."
 
 
 msgid "Error sending request. Please try again."
-msgstr ""
+msgstr "خطا در ارسال درخواست. لطفاً دوباره تلاش کنید."
 
 
 msgid "Error updating"
-msgstr ""
+msgstr "خطا در به‌روزرسانی"
 
 
 msgid "Error uploading image. Please try again."
-msgstr ""
+msgstr "خطا در آپلود تصویر. لطفاً دوباره تلاش کنید."
 
 
 msgid "Error!"
-msgstr ""
+msgstr "خطا!"
 
 
 msgid "Esfand"
-msgstr ""
+msgstr "اسفند"
 
 
 msgid "Example: 50000000"
-msgstr ""
+msgstr "مثال: 50000000"
 
 
 msgid "Example: Central"
-msgstr ""
+msgstr "مثال: مرکزی"
 
 
 msgid "Example: Engineer"
-msgstr ""
+msgstr "مثال: مهندس"
 
 
 msgid "Example: Melli"
-msgstr ""
+msgstr "مثال: ملی"
 
 
 msgid "Expert Dashboard"
-msgstr ""
+msgstr "داشبورد کارشناس"
 
 
 msgid "Expert Notes"
-msgstr ""
+msgstr "یادداشت‌های کارشناس"
 
 
 msgid "Expert Performance"
-msgstr ""
+msgstr "عملکرد کارشناس"
 
 
 msgid "Expert Performance Comparison"
-msgstr ""
+msgstr "مقایسه عملکرد کارشناسان"
 
 
 msgid "Expert Performance Report"
-msgstr ""
+msgstr "گزارش عملکرد کارشناس"
 
 
 msgid "Expert Status Control"
-msgstr ""
+msgstr "کنترل وضعیت کارشناس"
 
 
 msgid "Expert Status:"
-msgstr ""
+msgstr "وضعیت کارشناس:"
 
 
 msgid "Expert added successfully."
-msgstr ""
+msgstr "کارشناس با موفقیت افزوده شد."
 
 
 msgid "Expert can view and manage meetings."
-msgstr ""
+msgstr "کارشناس می‌تواند جلسات را مشاهده و مدیریت کند."
 
 
 msgid "Expert deleted successfully."
-msgstr ""
+msgstr "کارشناس با موفقیت حذف شد."
 
 
 msgid "Expert information updated successfully."
-msgstr ""
+msgstr "اطلاعات کارشناس با موفقیت به‌روزرسانی شد."
 
 
 msgid "Expert not found."
-msgstr ""
+msgstr "کارشناس یافت نشد."
 
 
 msgid "Expert not specified."
-msgstr ""
+msgstr "کارشناس مشخص نشده است."
 
 
 msgid "Expert updated successfully."
-msgstr ""
+msgstr "کارشناس با موفقیت به‌روزرسانی شد."
 
 
 msgid "Expert will be activated"
-msgstr ""
+msgstr "کارشناس فعال خواهد شد"
 
 
 msgid "Expert will be deactivated"
-msgstr ""
+msgstr "کارشناس غیرفعال خواهد شد"
 
 
 msgid "Expert:"
-msgstr ""
+msgstr "کارشناس:"
 
 
 msgid "Expert: %s"
-msgstr ""
+msgstr "کارشناس: %s"
 
 
 msgid "Export CSV"
-msgstr ""
+msgstr "خروجی CSV"
 
 
 msgid "Failed to upload images."
-msgstr ""
+msgstr "آپلود تصاویر ناموفق بود."
 
 
 msgid "Failed!"
@@ -3786,247 +3786,247 @@ msgstr ""
 
 
 msgid "Farvardin"
-msgstr ""
+msgstr "فروردین"
 
 
 msgid "Father\\"
-msgstr ""
+msgstr "نام پدر"
 
 
 msgid "Feature"
-msgstr ""
+msgstr "ویژگی"
 
 
 msgid "File %s is larger than 5MB and will be ignored."
-msgstr ""
+msgstr "فایل %s بزرگ‌تر از 5 مگابایت است و نادیده گرفته می‌شود."
 
 
 msgid "File size exceeds 2 MB limit."
-msgstr ""
+msgstr "اندازه فایل از حد 2 مگابایت بیشتر است."
 
 
 msgid "File size should not exceed 5MB."
-msgstr ""
+msgstr "اندازه فایل نباید بیش از 5 مگابایت باشد."
 
 
 msgid "Filter by Expert"
-msgstr ""
+msgstr "فیلتر بر اساس کارشناس"
 
 
 msgid "Final Admin Approval"
-msgstr ""
+msgstr "تایید نهایی مدیر"
 
 
 msgid "Final Approval"
-msgstr ""
+msgstr "تایید نهایی"
 
 
 msgid "Final Approval and Completed"
-msgstr ""
+msgstr "تایید نهایی و تکمیل شده"
 
 
 msgid "Final Approved"
-msgstr ""
+msgstr "تایید نهایی شده"
 
 
 msgid "Final Installment Inquiry Result"
-msgstr ""
+msgstr "نتیجه نهایی استعلام اقساطی"
 
 
 msgid "Finish"
-msgstr ""
+msgstr "پایان"
 
 
 msgid "First"
-msgstr ""
+msgstr "اول"
 
 
 msgid "Follow-up Completed (Date:"
-msgstr ""
+msgstr "پیگیری تکمیل شده (تاریخ:"
 
 
 msgid "Follow-up Date:"
-msgstr ""
+msgstr "تاریخ پیگیری:"
 
 
 msgid "Follow-up Inquiries List"
-msgstr ""
+msgstr "لیست استعلام‌های پیگیری"
 
 
 msgid "Follow-up Scheduled"
-msgstr ""
+msgstr "پیگیری برنامه‌ریزی شده"
 
 
 msgid "Follow-up Started by Expert"
-msgstr ""
+msgstr "پیگیری آغاز شده توسط کارشناس"
 
 
 msgid "Follow-ups"
-msgstr ""
+msgstr "پیگیری‌ها"
 
 
 msgid "Free"
-msgstr ""
+msgstr "رایگان"
 
 
 msgid "Friday"
-msgstr ""
+msgstr "جمعه"
 
 
 msgid "From Date:"
-msgstr ""
+msgstr "از تاریخ:"
 
 
 msgid "Full Address"
-msgstr ""
+msgstr "آدرس کامل"
 
 
 msgid "Full address"
-msgstr ""
+msgstr "آدرس کامل"
 
 
 msgid "Future Followup"
-msgstr ""
+msgstr "پیگیری آینده"
 
 
 msgid "Future meetings will be displayed here."
-msgstr ""
+msgstr "جلسات آینده در اینجا نمایش داده می‌شوند."
 
 
 msgid "Go to Cars List"
-msgstr ""
+msgstr "رفتن به لیست خودروها"
 
 
 msgid "Go to Payment Gateway"
-msgstr ""
+msgstr "رفتن به درگاه پرداخت"
 
 
 msgid "Government"
-msgstr ""
+msgstr "دولتی"
 
 
 msgid "Guide:"
-msgstr ""
+msgstr "راهنما:"
 
 
 msgid "Home"
-msgstr ""
+msgstr "خانه"
 
 
 msgid "Identity Information"
-msgstr ""
+msgstr "اطلاعات هویتی"
 
 
 msgid "Identity Information:"
-msgstr ""
+msgstr "اطلاعات هویتی:"
 
 
 msgid "Image Gallery"
-msgstr ""
+msgstr "گالری تصاویر"
 
 
 msgid "Image uploaded successfully."
-msgstr ""
+msgstr "تصویر با موفقیت آپلود شد."
 
 
 msgid "In-App Notifications"
-msgstr ""
+msgstr "اعلان‌های درون برنامه"
 
 
 msgid "In-person appointments"
-msgstr ""
+msgstr "قرارهای حضوری"
 
 
 msgid "Inactive"
-msgstr ""
+msgstr "غیرفعال"
 
 
 msgid "Income Level (Toman)"
-msgstr ""
+msgstr "سطح درآمد (تومان)"
 
 
 msgid "Income Level (Toman):"
-msgstr ""
+msgstr "سطح درآمد (تومان):"
 
 
 msgid "Inquiries that require follow-up contact on the specified dates are displayed here."
-msgstr ""
+msgstr "استعلام‌هایی که نیاز به تماس پیگیری در تاریخ‌های مشخص شده دارند در اینجا نمایش داده می‌شوند."
 
 
 msgid "Inquiry"
-msgstr ""
+msgstr "استعلام"
 
 
 msgid "Inquiry #%d"
-msgstr ""
+msgstr "استعلام #%d"
 
 
 msgid "Inquiry Count"
-msgstr ""
+msgstr "تعداد استعلام"
 
 
 msgid "Inquiry Status Distribution"
-msgstr ""
+msgstr "توزیع وضعیت استعلام‌ها"
 
 
 msgid "Inquiry not found or you do not have access."
-msgstr ""
+msgstr "استعلام یافت نشد یا شما دسترسی ندارید."
 
 
 msgid "Installment"
-msgstr ""
+msgstr "قسطی"
 
 
 msgid "Installment Car Purchase"
-msgstr ""
+msgstr "خرید خودرو قسطی"
 
 
 msgid "Installment Follow-ups"
-msgstr ""
+msgstr "پیگیری‌های قسطی"
 
 
 msgid "Installment Inquiries:"
-msgstr ""
+msgstr "استعلام‌های قسطی:"
 
 
 msgid "Installment Inquiry Follow-ups List"
-msgstr ""
+msgstr "لیست پیگیری‌های استعلام قسطی"
 
 
 msgid "Installment Period"
-msgstr ""
+msgstr "دوره اقساط"
 
 
 msgid "Installment Request Details"
-msgstr ""
+msgstr "جزئیات درخواست قسطی"
 
 
 msgid "Installment:"
-msgstr ""
+msgstr "قسطی:"
 
 
 msgid "Invalid file type. Only JPEG, PNG and GIF are allowed."
-msgstr ""
+msgstr "نوع فایل نامعتبر است. فقط JPEG، PNG و GIF مجاز است."
 
 
 msgid "Issuer Account Number"
-msgstr ""
+msgstr "شماره حساب صادرکننده"
 
 
 msgid "Issuer Address"
-msgstr ""
+msgstr "آدرس صادرکننده"
 
 
 msgid "Issuer Bank Name"
-msgstr ""
+msgstr "نام بانک صادرکننده"
 
 
 msgid "Issuer Birth Date"
-msgstr ""
+msgstr "تاریخ تولد صادرکننده"
 
 
 msgid "Issuer Branch Code"
-msgstr ""
+msgstr "کد شعبه صادرکننده"
 
 
 msgid "Issuer Branch Name"
