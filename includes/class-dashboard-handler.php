@@ -908,10 +908,11 @@ class Maneli_Dashboard_Handler {
             $wp_user = wp_get_current_user();
             
             // Determine actual role from WordPress user roles (always fresh from database)
+            // Note: maneli_admin is the actual role name, but we use 'maneli_manager' as internal identifier
             $user_role = 'customer';
             if (in_array('administrator', $wp_user->roles, true)) {
                 $user_role = 'administrator';
-            } elseif (in_array('maneli_manager', $wp_user->roles, true)) {
+            } elseif (in_array('maneli_admin', $wp_user->roles, true) || in_array('maneli_manager', $wp_user->roles, true)) {
                 $user_role = 'maneli_manager';
             } elseif (in_array('maneli_expert', $wp_user->roles, true)) {
                 $user_role = 'maneli_expert';
@@ -965,10 +966,11 @@ class Maneli_Dashboard_Handler {
         }
         
         // Determine actual role from WordPress user roles (always fresh from database)
+        // Note: maneli_admin is the actual role name, but we use 'maneli_manager' as internal identifier
         $user_role = 'customer';
         if (in_array('administrator', $wp_user->roles, true)) {
             $user_role = 'administrator';
-        } elseif (in_array('maneli_manager', $wp_user->roles, true)) {
+        } elseif (in_array('maneli_admin', $wp_user->roles, true) || in_array('maneli_manager', $wp_user->roles, true)) {
             $user_role = 'maneli_manager';
         } elseif (in_array('maneli_expert', $wp_user->roles, true)) {
             $user_role = 'maneli_expert';
@@ -1228,10 +1230,11 @@ class Maneli_Dashboard_Handler {
         }
         
         // Always get fresh role from WordPress user object
+        // Note: maneli_admin is the actual role name, but we use 'maneli_manager' as internal identifier
         $user_role = 'customer';
         if (in_array('administrator', $wp_user->roles, true)) {
                 $user_role = 'administrator';
-        } elseif (in_array('maneli_manager', $wp_user->roles, true)) {
+        } elseif (in_array('maneli_admin', $wp_user->roles, true) || in_array('maneli_manager', $wp_user->roles, true)) {
                 $user_role = 'maneli_manager';
         } elseif (in_array('maneli_expert', $wp_user->roles, true)) {
                 $user_role = 'maneli_expert';
@@ -1384,125 +1387,9 @@ class Maneli_Dashboard_Handler {
             ];
         }
         
-        // ===== مدیر پلاگین (Maneli Manager) =====
-        elseif ($user_role === 'maneli_manager') {
-            // دسته: داشبورد
-            $menu_items[] = ['title' => esc_html__('Dashboard', 'maneli-car-inquiry'), 'category' => true];
-            $menu_items[] = [
-                'title' => esc_html__('Home', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard'),
-                'icon' => 'ri-home-line'
-            ];
-            $menu_items[] = [
-                'title' => esc_html__('Notifications', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/notifications'),
-                'icon' => 'ri-notification-line'
-            ];
-            $menu_items[] = [
-                'title' => esc_html__('Meeting Calendar', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/calendar'),
-                'icon' => 'ri-calendar-todo-line',
-                'capability' => 'edit_posts'
-            ];
-            
-            // دسته: استعلامات
-            $menu_items[] = ['title' => esc_html__('Inquiries', 'maneli-car-inquiry'), 'category' => true];
-            
-            // گروه استعلامات نقدی
-            $menu_items[] = [
-                'title' => esc_html__('Cash Inquiries', 'maneli-car-inquiry'),
-                'icon' => 'ri-money-dollar-circle-line',
-                'capability' => 'edit_posts',
-                'children' => [
-                    [
-                        'title' => esc_html__('Cash Inquiries List', 'maneli-car-inquiry'),
-                        'url' => home_url('/dashboard/inquiries/cash'),
-                        'icon' => 'ri-file-list-3-line',
-                        'capability' => 'edit_posts'
-                    ],
-                    [
-                        'title' => esc_html__('Cash Follow-ups', 'maneli-car-inquiry'),
-                        'url' => home_url('/dashboard/cash-followups'),
-                        'icon' => 'ri-customer-service-2-line',
-                        'capability' => 'edit_posts'
-                    ]
-                ]
-            ];
-            
-            // گروه استعلامات اقساطی
-            $menu_items[] = [
-                'title' => esc_html__('Installment Inquiries', 'maneli-car-inquiry'),
-                'icon' => 'ri-bank-line',
-                'capability' => 'edit_posts',
-                'children' => [
-                    [
-                        'title' => esc_html__('Installment Inquiries List', 'maneli-car-inquiry'),
-                        'url' => home_url('/dashboard/inquiries/installment'),
-                        'icon' => 'ri-file-list-2-line',
-                        'capability' => 'edit_posts'
-                    ],
-                    [
-                        'title' => esc_html__('Installment Follow-ups', 'maneli-car-inquiry'),
-                        'url' => home_url('/dashboard/installment-followups'),
-                        'icon' => 'ri-customer-service-2-line',
-                        'capability' => 'edit_posts'
-                    ]
-                ]
-            ];
-            
-            // دسته: مدیریت
-            $menu_items[] = ['title' => esc_html__('Management', 'maneli-car-inquiry'), 'category' => true];
-            $menu_items[] = [
-                'title' => esc_html__('Performance Reports', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/reports'),
-                'icon' => 'ri-bar-chart-box-line',
-                'capability' => 'manage_maneli_inquiries'
-            ];
-            $menu_items[] = [
-                'title' => esc_html__('Edit Products', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/products'),
-                'icon' => 'ri-store-line',
-                'capability' => 'edit_product'
-            ];
-            $menu_items[] = [
-                'title' => esc_html__('Payment Management', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/payments'),
-                'icon' => 'ri-bank-card-line',
-                'capability' => 'manage_maneli_inquiries'
-            ];
-            
-            // دسته: کاربران
-            $menu_items[] = ['title' => esc_html__('Users', 'maneli-car-inquiry'), 'category' => true];
-            $menu_items[] = [
-                'title' => esc_html__('User Management', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/users'),
-                'icon' => 'ri-team-line',
-                'capability' => 'delete_users'
-            ];
-            $menu_items[] = [
-                'title' => esc_html__('Experts', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/experts'),
-                'icon' => 'ri-user-star-line',
-                'capability' => 'manage_maneli_inquiries'
-            ];
-            
-            // دسته: تنظیمات
-            $menu_items[] = ['title' => esc_html__('Settings', 'maneli-car-inquiry'), 'category' => true];
-            $menu_items[] = [
-                'title' => esc_html__('System Settings', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/settings'),
-                'icon' => 'ri-settings-3-line',
-                'capability' => 'manage_maneli_inquiries'
-            ];
-            $menu_items[] = [
-                'title' => esc_html__('Logout', 'maneli-car-inquiry'),
-                'url' => home_url('/logout'),
-                'icon' => 'ri-logout-box-r-line'
-            ];
-        }
-        
-        // ===== مدیر کل (Administrator) =====
-        else {
+        // ===== مدیر پلاگین (Maneli Manager) و مدیر کل (Administrator) =====
+        // Both roles get the exact same menu and permissions (except wp-admin access)
+        if ($user_role === 'maneli_manager' || $user_role === 'administrator') {
             // دسته: داشبورد
             $menu_items[] = ['title' => esc_html__('Dashboard', 'maneli-car-inquiry'), 'category' => true];
             $menu_items[] = [

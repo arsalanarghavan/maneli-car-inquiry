@@ -37,10 +37,37 @@ class Maneli_Notification_Handler {
 
         // Validate required fields
         if (empty($data['user_id']) || empty($data['type']) || empty($data['title'])) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Notification: Missing required fields. user_id: ' . $data['user_id'] . ', type: ' . $data['type'] . ', title: ' . $data['title']);
+            }
             return false;
         }
 
-        $result = $wpdb->insert($table, $data);
+        // Check if table exists
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
+        if (!$table_exists) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Notification: Table does not exist: ' . $table);
+            }
+            return false;
+        }
+
+        $result = $wpdb->insert($table, array(
+            'user_id' => (int)$data['user_id'],
+            'type' => sanitize_text_field($data['type']),
+            'title' => sanitize_text_field($data['title']),
+            'message' => wp_kses_post($data['message']),
+            'link' => esc_url_raw($data['link']),
+            'related_id' => (int)$data['related_id'],
+            'is_read' => (int)$data['is_read'],
+        ), array('%d', '%s', '%s', '%s', '%s', '%d', '%d'));
+
+        if ($result === false) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Notification: Insert failed. Error: ' . $wpdb->last_error);
+            }
+            return false;
+        }
 
         if ($result) {
             return $wpdb->insert_id;
@@ -71,6 +98,23 @@ class Maneli_Notification_Handler {
 
         $args = wp_parse_args($args, $defaults);
 
+        // Validate user_id
+        if (empty($args['user_id']) || $args['user_id'] <= 0) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Notification: get_notifications called with invalid user_id: ' . $args['user_id']);
+            }
+            return array();
+        }
+
+        // Check if table exists
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
+        if (!$table_exists) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Notification: Table does not exist: ' . $table);
+            }
+            return array();
+        }
+
         $where = array('user_id = %d');
         $prepare = array($args['user_id']);
 
@@ -95,7 +139,13 @@ class Maneli_Notification_Handler {
         $prepare[] = $args['limit'];
         $prepare[] = $args['offset'];
 
-        return $wpdb->get_results($wpdb->prepare($query, $prepare));
+        $results = $wpdb->get_results($wpdb->prepare($query, $prepare));
+        
+        if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Maneli Notification: get_notifications query error: ' . $wpdb->last_error);
+        }
+
+        return $results ? $results : array();
     }
 
     /**
@@ -109,17 +159,30 @@ class Maneli_Notification_Handler {
             $user_id = get_current_user_id();
         }
 
-        if (!$user_id) {
+        if (!$user_id || $user_id <= 0) {
             return 0;
         }
 
         global $wpdb;
         $table = $wpdb->prefix . 'maneli_notifications';
 
+        // Check if table exists
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
+        if (!$table_exists) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Notification: Table does not exist for unread count: ' . $table);
+            }
+            return 0;
+        }
+
         $count = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM {$table} WHERE user_id = %d AND is_read = 0",
             $user_id
         ));
+
+        if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Maneli Notification: get_unread_count query error: ' . $wpdb->last_error);
+        }
 
         return intval($count);
     }
@@ -502,6 +565,470 @@ class Maneli_Notification_Handler {
         }
         
         return esc_html__('Follow-up Reminder', 'maneli-car-inquiry');
+    }
+
+    /**
+     * Notify users about cash inquiry status change
+     *
+     * @param int $inquiry_id Cash inquiry post ID
+     * @param string $old_status Old status
+     * @param string $new_status New status
+     * @return bool Success status
+     */
+    public static function notify_cash_status_change($inquiry_id, $old_status, $new_status) {
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
+            return false;
+        }
+
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
+        
+        $post = get_post($inquiry_id);
+        if (!$post) {
+            return false;
+        }
+
+        $customer_id = $post->post_author;
+        $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $product_name = get_the_title($product_id);
+        $customer_first_name = get_post_meta($inquiry_id, 'cash_first_name', true);
+        $customer_last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
+        $customer_name = trim($customer_first_name . ' ' . $customer_last_name);
+
+        $old_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($old_status);
+        $new_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($new_status);
+        
+        $cash_inquiry_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+
+        // Notify customer
+        if ($customer_id) {
+            self::create_notification([
+                'user_id' => $customer_id,
+                'type' => 'cash_status_changed',
+                'title' => esc_html__('Your cash request status has changed', 'maneli-car-inquiry'),
+                'message' => sprintf(
+                    esc_html__('Your cash request for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    $product_name,
+                    $old_label,
+                    $new_label
+                ),
+                'link' => $cash_inquiry_url,
+                'related_id' => $inquiry_id,
+            ]);
+        }
+
+        // Notify assigned expert
+        if ($assigned_expert_id) {
+            self::create_notification([
+                'user_id' => $assigned_expert_id,
+                'type' => 'cash_status_changed',
+                'title' => sprintf(esc_html__('Cash request status changed', 'maneli-car-inquiry')),
+                'message' => sprintf(
+                    esc_html__('Cash request from %s for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    $customer_name,
+                    $product_name,
+                    $old_label,
+                    $new_label
+                ),
+                'link' => $cash_inquiry_url,
+                'related_id' => $inquiry_id,
+            ]);
+        }
+
+        // Notify all admins and managers for important status changes
+        $important_statuses = ['approved', 'rejected', 'completed'];
+        if (in_array($new_status, $important_statuses, true)) {
+            $managers = get_users([
+                'role__in' => ['administrator', 'maneli_admin'],
+                'fields' => 'ids'
+            ]);
+
+            foreach ($managers as $manager_id) {
+                self::create_notification([
+                    'user_id' => $manager_id,
+                    'type' => 'cash_status_changed',
+                    'title' => sprintf(esc_html__('Cash request status changed', 'maneli-car-inquiry')),
+                    'message' => sprintf(
+                        esc_html__('Cash request from %s for %s status changed to "%s"', 'maneli-car-inquiry'),
+                        $customer_name,
+                        $product_name,
+                        $new_label
+                    ),
+                    'link' => $cash_inquiry_url,
+                    'related_id' => $inquiry_id,
+                ]);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Notify users about installment inquiry status change
+     *
+     * @param int $inquiry_id Installment inquiry post ID
+     * @param string $old_status Old status (can be inquiry_status or tracking_status)
+     * @param string $new_status New status
+     * @param string $status_type Type: 'inquiry_status' or 'tracking_status'
+     * @return bool Success status
+     */
+    public static function notify_installment_status_change($inquiry_id, $old_status, $new_status, $status_type = 'tracking_status') {
+        if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
+            return false;
+        }
+
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
+        
+        $post = get_post($inquiry_id);
+        if (!$post) {
+            return false;
+        }
+
+        $customer_id = $post->post_author;
+        $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $product_name = get_the_title($product_id);
+        
+        $customer_first_name = get_post_meta($inquiry_id, 'first_name', true);
+        $customer_last_name = get_post_meta($inquiry_id, 'last_name', true);
+        if (empty($customer_first_name)) {
+            $user = get_userdata($customer_id);
+            if ($user) {
+                $customer_first_name = $user->first_name;
+                $customer_last_name = $user->last_name;
+            }
+        }
+        $customer_name = trim($customer_first_name . ' ' . $customer_last_name);
+
+        // Get appropriate status labels based on status type
+        if ($status_type === 'tracking_status') {
+            $old_label = Maneli_CPT_Handler::get_tracking_status_label($old_status);
+            $new_label = Maneli_CPT_Handler::get_tracking_status_label($new_status);
+            $notification_type = 'installment_tracking_changed';
+        } else {
+            $old_label = Maneli_CPT_Handler::get_status_label($old_status);
+            $new_label = Maneli_CPT_Handler::get_status_label($new_status);
+            $notification_type = 'installment_status_changed';
+        }
+        
+        $installment_inquiry_url = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+
+        // Notify customer
+        if ($customer_id) {
+            self::create_notification([
+                'user_id' => $customer_id,
+                'type' => $notification_type,
+                'title' => esc_html__('Your installment request status has changed', 'maneli-car-inquiry'),
+                'message' => sprintf(
+                    esc_html__('Your installment request for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    $product_name,
+                    $old_label,
+                    $new_label
+                ),
+                'link' => $installment_inquiry_url,
+                'related_id' => $inquiry_id,
+            ]);
+        }
+
+        // Notify assigned expert
+        if ($assigned_expert_id) {
+            self::create_notification([
+                'user_id' => $assigned_expert_id,
+                'type' => $notification_type,
+                'title' => sprintf(esc_html__('Installment request status changed', 'maneli-car-inquiry')),
+                'message' => sprintf(
+                    esc_html__('Installment request from %s for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    $customer_name,
+                    $product_name,
+                    $old_label,
+                    $new_label
+                ),
+                'link' => $installment_inquiry_url,
+                'related_id' => $inquiry_id,
+            ]);
+        }
+
+        // Notify all admins and managers for important status changes
+        $important_statuses = ['approved', 'rejected', 'completed', 'user_confirmed'];
+        if (in_array($new_status, $important_statuses, true)) {
+            $managers = get_users([
+                'role__in' => ['administrator', 'maneli_admin'],
+                'fields' => 'ids'
+            ]);
+
+            foreach ($managers as $manager_id) {
+                self::create_notification([
+                    'user_id' => $manager_id,
+                    'type' => $notification_type,
+                    'title' => sprintf(esc_html__('Installment request status changed', 'maneli-car-inquiry')),
+                    'message' => sprintf(
+                        esc_html__('Installment request from %s for %s status changed to "%s"', 'maneli-car-inquiry'),
+                        $customer_name,
+                        $product_name,
+                        $new_label
+                    ),
+                    'link' => $installment_inquiry_url,
+                    'related_id' => $inquiry_id,
+                ]);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Notify expert/admin when customer uploads a document
+     *
+     * @param int $inquiry_id Inquiry post ID (cash_inquiry or inquiry)
+     * @param string $document_name Document name
+     * @return bool Success status
+     */
+    public static function notify_document_uploaded($inquiry_id, $document_name) {
+        if (!$inquiry_id) {
+            return false;
+        }
+
+        $post_type = get_post_type($inquiry_id);
+        if (!in_array($post_type, ['cash_inquiry', 'inquiry'])) {
+            return false;
+        }
+
+        $post = get_post($inquiry_id);
+        if (!$post) {
+            return false;
+        }
+
+        $customer_id = $post->post_author;
+        $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $product_name = get_the_title($product_id);
+
+        // Get customer name
+        if ($post_type === 'cash_inquiry') {
+            $customer_first_name = get_post_meta($inquiry_id, 'cash_first_name', true);
+            $customer_last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
+            $inquiry_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+            $inquiry_type = esc_html__('Cash', 'maneli-car-inquiry');
+        } else {
+            $customer_first_name = get_post_meta($inquiry_id, 'first_name', true);
+            $customer_last_name = get_post_meta($inquiry_id, 'last_name', true);
+            if (empty($customer_first_name)) {
+                $user = get_userdata($customer_id);
+                if ($user) {
+                    $customer_first_name = $user->first_name;
+                    $customer_last_name = $user->last_name;
+                }
+            }
+            $inquiry_url = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            $inquiry_type = esc_html__('Installment', 'maneli-car-inquiry');
+        }
+        $customer_name = trim($customer_first_name . ' ' . $customer_last_name);
+
+        // Notify assigned expert
+        if ($assigned_expert_id) {
+            self::create_notification([
+                'user_id' => $assigned_expert_id,
+                'type' => 'document_uploaded',
+                'title' => sprintf(esc_html__('New document uploaded', 'maneli-car-inquiry')),
+                'message' => sprintf(
+                    esc_html__('%s request from %s: Document "%s" has been uploaded', 'maneli-car-inquiry'),
+                    $inquiry_type,
+                    $customer_name,
+                    $document_name
+                ),
+                'link' => $inquiry_url,
+                'related_id' => $inquiry_id,
+            ]);
+        }
+
+        // Notify all admins and managers
+        $managers = get_users([
+            'role__in' => ['administrator', 'maneli_admin'],
+            'fields' => 'ids'
+        ]);
+
+        foreach ($managers as $manager_id) {
+            self::create_notification([
+                'user_id' => $manager_id,
+                'type' => 'document_uploaded',
+                'title' => sprintf(esc_html__('New document uploaded', 'maneli-car-inquiry')),
+                'message' => sprintf(
+                    esc_html__('%s request from %s: Document "%s" has been uploaded', 'maneli-car-inquiry'),
+                    $inquiry_type,
+                    $customer_name,
+                    $document_name
+                ),
+                'link' => $inquiry_url,
+                'related_id' => $inquiry_id,
+            ]);
+        }
+
+        return true;
+    }
+
+    /**
+     * Notify customer when their document is approved
+     *
+     * @param int $user_id Customer user ID
+     * @param string $document_name Document name
+     * @param int|null $inquiry_id Optional inquiry ID if related to an inquiry
+     * @return bool Success status
+     */
+    public static function notify_document_approved($user_id, $document_name, $inquiry_id = null) {
+        if (!$user_id) {
+            return false;
+        }
+
+        $link = home_url('/dashboard/profile-settings');
+        if ($inquiry_id) {
+            $post_type = get_post_type($inquiry_id);
+            if ($post_type === 'cash_inquiry') {
+                $link = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+            } elseif ($post_type === 'inquiry') {
+                $link = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            }
+        }
+
+        return self::create_notification([
+            'user_id' => $user_id,
+            'type' => 'document_approved',
+            'title' => esc_html__('Document approved', 'maneli-car-inquiry'),
+            'message' => sprintf(
+                esc_html__('Your document "%s" has been approved', 'maneli-car-inquiry'),
+                $document_name
+            ),
+            'link' => $link,
+            'related_id' => $inquiry_id ? $inquiry_id : 0,
+        ]);
+    }
+
+    /**
+     * Notify customer when their document is rejected
+     *
+     * @param int $user_id Customer user ID
+     * @param string $document_name Document name
+     * @param string|null $rejection_reason Optional rejection reason
+     * @param int|null $inquiry_id Optional inquiry ID if related to an inquiry
+     * @return bool Success status
+     */
+    public static function notify_document_rejected($user_id, $document_name, $rejection_reason = null, $inquiry_id = null) {
+        if (!$user_id) {
+            return false;
+        }
+
+        $link = home_url('/dashboard/profile-settings');
+        if ($inquiry_id) {
+            $post_type = get_post_type($inquiry_id);
+            if ($post_type === 'cash_inquiry') {
+                $link = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+            } elseif ($post_type === 'inquiry') {
+                $link = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            }
+        }
+
+        $message = sprintf(
+            esc_html__('Your document "%s" has been rejected', 'maneli-car-inquiry'),
+            $document_name
+        );
+        
+        if ($rejection_reason) {
+            $message .= '. ' . esc_html__('Reason:', 'maneli-car-inquiry') . ' ' . esc_html($rejection_reason);
+        }
+
+        return self::create_notification([
+            'user_id' => $user_id,
+            'type' => 'document_rejected',
+            'title' => esc_html__('Document rejected', 'maneli-car-inquiry'),
+            'message' => $message,
+            'link' => $link,
+            'related_id' => $inquiry_id ? $inquiry_id : 0,
+        ]);
+    }
+
+    /**
+     * Notify expert and customer when expert is assigned to an inquiry
+     *
+     * @param int $inquiry_id Inquiry post ID (cash_inquiry or inquiry)
+     * @param int $expert_id Expert user ID
+     * @return bool Success status
+     */
+    public static function notify_expert_assigned($inquiry_id, $expert_id) {
+        if (!$inquiry_id || !$expert_id) {
+            return false;
+        }
+
+        $post_type = get_post_type($inquiry_id);
+        if (!in_array($post_type, ['cash_inquiry', 'inquiry'])) {
+            return false;
+        }
+
+        $post = get_post($inquiry_id);
+        if (!$post) {
+            return false;
+        }
+
+        $customer_id = $post->post_author;
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $product_name = get_the_title($product_id);
+        $expert = get_userdata($expert_id);
+        $expert_name = $expert ? $expert->display_name : esc_html__('Expert', 'maneli-car-inquiry');
+
+        // Get customer name
+        if ($post_type === 'cash_inquiry') {
+            $customer_first_name = get_post_meta($inquiry_id, 'cash_first_name', true);
+            $customer_last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
+            $expert_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+            $customer_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+            $inquiry_type = esc_html__('Cash', 'maneli-car-inquiry');
+        } else {
+            $customer_first_name = get_post_meta($inquiry_id, 'first_name', true);
+            $customer_last_name = get_post_meta($inquiry_id, 'last_name', true);
+            if (empty($customer_first_name)) {
+                $user = get_userdata($customer_id);
+                if ($user) {
+                    $customer_first_name = $user->first_name;
+                    $customer_last_name = $user->last_name;
+                }
+            }
+            $expert_url = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            $customer_url = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            $inquiry_type = esc_html__('Installment', 'maneli-car-inquiry');
+        }
+        $customer_name = trim($customer_first_name . ' ' . $customer_last_name);
+
+        // Notify expert
+        self::create_notification([
+            'user_id' => $expert_id,
+            'type' => 'inquiry_assigned',
+            'title' => sprintf(esc_html__('%s request assigned to you', 'maneli-car-inquiry'), $inquiry_type),
+            'message' => sprintf(
+                esc_html__('A %s request from %s for %s has been assigned to you', 'maneli-car-inquiry'),
+                $inquiry_type,
+                $customer_name,
+                $product_name
+            ),
+            'link' => $expert_url,
+            'related_id' => $inquiry_id,
+        ]);
+
+        // Notify customer
+        if ($customer_id) {
+            self::create_notification([
+                'user_id' => $customer_id,
+                'type' => 'expert_assigned',
+                'title' => esc_html__('Expert assigned to your request', 'maneli-car-inquiry'),
+                'message' => sprintf(
+                    esc_html__('Expert %s has been assigned to your %s request for %s', 'maneli-car-inquiry'),
+                    $expert_name,
+                    strtolower($inquiry_type),
+                    $product_name
+                ),
+                'link' => $customer_url,
+                'related_id' => $inquiry_id,
+            ]);
+        }
+
+        return true;
     }
 }
 

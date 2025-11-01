@@ -77,7 +77,14 @@ class Maneli_Admin_Actions_Handler {
              $sms_pattern_key = 'sms_pattern_more_docs';
         }
         
+        $old_status = get_post_meta($post_id, 'inquiry_status', true);
         update_post_meta($post_id, 'inquiry_status', $final_status);
+        
+        // Send notification for status change
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        if ($inquiry_type === 'installment') {
+            Maneli_Notification_Handler::notify_installment_status_change($post_id, $old_status, $final_status, 'inquiry_status');
+        }
         
         // Send notification to the customer
         $user_id = get_post_field('post_author', $post_id);
@@ -288,7 +295,12 @@ class Maneli_Admin_Actions_Handler {
             exit;
         } else {
             // Set status to approved if manually assigned successfully
-            update_post_meta($post_id, 'inquiry_status', 'user_confirmed'); 
+            $old_status = get_post_meta($post_id, 'inquiry_status', true);
+            update_post_meta($post_id, 'inquiry_status', 'user_confirmed');
+            
+            // Send notification for status change
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Maneli_Notification_Handler::notify_installment_status_change($post_id, $old_status, 'user_confirmed', 'inquiry_status');
         }
 
         // 7. Cleanup temporary user meta
@@ -434,8 +446,13 @@ class Maneli_Admin_Actions_Handler {
         wp_update_post(['ID' => $post_id, 'post_content' => "Finotex API raw response (Retried by Admin):\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>"]);
         update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
 
+        $old_status = get_post_meta($post_id, 'inquiry_status', true);
         $new_status = ($finotex_result['status'] === 'DONE' || $finotex_result['status'] === 'SKIPPED') ? 'pending' : 'failed';
         update_post_meta($post_id, 'inquiry_status', $new_status);
+        
+        // Send notification for status change
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_installment_status_change($post_id, $old_status, $new_status, 'inquiry_status');
 
         wp_redirect(add_query_arg('inquiry_id', $post_id, home_url('/dashboard/installment-inquiries')));
         exit;
@@ -471,21 +488,9 @@ class Maneli_Admin_Actions_Handler {
         
         $this->notify_expert_of_assignment($post_id, $assigned_expert_id, $inquiry_type);
         
-        // Send notification to the assigned expert
+        // Send notification using the helper method (notifies both expert and customer)
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        $inquiry_type_label = $inquiry_type === 'cash' ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry');
-        $car_name = get_the_title(get_post_meta($post_id, 'product_id', true));
-        
-        Maneli_Notification_Handler::create_notification(array(
-            'user_id' => $assigned_expert_id,
-            'type' => 'inquiry_assigned',
-            'title' => sprintf(esc_html__('%s inquiry assigned to you', 'maneli-car-inquiry'), $inquiry_type_label),
-            'message' => sprintf(esc_html__('A %s inquiry for %s has been assigned to you', 'maneli-car-inquiry'), $inquiry_type_label, $car_name),
-            'link' => $inquiry_type === 'cash' 
-                ? home_url('/dashboard/cash-inquiries') 
-                : home_url('/dashboard/installment-inquiries'),
-            'related_id' => $post_id,
-        ));
+        Maneli_Notification_Handler::notify_expert_assigned($post_id, $assigned_expert_id);
         
         return ['id' => $assigned_expert_id, 'name' => $expert_info->display_name];
     }

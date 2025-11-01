@@ -409,8 +409,16 @@ class Maneli_Ajax_Handler {
                 wp_send_json_error(['message' => esc_html__('Please enter a valid amount.', 'maneli-car-inquiry')]);
                 return;
             }
+            $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+            if (empty($old_status)) {
+                $old_status = 'new';
+            }
             update_post_meta($inquiry_id, 'cash_down_payment', $amount);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'awaiting_payment');
+            
+            // Send notification
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'awaiting_payment');
             
             $pattern_id = $options['cash_inquiry_approved_pattern'] ?? 0;
             if ($pattern_id > 0 && !empty($customer_mobile)) {
@@ -424,8 +432,16 @@ class Maneli_Ajax_Handler {
                 wp_send_json_error(['message' => esc_html__('A reason for rejection is required.', 'maneli-car-inquiry')]);
                 return;
             }
+            $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+            if (empty($old_status)) {
+                $old_status = 'new';
+            }
             update_post_meta($inquiry_id, 'cash_rejection_reason', $reason);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
+            
+            // Send notification
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'rejected');
             
             $pattern_id = $options['cash_inquiry_rejected_pattern'] ?? 0;
             if ($pattern_id > 0 && !empty($customer_mobile)) {
@@ -680,8 +696,18 @@ class Maneli_Ajax_Handler {
             return;
         }
         
+        // Get old status before update
+        $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        if (empty($old_status)) {
+            $old_status = 'new';
+        }
+        
         // Update status to "referred"
         update_post_meta($inquiry_id, 'cash_inquiry_status', 'referred');
+        
+        // Send notification for status change
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'referred');
 
         wp_send_json_success([
             'message' => sprintf(esc_html__('Request successfully assigned to %s.', 'maneli-car-inquiry'), $expert_data['name']),
@@ -714,7 +740,12 @@ class Maneli_Ajax_Handler {
             return;
         }
         
+        $old_status = get_post_meta($inquiry_id, 'inquiry_status', true);
         update_post_meta($inquiry_id, 'inquiry_status', 'user_confirmed');
+        
+        // Send notification for status change
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $old_status, 'user_confirmed', 'inquiry_status');
     
         wp_send_json_success([
             'message' => sprintf(esc_html__('Inquiry successfully assigned to %s.', 'maneli-car-inquiry'), $expert_data['name']),
@@ -915,8 +946,18 @@ class Maneli_Ajax_Handler {
             return;
         }
 
+        // Get old status before update
+        $old_status = get_post_meta($inquiry_id, 'tracking_status', true);
+        if (empty($old_status)) {
+            $old_status = 'new';
+        }
+
         // Update tracking status
         update_post_meta($inquiry_id, 'tracking_status', $new_status);
+        
+        // Send notification for status change
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $old_status, $new_status, 'tracking_status');
 
         // Handle date storage based on status
         if ($new_status === 'approved' && !empty($date_value)) {
@@ -1685,11 +1726,23 @@ class Maneli_Ajax_Handler {
             update_post_meta($inquiry_id, 'cash_down_payment', $downpayment);
         }
         
+        // Get old status before update
+        $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        if (empty($old_status)) {
+            $old_status = 'new';
+        }
+        
         // Update status based on decision
         if ($decision === 'approved') {
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
+            // Send notification
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'approved');
         } elseif ($decision === 'rejected') {
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
+            // Send notification
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'rejected');
         }
         
         wp_send_json_success(['message' => esc_html__('Decision saved successfully.', 'maneli-car-inquiry')]);
@@ -1717,10 +1770,20 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => esc_html__('Expert has not approved yet.', 'maneli-car-inquiry')]);
         }
         
+        // Get old status before update
+        $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        if (empty($old_status)) {
+            $old_status = 'approved';
+        }
+        
         // Set to completed
         update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
         update_post_meta($inquiry_id, 'admin_approved', 'yes');
         update_post_meta($inquiry_id, 'admin_approved_date', current_time('mysql'));
+        
+        // Send notification
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'completed');
         
         wp_send_json_success(['message' => esc_html__('Request finalized successfully.', 'maneli-car-inquiry')]);
     }
@@ -1760,8 +1823,18 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => esc_html__('Invalid status provided.', 'maneli-car-inquiry')]);
         }
         
+        // Get old status before update
+        $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        if (empty($old_status)) {
+            $old_status = 'new';
+        }
+        
         // Update status
         update_post_meta($inquiry_id, 'cash_inquiry_status', $new_status);
+        
+        // Send notification for status change
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, $new_status);
         
         // Handle additional data based on status
         if ($new_status === 'follow_up_scheduled') {
@@ -1834,11 +1907,17 @@ class Maneli_Ajax_Handler {
         }
         
         $current_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        if (empty($current_status)) {
+            $current_status = 'new';
+        }
+        
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         switch ($action) {
             case 'start_progress':
                 update_post_meta($inquiry_id, 'cash_inquiry_status', 'in_progress');
                 update_post_meta($inquiry_id, 'in_progress_at', current_time('mysql'));
+                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'in_progress');
                 wp_send_json_success(['message' => esc_html__('Inquiry status updated to In Progress.', 'maneli-car-inquiry')]);
                 break;
                 
@@ -1854,6 +1933,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
                 update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
                 update_post_meta($inquiry_id, 'meeting_scheduled_at', current_time('mysql'));
+                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'meeting_scheduled');
                 
                 wp_send_json_success(['message' => esc_html__('Meeting scheduled successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -1901,24 +1981,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'followup_date', $followup_date);
                 update_post_meta($inquiry_id, 'followup_note', $followup_note);
                 update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
-                
-                // Send notification to expert
-                $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
-                if ($assigned_expert_id) {
-                    $notification_message = sprintf(
-                        esc_html__('Follow-up scheduled for cash inquiry #%d on %s', 'maneli-car-inquiry'),
-                        $inquiry_id,
-                        $followup_date
-                    );
-                    Maneli_Notification_Handler::create_notification([
-                        'user_id' => $assigned_expert_id,
-                        'type' => 'followup_scheduled',
-                        'title' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'),
-                        'message' => $notification_message,
-                        'related_id' => $inquiry_id,
-                        'link' => add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'))
-                    ]);
-                }
+                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'follow_up_scheduled');
                 
                 wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -1930,6 +1993,7 @@ class Maneli_Ajax_Handler {
                 
                 update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
                 update_post_meta($inquiry_id, 'completed_at', current_time('mysql'));
+                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'completed');
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -1943,6 +2007,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
                 update_post_meta($inquiry_id, 'approved_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'approved_by', $current_user_id);
+                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'approved');
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry approved successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -1979,6 +2044,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'cash_rejection_reason', $rejection_reason);
                 update_post_meta($inquiry_id, 'rejected_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'rejected_by', $current_user_id);
+                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'rejected');
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -2040,9 +2106,19 @@ class Maneli_Ajax_Handler {
             return;
         }
         
+        // Get old status before update
+        $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+        if (empty($old_status)) {
+            $old_status = 'awaiting_payment';
+        }
+        
         // Update status to "downpayment received"
         update_post_meta($inquiry_id, 'cash_inquiry_status', 'downpayment_received');
         update_post_meta($inquiry_id, 'downpayment_paid_date', current_time('mysql'));
+        
+        // Send notification
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'downpayment_received');
         
         // TODO: Send SMS to expert notifying them that payment is received
     }
@@ -2182,6 +2258,7 @@ class Maneli_Ajax_Handler {
                 // Expert starts follow-up
                 update_post_meta($inquiry_id, 'tracking_status', 'in_progress');
                 update_post_meta($inquiry_id, 'in_progress_at', current_time('mysql'));
+                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'in_progress', 'tracking_status');
                 wp_send_json_success(['message' => esc_html__('Inquiry status updated to In Progress.', 'maneli-car-inquiry')]);
                 break;
                 
@@ -2198,6 +2275,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
                 update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
                 update_post_meta($inquiry_id, 'meeting_scheduled_at', current_time('mysql'));
+                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'meeting_scheduled', 'tracking_status');
                 
                 wp_send_json_success(['message' => esc_html__('Meeting scheduled successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -2251,32 +2329,7 @@ class Maneli_Ajax_Handler {
                     update_post_meta($inquiry_id, 'followup_date', $followup_date);
                     update_post_meta($inquiry_id, 'followup_note', $followup_note);
                     update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
-                    
-                    // Send notification to expert (optional, don't fail if notification fails)
-                    $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
-                    if ($assigned_expert_id && class_exists('Maneli_Notification_Handler')) {
-                        try {
-                            $notification_message = sprintf(
-                                esc_html__('Follow-up scheduled for inquiry #%d on %s', 'maneli-car-inquiry'),
-                                $inquiry_id,
-                                $followup_date
-                            );
-                            $link_url = home_url('/dashboard/installment-inquiries');
-                            $link_url = add_query_arg('inquiry_id', $inquiry_id, $link_url);
-                            
-                            Maneli_Notification_Handler::create_notification([
-                                'user_id' => $assigned_expert_id,
-                                'type' => 'followup_scheduled',
-                                'title' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'),
-                                'message' => $notification_message,
-                                'related_id' => $inquiry_id,
-                                'link' => $link_url
-                            ]);
-                        } catch (Exception $e) {
-                            // Log error but don't fail the operation
-                            error_log('Maneli: Failed to create notification: ' . $e->getMessage());
-                        }
-                    }
+                    Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'follow_up_scheduled', 'tracking_status');
                     
                     wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
                 } catch (Exception $e) {
@@ -2296,6 +2349,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'tracking_status', 'cancelled');
                 update_post_meta($inquiry_id, 'cancel_reason', $cancel_reason);
                 update_post_meta($inquiry_id, 'cancelled_at', current_time('mysql'));
+                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'cancelled', 'tracking_status');
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry cancelled successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -2308,6 +2362,7 @@ class Maneli_Ajax_Handler {
                 
                 update_post_meta($inquiry_id, 'tracking_status', 'completed');
                 update_post_meta($inquiry_id, 'completed_at', current_time('mysql'));
+                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -2321,6 +2376,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'tracking_status', 'completed');
                 update_post_meta($inquiry_id, 'approved_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'approved_by', $current_user_id);
+                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry approved successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -2357,6 +2413,7 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'rejection_reason', $rejection_reason);
                 update_post_meta($inquiry_id, 'rejected_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'rejected_by', $current_user_id);
+                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'rejected', 'tracking_status');
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -2404,12 +2461,48 @@ class Maneli_Ajax_Handler {
     //======================================================================
     
     /**
+     * Helper function to get current user ID (works with both WP users and session users)
+     */
+    private function get_current_user_id_for_notifications() {
+        // Try WordPress user first
+        if (is_user_logged_in()) {
+            $user_id = get_current_user_id();
+            if ($user_id > 0) {
+                return $user_id;
+            }
+        }
+        
+        // Fallback to session
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+        
+        if (isset($_SESSION['maneli']['user_id']) && !empty($_SESSION['maneli']['user_id'])) {
+            $user_id = (int)$_SESSION['maneli']['user_id'];
+            if ($user_id > 0 && get_user_by('ID', $user_id)) {
+                return $user_id;
+            }
+        }
+        
+        if (isset($_SESSION['maneli_user_id']) && !empty($_SESSION['maneli_user_id'])) {
+            $user_id = (int)$_SESSION['maneli_user_id'];
+            if ($user_id > 0 && get_user_by('ID', $user_id)) {
+                return $user_id;
+            }
+        }
+        
+        return 0;
+    }
+    
+    /**
      * Get notifications for current user
      */
     public function ajax_get_notifications() {
         check_ajax_referer('maneli_notifications_nonce', 'nonce');
         
-        if (!is_user_logged_in()) {
+        $user_id = $this->get_current_user_id_for_notifications();
+        
+        if (!$user_id) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
@@ -2417,7 +2510,7 @@ class Maneli_Ajax_Handler {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         $args = array(
-            'user_id' => get_current_user_id(),
+            'user_id' => $user_id,
             'limit' => isset($_POST['limit']) ? intval($_POST['limit']) : 50,
             'offset' => isset($_POST['offset']) ? intval($_POST['offset']) : 0,
         );
@@ -2451,14 +2544,16 @@ class Maneli_Ajax_Handler {
     public function ajax_get_unread_count() {
         check_ajax_referer('maneli_notifications_nonce', 'nonce');
         
-        if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        $user_id = $this->get_current_user_id_for_notifications();
+        
+        if (!$user_id) {
+            wp_send_json_success(['count' => 0]);
             return;
         }
         
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
-        $count = Maneli_Notification_Handler::get_unread_count(get_current_user_id());
+        $count = Maneli_Notification_Handler::get_unread_count($user_id);
         
         wp_send_json_success(['count' => $count]);
     }
@@ -2469,7 +2564,9 @@ class Maneli_Ajax_Handler {
     public function ajax_mark_notification_read() {
         check_ajax_referer('maneli_notifications_nonce', 'nonce');
         
-        if (!is_user_logged_in()) {
+        $user_id = $this->get_current_user_id_for_notifications();
+        
+        if (!$user_id) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
@@ -2483,7 +2580,7 @@ class Maneli_Ajax_Handler {
             return;
         }
         
-        $result = Maneli_Notification_Handler::mark_as_read($notification_id, get_current_user_id());
+        $result = Maneli_Notification_Handler::mark_as_read($notification_id, $user_id);
         
         if ($result) {
             wp_send_json_success(['message' => esc_html__('Notification marked as read.', 'maneli-car-inquiry')]);
@@ -2498,14 +2595,16 @@ class Maneli_Ajax_Handler {
     public function ajax_mark_all_notifications_read() {
         check_ajax_referer('maneli_notifications_nonce', 'nonce');
         
-        if (!is_user_logged_in()) {
+        $user_id = $this->get_current_user_id_for_notifications();
+        
+        if (!$user_id) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
         
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
-        $result = Maneli_Notification_Handler::mark_all_as_read(get_current_user_id());
+        $result = Maneli_Notification_Handler::mark_all_as_read($user_id);
         
         if ($result) {
             wp_send_json_success(['message' => esc_html__('All notifications marked as read.', 'maneli-car-inquiry')]);
@@ -2520,7 +2619,9 @@ class Maneli_Ajax_Handler {
     public function ajax_delete_notification() {
         check_ajax_referer('maneli_notifications_nonce', 'nonce');
         
-        if (!is_user_logged_in()) {
+        $user_id = $this->get_current_user_id_for_notifications();
+        
+        if (!$user_id) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
@@ -2534,7 +2635,7 @@ class Maneli_Ajax_Handler {
             return;
         }
         
-        $result = Maneli_Notification_Handler::delete_notification($notification_id, get_current_user_id());
+        $result = Maneli_Notification_Handler::delete_notification($notification_id, $user_id);
         
         if ($result) {
             wp_send_json_success(['message' => esc_html__('Notification deleted.', 'maneli-car-inquiry')]);
@@ -2549,14 +2650,16 @@ class Maneli_Ajax_Handler {
     public function ajax_delete_all_read_notifications() {
         check_ajax_referer('maneli_notifications_nonce', 'nonce');
         
-        if (!is_user_logged_in()) {
+        $user_id = $this->get_current_user_id_for_notifications();
+        
+        if (!$user_id) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
         
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
-        $result = Maneli_Notification_Handler::delete_all_read(get_current_user_id());
+        $result = Maneli_Notification_Handler::delete_all_read($user_id);
         
         if ($result) {
             wp_send_json_success(['message' => esc_html__('All read notifications deleted.', 'maneli-car-inquiry')]);
@@ -2872,6 +2975,30 @@ class Maneli_Ajax_Handler {
         ];
         update_user_meta($user_id, 'customer_uploaded_documents', $documents);
         
+        // Send notification to admins/experts about new document upload
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        $managers = get_users([
+            'role__in' => ['administrator', 'maneli_admin'],
+            'fields' => 'ids'
+        ]);
+        $user = get_userdata($user_id);
+        $user_name = $user ? $user->display_name : '';
+        
+        foreach ($managers as $manager_id) {
+            Maneli_Notification_Handler::create_notification([
+                'user_id' => $manager_id,
+                'type' => 'document_uploaded',
+                'title' => esc_html__('New document uploaded', 'maneli-car-inquiry'),
+                'message' => sprintf(
+                    esc_html__('Customer %s uploaded document "%s"', 'maneli-car-inquiry'),
+                    $user_name,
+                    $document_name
+                ),
+                'link' => add_query_arg('user_id', $user_id, home_url('/dashboard/users')),
+                'related_id' => 0,
+            ]);
+        }
+        
         wp_send_json_success([
             'message' => esc_html__('Document uploaded successfully. Awaiting admin review.', 'maneli-car-inquiry'),
             'document_url' => $uploaded_file_array['url']
@@ -2908,6 +3035,10 @@ class Maneli_Ajax_Handler {
         }
         update_user_meta($user_id, 'customer_uploaded_documents', $documents);
         
+        // Send notification to customer
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_document_approved($user_id, $document_name);
+        
         wp_send_json_success(['message' => esc_html__('Document approved successfully.', 'maneli-car-inquiry')]);
     }
     
@@ -2940,6 +3071,13 @@ class Maneli_Ajax_Handler {
             }
         }
         update_user_meta($user_id, 'customer_uploaded_documents', $documents);
+        
+        // Get rejection reason if provided
+        $rejection_reason = isset($_POST['rejection_reason']) ? sanitize_textarea_field($_POST['rejection_reason']) : null;
+        
+        // Send notification to customer
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_document_rejected($user_id, $document_name, $rejection_reason);
         
         wp_send_json_success(['message' => esc_html__('Document rejected successfully.', 'maneli-car-inquiry')]);
     }
@@ -3745,8 +3883,37 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'document_request_status', 'pending');
         
         // Update inquiry status to more_docs
+        $old_status = '';
         if ($inquiry_type === 'installment') {
+            $old_status = get_post_meta($inquiry_id, 'inquiry_status', true);
             update_post_meta($inquiry_id, 'inquiry_status', 'more_docs');
+        }
+        
+        // Send notification to customer
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        $customer_id = get_post_field('post_author', $inquiry_id);
+        $product_id = get_post_meta($inquiry_id, 'product_id', true);
+        $product_name = get_the_title($product_id);
+        
+        if ($customer_id) {
+            $documents_list = implode(', ', $documents);
+            $inquiry_url = $inquiry_type === 'cash' 
+                ? add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'))
+                : add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            
+            Maneli_Notification_Handler::create_notification([
+                'user_id' => $customer_id,
+                'type' => 'more_docs_requested',
+                'title' => esc_html__('More documents required', 'maneli-car-inquiry'),
+                'message' => sprintf(
+                    esc_html__('Please upload the following documents for your %s request for %s: %s', 'maneli-car-inquiry'),
+                    $inquiry_type === 'cash' ? esc_html__('cash', 'maneli-car-inquiry') : esc_html__('installment', 'maneli-car-inquiry'),
+                    $product_name,
+                    $documents_list
+                ),
+                'link' => $inquiry_url,
+                'related_id' => $inquiry_id,
+            ]);
         }
         
         wp_send_json_success([
@@ -3801,6 +3968,10 @@ class Maneli_Ajax_Handler {
             'uploaded_at' => current_time('mysql')
         ];
         update_post_meta($inquiry_id, 'uploaded_documents', $documents);
+        
+        // Send notification
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Maneli_Notification_Handler::notify_document_uploaded($inquiry_id, $document_name);
         
         wp_send_json_success([
             'message' => esc_html__('Document uploaded successfully.', 'maneli-car-inquiry'),

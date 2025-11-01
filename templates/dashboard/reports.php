@@ -69,8 +69,8 @@ $vip_customers = [];
 $status_distribution = [];
 $attention_required = null;
 
-if ($is_admin && !$expert_id) {
-    // آمار کامل کسب و کار (فقط برای ادمین)
+if (($is_admin || $is_manager) && !$expert_id) {
+    // آمار کامل کسب و کار (فقط برای ادمین و مدیر مانلی)
     $business_stats = Maneli_Reports_Dashboard::get_business_statistics($start_date, $end_date);
     $stats = $business_stats['overall'];
     $experts_detailed = $business_stats['experts'];
@@ -1046,7 +1046,7 @@ function waitForDependencies() {
         <?php endif; ?>
         
         // Monthly Revenue Chart
-        <?php if ($is_admin && !$expert_id && !empty($monthly_stats)): ?>
+        <?php if (($is_admin || $is_manager) && !$expert_id && !empty($monthly_stats)): ?>
         const monthlyCtx = document.getElementById('monthlyRevenueChart');
         if (monthlyCtx && typeof Chart !== 'undefined') {
             try {
@@ -1096,7 +1096,7 @@ function waitForDependencies() {
         <?php endif; ?>
         
         // Experts Comparison Chart
-        <?php if ($is_admin && !$expert_id && !empty($experts_detailed)): ?>
+        <?php if (($is_admin || $is_manager) && !$expert_id && !empty($experts_detailed)): ?>
         const expertsCtx = document.getElementById('expertsComparisonChart');
         if (expertsCtx && typeof Chart !== 'undefined') {
             try {

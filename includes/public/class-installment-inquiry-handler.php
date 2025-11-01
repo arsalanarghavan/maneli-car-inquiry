@@ -466,11 +466,31 @@ class Maneli_Installment_Inquiry_Handler {
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_confirm_car_step_nonce')) {
             wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
         }
-        if (!is_user_logged_in()) {
+        $user_id = 0;
+        
+        // Try WordPress user first
+        if (is_user_logged_in()) {
+            $user_id = get_current_user_id();
+        }
+        
+        // Fallback to session
+        if (!$user_id || $user_id <= 0) {
+            if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+                session_start();
+            }
+            
+            if (isset($_SESSION['maneli']['user_id']) && !empty($_SESSION['maneli']['user_id'])) {
+                $user_id = (int)$_SESSION['maneli']['user_id'];
+            } elseif (isset($_SESSION['maneli_user_id']) && !empty($_SESSION['maneli_user_id'])) {
+                $user_id = (int)$_SESSION['maneli_user_id'];
+            }
+        }
+        
+        if (!$user_id || $user_id <= 0) {
             wp_redirect(home_url());
             exit;
         }
-        $user_id = get_current_user_id();
+        
         if (empty($_POST['confirm_car_agree'])) {
             wp_die(esc_html__('Please confirm your selected car to continue.', 'maneli-car-inquiry'));
         }
@@ -511,7 +531,15 @@ class Maneli_Installment_Inquiry_Handler {
      */
     public function finalize_cash_inquiry_from_hook($user_id, $inquiry_id) {
         if ($inquiry_id && get_post_type($inquiry_id) === 'cash_inquiry') {
+            $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+            if (empty($old_status)) {
+                $old_status = 'new';
+            }
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
+            
+            // Send notification
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'completed');
         }
     }
 
@@ -577,18 +605,35 @@ class Maneli_Installment_Inquiry_Handler {
         update_post_meta($post_id, 'inquiry_status', $initial_status);
         update_post_meta($post_id, 'issuer_type', $issuer_type);
         
-        // Create notification for managers and admins about new installment inquiry
+        // Create notifications about new installment inquiry
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        
+        $customer_name = $buyer_data['first_name'] . ' ' . $buyer_data['last_name'];
+        $car_name = get_the_title($car_id);
+        
+        // Notify customer
+        if ($user_id > 0) {
+            $customer_notification = Maneli_Notification_Handler::create_notification(array(
+                'user_id' => $user_id,
+                'type' => 'inquiry_new',
+                'title' => esc_html__('Your installment request has been submitted', 'maneli-car-inquiry'),
+                'message' => sprintf(esc_html__('Your installment request for %s has been successfully submitted and is being reviewed', 'maneli-car-inquiry'), $car_name),
+                'link' => home_url('/dashboard/inquiries/installment?inquiry_id=' . $post_id),
+                'related_id' => $post_id,
+            ));
+            if (defined('WP_DEBUG') && WP_DEBUG && !$customer_notification) {
+                error_log('Maneli: Failed to create customer notification for installment inquiry ' . $post_id . ', user_id: ' . $user_id);
+            }
+        }
+        
+        // Notify all managers and admins
         $managers = get_users(array(
             'role__in' => array('administrator', 'maneli_admin'),
             'fields' => 'ids'
         ));
         
-        $customer_name = $buyer_data['first_name'] . ' ' . $buyer_data['last_name'];
-        $car_name = get_the_title($car_id);
-        
         foreach ($managers as $manager_id) {
-            Maneli_Notification_Handler::create_notification(array(
+            $manager_notification = Maneli_Notification_Handler::create_notification(array(
                 'user_id' => $manager_id,
                 'type' => 'inquiry_new',
                 'title' => esc_html__('New Installment Inquiry', 'maneli-car-inquiry'),
@@ -596,6 +641,9 @@ class Maneli_Installment_Inquiry_Handler {
                 'link' => home_url('/dashboard/inquiries/installment?inquiry_id=' . $post_id),
                 'related_id' => $post_id,
             ));
+            if (defined('WP_DEBUG') && WP_DEBUG && !$manager_notification) {
+                error_log('Maneli: Failed to create manager notification for installment inquiry ' . $post_id . ', manager_id: ' . $manager_id);
+            }
         }
         
         // Mark that payment was completed (even if amount was 0 due to discount or free inquiry)

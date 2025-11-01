@@ -24,12 +24,48 @@ class Maneli_Cash_Inquiry_Handler {
     }
     
     /**
+     * Helper function to get current user ID (works with both WP users and session users)
+     */
+    private function get_current_user_id_for_inquiry() {
+        // Try WordPress user first
+        if (is_user_logged_in()) {
+            $user_id = get_current_user_id();
+            if ($user_id > 0) {
+                return $user_id;
+            }
+        }
+        
+        // Fallback to session
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            session_start();
+        }
+        
+        if (isset($_SESSION['maneli']['user_id']) && !empty($_SESSION['maneli']['user_id'])) {
+            $user_id = (int)$_SESSION['maneli']['user_id'];
+            if ($user_id > 0 && get_user_by('ID', $user_id)) {
+                return $user_id;
+            }
+        }
+        
+        if (isset($_SESSION['maneli_user_id']) && !empty($_SESSION['maneli_user_id'])) {
+            $user_id = (int)$_SESSION['maneli_user_id'];
+            if ($user_id > 0 && get_user_by('ID', $user_id)) {
+                return $user_id;
+            }
+        }
+        
+        return 0;
+    }
+    
+    /**
      * AJAX handler for creating cash inquiry from customer dashboard
      */
     public function ajax_create_customer_cash_inquiry() {
         check_ajax_referer('maneli_customer_cash_inquiry', 'nonce');
         
-        if (!is_user_logged_in()) {
+        $user_id = $this->get_current_user_id_for_inquiry();
+        
+        if (!$user_id) {
             wp_send_json_error(['message' => esc_html__('You must be logged in to submit a request.', 'maneli-car-inquiry')]);
             return;
         }
@@ -56,7 +92,6 @@ class Maneli_Cash_Inquiry_Handler {
             $inquiry_data['description'] = sanitize_textarea_field($_POST['description']);
         }
         
-        $user_id = get_current_user_id();
         $post_id = self::create_cash_inquiry_post($inquiry_data, $user_id);
         
         if ($post_id) {
@@ -83,7 +118,9 @@ class Maneli_Cash_Inquiry_Handler {
             wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
         }
     
-        if (!is_user_logged_in()) {
+        $user_id = $this->get_current_user_id_for_inquiry();
+        
+        if (!$user_id) {
             wp_die(esc_html__('You must be logged in to submit a request.', 'maneli-car-inquiry'));
         }
     
@@ -102,7 +139,6 @@ class Maneli_Cash_Inquiry_Handler {
             'cash_car_color'   => sanitize_text_field($_POST['cash_car_color']),
         ];
     
-        $user_id = get_current_user_id();
         $post_id = self::create_cash_inquiry_post($inquiry_data, $user_id);
 
         if ($post_id) {
@@ -180,15 +216,32 @@ class Maneli_Cash_Inquiry_Handler {
         // Send SMS notification to the admin
         self::send_admin_notification($first_name . ' ' . $last_name, $car_name);
         
-        // Send notification to all managers and admins about new cash inquiry
+        // Send notifications about new cash inquiry
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        
+        // Notify customer
+        if ($user_id > 0) {
+            $customer_notification = Maneli_Notification_Handler::create_notification(array(
+                'user_id' => $user_id,
+                'type' => 'inquiry_new',
+                'title' => esc_html__('Your cash request has been submitted', 'maneli-car-inquiry'),
+                'message' => sprintf(esc_html__('Your cash request for %s has been successfully submitted and is being reviewed', 'maneli-car-inquiry'), $car_name),
+                'link' => home_url('/dashboard/inquiries/cash?cash_inquiry_id=' . $post_id),
+                'related_id' => $post_id,
+            ));
+            if (defined('WP_DEBUG') && WP_DEBUG && !$customer_notification) {
+                error_log('Maneli: Failed to create customer notification for cash inquiry ' . $post_id . ', user_id: ' . $user_id);
+            }
+        }
+        
+        // Notify all managers and admins
         $managers = get_users(array(
             'role__in' => array('administrator', 'maneli_admin'),
             'fields' => 'ids'
         ));
         
         foreach ($managers as $manager_id) {
-            Maneli_Notification_Handler::create_notification(array(
+            $manager_notification = Maneli_Notification_Handler::create_notification(array(
                 'user_id' => $manager_id,
                 'type' => 'inquiry_new',
                 'title' => esc_html__('New Cash Inquiry', 'maneli-car-inquiry'),
@@ -196,6 +249,9 @@ class Maneli_Cash_Inquiry_Handler {
                 'link' => home_url('/dashboard/inquiries/cash?cash_inquiry_id=' . $post_id),
                 'related_id' => $post_id,
             ));
+            if (defined('WP_DEBUG') && WP_DEBUG && !$manager_notification) {
+                error_log('Maneli: Failed to create manager notification for cash inquiry ' . $post_id . ', manager_id: ' . $manager_id);
+            }
         }
         
         return $post_id;

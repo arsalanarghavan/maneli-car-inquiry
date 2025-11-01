@@ -253,10 +253,14 @@ if ($is_customer) {
                         <?php esc_html_e('Your Recent Inquiries', 'maneli-car-inquiry'); ?>
                     </div>
                     <?php if (!empty($recent_inquiries)): ?>
-                    <div>
-                        <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="btn btn-sm btn-primary-light">
-                            <?php esc_html_e('View All', 'maneli-car-inquiry'); ?>
-                            <i class="la la-arrow-left ms-1"></i>
+                    <div class="btn-list">
+                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries/installment')); ?>" class="btn btn-sm btn-info btn-wave">
+                            <i class="ri-bank-line me-1"></i>
+                            <?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?>
+                        </a>
+                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="btn btn-sm btn-warning btn-wave">
+                            <i class="ri-money-dollar-circle-line me-1"></i>
+                            <?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?>
                         </a>
                     </div>
                     <?php endif; ?>
@@ -855,10 +859,14 @@ if ($is_customer) {
                         <i class="la la-list me-2"></i>
                         <?php esc_html_e('Recent Inquiries', 'maneli-car-inquiry'); ?>
                     </div>
-                    <div>
-                        <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="btn btn-sm btn-primary-light">
-                            <?php esc_html_e('View All', 'maneli-car-inquiry'); ?>
-                            <i class="la la-arrow-left ms-1"></i>
+                    <div class="btn-list">
+                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries/installment')); ?>" class="btn btn-sm btn-info btn-wave">
+                            <i class="ri-bank-line me-1"></i>
+                            <?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?>
+                        </a>
+                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="btn btn-sm btn-warning btn-wave">
+                            <i class="ri-money-dollar-circle-line me-1"></i>
+                            <?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?>
                         </a>
                     </div>
                 </div>
