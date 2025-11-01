@@ -99,6 +99,9 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_upload_profile_image', [$this, 'ajax_upload_profile_image']);
         add_action('wp_ajax_maneli_delete_profile_image', [$this, 'ajax_delete_profile_image']);
         add_action('wp_ajax_maneli_update_profile', [$this, 'ajax_update_profile']);
+        add_action('wp_ajax_maneli_upload_customer_document', [$this, 'ajax_upload_customer_document']);
+        add_action('wp_ajax_maneli_approve_customer_document', [$this, 'ajax_approve_customer_document']);
+        add_action('wp_ajax_maneli_reject_customer_document', [$this, 'ajax_reject_customer_document']);
         
     }
 
@@ -2688,6 +2691,12 @@ class Maneli_Ajax_Handler {
         // Update user data
         $user_data = array('ID' => $user_id);
         
+        // Handle first_name and last_name
+        if (isset($_POST['first_name']) || isset($_POST['last_name'])) {
+            $user_data['first_name'] = isset($_POST['first_name']) ? sanitize_text_field($_POST['first_name']) : '';
+            $user_data['last_name'] = isset($_POST['last_name']) ? sanitize_text_field($_POST['last_name']) : '';
+        }
+        
         if (isset($_POST['display_name'])) {
             $user_data['display_name'] = sanitize_text_field($_POST['display_name']);
         }
@@ -2806,6 +2815,133 @@ class Maneli_Ajax_Handler {
         }
         
         wp_send_json_success(['message' => esc_html__('Profile updated successfully.', 'maneli-car-inquiry')]);
+    }
+    
+    /**
+     * Handle customer document upload for profile
+     */
+    public function ajax_upload_customer_document() {
+        check_ajax_referer('maneli-profile-image-nonce', 'security');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $user_id = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $document_name = isset($_POST['document_name']) ? sanitize_text_field($_POST['document_name']) : '';
+        $uploaded_file = isset($_FILES['file']) ? $_FILES['file'] : null;
+        
+        if (!$user_id || !$document_name || !$uploaded_file) {
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        // Check permissions - user can only upload to their own profile
+        if ($user_id !== get_current_user_id()) {
+            wp_send_json_error(['message' => esc_html__('You do not have permission to upload documents for this user.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        // Handle file upload
+        require_once(ABSPATH . 'wp-admin/includes/file.php');
+        
+        $upload_overrides = array('test_form' => false);
+        $uploaded_file_array = wp_handle_upload($uploaded_file, $upload_overrides);
+        
+        if (isset($uploaded_file_array['error'])) {
+            wp_send_json_error(['message' => $uploaded_file_array['error']]);
+            return;
+        }
+        
+        // Store document info in user meta
+        $documents = get_user_meta($user_id, 'customer_uploaded_documents', true) ?: [];
+        
+        // Remove old version of this document if exists
+        $documents = array_filter($documents, function($doc) use ($document_name) {
+            return isset($doc['name']) && $doc['name'] !== $document_name;
+        });
+        
+        // Add new document
+        $documents[] = [
+            'name' => $document_name,
+            'file' => $uploaded_file_array['url'],
+            'file_path' => $uploaded_file_array['file'],
+            'status' => 'pending',
+            'uploaded_at' => current_time('mysql')
+        ];
+        update_user_meta($user_id, 'customer_uploaded_documents', $documents);
+        
+        wp_send_json_success([
+            'message' => esc_html__('Document uploaded successfully. Awaiting admin review.', 'maneli-car-inquiry'),
+            'document_url' => $uploaded_file_array['url']
+        ]);
+    }
+    
+    /**
+     * Approve customer document
+     */
+    public function ajax_approve_customer_document() {
+        check_ajax_referer('maneli_ajax_nonce', 'security');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $user_id = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $document_name = isset($_POST['document_name']) ? sanitize_text_field($_POST['document_name']) : '';
+        
+        if (!$user_id || !$document_name) {
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $documents = get_user_meta($user_id, 'customer_uploaded_documents', true) ?: [];
+        foreach ($documents as $index => $doc) {
+            if (isset($doc['name']) && $doc['name'] === $document_name) {
+                $documents[$index]['status'] = 'approved';
+                $documents[$index]['reviewed_at'] = current_time('mysql');
+                $documents[$index]['reviewed_by'] = get_current_user_id();
+                break;
+            }
+        }
+        update_user_meta($user_id, 'customer_uploaded_documents', $documents);
+        
+        wp_send_json_success(['message' => esc_html__('Document approved successfully.', 'maneli-car-inquiry')]);
+    }
+    
+    /**
+     * Reject customer document
+     */
+    public function ajax_reject_customer_document() {
+        check_ajax_referer('maneli_ajax_nonce', 'security');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $user_id = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $document_name = isset($_POST['document_name']) ? sanitize_text_field($_POST['document_name']) : '';
+        
+        if (!$user_id || !$document_name) {
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $documents = get_user_meta($user_id, 'customer_uploaded_documents', true) ?: [];
+        foreach ($documents as $index => $doc) {
+            if (isset($doc['name']) && $doc['name'] === $document_name) {
+                $documents[$index]['status'] = 'rejected';
+                $documents[$index]['reviewed_at'] = current_time('mysql');
+                $documents[$index]['reviewed_by'] = get_current_user_id();
+                break;
+            }
+        }
+        update_user_meta($user_id, 'customer_uploaded_documents', $documents);
+        
+        wp_send_json_success(['message' => esc_html__('Document rejected successfully.', 'maneli-car-inquiry')]);
     }
     
     /**

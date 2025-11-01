@@ -28,6 +28,9 @@ $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
 $status_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($status);
 $back_link = home_url('/dashboard/cash-inquiries');
 
+// Get customer ID
+$customer_id = $inquiry->post_author;
+
 // Customer Details
 $first_name = get_post_meta($inquiry_id, 'cash_first_name', true);
 $last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
@@ -217,10 +220,18 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
         <!-- Request Information -->
         <div class="card border mb-4">
             <div class="card-header bg-light">
-                <h6 class="card-title mb-0">
-                    <i class="la la-file-alt text-primary me-2"></i>
-                    <?php esc_html_e('Request Information', 'maneli-car-inquiry'); ?>
-                </h6>
+                <div class="card-title mb-0 d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="la la-file-alt text-primary me-2"></i>
+                        <?php esc_html_e('Request Information', 'maneli-car-inquiry'); ?>
+                    </span>
+                    <?php if ($customer_id): ?>
+                        <a href="<?php echo esc_url(add_query_arg(['view_user' => $customer_id], home_url('/dashboard/users'))); ?>#documents-tab" class="btn btn-sm btn-warning btn-wave">
+                            <i class="la la-file-alt me-1"></i>
+                            <?php esc_html_e('View Documents', 'maneli-car-inquiry'); ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
             </div>
             <div class="card-body">
                 <div class="row">

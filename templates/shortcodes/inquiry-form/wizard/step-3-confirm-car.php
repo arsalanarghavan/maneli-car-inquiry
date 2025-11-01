@@ -61,7 +61,7 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
                                     <i class="la la-money-bill me-1"></i>
                                     <?php esc_html_e('Down Payment', 'maneli-car-inquiry'); ?>
                                 </div>
-                                <strong class="fs-16 text-success"><?php echo number_format_i18n((int)$down_payment); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></strong>
+                                <strong class="fs-16 text-success"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian((int)$down_payment) : number_format_i18n((int)$down_payment); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></strong>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -70,7 +70,7 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
                                     <i class="la la-calendar me-1"></i>
                                     <?php esc_html_e('Installment Period', 'maneli-car-inquiry'); ?>
                                 </div>
-                                <strong class="fs-16 text-info"><?php echo esc_html($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></strong>
+                                <strong class="fs-16 text-info"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($term_months) : esc_html($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></strong>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -79,7 +79,7 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
                                     <i class="la la-calculator me-1"></i>
                                     <?php esc_html_e('Approximate Monthly Installment', 'maneli-car-inquiry'); ?>
                                 </div>
-                                <strong class="fs-18 text-primary"><?php echo number_format_i18n((int)$installment_amount); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></strong>
+                                <strong class="fs-18 text-primary"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian((int)$installment_amount) : number_format_i18n((int)$installment_amount); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></strong>
                             </div>
                         </div>
                     </div>
@@ -94,7 +94,35 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
     <?php echo esc_html($price_msg); ?>
 </div>
 
-<!-- Browse Other Cars Section -->
+<!-- Confirmation Form - Now above Browse Cars -->
+<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="confirm-car-form">
+    <input type="hidden" name="action" value="maneli_confirm_car_step">
+    <?php wp_nonce_field('maneli_confirm_car_step_nonce'); ?>
+    
+    <div class="card border mb-4">
+        <div class="card-body">
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="confirm_car_agree" id="confirm_car_agree" value="1" required>
+                <label class="form-check-label" for="confirm_car_agree">
+                    <?php esc_html_e('I agree and confirm this car.', 'maneli-car-inquiry'); ?>
+                </label>
+            </div>
+            
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-light wizard-btn prev" data-step="2">
+                    <i class="la la-arrow-right me-1"></i>
+                    <?php esc_html_e('Back', 'maneli-car-inquiry'); ?>
+                </button>
+                <button type="submit" class="btn btn-primary flex-fill wizard-btn next">
+                    <i class="la la-check me-1"></i>
+                    <?php esc_html_e('Confirm and Continue', 'maneli-car-inquiry'); ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Browse Other Cars Section - Now below confirmation -->
 <div class="row">
     <div class="col-xl-12">
         <div class="card border mb-4">
@@ -141,32 +169,4 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
         </div>
     </div>
 </div>
-
-<!-- Confirmation Form -->
-<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="confirm-car-form">
-    <input type="hidden" name="action" value="maneli_confirm_car_step">
-    <?php wp_nonce_field('maneli_confirm_car_step_nonce'); ?>
-    
-    <div class="card border">
-        <div class="card-body">
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" name="confirm_car_agree" id="confirm_car_agree" value="1" required>
-                <label class="form-check-label" for="confirm_car_agree">
-                    <?php esc_html_e('I agree and confirm this car.', 'maneli-car-inquiry'); ?>
-                </label>
-            </div>
-            
-            <div class="d-flex gap-2">
-                <button type="button" class="btn btn-light wizard-btn prev" data-step="2">
-                    <i class="la la-arrow-right me-1"></i>
-                    <?php esc_html_e('Back', 'maneli-car-inquiry'); ?>
-                </button>
-                <button type="submit" class="btn btn-primary flex-fill wizard-btn next">
-                    <i class="la la-check me-1"></i>
-                    <?php esc_html_e('Confirm and Continue', 'maneli-car-inquiry'); ?>
-                </button>
-            </div>
-        </div>
-    </div>
-</form>
 

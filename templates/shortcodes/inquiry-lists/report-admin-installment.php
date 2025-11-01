@@ -743,9 +743,15 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
         <!-- Buyer Information Card -->
         <div class="card custom-card mt-3">
             <div class="card-header">
-                <div class="card-title">
-                    <i class="la la-user me-2"></i>
-                    <?php esc_html_e('Buyer Information', 'maneli-car-inquiry'); ?>
+                <div class="card-title d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="la la-user me-2"></i>
+                        <?php esc_html_e('Buyer Information', 'maneli-car-inquiry'); ?>
+                    </span>
+                    <a href="<?php echo esc_url(add_query_arg(['view_user' => $customer_id], home_url('/dashboard/users'))); ?>#documents-tab" class="btn btn-sm btn-warning btn-wave">
+                        <i class="la la-file-alt me-1"></i>
+                        <?php esc_html_e('View Documents', 'maneli-car-inquiry'); ?>
+                    </a>
                 </div>
             </div>
             <div class="card-body">

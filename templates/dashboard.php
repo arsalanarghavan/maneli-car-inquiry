@@ -516,6 +516,7 @@ $need_inquiry_scripts = (
     ($page === 'inquiries' && ($subpage === 'cash' || $subpage === 'installment')) ||
     $page === 'new-inquiry' ||
     $page === 'new-cash-inquiry' ||
+    $page === 'profile-settings' ||
     $inquiry_id > 0 ||
     $cash_inquiry_id > 0
 );
@@ -551,6 +552,21 @@ if ($need_inquiry_scripts) {
             $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
         }
         // Inquiry form JS
+        $inquiry_form_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';
+        if (file_exists($inquiry_form_file)) {
+            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js?v=' . filemtime($inquiry_form_file)) . '"></script>' . PHP_EOL;
+        }
+    }
+    
+    // Add datepicker scripts for profile-settings page
+    if ($page === 'profile-settings') {
+        $datepicker_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/persianDatepicker-default.css';
+        $datepicker_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/persianDatepicker.min.js';
+        if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
+            $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+        }
+        // Inquiry form JS for Persian numbers
         $inquiry_form_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';
         if (file_exists($inquiry_form_file)) {
             $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js?v=' . filemtime($inquiry_form_file)) . '"></script>' . PHP_EOL;

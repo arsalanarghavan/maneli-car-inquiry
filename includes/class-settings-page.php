@@ -590,6 +590,18 @@ class Maneli_Settings_Page {
                     ]
                 ]
             ],
+            'documents' => [
+                'title' => esc_html__('Documents', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-file-alt',
+                'sections' => [
+                    'maneli_customer_documents_section' => [
+                        'title' => esc_html__('Customer Documents', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'customer_required_documents', 'label' => esc_html__('Required Documents List', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one document name per line. These documents will be shown to customers in their profile to upload.', 'maneli-car-inquiry')],
+                        ]
+                    ]
+                ]
+            ],
         ];
     }
 }

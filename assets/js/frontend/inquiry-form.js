@@ -72,7 +72,14 @@ document.addEventListener('DOMContentLoaded', function() {
         '#issuer_phone_number',
         '#issuer_income_level',
         '#issuer_account_number',
-        '#issuer_branch_code'
+        '#issuer_branch_code',
+        // Profile settings page fields
+        '#profile-national-code',
+        '#profile-phn-no',
+        '#profile-phone',
+        '#profile-income',
+        '#profile-account-number',
+        '#profile-branch-code'
     ];
 
     numericFields.forEach(selector => {
@@ -160,7 +167,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     '#expert_buyer_birth_date',
                     '#expert_issuer_birth_date',
                     // Target used in form-edit-user.php and class-user-profile.php
-                    '#birth_date', 
+                    '#birth_date',
+                    // Profile settings page
+                    '#profile-birth-date',
                     // Target used generally in class-user-profile.php
                     '.maneli-datepicker'
                 ];

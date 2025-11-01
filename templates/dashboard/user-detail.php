@@ -156,6 +156,11 @@ if ($workplace_status === 'owner') {
                                 <?php esc_html_e('User Account', 'maneli-car-inquiry'); ?>
                             </button>
                         </li>
+                        <li class="nav-item me-1" role="presentation">
+                            <button class="nav-link px-4 bg-primary-transparent" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents-pane" type="button" role="tab" aria-controls="documents-pane" aria-selected="false">
+                                <?php esc_html_e('Documents', 'maneli-car-inquiry'); ?>
+                            </button>
+                        </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link px-4 bg-primary-transparent" id="inquiries-tab" data-bs-toggle="tab" data-bs-target="#inquiries-pane" type="button" role="tab" aria-controls="inquiries-pane" aria-selected="false">
                                 <?php esc_html_e('Registered Inquiries', 'maneli-car-inquiry'); ?>
@@ -397,6 +402,110 @@ if ($workplace_status === 'owner') {
                             </div>
                         </div>
                         
+                        <!-- Documents Tab -->
+                        <div class="tab-pane overflow-hidden p-0 border-0" id="documents-pane" role="tabpanel" aria-labelledby="documents-tab" tabindex="0">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
+                                    <div class="fw-semibold d-block fs-15"><?php esc_html_e('Customer Documents:', 'maneli-car-inquiry'); ?></div>
+                                </div>
+                                <?php 
+                                // Get required documents from settings - merge both customer and installment documents
+                                $options = get_option('maneli_inquiry_all_options', []);
+                                $customer_docs_raw = $options['customer_required_documents'] ?? '';
+                                $installment_docs_raw = $options['installment_required_documents'] ?? '';
+                                
+                                // Merge and deduplicate documents
+                                $all_docs = array_merge(
+                                    array_filter(array_map('trim', explode("\n", $customer_docs_raw))),
+                                    array_filter(array_map('trim', explode("\n", $installment_docs_raw)))
+                                );
+                                $required_docs = array_unique($all_docs);
+                                
+                                // Get uploaded documents for this user
+                                $uploaded_docs = get_user_meta($user_id, 'customer_uploaded_documents', true) ?: [];
+                                ?>
+                                <?php if (!empty($required_docs)): ?>
+                                    <div class="row g-3">
+                                        <?php foreach ($required_docs as $doc_name): ?>
+                                            <?php 
+                                            // Check if this document has been uploaded
+                                            $is_uploaded = false;
+                                            $uploaded_file_url = '';
+                                            $doc_status = 'pending';
+                                            foreach ($uploaded_docs as $uploaded) {
+                                                if (isset($uploaded['name']) && $uploaded['name'] === $doc_name) {
+                                                    $is_uploaded = true;
+                                                    $uploaded_file_url = $uploaded['file'] ?? '';
+                                                    $doc_status = $uploaded['status'] ?? 'pending';
+                                                    break;
+                                                }
+                                            }
+                                            ?>
+                                            <div class="col-xl-12">
+                                                <div class="border rounded p-3">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div class="flex-fill">
+                                                            <label class="fw-semibold mb-2 d-block">
+                                                                <?php echo esc_html($doc_name); ?>
+                                                            </label>
+                                                            <?php if ($is_uploaded && $doc_status === 'approved'): ?>
+                                                                <div class="alert alert-success border-success py-2 px-3 mb-2">
+                                                                    <i class="la la-check-circle me-2"></i>
+                                                                    <?php esc_html_e('Approved', 'maneli-car-inquiry'); ?>
+                                                                </div>
+                                                                <?php if ($uploaded_file_url): ?>
+                                                                    <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary me-2">
+                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                            <?php elseif ($is_uploaded && $doc_status === 'rejected'): ?>
+                                                                <div class="alert alert-danger border-danger py-2 px-3 mb-2">
+                                                                    <i class="la la-times-circle me-2"></i>
+                                                                    <?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?>
+                                                                </div>
+                                                                <?php if ($uploaded_file_url): ?>
+                                                                    <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary me-2">
+                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                            <?php elseif ($is_uploaded): ?>
+                                                                <div class="alert alert-info border-info py-2 px-3 mb-2">
+                                                                    <i class="la la-clock me-2"></i>
+                                                                    <?php esc_html_e('Awaiting Review', 'maneli-car-inquiry'); ?>
+                                                                </div>
+                                                                <?php if ($uploaded_file_url): ?>
+                                                                    <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary me-2">
+                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                                <button class="btn btn-sm btn-success approve-doc-btn" 
+                                                                        data-user-id="<?php echo esc_attr($user_id); ?>" 
+                                                                        data-doc-name="<?php echo esc_attr($doc_name); ?>">
+                                                                    <i class="la la-check"></i> <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
+                                                                </button>
+                                                                <button class="btn btn-sm btn-danger ms-2 reject-doc-btn" 
+                                                                        data-user-id="<?php echo esc_attr($user_id); ?>" 
+                                                                        data-doc-name="<?php echo esc_attr($doc_name); ?>">
+                                                                    <i class="la la-times"></i> <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
+                                                                </button>
+                                                            <?php else: ?>
+                                                                <div class="alert alert-warning border-warning py-2 px-3 mb-0">
+                                                                    <i class="la la-exclamation-triangle me-2"></i>
+                                                                    <?php esc_html_e('Not Uploaded', 'maneli-car-inquiry'); ?>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <p class="text-muted"><?php esc_html_e('No documents have been configured yet.', 'maneli-car-inquiry'); ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
                         <!-- Inquiries Tab -->
                         <div class="tab-pane overflow-hidden p-0 border-0" id="inquiries-pane" role="tabpanel" aria-labelledby="inquiries-tab" tabindex="0">
                             <div class="p-4">
@@ -635,6 +744,92 @@ function saveUserDetails(userId) {
         }
     });
 }
+
+// Handle document approval/rejection buttons
+jQuery(document).ready(function($) {
+    // Approve document
+    $(document).on('click', '.approve-doc-btn', function() {
+        const $btn = $(this);
+        const userId = $btn.data('user-id');
+        const docName = $btn.data('doc-name');
+        
+        Swal.fire({
+            title: '<?php esc_html_e('Approve Document?', 'maneli-car-inquiry'); ?>',
+            text: '<?php esc_html_e('Are you sure you want to approve this document?', 'maneli-car-inquiry'); ?>',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<?php esc_html_e('Yes, Approve', 'maneli-car-inquiry'); ?>',
+            cancelButtonText: '<?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: maneliAjaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_approve_customer_document',
+                        security: '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
+                        user_id: userId,
+                        document_name: docName
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('<?php esc_html_e('Success', 'maneli-car-inquiry'); ?>', response.data.message, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', response.data.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', '<?php esc_html_e('Server error. Please try again.', 'maneli-car-inquiry'); ?>', 'error');
+                    }
+                });
+            }
+        });
+    });
+    
+    // Reject document
+    $(document).on('click', '.reject-doc-btn', function() {
+        const $btn = $(this);
+        const userId = $btn.data('user-id');
+        const docName = $btn.data('doc-name');
+        
+        Swal.fire({
+            title: '<?php esc_html_e('Reject Document?', 'maneli-car-inquiry'); ?>',
+            text: '<?php esc_html_e('Are you sure you want to reject this document?', 'maneli-car-inquiry'); ?>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<?php esc_html_e('Yes, Reject', 'maneli-car-inquiry'); ?>',
+            cancelButtonText: '<?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>',
+            confirmButtonColor: '#dc3545'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: maneliAjaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_reject_customer_document',
+                        security: '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
+                        user_id: userId,
+                        document_name: docName
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('<?php esc_html_e('Success', 'maneli-car-inquiry'); ?>', response.data.message, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', response.data.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', '<?php esc_html_e('Server error. Please try again.', 'maneli-car-inquiry'); ?>', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
 </script>
 
 <style>

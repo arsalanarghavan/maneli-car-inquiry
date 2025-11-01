@@ -267,10 +267,14 @@ if ($is_customer) {
                         <?php esc_html_e('Your Recent Inquiries', 'maneli-car-inquiry'); ?>
                     </div>
                     <?php if (!empty($recent_inquiries)): ?>
-                    <div>
-                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries')); ?>" class="btn btn-sm btn-primary-light">
-                            <?php esc_html_e('View All', 'maneli-car-inquiry'); ?>
-                            <i class="la la-arrow-left ms-1"></i>
+                    <div class="btn-list">
+                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="btn btn-sm btn-warning btn-wave">
+                            <i class="ri-money-dollar-circle-line me-1"></i>
+                            <?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?>
+                        </a>
+                        <a href="<?php echo esc_url(home_url('/dashboard/inquiries/installment')); ?>" class="btn btn-sm btn-info btn-wave">
+                            <i class="ri-bank-line me-1"></i>
+                            <?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?>
                         </a>
                     </div>
                     <?php endif; ?>
@@ -351,7 +355,9 @@ if ($is_customer) {
                                         }
                                         
                                         $timestamp = strtotime($inq->post_date);
-                                        if (function_exists('maneli_gregorian_to_jalali')) {
+                                        if ($timestamp === false) {
+                                            $date = '-';
+                                        } elseif (function_exists('maneli_gregorian_to_jalali')) {
                                             $date = maneli_gregorian_to_jalali(
                                                 date('Y', $timestamp),
                                                 date('m', $timestamp),
@@ -379,7 +385,7 @@ if ($is_customer) {
                                                     <?php echo $badge['label']; ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo maneli_number_format_persian($date); ?></td>
+                                            <td><?php echo function_exists('persian_numbers') ? persian_numbers($date) : esc_html($date); ?></td>
                                             <td>
                                                 <div class="btn-list">
                                                     <a href="<?php echo esc_url($view_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
@@ -893,7 +899,9 @@ if ($is_customer) {
                                         }
                                         
                                         $timestamp = strtotime($inq->post_date);
-                                        if (function_exists('maneli_gregorian_to_jalali')) {
+                                        if ($timestamp === false) {
+                                            $date = '-';
+                                        } elseif (function_exists('maneli_gregorian_to_jalali')) {
                                             $date = maneli_gregorian_to_jalali(
                                                 date('Y', $timestamp),
                                                 date('m', $timestamp),
@@ -922,13 +930,13 @@ if ($is_customer) {
                                                     <?php echo $badge['label']; ?>
                                                 </span>
                                             </td>
-                                            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo maneli_number_format_persian($date); ?></td>
+                                            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo function_exists('persian_numbers') ? persian_numbers($date) : esc_html($date); ?></td>
                                             <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
                                                 <div class="btn-list">
                                                     <a href="<?php echo esc_url($view_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
                                                         <i class="la la-eye"></i>
-                                </a>
-                            </div>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

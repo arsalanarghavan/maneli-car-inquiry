@@ -5170,3 +5170,107 @@ msgstr "ایجاد استعلام نقدی"
 
 msgid "Issuer Father's Name"
 msgstr "نام پدر صادرکننده"
+
+
+msgid "Your cash request has been successfully submitted. An expert will contact you soon."
+msgstr "درخواست نقدی شما با موفقیت ثبت شد. یک کارشناس به زودی با شما تماس خواهد گرفت."
+
+
+msgid "Father's Name:"
+msgstr "نام پدر:"
+
+
+msgid "Documents"
+msgstr "مدارک"
+
+
+msgid "Customer Documents"
+msgstr "مدارک مشتری"
+
+
+msgid "Upload Required Documents"
+msgstr "آپلود مدارک موردنیاز"
+
+
+msgid "Please upload the required documents for your application."
+msgstr "لطفاً مدارک موردنیاز را برای درخواست خود آپلود کنید."
+
+
+msgid "No documents have been configured yet by the admin."
+msgstr "هیچ مدرکی توسط مدیر تنظیم نشده است."
+
+
+msgid "Approve Document?"
+msgstr "مدرک تأیید شود؟"
+
+
+msgid "Are you sure you want to approve this document?"
+msgstr "آیا مطمئن هستید که این مدرک را تأیید می‌کنید؟"
+
+
+msgid "Reject Document?"
+msgstr "مدرک رد شود؟"
+
+
+msgid "Are you sure you want to reject this document?"
+msgstr "آیا مطمئن هستید که این مدرک را رد می‌کنید؟"
+
+
+msgid "Awaiting Review"
+msgstr "در انتظار بررسی"
+
+
+msgid "View Documents"
+msgstr "مشاهده مدارک"
+
+
+msgid "Required Documents List"
+msgstr "لیست مدارک موردنیاز"
+
+
+msgid "Enter one document name per line. These documents will be shown to customers in their profile to upload."
+msgstr "نام هر مدرک را در یک سطر وارد کنید. این مدارک در پروفایل مشتری برای آپلود نمایش داده می‌شوند."
+
+
+msgid "Document uploaded successfully. Awaiting admin review."
+msgstr "مدرک با موفقیت آپلود شد. در انتظار بررسی مدیر."
+
+
+msgid "Document approved successfully."
+msgstr "مدرک با موفقیت تأیید شد."
+
+
+msgid "Document rejected successfully."
+msgstr "مدرک با موفقیت رد شد."
+
+
+msgid "Invalid File Type"
+msgstr "نوع فایل نامعتبر"
+
+
+msgid "Please upload only PDF, JPG, or PNG files."
+msgstr "لطفاً فقط فایل‌های PDF، JPG یا PNG آپلود کنید."
+
+
+msgid "Accepted formats: PDF, JPG, PNG"
+msgstr "فرمت‌های مجاز: PDF، JPG، PNG"
+
+
+msgid "Not Uploaded"
+msgstr "آپلود نشده"
+
+
+msgid "Yes, Approve"
+msgstr "بله، تأیید کن"
+
+
+msgid "Yes, Reject"
+msgstr "بله، رد کن"
+
+
+msgid "Document List"
+msgstr "لیست مدارک"
+
+
+msgid "Enter one document name per line. These will be shown to the manager when requesting additional documents from customers."
+msgstr "نام هر مدرک را در یک سطر وارد کنید. این مدارک زمانی به مدیر نمایش داده می‌شوند که بخواهد مدارک اضافی از مشتری درخواست کند."

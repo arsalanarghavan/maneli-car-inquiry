@@ -1973,7 +1973,14 @@ class Maneli_Dashboard_Handler {
      * Handle logout
      */
     public function handle_logout() {
+        // Destroy custom session
         $this->destroy_session();
+        
+        // Also logout from WordPress if user is logged in
+        if (is_user_logged_in()) {
+            wp_logout();
+        }
+        
         wp_redirect(home_url('/login'));
         exit;
     }
@@ -1982,7 +1989,14 @@ class Maneli_Dashboard_Handler {
      * Handle AJAX logout
      */
     public function handle_dashboard_logout() {
+        // Destroy custom session
         $this->destroy_session();
+        
+        // Also logout from WordPress if user is logged in
+        if (is_user_logged_in()) {
+            wp_logout();
+        }
+        
         wp_send_json_success(['redirect' => home_url('/login')]);
     }
 

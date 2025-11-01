@@ -12,6 +12,24 @@ if (!defined('ABSPATH')) {
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
 
+// Check user role
+$is_admin = current_user_can('manage_maneli_inquiries');
+$is_manager = in_array('maneli_manager', $current_user->roles, true) || in_array('maneli_admin', $current_user->roles, true);
+$is_expert = in_array('maneli_expert', $current_user->roles, true);
+$is_customer = !$is_admin && !$is_manager && !$is_expert;
+
+// Get name fields - use WordPress user meta first
+$first_name = get_user_meta($user_id, 'first_name', true);
+$last_name = get_user_meta($user_id, 'last_name', true);
+
+// Fallback to display name if first_name/last_name are empty
+if (empty($first_name) && empty($last_name)) {
+    $full_name = $current_user->display_name;
+    $name_parts = explode(' ', $full_name, 2);
+    $first_name = $name_parts[0] ?? '';
+    $last_name = $name_parts[1] ?? '';
+}
+
 // Get user meta data - Basic info
 $designation = get_user_meta($user_id, 'designation', true);
 $mobile_number = get_user_meta($user_id, 'mobile_number', true);
@@ -82,6 +100,9 @@ $phone_verification = get_user_meta($user_id, 'phone_verification', true);
                     <button class="nav-link px-4 bg-primary-transparent active" id="account" data-bs-toggle="tab" data-bs-target="#account-pane" type="button" role="tab" aria-controls="account-pane" aria-selected="true"><?php esc_html_e('My Account', 'maneli-car-inquiry'); ?></button>
                 </li>
                 <li class="nav-item me-1" role="presentation">
+                    <button class="nav-link px-4 bg-primary-transparent" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents-tab-pane" type="button" role="tab" aria-controls="documents-tab-pane" aria-selected="false"><?php esc_html_e('Documents', 'maneli-car-inquiry'); ?></button>
+                </li>
+                <li class="nav-item me-1" role="presentation">
                     <button class="nav-link px-4 bg-primary-transparent" id="notification-tab" data-bs-toggle="tab" data-bs-target="#notification-tab-pane" type="button" role="tab" aria-controls="notification-tab-pane" aria-selected="false"><?php esc_html_e('Notifications', 'maneli-car-inquiry'); ?></button>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -118,16 +139,12 @@ $phone_verification = get_user_meta($user_id, 'phone_verification', true);
                                 </div>
                             </div>
                             <div class="col-xl-6">
-                                <label for="profile-user-name" class="form-label"><?php esc_html_e('Username:', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" class="form-control" id="profile-user-name" name="display_name" value="<?php echo esc_attr($current_user->display_name); ?>" placeholder="<?php esc_attr_e('Enter name', 'maneli-car-inquiry'); ?>">
+                                <label for="profile-first-name" class="form-label"><?php esc_html_e('First Name:', 'maneli-car-inquiry'); ?></label>
+                                <input type="text" class="form-control" id="profile-first-name" name="first_name" value="<?php echo esc_attr($first_name); ?>" placeholder="<?php esc_attr_e('Enter first name', 'maneli-car-inquiry'); ?>">
                             </div>
                             <div class="col-xl-6">
-                                <label for="profile-email" class="form-label"><?php esc_html_e('Email:', 'maneli-car-inquiry'); ?></label>
-                                <input type="email" class="form-control" id="profile-email" name="user_email" value="<?php echo esc_attr($current_user->user_email); ?>" placeholder="<?php esc_attr_e('Enter email', 'maneli-car-inquiry'); ?>">
-                            </div>
-                            <div class="col-xl-6">
-                                <label for="profile-designation" class="form-label"><?php esc_html_e('Designation:', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" class="form-control" id="profile-designation" name="designation" value="<?php echo esc_attr($designation); ?>" placeholder="<?php esc_attr_e('Enter designation', 'maneli-car-inquiry'); ?>">
+                                <label for="profile-last-name" class="form-label"><?php esc_html_e('Last Name:', 'maneli-car-inquiry'); ?></label>
+                                <input type="text" class="form-control" id="profile-last-name" name="last_name" value="<?php echo esc_attr($last_name); ?>" placeholder="<?php esc_attr_e('Enter last name', 'maneli-car-inquiry'); ?>">
                             </div>
                             <div class="col-xl-6">
                                 <label for="profile-phn-no" class="form-label"><?php esc_html_e('Mobile Number:', 'maneli-car-inquiry'); ?></label>
@@ -164,29 +181,27 @@ $phone_verification = get_user_meta($user_id, 'phone_verification', true);
                             </div>
                             
                             <div class="col-xl-6">
-                                <label for="profile-occupation" class="form-label"><?php esc_html_e('Occupation/Job Title:', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" class="form-control" id="profile-occupation" name="occupation" value="<?php echo esc_attr($job_title ?: $occupation); ?>" placeholder="<?php esc_attr_e('Enter occupation or job title', 'maneli-car-inquiry'); ?>">
-                            </div>
-                            <div class="col-xl-6">
                                 <label for="profile-job-type" class="form-label"><?php esc_html_e('Job Type:', 'maneli-car-inquiry'); ?></label>
                                 <select class="form-select" id="profile-job-type" name="job_type">
                                     <option value="">-- <?php esc_html_e('Select', 'maneli-car-inquiry'); ?> --</option>
-                                    <option value="government" <?php selected($job_type, 'government'); ?>><?php esc_html_e('Government', 'maneli-car-inquiry'); ?></option>
-                                    <option value="private" <?php selected($job_type, 'private'); ?>><?php esc_html_e('Private', 'maneli-car-inquiry'); ?></option>
-                                    <option value="self_employed" <?php selected($job_type, 'self_employed'); ?>><?php esc_html_e('Self Employed', 'maneli-car-inquiry'); ?></option>
+                                    <option value="self" <?php selected($job_type, 'self'); ?>><?php esc_html_e('Self-Employed', 'maneli-car-inquiry'); ?></option>
+                                    <option value="employee" <?php selected($job_type, 'employee'); ?>><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
                                 </select>
+                            </div>
+                            <div class="col-xl-6 buyer-job-title-wrapper maneli-initially-hidden" id="profile-job-title-wrapper">
+                                <label for="profile-job-title" class="form-label"><?php esc_html_e('Job Title:', 'maneli-car-inquiry'); ?></label>
+                                <input type="text" class="form-control" id="profile-job-title" name="job_title" value="<?php echo esc_attr($job_title ?: $occupation); ?>" placeholder="<?php esc_attr_e('Example: Engineer', 'maneli-car-inquiry'); ?>">
                             </div>
                             <div class="col-xl-6">
                                 <label for="profile-income" class="form-label"><?php esc_html_e('Income Level (Toman):', 'maneli-car-inquiry'); ?></label>
                                 <input type="number" class="form-control" id="profile-income" name="income_level" value="<?php echo esc_attr($income_level); ?>" placeholder="<?php esc_attr_e('Example: 50000000', 'maneli-car-inquiry'); ?>">
                             </div>
-                            <div class="col-xl-6">
-                                <label for="profile-workplace-status" class="form-label"><?php esc_html_e('Workplace Status:', 'maneli-car-inquiry'); ?></label>
-                                <select class="form-select" id="profile-workplace-status" name="workplace_status">
+                            <div class="col-xl-6 buyer-residency-wrapper maneli-initially-hidden" id="profile-residency-wrapper">
+                                <label for="profile-residency-status" class="form-label"><?php esc_html_e('Residency Status:', 'maneli-car-inquiry'); ?></label>
+                                <select class="form-select" id="profile-residency-status-job" name="residency_status">
                                     <option value="">-- <?php esc_html_e('Select', 'maneli-car-inquiry'); ?> --</option>
-                                    <option value="owner" <?php selected($workplace_status, 'owner'); ?>><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                    <option value="employee" <?php selected($workplace_status, 'employee'); ?>><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
-                                    <option value="tenant" <?php selected($workplace_status, 'tenant'); ?>><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                    <option value="owner" <?php selected($residency_status, 'owner'); ?>><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
+                                    <option value="tenant" <?php selected($residency_status, 'tenant'); ?>><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
                                 </select>
                             </div>
                             
@@ -196,14 +211,6 @@ $phone_verification = get_user_meta($user_id, 'phone_verification', true);
                                 <h5 class="fw-semibold mb-3"><?php esc_html_e('Contact Information', 'maneli-car-inquiry'); ?></h5>
                             </div>
                             
-                            <div class="col-xl-6">
-                                <label for="profile-residency-status" class="form-label"><?php esc_html_e('Residency Status:', 'maneli-car-inquiry'); ?></label>
-                                <select class="form-select" id="profile-residency-status" name="residency_status">
-                                    <option value="">-- <?php esc_html_e('Select', 'maneli-car-inquiry'); ?> --</option>
-                                    <option value="owner" <?php selected($residency_status, 'owner'); ?>><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                    <option value="tenant" <?php selected($residency_status, 'tenant'); ?>><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
-                                </select>
-                            </div>
                             <div class="col-xl-12">
                                 <label for="profile-address" class="form-label"><?php esc_html_e('Address:', 'maneli-car-inquiry'); ?></label>
                                 <textarea class="form-control" id="profile-address" name="address" rows="3" placeholder="<?php esc_attr_e('Enter address', 'maneli-car-inquiry'); ?>"><?php echo esc_textarea($address); ?></textarea>
@@ -231,6 +238,100 @@ $phone_verification = get_user_meta($user_id, 'phone_verification', true);
                                 <label for="profile-branch-name" class="form-label"><?php esc_html_e('Branch Name:', 'maneli-car-inquiry'); ?></label>
                                 <input type="text" class="form-control" id="profile-branch-name" name="branch_name" value="<?php echo esc_attr($branch_name); ?>" placeholder="<?php esc_attr_e('Enter branch name', 'maneli-car-inquiry'); ?>">
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents Tab -->
+                    <div class="tab-pane overflow-hidden p-0 border-0" id="documents-tab-pane" role="tabpanel" aria-labelledby="documents-tab" tabindex="0">
+                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
+                            <div class="fw-semibold d-block fs-15"><?php esc_html_e('Documents:', 'maneli-car-inquiry'); ?></div>
+                        </div>
+                        <div class="row gx-5 gy-3">
+                            <div class="col-xl-12">
+                                <p class="fs-14 mb-1 fw-medium"><?php esc_html_e('Upload Required Documents', 'maneli-car-inquiry'); ?></p>
+                                <p class="fs-12 mb-0 text-muted"><?php esc_html_e('Please upload the required documents for your application.', 'maneli-car-inquiry'); ?></p>
+                            </div>
+                            <?php 
+                            // Get required documents from settings
+                            $required_docs_raw = get_option('maneli_inquiry_all_options', [])['customer_required_documents'] ?? '';
+                            $required_docs = array_filter(array_map('trim', explode("\n", $required_docs_raw)));
+                            
+                            // Get uploaded documents for this user
+                            $uploaded_docs = get_user_meta($user_id, 'customer_uploaded_documents', true) ?: [];
+                            ?>
+                            <?php if (!empty($required_docs)): ?>
+                                <?php foreach ($required_docs as $doc_name): ?>
+                                    <?php 
+                                    // Check if this document has been uploaded
+                                    $is_uploaded = false;
+                                    $uploaded_file_url = '';
+                                    $doc_status = 'pending';
+                                    foreach ($uploaded_docs as $uploaded) {
+                                        if (isset($uploaded['name']) && $uploaded['name'] === $doc_name) {
+                                            $is_uploaded = true;
+                                            $uploaded_file_url = $uploaded['file'] ?? '';
+                                            $doc_status = $uploaded['status'] ?? 'pending';
+                                            break;
+                                        }
+                                    }
+                                    ?>
+                                    <div class="col-xl-12">
+                                        <div class="border rounded p-3 document-item-customer" data-doc-name="<?php echo esc_attr($doc_name); ?>">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-fill">
+                                                    <label class="fw-semibold mb-2 d-block">
+                                                        <?php echo esc_html($doc_name); ?>
+                                                    </label>
+                                                    <?php if ($is_uploaded && $doc_status === 'approved'): ?>
+                                                        <div class="alert alert-success border-success py-2 px-3 mb-2">
+                                                            <i class="la la-check-circle me-2"></i>
+                                                            <?php esc_html_e('Approved', 'maneli-car-inquiry'); ?>
+                                                        </div>
+                                                        <?php if ($uploaded_file_url): ?>
+                                                            <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary">
+                                                                <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    <?php elseif ($is_uploaded && $doc_status === 'rejected'): ?>
+                                                        <div class="alert alert-danger border-danger py-2 px-3 mb-2">
+                                                            <i class="la la-times-circle me-2"></i>
+                                                            <?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?>
+                                                        </div>
+                                                        <?php if ($uploaded_file_url): ?>
+                                                            <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary ms-2">
+                                                                <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    <?php elseif ($is_uploaded): ?>
+                                                        <div class="alert alert-info border-info py-2 px-3 mb-2">
+                                                            <i class="la la-clock me-2"></i>
+                                                            <?php esc_html_e('Awaiting Review', 'maneli-car-inquiry'); ?>
+                                                        </div>
+                                                        <?php if ($uploaded_file_url): ?>
+                                                            <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary ms-2">
+                                                                <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                            </a>
+                                                        <?php endif; ?>
+                                                    <?php else: ?>
+                                                        <input type="file" 
+                                                               accept=".pdf,.jpg,.jpeg,.png" 
+                                                               class="form-control customer-doc-file-input" 
+                                                               data-user-id="<?php echo esc_attr($user_id); ?>"
+                                                               data-doc-name="<?php echo esc_attr($doc_name); ?>">
+                                                        <small class="text-muted d-block mt-1">
+                                                            <?php esc_html_e('Accepted formats: PDF, JPG, PNG', 'maneli-car-inquiry'); ?>
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="col-xl-12">
+                                    <p class="text-muted"><?php esc_html_e('No documents have been configured yet by the admin.', 'maneli-car-inquiry'); ?></p>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -534,21 +635,111 @@ $phone_verification = get_user_meta($user_id, 'phone_verification', true);
         });
     });
 
+    // Handle job type changes to show/hide fields
+    $('#profile-job-type').on('change', function() {
+        var jobValue = $(this).val();
+        var $jobTitleWrapper = $('#profile-job-title-wrapper');
+        var $residencyWrapper = $('#profile-residency-wrapper');
+        
+        if (jobValue === 'self') {
+            $jobTitleWrapper.slideDown(200);
+            $residencyWrapper.slideDown(200);
+        } else {
+            $jobTitleWrapper.slideUp(200);
+            $residencyWrapper.slideUp(200);
+        }
+    });
+    
+    // Trigger on page load to show/hide fields based on current value
+    $('#profile-job-type').trigger('change');
+
+    // Handle customer document upload
+    $(document).on('change', '.customer-doc-file-input', function() {
+        var $input = $(this);
+        var file = this.files[0];
+        var userId = $input.data('user-id');
+        var docName = $input.data('doc-name');
+        
+        if (!file) return;
+        
+        // Validate file type
+        var allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        if (allowedTypes.indexOf(file.type) === -1) {
+            Swal.fire({
+                icon: 'error',
+                title: '<?php esc_html_e('Invalid File Type', 'maneli-car-inquiry'); ?>',
+                text: '<?php esc_html_e('Please upload only PDF, JPG, or PNG files.', 'maneli-car-inquiry'); ?>'
+            });
+            $input.val('');
+            return;
+        }
+        
+        // Show loading
+        $input.prop('disabled', true);
+        $input.closest('.document-item-customer').append('<div class="upload-progress text-center mt-2"><i class="la la-spinner la-spin me-2"></i><?php esc_html_e('Uploading...', 'maneli-car-inquiry'); ?></div>');
+        
+        // Create FormData
+        var formData = new FormData();
+        formData.append('action', 'maneli_upload_customer_document');
+        formData.append('security', '<?php echo wp_create_nonce('maneli-profile-image-nonce'); ?>');
+        formData.append('user_id', userId);
+        formData.append('document_name', docName);
+        formData.append('file', file);
+        
+        // Upload via AJAX
+        $.ajax({
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $input.closest('.document-item-customer').find('.upload-progress').remove();
+                $input.prop('disabled', false);
+                
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<?php esc_html_e('Success', 'maneli-car-inquiry'); ?>',
+                        text: response.data.message
+                    }).then(function() {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>',
+                        text: response.data.message
+                    });
+                    $input.val('');
+                }
+            },
+            error: function() {
+                $input.closest('.document-item-customer').find('.upload-progress').remove();
+                $input.prop('disabled', false);
+                Swal.fire({
+                    icon: 'error',
+                    title: '<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>',
+                    text: '<?php esc_html_e('Server error. Please try again.', 'maneli-car-inquiry'); ?>'
+                });
+                $input.val('');
+            }
+        });
+    });
+
     // Reset functions
     window.resetAccountForm = function() {
-        $('#profile-user-name').val('<?php echo esc_js($current_user->display_name); ?>');
-        $('#profile-email').val('<?php echo esc_js($current_user->user_email); ?>');
-        $('#profile-designation').val('<?php echo esc_js($designation); ?>');
+        $('#profile-first-name').val('<?php echo esc_js($first_name); ?>');
+        $('#profile-last-name').val('<?php echo esc_js($last_name); ?>');
         $('#profile-phn-no').val('<?php echo esc_js($mobile_number); ?>');
         $('#profile-national-code').val('<?php echo esc_js($national_code); ?>');
         $('#profile-father-name').val('<?php echo esc_js($father_name); ?>');
         $('#profile-birth-date').val('<?php echo esc_js($birth_date); ?>');
         $('#profile-phone').val('<?php echo esc_js($phone_number); ?>');
-        $('#profile-occupation').val('<?php echo esc_js($job_title ?: $occupation); ?>');
+        $('#profile-job-title').val('<?php echo esc_js($job_title ?: $occupation); ?>');
         $('#profile-job-type').val('<?php echo esc_js($job_type); ?>');
         $('#profile-income').val('<?php echo esc_js($income_level); ?>');
-        $('#profile-workplace-status').val('<?php echo esc_js($workplace_status); ?>');
-        $('#profile-residency-status').val('<?php echo esc_js($residency_status); ?>');
+        $('#profile-residency-status-job').val('<?php echo esc_js($residency_status); ?>');
         $('#profile-address').val('<?php echo esc_js($address); ?>');
         $('#profile-bank-name').val('<?php echo esc_js($bank_name); ?>');
         $('#profile-account-number').val('<?php echo esc_js($account_number); ?>');
