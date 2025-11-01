@@ -4030,7 +4030,7 @@ msgstr "کد شعبه صادرکننده"
 
 
 msgid "Issuer Branch Name"
-msgstr ""
+msgstr "نام شعبه صادرکننده"
 
 
 msgid "Issuer Father\\"
@@ -4038,27 +4038,27 @@ msgstr ""
 
 
 msgid "Issuer First Name"
-msgstr ""
+msgstr "نام صادرکننده"
 
 
 msgid "Issuer Income Level (Toman)"
-msgstr ""
+msgstr "سطح درآمد صادرکننده (تومان)"
 
 
 msgid "Issuer Income Level (Toman):"
-msgstr ""
+msgstr "سطح درآمد صادرکننده (تومان):"
 
 
 msgid "Issuer Job Title"
-msgstr ""
+msgstr "عنوان شغلی صادرکننده"
 
 
 msgid "Issuer Job Type"
-msgstr ""
+msgstr "نوع شغل صادرکننده"
 
 
 msgid "Issuer Landline Phone"
-msgstr ""
+msgstr "شماره تلفن ثابت صادرکننده"
 
 
 msgid "Issuer Mobile Number"
@@ -4066,71 +4066,71 @@ msgstr ""
 
 
 msgid "Items"
-msgstr ""
+msgstr "موارد"
 
 
 msgid "Job Information"
-msgstr ""
+msgstr "اطلاعات شغلی"
 
 
 msgid "Job Title"
-msgstr ""
+msgstr "عنوان شغلی"
 
 
 msgid "Job Type:"
-msgstr ""
+msgstr "نوع شغل:"
 
 
 msgid "Khordad"
-msgstr ""
+msgstr "خرداد"
 
 
 msgid "Landline Phone"
-msgstr ""
+msgstr "تلفن ثابت"
 
 
 msgid "Last 3 Months"
-msgstr ""
+msgstr "۳ ماه گذشته"
 
 
 msgid "Last 6 Months"
-msgstr ""
+msgstr "۶ ماه گذشته"
 
 
 msgid "Last 7 Days Summary:"
-msgstr ""
+msgstr "خلاصه ۷ روز گذشته:"
 
 
 msgid "Last Month"
-msgstr ""
+msgstr "ماه گذشته"
 
 
 msgid "Last Year"
-msgstr ""
+msgstr "سال گذشته"
 
 
 msgid "Loading follow-ups..."
-msgstr ""
+msgstr "در حال بارگذاری پیگیری‌ها..."
 
 
 msgid "Loading inquiries..."
-msgstr ""
+msgstr "در حال بارگذاری استعلام‌ها..."
 
 
 msgid "Loan Calculator"
-msgstr ""
+msgstr "ماشین حساب وام"
 
 
 msgid "Login Verification"
-msgstr ""
+msgstr "تایید ورود"
 
 
 msgid "Maneli Admin"
-msgstr ""
+msgstr "مدیر مانلی"
 
 
 msgid "Manufacturing Year"
-msgstr ""
+msgstr "سال ساخت"
 
 
 msgid "Meeting Scheduled"
@@ -4138,71 +4138,71 @@ msgstr ""
 
 
 msgid "Meeting Scheduled:"
-msgstr ""
+msgstr "جلسه برنامه‌ریزی شده:"
 
 
 msgid "Mehr"
-msgstr ""
+msgstr "مهر"
 
 
 msgid "Messages sent to user email address."
-msgstr ""
+msgstr "پیام‌های ارسال شده به آدرس ایمیل کاربر."
 
 
 msgid "Minimum Down Payment"
-msgstr ""
+msgstr "حداقل پیش‌پرداخت"
 
 
 msgid "Mobile Number (Username):"
-msgstr ""
+msgstr "شماره موبایل (نام کاربری):"
 
 
 msgid "Monday"
-msgstr ""
+msgstr "دوشنبه"
 
 
 msgid "Monthly"
-msgstr ""
+msgstr "ماهانه"
 
 
 msgid "Monthly Revenue (Last 6 Months)"
-msgstr ""
+msgstr "درآمد ماهانه (۶ ماه گذشته)"
 
 
 msgid "Mordad"
-msgstr ""
+msgstr "مرداد"
 
 
 msgid "My Account"
-msgstr ""
+msgstr "حساب کاربری من"
 
 
 msgid "My Assigned Inquiries Needing Action"
-msgstr ""
+msgstr "استعلام‌های اختصاص‌یافته به من که نیاز به اقدام دارند"
 
 
 msgid "My Cash Inquiries"
-msgstr ""
+msgstr "استعلام‌های نقدی من"
 
 
 msgid "My Cash Purchase Inquiries"
-msgstr ""
+msgstr "استعلام‌های خرید نقدی من"
 
 
 msgid "My Customers"
-msgstr ""
+msgstr "مشتریان من"
 
 
 msgid "My Installment Inquiries"
-msgstr ""
+msgstr "استعلام‌های قسطی من"
 
 
 msgid "My Installment Purchase Inquiries"
-msgstr ""
+msgstr "استعلام‌های خرید قسطی من"
 
 
 msgid "My Performance Report"
-msgstr ""
+msgstr "گزارش عملکرد من"
 
 
 msgid "My Profit"
@@ -4210,11 +4210,11 @@ msgstr ""
 
 
 msgid "My Total Inquiries"
-msgstr ""
+msgstr "مجموع استعلام‌های من"
 
 
 msgid "My Upcoming Follow-ups"
-msgstr ""
+msgstr "پیگیری‌های آینده من"
 
 
 msgid "National Code:"
@@ -4222,151 +4222,151 @@ msgstr ""
 
 
 msgid "Need More Documents"
-msgstr ""
+msgstr "نیاز به مدارک بیشتر"
 
 
 msgid "Need expert assignment"
-msgstr ""
+msgstr "نیاز به اختصاص کارشناس"
 
 
 msgid "New Inquiry"
-msgstr ""
+msgstr "استعلام جدید"
 
 
 msgid "New Installment Inquiry"
-msgstr ""
+msgstr "استعلام قسطی جدید"
 
 
 msgid "Newest"
-msgstr ""
+msgstr "جدیدترین"
 
 
 msgid "Next Follow-up Scheduled for:"
-msgstr ""
+msgstr "پیگیری بعدی برنامه‌ریزی شده برای:"
 
 
 msgid "Next Step"
-msgstr ""
+msgstr "مرحله بعد"
 
 
 msgid "No"
-msgstr ""
+msgstr "خیر"
 
 
 msgid "No Car Selected"
-msgstr ""
+msgstr "هیچ خودرویی انتخاب نشده است"
 
 
 msgid "No Cash Inquiries Yet"
-msgstr ""
+msgstr "هنوز استعلام نقدی ثبت نشده است"
 
 
 msgid "No Image"
-msgstr ""
+msgstr "بدون تصویر"
 
 
 msgid "No Inquiries Found"
-msgstr ""
+msgstr "هیچ استعلامی یافت نشد"
 
 
 msgid "No Inquiries Yet"
-msgstr ""
+msgstr "هنوز استعلامی ثبت نشده است"
 
 
 msgid "No Installment Inquiries Yet"
-msgstr ""
+msgstr "هنوز استعلام قسطی ثبت نشده است"
 
 
 msgid "No Role"
-msgstr ""
+msgstr "بدون نقش"
 
 
 msgid "No data available"
-msgstr ""
+msgstr "داده‌ای در دسترس نیست"
 
 
 msgid "No experts found."
-msgstr ""
+msgstr "هیچ کارشناسی یافت نشد."
 
 
 msgid "No follow-ups found."
-msgstr ""
+msgstr "هیچ پیگیری‌ای یافت نشد."
 
 
 msgid "No inquiries have been registered in the system yet"
-msgstr ""
+msgstr "هنوز هیچ استعلامی در سیستم ثبت نشده است"
 
 
 msgid "No inquiries registered in the last 7 days."
-msgstr ""
+msgstr "هیچ استعلامی در ۷ روز گذشته ثبت نشده است."
 
 
 msgid "No meetings scheduled"
-msgstr ""
+msgstr "هیچ جلسه‌ای برنامه‌ریزی نشده است"
 
 
 msgid "No notes have been recorded yet."
-msgstr ""
+msgstr "هنوز هیچ یادداشتی ثبت نشده است."
 
 
 msgid "No valid files selected."
-msgstr ""
+msgstr "هیچ فایل معتبری انتخاب نشده است."
 
 
 msgid "Not Specified"
-msgstr ""
+msgstr "مشخص نشده"
 
 
 msgid "Note:"
-msgstr ""
+msgstr "یادداشت:"
 
 
 msgid "Notification Settings:"
-msgstr ""
+msgstr "تنظیمات اعلان‌ها:"
 
 
 msgid "Notifications"
-msgstr ""
+msgstr "اعلان‌ها"
 
 
 msgid "Notifications sent to user mobile or desktop devices."
-msgstr ""
+msgstr "اعلان‌های ارسال شده به دستگاه موبایل یا دسکتاپ کاربر."
 
 
 msgid "Notifications that appear within the application interface."
-msgstr ""
+msgstr "اعلان‌هایی که در رابط برنامه نمایش داده می‌شوند."
 
 
 msgid "OK"
-msgstr ""
+msgstr "تایید"
 
 
 msgid "Occupation / Position:"
-msgstr ""
+msgstr "شغل / سمت:"
 
 
 msgid "Occupation or Position"
-msgstr ""
+msgstr "شغل یا سمت"
 
 
 msgid "Occupation/Job Title:"
-msgstr ""
+msgstr "شغل/عنوان شغلی:"
 
 
 msgid "Oldest"
-msgstr ""
+msgstr "قدیمی‌ترین"
 
 
 msgid "Ordibehesht"
-msgstr ""
+msgstr "اردیبهشت"
 
 
 msgid "Our colleagues will contact you soon for final coordination."
-msgstr ""
+msgstr "همکاران ما به زودی برای هماهنگی نهایی با شما تماس خواهند گرفت."
 
 
 msgid "Our experts need more documents to complete the process. Please wait for our team to contact you."
-msgstr ""
+msgstr "کارشناسان ما برای تکمیل فرآیند به مدارک بیشتری نیاز دارند. لطفاً منتظر بمانید تا تیم ما با شما تماس بگیرد."
 
 
 msgid "Overdue"
@@ -4374,63 +4374,63 @@ msgstr ""
 
 
 msgid "Overdue Follow-ups"
-msgstr ""
+msgstr "پیگیری‌های معوق"
 
 
 msgid "Overdue Followups"
-msgstr ""
+msgstr "پیگیری‌های معوق"
 
 
 msgid "Overdue Inquiries (%d)"
-msgstr ""
+msgstr "استعلام‌های معوق (%d)"
 
 
 msgid "Password Verification"
-msgstr ""
+msgstr "تایید رمز عبور"
 
 
 msgid "Password will be automatically generated. The expert can set their password through the forgot password option."
-msgstr ""
+msgstr "رمز عبور به صورت خودکار تولید می‌شود. کارشناس می‌تواند رمز عبور خود را از طریق گزینه فراموشی رمز عبور تنظیم کند."
 
 
 msgid "Payment Amount"
-msgstr ""
+msgstr "مبلغ پرداخت"
 
 
 msgid "Payment completed successfully."
-msgstr ""
+msgstr "پرداخت با موفقیت انجام شد."
 
 
 msgid "Payment was not completed."
-msgstr ""
+msgstr "پرداخت انجام نشد."
 
 
 msgid "Pending"
-msgstr ""
+msgstr "در انتظار"
 
 
 msgid "Pending Cash Assignments"
-msgstr ""
+msgstr "اختصاص‌های نقدی در انتظار"
 
 
 msgid "Pending Cash Inquiries"
-msgstr ""
+msgstr "استعلام‌های نقدی در انتظار"
 
 
 msgid "Pending Installment Assignments"
-msgstr ""
+msgstr "اختصاص‌های قسطی در انتظار"
 
 
 msgid "Pending Installment Inquiries"
-msgstr ""
+msgstr "استعلام‌های قسطی در انتظار"
 
 
 msgid "Percentage"
-msgstr ""
+msgstr "درصد"
 
 
 msgid "Permissions updated successfully."
-msgstr ""
+msgstr "مجوزها با موفقیت به‌روزرسانی شد."
 
 
 msgid "Permissions:"
@@ -4438,195 +4438,195 @@ msgstr ""
 
 
 msgid "Phone"
-msgstr ""
+msgstr "تلفن"
 
 
 msgid "Phone Number:"
-msgstr ""
+msgstr "شماره تلفن:"
 
 
 msgid "Please enter car name."
-msgstr ""
+msgstr "لطفاً نام خودرو را وارد کنید."
 
 
 msgid "Please fill all required fields."
-msgstr ""
+msgstr "لطفاً تمام فیلدهای الزامی را پر کنید."
 
 
 msgid "Please select a car first."
-msgstr ""
+msgstr "لطفاً ابتدا یک خودرو انتخاب کنید."
 
 
 msgid "Please send the additional documents requested."
-msgstr ""
+msgstr "لطفاً مدارک اضافی درخواست شده را ارسال کنید."
 
 
 msgid "Popular Products"
-msgstr ""
+msgstr "محصولات محبوب"
 
 
 msgid "Price"
-msgstr ""
+msgstr "قیمت"
 
 
 msgid "Private"
-msgstr ""
+msgstr "خصوصی"
 
 
 msgid "Proceed to Payment"
-msgstr ""
+msgstr "ادامه به پرداخت"
 
 
 msgid "Product Description"
-msgstr ""
+msgstr "توضیحات محصول"
 
 
 msgid "Product Images"
-msgstr ""
+msgstr "تصاویر محصول"
 
 
 msgid "Product Name"
-msgstr ""
+msgstr "نام محصول"
 
 
 msgid "Product name should not exceed 30 characters."
-msgstr ""
+msgstr "نام محصول نباید از ۳۰ کاراکتر بیشتر باشد."
 
 
 msgid "Product saved successfully."
-msgstr ""
+msgstr "محصول با موفقیت ذخیره شد."
 
 
 msgid "Products"
-msgstr ""
+msgstr "محصولات"
 
 
 msgid "Profile Picture"
-msgstr ""
+msgstr "تصویر پروفایل"
 
 
 msgid "Profile Settings"
-msgstr ""
+msgstr "تنظیمات پروفایل"
 
 
 msgid "Profit (Toman)"
-msgstr ""
+msgstr "سود (تومان)"
 
 
 msgid "Push Notifications"
-msgstr ""
+msgstr "اعلان‌های پوش"
 
 
 msgid "Rank"
-msgstr ""
+msgstr "رتبه"
 
 
 msgid "Recent Inquiries"
-msgstr ""
+msgstr "استعلام‌های اخیر"
 
 
 msgid "Refresh"
-msgstr ""
+msgstr "بازخوانی"
 
 
 msgid "Registered Inquiries:"
-msgstr ""
+msgstr "استعلام‌های ثبت‌شده:"
 
 
 msgid "Reject"
-msgstr ""
+msgstr "رد کردن"
 
 
 msgid "Rejection Reason:"
-msgstr ""
+msgstr "دلیل رد:"
 
 
 msgid "Reports"
-msgstr ""
+msgstr "گزارش‌ها"
 
 
 msgid "Request Created"
-msgstr ""
+msgstr "درخواست ایجاد شد"
 
 
 msgid "Request Down Payment"
-msgstr ""
+msgstr "درخواست پیش‌پرداخت"
 
 
 msgid "Request Journey"
-msgstr ""
+msgstr "سفر درخواست"
 
 
 msgid "Request Status Management"
-msgstr ""
+msgstr "مدیریت وضعیت درخواست"
 
 
 msgid "Require Personal Details"
-msgstr ""
+msgstr "نیاز به جزئیات شخصی"
 
 
 msgid "Requires urgent action"
-msgstr ""
+msgstr "نیاز به اقدام فوری"
 
 
 msgid "Reserved"
-msgstr ""
+msgstr "رزرو شده"
 
 
 msgid "Reset Changes"
-msgstr ""
+msgstr "بازنشانی تغییرات"
 
 
 msgid "Residency Status:"
-msgstr ""
+msgstr "وضعیت سکونت:"
 
 
 msgid "Revenue"
-msgstr ""
+msgstr "درآمد"
 
 
 msgid "Revenue (Toman)"
-msgstr ""
+msgstr "درآمد (تومان)"
 
 
 msgid "Revenue Comparison:"
-msgstr ""
+msgstr "مقایسه درآمد:"
 
 
 msgid "Role:"
-msgstr ""
+msgstr "نقش:"
 
 
 msgid "SMS Notifications"
-msgstr ""
+msgstr "اعلان‌های پیامک"
 
 
 msgid "SMS messages sent to user mobile phone."
-msgstr ""
+msgstr "پیام‌های پیامک ارسال شده به تلفن همراه کاربر."
 
 
 msgid "Saturday"
-msgstr ""
+msgstr "شنبه"
 
 
 msgid "Save"
-msgstr ""
+msgstr "ذخیره"
 
 
 msgid "Save Expert"
-msgstr ""
+msgstr "ذخیره کارشناس"
 
 
 msgid "Save Meeting Time and Update Status"
-msgstr ""
+msgstr "ذخیره زمان جلسه و به‌روزرسانی وضعیت"
 
 
 msgid "Save Note"
-msgstr ""
+msgstr "ذخیره یادداشت"
 
 
 msgid "Save Product"
-msgstr ""
+msgstr "ذخیره محصول"
 
 
 msgid "Saving..."
