@@ -229,8 +229,8 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 
                 <!-- Expert Status Control -->
                 <div class="card custom-card mt-3">
-                    <div class="card-header bg-gradient-primary">
-                        <div class="card-title text-white d-flex align-items-center justify-content-between">
+                    <div class="card-header bg-primary-gradient">
+                        <div class="card-title text-fixed-white d-flex align-items-center justify-content-between">
                             <span>
                                 <i class="la la-user-cog me-2"></i>
                                 <?php esc_html_e('Expert Status Control', 'maneli-car-inquiry'); ?>

@@ -214,6 +214,10 @@ class Maneli_Ajax_Handler {
         }
         
         if (!empty($_POST['status'])) $meta_query[] = ['key' => 'inquiry_status', 'value' => sanitize_text_field($_POST['status'])];
+        
+        // Check if tracking_status filter is provided
+        $tracking_status_query = isset($_POST['tracking_status']) ? sanitize_text_field($_POST['tracking_status']) : '';
+        
         if ($is_admin || $is_manager) {
             if (!empty($_POST['expert'])) {
                 $meta_query[] = ['key' => 'assigned_expert_id', 'value' => absint($_POST['expert']), 'compare' => '='];
@@ -223,6 +227,19 @@ class Maneli_Ajax_Handler {
             $meta_query[] = ['key' => 'assigned_expert_id', 'value' => get_current_user_id(), 'compare' => '='];
         }
         // For customers, we already filtered by author, so no expert filter needed
+        
+        // CRITICAL: Exclude follow_up_scheduled from normal list (only show in followups page)
+        // Unless specifically filtering by follow_up_scheduled tracking_status
+        if (empty($tracking_status_query) || $tracking_status_query !== 'follow_up_scheduled') {
+            $meta_query[] = [
+                'relation' => 'OR',
+                ['key' => 'tracking_status', 'value' => 'follow_up_scheduled', 'compare' => '!='],
+                ['key' => 'tracking_status', 'value' => 'follow_up_scheduled', 'compare' => 'NOT EXISTS']
+            ];
+        } else {
+            // If filtering by follow_up_scheduled, only show those
+            $meta_query[] = ['key' => 'tracking_status', 'value' => 'follow_up_scheduled', 'compare' => '='];
+        }
         
         if (count($meta_query) > 1) $args['meta_query'] = $meta_query;
     
@@ -563,9 +580,35 @@ class Maneli_Ajax_Handler {
                     ['key' => 'cash_inquiry_status', 'compare' => 'NOT EXISTS']
                 ];
                 
+                // CRITICAL: Exclude follow_up_scheduled from normal list (only show in followups page)
+                if (empty($status_query) || $status_query !== 'follow_up_scheduled') {
+                    $final_meta_query[] = [
+                        'relation' => 'OR',
+                        ['key' => 'cash_inquiry_status', 'value' => 'follow_up_scheduled', 'compare' => '!='],
+                        ['key' => 'cash_inquiry_status', 'value' => 'follow_up_scheduled', 'compare' => 'NOT EXISTS']
+                    ];
+                }
+                
                 $args['meta_query'] = $final_meta_query;
             } else {
+                // CRITICAL: Exclude follow_up_scheduled from normal list (only show in followups page)
+                if (empty($status_query) || $status_query !== 'follow_up_scheduled') {
+                    $meta_query[] = [
+                        'relation' => 'OR',
+                        ['key' => 'cash_inquiry_status', 'value' => 'follow_up_scheduled', 'compare' => '!='],
+                        ['key' => 'cash_inquiry_status', 'value' => 'follow_up_scheduled', 'compare' => 'NOT EXISTS']
+                    ];
+                }
                 $args['meta_query'] = $meta_query;
+            }
+        } else {
+            // Even if no other filters, exclude follow_up_scheduled
+            if (empty($status_query) || $status_query !== 'follow_up_scheduled') {
+                $args['meta_query'] = [
+                    'relation' => 'OR',
+                    ['key' => 'cash_inquiry_status', 'value' => 'follow_up_scheduled', 'compare' => '!='],
+                    ['key' => 'cash_inquiry_status', 'value' => 'follow_up_scheduled', 'compare' => 'NOT EXISTS']
+                ];
             }
         }
         
@@ -1864,12 +1907,14 @@ class Maneli_Ajax_Handler {
                         $inquiry_id,
                         $followup_date
                     );
-                    Maneli_Notification_Handler::create_notification(
-                        $assigned_expert_id,
-                        'followup_scheduled',
-                        $notification_message,
-                        ['inquiry_id' => $inquiry_id, 'inquiry_type' => 'cash']
-                    );
+                    Maneli_Notification_Handler::create_notification([
+                        'user_id' => $assigned_expert_id,
+                        'type' => 'followup_scheduled',
+                        'title' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'),
+                        'message' => $notification_message,
+                        'related_id' => $inquiry_id,
+                        'link' => add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'))
+                    ]);
                 }
                 
                 wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
@@ -2100,6 +2145,11 @@ class Maneli_Ajax_Handler {
      * Handles: in_progress, meeting_scheduled, follow_up_scheduled, cancelled, completed, rejected
      */
     public function ajax_update_installment_status() {
+        // Ensure Notification Handler is loaded
+        if (!class_exists('Maneli_Notification_Handler')) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        }
+        
         check_ajax_referer('maneli_installment_status', 'nonce');
         
         $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
@@ -2118,8 +2168,11 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry')]);
         }
         
-        // Get current status
+        // Get current status (default to 'new' if empty)
         $current_status = get_post_meta($inquiry_id, 'tracking_status', true);
+        if (empty($current_status)) {
+            $current_status = 'new';
+        }
         
         switch ($action) {
             case 'start_progress':
@@ -2147,10 +2200,12 @@ class Maneli_Ajax_Handler {
                 break;
                 
             case 'schedule_followup':
-                // Expert schedules next follow-up (from in_progress or meeting_scheduled)
-                // Allow from in_progress or meeting_scheduled
-                if ($current_status !== 'in_progress' && $current_status !== 'meeting_scheduled') {
-                    wp_send_json_error(['message' => esc_html__('Can only schedule follow-up from In Progress or Meeting Scheduled status.', 'maneli-car-inquiry')]);
+                // Expert schedules next follow-up (from in_progress, meeting_scheduled, referred, or new)
+                // Allow from multiple statuses for flexibility
+                $allowed_statuses = ['in_progress', 'meeting_scheduled', 'referred', 'new', 'follow_up_scheduled'];
+                if (!in_array($current_status, $allowed_statuses)) {
+                    wp_send_json_error(['message' => esc_html__('Can only schedule follow-up from In Progress, Meeting Scheduled, Referred, or New status.', 'maneli-car-inquiry')]);
+                    return;
                 }
                 
                 $followup_date = isset($_POST['followup_date']) ? sanitize_text_field($_POST['followup_date']) : '';
@@ -2158,57 +2213,73 @@ class Maneli_Ajax_Handler {
                 
                 if (empty($followup_date)) {
                     wp_send_json_error(['message' => esc_html__('Follow-up date is required.', 'maneli-car-inquiry')]);
+                    return;
                 }
                 
-                // If meeting was scheduled, cancel it before scheduling follow-up
-                if ($current_status === 'meeting_scheduled') {
-                    $meeting_id = get_posts([
-                        'post_type' => 'maneli_meeting',
-                        'posts_per_page' => 1,
-                        'meta_query' => [
-                            ['key' => 'meeting_inquiry_id', 'value' => $inquiry_id, 'compare' => '='],
-                            ['key' => 'meeting_inquiry_type', 'value' => 'installment', 'compare' => '=']
-                        ]
-                    ]);
-                    if (!empty($meeting_id)) {
-                        wp_delete_post($meeting_id[0]->ID, true);
+                try {
+                    // If meeting was scheduled, cancel it before scheduling follow-up
+                    if ($current_status === 'meeting_scheduled') {
+                        $meeting_id = get_posts([
+                            'post_type' => 'maneli_meeting',
+                            'posts_per_page' => 1,
+                            'meta_query' => [
+                                ['key' => 'meeting_inquiry_id', 'value' => $inquiry_id, 'compare' => '='],
+                                ['key' => 'meeting_inquiry_type', 'value' => 'installment', 'compare' => '=']
+                            ]
+                        ]);
+                        if (!empty($meeting_id)) {
+                            wp_delete_post($meeting_id[0]->ID, true);
+                        }
                     }
+                    
+                    // Save previous follow-up date (if exists)
+                    $previous_followup = get_post_meta($inquiry_id, 'followup_date', true);
+                    if ($previous_followup) {
+                        // Save to array of previous follow-up dates
+                        $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
+                        $followup_history[] = [
+                            'date' => $previous_followup,
+                            'completed_at' => current_time('mysql')
+                        ];
+                        update_post_meta($inquiry_id, 'followup_history', $followup_history);
+                    }
+                    
+                    update_post_meta($inquiry_id, 'tracking_status', 'follow_up_scheduled');
+                    update_post_meta($inquiry_id, 'followup_date', $followup_date);
+                    update_post_meta($inquiry_id, 'followup_note', $followup_note);
+                    update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
+                    
+                    // Send notification to expert (optional, don't fail if notification fails)
+                    $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+                    if ($assigned_expert_id && class_exists('Maneli_Notification_Handler')) {
+                        try {
+                            $notification_message = sprintf(
+                                esc_html__('Follow-up scheduled for inquiry #%d on %s', 'maneli-car-inquiry'),
+                                $inquiry_id,
+                                $followup_date
+                            );
+                            $link_url = home_url('/dashboard/installment-inquiries');
+                            $link_url = add_query_arg('inquiry_id', $inquiry_id, $link_url);
+                            
+                            Maneli_Notification_Handler::create_notification([
+                                'user_id' => $assigned_expert_id,
+                                'type' => 'followup_scheduled',
+                                'title' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'),
+                                'message' => $notification_message,
+                                'related_id' => $inquiry_id,
+                                'link' => $link_url
+                            ]);
+                        } catch (Exception $e) {
+                            // Log error but don't fail the operation
+                            error_log('Maneli: Failed to create notification: ' . $e->getMessage());
+                        }
+                    }
+                    
+                    wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
+                } catch (Exception $e) {
+                    error_log('Maneli: Error in schedule_followup: ' . $e->getMessage());
+                    wp_send_json_error(['message' => esc_html__('An error occurred while scheduling the follow-up. Please try again.', 'maneli-car-inquiry')]);
                 }
-                
-                // Save previous follow-up date (if exists)
-                $previous_followup = get_post_meta($inquiry_id, 'followup_date', true);
-                if ($previous_followup) {
-                    // Save to array of previous follow-up dates
-                    $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
-                    $followup_history[] = [
-                        'date' => $previous_followup,
-                        'completed_at' => current_time('mysql')
-                    ];
-                    update_post_meta($inquiry_id, 'followup_history', $followup_history);
-                }
-                
-                update_post_meta($inquiry_id, 'tracking_status', 'follow_up_scheduled');
-                update_post_meta($inquiry_id, 'followup_date', $followup_date);
-                update_post_meta($inquiry_id, 'followup_note', $followup_note);
-                update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
-                
-                // Send notification to expert
-                $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
-                if ($assigned_expert_id) {
-                    $notification_message = sprintf(
-                        esc_html__('Follow-up scheduled for inquiry #%d on %s', 'maneli-car-inquiry'),
-                        $inquiry_id,
-                        $followup_date
-                    );
-                    Maneli_Notification_Handler::create_notification(
-                        $assigned_expert_id,
-                        'followup_scheduled',
-                        $notification_message,
-                        ['inquiry_id' => $inquiry_id]
-                    );
-                }
-                
-                wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
                 break;
                 
             case 'cancel':

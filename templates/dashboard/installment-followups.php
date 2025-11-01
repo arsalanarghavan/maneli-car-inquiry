@@ -127,7 +127,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
                                 <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e("Today's Followups", 'maneli-car-inquiry'); ?></span>
-                                <h4 class="mb-0 fw-semibold"><?php echo number_format_i18n($today_count); ?></h4>
+                                <h4 class="mb-0 fw-semibold"><?php echo persian_numbers_no_separator($today_count); ?></h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <div class="avatar avatar-md avatar-rounded bg-warning-transparent">
@@ -144,7 +144,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
                                 <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
-                                <h4 class="mb-0 fw-semibold text-danger"><?php echo number_format_i18n($overdue_count); ?></h4>
+                                <h4 class="mb-0 fw-semibold text-danger"><?php echo persian_numbers_no_separator($overdue_count); ?></h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <div class="avatar avatar-md avatar-rounded bg-danger-transparent">
@@ -161,7 +161,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
                                 <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></span>
-                                <h4 class="mb-0 fw-semibold"><?php echo number_format_i18n($week_count); ?></h4>
+                                <h4 class="mb-0 fw-semibold"><?php echo persian_numbers_no_separator($week_count); ?></h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <div class="avatar avatar-md avatar-rounded bg-info-transparent">
@@ -178,7 +178,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
                                 <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e('Total', 'maneli-car-inquiry'); ?></span>
-                                <h4 class="mb-0 fw-semibold"><?php echo number_format_i18n($total_count); ?></h4>
+                                <h4 class="mb-0 fw-semibold"><?php echo persian_numbers_no_separator($total_count); ?></h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <div class="avatar avatar-md avatar-rounded bg-primary-transparent">
@@ -195,7 +195,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
         <div class="card custom-card">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div class="card-title">
-                    <?php esc_html_e('Installment Inquiry Follow-ups List', 'maneli-car-inquiry'); ?><span class="badge bg-primary rounded ms-2 fs-12 align-middle"><?php echo number_format_i18n($total_count); ?></span>
+                    <?php esc_html_e('Installment Inquiry Follow-ups List', 'maneli-car-inquiry'); ?><span class="badge bg-primary rounded ms-2 fs-12 align-middle"><?php echo persian_numbers_no_separator($total_count); ?></span>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -250,6 +250,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                     } else {
                                         $created_date = date('Y/m/d', $created_timestamp);
                                     }
+                                    $created_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($created_date) : $created_date;
                                     
                                     // Status badge color
                                     $status_class_map = [
@@ -270,7 +271,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                 ?>
                                     <tr class="crm-contact contacts-list <?php echo $row_class; ?>">
                                         <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">
-                                            <span class="fw-medium">#<?php echo $inquiry_id; ?></span>
+                                            <span class="fw-medium">#<?php echo persian_numbers_no_separator($inquiry_id); ?></span>
                                         </td>
                                         <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>">
                                             <div class="d-flex align-items-center gap-2">
@@ -284,9 +285,11 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                         </td>
                                         <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
                                         <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">
-                                            <?php if ($follow_up_date): ?>
+                                            <?php if ($follow_up_date): 
+                                                $follow_up_date_persian = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($follow_up_date) : $follow_up_date;
+                                            ?>
                                                 <strong class="<?php echo $is_overdue ? 'text-danger' : 'text-success'; ?>">
-                                                    <?php echo esc_html($follow_up_date); ?>
+                                                    <?php echo esc_html($follow_up_date_persian); ?>
                                                 </strong>
                                                 <?php if ($is_overdue): ?>
                                                     <br><span class="badge bg-danger-transparent"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
@@ -301,7 +304,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                             </span>
                                             <?php if (!empty($followup_history)): ?>
                                                 <br><small class="text-muted fs-11">
-                                                    (<?php echo count($followup_history); ?> <?php esc_html_e('previous follow-ups', 'maneli-car-inquiry'); ?>)
+                                                    (<?php printf(esc_html__('%s previous follow-ups', 'maneli-car-inquiry'), persian_numbers_no_separator(count($followup_history))); ?>)
                                                 </small>
                                             <?php endif; ?>
                                         </td>

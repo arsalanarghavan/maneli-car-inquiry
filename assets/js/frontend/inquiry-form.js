@@ -7,7 +7,7 @@
  * 2. Expert New Inquiry Form (expert-new-inquiry-form.php)
  * 3. User Edit Forms (form-edit-user.php and admin user profile)
  *
- * @version 1.0.2 (Localized Datepicker placeholder)
+ * @version 1.0.3 (Added Persian digit conversion for form numbers)
  */
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -28,6 +28,70 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const datepickerPlaceholder = getDatepickerPlaceholder();
+
+    // --- 0.5 Persian Number Conversion Helpers ---
+    /**
+     * Convert English digits to Persian digits
+     */
+    function toPersianDigits(str) {
+        if (!str) return '';
+        const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        let result = String(str);
+        for (let i = 0; i < 10; i++) {
+            result = result.split(english[i]).join(persian[i]);
+        }
+        return result;
+    }
+
+    /**
+     * Convert Persian digits to English digits
+     */
+    function toEnglishDigits(str) {
+        if (!str) return '';
+        const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        let result = String(str);
+        for (let i = 0; i < 10; i++) {
+            result = result.split(persian[i]).join(english[i]);
+        }
+        return result;
+    }
+
+    // --- 0.6 Convert numeric input fields to display Persian digits ---
+    // Target numeric fields: national code, phone numbers, income, account numbers, etc.
+    const numericFields = [
+        '#national_code',
+        '#mobile_number', 
+        '#phone_number',
+        '#income_level',
+        '#account_number',
+        '#branch_code',
+        '#issuer_national_code',
+        '#issuer_mobile_number',
+        '#issuer_phone_number',
+        '#issuer_income_level',
+        '#issuer_account_number',
+        '#issuer_branch_code'
+    ];
+
+    numericFields.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+            // Convert on blur (when user finishes typing)
+            element.addEventListener('blur', function() {
+                if (this.value && /^\d+$/.test(toEnglishDigits(this.value))) {
+                    // Only convert if all characters are digits
+                    this.value = toPersianDigits(toEnglishDigits(this.value));
+                }
+            });
+
+            // Convert initial value if present
+            if (element.value && /^\d+$/.test(toEnglishDigits(element.value))) {
+                element.value = toPersianDigits(toEnglishDigits(element.value));
+            }
+        });
+    });
 
     // --- 1. Datepicker Initialization ---
     // Check if the kamadatepicker library is available.
@@ -53,11 +117,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 
-                kamadatepicker(element.id || element, {
-                    bidi: true, // Enable bidirectional support for RTL
-                    placeholder: datepickerPlaceholder, // FIX: Use localized string
-                    format: 'YYYY/MM/DD'
-                });
+                // Kamadatepicker requires element ID as string, not DOM element
+                // For elements with ID, use ID; for elements without ID but with class, use element reference
+                if (element.id) {
+                    kamadatepicker(element.id, {
+                        bidi: true, // Enable bidirectional support for RTL
+                        placeholder: datepickerPlaceholder, // FIX: Use localized string
+                        format: 'YYYY/MM/DD'
+                    });
+                } else if (selector.startsWith('#')) {
+                    // If selector was an ID but element doesn't have one, this shouldn't happen
+                    console.warn('Datepicker element without ID:', element);
+                } else {
+                    // For elements without ID (e.g. class selector), create temporary ID
+                    const tempId = 'maneli_dp_' + Math.random().toString(36).substr(2, 9);
+                    element.id = tempId;
+                    kamadatepicker(tempId, {
+                        bidi: true,
+                        placeholder: datepickerPlaceholder,
+                        format: 'YYYY/MM/DD'
+                    });
+                }
                 element.setAttribute('data-kdp-init', 'true'); // Mark as initialized
             });
         });

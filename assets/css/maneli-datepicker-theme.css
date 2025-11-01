@@ -9,7 +9,8 @@
 
 /* === 1. Main Container === */
 div.kamadatepicker-container {
-    font-family: inherit !important; /* Inherit theme's font */
+    font-family: 'IRANSans', 'Vazir', 'Tahoma', sans-serif !important; /* Persian font support */
+    direction: rtl !important; /* Right-to-left layout */
     z-index: 10000 !important;      /* Ensure it appears above other elements */
     position: absolute;
     border: 1px solid var(--border-color, #ccc);

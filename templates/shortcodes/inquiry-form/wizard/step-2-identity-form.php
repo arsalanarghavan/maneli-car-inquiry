@@ -62,7 +62,7 @@ $loan_amount = (int)$total_price - (int)$down_payment;
                                 <i class="la la-calendar me-1"></i>
                                 <?php esc_html_e('Installment Period', 'maneli-car-inquiry'); ?>
                             </div>
-                            <strong class="fs-16 text-info"><?php echo esc_html($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></strong>
+                            <strong class="fs-16 text-info"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($term_months) : esc_html($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></strong>
                         </div>
                     </div>
                     <div class="col-md-6">

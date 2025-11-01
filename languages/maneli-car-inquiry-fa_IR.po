@@ -3053,6 +3053,10 @@ msgid "%d previous follow-ups"
 msgstr "%d پیگیری قبلی"
 
 
+msgid "%s previous follow-ups"
+msgstr "%s پیگیری‌های قبلی"
+
+
 msgid "%s inquiries"
 msgstr "%s استعلام"
 
@@ -4054,7 +4058,7 @@ msgid "My Cash Purchase Inquiries"
 msgstr "استعلام‌های خرید نقدی من"
 
 msgid "My Customers"
-msgstr ""
+msgstr "مشتریان من"
 
 msgid "My Installment Inquiries"
 msgstr "استعلام‌های قسطی من"
@@ -4549,7 +4553,7 @@ msgid "To purchase a car with installments, use the loan calculator."
 msgstr "برای خرید خودرو با اقساط، از ماشین حساب وام استفاده کنید."
 
 msgid "To start the inquiry process, please first select your desired car from the products page and click on the \"Bank Credit Inquiry\" button."
-msgstr ""
+msgstr "برای شروع فرآیند استعلام، لطفاً ابتدا خودروی مورد نظر خود را از صفحه محصولات انتخاب کرده و روی دکمه \"استعلام اعتبار بانکی\" کلیک کنید."
 
 msgid "To submit a cash inquiry, please use the"
 msgstr "برای ثبت استعلام نقدی، لطفاً از"
@@ -5052,3 +5056,117 @@ msgstr "ارجاع داده شده به کارشناس"
 
 msgid "Follow Up Scheduled"
 msgstr "پیگیری برنامه‌ریزی شده"
+
+
+msgid "Login to Dashboard"
+msgstr "ورود به داشبورد"
+
+
+msgid "Login with SMS"
+msgstr "ورود با پیامک"
+
+
+msgid "Login with password"
+msgstr "ورود با رمز عبور"
+
+
+msgid "Select login method"
+msgstr "انتخاب روش ورود"
+
+
+msgid "Sending code..."
+msgstr "در حال ارسال کد..."
+
+
+msgid ""
+"Welcome to the management dashboard. Please log in to manage inquiries and "
+"monitor activities."
+msgstr "به داشبورد مدیریت خوش آمدید. لطفاً وارد شوید تا استعلام‌ها را مدیریت و فعالیت‌ها را رصد کنید."
+
+
+msgid "Welcome!"
+msgstr "خوش آمدید!"
+
+
+msgid "Send Code"
+msgstr "ارسال کد"
+
+
+msgid "Verification Code"
+msgstr "کد تأیید"
+
+
+msgid "Verification code"
+msgstr "کد تأیید"
+
+
+msgid "Enter 4-digit code"
+msgstr "کد 4 رقمی را وارد کنید"
+
+
+msgid "Resend in %s seconds"
+msgstr "ارسال مجدد در %s ثانیه"
+
+
+msgid "Verify and Continue"
+msgstr "تأیید و ادامه"
+
+
+msgid "← Back to phone number"
+msgstr "← بازگشت به شماره موبایل"
+
+
+msgid "Verification code sent."
+msgstr "کد تأیید ارسال شد."
+
+
+msgid "Verifying..."
+msgstr "در حال تأیید..."
+
+
+msgid "Please enter reason..."
+msgstr "لطفاً دلیل را وارد کنید..."
+
+
+msgid "Schedule"
+msgstr "زمان‌بندی"
+
+
+msgid "Send"
+msgstr "ارسال"
+
+
+msgid "Installment Inquiries List"
+msgstr "لیست استعلام‌های قسطی"
+
+
+msgid "Inquiry status updated to In Progress."
+msgstr "وضعیت استعلام به در حال انجام تغییر یافت."
+
+
+msgid "Can only schedule follow-up from In Progress, Meeting Scheduled, Referred, or New status."
+msgstr "فقط از وضعیت‌های در حال انجام، جلسه برنامه‌ریزی شده، ارجاع داده شده یا جدید می‌توان پیگیری برنامه‌ریزی کرد."
+
+
+msgid "An error occurred while scheduling the follow-up. Please try again."
+msgstr "خطایی در هنگام برنامه‌ریزی پیگیری بعدی رخ داد. لطفاً دوباره تلاش کنید."
+
+
+msgid "My Inquiries"
+msgstr "استعلام‌های من"
+
+
+msgid "Create Inquiry"
+msgstr "ایجاد استعلام"
+
+
+msgid "Create Installment Inquiry"
+msgstr "ایجاد استعلام قسطی"
+
+
+msgid "Create Cash Inquiry"
+msgstr "ایجاد استعلام نقدی"
+
+
+msgid "Issuer Father's Name"
+msgstr "نام پدر صادرکننده"

@@ -50,23 +50,23 @@ $loan_amount = (int)$total_price - (int)$down_payment;
                             </tr>
                             <tr>
                                 <td class="fw-semibold"><?php esc_html_e('Total Price:', 'maneli-car-inquiry'); ?></td>
-                                <td><span class="badge bg-primary-transparent"><?php echo esc_html(number_format_i18n((int)$total_price)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
+                                <td><span class="badge bg-primary-transparent"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian((int)$total_price) : esc_html(number_format_i18n((int)$total_price)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
                             </tr>
                             <tr>
                                 <td class="fw-semibold"><?php esc_html_e('Down Payment:', 'maneli-car-inquiry'); ?></td>
-                                <td><span class="badge bg-success-transparent"><?php echo esc_html(number_format_i18n((int)$down_payment)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
+                                <td><span class="badge bg-success-transparent"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian((int)$down_payment) : esc_html(number_format_i18n((int)$down_payment)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
                             </tr>
                             <tr>
                                 <td class="fw-semibold"><?php esc_html_e('Loan Amount:', 'maneli-car-inquiry'); ?></td>
-                                <td><span class="badge bg-warning-transparent"><?php echo esc_html(number_format_i18n($loan_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
+                                <td><span class="badge bg-warning-transparent"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($loan_amount) : esc_html(number_format_i18n($loan_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
                             </tr>
                             <tr>
                                 <td class="fw-semibold"><?php esc_html_e('Installment Term:', 'maneli-car-inquiry'); ?></td>
-                                <td><?php echo esc_html($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></td>
+                                <td><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($term_months) : esc_html($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></td>
                             </tr>
                             <tr>
                                 <td class="fw-semibold"><?php esc_html_e('Approx. Installment:', 'maneli-car-inquiry'); ?></td>
-                                <td><span class="badge bg-info-transparent"><?php echo esc_html(number_format_i18n((int)$installment_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
+                                <td><span class="badge bg-info-transparent"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian((int)$installment_amount) : esc_html(number_format_i18n((int)$installment_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
                             </tr>
                         </tbody>
                     </table>
