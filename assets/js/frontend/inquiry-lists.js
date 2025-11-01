@@ -830,17 +830,16 @@ function toPersianNumber(num) {
         modal.fadeIn(300);
 
         // Initialize datepicker if not already initialized
-        if (!datePicker.data('kamadatepicker-initialized')) {
-            if (typeof kamadatepicker === 'function') {
-                kamadatepicker('tracking-date-picker', {
-                    buttonsColor: "red",
-                    forceFarsiDigits: true,
-                    markToday: true,
-                    markHolidays: true,
-                    highlightSelectedDay: true,
-                    sync: true
+        if (!datePicker.data('pdp-init')) {
+            if (typeof $.fn.persianDatepicker !== 'undefined') {
+                datePicker.persianDatepicker({
+                    formatDate: 'YYYY/MM/DD',
+                    persianNumbers: true, // Display Persian digits
+                    autoClose: true,
+                    initialValue: false,
+                    observer: false
                 });
-                datePicker.data('kamadatepicker-initialized', true);
+                datePicker.attr('data-pdp-init', 'true');
             }
         }
 
@@ -1755,10 +1754,11 @@ function toPersianNumber(num) {
                 cancelButtonText: getText('cancel_button', 'Cancel'),
                 confirmButtonColor: '#28a745',
                 didOpen: () => {
-                    if (typeof kamadatepicker !== 'undefined') {
-                        kamadatepicker('swal-meeting-date', {
-                            buttonsColor: "red",
-                            forceFarsiDigits: true
+                    if (typeof $.fn.persianDatepicker !== 'undefined') {
+                        $('#swal-meeting-date').persianDatepicker({
+                            formatDate: 'YYYY/MM/DD',
+                            persianNumbers: true,
+                            autoClose: true
                         });
                     }
                 },
@@ -1793,10 +1793,11 @@ function toPersianNumber(num) {
                 confirmButtonColor: '#ffc107',
                 width: '600px',
                 didOpen: () => {
-                    if (typeof kamadatepicker !== 'undefined') {
-                        kamadatepicker('swal-followup-date', {
-                            buttonsColor: "red",
-                            forceFarsiDigits: true
+                    if (typeof $.fn.persianDatepicker !== 'undefined') {
+                        $('#swal-followup-date').persianDatepicker({
+                            formatDate: 'YYYY/MM/DD',
+                            persianNumbers: true,
+                            autoClose: true
                         });
                     }
                 },
@@ -2170,10 +2171,11 @@ function toPersianNumber(num) {
                 cancelButtonText: getText('cancel_button', 'Cancel'),
                 confirmButtonColor: '#28a745',
                 didOpen: () => {
-                    if (typeof kamadatepicker !== 'undefined') {
-                        kamadatepicker('swal-meeting-date', {
-                            buttonsColor: "red",
-                            forceFarsiDigits: true
+                    if (typeof $.fn.persianDatepicker !== 'undefined') {
+                        $('#swal-meeting-date').persianDatepicker({
+                            formatDate: 'YYYY/MM/DD',
+                            persianNumbers: true,
+                            autoClose: true
                         });
                     }
                 },
@@ -2252,10 +2254,11 @@ function toPersianNumber(num) {
                 confirmButtonColor: '#17a2b8',
                 width: '600px',
                 didOpen: () => {
-                    if (typeof kamadatepicker !== 'undefined') {
-                        kamadatepicker('swal-cash-followup-date', {
-                            buttonsColor: "red",
-                            forceFarsiDigits: true
+                    if (typeof $.fn.persianDatepicker !== 'undefined') {
+                        $('#swal-cash-followup-date').persianDatepicker({
+                            formatDate: 'YYYY/MM/DD',
+                            persianNumbers: true,
+                            autoClose: true
                         });
                     }
                 },

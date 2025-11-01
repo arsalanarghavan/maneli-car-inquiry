@@ -40,17 +40,17 @@ if (!wp_script_is('select2', 'enqueued')) {
     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
 }
 
-// Enqueue Persian Datepicker
-if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
-    wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
+// Enqueue Persian Datepicker - use persianDatepicker like in expert reports
+if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
+    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
 }
-if (!wp_style_is('maneli-datepicker-theme', 'enqueued')) {
-    wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
+if (!wp_style_is('maneli-persian-datepicker', 'enqueued')) {
+    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
 }
 
 // Enqueue inquiry form script (for datepicker initialization)
 if (!wp_script_is('maneli-inquiry-form-js', 'enqueued')) {
-    wp_enqueue_script('maneli-inquiry-form-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js', ['jquery', 'maneli-jalali-datepicker'], '1.0.0', true);
+    wp_enqueue_script('maneli-inquiry-form-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js', ['jquery', 'maneli-persian-datepicker'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'), true);
 }
 
 // Enqueue expert panel JS (for car search and calculator)

@@ -378,13 +378,14 @@ class Maneli_Dashboard_Handler {
                 wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
                 wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
                 
-                // Try to enqueue datepicker - but make it optional
-                $datepicker_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/vendor/kamadatepicker.min.js';
+                // Use persianDatepicker (same as in expert reports and inquiry forms)
                 $datepicker_enqueued = false;
-                if (file_exists($datepicker_file)) {
-                    wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', ['jquery'], '2.1.0', true);
-                    wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
+                // Check if persianDatepicker is already enqueued by dashboard handler
+                if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
+                    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
                     $datepicker_enqueued = true;
+                } else {
+                    $datepicker_enqueued = true; // Already enqueued
                 }
                 
                 // Debug script first (loads before everything, in header)
@@ -394,7 +395,7 @@ class Maneli_Dashboard_Handler {
                 // Make datepicker optional - only add if it was successfully enqueued
                 $inquiry_lists_deps = ['jquery', 'sweetalert2', 'select2'];
                 if ($datepicker_enqueued) {
-                    $inquiry_lists_deps[] = 'maneli-jalali-datepicker';
+                    $inquiry_lists_deps[] = 'maneli-persian-datepicker';
                 }
                 
                 wp_enqueue_script('maneli-inquiry-lists-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js', $inquiry_lists_deps, '1.0.2', true);

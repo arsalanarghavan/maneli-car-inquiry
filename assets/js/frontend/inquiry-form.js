@@ -7,7 +7,7 @@
  * 2. Expert New Inquiry Form (expert-new-inquiry-form.php)
  * 3. User Edit Forms (form-edit-user.php and admin user profile)
  *
- * @version 1.0.3 (Added Persian digit conversion for form numbers)
+ * @version 1.2.0 (Persian digit conversion and validation fixes)
  */
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -93,53 +93,100 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- 1. Datepicker Initialization ---
-    // Check if the kamadatepicker library is available.
-    if (typeof kamadatepicker !== 'undefined') {
-        
-        // Target all individual IDs used in various forms (customer/expert) 
-        // AND the class used in admin profile/user edit forms.
-        const datepickerSelectors = [
-            '#buyer_birth_date',
-            '#issuer_birth_date',
-            '#expert_buyer_birth_date',
-            '#expert_issuer_birth_date',
-            // Target used in form-edit-user.php and class-user-profile.php
-            '#birth_date', 
-            // Target used generally in class-user-profile.php
-            '.maneli-datepicker'
-        ];
-
-        datepickerSelectors.forEach(selector => {
-            document.querySelectorAll(selector).forEach(element => {
-                // Ensure the element hasn't been initialized by another selector (e.g. if it has an ID and the class)
-                if (element.hasAttribute('data-kdp-init')) {
-                    return;
-                }
-                
-                // Kamadatepicker requires element ID as string, not DOM element
-                // For elements with ID, use ID; for elements without ID but with class, use element reference
-                if (element.id) {
-                    kamadatepicker(element.id, {
-                        bidi: true, // Enable bidirectional support for RTL
-                        placeholder: datepickerPlaceholder, // FIX: Use localized string
-                        format: 'YYYY/MM/DD'
+    // --- 0.7 Convert Persian digits back to English before form submission ---
+    // Also fix pattern validation for Persian digits
+    document.querySelectorAll('form').forEach(form => {
+        // Only handle forms that contain numeric fields
+        const hasNumericFields = form.querySelectorAll(numericFields.join(',')).length > 0;
+        if (hasNumericFields) {
+            form.addEventListener('submit', function(e) {
+                // Convert all Persian digits to English before submission
+                numericFields.forEach(selector => {
+                    const elements = form.querySelectorAll(selector);
+                    elements.forEach(element => {
+                        if (element.value) {
+                            element.value = toEnglishDigits(element.value);
+                        }
                     });
-                } else if (selector.startsWith('#')) {
-                    // If selector was an ID but element doesn't have one, this shouldn't happen
-                    console.warn('Datepicker element without ID:', element);
-                } else {
-                    // For elements without ID (e.g. class selector), create temporary ID
-                    const tempId = 'maneli_dp_' + Math.random().toString(36).substr(2, 9);
-                    element.id = tempId;
-                    kamadatepicker(tempId, {
-                        bidi: true,
-                        placeholder: datepickerPlaceholder,
-                        format: 'YYYY/MM/DD'
-                    });
-                }
-                element.setAttribute('data-kdp-init', 'true'); // Mark as initialized
+                });
             });
+            
+            // Fix pattern validation for fields with Persian digits
+            // Store original pattern, then validate in JS
+            form.querySelectorAll('input[pattern]').forEach(input => {
+                // Check if this input is in our numeric fields list
+                const inputId = input.getAttribute('id');
+                const isNumericField = numericFields.some(sel => {
+                    const selectorWithoutHash = sel.replace('#', '');
+                    return inputId === selectorWithoutHash;
+                });
+                
+                if (isNumericField) {
+                    const originalPattern = input.getAttribute('pattern');
+                    // Remove pattern to allow Persian digits in HTML5 validation
+                    input.removeAttribute('pattern');
+                    
+                    // Add custom validation
+                    const validationHandler = function(e) {
+                        const englishValue = toEnglishDigits(this.value);
+                        this.setCustomValidity('');
+                        
+                        // Convert to English and check length
+                        if (originalPattern === '\\d{10}' && englishValue.length !== 10) {
+                            this.setCustomValidity('کد ملی باید ۱۰ رقم باشد');
+                            return;
+                        }
+                    };
+                    
+                    input.addEventListener('invalid', validationHandler);
+                    input.addEventListener('blur', validationHandler);
+                }
+            });
+        }
+    });
+
+    // --- 1. Datepicker Initialization ---
+    // Wait for jQuery and check if persianDatepicker library is available
+    if (typeof jQuery !== 'undefined') {
+        jQuery(document).ready(function($) {
+            // Check if persianDatepicker plugin is available
+            if (typeof $.fn.persianDatepicker !== 'undefined') {
+                
+                // Target all individual IDs used in various forms (customer/expert) 
+                // AND the class used in admin profile/user edit forms.
+                const datepickerSelectors = [
+                    '#buyer_birth_date',
+                    '#issuer_birth_date',
+                    '#expert_buyer_birth_date',
+                    '#expert_issuer_birth_date',
+                    // Target used in form-edit-user.php and class-user-profile.php
+                    '#birth_date', 
+                    // Target used generally in class-user-profile.php
+                    '.maneli-datepicker'
+                ];
+
+                datepickerSelectors.forEach(selector => {
+                    $(selector).each(function() {
+                        var $element = $(this);
+                        
+                        // Ensure the element hasn't been initialized
+                        if ($element.attr('data-pdp-init')) {
+                            return;
+                        }
+                        
+                        // Initialize persianDatepicker (jQuery plugin - works with jQuery objects)
+                        $element.persianDatepicker({
+                            formatDate: 'YYYY/MM/DD',
+                            persianNumbers: true, // Display Persian digits
+                            autoClose: true,
+                            initialValue: false,
+                            observer: false
+                        });
+                        
+                        $element.attr('data-pdp-init', 'true'); // Mark as initialized
+                    });
+                });
+            }
         });
     }
 

@@ -40,14 +40,14 @@ class Maneli_Expert_Panel {
         }
         
         // Enqueue datepicker for birth date fields
-        wp_enqueue_script('maneli-jalali-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js', [], '2.1.0', true);
-        wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
+        wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
+        wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
         
         // Enqueue the expert panel JavaScript file
         wp_enqueue_script(
             'maneli-expert-panel-js',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js',
-            ['jquery', 'select2', 'maneli-jalali-datepicker'],
+            ['jquery', 'select2', 'maneli-persian-datepicker'],
             '1.0.2',
             true
         );

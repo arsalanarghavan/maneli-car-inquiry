@@ -43,13 +43,19 @@
             console.log('✅ maneliCashReport:', maneliCashReport);
     
             // Initialize datepicker
-            if ($('.maneli-datepicker').length && typeof kamaDatepicker !== 'undefined') {
-                kamaDatepicker('meeting-date', {
-                    placeholder: (maneliCashReport.text && maneliCashReport.text.select_date) ? maneliCashReport.text.select_date : 'Select Date',
-                    twodigit: true,
-                    closeAfterSelect: true,
-                    nextButtonIcon: 'la la-angle-left',
-                    previousButtonIcon: 'la la-angle-right'
+            if ($('.maneli-datepicker').length && typeof $.fn.persianDatepicker !== 'undefined') {
+                $('.maneli-datepicker').each(function() {
+                    var $el = $(this);
+                    if (!$el.attr('data-pdp-init')) {
+                        $el.persianDatepicker({
+                            formatDate: 'YYYY/MM/DD',
+                            persianNumbers: true,
+                            autoClose: true,
+                            initialValue: false,
+                            observer: false
+                        });
+                        $el.attr('data-pdp-init', 'true');
+                    }
                 });
             }
     

@@ -543,11 +543,12 @@ if ($need_inquiry_scripts) {
         if (file_exists($form_wizard_file)) {
             $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/form-wizard.js?v=' . filemtime($form_wizard_file)) . '"></script>' . PHP_EOL;
         }
-        // Datepicker for identity form
-        $datepicker_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/vendor/kamadatepicker.min.js';
-        if (file_exists($datepicker_file)) {
-            $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css') . '">' . PHP_EOL;
-            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/vendor/kamadatepicker.min.js') . '"></script>' . PHP_EOL;
+        // Datepicker for identity form - use persianDatepicker like in expert reports
+        $datepicker_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/persianDatepicker-default.css';
+        $datepicker_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/persianDatepicker.min.js';
+        if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
+            $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
         }
         // Inquiry form JS
         $inquiry_form_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';
