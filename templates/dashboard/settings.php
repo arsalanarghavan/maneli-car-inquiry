@@ -3,514 +3,419 @@
 /**
  * Settings Page
  * Only accessible by Administrators
+ * Redesigned to match profile-settings.html style
  */
+
+// Helper function to convert numbers to Persian
+if (!function_exists('persian_numbers')) {
+    function persian_numbers($str) {
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        return str_replace($english, $persian, $str);
+    }
+}
 
 // Permission check - Only Admin can access
 if (!current_user_can('manage_maneli_inquiries')) {
-    ?>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <strong>دسترسی محدود!</strong> شما به این صفحه دسترسی ندارید.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    </div>
-    <?php
-    return;
+    wp_redirect(home_url('/dashboard'));
+    exit;
 }
 
 $settings_page_handler = new Maneli_Settings_Page();
 $all_settings = $settings_page_handler->get_all_settings_public();
 $options = get_option('maneli_inquiry_all_options', []);
+
+// Tab mapping to Persian names
+$tab_persian_names = [
+    'finance' => esc_html__('Finance & Calculator', 'maneli-car-inquiry'),
+    'gateways' => esc_html__('Payment Gateways', 'maneli-car-inquiry'),
+    'authentication' => esc_html__('Authentication', 'maneli-car-inquiry'),
+    'sms' => esc_html__('SMS', 'maneli-car-inquiry'),
+    'cash_inquiry' => esc_html__('Cash Inquiry', 'maneli-car-inquiry'),
+    'installment' => esc_html__('Installment Inquiry', 'maneli-car-inquiry'),
+    'experts' => esc_html__('Experts', 'maneli-car-inquiry'),
+    'finotex' => esc_html__('Finotex', 'maneli-car-inquiry'),
+    'meetings' => esc_html__('Meetings & Calendar', 'maneli-car-inquiry')
+];
 ?>
-
-<div class="row">
-    <div class="col-xl-12">
-        <?php if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true') : ?>
-            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
-                <i class="la la-check-circle fs-20 me-2"></i>
-                <div class="flex-grow-1">
-                    <strong>موفقیت!</strong> تنظیمات با موفقیت ذخیره شد.
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="main-content app-content">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+            <div>
+                <nav>
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('System Settings', 'maneli-car-inquiry'); ?></li>
+                    </ol>
+                </nav>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Maneli Car System Settings', 'maneli-car-inquiry'); ?></h1>
             </div>
-        <?php endif; ?>
+        </div>
+        <!-- Page Header Close -->
 
-        <div class="card custom-card">
-            <div class="card-header">
-                <div class="card-title d-flex align-items-center">
-                    <i class="la la-cogs me-2 fs-20"></i>
-                    <span>تنظیمات سیستم مانلی خودرو</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="settings-form">
-                    <input type="hidden" name="action" value="maneli_save_frontend_settings">
-                    <?php wp_nonce_field('maneli_save_frontend_settings_nonce'); ?>
-                    <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
-                    
-                    <!-- Tabs Navigation - Modern Style -->
-                    <ul class="nav nav-tabs nav-tabs-header mb-0 border-bottom" id="settingsTabs" role="tablist">
-                        <?php 
-                        $first = true;
-                        $tab_icons = [
-                            'theme' => 'la-palette',
-                            'general' => 'la-cog',
-                            'payment' => 'la-credit-card',
-                            'sms' => 'la-sms',
-                            'cash_inquiry' => 'la-dollar-sign',
-                            'api' => 'la-plug',
-                            'loan' => 'la-calculator',
-                            'expert' => 'la-user-tie',
-                            'rejection' => 'la-times-circle'
-                        ];
-                        foreach ($all_settings as $tab_key => $tab_data) : 
-                            $icon = $tab_icons[$tab_key] ?? ($tab_data['icon'] ?? 'la-cog');
-                        ?>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link <?php echo $first ? 'active' : ''; ?>" 
-                                        id="<?php echo esc_attr($tab_key); ?>-tab" 
-                                        data-bs-toggle="tab" 
-                                        data-bs-target="#<?php echo esc_attr($tab_key); ?>" 
-                                        type="button" 
-                                        role="tab">
-                                    <i class="la <?php echo esc_attr($icon); ?> me-2"></i>
-                                    <?php echo esc_html($tab_data['title']); ?>
-                                </button>
-                            </li>
-                        <?php 
-                        $first = false;
-                        endforeach; 
-                        ?>
-                    </ul>
+        <!-- Start::row -->
+        <div class="row gap-3 justify-content-center">
+            <div class="col-xl-9">
+                <?php if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true') : ?>
+                    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                        <i class="la la-check-circle fs-20 me-2"></i>
+                        <div class="flex-grow-1">
+                            <strong><?php esc_html_e('Success!', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('Settings saved successfully.', 'maneli-car-inquiry'); ?>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
 
-                    <!-- Tabs Content -->
-                    <div class="tab-content p-4 bg-white" id="settingsTabsContent" style="min-height: 400px;">
-                        <?php 
-                        $first_tab = true;
-                        foreach ($all_settings as $tab_key => $tab_data) : 
-                        ?>
-                            <div class="tab-pane fade <?php echo $first_tab ? 'show active' : ''; ?>" 
-                                 id="<?php echo esc_attr($tab_key); ?>" 
-                                 role="tabpanel">
-                                
-                                <?php if (!empty($tab_data['sections'])) : ?>
-                                    <?php foreach ($tab_data['sections'] as $section_key => $section) : ?>
-                                        <div class="card border mb-4 shadow-sm">
-                                            <div class="card-header bg-light border-bottom">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="la la-folder-open text-primary me-2 fs-18"></i>
-                                                    <div class="flex-grow-1">
-                                                        <h5 class="card-title mb-0 fw-semibold"><?php echo esc_html($section['title']); ?></h5>
+                <div class="card custom-card">
+                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="settings-form">
+                        <input type="hidden" name="action" value="maneli_save_frontend_settings">
+                        <?php wp_nonce_field('maneli_save_frontend_settings_nonce'); ?>
+                        <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+                        
+                        <!-- Tabs Navigation -->
+                        <ul class="nav nav-tabs tab-style-8 scaleX rounded m-3 profile-settings-tab gap-2" id="settingsTabs" role="tablist">
+                            <?php 
+                            $first = true;
+                            $tab_icons = [
+                                'finance' => 'la-calculator',
+                                'gateways' => 'la-credit-card',
+                                'authentication' => 'la-shield-alt',
+                                'sms' => 'la-sms',
+                                'cash_inquiry' => 'la-dollar-sign',
+                                'installment' => 'la-car',
+                                'experts' => 'la-user-tie',
+                                'finotex' => 'la-university',
+                                'meetings' => 'la-calendar'
+                            ];
+                            foreach ($all_settings as $tab_key => $tab_data) : 
+                                $icon = $tab_icons[$tab_key] ?? 'la-cog';
+                                $persian_title = isset($tab_persian_names[$tab_key]) ? $tab_persian_names[$tab_key] : $tab_data['title'];
+                            ?>
+                                <li class="nav-item me-1" role="presentation">
+                                    <button class="nav-link px-4 bg-primary-transparent <?php echo $first ? 'active' : ''; ?>" 
+                                            id="<?php echo esc_attr($tab_key); ?>-tab" 
+                                            data-bs-toggle="tab" 
+                                            data-bs-target="#<?php echo esc_attr($tab_key); ?>-pane" 
+                                            type="button" 
+                                            role="tab" 
+                                            aria-controls="<?php echo esc_attr($tab_key); ?>-pane" 
+                                            aria-selected="<?php echo $first ? 'true' : 'false'; ?>">
+                                        <i class="la <?php echo esc_attr($icon); ?> me-2"></i>
+                                        <?php echo esc_html($persian_title); ?>
+                                    </button>
+                                </li>
+                            <?php 
+                            $first = false;
+                            endforeach; 
+                            ?>
+                        </ul>
+
+                        <!-- Tabs Content -->
+                        <div class="p-3 border-bottom border-top border-block-end-dashed tab-content">
+                            <?php 
+                            $first_tab = true;
+                            foreach ($all_settings as $tab_key => $tab_data) : 
+                                $persian_title = isset($tab_persian_names[$tab_key]) ? $tab_persian_names[$tab_key] : $tab_data['title'];
+                            ?>
+                                <div class="tab-pane <?php echo $first_tab ? 'show active' : ''; ?> overflow-hidden p-0 border-0" 
+                                     id="<?php echo esc_attr($tab_key); ?>-pane" 
+                                     role="tabpanel" 
+                                     aria-labelledby="<?php echo esc_attr($tab_key); ?>-tab" 
+                                     tabindex="0">
+                                    <div class="p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
+                                            <div class="fw-semibold d-block fs-15"><?php echo esc_html($persian_title); ?>:</div>
+                                            <button type="reset" class="btn btn-primary btn-sm">
+                                                <i class="la la-undo me-1"></i>بازگردانی تغییرات
+                                            </button>
+                                        </div>
+                                        
+                                        <?php if (!empty($tab_data['sections'])) : ?>
+                                            <?php foreach ($tab_data['sections'] as $section_key => $section) : ?>
+                                                <?php if (!empty($section['fields']) || !empty($section['desc'])): ?>
+                                                    <div class="mb-4">
+                                                        <?php if (!empty($section['title'])): ?>
+                                                            <h6 class="fw-semibold mb-3 pb-2 border-bottom">
+                                                                <i class="la la-folder-open me-2 text-primary"></i>
+                                                                <?php echo esc_html($section['title']); ?>
+                                                            </h6>
+                                                        <?php endif; ?>
+                                                        
                                                         <?php if (!empty($section['desc'])) : ?>
-                                                            <p class="text-muted mb-0 mt-1 fs-12"><?php echo wp_kses_post($section['desc']); ?></p>
+                                                            <p class="text-muted fs-12 mb-3"><?php echo wp_kses_post($section['desc']); ?></p>
+                                                        <?php endif; ?>
+                                                        
+                                                        <?php if (!empty($section['fields'])) : ?>
+                                                            <div class="row gy-3">
+                                                                <?php foreach ($section['fields'] as $field) : ?>
+                                                                    <?php if ($field['type'] === 'switch'): ?>
+                                                                        <!-- Switch field with toggle style from profile-settings -->
+                                                                        <div class="col-xl-12">
+                                                                            <div class="d-flex align-items-top justify-content-between mt-3">
+                                                                                <div class="mail-notification-settings">
+                                                                                    <p class="fs-14 mb-1 fw-medium"><?php echo esc_html($field['label']); ?></p>
+                                                                                    <?php if (!empty($field['desc'])): ?>
+                                                                                        <p class="fs-12 mb-0 text-muted"><?php echo wp_kses_post($field['desc']); ?></p>
+                                                                                    <?php endif; ?>
+                                                                                </div>
+                                                                                <?php 
+                                                                                $value = $options[$field['name']] ?? ($field['default'] ?? '0');
+                                                                                $field_name = "maneli_inquiry_all_options[" . $field['name'] . "]";
+                                                                                $toggle_class = ($value == '1') ? 'toggle on toggle-success' : 'toggle toggle-success';
+                                                                                ?>
+                                                                                <div class="toggle-wrapper">
+                                                                                    <input type="hidden" name="<?php echo esc_attr($field_name); ?>" value="0">
+                                                                                    <input type="checkbox" 
+                                                                                           name="<?php echo esc_attr($field_name); ?>" 
+                                                                                           id="<?php echo esc_attr($settings_page_handler->get_options_name() . '_' . $field['name']); ?>" 
+                                                                                           value="1" 
+                                                                                           class="toggle-checkbox d-none" 
+                                                                                           <?php checked('1', $value); ?>>
+                                                                                    <label for="<?php echo esc_attr($settings_page_handler->get_options_name() . '_' . $field['name']); ?>" 
+                                                                                           class="<?php echo esc_attr($toggle_class); ?> mb-0 float-sm-end" 
+                                                                                           style="cursor: pointer;">
+                                                                                        <span></span>
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    <?php else: ?>
+                                                                        <!-- Regular field - exactly like profile-settings.html -->
+                                                                        <div class="col-xl-<?php echo ($field['type'] === 'textarea') ? '12' : '6'; ?>">
+                                                                            <label for="<?php echo esc_attr($settings_page_handler->get_options_name() . '_' . $field['name']); ?>" class="form-label"><?php echo esc_html($field['label']); ?> :</label>
+                                                                            <?php 
+                                                                            // Render field using handler method (handles desc internally)
+                                                                            $settings_page_handler->render_field_html($field);
+                                                                            ?>
+                                                                        </div>
+                                                                    <?php endif; ?>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        <?php elseif ($tab_key === 'experts' && $section_key === 'maneli_experts_list_section'): ?>
+                                                            <!-- Experts List -->
+                                                            <?php 
+                                                            $experts_list = get_users([
+                                                                'role' => 'maneli_expert',
+                                                                'orderby' => 'display_name',
+                                                                'order' => 'ASC'
+                                                            ]);
+                                                            ?>
+                                                            <?php if (!empty($experts_list)): ?>
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-hover table-bordered">
+                                                                        <thead class="table-light">
+                                                                            <tr>
+                                                                                <th><?php esc_html_e('Expert Name', 'maneli-car-inquiry'); ?></th>
+                                                                                <th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></th>
+                                                                                <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                                                                <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <?php foreach ($experts_list as $expert): 
+                                                                                $mobile_number = get_user_meta($expert->ID, 'mobile_number', true);
+                                                                                $is_active = get_user_meta($expert->ID, 'expert_active', true) !== 'no';
+                                                                            ?>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                        <span class="fw-medium"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($expert->display_name)) : esc_html($expert->display_name); ?></span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <?php if (!empty($mobile_number)): ?>
+                                                                                            <a href="tel:<?php echo esc_attr($mobile_number); ?>" class="text-primary text-decoration-none">
+                                                                                                <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($mobile_number)) : esc_html($mobile_number); ?>
+                                                                                            </a>
+                                                                                        <?php else: ?>
+                                                                                            <span class="text-muted">-</span>
+                                                                                        <?php endif; ?>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <?php if ($is_active): ?>
+                                                                                            <span class="badge bg-success"><?php esc_html_e('Active', 'maneli-car-inquiry'); ?></span>
+                                                                                        <?php else: ?>
+                                                                                            <span class="badge bg-danger"><?php esc_html_e('Inactive', 'maneli-car-inquiry'); ?></span>
+                                                                                        <?php endif; ?>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <a href="<?php echo esc_url(home_url('/dashboard/experts?view_expert=' . $expert->ID)); ?>" class="btn btn-sm btn-primary-light" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                                                            <i class="la la-eye"></i>
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            <?php endforeach; ?>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <?php else: ?>
+                                                                <div class="alert alert-info">
+                                                                    <i class="la la-info-circle me-2"></i>
+                                                                    <?php esc_html_e('No experts are currently registered.', 'maneli-car-inquiry'); ?>
+                                                                </div>
+                                                            <?php endif; ?>
                                                         <?php endif; ?>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body bg-white">
-                                                <div class="row g-4">
-                                                    <?php if (!empty($section['fields'])) : ?>
-                                                        <?php foreach ($section['fields'] as $field) : ?>
-                                                            <div class="col-lg-<?php echo ($field['type'] === 'textarea') ? '12' : '6'; ?> col-md-<?php echo ($field['type'] === 'textarea') ? '12' : '12'; ?>">
-                                                                <div class="form-group-modern">
-                                                                    <?php 
-                                                                    // Render field using helper
-                                                                    $settings_page_handler->render_field_html($field, $options);
-                                                                    ?>
-                                                                </div>
-                                                            </div>
-                                                        <?php endforeach; ?>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </div>
-                        <?php 
-                        $first_tab = false;
-                        endforeach; 
-                        ?>
-                    </div>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php 
+                            $first_tab = false;
+                            endforeach; 
+                            ?>
+                        </div>
 
-                    <!-- Action Buttons - Sticky Footer -->
-                    <div class="card-footer bg-light border-top sticky-bottom">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                            <div class="text-muted">
-                                <i class="la la-info-circle me-1"></i>
-                                <small>تغییرات خود را ذخیره کنید تا اعمال شوند.</small>
-                            </div>
-                            <div class="d-flex gap-2">
+                        <!-- Footer with Save Button -->
+                        <div class="card-footer border-top-0">
+                            <div class="btn-list float-end">
                                 <button type="reset" class="btn btn-light btn-wave">
                                     <i class="la la-undo me-1"></i>
-                                    بازنشانی
+                                    بازنشانی تغییرات
                                 </button>
-                                <button type="submit" class="btn btn-primary btn-wave px-4">
+                                <button type="submit" class="btn btn-primary btn-wave">
                                     <i class="la la-save me-1"></i>
-                                    ذخیره تمام تنظیمات
+                                    ذخیره تغییرات
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
+        <!-- End::row -->
     </div>
 </div>
-<!-- End::row -->
 
 <style>
-/* ═══════════════════════════════════════════════════════════
-   Modern Settings Page Styles
-   ═══════════════════════════════════════════════════════════ */
-
-/* Tab Navigation */
-.nav-tabs-header {
-    background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
-    padding: 10px 15px 0;
-    border-radius: 8px 8px 0 0;
+.tab-style-8 .nav-link.active {
+    background-color: var(--primary-color) !important;
+    color: white !important;
 }
 
-.nav-tabs-header .nav-link {
-    border: none;
-    border-bottom: 3px solid transparent;
-    color: #6c757d;
-    padding: 12px 20px;
-    margin: 0 5px;
-    transition: all 0.3s ease;
-    background: transparent;
-    border-radius: 8px 8px 0 0;
-    font-weight: 500;
-}
-
-.nav-tabs-header .nav-link:hover {
-    color: var(--primary-color, #007cba);
-    background: rgba(var(--primary-rgb, 0, 124, 186), 0.05);
-    border-bottom-color: rgba(var(--primary-rgb, 0, 124, 186), 0.3);
-}
-
-.nav-tabs-header .nav-link.active {
-    color: var(--primary-color, #007cba);
-    background: white;
-    border-bottom-color: var(--primary-color, #007cba);
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.nav-tabs-header .nav-link i {
-    transition: transform 0.3s ease;
-}
-
-.nav-tabs-header .nav-link:hover i,
-.nav-tabs-header .nav-link.active i {
-    transform: scale(1.1);
-}
-
-/* Tab Content */
-.tab-content {
-    border-radius: 0 0 8px 8px;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Section Cards */
-.card.border.shadow-sm {
-    border-radius: 8px;
-    overflow: hidden;
+.tab-style-8 .nav-link {
     transition: all 0.3s ease;
 }
 
-.card.border.shadow-sm:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-    transform: translateY(-2px);
+.tab-style-8 .nav-link:hover:not(.active) {
+    background-color: rgba(var(--primary-rgb), 0.1) !important;
 }
 
-.card-header.bg-light {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-}
-
-/* Form Fields Modern Style */
-.form-group-modern {
-    position: relative;
-}
-
-.form-group-modern label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
+/* Form Label - exactly like profile-settings.html */
+.form-label {
+    margin-bottom: 0.5rem;
+    font-weight: 400;
     color: #495057;
-    font-size: 14px;
 }
 
-.form-group-modern label i {
-    color: var(--primary-color, #007cba);
-    margin-left: 5px;
-}
-
-.form-group-modern input[type="text"],
-.form-group-modern input[type="number"],
-.form-group-modern input[type="email"],
-.form-group-modern input[type="url"],
-.form-group-modern textarea,
-.form-group-modern select {
+/* Form Controls - exactly like profile-settings.html */
+.form-control, textarea, select.form-control {
+    display: block;
     width: 100%;
-    padding: 10px 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    background: white;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.form-group-modern input:focus,
-.form-group-modern textarea:focus,
-.form-group-modern select:focus {
-    outline: none;
-    border-color: var(--primary-color, #007cba);
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 0, 124, 186), 0.1);
-    background: #fff;
+.form-control:focus, textarea:focus, select.form-control:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-.form-group-modern textarea {
-    min-height: 100px;
+.form-control::placeholder {
+    color: #6c757d;
+    opacity: 1;
+}
+
+textarea.form-control {
+    min-height: calc(1.5em + 0.75rem + 2px);
     resize: vertical;
 }
 
-.form-group-modern .form-text {
-    display: block;
-    margin-top: 6px;
-    font-size: 12px;
-    color: #6c757d;
-    line-height: 1.4;
-}
-
-.form-group-modern .form-text i {
-    color: #007cba;
-    margin-left: 3px;
-}
-
-/* Checkbox/Radio Styling */
-.form-group-modern input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    accent-color: var(--primary-color, #007cba);
-}
-
-.form-group-modern label.checkbox-label {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
+/* Description text style */
+.description {
+    margin-top: 0.25rem;
     margin-bottom: 0;
+    font-size: 0.75rem;
+    color: #6c757d;
 }
 
-/* Number Input Arrows */
-.form-group-modern input[type="number"] {
-    -moz-appearance: textfield;
+/* Toggle Switch Styles */
+.toggle-wrapper .toggle-checkbox {
+    display: none;
 }
 
-.form-group-modern input[type="number"]::-webkit-outer-spin-button,
-.form-group-modern input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+.toggle-wrapper .toggle-checkbox:checked + label.toggle {
+    background-color: var(--success-color, #10b981);
 }
 
-/* Sticky Footer */
-.sticky-bottom {
-    position: sticky;
-    bottom: 0;
-    z-index: 100;
-    margin: 0 -1.5rem -1.5rem;
-    padding: 15px 25px;
-    background: linear-gradient(to top, #ffffff 0%, #f8f9fa 100%);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+.toggle-wrapper .toggle-checkbox:checked + label.toggle.on {
+    background-color: var(--success-color, #10b981);
 }
 
-/* Submit Button Enhancement */
+.toggle-wrapper label.toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+
+.border-bottom {
+    border-bottom: 2px solid #e9ecef !important;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
 .btn-wave {
     position: relative;
     overflow: hidden;
 }
 
-.btn-wave::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.btn-wave:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-/* Responsive Tabs */
-@media (max-width: 768px) {
-    .nav-tabs-header .nav-link {
-        padding: 10px 12px;
-        font-size: 13px;
-        margin: 0 2px;
-    }
-    
-    .nav-tabs-header .nav-link i {
-        display: none;
-    }
-    
-    .sticky-bottom {
-        margin: 0;
-        padding: 12px 15px;
-    }
-}
-
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #6c757d;
-}
-
-.empty-state i {
-    font-size: 64px;
-    color: #dee2e6;
-    margin-bottom: 20px;
-}
-
-/* Field Groups */
-.form-group-modern + .form-group-modern {
-    margin-top: 0;
-}
-
-/* Input Group Enhancement */
-.input-group-modern {
-    position: relative;
-}
-
-.input-group-modern .input-group-text {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 2px solid #e9ecef;
-    color: #495057;
-}
-
-/* Card Section Animation */
-.card.border.mb-4 {
-    animation: slideInUp 0.4s ease;
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Tooltips */
-[data-bs-toggle="tooltip"] {
-    cursor: help;
-}
-
-/* Color Inputs */
-.form-group-modern input[type="color"] {
-    height: 45px;
-    padding: 5px;
-    cursor: pointer;
-}
-
-/* File Upload */
-.form-group-modern input[type="file"] {
-    padding: 8px;
-    cursor: pointer;
-}
-
-.form-group-modern input[type="file"]::-webkit-file-upload-button {
-    background: var(--primary-color, #007cba);
-    color: white;
-    border: none;
-    padding: 6px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.form-group-modern input[type="file"]::-webkit-file-upload-button:hover {
-    background: var(--primary-hover, #006ba1);
-}
-
-/* Section Icons */
-.card-header i.la-folder-open {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-}
-
-/* Help Text Enhancement */
-.form-text.text-muted {
-    background: #f8f9fa;
-    padding: 8px 12px;
-    border-radius: 4px;
-    border-right: 3px solid var(--primary-color, #007cba);
-    margin-top: 8px;
-}
-
-/* Select Dropdown */
-.form-group-modern select {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: left 0.75rem center;
-    background-size: 16px 12px;
-    padding-left: 2.5rem;
-}
-
-/* Success/Error States */
-.form-group-modern.has-success input,
-.form-group-modern.has-success textarea,
-.form-group-modern.has-success select {
-    border-color: #28a745;
-}
-
-.form-group-modern.has-error input,
-.form-group-modern.has-error textarea,
-.form-group-modern.has-error select {
-    border-color: #dc3545;
-}
-
-/* Loading State */
-.form-control.loading {
-    background-image: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+.btn-list {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 </style>
+
+<script>
+jQuery(document).ready(function($) {
+    // Handle toggle switches - sync checkbox with toggle label
+    $('.toggle-wrapper label.toggle').on('click', function(e) {
+        e.preventDefault();
+        var checkbox = $(this).prev('.toggle-checkbox');
+        var isChecked = checkbox.prop('checked');
+        checkbox.prop('checked', !isChecked);
+        
+        // Update toggle visual state
+        if (!isChecked) {
+            $(this).addClass('on');
+        } else {
+            $(this).removeClass('on');
+        }
+    });
+    
+    // Handle form reset
+    $('button[type="reset"]').on('click', function(e) {
+        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to revert changes?', 'maneli-car-inquiry')); ?>)) {
+            e.preventDefault();
+            return false;
+        }
+        // Reset form to original values by reloading
+        location.reload();
+    });
+});
+</script>

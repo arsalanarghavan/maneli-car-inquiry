@@ -1,0 +1,301 @@
+/**
+ * Maneli Car Inquiry - Inline Styles Replacement
+ * This file contains CSS classes to replace inline styles found in PHP templates
+ * 
+ * @package Maneli_Car_Inquiry
+ * @version 1.0.0
+ */
+
+/* ========================================
+   Spacing & Layout
+   ======================================== */
+
+.maneli-mt-20 {
+    margin-top: 20px;
+}
+
+.maneli-mr-5 {
+    margin-right: 5px;
+}
+
+.maneli-mt-5 {
+    margin-top: 5px;
+}
+
+/* ========================================
+   Display Utilities
+   ======================================== */
+
+.maneli-hidden {
+    display: none;
+}
+
+.maneli-visible {
+    display: block;
+}
+
+.maneli-flex {
+    display: flex;
+}
+
+/* For elements that need to be hidden initially but shown via JS */
+.maneli-initially-hidden {
+    display: none;
+}
+
+/* ========================================
+   Save Status Icon (repeated pattern)
+   ======================================== */
+
+.maneli-save-status-icon {
+    margin-right: 5px;
+    display: none;
+}
+
+/* When visible (via JS) */
+.maneli-save-status-icon.maneli-visible {
+    display: inline-block;
+}
+
+/* ========================================
+   Button Styles
+   ======================================== */
+
+/* Delete button with theme red */
+.maneli-btn-delete {
+    background-color: var(--theme-red);
+    border-color: var(--theme-red);
+    margin-top: 5px;
+}
+
+.maneli-btn-delete:hover {
+    background-color: var(--theme-red);
+    border-color: var(--theme-red);
+    opacity: 0.9;
+}
+
+/* ========================================
+   Text & Colors
+   ======================================== */
+
+.maneli-text-danger {
+    color: #d63638;
+}
+
+.maneli-text-center {
+    text-align: center;
+}
+
+/* ========================================
+   Table Styles
+   ======================================== */
+
+.maneli-summary-table {
+    margin-top: 20px;
+}
+
+/* ========================================
+   Loader Styles
+   ======================================== */
+
+.maneli-list-loader {
+    display: none;
+    text-align: center;
+    padding: 40px;
+}
+
+.maneli-list-loader.maneli-loading {
+    display: block;
+}
+
+/* ========================================
+   Price Disclaimer Box
+   ======================================== */
+
+.maneli-price-disclaimer {
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+/* ========================================
+   Rank Badge (from reports.php)
+   ======================================== */
+
+.maneli-rank-badge {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ========================================
+          Status Step (for progress indicators)
+          ======================================== */
+
+.maneli-status-step {
+    flex: 1;
+    position: relative;
+}
+
+.maneli-status-arrow {
+    /* Opacity is controlled inline for dynamic values */
+}
+
+/* ========================================
+          Placeholder Image Container
+          ======================================== */
+
+.maneli-placeholder-image {
+    height: 200px;
+    border: 2px dashed #dee2e6;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    color: #6c757d;
+}
+
+.maneli-placeholder-image i {
+    font-size: 40px;
+}
+
+/* ========================================
+          Progress Bar Styles
+          ======================================== */
+
+.maneli-progress {
+    height: 20px;
+}
+
+/* Additional progress bar heights for specific use cases */
+.maneli-progress-sm {
+    height: 6px;
+}
+
+.maneli-progress-md {
+    height: 10px;
+}
+
+/* For charts/graphs containers */
+.maneli-chart-container {
+    height: 350px;
+    position: relative;
+}
+
+/* Loading overlay */
+.maneli-loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+.maneli-loading-overlay.maneli-visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Unavailable product blur effect */
+.maneli-calculator-unavailable {
+    filter: blur(5px);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Table column widths (for consistent sizing) */
+.maneli-col-width-30 {
+    width: 30px;
+}
+
+.maneli-col-width-40 {
+    width: 40px;
+}
+
+.maneli-col-width-60 {
+    width: 60px;
+}
+
+.maneli-col-width-80 {
+    width: 80px;
+}
+
+.maneli-col-width-100 {
+    width: 100px;
+}
+
+/* ========================================
+          Image Max Height
+          ======================================== */
+
+.maneli-img-max-height-200 {
+    max-height: 200px;
+}
+
+.maneli-img-responsive {
+    max-width: 200px;
+    height: auto;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.maneli-img-responsive-sm {
+    max-width: 100px;
+    height: auto;
+    border-radius: 4px;
+}
+
+.maneli-notification-icon {
+    width: 48px;
+    height: 48px;
+}
+
+/* Remove button positioning */
+.maneli-remove-image-btn {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    padding: 2px 6px;
+    font-size: 10px;
+}
+
+/* ========================================
+          Responsive adjustments
+          ======================================== */
+
+@media (max-width: 768px) {
+    .maneli-mr-5 {
+        margin-right: 0;
+        margin-bottom: 5px;
+    }
+
+    .maneli-price-disclaimer {
+        font-size: 12px;
+        padding: 8px 0;
+    }
+
+    .maneli-rank-badge {
+        width: 30px;
+        height: 30px;
+    }
+
+    .maneli-placeholder-image {
+        height: 150px;
+    }
+
+    .maneli-placeholder-image i {
+        font-size: 32px;
+    }
+}
+

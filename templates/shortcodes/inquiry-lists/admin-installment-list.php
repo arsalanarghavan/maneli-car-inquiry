@@ -85,9 +85,9 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                     </table>
                 </div>
                 
-                <div id="inquiry-list-loader" style="display: none; text-align:center; padding: 40px;">
+                <div id="inquiry-list-loader" class="maneli-list-loader">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">در حال بارگذاری...</span>
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
                     </div>
                 </div>
 
@@ -115,7 +115,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                     </select>
                 </div>
                 
-                <div id="calendar-wrapper" style="display:none;">
+                <div id="calendar-wrapper" class="maneli-initially-hidden">
                     <label id="calendar-label" class="form-label"><?php esc_html_e('Select Date:', 'maneli-car-inquiry'); ?></label>
                     <input type="text" id="tracking-date-picker" class="form-control maneli-datepicker" readonly>
                 </div>

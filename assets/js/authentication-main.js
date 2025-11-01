@@ -1,20 +1,17 @@
 (function () {
     'use strict';
-    if (localStorage.getItem("xintradarktheme")) {
+    if (localStorage.getItem("manelidarktheme")) {
         document.querySelector("html").setAttribute("data-theme-mode", "dark")
         document.querySelector("html").setAttribute("data-menu-styles", "dark")
         document.querySelector("html").setAttribute("data-header-styles", "dark")
     }
-    if (localStorage.xintrartl) {
+    if (localStorage.manelirtl) {
         let html = document.querySelector('html');
         html.setAttribute("dir", "rtl");
-        var pluginUrl = window.MANELI_PLUGIN_URL || '';
-        if (pluginUrl) {
-            document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css");
-        }
+        document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.rtl.min.css");
             // rtlFn();
     }
-    if (localStorage.getItem("xintralayout") == "horizontal") {
+    if (localStorage.getItem("manelilayout") == "horizontal") {
         document.querySelector("html").setAttribute("data-nav-layout", "horizontal") 
     }
     function localStorageBackup() {
@@ -43,17 +40,14 @@
 
 
         }
-        if (localStorage.xintradarktheme) {
+        if (localStorage.manelidarktheme) {
             let html = document.querySelector('html');
             html.setAttribute('data-theme-mode', 'dark');
         }
-        if (localStorage.xintrartl) {
+        if (localStorage.manelirtl) {
             let html = document.querySelector('html');
             html.setAttribute('dir', 'rtl');
-            var pluginUrl = window.MANELI_PLUGIN_URL || '';
-            if (pluginUrl) {
-                document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css");
-            }
+            document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.rtl.min.css");
             setTimeout(() => {
                 rtlFn();
             }, 10);
@@ -66,11 +60,8 @@
 
 function ltrFn() {
     let html = document.querySelector('html')
-    var pluginUrl = window.MANELI_PLUGIN_URL || '';
     if(!document.querySelector("#style").href.includes('bootstrap.min.css')){
-        if (pluginUrl) {
-            document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.min.css");
-        }
+        document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.min.css");
     }
     html.setAttribute("dir", "ltr");
 }
@@ -78,8 +69,5 @@ function ltrFn() {
 function rtlFn() {
     let html = document.querySelector('html');
     html.setAttribute("dir", "rtl");
-    var pluginUrl = window.MANELI_PLUGIN_URL || '';
-    if (pluginUrl) {
-        document.querySelector("#style")?.setAttribute("href", pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css");
-    }
+    document.querySelector("#style")?.setAttribute("href", "./assets/libs/bootstrap/css/bootstrap.rtl.min.css");
 }

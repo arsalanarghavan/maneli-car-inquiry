@@ -2,207 +2,614 @@
  * Handles frontend logic for the loan calculator widget on the single product page.
  * This includes tab switching, live calculation for installments, and AJAX form submission.
  *
- * @version 1.0.1 (Configurable loan interest rate)
+ * @version 2.2.0 (Complete rewrite with comprehensive debugging)
  */
 
-document.addEventListener("DOMContentLoaded", function () {
-    const calcContainer = document.querySelector(".maneli-calculator-container");
-    if (!calcContainer) {
-        // If the calculator container is not on the page, do nothing.
-        return;
-    }
+(function() {
+    'use strict';
 
-    // --- 1. TAB SWITCHING LOGIC ---
-    const tabs = calcContainer.querySelectorAll('.calculator-tabs .tab-link');
-    const contents = calcContainer.querySelectorAll('.tabs-content-wrapper .tab-content');
+    let initialized = false;
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function (e) {
-            e.preventDefault();
+    // Comprehensive initialization with retry mechanism
+    function initializeCalculator() {
+        // Prevent multiple initializations
+        if (initialized) {
+            console.log('Maneli Calculator: Already initialized, skipping...');
+            return;
+        }
 
-            // Deactivate all tabs and content panels
-            tabs.forEach(item => item.classList.remove('active'));
-            contents.forEach(content => content.classList.remove('active'));
+        const calcContainer = document.querySelector(".maneli-calculator-container");
+        if (!calcContainer) {
+            console.log('Maneli Calculator: Container not found yet, will retry...');
+            return false;
+        }
 
-            // Activate the clicked tab and its corresponding content panel
-            this.classList.add('active');
-            const activeContent = calcContainer.querySelector('#' + this.dataset.tab);
-            if (activeContent) {
-                activeContent.classList.add('active');
+        console.log('Maneli Calculator: Container found, initializing...');
+
+        try {
+            // Initialize tab switching
+            initTabSwitching(calcContainer);
+
+            // Initialize cash tab
+            initCashTab();
+
+            // Initialize installment calculator
+            const success = initInstallmentCalculator(calcContainer);
+            
+            if (success) {
+                initialized = true;
+                console.log('Maneli Calculator: Successfully initialized!');
             }
-        });
-    });
-
-    // --- 2. HELPER FUNCTIONS ---
-    const formatMoney = (num) => {
-        if (isNaN(num) || num === null) return '۰';
-        // Converts number to Persian/Farsi numerals for display
-        return Math.ceil(num).toLocaleString('fa-IR');
-    };
-    const parseMoney = (str) => {
-        if (!str) return 0;
-        // Converts a formatted string (with commas and Persian numerals) to a plain integer
-        const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
-        const englishDigits = '0123456789';
-        let englishStr = String(str).replace(/,/g, '');
-        for (let i = 0; i < persianDigits.length; i++) {
-            englishStr = englishStr.replace(new RegExp(persianDigits[i], 'g'), englishDigits[i]);
+            
+            return success;
+        } catch (error) {
+            console.error('Maneli Calculator: Error during initialization', error);
+            return false;
         }
-        return parseInt(englishStr, 10) || 0;
-    };
-    const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-    // --- 3. CASH TAB LOGIC ---
-    const cashTab = document.getElementById("cash-tab");
-    if (cashTab) {
-        const cashPriceEl = document.getElementById('cashPriceAmount');
-        if (cashPriceEl) {
-            const priceValue = parseMoney(cashPriceEl.innerText);
-            cashPriceEl.innerText = formatMoney(priceValue);
-        }
-        // Note: The form submission is a standard, non-AJAX POST request.
-        // The backend handles logic for guests vs. logged-in users.
     }
 
-    // --- 4. INSTALLMENT CALCULATOR LOGIC ---
-    const installmentTab = document.getElementById("installment-tab");
-    if (installmentTab) {
+    // Try initialization with multiple strategies
+    function tryInit() {
+        if (initializeCalculator()) {
+            return;
+        }
+
+        // Retry after DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(initializeCalculator, 100);
+            });
+        } else {
+            setTimeout(initializeCalculator, 100);
+        }
+
+        // Final retry after page load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (!initialized) {
+                    console.warn('Maneli Calculator: Final retry after window load');
+                    initializeCalculator();
+                }
+            }, 300);
+        });
+    }
+
+    // Start initialization
+    tryInit();
+
+    // === TAB SWITCHING ===
+    function initTabSwitching(container) {
+        const tabs = container.querySelectorAll('.calculator-tabs .tab-link');
+        const contents = container.querySelectorAll('.tabs-content-wrapper .tab-content');
+
+        if (tabs.length === 0 || contents.length === 0) {
+            console.warn('Maneli Calculator: Tabs or contents not found');
+            return;
+        }
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Deactivate all
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+                
+                // Activate clicked tab
+                this.classList.add('active');
+                const targetContent = container.querySelector('#' + this.dataset.tab);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+
+        console.log('Maneli Calculator: Tab switching initialized');
+    }
+
+    // === CASH TAB ===
+    function initCashTab() {
+        const cashPriceEl = document.getElementById('cashPriceAmount');
+        if (cashPriceEl && cashPriceEl.innerText) {
+            const priceValue = parseMoney(cashPriceEl.innerText);
+            if (priceValue > 0) {
+                cashPriceEl.innerText = formatMoney(priceValue);
+            }
+        }
+        
+        // Handle cash form submission with AJAX for logged-in users
+        const cashForm = document.querySelector('.cash-request-form');
+        if (cashForm) {
+            const submitBtn = cashForm.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                cashForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Check if user is logged in
+                    const isLoggedIn = typeof maneli_ajax_object !== 'undefined' && 
+                                      maneli_ajax_object.ajax_url && 
+                                      maneli_ajax_object.ajax_url !== '' &&
+                                      maneli_ajax_object.nonce && 
+                                      maneli_ajax_object.nonce !== '';
+                    
+                    if (!isLoggedIn) {
+                        // Save form data to localStorage and redirect to login
+                        const formData = {
+                            product_id: cashForm.querySelector('input[name="product_id"]').value,
+                            first_name: cashForm.querySelector('#cash_first_name')?.value || '',
+                            last_name: cashForm.querySelector('#cash_last_name')?.value || '',
+                            mobile_number: cashForm.querySelector('#cash_mobile_number')?.value || '',
+                            car_color: cashForm.querySelector('#cash_car_color')?.value || '',
+                            timestamp: Date.now()
+                        };
+                        
+                        localStorage.setItem('maneli_pending_cash_inquiry', JSON.stringify(formData));
+                        console.log('Maneli Cash Form: Saved form data to localStorage');
+                        
+                        // Redirect to login
+                        window.location.href = '/dashboard/';
+                        return;
+                    }
+                    
+                    // User is logged in, submit via AJAX
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = (maneli_ajax_object.text && maneli_ajax_object.text.sending) 
+                                         ? maneli_ajax_object.text.sending 
+                                         : "Submitting...";
+                    
+                    const formDataObj = new FormData();
+                    formDataObj.append('action', 'maneli_create_customer_cash_inquiry');
+                    formDataObj.append('nonce', maneli_ajax_object.cash_inquiry_nonce || maneli_ajax_object.nonce);
+                    formDataObj.append('product_id', cashForm.querySelector('input[name="product_id"]').value);
+                    formDataObj.append('first_name', cashForm.querySelector('#cash_first_name')?.value || '');
+                    formDataObj.append('last_name', cashForm.querySelector('#cash_last_name')?.value || '');
+                    formDataObj.append('mobile_number', cashForm.querySelector('#cash_mobile_number')?.value || '');
+                    formDataObj.append('car_color', cashForm.querySelector('#cash_car_color')?.value || '');
+                    
+                    fetch(maneli_ajax_object.ajax_url, {
+                        method: 'POST',
+                        body: formDataObj
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Redirect to inquiry page
+                            if (data.data && data.data.redirect_url) {
+                                window.location.href = data.data.redirect_url;
+                            } else if (data.data && data.data.inquiry_id) {
+                                window.location.href = '/dashboard/inquiries/cash?cash_inquiry_id=' + data.data.inquiry_id;
+                            } else {
+                                window.location.href = '/dashboard/inquiries/cash';
+                            }
+                        } else {
+                            const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.error_sending) 
+                                           ? maneli_ajax_object.text.error_sending 
+                                           : "Error: ";
+                            alert(errorMsg + (data.data && data.data.message ? data.data.message : "Unknown error."));
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = originalText;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Maneli Cash Form: AJAX Error:', error);
+                        const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
+                                       ? maneli_ajax_object.text.server_error_connection 
+                                       : "An error occurred while communicating with the server.";
+                        alert(errorMsg);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    });
+                });
+            }
+        }
+    }
+
+    // === INSTALLMENT CALCULATOR ===
+    function initInstallmentCalculator(container) {
+        const installmentTab = document.getElementById("installment-tab");
+        if (!installmentTab) {
+            console.error('Maneli Calculator: installment-tab not found');
+            return false;
+        }
+
         const calc = document.getElementById("loan-calculator");
-        if (!calc) return;
+        if (!calc) {
+            console.error('Maneli Calculator: loan-calculator element not found');
+            return false;
+        }
 
-        // Get initial values from data attributes
-        const productPrice = parseInt(calc.dataset.price) || 0;
-        const minDown = parseInt(calc.dataset.minDown) || 0;
-        const maxDown = parseInt(calc.dataset.maxDown) || (productPrice * 0.8);
+        // Parse initial values from data attributes
+        const priceAttr = calc.getAttribute('data-price');
+        const minDownAttr = calc.getAttribute('data-min-down');
+        const maxDownAttr = calc.getAttribute('data-max-down');
+        
+        console.log('Maneli Calculator: Data attributes:', {
+            price: priceAttr,
+            minDown: minDownAttr,
+            maxDown: maxDownAttr
+        });
 
-        // Get DOM elements
+        let productPrice = 0;
+        if (priceAttr) {
+            productPrice = parseMoney(priceAttr);
+            if (productPrice <= 0 && priceAttr) {
+                // Try direct parsing if parseMoney fails
+                const cleanPrice = String(priceAttr).replace(/[^\d]/g, '');
+                productPrice = parseInt(cleanPrice, 10) || 0;
+            }
+        }
+        
+        let minDown = 0;
+        if (minDownAttr) {
+            minDown = parseMoney(minDownAttr);
+            if (minDown <= 0 && minDownAttr) {
+                const cleanMin = String(minDownAttr).replace(/[^\d]/g, '');
+                minDown = parseInt(cleanMin, 10) || 0;
+            }
+        }
+        
+        let maxDown = productPrice * 0.8;
+        if (maxDownAttr) {
+            const parsedMax = parseMoney(maxDownAttr);
+            if (parsedMax > 0) {
+                maxDown = parsedMax;
+            }
+        }
+
+        console.log('Maneli Calculator: Parsed values:', {
+            productPrice,
+            minDown,
+            maxDown
+        });
+
+        // Get DOM elements - use querySelector to find hidden elements too
         const input = document.getElementById("downPaymentInput");
         const slider = document.getElementById("downPaymentSlider");
-        const minDisplay = document.getElementById("minDownDisplay");
-        const installmentEl = document.getElementById("installmentAmount");
+        const minDisplay = installmentTab.querySelector("#minDownDisplay"); // Find even if hidden
+        let installmentEl = installmentTab.querySelector("#installmentAmount"); // Find even if hidden
         const actionBtn = installmentTab.querySelector(".loan-action-btn");
+
+        if (!input) {
+            console.error('Maneli Calculator: downPaymentInput not found');
+            return false;
+        }
+        if (!slider) {
+            console.error('Maneli Calculator: downPaymentSlider not found');
+            return false;
+        }
+        if (!installmentEl) {
+            // Try to find hidden element by searching all elements
+            installmentEl = installmentTab.querySelector('span#installmentAmount[style*="display:none"]') || 
+                            installmentTab.querySelector('span#installmentAmount');
+            if (!installmentEl) {
+                console.error('Maneli Calculator: installmentAmount not found anywhere');
+                return false;
+            }
+            console.warn('Maneli Calculator: Found hidden installmentAmount element');
+        }
         
-        // NEW: Get the configurable interest rate from the localized object
-        const interestRate = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.interestRate) 
-                             ? parseFloat(maneli_ajax_object.interestRate) 
-                             : 0.035; 
+        // If installmentEl is hidden (via style), make it visible so calculations show
+        if (installmentEl && installmentEl.style.display === 'none') {
+            installmentEl.style.display = '';
+            console.log('Maneli Calculator: Made installmentAmount visible (was hidden)');
+        }
         
-        /**
-         * Updates the visual fill of the slider based on its current value.
-         */
-        function updateSliderLook() {
-            if (!slider) return;
+        // Hide price-hidden span if installmentAmount is being shown (to remove the "-" sign)
+        const priceHiddenSpan = installmentTab.querySelector('.result-section .price-hidden');
+        if (priceHiddenSpan && installmentEl && installmentEl.style.display !== 'none') {
+            priceHiddenSpan.style.display = 'none';
+        }
+        
+        // Also check and show minDisplay if it was hidden
+        if (minDisplay && minDisplay.style.display === 'none' && minDown > 0) {
+            minDisplay.style.display = '';
+            console.log('Maneli Calculator: Made minDownDisplay visible (was hidden)');
+        }
+        
+        // Hide price-hidden span near minDisplay (to remove the "-" sign)
+        const minPriceHidden = installmentTab.querySelector('.loan-note .price-hidden');
+        if (minPriceHidden && minDisplay && minDisplay.style.display !== 'none') {
+            minPriceHidden.style.display = 'none';
+        }
+
+        // Check if calculator should be disabled
+        // Only disable if product is UNAVAILABLE - don't disable just because prices are hidden
+        const isUnavailable = calc.getAttribute('data-is-unavailable') === 'true';
+        const canSeePricesAttr = calc.getAttribute('data-can-see-prices');
+
+        console.log('Maneli Calculator: Availability check:', {
+            isUnavailable: isUnavailable,
+            canSeePricesAttr: canSeePricesAttr,
+            productPrice: productPrice
+        });
+
+        // ONLY disable if product is unavailable
+        // If prices are hidden, calculator should still work, just hide the display
+        if (isUnavailable) {
+            console.log('Maneli Calculator: Product unavailable - calculator disabled');
+            if (input) input.disabled = true;
+            if (slider) slider.disabled = true;
+            installmentTab.querySelectorAll(".term-btn").forEach(btn => btn.disabled = true);
+            return true; // Initialized but disabled
+        }
+
+        console.log('Maneli Calculator: Calculator enabled and ready to use');
+
+        // Get interest rate
+        const interestRate = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.interestRate)
+                           ? parseFloat(maneli_ajax_object.interestRate) 
+                           : 0.035;
+
+        console.log('Maneli Calculator: Interest rate:', interestRate);
+
+        // Helper: Update slider visual fill
+        function updateSliderVisual() {
+            if (!slider || !slider.max || slider.max === slider.min) return;
             const percentage = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
             slider.style.setProperty('--value-percent', percentage + '%');
         }
 
-        /**
-         * Calculates and displays the monthly installment amount.
-         */
+        // Helper: Calculate and display installment
         function calculateInstallment() {
             if (!input || !installmentEl) return;
-            const dp = parseMoney(input.value);
+
+            const downPayment = parseMoney(input.value) || 0;
             const activeBtn = installmentTab.querySelector(".term-btn.active");
-            if (!activeBtn) return;
-
-            const selectedMonths = parseInt(activeBtn.dataset.months);
-            const loanAmount = productPrice - dp;
-
-            if (loanAmount <= 0) {
-                installmentEl.innerText = formatMoney(0);
+            
+            if (!activeBtn) {
+                // Activate first button if none is active
+                const firstBtn = installmentTab.querySelector(".term-btn");
+                if (firstBtn) {
+                    firstBtn.classList.add("active");
+                    calculateWithMonth(parseInt(firstBtn.dataset.months) || 12, downPayment);
+                } else {
+                    // No buttons found, use default 12 months
+                    calculateWithMonth(12, downPayment);
+                }
                 return;
             }
 
-            // Calculation logic (using configurable interest rate)
-            const monthlyInterestAmount = loanAmount * interestRate; // FIXED: Used configurable rate
-            const totalInterest = monthlyInterestAmount * (selectedMonths + 1);
+            const months = parseInt(activeBtn.dataset.months) || 12;
+            calculateWithMonth(months, downPayment);
+        }
+
+        // Helper: Calculate with specific month count
+        function calculateWithMonth(months, downPayment) {
+            const loanAmount = productPrice - downPayment;
+
+            if (loanAmount <= 0 || productPrice <= 0 || months <= 0) {
+                if (installmentEl) {
+                    installmentEl.innerText = formatMoney(0);
+                }
+                return;
+            }
+
+            // Calculation: monthlyInterestAmount * (months + 1) = total interest
+            const monthlyInterestAmount = loanAmount * interestRate;
+            const totalInterest = monthlyInterestAmount * (months + 1);
             const totalRepayment = loanAmount + totalInterest;
-            const installment = totalRepayment / selectedMonths;
+            const installment = totalRepayment / months;
 
-            installmentEl.innerText = formatMoney(installment);
+            if (installmentEl) {
+                const formatted = formatMoney(Math.ceil(installment));
+                installmentEl.innerText = formatted;
+                // Ensure the element is visible
+                if (installmentEl.style.display === 'none') {
+                    installmentEl.style.display = '';
+                }
+                // Also check parent if it was hidden
+                const parent = installmentEl.parentElement;
+                if (parent && parent.style.display === 'none') {
+                    parent.style.display = '';
+                }
+                console.log('Maneli Calculator: Calculated installment:', formatted, 'for', months, 'months');
+            }
         }
 
-        /**
-         * Sets the initial state of the calculator.
-         */
-        function initializeCalculator() {
-            if (!slider || !input || !minDisplay) return;
+        // Initialize calculator state
+        function initializeCalculatorState() {
+            if (!slider || !input) {
+                console.warn('Maneli Calculator: Cannot initialize state - slider or input missing');
+                return;
+            }
 
-            slider.min = 0;
-            slider.max = productPrice;
-            slider.value = minDown;
-            input.value = formatMoney(minDown);
-            minDisplay.innerText = formatMoney(minDown);
+            try {
+                // Set slider min and max correctly - min should be minDown, max should be maxDown
+                slider.min = minDown || 0;
+                slider.max = maxDown || productPrice || 1000000;
+                slider.value = minDown || 0;
 
-            updateSliderLook();
+                if (input) {
+                    input.value = formatMoney(minDown || 0);
+                }
+                if (minDisplay) {
+                    // Always update minDisplay value, even if hidden - we'll show it if needed
+                    const currentDisplay = window.getComputedStyle(minDisplay).display;
+                    minDisplay.innerText = formatMoney(minDown || 0);
+                    // If it was hidden but we have a value, show it
+                    if (currentDisplay === 'none' && minDown > 0) {
+                        minDisplay.style.display = '';
+                    }
+                }
+
+                updateSliderVisual();
+                calculateInstallment();
+
+                console.log('Maneli Calculator: State initialized successfully');
+            } catch (error) {
+                console.error('Maneli Calculator: Error initializing state', error);
+            }
+        }
+
+        // === EVENT LISTENERS ===
+
+        // Slider events
+        slider.addEventListener("input", function() {
+            // Ensure min and max are set correctly
+            if (this.min != minDown) this.min = minDown || 0;
+            if (this.max != maxDown) this.max = maxDown || productPrice || 1000000;
+            
+            if (input) {
+                input.value = formatMoney(parseInt(this.value) || 0);
+            }
+            updateSliderVisual();
             calculateInstallment();
-        }
-
-        // --- Event Listeners for Installment Calculator ---
-
-        if (slider) {
-            slider.addEventListener("input", () => {
-                if (input) input.value = formatMoney(slider.value);
-                updateSliderLook();
-                calculateInstallment();
-            });
-            slider.addEventListener("change", () => { // On release
-                let value = parseInt(slider.value);
-                let clampedValue = clamp(value, minDown, maxDown);
-                if (value !== clampedValue) {
-                    slider.value = clampedValue;
-                    if (input) input.value = formatMoney(clampedValue);
-                    updateSliderLook();
-                }
-                calculateInstallment();
-            });
-        }
-
-        if (input) {
-            input.addEventListener('input', () => {
-                let value = parseMoney(input.value);
-                if (slider) slider.value = clamp(value, 0, productPrice);
-                updateSliderLook();
-                calculateInstallment();
-            });
-            input.addEventListener('blur', () => { // On focus out
-                let value = parseMoney(input.value);
-                let clampedValue = clamp(value, minDown, maxDown);
-                if (slider) slider.value = clampedValue;
-                input.value = formatMoney(clampedValue);
-                updateSliderLook();
-                calculateInstallment();
-            });
-        }
-
-        installmentTab.querySelectorAll(".term-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const currentActive = installmentTab.querySelector(".term-btn.active");
-                if (currentActive) {
-                    currentActive.classList.remove("active");
-                }
-                btn.classList.add("active");
-                calculateInstallment();
-            });
         });
 
-        // AJAX submission for logged-in users
-        if (actionBtn && typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.ajax_url && maneli_ajax_object.nonce) {
-            actionBtn.addEventListener("click", function (e) {
+        slider.addEventListener("change", function() {
+            // Ensure min and max are set correctly
+            if (this.min != minDown) this.min = minDown || 0;
+            if (this.max != maxDown) this.max = maxDown || productPrice || 1000000;
+            
+            let value = parseInt(this.value) || 0;
+            let clamped = clamp(value, minDown, maxDown);
+            if (value !== clamped) {
+                this.value = clamped;
+                if (input) input.value = formatMoney(clamped);
+            }
+            updateSliderVisual();
+            calculateInstallment();
+        });
+
+        // Input field events
+        input.addEventListener("input", function() {
+            let value = parseMoney(this.value) || 0;
+            if (slider) {
+                slider.value = clamp(value, minDown, maxDown);
+            }
+            updateSliderVisual();
+            calculateInstallment();
+        });
+
+        input.addEventListener("blur", function() {
+            let value = parseMoney(this.value) || 0;
+            let clamped = clamp(value, minDown, maxDown);
+            if (slider) {
+                slider.min = minDown;
+                slider.max = maxDown;
+                slider.value = clamped;
+            }
+            this.value = formatMoney(clamped);
+            updateSliderVisual();
+            calculateInstallment();
+        });
+
+        // Term button events
+        const termButtons = installmentTab.querySelectorAll(".term-btn");
+        termButtons.forEach(btn => {
+            btn.addEventListener("click", function(e) {
+                e.preventDefault();
+                
+                // Remove active from all buttons
+                termButtons.forEach(b => b.classList.remove("active"));
+                
+                // Add active to clicked button
+                this.classList.add("active");
+                
+                // Recalculate
+                calculateInstallment();
+优先            });
+        });
+
+        // AJAX submission button - always attach listener, check login state inside
+        if (actionBtn) {
+            actionBtn.addEventListener("click", function(e) {
                 e.preventDefault();
 
-                actionBtn.disabled = true;
-                const sendingText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.sending) 
-                                    ? maneli_ajax_object.text.sending 
-                                    : "در حال ارسال اطلاعات...";
-                actionBtn.textContent = sendingText;
+                // Check if user is logged in - check both ajax_url and nonce
+                const isLoggedIn = typeof maneli_ajax_object !== 'undefined' && 
+                                  maneli_ajax_object.ajax_url && 
+                                  maneli_ajax_object.ajax_url !== '' &&
+                                  maneli_ajax_object.nonce && 
+                                  maneli_ajax_object.nonce !== '';
+                
+                console.log('Maneli Calculator: Login check:', {
+                    ajax_url: typeof maneli_ajax_object !== 'undefined' ? maneli_ajax_object.ajax_url : 'undefined',
+                    nonce: typeof maneli_ajax_object !== 'undefined' ? maneli_ajax_object.nonce : 'undefined',
+                    isLoggedIn: isLoggedIn
+                });
+                
+                if (!isLoggedIn) {
+                    // User is not logged in, save calculator data to localStorage and redirect to login
+                    const downPaymentInput = document.getElementById('downPaymentInput');
+                    const installmentAmountEl = document.getElementById('installmentAmount');
+                    const activeTermBtn = installmentTab.querySelector('.term-btn.active');
+                    const termMonths = activeTermBtn ? (activeTermBtn.dataset.months || '12') : '12';
+                    const productIdInput = installmentTab.querySelector('input[name="product_id"]');
+                    
+                    if (downPaymentInput && installmentAmountEl && productIdInput) {
+                        const calculatorData = {
+                            product_id: productIdInput.value,
+                            down_payment: parseMoney(downPaymentInput.value) || 0,
+                            term_months: termMonths,
+                            installment_amount: parseMoney(installmentAmountEl.innerText) || 0,
+                            total_price: productPrice,
+                            timestamp: Date.now()
+                        };
+                        
+                        // Save to localStorage
+                        localStorage.setItem('maneli_pending_calculator_data', JSON.stringify(calculatorData));
+                        console.log('Maneli Calculator: Saved calculator data to localStorage:', calculatorData);
+                    }
+                    
+                    // Redirect to login page
+                    const loginWrapper = actionBtn.closest('.loan-action-wrapper');
+                    if (loginWrapper) {
+                        const loginLink = loginWrapper.querySelector('a.loan-action-btn');
+                        if (loginLink && loginLink.href) {
+                            console.log('Maneli Calculator: Redirecting to login:', loginLink.href);
+                            window.location.href = loginLink.href;
+                            return;
+                        }
+                    }
+                    // Fallback to dashboard login
+                    console.log('Maneli Calculator: Redirecting to dashboard login');
+                    window.location.href = '/dashboard/';
+                    return;
+                }
 
-                const downPayment = parseMoney(document.getElementById('downPaymentInput').value);
-                const termMonths = installmentTab.querySelector('.term-btn.active').dataset.months;
-                const installmentAmount = parseMoney(document.getElementById('installmentAmount').innerText);
-                const totalPrice = calc.dataset.price;
-                const productId = installmentTab.querySelector('input[name="product_id"]').value;
+                // Disable button and show loading
+                const originalText = this.textContent;
+                this.disabled = true;
+                this.textContent = (maneli_ajax_object.text && maneli_ajax_object.text.sending) 
+                                 ? maneli_ajax_object.text.sending 
+                                 : "Sending information...";
 
+                // Get values
+                const downPaymentInput = document.getElementById('downPaymentInput');
+                const installmentAmountEl = document.getElementById('installmentAmount');
+                const productIdInput = installmentTab.querySelector('input[name="product_id"]');
+                
+                if (!downPaymentInput || !installmentAmountEl || !productIdInput) {
+                    console.error('Maneli Calculator: Required elements not found for submission');
+                    this.disabled = false;
+                    this.textContent = originalText;
+                    return;
+                }
+
+                const downPayment = parseMoney(downPaymentInput.value) || 0;
+                const activeTermBtn = installmentTab.querySelector('.term-btn.active');
+                const termMonths = activeTermBtn ? (activeTermBtn.dataset.months || '12') : '12';
+                const installmentAmount = parseMoney(installmentAmountEl.innerText) || 0;
+                const productId = productIdInput.value;
+
+                if (!productId) {
+                    console.error('Maneli Calculator: Product ID not found');
+                    this.disabled = false;
+                    this.textContent = originalText;
+                    return;
+                }
+
+                console.log('Maneli Calculator: Submitting inquiry:', {
+                    productId,
+                    downPayment,
+                    termMonths,
+                    installmentAmount,
+                    productPrice
+                });
+
+                // Prepare form data
                 const formData = new FormData();
                 formData.append('action', 'maneli_select_car_ajax');
                 formData.append('product_id', productId);
@@ -210,46 +617,115 @@ document.addEventListener("DOMContentLoaded", function () {
                 formData.append('down_payment', downPayment);
                 formData.append('term_months', termMonths);
                 formData.append('installment_amount', installmentAmount);
-                formData.append('total_price', totalPrice);
+                formData.append('total_price', productPrice);
 
-                fetch(maneli_ajax_object.ajax_url, { method: 'POST', body: formData })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            window.location.href = maneli_ajax_object.inquiry_page_url;
-                        } else {
-                            const errorText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.error_sending) 
-                                              ? maneli_ajax_object.text.error_sending 
-                                              : "خطا در ارسال اطلاعات: ";
-                            const unknownError = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.unknown_error) 
-                                                 ? maneli_ajax_object.text.unknown_error 
-                                                 : "خطای ناشناخته.";
-                            const buttonText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.credit_check) 
-                                               ? maneli_ajax_object.text.credit_check 
-                                               : "استعلام سنجی بانکی جهت خرید خودرو";
-                            alert(errorText + (data.data.message || unknownError));
-                            actionBtn.disabled = false;
-                            actionBtn.textContent = buttonText;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        const serverError = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
-                                            ? maneli_ajax_object.text.server_error_connection 
-                                            : "یک خطای ناشناخته در ارتباط با سرور رخ داد.";
-                        const buttonText = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.text && maneli_ajax_object.text.credit_check) 
-                                           ? maneli_ajax_object.text.credit_check 
-                                           : "استعلام سنجی بانکی جهت خرید خودرو";
-                        alert(serverError);
-                        actionBtn.disabled = false;
-                        actionBtn.textContent = buttonText;
-                    });
+                // Send AJAX request
+                fetch(maneli_ajax_object.ajax_url, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Maneli Calculator: AJAX response:', data);
+                    if (data.success) {
+                        // Redirect to wizard form step 2 (identity form)
+                        const redirectUrl = '/dashboard/new-inquiry?step=2';
+                        console.log('Maneli Calculator: Redirecting to wizard:', redirectUrl);
+                        window.location.href = redirectUrl;
+                    } else {
+                        const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.error_sending) 
+                                       ? maneli_ajax_object.text.error_sending 
+                                       : "Error sending information: ";
+                        const unknownError = (maneli_ajax_object.text && maneli_ajax_object.text.unknown_error) 
+                                           ? maneli_ajax_object.text.unknown_error 
+                                           : "Unknown error.";
+                        alert(errorMsg + (data.data && data.data.message ? data.data.message : unknownError));
+                        this.disabled = false;
+                        this.textContent = originalText;
+                    }
+                })
+                .catch(error => {
+                    console.error('Maneli Calculator: AJAX Error:', error);
+                    const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
+                                   ? maneli_ajax_object.text.server_error_connection 
+                                   : "An unknown error occurred while communicating with the server.";
+                    alert(errorMsg);
+                    this.disabled = false;
+                    this.textContent = originalText;
+                });
             });
+        } else {
+            console.warn('Maneli Calculator: Action button not found');
         }
 
-        // Initialize the calculator if the product has a price.
-        if (productPrice > 0) {
-            initializeCalculator();
-        }
+        // Initialize calculator state after a short delay to ensure DOM is ready
+        setTimeout(function() {
+            initializeCalculatorState();
+        }, 50);
+
+        return true;
     }
-});
+
+    // === UTILITY FUNCTIONS ===
+
+    /**
+     * Formats a number as Persian numerals with thousand separators
+     */
+    function formatMoney(num) {
+        if (isNaN(num) || num === null || num === undefined || num === '') return '۰';
+        const numValue = typeof num === 'string' ? parseFloat(num) : num;
+        if (isNaN(numValue)) return '۰';
+        // Ensure non-negative numbers
+        const absValue = Math.abs(numValue);
+        // Use toLocaleString with options to get Persian digits but English comma
+        return Math.ceil(absValue).toLocaleString('fa-IR', {
+            useGrouping: true,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).replace(/٬/g, ',');
+    }
+
+    /**
+     * Parses a formatted money string (with Persian digits and separators) to integer
+     */
+    function parseMoney(str) {
+        if (!str && str !== 0) return 0;
+        
+        // Convert to string and trim
+        let cleanStr = String(str).trim();
+        
+        // If already a clean number string, parse directly
+        if (/^\d+$/.test(cleanStr)) {
+            return parseInt(cleanStr, 10) || 0;
+        }
+        
+        // Remove thousand separators (commas, spaces, Persian comma)
+        cleanStr = cleanStr.replace(/[,،\s]/g, '');
+        
+        // Convert Persian digits to English
+        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        for (let i = 0; i < persianDigits.length; i++) {
+            cleanStr = cleanStr.replace(new RegExp(persianDigits[i], 'g'), englishDigits[i]);
+        }
+        
+        // Remove all non-numeric characters
+        cleanStr = cleanStr.replace(/[^\d]/g, '');
+        
+        const parsed = parseInt(cleanStr, 10);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
+    /**
+     * Clamps a number between min and max
+     */
+    function clamp(num, min, max) {
+        return Math.min(Math.max(num, min), max);
+    }
+
+})();

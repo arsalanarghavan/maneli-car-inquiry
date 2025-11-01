@@ -45,7 +45,7 @@ class Maneli_Admin_Actions_Handler {
         $new_status_request = sanitize_text_field($_POST['new_status']);
         $valid_statuses = ['approved', 'rejected', 'more_docs'];
         
-        $redirect_url = add_query_arg('inquiry_id', $post_id, home_url('/dashboard/inquiries/installment'));
+        $redirect_url = add_query_arg('inquiry_id', $post_id, home_url('/dashboard/installment-inquiries'));
 
         if (!in_array($new_status_request, $valid_statuses, true)) {
             wp_die(esc_html__('Invalid status provided.', 'maneli-car-inquiry'));
@@ -266,6 +266,11 @@ class Maneli_Admin_Actions_Handler {
         update_post_meta($post_id, 'inquiry_status', $initial_status);
         update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
         
+        // Mark that payment was completed (admin-created inquiries are considered as paid with 0 amount)
+        update_post_meta($post_id, 'inquiry_payment_completed', 'yes');
+        update_post_meta($post_id, 'inquiry_payment_date', current_time('mysql'));
+        update_post_meta($post_id, 'inquiry_paid_amount', 0); // Admin-created inquiries are free
+        
         // Save all form and calculated meta
         foreach ($all_post_meta as $key => $value) {
             update_post_meta($post_id, $key, $value);
@@ -432,7 +437,7 @@ class Maneli_Admin_Actions_Handler {
         $new_status = ($finotex_result['status'] === 'DONE' || $finotex_result['status'] === 'SKIPPED') ? 'pending' : 'failed';
         update_post_meta($post_id, 'inquiry_status', $new_status);
 
-        wp_redirect(add_query_arg('inquiry_id', $post_id, home_url('/dashboard/inquiries/installment')));
+        wp_redirect(add_query_arg('inquiry_id', $post_id, home_url('/dashboard/installment-inquiries')));
         exit;
     }
     
@@ -465,6 +470,22 @@ class Maneli_Admin_Actions_Handler {
         update_post_meta($post_id, 'assigned_expert_name', $expert_info->display_name);
         
         $this->notify_expert_of_assignment($post_id, $assigned_expert_id, $inquiry_type);
+        
+        // Send notification to the assigned expert
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        $inquiry_type_label = $inquiry_type === 'cash' ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry');
+        $car_name = get_the_title(get_post_meta($post_id, 'product_id', true));
+        
+        Maneli_Notification_Handler::create_notification(array(
+            'user_id' => $assigned_expert_id,
+            'type' => 'inquiry_assigned',
+            'title' => sprintf(esc_html__('%s inquiry assigned to you', 'maneli-car-inquiry'), $inquiry_type_label),
+            'message' => sprintf(esc_html__('A %s inquiry for %s has been assigned to you', 'maneli-car-inquiry'), $inquiry_type_label, $car_name),
+            'link' => $inquiry_type === 'cash' 
+                ? home_url('/dashboard/cash-inquiries') 
+                : home_url('/dashboard/installment-inquiries'),
+            'related_id' => $post_id,
+        ));
         
         return ['id' => $assigned_expert_id, 'name' => $expert_info->display_name];
     }

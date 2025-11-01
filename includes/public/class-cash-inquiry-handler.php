@@ -30,7 +30,7 @@ class Maneli_Cash_Inquiry_Handler {
         check_ajax_referer('maneli_customer_cash_inquiry', 'nonce');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => 'لطفاً ابتدا وارد سیستم شوید.']);
+            wp_send_json_error(['message' => esc_html__('You must be logged in to submit a request.', 'maneli-car-inquiry')]);
             return;
         }
         
@@ -38,7 +38,7 @@ class Maneli_Cash_Inquiry_Handler {
         $required_fields = ['product_id', 'first_name', 'last_name', 'mobile_number'];
         foreach ($required_fields as $field) {
             if (empty($_POST[$field])) {
-                wp_send_json_error(['message' => 'لطفاً تمام فیلدهای ضروری را پر کنید.']);
+                wp_send_json_error(['message' => esc_html__('Please fill out all required fields.', 'maneli-car-inquiry')]);
                 return;
             }
         }
@@ -66,11 +66,12 @@ class Maneli_Cash_Inquiry_Handler {
             }
             
             wp_send_json_success([
-                'message' => 'درخواست نقدی شما با موفقیت ثبت شد. به زودی کارشناس با شما تماس خواهد گرفت.',
-                'inquiry_id' => $post_id
+                'message' => esc_html__('Your cash request has been successfully submitted. An expert will contact you soon.', 'maneli-car-inquiry'),
+                'inquiry_id' => $post_id,
+                'redirect_url' => add_query_arg('cash_inquiry_id', $post_id, home_url('/dashboard/inquiries/cash'))
             ]);
         } else {
-            wp_send_json_error(['message' => 'خطا در ثبت درخواست. لطفاً دوباره تلاش کنید.']);
+            wp_send_json_error(['message' => esc_html__('An error occurred while creating your request. Please try again.', 'maneli-car-inquiry')]);
         }
     }
 
@@ -105,8 +106,8 @@ class Maneli_Cash_Inquiry_Handler {
         $post_id = self::create_cash_inquiry_post($inquiry_data, $user_id);
 
         if ($post_id) {
-            // Redirect to the cash inquiry list page with a success message
-            $redirect_url = add_query_arg('cash_inquiry_sent', 'true', home_url('/dashboard/inquiries/cash'));
+            // Redirect to the specific cash inquiry page
+            $redirect_url = add_query_arg('cash_inquiry_id', $post_id, home_url('/dashboard/inquiries/cash'));
             wp_redirect($redirect_url);
             exit;
         } else {
@@ -157,7 +158,9 @@ class Maneli_Cash_Inquiry_Handler {
         $post_id = wp_insert_post($post_data, true); // Second param true to return WP_Error on failure
     
         if (is_wp_error($post_id)) {
-            error_log('Maneli Cash Inquiry Error: ' . $post_id->get_error_message());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Cash Inquiry Error: ' . $post_id->get_error_message());
+            }
             return false;
         }
         
@@ -176,6 +179,24 @@ class Maneli_Cash_Inquiry_Handler {
             
         // Send SMS notification to the admin
         self::send_admin_notification($first_name . ' ' . $last_name, $car_name);
+        
+        // Send notification to all managers and admins about new cash inquiry
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        $managers = get_users(array(
+            'role__in' => array('administrator', 'maneli_admin'),
+            'fields' => 'ids'
+        ));
+        
+        foreach ($managers as $manager_id) {
+            Maneli_Notification_Handler::create_notification(array(
+                'user_id' => $manager_id,
+                'type' => 'inquiry_new',
+                'title' => esc_html__('New Cash Inquiry', 'maneli-car-inquiry'),
+                'message' => sprintf(esc_html__('A new cash inquiry from %s for %s has been registered', 'maneli-car-inquiry'), $first_name . ' ' . $last_name, $car_name),
+                'link' => home_url('/dashboard/inquiries/cash?cash_inquiry_id=' . $post_id),
+                'related_id' => $post_id,
+            ));
+        }
         
         return $post_id;
     }

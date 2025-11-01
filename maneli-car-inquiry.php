@@ -3,11 +3,7 @@
  * Plugin Name:       Maneli Car Inquiry Core
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
-<<<<<<< HEAD
- * Version:           0.2.20
-=======
- * Version:           0.1.56
->>>>>>> parent of 7d04676 (.)
+ * Version:           1.1.0
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later
@@ -28,11 +24,24 @@ define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_DIR', plugin_dir_path(__FILE__)); // Alias for compatibility
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));
 
+// Legacy constants for backward compatibility with templates
+// Note: These are aliases to avoid duplication and confusion
+if (!defined('MANELI_PLUGIN_PATH')) {
+    define('MANELI_PLUGIN_PATH', MANELI_INQUIRY_PLUGIN_PATH);
+}
+if (!defined('MANELI_PLUGIN_DIR')) {
+    define('MANELI_PLUGIN_DIR', MANELI_INQUIRY_PLUGIN_DIR);
+}
+if (!defined('MANELI_PLUGIN_URL')) {
+    define('MANELI_PLUGIN_URL', MANELI_INQUIRY_PLUGIN_URL);
+}
+define('MANELI_VERSION', '0.2.20');
+
 /**
  * External API Endpoints (Centralized for Security and Maintenance)
  */
 define('MANELI_FINOTEX_API_URL', 'https://api.finnotech.ir/credit/v2/clients/%s/chequeColorInquiry');
-define('MANELI_SMS_API_WSDL', 'https://api.payamak-panel.com/post/send.asmx?wsdl'); // Enforced HTTPS
+define('MANELI_SMS_API_WSDL', 'https://api.payamak-panel.com/post/send.asmx?wsdl');
 
 // Zarinpal Gateway
 define('MANELI_ZARINPAL_REQUEST_URL', 'https://api.zarinpal.com/pg/v4/payment/request.json');
@@ -43,8 +52,6 @@ define('MANELI_ZARINPAL_STARTPAY_URL', 'https://www.zarinpal.com/pg/StartPay/');
 define('MANELI_SADAD_REQUEST_URL', 'https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest');
 define('MANELI_SADAD_VERIFY_URL', 'https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify');
 define('MANELI_SADAD_PURCHASE_URL', 'https://sadad.shaparak.ir/VPG/Purchase?Token=');
-// --- End API URL Definitions ---
-
 
 /**
  * The main file that bootstraps the plugin.
@@ -66,9 +73,13 @@ function run_maneli_car_inquiry_plugin() {
 run_maneli_car_inquiry_plugin();
 
 /**
- * Register the deactivation hook to clean up plugin data.
- * This calls a static method in the Maneli_Roles_Caps class to remove custom roles.
+ * Register activation and deactivation hooks
  */
+register_activation_hook(__FILE__, function() {
+    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-activator.php';
+    Maneli_Activator::activate();
+});
+
 register_deactivation_hook(__FILE__, function() {
     require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-roles-caps.php';
     Maneli_Roles_Caps::deactivate();

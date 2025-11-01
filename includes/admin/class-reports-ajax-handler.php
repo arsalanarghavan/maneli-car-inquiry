@@ -29,8 +29,8 @@ class Maneli_Reports_Ajax_Handler {
     public function get_overall_stats() {
         check_ajax_referer('maneli_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -50,8 +50,8 @@ class Maneli_Reports_Ajax_Handler {
     public function get_experts_stats() {
         check_ajax_referer('maneli_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -70,8 +70,8 @@ class Maneli_Reports_Ajax_Handler {
     public function get_daily_stats() {
         check_ajax_referer('maneli_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -91,8 +91,8 @@ class Maneli_Reports_Ajax_Handler {
     public function get_popular_products() {
         check_ajax_referer('maneli_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -113,8 +113,8 @@ class Maneli_Reports_Ajax_Handler {
     public function get_monthly_performance() {
         check_ajax_referer('maneli_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
         }
         
         $months = isset($_POST['months']) ? intval($_POST['months']) : 6;
@@ -133,8 +133,8 @@ class Maneli_Reports_Ajax_Handler {
     public function get_inquiries_details() {
         check_ajax_referer('maneli_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'دسترسی غیرمجاز']);
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
         }
         
         $args = [
@@ -162,8 +162,8 @@ class Maneli_Reports_Ajax_Handler {
     public function export_inquiries_csv() {
         check_ajax_referer('maneli_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_options')) {
-            wp_die('دسترسی غیرمجاز');
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_die(esc_html__('Unauthorized access.', 'maneli-car-inquiry'));
         }
         
         $args = [

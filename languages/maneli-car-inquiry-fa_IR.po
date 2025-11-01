@@ -1,9 +1,28 @@
+# Translation file for Maneli Car Inquiry Plugin
+# Copyright (C) 2024-2025 Maneli Khodro
+# This file is distributed under the same license as the Maneli Car Inquiry package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Maneli Car Inquiry 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 12:00+0330\n"
+"PO-Revision-Date: 2025-01-01 12:00+0330\n"
+"Last-Translator: Maneli Team <info@manelikhodro.com>\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+
 msgid "Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue."
-msgstr "افزونه استعلام خودرو مانلی نیاز به نصب و فعال‌سازی ووکامرس دارد. لطفاً ووکامرس را فعال کنید."
+msgstr "پلاگین استعلام خودرو مانلی نیازمند نصب و فعال‌سازی ووکامرس است. لطفاً ووکامرس را فعال کنید تا ادامه دهید."
 
 
 msgid "You do not have sufficient permissions to access this page."
-msgstr "شما اجازه کافی برای دسترسی به این صفحه را ندارید."
+msgstr "شما مجوز کافی برای دسترسی به این صفحه را ندارید."
 
 
 msgid "Unauthorized access."
@@ -11,7 +30,7 @@ msgstr "دسترسی غیرمجاز."
 
 
 msgid "Invalid request or insufficient permissions."
-msgstr "درخواست نامعتبر یا عدم دسترسی کافی."
+msgstr "درخواست نامعتبر یا مجوز ناکافی."
 
 
 msgid "Security check failed!"
@@ -19,17 +38,19 @@ msgstr "بررسی امنیتی ناموفق بود!"
 
 
 msgid "Login Required"
-msgstr "ورود به سیستم لازم است"
+msgstr "ورود الزامی است"
 
 
 msgid "Please log in to start your inquiry."
-msgstr "برای شروع استعلام وارد شوید."
+msgstr "لطفاً برای شروع استعلام خود وارد شوید."
 
 
 msgid "Log In"
 msgstr "ورود"
 
+
 # User Roles
+
 
 msgid "Customer"
 msgstr "مشتری"
@@ -46,7 +67,9 @@ msgstr "مدیر مانلی"
 msgid "General Manager"
 msgstr "مدیر کل"
 
+
 # Form Fields
+
 
 msgid "First Name"
 msgstr "نام"
@@ -93,19 +116,19 @@ msgstr "نوع شغل"
 
 
 msgid "Job Title:"
-msgstr "عنوان شغل:"
+msgstr "عنوان شغلی:"
 
 
 msgid "Issuer Job Title:"
-msgstr "عنوان شغل صادرکننده:"
+msgstr "عنوان شغلی صادرکننده:"
 
 
 msgid "Income Level"
-msgstr "میزان درآمد"
+msgstr "سطح درآمد"
 
 
 msgid "Residency Status"
-msgstr "وضعیت اقامت"
+msgstr "وضعیت سکونت"
 
 
 msgid "Workplace Status"
@@ -127,7 +150,9 @@ msgstr "کد شعبه"
 msgid "Branch Name"
 msgstr "نام شعبه"
 
+
 # Job Type Options
+
 
 msgid "Freelance"
 msgstr "آزاد"
@@ -136,7 +161,9 @@ msgstr "آزاد"
 msgid "Employee"
 msgstr "کارمند"
 
+
 # Residency Status Options
+
 
 msgid "Owner"
 msgstr "مالک"
@@ -145,16 +172,20 @@ msgstr "مالک"
 msgid "Tenant"
 msgstr "مستأجر"
 
+
 # Workplace Status Options
 
+
 msgid "Permanent"
-msgstr "دائمی"
+msgstr "دائم"
 
 
 msgid "Contract"
 msgstr "قراردادی"
 
+
 # Car and Product
+
 
 msgid "Car"
 msgstr "خودرو"
@@ -185,7 +216,7 @@ msgstr "پیش پرداخت"
 
 
 msgid "Min. Down Payment (Toman)"
-msgstr "حداقل پیش‌پرداخت (تومان)"
+msgstr "حداقل پیش پرداخت (تومان)"
 
 
 msgid "Loan Amount"
@@ -223,24 +254,28 @@ msgstr "تومان"
 msgid "Months"
 msgstr "ماه"
 
+
 # Time Periods
 
+
 msgid "12 Months"
-msgstr "۱۲ ماهه"
+msgstr "12 ماه"
 
 
 msgid "18 Months"
-msgstr "۱۸ ماهه"
+msgstr "18 ماه"
 
 
 msgid "24 Months"
-msgstr "۲۴ ماهه"
+msgstr "24 ماه"
 
 
 msgid "36 Months"
-msgstr "۳۶ ماهه"
+msgstr "36 ماه"
+
 
 # Status Messages
+
 
 msgid "Status"
 msgstr "وضعیت"
@@ -251,15 +286,15 @@ msgstr "در انتظار بررسی"
 
 
 msgid "Approved and Referred"
-msgstr "تأیید و ارجاع داده شد"
+msgstr "تایید شده و ارجاع داده شده"
 
 
 msgid "More Documents Required"
-msgstr "مدارک بیشتر لازم است"
+msgstr "نیاز به مدارک بیشتر"
 
 
 msgid "Rejected"
-msgstr "رد شد"
+msgstr "رد شده"
 
 
 msgid "Inquiry Failed"
@@ -267,15 +302,15 @@ msgstr "استعلام ناموفق"
 
 
 msgid "Unknown"
-msgstr "ناشناخته"
+msgstr "نامشخص"
 
 
 msgid "Follow-up in Progress"
-msgstr "در حال پیگیری"
+msgstr "پیگیری در حال انجام"
 
 
 msgid "Referred"
-msgstr "ارجاع داده شد"
+msgstr "ارجاع داده شده"
 
 
 msgid "Awaiting Payment"
@@ -285,7 +320,9 @@ msgstr "در انتظار پرداخت"
 msgid "Completed"
 msgstr "تکمیل شده"
 
+
 # Inquiry Types
+
 
 msgid "Installment Inquiries"
 msgstr "استعلام‌های اقساطی"
@@ -314,7 +351,9 @@ msgstr "درخواست نقدی"
 msgid "All Cash Requests"
 msgstr "همه درخواست‌های نقدی"
 
+
 # Cheque Information
+
 
 msgid "Cheque Issuer Information"
 msgstr "اطلاعات صادرکننده چک"
@@ -385,734 +424,788 @@ msgstr "نام شعبه صادرکننده:"
 
 
 msgid "Issuer Residency Status"
-msgstr "وضعیت اقامت صادرکننده"
+msgstr "وضعیت سکونت صادرکننده"
+
 
 # Form Steps
 
+
 msgid "Step 1: Select a Car"
-msgstr "مرحله ۱: انتخاب خودرو"
+msgstr ""
 
 
 msgid "Step 2: Complete Information"
-msgstr "مرحله ۲: تکمیل اطلاعات"
+msgstr ""
 
 
 msgid "Step 3: Confirm Car"
-msgstr "مرحله ۳: تایید خودرو"
+msgstr ""
 
 
 msgid "Step 4: Payment"
-msgstr "مرحله ۴: پرداخت"
+msgstr ""
 
 
 msgid "Step 5: Pending Review"
-msgstr "مرحله ۵: در انتظار بررسی"
+msgstr ""
 
 
 msgid "Step 6: Final Result"
-msgstr "مرحله ۶: نتیجه نهایی"
+msgstr ""
 
 
 msgid "Select Car"
-msgstr "انتخاب خودرو"
+msgstr ""
 
 
 msgid "Complete Information"
-msgstr "تکمیل اطلاعات"
+msgstr ""
 
 
 msgid "Confirm Car"
-msgstr "تایید خودرو"
+msgstr ""
 
 
 msgid "Payment"
-msgstr "پرداخت"
+msgstr ""
 
 
 msgid "Final Result"
-msgstr "نتیجه نهایی"
+msgstr ""
+
 
 # Progress Tracker
 
+
 msgid "Step %s"
-msgstr "مرحله %s"
+msgstr ""
+
 
 # Car Selection
 
+
 msgid "Your Request Summary"
-msgstr "خلاصه درخواست شما"
+msgstr ""
 
 
 msgid "Selected Car:"
-msgstr "خودروی انتخابی:"
+msgstr ""
 
 
 msgid "Car Model:"
-msgstr "مدل خودرو:"
+msgstr ""
 
 
 msgid "Total Price:"
-msgstr "قیمت کل:"
+msgstr ""
 
 
 msgid "Down Payment:"
-msgstr "پیش پرداخت:"
+msgstr ""
 
 
 msgid "Loan Amount:"
-msgstr "مبلغ وام:"
+msgstr ""
 
 
 msgid "Installment Term:"
-msgstr "مدت اقساط:"
+msgstr ""
 
 
 msgid "Approx. Installment:"
-msgstr "قسط تقریبی:"
+msgstr ""
+
 
 # Price Disclaimer
 
+
 msgid "Due to severe market fluctuations, car prices are approximate and may change until final approval."
-msgstr "به علت نوسانات شدید، قیمت خودروها تقریبی است و تا زمان تایید نهایی ممکن است تغییر کند."
+msgstr ""
+
 
 # Confirm Car Step
 
+
 msgid "The inquiry will be performed for the car below and cannot be changed."
-msgstr "استعلام برای خودروی زیر انجام می‌شود و قابل تغییر نیست."
+msgstr ""
 
 
 msgid "Your Selected Car"
-msgstr "خودروی انتخابی شما"
+msgstr ""
 
 
 msgid "Search…"
-msgstr "جستجو…"
+msgstr ""
 
 
 msgid "All Brands"
-msgstr "همه برندها"
+msgstr ""
 
 
 msgid "All Categories"
-msgstr "همه دسته‌بندی‌ها"
+msgstr ""
 
 
 msgid "Filter"
-msgstr "فیلتر"
+msgstr ""
 
 
 msgid "View Full Cars List"
-msgstr "مشاهده لیست کامل خودروها"
+msgstr ""
 
 
 msgid "I agree and confirm this car."
-msgstr "موافقم، همین خودرو را انتخاب می‌کنم."
+msgstr ""
 
 
 msgid "Previous Step"
-msgstr "مرحله قبل"
+msgstr ""
 
 
 msgid "Continue"
-msgstr "ادامه"
+msgstr ""
+
 
 # Payment
 
+
 msgid "Step 3: Payment of Inquiry Fee"
-msgstr "مرحله ۳: پرداخت هزینه استعلام"
+msgstr ""
 
 
 msgid "To finalize your request and send it to our experts, please pay the inquiry fee of %s Toman."
-msgstr "برای نهایی کردن درخواست و ارسال آن به کارشناسان ما، لطفاً هزینه استعلام به مبلغ %s تومان را پرداخت نمایید."
+msgstr ""
 
 
 msgid "Have a discount code?"
-msgstr "کد تخفیف دارید؟"
+msgstr ""
 
 
 msgid "Enter discount code:"
-msgstr "کد تخفیف را وارد کنید:"
+msgstr ""
 
 
 msgid "Discount Code"
-msgstr "کد تخفیف"
+msgstr ""
 
 
 msgid "Pay and Finalize Request"
-msgstr "پرداخت و نهایی کردن درخواست"
+msgstr ""
 
 
 msgid "Finalize Request"
-msgstr "نهایی کردن درخواست"
+msgstr ""
+
 
 # Wait Message
 
+
 msgid "Our experts require additional documents to complete the process. Please wait for our team to contact you."
-msgstr "کارشناسان ما برای تکمیل فرآیند نیاز به مدارک بیشتری دارند. لطفاً منتظر تماس تیم ما باشید."
+msgstr ""
 
 
 msgid "Your inquiry request has been successfully submitted. You will be notified of the result after it has been reviewed by our experts (usually within 24 business hours)."
-msgstr "درخواست استعلام شما با موفقیت ثبت شد. پس از بررسی کارشناسان (معمولاً ظرف ۲۴ ساعت کاری)، نتیجه به شما اطلاع داده خواهد شد."
+msgstr ""
 
 
 msgid "Step 4: Pending Review"
-msgstr "مرحله ۴: در انتظار بررسی"
+msgstr ""
 
 
 msgid "Thank you for your patience."
-msgstr "از صبوری شما سپاسگزاریم."
+msgstr ""
+
 
 # Final Report
 
+
 msgid "Step 5: Final Result"
-msgstr "مرحله ۵: نتیجه نهایی"
+msgstr ""
 
 
 msgid "Final Result: Your request has been approved."
-msgstr "نتیجه نهایی: درخواست شما تأیید شد."
+msgstr ""
 
 
 msgid "Your request has been approved by our experts and referred to the sales unit. One of our colleagues will contact you soon for final coordination."
-msgstr "درخواست شما توسط کارشناسان تأیید شده و به واحد فروش ارجاع گردید. به زودی برای هماهنگی نهایی با شما تماس گرفته خواهد شد."
+msgstr ""
 
 
 msgid "Final Result: Your request has been rejected."
-msgstr "نتیجه نهایی: درخواست شما رد شد."
+msgstr ""
 
 
 msgid "Reason:"
-msgstr "دلیل:"
+msgstr ""
 
 
 msgid "Request Summary"
-msgstr "خلاصه درخواست"
+msgstr ""
 
 
 msgid "Credit Verification Result"
-msgstr "نتیجه اعتبارسنجی"
+msgstr ""
 
 
 msgid "Sayad Cheque Status:"
-msgstr "وضعیت چک صیادی:"
+msgstr ""
 
 
 msgid "Status Explanation:"
-msgstr "توضیح وضعیت:"
+msgstr ""
 
 
 msgid "Bank inquiry was not performed."
-msgstr "استعلام بانکی انجام نشد."
+msgstr ""
+
 
 # Failed Inquiry
 
+
 msgid "Inquiry Unsuccessful"
-msgstr "استعلام ناموفق"
+msgstr ""
 
 
 msgid "Unfortunately, an error occurred while attempting to retrieve your inquiry from the banking system. This issue could be due to incorrect identity information or temporary system problems."
-msgstr "متأسفانه، هنگام تلاش برای دریافت استعلام شما از سیستم بانکی خطایی رخ داد. این مشکل می‌تواند به دلیل اطلاعات هویتی نادرست یا مشکلات موقت سیستم باشد."
+msgstr ""
 
 
 msgid "You can edit your information and try again."
-msgstr "شما می‌توانید اطلاعات خود را ویرایش کرده و دوباره تلاش کنید."
+msgstr ""
 
 
 msgid "Retry and Correct Information"
-msgstr "تلاش مجدد و اصلاح اطلاعات"
+msgstr ""
+
 
 # Expert Panel
 
+
 msgid "New inquiry has been successfully created for the customer."
-msgstr "استعلام جدید با موفقیت برای مشتری ایجاد شد."
+msgstr ""
 
 
 msgid "1. Select Car and Conditions"
-msgstr "۱. انتخاب خودرو و شرایط"
+msgstr ""
 
 
 msgid "Search for a Car"
-msgstr "جستجوی خودرو"
+msgstr ""
 
 
 msgid "Start typing to search for a car..."
-msgstr "شروع به تایپ برای جستجوی خودرو..."
+msgstr ""
 
 
 msgid "Assign Responsible Expert"
-msgstr "تخصیص کارشناس مسئول"
+msgstr ""
 
 
 msgid "-- Automatic Assignment (Round-robin) --"
-msgstr "-- تخصیص خودکار (چرخشی) --"
+msgstr ""
 
 
 msgid "If not selected, the system will automatically assign an expert."
-msgstr "در صورت عدم انتخاب، سیستم به صورت خودکار یک کارشناس را تخصیص می‌دهد."
+msgstr ""
 
 
 msgid "2. Identity Information"
-msgstr "۲. اطلاعات هویتی"
+msgstr ""
 
 
 msgid "Buyer and cheque issuer are the same person."
-msgstr "خریدار و صادرکننده چک یک نفر هستند."
+msgstr ""
 
 
 msgid "Buyer Information Form"
-msgstr "فرم اطلاعات خریدار"
+msgstr ""
 
 
 msgid "Cheque Issuer Information Form"
-msgstr "فرم اطلاعات صادرکننده چک"
+msgstr ""
 
 
 msgid "Submit Inquiry and Create User"
-msgstr "ثبت استعلام و ایجاد کاربر"
+msgstr ""
+
 
 # Payment Status
 
+
 msgid "Your payment was successful. Your request has been submitted to our experts."
-msgstr "پرداخت شما موفقیت‌آمیز بود. درخواست شما برای کارشناسان ما ارسال شد."
+msgstr ""
 
 
 msgid "Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours."
-msgstr "متأسفانه تراکنش شما ناموفق بود. اگر مبلغی کسر شده باشد، ظرف ۷۲ ساعت به حساب شما بازخواهد گشت."
+msgstr ""
 
 
 msgid "You have cancelled the payment. Your request has not been finalized yet."
-msgstr "شما پرداخت را لغو کردید. درخواست شما هنوز نهایی نشده است."
+msgstr ""
+
 
 # Lists and Reports
 
+
 msgid "Complete List of Inquiries"
-msgstr "فهرست کامل استعلام‌ها"
+msgstr ""
 
 
 msgid "Your Installment Inquiries List"
-msgstr "لیست استعلام‌های اقساطی شما"
+msgstr ""
 
 
 msgid "Your Cash Purchase Requests"
-msgstr "درخواست‌های خرید نقدی شما"
+msgstr ""
 
 
 msgid "Cash Purchase Requests List"
-msgstr "لیست درخواست‌های خرید نقدی"
+msgstr ""
 
 
 msgid "Installment Request Report #%d - %s"
-msgstr "گزارش درخواست اقساطی #%d - %s"
+msgstr ""
 
 
 msgid "Cash Purchase Request Details"
-msgstr "جزئیات درخواست خرید نقدی"
+msgstr ""
+
 
 # Search and Filters
 
+
 msgid "Search by customer name, car name, national ID or mobile..."
-msgstr "جستجو بر اساس نام مشتری، نام خودرو، کد ملی یا موبایل..."
+msgstr ""
 
 
 msgid "Search by customer name, car name, or mobile..."
-msgstr "جستجو بر اساس نام مشتری، نام خودرو یا موبایل..."
+msgstr ""
 
 
 msgid "Search by name, email, mobile, or national ID..."
-msgstr "جستجو بر اساس نام، ایمیل، موبایل یا کد ملی..."
+msgstr ""
 
 
 msgid "All Statuses"
-msgstr "همه وضعیت‌ها"
+msgstr ""
 
 
 msgid "All Experts"
-msgstr "همه کارشناسان"
+msgstr ""
 
 
 msgid "All Roles"
-msgstr "همه نقش‌ها"
+msgstr ""
+
 
 # Table Headers
 
+
 msgid "ID"
-msgstr "شناسه"
+msgstr ""
 
 
 msgid "Mobile"
-msgstr "موبایل"
+msgstr ""
 
 
 msgid "Assigned"
-msgstr "تخصیص داده شده"
+msgstr ""
 
 
 msgid "Date"
-msgstr "تاریخ"
+msgstr ""
 
 
 msgid "Actions"
-msgstr "عملیات"
+msgstr ""
 
 
 msgid "Display Name"
-msgstr "نام نمایشی"
+msgstr ""
 
 
 msgid "Username"
-msgstr "نام کاربری"
+msgstr ""
 
 
 msgid "Role"
-msgstr "نقش"
+msgstr ""
 
 
 msgid "Registration Date"
-msgstr "تاریخ ثبت نام"
+msgstr ""
+
 
 # Current Status
 
+
 msgid "Current Status:"
-msgstr "وضعیت فعلی:"
+msgstr ""
 
 
 msgid "Assigned Expert:"
-msgstr "کارشناس تخصیص داده شده:"
+msgstr ""
 
 
 msgid "Reason for Rejection:"
-msgstr "دلیل رد:"
+msgstr ""
+
 
 # Actions
 
+
 msgid "View Details"
-msgstr "مشاهده جزئیات"
+msgstr ""
 
 
 msgid "Edit Information"
-msgstr "ویرایش اطلاعات"
+msgstr ""
 
 
 msgid "Delete Request"
-msgstr "حذف درخواست"
+msgstr ""
 
 
 msgid "Assign"
-msgstr "تخصیص"
+msgstr ""
 
 
 msgid "Assign to Expert"
-msgstr "تخصیص به کارشناس"
+msgstr ""
 
 
 msgid "Set Down Payment"
-msgstr "تعیین پیش پرداخت"
+msgstr ""
 
 
 msgid "Reject Request"
-msgstr "رد درخواست"
+msgstr ""
 
 
 msgid "View Customer Payment Link"
-msgstr "مشاهده لینک پرداخت مشتری"
+msgstr ""
 
 
 msgid "Back to List"
-msgstr "بازگشت به لیست"
+msgstr ""
 
 
 msgid "Back to Inquiry List"
-msgstr "بازگشت به لیست استعلام‌ها"
+msgstr ""
 
 
 msgid "Back to Requests List"
-msgstr "بازگشت به لیست درخواست‌ها"
+msgstr ""
+
 
 # Request Information
 
+
 msgid "Request Information"
-msgstr "اطلاعات درخواست"
+msgstr ""
 
 
 msgid "Customer Name"
-msgstr "نام مشتری"
+msgstr ""
 
 
 msgid "National ID"
-msgstr "کد ملی"
+msgstr ""
 
 
 msgid "Assigned Expert"
-msgstr "کارشناس تخصیص داده شده"
+msgstr ""
 
 
 msgid "Requested Color"
-msgstr "رنگ درخواستی"
+msgstr ""
 
 
 msgid "Down Payment Amount"
-msgstr "مبلغ پیش پرداخت"
+msgstr ""
 
 
 msgid "Rejection Reason"
-msgstr "دلیل رد"
+msgstr ""
 
 
 msgid "Notes"
-msgstr "ملاحظات"
+msgstr ""
+
 
 # Loan and Car Details
 
+
 msgid "Loan and Car Details"
-msgstr "جزئیات وام و خودرو"
+msgstr ""
 
 
 msgid "Selected Car"
-msgstr "خودروی انتخابی"
+msgstr ""
 
 
 msgid "Date Submitted"
-msgstr "تاریخ ثبت"
+msgstr ""
+
 
 # Applicant and Expert Details
 
+
 msgid "Applicant and Expert Details"
-msgstr "جزئیات متقاضی و کارشناس"
+msgstr ""
 
 
 msgid "Cheque Issuer: Another Person"
-msgstr "صادرکننده چک: شخص دیگر"
+msgstr ""
 
 
 msgid "Issuer National ID"
-msgstr "کد ملی صادرکننده"
+msgstr ""
 
 
 msgid "Cheque Issuer"
-msgstr "صادرکننده چک"
+msgstr ""
 
 
 msgid "Same as Applicant"
-msgstr "همان متقاضی"
+msgstr ""
+
 
 # Credit Verification
 
+
 msgid "Credit Verification Result (Finotex)"
-msgstr "نتیجه اعتبارسنجی (فینوتکس)"
+msgstr ""
 
 
 msgid "Bank inquiry was not performed or failed to return data."
-msgstr "استعلام بانکی انجام نشد یا در دریافت داده‌ها ناموفق بود."
+msgstr ""
+
 
 # Rejection Reasons
 
+
 msgid "Please specify the reason for rejecting this request. This reason will be shown to the user."
-msgstr "لطفاً دلیل رد این درخواست را مشخص کنید. این دلیل به کاربر نمایش داده خواهد شد."
+msgstr ""
 
 
 msgid "Please specify the reason for rejecting this request. This reason will be sent to the user via SMS."
-msgstr "لطفاً دلیل رد این درخواست را مشخص کنید. این دلیل از طریق پیامک برای کاربر ارسال خواهد شد."
+msgstr ""
 
 
 msgid "Select a reason:"
-msgstr "انتخاب دلیل:"
+msgstr ""
 
 
 msgid "-- Select a reason --"
-msgstr "-- انتخاب دلیل --"
+msgstr ""
 
 
 msgid "Other reason (write in the box below)"
-msgstr "دلیل دیگر (در کادر زیر بنویسید)"
+msgstr ""
 
 
 msgid "Custom Text:"
-msgstr "متن دلخواه:"
+msgstr ""
 
 
 msgid "Submit Reason and Reject Request"
-msgstr "ثبت دلیل و رد درخواست"
+msgstr ""
+
 
 # Final Actions
 
+
 msgid "Final Approval & Refer to Sales"
-msgstr "تأیید نهایی و ارجاع به فروش"
+msgstr ""
 
 
 msgid "Assign Expert"
-msgstr "تخصیص کارشناس"
+msgstr ""
 
 
 msgid "Retry Finotex Inquiry"
-msgstr "تلاش مجدد استعلام فینوتکس"
+msgstr ""
 
 
 msgid "Request More Documents"
-msgstr "درخواست مدارک بیشتر"
+msgstr ""
+
 
 # Action Required
 
+
 msgid "Action Required"
-msgstr "عملیات مورد نیاز"
+msgstr ""
 
 
 msgid "Please note: Prices are approximate and the final price of the car will be determined by the daily rate at the time the down payment is made."
-msgstr "توجه: قیمت‌ها تقریبی هستند و قیمت نهایی خودرو بر اساس نرخ روز در زمان پرداخت پیش‌پرداخت تعیین خواهد شد."
+msgstr ""
 
 
 msgid "Your down payment has been set. To finalize your purchase, please proceed to the payment gateway via the button below."
-msgstr "مبلغ پیش‌پرداخت شما تعیین شده است. برای نهایی کردن خرید، لطفاً از طریق دکمه زیر به درگاه پرداخت مراجعه کنید."
+msgstr ""
 
 
 msgid "Proceed to Payment Gateway"
-msgstr "مراجعه به درگاه پرداخت"
+msgstr ""
+
 
 # Messages
 
+
 msgid "You have not submitted any installment inquiries yet."
-msgstr "شما هنوز هیچ استعلام اقساطی ثبت نکرده‌اید."
+msgstr ""
 
 
 msgid "You have not submitted any cash purchase requests yet."
-msgstr "شما هنوز هیچ درخواست خرید نقدی ثبت نکرده‌اید."
+msgstr ""
 
 
 msgid "Please note: Quoted prices are approximate. The final price will be determined based on the market rate at the time of the down payment."
-msgstr "توجه: قیمت‌های اعلام شده تقریبی است. قیمت نهایی بر اساس نرخ روز در زمان پرداخت پیش‌پرداخت مشخص خواهد شد."
+msgstr ""
+
 
 # System Messages
 
+
 msgid "No inquiries found."
-msgstr "استعلامی یافت نشد."
+msgstr ""
 
 
 msgid "No users found."
-msgstr "کاربری یافت نشد."
+msgstr ""
 
 
 msgid "No products found."
-msgstr "محصولی یافت نشد."
+msgstr ""
 
 
 msgid "N/A"
-msgstr "نامشخص"
+msgstr ""
 
 
 msgid "Not set"
-msgstr "تنظیم نشده"
+msgstr ""
 
 
 msgid "No experts are currently registered."
-msgstr "در حال حاضر هیچ کارشناسی ثبت نشده است."
+msgstr ""
+
 
 # Success Messages
 
+
 msgid "Inquiry deleted successfully."
-msgstr "استعلام با موفقیت حذف شد."
+msgstr ""
 
 
 msgid "Request updated successfully."
-msgstr "درخواست با موفقیت به‌روزرسانی شد."
+msgstr ""
 
 
 msgid "Request deleted successfully."
-msgstr "درخواست با موفقیت حذف شد."
+msgstr ""
 
 
 msgid "Status changed successfully."
-msgstr "وضعیت با موفقیت تغییر یافت."
+msgstr ""
 
 
 msgid "Inquiry successfully assigned to %s."
-msgstr "استعلام با موفقیت به %s ارجاع شد."
+msgstr ""
 
 
 msgid "Request successfully assigned to %s."
-msgstr "درخواست با موفقیت به %s ارجاع شد."
+msgstr ""
 
 
 msgid "User information updated successfully."
-msgstr "اطلاعات کاربر با موفقیت به‌روزرسانی شد."
+msgstr ""
 
 
 msgid "New user created successfully."
-msgstr "کاربر جدید با موفقیت ایجاد شد."
+msgstr ""
 
 
 msgid "User deleted successfully."
-msgstr "کاربر با موفقیت حذف شد."
+msgstr ""
 
 
 msgid "Settings saved successfully."
-msgstr "تنظیمات با موفقیت ذخیره شد."
+msgstr ""
+
 
 # Error Messages
 
+
 msgid "Error deleting inquiry."
-msgstr "خطا در حذف استعلام."
+msgstr ""
 
 
 msgid "Error deleting request."
-msgstr "خطا در حذف درخواست."
+msgstr ""
 
 
 msgid "Error deleting user."
-msgstr "خطا در حذف کاربر."
+msgstr ""
 
 
 msgid "An error occurred while deleting the user."
-msgstr "هنگام حذف کاربر خطایی رخ داد."
+msgstr ""
 
 
 msgid "Invalid inquiry ID."
-msgstr "شناسه استعلام نامعتبر."
+msgstr ""
 
 
 msgid "Invalid request ID."
-msgstr "شناسه درخواست نامعتبر."
+msgstr ""
 
 
 msgid "Invalid data sent."
-msgstr "داده نامعتبر ارسال شد."
+msgstr ""
 
 
 msgid "Invalid data submitted."
-msgstr "داده ارسالی نامعتبر است."
+msgstr ""
 
 
 msgid "Invalid status provided."
-msgstr "وضعیت نامعتبر ارائه شد."
+msgstr ""
 
 
 msgid "Invalid inquiry type."
-msgstr "نوع استعلام نامعتبر است."
+msgstr ""
 
 
 msgid "Invalid field type."
-msgstr "نوع فیلد نامعتبر است."
+msgstr ""
 
 
 msgid "Invalid amount."
-msgstr "مبلغ نامعتبر."
+msgstr ""
 
 
 msgid "Please enter a valid amount."
-msgstr "لطفاً مبلغ معتبری وارد کنید."
+msgstr ""
 
 
 msgid "A reason for rejection is required."
-msgstr "دلیل رد درخواست الزامی است."
+msgstr ""
 
 
 msgid "You do not have permission to perform this action."
-msgstr "شما اجازه انجام این عمل را ندارید."
+msgstr ""
 
 
 msgid "You do not have permission to view this report."
-msgstr "شما اجازه مشاهده این گزارش را ندارید."
+msgstr ""
 
 
 msgid "Please select a car."
-msgstr "لطفاً یک خودرو انتخاب کنید."
+msgstr ""
 
 
 msgid "Error: The field \"%s\" for the buyer is required."
@@ -1120,304 +1213,322 @@ msgstr "خطا: فیلد «%s» برای خریدار الزامی است."
 
 
 msgid "Error creating new user: "
-msgstr "خطا در ایجاد کاربر جدید: "
+msgstr ""
 
 
 msgid "Error creating inquiry post."
-msgstr "خطا در ایجاد پست استعلام."
+msgstr ""
 
 
 msgid "User ID not specified."
-msgstr "شناسه کاربری مشخص نشده است."
+msgstr ""
 
 
 msgid "You cannot change your own administrative role to a lower-level role."
-msgstr "شما نمی‌توانید نقش مدیریتی خود را به نقش سطح پایین‌تر تغییر دهید."
+msgstr ""
 
 
 msgid "Mobile number and password are required."
-msgstr "شماره موبایل و رمز عبور الزامی هستند."
+msgstr ""
 
 
 msgid "A user with this mobile number already exists."
-msgstr "کاربری با این شماره موبایل از قبل وجود دارد."
+msgstr ""
 
 
 msgid "An email associated with this mobile number already exists."
-msgstr "ایمیلی مرتبط با این شماره موبایل از قبل وجود دارد."
+msgstr ""
 
 
 msgid "No experts found for automatic assignment."
-msgstr "کارشناسی برای تخصیص خودکار یافت نشد."
+msgstr ""
 
 
 msgid "The selected expert is not valid."
-msgstr "کارشناس انتخاب شده معتبر نیست."
+msgstr ""
 
 
 msgid "No inquiries found matching your criteria."
-msgstr "هیچ استعلامی مطابق با معیارهای شما یافت نشد."
+msgstr ""
 
 
 msgid "No requests found."
-msgstr "هیچ درخواستی یافت نشد."
+msgstr ""
 
 
 msgid "No users found matching your criteria."
-msgstr "هیچ کاربری مطابق با معیارهای شما یافت نشد."
+msgstr ""
 
 
 msgid "No products found matching your criteria."
-msgstr "هیچ محصولی مطابق با معیارهای شما یافت نشد."
+msgstr ""
 
 
 msgid "You cannot delete your own account."
-msgstr "شما نمی‌توانید حساب کاربری خود را حذف کنید."
+msgstr ""
 
 
 msgid "Product not found."
-msgstr "محصول یافت نشد."
+msgstr ""
 
 
 msgid "Inquiry not found or you do not have permission to view it."
-msgstr "استعلام یافت نشد یا شما اجازه مشاهده آن را ندارید."
+msgstr ""
 
 
 msgid "The requested user was not found."
-msgstr "کاربر درخواستی یافت نشد."
+msgstr ""
+
 
 # Pagination
 
+
 msgid "&laquo; Previous"
-msgstr "« قبلی"
+msgstr ""
 
 
 msgid "Next &raquo;"
-msgstr "بعدی »"
+msgstr ""
+
 
 # Updated
 
+
 msgid "Updated."
-msgstr "به‌روزرسانی شد."
+msgstr ""
+
 
 # Select Options
 
+
 msgid "-- Select --"
-msgstr "-- انتخاب کنید --"
+msgstr ""
 
 
 msgid "-- Select a color --"
-msgstr "-- انتخاب رنگ --"
+msgstr ""
+
 
 # Examples
 
+
 msgid "e.g., 1365/04/15"
-msgstr "مثال: ۱۳۶۵/۰۴/۱۵"
+msgstr ""
 
 
 msgid "e.g., 09123456789"
-msgstr "مثلاً: ۰۹۱۲۳۴۵۶۷۸۹"
+msgstr ""
 
 
 msgid "e.g., 09129876543"
-msgstr "مثلاً: ۰۹۱۲۹۸۷۶۵۴۳"
+msgstr ""
 
 
 msgid "e.g., White, Black, Silver"
-msgstr "مثلاً: سفید، مشکی، نقره‌ای"
+msgstr ""
 
 
 msgid "10-digit national ID"
-msgstr "کد ملی ۱۰ رقمی"
+msgstr ""
+
 
 # Calculator
 
+
 msgid "Installment Sale"
-msgstr "فروش اقساطی"
+msgstr ""
 
 
 msgid "Cash Sale"
-msgstr "فروش نقدی"
+msgstr ""
 
 
 msgid "Cash Purchase Request"
-msgstr "درخواست خرید نقدی"
+msgstr ""
 
 
 msgid "First Name:"
-msgstr "نام:"
+msgstr ""
 
 
 msgid "Last Name:"
-msgstr "نام خانوادگی:"
+msgstr ""
 
 
 msgid "Mobile Number:"
-msgstr "شماره موبایل:"
+msgstr ""
 
 
 msgid "Car Color:"
-msgstr "رنگ خودرو:"
+msgstr ""
 
 
 msgid "Enter your desired color"
-msgstr "رنگ دلخواه خود را وارد کنید"
+msgstr ""
 
 
 msgid "The listed price is approximate. Due to market fluctuations, the final price will be determined upon down payment."
-msgstr "قیمت درج شده تقریبی است. با توجه به نوسانات بازار، قیمت نهایی در زمان پرداخت پیش‌پرداخت مشخص خواهد شد."
+msgstr ""
 
 
 msgid "Approximate Price:"
-msgstr "قیمت تقریبی:"
+msgstr ""
 
 
 msgid "Submit Price Inquiry Request"
-msgstr "ثبت درخواست استعلام قیمت"
+msgstr ""
 
 
 msgid "To submit a cash purchase request, please log in to your account first."
-msgstr "برای ثبت درخواست خرید نقدی، ابتدا وارد حساب کاربری خود شوید."
+msgstr ""
 
 
 msgid "Login and Submit Request"
-msgstr "ورود و ثبت درخواست"
+msgstr ""
 
 
 msgid "Budgeting and Installment Calculation"
-msgstr "بودجه‌بندی و محاسبه اقساط"
+msgstr ""
 
 
 msgid "Down Payment Amount:"
-msgstr "مبلغ پیش پرداخت:"
+msgstr ""
 
 
 msgid "Minimum Down Payment:"
-msgstr "حداقل پیش پرداخت:"
+msgstr ""
 
 
 msgid "Required Conditions"
-msgstr "شرایط مورد نیاز"
+msgstr ""
 
 
 msgid "1. ID Card - National ID Card"
-msgstr "۱. کارت شناسایی - کارت ملی"
+msgstr ""
 
 
 msgid "2. Chequebook"
-msgstr "۲. دسته‌چک صیادی"
+msgstr ""
 
 
 msgid "3. Last 3-month bank statement (cheque owner)"
-msgstr "۳. گردش حساب ۳ ماه اخیر (صادرکننده چک)"
+msgstr ""
 
 
 msgid "4. Payslip or business license (applicant and cheque owner)"
-msgstr "۴. فیش حقوقی یا جواز کسب (متقاضی و صادرکننده چک)"
+msgstr ""
 
 
 msgid "Repayment Period:"
-msgstr "مدت بازپرداخت:"
+msgstr ""
 
 
 msgid "Bank Credit Check for Car Purchase"
-msgstr "استعلام سنجی بانکی جهت خرید خودرو"
+msgstr ""
 
 
 msgid "Log in to Start Inquiry"
-msgstr "برای شروع استعلام وارد شوید"
+msgstr ""
 
 
 msgid "This car is currently unavailable for purchase."
-msgstr "این خودرو در حال حاضر برای خرید موجود نیست."
+msgstr ""
+
 
 # Product Editor
 
+
 msgid "Car Price & Status"
-msgstr "قیمت و وضعیت خودرو"
+msgstr ""
 
 
 msgid "On this page, you can quickly change the price and sales status of products. Changes are saved automatically."
-msgstr "در این صفحه می‌توانید قیمت و وضعیت فروش محصولات را به سرعت تغییر دهید. تغییرات به صورت خودکار ذخیره می‌شوند."
+msgstr ""
 
 
 msgid "Available Colors (comma-separated)"
-msgstr "رنگ‌های موجود (با کاما جدا شود)"
+msgstr ""
 
 
 msgid "Error:"
-msgstr "خطا:"
+msgstr ""
 
 
 msgid "To use this plugin, please install and activate WooCommerce first."
-msgstr "برای استفاده از این افزونه، ابتدا ووکامرس را نصب و فعال کنید."
+msgstr ""
 
 
 msgid "Car Price & Status List"
-msgstr "لیست قیمت و وضعیت خودرو"
+msgstr ""
 
 
 msgid "Search car name..."
-msgstr "جستجوی نام خودرو..."
+msgstr ""
+
 
 # Sales Status Options
 
+
 msgid "Special Sale (Active)"
-msgstr "فروش ویژه (فعال)"
+msgstr ""
 
 
 msgid "Unavailable (Show in site)"
-msgstr "ناموجود (نمایش در سایت)"
+msgstr ""
 
 
 msgid "Disabled (Hide from site)"
-msgstr "غیرفعال (پنهان از سایت)"
+msgstr ""
+
 
 # System Report
 
+
 msgid "General System Reports"
-msgstr "گزارشات کلی سیستم"
+msgstr ""
 
 
 msgid "Latest Registered Inquiries"
-msgstr "جدیدترین استعلام‌های ثبت شده"
+msgstr ""
 
 
 msgid "Latest Registered Users"
-msgstr "جدیدترین کاربران ثبت نام شده"
+msgstr ""
+
 
 # User Management
 
+
 msgid "Complete User List"
-msgstr "فهرست کامل کاربران"
+msgstr ""
 
 
 msgid "Add New User"
-msgstr "افزودن کاربر جدید"
+msgstr ""
 
 
 msgid "User Role:"
-msgstr "نقش کاربر:"
+msgstr ""
 
 
 msgid "Order By:"
-msgstr "مرتب‌سازی بر اساس:"
+msgstr ""
 
 
 msgid "Order:"
-msgstr "ترتیب:"
+msgstr ""
 
 
 msgid "Ascending"
-msgstr "صعودی"
+msgstr ""
 
 
 msgid "Descending"
-msgstr "نزولی"
+msgstr ""
 
 
 msgid "Editing User: %s"
-msgstr "ویرایش کاربر: %s"
+msgstr ""
 
 
 msgid "The new user will be created with the default \"Customer\" role. The username and email will be automatically generated based on the mobile number."
@@ -1425,413 +1536,425 @@ msgstr "کاربر جدید با نقش پیش‌فرض «مشتری» ایجا�
 
 
 msgid "Mobile Number (Required):"
-msgstr "شماره موبایل (الزامی):"
+msgstr ""
 
 
 msgid "Password (Required):"
-msgstr "رمز عبور (الزامی):"
+msgstr ""
 
 
 msgid "Supplementary Information"
-msgstr "اطلاعات تکمیلی"
+msgstr ""
 
 
 msgid "Create User"
-msgstr "ایجاد کاربر"
+msgstr ""
 
 
 msgid "Cancel"
-msgstr "انصراف"
+msgstr ""
 
 
 msgid "Save Changes"
-msgstr "ذخیره تغییرات"
+msgstr ""
+
 
 # Settings
 
+
 msgid "Expert Name"
-msgstr "نام کارشناس"
+msgstr ""
 
 
 msgid "Name"
-msgstr "نام"
+msgstr ""
+
 
 # Dashboard Widgets
 
+
 msgid "Installment Inquiry Statistics"
-msgstr "آمار استعلام‌های اقساطی"
+msgstr ""
 
 
 msgid "Cash Inquiry Statistics"
-msgstr "آمار درخواست‌های نقدی"
+msgstr ""
 
 
 msgid "User Statistics"
-msgstr "آمار کاربران"
+msgstr ""
 
 
 msgid "Product Statistics"
-msgstr "آمار محصولات"
+msgstr ""
 
 
 msgid "Total Inquiries"
-msgstr "کل استعلام‌ها"
+msgstr ""
 
 
 msgid "Docs Req."
-msgstr "مدارک لازم"
+msgstr ""
 
 
 msgid "Total Cash Requests"
-msgstr "کل درخواست‌های نقدی"
+msgstr ""
 
 
 msgid "Total Users"
-msgstr "کل کاربران"
+msgstr ""
 
 
 msgid "Maneli Experts"
-msgstr "کارشناسان مانلی"
+msgstr ""
 
 
 msgid "Managers"
-msgstr "مدیران"
+msgstr ""
 
 
 msgid "Total Products"
-msgstr "کل محصولات"
+msgstr ""
 
 
 msgid "Active for Sale"
-msgstr "فعال برای فروش"
+msgstr ""
 
 
 msgid "Unavailable"
-msgstr "ناموجود"
+msgstr ""
 
 
 msgid "Hidden Products"
-msgstr "محصولات پنهان"
+msgstr ""
+
 
 # Credit Report
 
+
 msgid "Full Credit Report"
-msgstr "گزارش کامل اعتباری"
+msgstr ""
 
 
 msgid "for Inquiry #%d"
-msgstr "برای استعلام شماره #%d"
+msgstr ""
 
 
 msgid "Requested Car"
-msgstr "خودروی درخواستی"
+msgstr ""
 
 
 msgid "No image has been set for this product."
-msgstr "تصویری برای این محصول تنظیم نشده است."
+msgstr ""
 
 
 msgid "Installment Amount"
-msgstr "مبلغ قسط"
+msgstr ""
 
 
 msgid "Personal Information"
-msgstr "اطلاعات فردی"
+msgstr ""
 
 
 msgid "Buyer Name"
-msgstr "نام خریدار"
+msgstr ""
 
 
 msgid "Buyer Last Name"
-msgstr "نام خانوادگی خریدار"
+msgstr ""
 
 
 msgid "Buyer National Code"
-msgstr "کد ملی خریدار"
+msgstr ""
 
 
 msgid "Buyer Father's Name"
-msgstr "نام پدر خریدار"
+msgstr ""
 
 
 msgid "Buyer Date of Birth"
-msgstr "تاریخ تولد خریدار"
+msgstr ""
 
 
 msgid "Buyer Mobile Number"
-msgstr "شماره موبایل خریدار"
+msgstr ""
 
 
 msgid "Cheque Status Inquiry Result (Sayadi)"
-msgstr "نتیجه استعلام وضعیت چک (صیادی)"
+msgstr ""
 
 
 msgid "White"
-msgstr "سفید"
+msgstr ""
 
 
 msgid "Yellow"
-msgstr "زرد"
+msgstr ""
 
 
 msgid "Orange"
-msgstr "نارنجی"
+msgstr ""
 
 
 msgid "Brown"
-msgstr "قهوه‌ای"
+msgstr ""
 
 
 msgid "Red"
-msgstr "قرمز"
+msgstr ""
 
 
 msgid "Credit Status"
-msgstr "وضعیت اعتباری"
+msgstr ""
 
 
 msgid "Description"
-msgstr "توضیحات"
+msgstr ""
 
 
 msgid "No history of bounced cheques."
-msgstr "عدم سابقه چک برگشتی."
+msgstr ""
 
 
 msgid "One bounced cheque or a maximum of 50 million Rials in returned commitments."
-msgstr "یک فقره چک برگشتی یا حداکثر ۵۰ میلیون ریال تعهدات برگشتی."
+msgstr ""
 
 
 msgid "Two to four bounced cheques or a maximum of 200 million Rials in returned commitments."
-msgstr "دو تا چهار فقره چک برگشتی یا حداکثر ۲۰۰ میلیون ریال تعهدات برگشتی."
+msgstr ""
 
 
 msgid "Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments."
-msgstr "پنج تا ده فقره چک برگشتی یا حداکثر ۵۰۰ میلیون ریال تعهدات برگشتی."
+msgstr ""
 
 
 msgid "More than ten bounced cheques or more than 500 million Rials in returned commitments."
-msgstr "بیش از ده فقره چک برگشتی یا بیش از ۵۰۰ میلیون ریال تعهدات برگشتی."
+msgstr ""
 
 
 msgid "Undetermined"
-msgstr "نامشخص"
+msgstr ""
 
 
 msgid "Information was not received from Finotex or the inquiry was unsuccessful."
-msgstr "اطلاعاتی از فینوتکس دریافت نشد یا استعلام ناموفق بود."
+msgstr ""
 
 
 msgid "Raw Service Response:"
-msgstr "پاسخ خام سرویس:"
+msgstr ""
 
 
 msgid "Final Decision"
-msgstr "تصمیم نهایی"
+msgstr ""
 
 
 msgid "After reviewing the information above, specify the final status of this request."
-msgstr "پس از بررسی اطلاعات بالا، وضعیت نهایی این درخواست را مشخص کنید."
+msgstr ""
 
 
 msgid "Approve and Assign to Expert"
-msgstr "تأیید و ارجاع به کارشناس"
+msgstr ""
 
 
 msgid "Final Rejection of Request"
-msgstr "رد نهایی درخواست"
+msgstr ""
 
 
 msgid "Reason for Rejection"
-msgstr "دلیل رد"
+msgstr ""
 
 
 msgid "Applicant Information"
-msgstr "اطلاعات متقاضی"
+msgstr ""
 
 
 msgid "Issuer Name"
-msgstr "نام صادرکننده"
+msgstr ""
 
 
 msgid "Issuer National Code"
-msgstr "کد ملی صادرکننده"
+msgstr ""
 
 
 msgid "Car and Installment Details"
-msgstr "جزئیات خودرو و اقساط"
+msgstr ""
 
 
 msgid "Your request has been successfully submitted. We will contact you soon."
-msgstr "درخواست شما با موفقیت ثبت شد. به زودی با شما تماس خواهیم گرفت."
+msgstr ""
+
 
 # Grouped Attributes
 
+
 msgid "Specifications"
-msgstr "مشخصات"
+msgstr ""
+
 
 # Settings Messages
 
+
 msgid "car_inquiry_form"
-msgstr "فرم_استعلام_خودرو"
+msgstr ""
+
 
 # Expert Panel Messages
 
+
 msgid "Search for a car name..."
-msgstr "جستجوی نام خودرو..."
+msgstr ""
 
 
 msgid "Down Payment Amount (Toman)"
-msgstr "مبلغ پیش پرداخت (تومان)"
+msgstr ""
 
 
 msgid "Minimum recommended down payment:"
-msgstr "حداقل پیش پرداخت پیشنهادی:"
+msgstr ""
 
 
 msgid "Repayment Period (Months)"
-msgstr "مدت بازپرداخت (ماه)"
+msgstr ""
 
 
 msgid "Total Loan Amount"
-msgstr "مبلغ کل وام"
+msgstr ""
 
 
 msgid "Total Repayment Amount"
-msgstr "مبلغ کل بازپرداخت"
+msgstr ""
 
 
 msgid "Server error:"
-msgstr "خطای سرور:"
+msgstr ""
 
 
 msgid "Unknown error"
-msgstr "خطای ناشناخته"
+msgstr ""
 
 
 msgid "Finance & Calculator"
-msgstr "مالی و ماشین حساب"
+msgstr ""
 
 
 msgid "Installment Loan Settings"
-msgstr "تنظیمات وام اقساطی"
+msgstr ""
 
 
 msgid "Monthly Interest Rate (Decimal)"
-msgstr "نرخ سود ماهانه (اعشاری)"
+msgstr ""
 
 
 msgid "Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in all installment calculations."
-msgstr "نرخ سود ماهانه را به صورت اعشاری وارد کنید (مانند 0.035 برای ۳.۵٪). این نرخ در تمامی محاسبات اقساط استفاده می‌شود."
+msgstr ""
 
 
 msgid "Payment Gateway"
-msgstr "درگاه پرداخت"
+msgstr ""
 
 
 msgid "General Payment Settings"
-msgstr "تنظیمات عمومی پرداخت"
+msgstr ""
 
 
 msgid "Enable Payment Gateway"
-msgstr "فعال‌سازی درگاه پرداخت"
+msgstr ""
 
 
 msgid "If enabled, the inquiry fee payment step will be shown to users."
-msgstr "در صورت فعال بودن، مرحله پرداخت هزینه استعلام به کاربران نمایش داده خواهد شد."
+msgstr ""
 
 
 msgid "Inquiry Fee (Toman)"
-msgstr "هزینه استعلام (تومان)"
+msgstr ""
 
 
 msgid "Enter 0 for free inquiries."
-msgstr "برای استعلام‌های رایگان، عدد ۰ را وارد کنید."
+msgstr ""
 
 
 msgid "Message for Free Inquiry"
-msgstr "پیام برای استعلام رایگان"
+msgstr ""
 
 
 msgid "The inquiry fee is waived for you. Please click the button below to continue."
-msgstr "هزینه استعلام برای شما حذف شده است. لطفاً برای ادامه روی دکمه زیر کلیک کنید."
+msgstr ""
 
 
 msgid "Discount Code Settings"
-msgstr "تنظیمات کد تخفیف"
+msgstr ""
 
 
 msgid "Enter a code for 100% off the inquiry fee."
-msgstr "یک کد برای تخفیف ۱۰۰٪ هزینه استعلام وارد کنید."
+msgstr ""
 
 
 msgid "Discount Code Success Message"
-msgstr "پیام موفقیت کد تخفیف"
+msgstr ""
 
 
 msgid "100% discount applied successfully."
-msgstr "تخفیف ۱۰۰٪ با موفقیت اعمال شد."
+msgstr ""
 
 
 msgid "Sadad (Melli Bank) Settings"
-msgstr "تنظیمات سداد (بانک ملی)"
+msgstr ""
 
 
 msgid "Enable Sadad"
-msgstr "فعال‌سازی سداد"
+msgstr ""
 
 
 msgid "Terminal ID"
-msgstr "شناسه ترمینال"
+msgstr ""
 
 
 msgid "Merchant ID"
-msgstr "شناسه پذیرنده"
+msgstr ""
 
 
 msgid "Sadad Encryption Key"
-msgstr "کلید رمزنگاری سداد"
+msgstr ""
 
 
 msgid "The encryption key (TDes key) provided by Sadad. Stored securely encrypted."
-msgstr "کلید رمزنگاری (TDes) ارائه شده توسط سداد. به صورت امن رمزنگاری و ذخیره می‌شود."
+msgstr ""
 
 
 msgid "Zarinpal Settings"
-msgstr "تنظیمات زرین‌پال"
+msgstr ""
 
 
 msgid "Enable Zarinpal"
-msgstr "فعال‌سازی زرین‌پال"
+msgstr ""
 
 
 msgid "SMS"
-msgstr "پیامک"
+msgstr ""
 
 
 msgid "MeliPayamak Panel Information"
-msgstr "اطلاعات پنل ملی پیامک"
+msgstr ""
 
 
 msgid "Password"
-msgstr "رمز عبور"
+msgstr ""
 
 
 msgid "SMS Pattern Codes (Body ID) - General & Installment"
-msgstr "کدهای الگو (Body ID) پیامک - عمومی و اقساطی"
+msgstr ""
 
 
 msgid "Enter only the approved Pattern Code (Body ID) from your SMS panel. Variable order must match the descriptions."
-msgstr "تنها کد الگو (Body ID) تأیید شده از پنل پیامکی خود را وارد کنید. ترتیب متغیرها باید با توضیحات مطابقت داشته باشد."
+msgstr ""
 
 
 msgid "Admin Mobile Number"
-msgstr "شماره موبایل مدیر"
+msgstr ""
 
 
 msgid "Mobile number to receive new request notifications."
-msgstr "شماره موبایل برای دریافت اعلان‌های درخواست جدید."
+msgstr ""
 
 
 msgid "Pattern: \"New Request for Admin\""
@@ -1839,63 +1962,63 @@ msgstr "الگو: «درخواست جدید برای مدیر»"
 
 
 msgid "Variables: 1. Customer Name 2. Car Name"
-msgstr "متغیرها: ۱. نام مشتری ۲. نام خودرو"
+msgstr ""
 
 
 msgid "Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
-msgstr "متغیرها: ۱. نام مشتری ۲. نام خودرو ۳. دلیل رد"
+msgstr ""
 
 
 msgid "Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
-msgstr "متغیرها: ۱. نام کارشناس ۲. نام مشتری ۳. موبایل مشتری ۴. نام خودرو"
+msgstr ""
 
 
 msgid "SMS Pattern Codes - Cash Request"
-msgstr "کدهای الگو پیامک - درخواست نقدی"
+msgstr ""
 
 
 msgid "Sent to customer after down payment is set. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount"
-msgstr "پس از تعیین پیش پرداخت به مشتری ارسال می‌شود. متغیرها: ۱. نام مشتری ۲. نام خودرو ۳. مبلغ پیش پرداخت"
+msgstr ""
 
 
 msgid "Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
-msgstr "پس از رد درخواست به مشتری ارسال می‌شود. متغیرها: ۱. نام مشتری ۲. نام خودرو ۳. دلیل رد"
+msgstr ""
 
 
 msgid "Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
-msgstr "به کارشناس ارسال می‌شود. متغیرها: ۱. نام کارشناس ۲. نام مشتری ۳. موبایل مشتری ۴. نام خودرو"
+msgstr ""
 
 
 msgid "Cash Request Process Settings"
-msgstr "تنظیمات فرآیند درخواست نقدی"
+msgstr ""
 
 
 msgid "Predefined Rejection Reasons"
-msgstr "دلایل از پیش تعریف شده برای رد"
+msgstr ""
 
 
 msgid "Enter one reason per line. These will be shown as a list to the admin when rejecting a request."
-msgstr "یک دلیل در هر خط وارد کنید. این موارد هنگام رد درخواست در لیست به مدیر نمایش داده می‌شوند."
+msgstr ""
 
 
 msgid "Installment Request"
-msgstr "درخواست اقساطی"
+msgstr ""
 
 
 msgid "Installment Rejection Reasons"
-msgstr "دلایل رد درخواست اقساطی"
+msgstr ""
 
 
 msgid "Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request."
-msgstr "یک دلیل در هر خط وارد کنید. این موارد هنگام رد درخواست اقساطی در لیست به مدیر نمایش داده می‌شوند."
+msgstr ""
 
 
 msgid "Experts"
-msgstr "کارشناسان"
+msgstr ""
 
 
 msgid "Expert Management"
-msgstr "مدیریت کارشناسان"
+msgstr ""
 
 
 msgid "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
@@ -1903,881 +2026,3452 @@ msgstr "سیستم به صورت خودکار تمام کاربرانی که ن�
 
 
 msgid "Finotex"
-msgstr "فینوتکس"
+msgstr ""
 
 
 msgid "Cheque Color Inquiry Service"
-msgstr "سرویس استعلام رنگ چک"
+msgstr ""
 
 
 msgid "Enable Finotex Inquiry"
-msgstr "فعال‌سازی استعلام فینوتکس"
+msgstr ""
 
 
 msgid "Enable the cheque color inquiry via the Finotex service."
-msgstr "فعال‌سازی استعلام رنگ چک صیادی از طریق سرویس فینوتکس."
+msgstr ""
 
 
 msgid "Finotex Client ID"
-msgstr "شناسه کلاینت فینوتکس"
+msgstr ""
 
 
 msgid "Client ID provided by Finotex. Stored securely encrypted."
-msgstr "شناسه کلاینت ارائه شده توسط فینوتکس. به صورت امن رمزنگاری و ذخیره می‌شود."
+msgstr ""
 
 
 msgid "Finotex API Key"
-msgstr "کلید API فینوتکس"
+msgstr ""
 
 
 msgid "API Key (Access Token) provided by Finotex. Stored securely encrypted."
-msgstr "کلید API (توکن دسترسی) ارائه شده توسط فینوتکس. به صورت امن رمزنگاری و ذخیره می‌شود."
+msgstr ""
+
 
 # Frontend Messages
 
+
 msgid "Frontend Messages"
-msgstr "پیام‌های فرانت‌اند"
+msgstr ""
 
 
 msgid "Price Disclaimer"
-msgstr "هشدار قیمت"
+msgstr ""
 
 
 msgid "Waiting Review Message"
-msgstr "پیام انتظار بررسی"
+msgstr ""
 
 
 msgid "Post Approval Message"
-msgstr "پیام پس از تایید"
+msgstr ""
+
 
 # Expert Decision Settings
 
+
 msgid "Expert Decision Settings"
-msgstr "تنظیمات تصمیم‌گیری کارشناس"
+msgstr ""
 
 
 msgid "Expert Statuses"
-msgstr "وضعیت‌های کارشناس"
+msgstr ""
 
 
 msgid "Default Expert Status"
-msgstr "وضعیت پیش‌فرض کارشناس"
+msgstr ""
+
 
 # Meeting Settings
 
+
 msgid "Meetings & Calendar"
-msgstr "جلسات و تقویم"
+msgstr ""
 
 
 msgid "Enable Meeting Scheduling"
-msgstr "فعال‌سازی رزرو جلسات"
+msgstr ""
 
 
 msgid "Working Hours Start"
-msgstr "شروع ساعات کاری"
+msgstr ""
 
 
 msgid "Working Hours End"
-msgstr "پایان ساعات کاری"
+msgstr ""
 
 
 msgid "Slot Duration (Minutes)"
-msgstr "مدت زمان هر نوبت (دقیقه)"
+msgstr ""
+
 
 # Meeting Calendar
 
+
 msgid "Meeting Calendar"
-msgstr "تقویم جلسات"
+msgstr ""
 
 
 msgid "Schedule Meeting"
-msgstr "رزرو جلسه"
+msgstr ""
 
 
 msgid "Select Date"
-msgstr "انتخاب تاریخ"
+msgstr ""
 
 
 msgid "Available Slots"
-msgstr "نوبت‌های موجود"
+msgstr ""
 
 
 msgid "Book Meeting"
-msgstr "رزرو جلسه"
+msgstr ""
 
 
 msgid "Meeting Scheduled Successfully"
-msgstr "جلسه با موفقیت رزرو شد"
+msgstr ""
 
 
 msgid "No available slots for selected date"
-msgstr "برای تاریخ انتخاب شده نوبت خالی وجود ندارد"
+msgstr ""
 
 
 msgid "Meeting Details"
-msgstr "جزئیات جلسه"
+msgstr ""
 
 
 msgid "Meeting Time"
-msgstr "زمان جلسه"
+msgstr ""
 
 
 msgid "Meeting Date"
-msgstr "تاریخ جلسه"
+msgstr ""
+
 
 # Expert Status Badge
 
+
 msgid "Expert Status"
-msgstr "وضعیت کارشناس"
+msgstr ""
 
 
 msgid "In Progress"
-msgstr "در حال پیگیری"
+msgstr ""
 
 
 msgid "Approved"
-msgstr "تایید شده"
+msgstr ""
 
 
 msgid "Confirm Car Alert"
-msgstr "هشدار تایید خودرو"
+msgstr ""
 
 
 msgid "I agree, I choose this car."
-msgstr "موافقم، همین خودرو را انتخاب می‌کنم."
+msgstr ""
 
 
 msgid "Previous"
-msgstr "قبلی"
+msgstr ""
 
 
 msgid "Next"
-msgstr "بعدی"
+msgstr ""
 
 
 msgid "View Full Car List"
-msgstr "مشاهده لیست کامل خودروها"
+msgstr ""
 
 
 msgid "Search"
-msgstr "جستجو"
+msgstr ""
 
 
 msgid "Loading..."
-msgstr "در حال بارگذاری..."
+msgstr ""
 
 
 msgid "Error loading products."
-msgstr "خطا در بارگذاری محصولات."
+msgstr ""
 
 
 msgid "Select a time slot"
-msgstr "انتخاب نوبت زمانی"
+msgstr ""
 
 
 msgid "Time slot is already booked"
-msgstr "این نوبت قبلاً رزرو شده است"
+msgstr ""
 
 
 msgid "Time slot is available"
-msgstr "این نوبت خالی است"
+msgstr ""
 
 
 msgid "Book this slot"
-msgstr "رزرو این نوبت"
+msgstr ""
 
 
 msgid "Meeting booked successfully!"
-msgstr "جلسه با موفقیت رزرو شد!"
+msgstr ""
 
 
 msgid "Error booking meeting. Please try again."
-msgstr "خطا در رزرو جلسه. لطفاً دوباره تلاش کنید."
+msgstr ""
 
 
 msgid "No available slots for this date"
-msgstr "برای این تاریخ نوبت خالی وجود ندارد"
+msgstr ""
 
 
 msgid "Loading available slots..."
-msgstr "در حال بارگذاری نوبت‌های موجود..."
+msgstr ""
 
 
 msgid "Expert Decision"
-msgstr "تصمیم کارشناس"
+msgstr ""
 
 
 msgid "Update Decision"
-msgstr "به‌روزرسانی تصمیم"
+msgstr ""
 
 
 msgid "Decision updated successfully!"
-msgstr "تصمیم با موفقیت به‌روزرسانی شد!"
+msgstr ""
 
 
 msgid "Error updating decision. Please try again."
-msgstr "خطا در به‌روزرسانی تصمیم. لطفاً دوباره تلاش کنید."
+msgstr ""
 
 
 msgid "Please select a status"
-msgstr "لطفاً یک وضعیت انتخاب کنید"
+msgstr ""
 
 
 msgid "Please enter notes"
-msgstr "لطفاً یادداشت وارد کنید"
+msgstr ""
 
 
 msgid "Expert Status Badge"
-msgstr "نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Display expert status badge in inquiry lists"
-msgstr "نمایش نشان وضعیت کارشناس در لیست استعلام‌ها"
+msgstr ""
 
 
 msgid "Expert status badge color"
-msgstr "رنگ نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge text color"
-msgstr "رنگ متن نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge border color"
-msgstr "رنگ حاشیه نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge hover color"
-msgstr "رنگ نشان وضعیت کارشناس هنگام hover"
+msgstr ""
 
 
 msgid "Expert status badge shadow color"
-msgstr "رنگ سایه نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge font size"
-msgstr "اندازه فونت نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge padding"
-msgstr "فاصله داخلی نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge border radius"
-msgstr "گردی گوشه‌های نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge font weight"
-msgstr "ضخامت فونت نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge text transform"
-msgstr "تبدیل متن نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge letter spacing"
-msgstr "فاصله حروف نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge line height"
-msgstr "ارتفاع خط نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge margin"
-msgstr "فاصله خارجی نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge display"
-msgstr "نمایش نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge position"
-msgstr "موقعیت نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge z-index"
-msgstr "z-index نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge transition"
-msgstr "انتقال نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge animation"
-msgstr "انیمیشن نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge transform"
-msgstr "تبدیل نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge filter"
-msgstr "فیلتر نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge backdrop-filter"
-msgstr "فیلتر پس‌زمینه نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge mix-blend-mode"
-msgstr "حالت ترکیب نشان وضعیت کارشناس"
+msgstr ""
 
 
 msgid "Expert status badge isolation"
-msgstr "جداسازی نشان وضعیت کارشناس"
+msgstr ""
+
 
 # JavaScript Hardcoded Persian Strings (calculator.js)
 
+
 msgid "Sending information..."
-msgstr "در حال ارسال اطلاعات..."
+msgstr ""
 
 
 msgid "Error sending information: "
-msgstr "خطا در ارسال اطلاعات: "
+msgstr ""
 
 
 msgid "An unknown error occurred while communicating with the server."
-msgstr "یک خطای ناشناخته در ارتباط با سرور رخ داد."
+msgstr ""
+
 
 # JavaScript Hardcoded Persian Strings (expert-panel.js)
 
+
 msgid "Start typing to search for a car... (minimum 2 characters)"
-msgstr "شروع به تایپ برای جستجوی خودرو... (حداقل 2 حرف)"
+msgstr ""
 
 
 msgid "Please enter at least 2 characters..."
-msgstr "لطفاً حداقل 2 حرف وارد کنید..."
+msgstr ""
 
 
 msgid "Searching..."
-msgstr "در حال جستجو..."
+msgstr ""
 
 
 msgid "No car found"
-msgstr "خودرویی یافت نشد"
+msgstr ""
 
 
 msgid "Loading more..."
-msgstr "در حال بارگذاری بیشتر..."
+msgstr ""
+
 
 # JavaScript Hardcoded Persian Strings (inquiry-form.js)
 
+
 msgid "Error retrieving information"
-msgstr "خطا در دریافت اطلاعات"
+msgstr ""
 
 
 msgid "Error communicating with server"
-msgstr "خطا در ارتباط با سرور"
+msgstr ""
 
 
 msgid "Booking..."
-msgstr "در حال رزرو..."
+msgstr ""
 
 
 msgid "Meeting booked successfully"
-msgstr "رزرو با موفقیت انجام شد"
+msgstr ""
 
 
 msgid "Booking error"
-msgstr "خطا در رزرو"
+msgstr ""
 
 
 msgid "Please select a time"
-msgstr "لطفاً یک زمان را انتخاب کنید"
+msgstr ""
+
 
 # JavaScript Hardcoded Persian Strings (reports-dashboard.js)
 
+
 msgid "View"
-msgstr "مشاهده"
+msgstr ""
 
 
 msgid "Meetings"
-msgstr "جلسات"
+msgstr ""
 
 
 msgid "Meeting"
-msgstr "جلسه"
+msgstr ""
 
 
 msgid "New"
-msgstr "جدید"
+msgstr ""
 
 
 msgid "Follow Up"
-msgstr "پیگیری"
+msgstr ""
 
 
 msgid "Inquiry for"
-msgstr "استعلام برای"
+msgstr ""
 
 
 msgid "Cash"
-msgstr "نقدی"
+msgstr ""
 
 
 msgid "Invalid request."
-msgstr "درخواست نامعتبر."
+msgstr ""
 
 
 msgid "Access denied."
-msgstr "دسترسی رد شد."
+msgstr ""
 
 
 msgid "Please fill out all required fields."
-msgstr "لطفاً تمام فیلد‌های الزامی را پر کنید."
+msgstr ""
 
 
 msgid "You must be logged in to submit a request."
-msgstr "برای ثبت درخواست باید وارد شوید."
+msgstr ""
 
 
 msgid "An error occurred while creating your request. Please try again."
-msgstr "هنگام ایجاد درخواست شما خطایی رخ داد. لطفاً دوباره تلاش کنید."
+msgstr ""
 
 
 msgid "Invalid schedule range."
-msgstr "بازه زمانی نامعتبر است."
+msgstr ""
 
 
 msgid "Selected slot is no longer available."
-msgstr "نوبت انتخابی دیگر موجود نیست."
+msgstr ""
 
 
 msgid "Meeting - %s"
-msgstr "جلسه - %s"
+msgstr ""
 
 
 msgid "Invalid tracking status."
-msgstr "وضعیت پیگیری نامعتبر است."
+msgstr ""
 
 
 msgid "Tracking status updated to: %s"
-msgstr "وضعیت پیگیری به %s تغییر یافت"
+msgstr ""
 
 
 msgid "No follow-up inquiries found."
-msgstr "هیچ استعلام پیگیری یافت نشد."
+msgstr ""
 
 
 msgid "Cash Price"
-msgstr "قیمت نقدی"
+msgstr ""
 
 
 msgid "Installment Price"
-msgstr "قیمت اقساطی"
+msgstr ""
 
 
 msgid "Edit"
-msgstr "ویرایش"
+msgstr ""
 
 
 msgid "Your request has been submitted. The result will be announced within the next 24 hours."
-msgstr "درخواست شما ثبت شد. نتیجه ظرف ۲۴ ساعت آینده اعلام خواهد شد."
+msgstr ""
 
 
 msgid "Your documents have been approved. Our team will contact you shortly for next steps."
-msgstr "مدارک شما تایید شد. تیم ما به زودی برای مراحل بعدی با شما تماس خواهد گرفت."
+msgstr ""
 
 
 msgid "Statuses (one per line: key|label|#color)"
-msgstr "وضعیت‌ها (هر خط: کلید|برچسب|#رنگ)"
+msgstr ""
 
 
 msgid "Example: unknown|Unknown|#999999"
-msgstr "مثال: unknown|ناشناخته|#999999"
+msgstr ""
 
 
 msgid "Default Expert Status Key"
-msgstr "کلید پیش‌فرض وضعیت کارشناس"
+msgstr ""
 
 
 msgid "General Settings"
-msgstr "تنظیمات عمومی"
+msgstr ""
 
 
 msgid "Enable Meetings"
-msgstr "فعال‌سازی جلسات"
+msgstr ""
 
 
 msgid "Workday Start (HH:MM)"
-msgstr "شروع روز کاری (ساعت:دقیقه)"
+msgstr ""
 
 
 msgid "Workday End (HH:MM)"
-msgstr "پایان روز کاری (ساعت:دقیقه)"
+msgstr ""
 
 
 msgid "Slot Duration (minutes)"
-msgstr "مدت زمان هر نوبت (دقیقه)"
+msgstr ""
+
+
+msgid "Excluded Days"
+msgstr ""
+
+
+msgid "Select days when meetings cannot be scheduled"
+msgstr ""
+
+
+msgid "This day is excluded from meeting schedules."
+msgstr ""
+
+
+msgid "⚠️ Overdue Follow-up"
+msgstr ""
+
+
+msgid "🔥 Follow-up Due Today"
+msgstr ""
+
+
+msgid "⚠️ Follow-up Tomorrow"
+msgstr ""
+
+
+msgid "⚠️ Follow-up in 2 Days"
+msgstr ""
+
+
+msgid "ℹ️ Follow-up in 3 Days"
+msgstr ""
+
+
+msgid "Follow-up Reminder"
+msgstr ""
+
+
+msgid "Follow-up for %s inquiry is due in %d day(s)"
+msgstr ""
 
 
 msgid "Invalid request. Please log in and try again."
-msgstr "درخواست نامعتبر. لطفاً وارد شوید و دوباره تلاش کنید."
+msgstr ""
 
 
 msgid "Car selected. Redirecting..."
-msgstr "خودرو انتخاب شد. در حال انتقال..."
+msgstr ""
 
 
 msgid "Please confirm your selected car to continue."
-msgstr "لطفاً خودروی انتخابی خود را برای ادامه تأیید کنید."
+msgstr ""
 
 
 msgid "Start typing the car name to search (at least 2 characters)"
-msgstr "شروع به تایپ نام خودرو برای جستجو (حداقل ۲ حرف)"
+msgstr ""
 
 
 msgid "Referral Request #%d"
-msgstr "درخواست ارجاع #%d"
+msgstr ""
 
 
 msgid "Select an expert for this request:"
-msgstr "یک کارشناس برای این درخواست انتخاب کنید:"
+msgstr ""
 
 
 msgid "Refer"
-msgstr "ارجاع"
+msgstr ""
 
 
 msgid "Are you sure you want to permanently delete this request?"
-msgstr "آیا مطمئن هستید که می‌خواهید این درخواست را برای همیشه حذف کنید؟"
+msgstr ""
 
 
 msgid "Yes, delete it!"
-msgstr "بله، حذف کن!"
+msgstr ""
 
 
 msgid "Plugin Settings"
-msgstr "تنظیمات افزونه"
+msgstr ""
 
 
 msgid "Configure all aspects of the Maneli Car Inquiry plugin from this centralized settings panel."
-msgstr "تمام جنبه‌های افزونه استعلام خودرو مانلی را از این پنل تنظیمات مرکزی پیکربندی کنید."
+msgstr ""
 
 
 msgid "Post-Approval Message"
-msgstr "پیام پس از تایید"
+msgstr ""
 
 
 msgid "Schedule In-Person Meeting"
-msgstr "زمان‌بندی جلسه حضوری"
+msgstr ""
 
 
 msgid "Note (optional):"
-msgstr "یادداشت (اختیاری):"
+msgstr ""
 
 
 msgid "No meetings scheduled."
-msgstr "هیچ جلسه‌ای برنامه‌ریزی نشده است."
+msgstr ""
 
 
 msgid "Follow-up List"
-msgstr "لیست پیگیری‌ها"
+msgstr ""
 
 
 msgid "Inquiries that require follow-up contact on the specified dates."
-msgstr "استعلام‌هایی که نیاز به پیگیری تماس در تاریخ‌های مشخص دارند."
+msgstr ""
 
 
 msgid "Follow-up Date"
-msgstr "تاریخ پیگیری"
+msgstr ""
 
 
 msgid "Date Created"
-msgstr "تاریخ ایجاد"
+msgstr ""
 
 
 msgid "Unknown error."
-msgstr "خطای ناشناخته."
+msgstr ""
+
 
 # Additional Missing Frontend Labels
 msgid "Tracking Status:"
-msgstr "وضعیت پیگیری:"
+msgstr ""
+
 
 msgid "Set Status"
-msgstr "تنظیم وضعیت"
+msgstr ""
 
 
 msgid "Save Decision"
-msgstr "ذخیره تصمیم"
+msgstr ""
+
 
 msgid "Referral Request"
-msgstr "درخواست ارجاع"
+msgstr ""
+
 
 msgid "Not Assigned"
-msgstr "تخصیص داده نشده"
+msgstr ""
+
 
 msgid "Note (optional)"
-msgstr "یادداشت (اختیاری)"
+msgstr ""
+
 
 msgid "Buyer Information"
-msgstr "اطلاعات خریدار"
+msgstr ""
+
 
 msgid "Bank Information"
-msgstr "اطلاعات بانکی"
+msgstr ""
+
 
 msgid "Bank Information (Cheque Holder)"
-msgstr "اطلاعات بانکی (دارنده چک)"
+msgstr ""
+
 
 msgid "Issuer Last Name"
-msgstr "نام خانوادگی صادرکننده"
+msgstr ""
+
 
 msgid "Issuer Date of Birth"
-msgstr "تاریخ تولد صادرکننده"
+msgstr ""
+
 
 msgid "Set Tracking Status"
-msgstr "تعیین وضعیت پیگیری"
+msgstr ""
+
 
 msgid "Select Status:"
-msgstr "انتخاب وضعیت:"
+msgstr ""
+
 
 msgid "Select Date:"
-msgstr "انتخاب تاریخ:"
+msgstr ""
+
 
 msgid "Confirm Status"
-msgstr "تأیید وضعیت"
-
-msgid "Error"
-msgstr "خطا"
-
-msgid "Success"
-msgstr "موفقیت"
-
-msgid "Are you sure you want to delete this request?"
-msgstr "آیا مطمئن هستید که می‌خواهید این درخواست را حذف کنید؟"
-
-msgid "This action cannot be undone!"
-msgstr "این عمل قابل بازگشت نیست!"
-
-msgid "Select Expert"
-msgstr "انتخاب کارشناس"
-
-msgid "Edit Request"
-msgstr "ویرایش درخواست"
-
-msgid "Car Color"
-msgstr "رنگ خودرو"
-
-msgid "Deleted!"
-msgstr "حذف شد!"
-
-msgid "Down Payment Amount in Toman"
-msgstr "مبلغ پیش پرداخت به تومان"
-
-msgid "Confirm and Send to Customer"
-msgstr "تأیید و ارسال به مشتری"
-
-msgid "Please select a reason for rejection:"
-msgstr "لطفاً دلیل رد را انتخاب کنید:"
-
-msgid "Other reason (Custom)"
-msgstr "دلیل دیگر (سفارشی)"
-
-msgid "Write your custom reason here..."
-msgstr "دلیل خود را اینجا بنویسید..."
-
-msgid "Submit Rejection"
-msgstr "ثبت رد"
-
-msgid "A server error occurred."
-msgstr "خطای سرور رخ داد."
-
-msgid "Please select or enter a reason for rejection."
-msgstr "لطفاً دلیل رد را انتخاب یا وارد کنید."
-
-msgid "Select Meeting Date:"
-msgstr "انتخاب تاریخ جلسه:"
-
-msgid "Select Follow-up Date:"
-msgstr "انتخاب تاریخ پیگیری:"
-
-msgid "Please select a date."
-msgstr "لطفاً یک تاریخ انتخاب کنید."
-
-msgid "Meeting Date:"
-msgstr "تاریخ جلسه:"
-
-msgid "Follow-up Date:"
-msgstr "تاریخ پیگیری:"
-
-msgid "No experts available"
-msgstr "هیچ کارشناسی موجود نیست"
-
-msgid "Please select an expert"
-msgstr "لطفاً یک کارشناس انتخاب کنید"
+msgstr ""
 
 
+msgid "Invalid SMS panel username or password. Please check your credentials in Settings."
+msgstr "Invalid SMS panel username or password. Please check your credentials in Settings."
 
 
+msgid "Your SMS panel account is restricted or limited. Please contact your SMS panel support or check your account status."
+msgstr "Your SMS panel account is restricted or limited. Please contact your SMS panel support or check your account status."
 
 
+msgid "Insufficient credit in your SMS panel. Please recharge your account."
+msgstr "Insufficient credit in your SMS panel. Please recharge your account."
 
 
+msgid "Invalid pattern code. Please check the pattern code (Body ID) in Settings."
+msgstr "Invalid pattern code. Please check the pattern code (Body ID) in Settings."
 
 
+msgid "Invalid phone number format. Please check the recipient number."
+msgstr "Invalid phone number format. Please check the recipient number."
 
 
+msgid "Error sending SMS. API returned error code: "
+msgstr "Error sending SMS. API returned error code: "
 
-msgid "No experts found for assignment."
-msgstr "هیچ کارشناسی برای تخصیص یافت نشد."
 
-msgid "Please select an expert."
-msgstr "لطفاً یک کارشناس انتخاب کنید."
+msgid "Approve Inquiry"
+msgstr "Approve Inquiry"
 
-# Form Labels (Step 2 - Identity Form)
 
-msgid "Father's Name:"
-msgstr "نام پدر:"
+msgid "Approve"
+msgstr "Approve"
 
-msgid "Date of Birth:"
-msgstr "تاریخ تولد:"
 
-msgid "National Code:"
-msgstr "کد ملی:"
+msgid "Are you sure you want to approve this inquiry?"
+msgstr "Are you sure you want to approve this inquiry?"
 
-msgid "Income Level (Toman):"
-msgstr "میزان درآمد (تومان):"
 
-msgid "Phone Number:"
-msgstr "شماره تلفن:"
+msgid "Cancel Meeting"
+msgstr "Cancel Meeting"
 
-msgid "Address:"
-msgstr "آدرس:"
 
-msgid "Bank Name:"
-msgstr "نام بانک:"
+msgid "Are you sure you want to cancel this meeting?"
+msgstr "Are you sure you want to cancel this meeting?"
+
+
+msgid "Meeting cancelled successfully"
+msgstr "Meeting cancelled successfully"
+
+
+msgid "Error cancelling meeting"
+msgstr "Error cancelling meeting"
+
+
+msgid "Can only approve from In Progress status."
+msgstr "Can only approve from In Progress status."
+
+
+msgid "Can only reject from In Progress or Meeting Scheduled status."
+msgstr "Can only reject from In Progress or Meeting Scheduled status."
+
+
+msgid "Can only schedule follow-up from In Progress or Meeting Scheduled status."
+msgstr "Can only schedule follow-up from In Progress or Meeting Scheduled status."
+
+
+msgid "Inquiry approved successfully."
+msgstr "Inquiry approved successfully."
+
+
+msgid "Follow-up scheduled for inquiry #%d on %s"
+msgstr "Follow-up scheduled for inquiry #%d on %s"
+
+
+msgid "Follow-up scheduled for cash inquiry #%d on %s"
+msgstr "Follow-up scheduled for cash inquiry #%d on %s"
+
+
+msgid "Meeting is not scheduled."
+msgstr "Meeting is not scheduled."
+
+
+msgid "You do not have permission to cancel this meeting."
+msgstr "You do not have permission to cancel this meeting."
+
+
+msgid "Pages"
+msgstr "Pages"
+
+
+msgid "Expert"
+msgstr "Expert"
+
+
+msgid "Edit Expert"
+msgstr "Edit Expert"
+
+
+msgid "Expert Details"
+msgstr "Expert Details"
+
+
+msgid "Account"
+msgstr "Account"
+
+
+msgid "Registered Inquiries"
+msgstr "Registered Inquiries"
+
+
+msgid "Permissions"
+msgstr "Permissions"
+
+
+msgid "Assigned Inquiries:"
+msgstr "Assigned Inquiries:"
+
+
+msgid "Payment Management"
+msgstr "Payment Management"
+
+
+msgid "Search payments..."
+msgstr "Search payments..."
+
+
+msgid "All"
+msgstr "All"
+
+
+msgid "Inquiry Fee Payment"
+msgstr "Inquiry Fee Payment"
+
+
+msgid "Cash Car Down Payment"
+msgstr "Cash Car Down Payment"
+
+
+msgid "Inquiry ID"
+msgstr "Inquiry ID"
+
+
+msgid "Payment Date"
+msgstr "Payment Date"
+
+
+msgid "Payment Type"
+msgstr "Payment Type"
+
+
+msgid "Payment Method"
+msgstr "Payment Method"
+
+
+msgid "Amount"
+msgstr "Amount"
+
+
+msgid "Payment Details"
+msgstr "Payment Details"
+
+
+msgid "Back"
+msgstr "Back"
+
+
+msgid "Payment Number"
+msgstr "Payment Number"
+
+
+msgid "Payment Type:"
+msgstr "Payment Type:"
+
+
+msgid "Payment Method:"
+msgstr "Payment Method:"
+
+
+msgid "Payment Amount:"
+msgstr "Payment Amount:"
+
+
+msgid "Payment Date:"
+msgstr "Payment Date:"
+
+
+msgid "Transaction Information"
+msgstr "Transaction Information"
+
+
+msgid "Inquiry Information"
+msgstr "Inquiry Information"
+
+
+msgid "Permission Management:"
+msgstr "Permission Management:"
+
+
+msgid "Access to Cash Inquiries"
+msgstr "Access to Cash Inquiries"
+
+
+msgid "Expert can view and manage cash inquiries."
+msgstr "Expert can view and manage cash inquiries."
+
+
+msgid "Access to Installment Inquiries"
+msgstr "Access to Installment Inquiries"
+
+
+msgid "Expert can view and manage installment inquiries."
+msgstr "Expert can view and manage installment inquiries."
+
+
+msgid "No inquiries have been assigned to this expert."
+msgstr "No inquiries have been assigned to this expert."
+
+
+msgid "User Management"
+msgstr "User Management"
+
+
+msgid "Total Experts"
+msgstr "Total Experts"
+
+
+msgid "System Settings"
+msgstr "System Settings"
+
+
+msgid "Maneli Car System Settings"
+msgstr "Maneli Car System Settings"
+
+
+msgid "Success!"
+msgstr "Success!"
+
+
+msgid "Add New Expert"
+msgstr "Add New Expert"
+
+
+msgid "Search name, mobile..."
+msgstr "Search name, mobile..."
+
+
+msgid "Clear"
+msgstr "Clear"
+
+
+msgid "Deactivate"
+msgstr "Deactivate"
+
+
+msgid "Activate"
+msgstr "Activate"
+
+
+msgid "Permission Level"
+msgstr "Permission Level"
+
+
+msgid "Notifications and Alerts"
+msgstr "Notifications and Alerts"
+
+
+msgid "Mark All as Read"
+msgstr "Mark All as Read"
+
+
+msgid "Delete Read"
+msgstr "Delete Read"
+
+
+msgid "Cash Follow-ups"
+msgstr "Cash Follow-ups"
+
+
+msgid "Print"
+msgstr "Print"
+
+
+msgid "Export PDF"
+msgstr "Export PDF"
+
+
+msgid "Advanced Filters"
+msgstr "Advanced Filters"
+
+
+msgid "Reset Filters"
+msgstr "Reset Filters"
+
+
+msgid "Time Period:"
+msgstr "Time Period:"
+
+
+msgid "Today"
+msgstr "Today"
+
+
+msgid "Yesterday"
+msgstr "Yesterday"
+
+
+msgid "Last Week"
+msgstr "Last Week"
+
+
+msgid "%d days ago"
+msgstr ""
+
+
+msgid "%d images uploaded successfully%s."
+msgstr ""
+
+
+msgid "%d previous follow-ups"
+msgstr ""
+
+
+msgid "%s inquiries"
+msgstr ""
+
+
+msgid "%s items"
+msgstr ""
+
+
+msgid "-"
+msgstr ""
+
+
+msgid "-- Please Select --"
+msgstr ""
+
+
+msgid "02112345678"
+msgstr ""
+
+
+msgid "09123456789"
+msgstr ""
+
+
+msgid "10 digits"
+msgstr ""
+
+
+msgid "1370/01/01"
+msgstr ""
+
+
+msgid "Aban"
+msgstr ""
+
+
+msgid "Access Restricted!"
+msgstr ""
+
+
+msgid "Access to Meeting Calendar"
+msgstr ""
+
+
+msgid "Account Information"
+msgstr ""
+
 
 msgid "Account Number:"
-msgstr "شماره حساب:"
+msgstr ""
 
-msgid "Branch Code:"
-msgstr "کد شعبه:"
 
-msgid "Branch Name:"
-msgstr "نام شعبه:"
+msgid "Account Settings:"
+msgstr ""
 
-msgid "Continue to Next Step"
-msgstr "ادامه به مرحله بعد"
 
-msgid "Workplace Status:"
-msgstr "وضعیت محل کار:"
+msgid "Activate Expert?"
+msgstr ""
 
-msgid "Issuer Income Level (Toman):"
-msgstr "میزان درآمد صادرکننده (تومان):"
 
-msgid "Issuer Workplace Status"
-msgstr "وضعیت محل کار صادرکننده"
+msgid "Active"
+msgstr ""
 
-msgid "Issuer Workplace Status:"
-msgstr "وضعیت محل کار صادرکننده:"
 
-# Cash Inquiry New Statuses and Translations
+msgid "Activity Timeline"
+msgstr ""
 
-msgid "Referred to Expert"
-msgstr "ارجاع داده شده"
+
+msgid "Add Color"
+msgstr ""
+
+
+msgid "Add Feature"
+msgstr ""
+
+
+msgid "Add Image to Gallery"
+msgstr ""
+
+
+msgid "Add New Product"
+msgstr ""
+
+
+msgid "Add a note..."
+msgstr ""
+
+
+msgid "Address:"
+msgstr ""
+
+
+msgid "Admin Actions"
+msgstr ""
+
+
+msgid "Administrator"
+msgstr ""
+
+
+msgid "After submitting your inquiry, our expert will contact you and guide you through the required documents."
+msgstr ""
+
+
+msgid "Apply Filter"
+msgstr ""
+
+
+msgid "Apply Filters"
+msgstr ""
+
+
+msgid "Approximate Monthly Installment"
+msgstr ""
+
+
+msgid "Are you sure?"
+msgstr ""
+
+
+msgid "Assigned to Expert:"
+msgstr ""
+
+
+msgid "Assigned to Me"
+msgstr ""
+
+
+msgid "Assigned to:"
+msgstr ""
+
+
+msgid "Attention Required"
+msgstr ""
+
+
+msgid "Authentication"
+msgstr ""
 
 
 msgid "Awaiting Down Payment"
-msgstr "در انتظار پیش پرداخت"
+msgstr ""
+
+
+msgid "Azar"
+msgstr ""
+
+
+msgid "Back to Dashboard"
+msgstr ""
+
+
+msgid "Back to Inquiries List"
+msgstr ""
+
+
+msgid "Back to Previous Step"
+msgstr ""
+
+
+msgid "Bahman"
+msgstr ""
+
+
+msgid "Bank Name:"
+msgstr ""
+
+
+msgid "Bank inquiry has not been performed."
+msgstr ""
+
+
+msgid "Birth Date"
+msgstr ""
+
+
+msgid "Birth Date:"
+msgstr ""
+
+
+msgid "Branch Code:"
+msgstr ""
+
+
+msgid "Branch Name:"
+msgstr ""
+
+
+msgid "Brand"
+msgstr ""
+
+
+msgid "Browse Other Cars"
+msgstr ""
+
+
+msgid "Business Management Dashboard"
+msgstr ""
+
+
+msgid "Buy your dream car with easy installments"
+msgstr ""
+
+
+msgid "By Status"
+msgstr ""
+
+
+msgid "Cancellation Reason:"
+msgstr ""
+
+
+msgid "Cancelled"
+msgstr ""
+
+
+msgid "Car Features"
+msgstr ""
+
+
+msgid "Car Selection"
+msgstr ""
+
+
+msgid "Cash Car Purchase"
+msgstr ""
+
+
+msgid "Cash Inquiries"
+msgstr ""
+
+
+msgid "Cash Inquiries List"
+msgstr ""
+
+
+msgid "Cash Inquiries:"
+msgstr ""
+
+
+msgid "Cash Inquiry"
+msgstr ""
+
+
+msgid "Cash Inquiry Follow-ups List"
+msgstr ""
+
+
+msgid "Cash Inquiry List"
+msgstr ""
+
+
+msgid "Cash inquiries"
+msgstr ""
+
+
+msgid "Cash vs Installment Comparison"
+msgstr ""
+
+
+msgid "Cash:"
+msgstr ""
+
+
+msgid "Category"
+msgstr ""
+
+
+msgid "Change Expert"
+msgstr ""
+
+
+msgid "Change Image"
+msgstr ""
+
+
+msgid "Check Issuer Information"
+msgstr ""
+
+
+msgid "Cheque Status:"
+msgstr ""
+
+
+msgid "Clear Filters"
+msgstr ""
+
+
+msgid "Color"
+msgstr ""
+
+
+msgid "Colors"
+msgstr ""
+
+
+msgid "Complete"
+msgstr ""
+
+
+msgid "Complete System Reports"
+msgstr ""
+
+
+msgid "Completed / Rejected"
+msgstr ""
+
+
+msgid "Configure Notifications"
+msgstr ""
+
+
+msgid "Confirm and Continue"
+msgstr ""
+
+
+msgid "Confirmed"
+msgstr ""
+
+
+msgid "Confirmed and Referred"
+msgstr ""
+
+
+msgid "Congratulations! Your request has been approved"
+msgstr ""
+
+
+msgid "Contact Information"
+msgstr ""
+
+
+msgid "Contact Number"
+msgstr ""
+
+
+msgid "Continue to Next Step"
+msgstr ""
+
+
+msgid "Continue to Payment"
+msgstr ""
+
+
+msgid "Control how profile information is verified for security purposes."
+msgstr ""
+
+
+msgid "Cover Image"
+msgstr ""
+
+
+msgid "Create First Inquiry"
+msgstr ""
+
+
+msgid "Create New Cash Request"
+msgstr ""
+
+
+msgid "Create New Inquiry"
+msgstr ""
+
+
+msgid "Create New Inquiry (Expert Mode)"
+msgstr ""
+
+
+msgid "Create New Installment Request"
+msgstr ""
+
+
+msgid "Created"
+msgstr ""
+
+
+msgid "Current Status"
+msgstr ""
+
+
+msgid "Custom"
+msgstr ""
+
+
+msgid "Custom Range"
+msgstr ""
+
+
+msgid "Customer name, car name, mobile..."
+msgstr ""
+
+
+msgid "Customers"
+msgstr ""
+
+
+msgid "Daily"
+msgstr ""
+
+
+msgid "Daily Inquiries Trend (Last 7 Days)"
+msgstr ""
+
+
+msgid "Daily Inquiry Trend"
+msgstr ""
+
+
+msgid "Daily Inquiry Trend (Last 7 Days)"
+msgstr ""
+
+
+msgid "Dashboard"
+msgstr ""
+
+
+msgid "Date of Birth:"
+msgstr ""
+
+
+msgid "Deactivate Expert?"
+msgstr ""
+
+
+msgid "Default (Newest First)"
+msgstr ""
+
+
+msgid "Delete"
+msgstr ""
+
+
+msgid "Delete Expert?"
+msgstr ""
+
+
+msgid "Delete Inquiry"
+msgstr ""
+
+
+msgid "Delete works!"
+msgstr ""
+
+
+msgid "Deleted"
+msgstr ""
+
+
+msgid "Deleted!"
+msgstr ""
+
+
+msgid "Deleting..."
+msgstr ""
+
+
+msgid "Description should not exceed 500 characters."
+msgstr ""
+
+
+msgid "Designation:"
+msgstr ""
+
+
+msgid "Dey"
+msgstr ""
+
+
+msgid "Disabled"
+msgstr ""
+
+
+msgid "Do you have a discount code?"
+msgstr ""
+
+
+msgid "Documents Required"
+msgstr ""
+
+
+msgid "Down Payment Amount (Toman):"
+msgstr ""
 
 
 msgid "Down Payment Received"
-msgstr "پیش پرداخت دریافت شد"
+msgstr ""
+
+
+msgid "Down Payment Requested:"
+msgstr ""
+
+
+msgid "Due to severe market fluctuations, car prices are approximate and may change until final confirmation."
+msgstr ""
+
+
+msgid "Edit Account"
+msgstr ""
+
+
+msgid "Edit Permissions"
+msgstr ""
+
+
+msgid "Edit Product"
+msgstr ""
+
+
+msgid "Edit User"
+msgstr ""
+
+
+msgid "Edit User Account"
+msgstr ""
+
+
+msgid "Email Notifications"
+msgstr ""
+
+
+msgid "Email:"
+msgstr ""
+
+
+msgid "Enter account number"
+msgstr ""
+
+
+msgid "Enter address"
+msgstr ""
+
+
+msgid "Enter bank name"
+msgstr ""
+
+
+msgid "Enter branch code"
+msgstr ""
+
+
+msgid "Enter branch name"
+msgstr ""
+
+
+msgid "Enter designation"
+msgstr ""
+
+
+msgid "Enter email"
+msgstr ""
+
+
+msgid "Enter father\\"
+msgstr ""
+
+
+msgid "Enter mobile number"
+msgstr ""
+
+
+msgid "Enter name"
+msgstr ""
+
+
+msgid "Enter occupation or job title"
+msgstr ""
+
+
+msgid "Enter the 4-digit code sent to mobile number %s."
+msgstr ""
+
+
+msgid "Enter your father\\"
+msgstr ""
+
+
+msgid "Enter your first name"
+msgstr ""
+
+
+msgid "Enter your last name"
+msgstr ""
+
+
+msgid "Enter your mobile number"
+msgstr ""
+
+
+msgid "Enter your note..."
+msgstr ""
+
+
+msgid "Error"
+msgstr ""
+
+
+msgid "Error adding expert"
+msgstr ""
+
+
+msgid "Error loading data"
+msgstr ""
+
+
+msgid "Error loading permissions"
+msgstr ""
+
+
+msgid "Error saving product. Please try again."
+msgstr ""
+
+
+msgid "Error sending request. Please try again."
+msgstr ""
+
+
+msgid "Error updating"
+msgstr ""
+
+
+msgid "Error uploading image. Please try again."
+msgstr ""
+
+
+msgid "Error!"
+msgstr ""
+
+
+msgid "Esfand"
+msgstr ""
+
+
+msgid "Example: 50000000"
+msgstr ""
+
+
+msgid "Example: Central"
+msgstr ""
+
+
+msgid "Example: Engineer"
+msgstr ""
+
+
+msgid "Example: Melli"
+msgstr ""
+
+
+msgid "Expert Dashboard"
+msgstr ""
+
+
+msgid "Expert Notes"
+msgstr ""
+
+
+msgid "Expert Performance"
+msgstr ""
+
+
+msgid "Expert Performance Comparison"
+msgstr ""
+
+
+msgid "Expert Performance Report"
+msgstr ""
+
+
+msgid "Expert Status Control"
+msgstr ""
+
+
+msgid "Expert Status:"
+msgstr ""
+
+
+msgid "Expert added successfully."
+msgstr ""
+
+
+msgid "Expert can view and manage meetings."
+msgstr ""
+
+
+msgid "Expert deleted successfully."
+msgstr ""
+
+
+msgid "Expert information updated successfully."
+msgstr ""
+
+
+msgid "Expert not found."
+msgstr ""
+
+
+msgid "Expert not specified."
+msgstr ""
+
+
+msgid "Expert updated successfully."
+msgstr ""
+
+
+msgid "Expert will be activated"
+msgstr ""
+
+
+msgid "Expert will be deactivated"
+msgstr ""
+
+
+msgid "Expert:"
+msgstr ""
+
+
+msgid "Expert: %s"
+msgstr ""
+
+
+msgid "Export CSV"
+msgstr ""
+
+
+msgid "Failed to upload images."
+msgstr ""
+
+
+msgid "Failed!"
+msgstr ""
+
+
+msgid "Farvardin"
+msgstr ""
+
+
+msgid "Father\\"
+msgstr ""
+
+
+msgid "Feature"
+msgstr ""
+
+
+msgid "File %s is larger than 5MB and will be ignored."
+msgstr ""
+
+
+msgid "File size exceeds 2 MB limit."
+msgstr ""
+
+
+msgid "File size should not exceed 5MB."
+msgstr ""
+
+
+msgid "Filter by Expert"
+msgstr ""
+
+
+msgid "Final Admin Approval"
+msgstr ""
+
+
+msgid "Final Approval"
+msgstr ""
+
+
+msgid "Final Approval and Completed"
+msgstr ""
+
+
+msgid "Final Approved"
+msgstr ""
+
+
+msgid "Final Installment Inquiry Result"
+msgstr ""
+
+
+msgid "Finish"
+msgstr ""
+
+
+msgid "First"
+msgstr ""
+
+
+msgid "Follow-up Completed (Date:"
+msgstr ""
+
+
+msgid "Follow-up Date:"
+msgstr ""
+
+
+msgid "Follow-up Inquiries List"
+msgstr ""
+
+
+msgid "Follow-up Scheduled"
+msgstr ""
+
+
+msgid "Follow-up Started by Expert"
+msgstr ""
+
+
+msgid "Follow-ups"
+msgstr ""
+
+
+msgid "Free"
+msgstr ""
+
+
+msgid "Friday"
+msgstr ""
+
+
+msgid "From Date:"
+msgstr ""
+
+
+msgid "Full Address"
+msgstr ""
+
+
+msgid "Full address"
+msgstr ""
+
+
+msgid "Future Followup"
+msgstr ""
+
+
+msgid "Future meetings will be displayed here."
+msgstr ""
+
+
+msgid "Go to Cars List"
+msgstr ""
+
+
+msgid "Go to Payment Gateway"
+msgstr ""
+
+
+msgid "Government"
+msgstr ""
+
+
+msgid "Guide:"
+msgstr ""
+
+
+msgid "Home"
+msgstr ""
+
+
+msgid "Identity Information"
+msgstr ""
+
+
+msgid "Identity Information:"
+msgstr ""
+
+
+msgid "Image Gallery"
+msgstr ""
+
+
+msgid "Image uploaded successfully."
+msgstr ""
+
+
+msgid "In-App Notifications"
+msgstr ""
+
+
+msgid "In-person appointments"
+msgstr ""
+
+
+msgid "Inactive"
+msgstr ""
+
+
+msgid "Income Level (Toman)"
+msgstr ""
+
+
+msgid "Income Level (Toman):"
+msgstr ""
+
+
+msgid "Inquiries that require follow-up contact on the specified dates are displayed here."
+msgstr ""
+
+
+msgid "Inquiry"
+msgstr ""
+
+
+msgid "Inquiry #%d"
+msgstr ""
+
+
+msgid "Inquiry Count"
+msgstr ""
+
+
+msgid "Inquiry Status Distribution"
+msgstr ""
+
+
+msgid "Inquiry not found or you do not have access."
+msgstr ""
+
+
+msgid "Installment"
+msgstr ""
+
+
+msgid "Installment Car Purchase"
+msgstr ""
+
+
+msgid "Installment Follow-ups"
+msgstr ""
+
+
+msgid "Installment Inquiries:"
+msgstr ""
+
+
+msgid "Installment Inquiry Follow-ups List"
+msgstr ""
+
+
+msgid "Installment Period"
+msgstr ""
+
+
+msgid "Installment Request Details"
+msgstr ""
+
+
+msgid "Installment:"
+msgstr ""
+
+
+msgid "Invalid file type. Only JPEG, PNG and GIF are allowed."
+msgstr ""
+
+
+msgid "Issuer Account Number"
+msgstr ""
+
+
+msgid "Issuer Address"
+msgstr ""
+
+
+msgid "Issuer Bank Name"
+msgstr ""
+
+
+msgid "Issuer Birth Date"
+msgstr ""
+
+
+msgid "Issuer Branch Code"
+msgstr ""
+
+
+msgid "Issuer Branch Name"
+msgstr ""
+
+
+msgid "Issuer Father\\"
+msgstr ""
+
+
+msgid "Issuer First Name"
+msgstr ""
+
+
+msgid "Issuer Income Level (Toman)"
+msgstr ""
+
+
+msgid "Issuer Income Level (Toman):"
+msgstr ""
+
+
+msgid "Issuer Job Title"
+msgstr ""
+
+
+msgid "Issuer Job Type"
+msgstr ""
+
+
+msgid "Issuer Landline Phone"
+msgstr ""
+
+
+msgid "Issuer Mobile Number"
+msgstr ""
+
+
+msgid "Items"
+msgstr ""
+
+
+msgid "Job Information"
+msgstr ""
+
+
+msgid "Job Title"
+msgstr ""
+
+
+msgid "Job Type:"
+msgstr ""
+
+
+msgid "Khordad"
+msgstr ""
+
+
+msgid "Landline Phone"
+msgstr ""
+
+
+msgid "Last 3 Months"
+msgstr ""
+
+
+msgid "Last 6 Months"
+msgstr ""
+
+
+msgid "Last 7 Days Summary:"
+msgstr ""
+
+
+msgid "Last Month"
+msgstr ""
+
+
+msgid "Last Year"
+msgstr ""
+
+
+msgid "Loading follow-ups..."
+msgstr ""
+
+
+msgid "Loading inquiries..."
+msgstr ""
+
+
+msgid "Loan Calculator"
+msgstr ""
+
+
+msgid "Login Verification"
+msgstr ""
+
+
+msgid "Maneli Admin"
+msgstr ""
+
+
+msgid "Manufacturing Year"
+msgstr ""
 
 
 msgid "Meeting Scheduled"
-msgstr "مراجعه حضوری"
+msgstr ""
 
 
-# Installment Inquiry New Statuses
+msgid "Meeting Scheduled:"
+msgstr ""
 
-msgid "Follow Up Scheduled"
-msgstr "پیگیری بعدی"
 
-msgid "Cancelled"
-msgstr "لغو شده"
+msgid "Mehr"
+msgstr ""
 
-# Installment Status Management
 
-msgid "Expert Status Control"
-msgstr "کنترل وضعیت کارشناس"
+msgid "Messages sent to user email address."
+msgstr ""
 
-msgid "Expert Notes"
-msgstr "یادداشت‌های کارشناس"
 
-msgid "Add a note..."
-msgstr "یادداشت خود را وارد کنید..."
+msgid "Minimum Down Payment"
+msgstr ""
 
-msgid "Save Note"
-msgstr "ذخیره یادداشت"
 
-msgid "Start Progress"
-msgstr "شروع پیگیری"
+msgid "Mobile Number (Username):"
+msgstr ""
 
-msgid "Schedule Follow-up"
-msgstr "ثبت پیگیری بعدی"
 
-msgid "Complete"
-msgstr "تکمیل"
+msgid "Monday"
+msgstr ""
 
-msgid "Reject"
-msgstr "رد"
 
-msgid "Inquiry status updated to In Progress."
-msgstr "وضعیت استعلام به «در حال پیگیری» تغییر یافت."
+msgid "Monthly"
+msgstr ""
 
-msgid "Meeting date and time are required."
-msgstr "تاریخ و ساعت جلسه الزامی است."
 
-msgid "Meeting scheduled successfully."
-msgstr "جلسه حضوری با موفقیت ثبت شد."
+msgid "Monthly Revenue (Last 6 Months)"
+msgstr ""
 
-msgid "Follow-up date is required."
-msgstr "تاریخ پیگیری بعدی الزامی است."
 
-msgid "Follow-up scheduled successfully."
-msgstr "پیگیری بعدی با موفقیت ثبت شد."
+msgid "Mordad"
+msgstr ""
 
-msgid "Cancellation reason is required."
-msgstr "دلیل لغو الزامی است."
 
-msgid "Inquiry cancelled successfully."
-msgstr "استعلام با موفقیت لغو شد."
+msgid "My Account"
+msgstr ""
 
-msgid "Can only complete after meeting is scheduled."
-msgstr "فقط بعد از ثبت جلسه حضوری می‌توان تکمیل کرد."
 
-msgid "Inquiry completed successfully."
-msgstr "استعلام با موفقیت تکمیل شد."
+msgid "My Assigned Inquiries Needing Action"
+msgstr ""
 
-msgid "Can only reject after meeting is scheduled."
-msgstr "فقط بعد از ثبت جلسه حضوری می‌توان رد کرد."
 
-msgid "Rejection reason is required."
-msgstr "دلیل رد الزامی است."
+msgid "My Cash Inquiries"
+msgstr ""
 
-msgid "Inquiry rejected successfully."
-msgstr "استعلام با موفقیت رد شد."
 
-msgid "Note cannot be empty."
-msgstr "یادداشت نمی‌تواند خالی باشد."
+msgid "My Cash Purchase Inquiries"
+msgstr ""
 
-msgid "Note saved successfully."
-msgstr "یادداشت با موفقیت ذخیره شد."
 
-msgid "Cancellation Reason:"
-msgstr "دلیل لغو:"
+msgid "My Customers"
+msgstr ""
 
-msgid "Note:"
-msgstr "یادداشت:"
+
+msgid "My Installment Inquiries"
+msgstr ""
+
+
+msgid "My Installment Purchase Inquiries"
+msgstr ""
+
+
+msgid "My Performance Report"
+msgstr ""
+
+
+msgid "My Profit"
+msgstr ""
+
+
+msgid "My Total Inquiries"
+msgstr ""
+
+
+msgid "My Upcoming Follow-ups"
+msgstr ""
+
+
+msgid "National Code:"
+msgstr ""
+
+
+msgid "Need More Documents"
+msgstr ""
+
+
+msgid "Need expert assignment"
+msgstr ""
+
+
+msgid "New Inquiry"
+msgstr ""
+
+
+msgid "New Installment Inquiry"
+msgstr ""
+
+
+msgid "Newest"
+msgstr ""
+
+
+msgid "Next Follow-up Scheduled for:"
+msgstr ""
+
+
+msgid "Next Step"
+msgstr ""
+
+
+msgid "No"
+msgstr ""
+
+
+msgid "No Car Selected"
+msgstr ""
+
+
+msgid "No Cash Inquiries Yet"
+msgstr ""
+
+
+msgid "No Image"
+msgstr ""
+
+
+msgid "No Inquiries Found"
+msgstr ""
+
+
+msgid "No Inquiries Yet"
+msgstr ""
+
+
+msgid "No Installment Inquiries Yet"
+msgstr ""
+
+
+msgid "No Role"
+msgstr ""
+
+
+msgid "No data available"
+msgstr ""
+
+
+msgid "No experts found."
+msgstr ""
+
+
+msgid "No follow-ups found."
+msgstr ""
+
+
+msgid "No inquiries have been registered in the system yet"
+msgstr ""
+
+
+msgid "No inquiries registered in the last 7 days."
+msgstr ""
+
+
+msgid "No meetings scheduled"
+msgstr ""
 
 
 msgid "No notes have been recorded yet."
-msgstr "هیچ یادداشتی ثبت نشده است."
+msgstr ""
 
-msgid "Change Expert"
-msgstr "تغییر کارشناس"
+
+msgid "No valid files selected."
+msgstr ""
+
+
+msgid "Not Specified"
+msgstr ""
+
+
+msgid "Note:"
+msgstr ""
+
+
+msgid "Notification Settings:"
+msgstr ""
+
+
+msgid "Notifications"
+msgstr ""
+
+
+msgid "Notifications sent to user mobile or desktop devices."
+msgstr ""
+
+
+msgid "Notifications that appear within the application interface."
+msgstr ""
+
+
+msgid "OK"
+msgstr ""
+
+
+msgid "Occupation / Position:"
+msgstr ""
+
+
+msgid "Occupation or Position"
+msgstr ""
+
+
+msgid "Occupation/Job Title:"
+msgstr ""
+
+
+msgid "Oldest"
+msgstr ""
+
+
+msgid "Ordibehesht"
+msgstr ""
+
+
+msgid "Our colleagues will contact you soon for final coordination."
+msgstr ""
+
+
+msgid "Our experts need more documents to complete the process. Please wait for our team to contact you."
+msgstr ""
+
+
+msgid "Overdue"
+msgstr ""
+
+
+msgid "Overdue Follow-ups"
+msgstr ""
+
+
+msgid "Overdue Followups"
+msgstr ""
+
+
+msgid "Overdue Inquiries (%d)"
+msgstr ""
+
+
+msgid "Password Verification"
+msgstr ""
+
+
+msgid "Password will be automatically generated. The expert can set their password through the forgot password option."
+msgstr ""
+
+
+msgid "Payment Amount"
+msgstr ""
+
+
+msgid "Payment completed successfully."
+msgstr ""
+
+
+msgid "Payment was not completed."
+msgstr ""
+
+
+msgid "Pending"
+msgstr ""
+
+
+msgid "Pending Cash Assignments"
+msgstr ""
+
+
+msgid "Pending Cash Inquiries"
+msgstr ""
+
+
+msgid "Pending Installment Assignments"
+msgstr ""
+
+
+msgid "Pending Installment Inquiries"
+msgstr ""
+
+
+msgid "Percentage"
+msgstr ""
+
+
+msgid "Permissions updated successfully."
+msgstr ""
+
+
+msgid "Permissions:"
+msgstr ""
+
+
+msgid "Phone"
+msgstr ""
+
+
+msgid "Phone Number:"
+msgstr ""
+
+
+msgid "Please enter car name."
+msgstr ""
+
+
+msgid "Please fill all required fields."
+msgstr ""
+
+
+msgid "Please select a car first."
+msgstr ""
+
+
+msgid "Please send the additional documents requested."
+msgstr ""
+
+
+msgid "Popular Products"
+msgstr ""
+
+
+msgid "Price"
+msgstr ""
+
+
+msgid "Private"
+msgstr ""
+
+
+msgid "Proceed to Payment"
+msgstr ""
+
+
+msgid "Product Description"
+msgstr ""
+
+
+msgid "Product Images"
+msgstr ""
+
+
+msgid "Product Name"
+msgstr ""
+
+
+msgid "Product name should not exceed 30 characters."
+msgstr ""
+
+
+msgid "Product saved successfully."
+msgstr ""
+
+
+msgid "Products"
+msgstr ""
+
+
+msgid "Profile Picture"
+msgstr ""
+
+
+msgid "Profile Settings"
+msgstr ""
+
+
+msgid "Profit (Toman)"
+msgstr ""
+
+
+msgid "Push Notifications"
+msgstr ""
+
+
+msgid "Rank"
+msgstr ""
+
+
+msgid "Recent Inquiries"
+msgstr ""
+
+
+msgid "Refresh"
+msgstr ""
+
+
+msgid "Registered Inquiries:"
+msgstr ""
+
+
+msgid "Reject"
+msgstr ""
+
+
+msgid "Rejection Reason:"
+msgstr ""
+
+
+msgid "Reports"
+msgstr ""
+
+
+msgid "Request Created"
+msgstr ""
+
+
+msgid "Request Down Payment"
+msgstr ""
+
 
 msgid "Request Journey"
-msgstr "مسیر درخواست"
+msgstr ""
 
+
+msgid "Request Status Management"
+msgstr ""
+
+
+msgid "Require Personal Details"
+msgstr ""
+
+
+msgid "Requires urgent action"
+msgstr ""
+
+
+msgid "Reserved"
+msgstr ""
+
+
+msgid "Reset Changes"
+msgstr ""
+
+
+msgid "Residency Status:"
+msgstr ""
+
+
+msgid "Revenue"
+msgstr ""
+
+
+msgid "Revenue (Toman)"
+msgstr ""
+
+
+msgid "Revenue Comparison:"
+msgstr ""
+
+
+msgid "Role:"
+msgstr ""
+
+
+msgid "SMS Notifications"
+msgstr ""
+
+
+msgid "SMS messages sent to user mobile phone."
+msgstr ""
+
+
+msgid "Saturday"
+msgstr ""
+
+
+msgid "Save"
+msgstr ""
+
+
+msgid "Save Expert"
+msgstr ""
+
+
+msgid "Save Meeting Time and Update Status"
+msgstr ""
+
+
+msgid "Save Note"
+msgstr ""
+
+
+msgid "Save Product"
+msgstr ""
+
+
+msgid "Saving..."
+msgstr ""
+
+
+msgid "Schedule Follow-up"
+msgstr ""
+
+
+msgid "Search by car name..."
+msgstr ""
+
+
+msgid "Search by customer name, car name or mobile number..."
+msgstr ""
+
+
+msgid "Search..."
+msgstr ""
+
+
+msgid "Security"
+msgstr ""
+
+
+msgid "Security Settings:"
+msgstr ""
+
+
+msgid "Select"
+msgstr ""
+
+
+msgid "Select Car and Conditions"
+msgstr ""
+
+
+msgid "Select Cover Image"
+msgstr ""
+
+
+msgid "Select Time:"
+msgstr ""
+
+
+msgid "Select birth date"
+msgstr ""
+
+
+msgid "Select category"
+msgstr ""
+
+
+msgid "Self Employed"
+msgstr ""
+
+
+msgid "Self-Employed"
+msgstr ""
+
+
+msgid "Self-employed"
+msgstr ""
+
+
+msgid "Send Down Payment Request to Customer"
+msgstr ""
+
+
+msgid "Server configuration not available. Please refresh the page."
+msgstr ""
+
+
+msgid "Server connection error"
+msgstr ""
+
+
+msgid "Server connection error. Please try again."
+msgstr ""
+
+
+msgid "Set Down Payment Amount"
+msgstr ""
+
+
+msgid "Setup Verification"
+msgstr ""
+
+
+msgid "Shahrivar"
+msgstr ""
+
+
+msgid "Showing %s items"
+msgstr ""
+
+
+msgid "Sort:"
+msgstr ""
+
+
+msgid "Special Sale"
+msgstr ""
+
+
+msgid "Staff"
+msgstr ""
+
+
+msgid "Start Progress"
+msgstr ""
+
+
+msgid "Status:"
+msgstr ""
+
+
+msgid "Submit Installment Inquiry"
+msgstr ""
+
+
+msgid "Subscriber"
+msgstr ""
+
+
+msgid "Success"
+msgstr ""
+
+
+msgid "Success Rate"
+msgstr ""
+
+
+msgid "Sunday"
+msgstr ""
+
+
+msgid "System Reports"
+msgstr ""
+
+
+msgid "Thank You for Your Patience"
+msgstr ""
+
+
+msgid "The announced prices are approximate. The final price of the car will be determined based on the daily market rate at the time of down payment."
+msgstr ""
+
+
+msgid "The announced prices are approximate. The final price will be determined based on the daily market rate at the time of down payment."
+msgstr ""
+
+
+msgid "The buyer and check issuer are the same person."
+msgstr ""
+
+
+msgid "The check issuer is another person."
+msgstr ""
+
+
+msgid "The fastest way to buy a car with cash"
+msgstr ""
+
+
+msgid "The inquiry fee is free for you. Please click the button below to continue."
+msgstr ""
+
+
+msgid "The inquiry will be made for the car below and cannot be changed."
+msgstr ""
+
+
+msgid "This Week"
+msgstr ""
+
+
+msgid "This action cannot be undone!"
+msgstr ""
+
+
+msgid "This extra step helps ensure the person trying to change account details is the real owner."
+msgstr ""
+
+
+msgid "This helps protect account from unauthorized access, even if password is compromised."
+msgstr ""
+
+
+msgid "Thursday"
+msgstr ""
+
+
+msgid "Time Period: %s days ago"
+msgstr ""
+
+
+msgid "Tir"
+msgstr ""
+
+
+msgid "To Date:"
+msgstr ""
+
+
+msgid "To begin the inquiry process, please first select your desired car from one of the product pages and click the \"Bank Credit Check\" button."
+msgstr ""
+
+
+msgid "To finalize your purchase, please go to the payment gateway using the button below."
+msgstr ""
+
+
+msgid "To purchase a car with cash, create your first inquiry."
+msgstr ""
+
+
+msgid "To purchase a car with installments, use the loan calculator."
+msgstr ""
+
+
+msgid "To start the inquiry process, please first select your desired car from the products page and click on the \"Bank Credit Inquiry\" button."
+msgstr ""
+
+
+msgid "To submit a cash inquiry, please use the"
+msgstr ""
+
+
+msgid "To submit an installment inquiry, please use the"
+msgstr ""
+
+
+msgid "Today Follow-ups"
+msgstr ""
+
+
+msgid "Today Inquiries"
+msgstr ""
+
+
+msgid "Today's Follow-ups"
+msgstr ""
+
+
+msgid "Today's Followups"
+msgstr ""
+
+
+msgid "Today's Meetings"
+msgstr ""
+
+
+msgid "Today's Task List"
+msgstr ""
+
+
+msgid "Today:"
+msgstr ""
+
+
+msgid "Today\\"
+msgstr ""
+
+
+msgid "Toman Profit"
+msgstr ""
+
+
+msgid "Top Experts (Based on Profit)"
+msgstr ""
+
+
+msgid "Total"
+msgstr ""
+
+
+msgid "Total Amount"
+msgstr ""
+
+
+msgid "Total Customers"
+msgstr ""
+
+
+msgid "Total Meetings"
+msgstr ""
+
+
+msgid "Total Profit"
+msgstr ""
+
+
+msgid "Total Referrals"
+msgstr ""
+
+
+msgid "Total Revenue"
+msgstr ""
+
+
+msgid "Total:"
+msgstr ""
+
+
+msgid "Tuesday"
+msgstr ""
+
+
+msgid "Type"
+msgstr ""
+
+
+msgid "Type:"
+msgstr ""
+
+
+msgid "Typically within 24 hours."
+msgstr ""
+
+
+msgid "Unassigned Inquiries (%d)"
+msgstr ""
+
+
+msgid "Under Review"
+msgstr ""
+
+
+msgid "Unfortunately, your request has been rejected."
+msgstr ""
+
+
+msgid "Updating..."
+msgstr ""
+
+
+msgid "Upload failed. Please try again."
+msgstr ""
+
+
+msgid "Uploading %d images..."
+msgstr ""
+
+
+msgid "Uploading..."
+msgstr ""
+
+
+msgid "Use JPEG, PNG or GIF formats. Best size: 200x200 pixels. File size less than 2 MB"
+msgstr ""
+
+
+msgid "User"
+msgstr ""
+
+
+msgid "User Account"
+msgstr ""
+
+
+msgid "User Account Information"
+msgstr ""
+
+
+msgid "User Details"
+msgstr ""
+
+
+msgid "User not found."
+msgstr ""
+
+
+msgid "User not specified."
+msgstr ""
+
+
+msgid "Username:"
+msgstr ""
+
+
+msgid "Users can configure their experience to receive notifications about important events."
+msgstr ""
+
+
+msgid "Usually within 24 hours."
+msgstr ""
+
+
+msgid "VIP Customers"
+msgstr ""
+
+
+msgid "View & Action"
+msgstr ""
+
+
+msgid "View All"
+msgstr ""
+
+
+msgid "View All Followups"
+msgstr ""
+
+
+msgid "View All My Inquiries"
+msgstr ""
+
+
+msgid "View Cash Inquiries"
+msgstr ""
+
+
+msgid "View Inquiries List"
+msgstr ""
+
+
+msgid "View Installment Inquiries"
+msgstr ""
+
+
+msgid "View Reports"
+msgstr ""
+
+
+msgid "Warning"
+msgstr ""
+
+
+msgid "Wednesday"
+msgstr ""
+
+
+msgid "Weekly"
+msgstr ""
+
+
+msgid "Welcome, %s"
+msgstr ""
+
+
+msgid "Workplace Status:"
+msgstr ""
+
+
+msgid "Yes"
+msgstr ""
+
+
+msgid "Yes, Delete"
+msgstr ""
+
+
+msgid "You can create your first inquiry"
+msgstr ""
+
+
+msgid "You do not have access to this page."
+msgstr ""
+
+
+msgid "You want to delete your profile image?"
+msgstr ""
+
+
+msgid "Your Recent Inquiries"
+msgstr ""
+
+
+msgid "Your down payment amount has been determined."
+msgstr ""
+
+
+msgid "Your request has been approved by our experts and referred to the sales department. One of our colleagues will contact you soon for final coordination."
+msgstr ""
+
+
+msgid "Your request has been completed successfully"
+msgstr ""
+
+
+msgid "Your request has been registered. The result will be announced within the next 24 hours."
+msgstr ""
+
+
+msgid "Your request is under review. Please wait."
+msgstr ""
+
+
+msgid "days"
+msgstr ""
+
+
+msgid "failed"
+msgstr ""
+
+
+msgid "inquiries"
+msgstr ""
+
+
+msgid "items"
+msgstr ""
+
+
+msgid "page."
+msgstr ""
+
+
+msgid "previous follow-ups"
+msgstr ""
+
+
+msgid "to"
+msgstr ""
+
+
+msgid "محصولی یافت نشد."
+msgstr ""
+
+
+msgid "ناموجود"
+msgstr ""
+
+
+msgid "No notifications"
+msgstr ""
+
+
+msgid "When you receive new notifications, they will appear here."
+msgstr ""
+
+
+msgid "Mark as Read"
+msgstr ""
+
+
+msgid "Processing..."
+msgstr ""
+
+
+msgid "Error loading notifications"
+msgstr ""
+
+
+msgid "Operation failed"
+msgstr ""
+
+
+msgid "Are you sure you want to delete all read notifications?"
+msgstr ""
+
+
+msgid "Are you sure you want to delete this notification?"
+msgstr ""
+
+
+msgid "User added successfully."
+msgstr ""
+
+
+msgid "Error adding user"
+msgstr ""
+
+
+msgid "Delete User?"
+msgstr ""
+
+
+msgid "Error deleting user"
+msgstr ""
+
+
+msgid "Button works!"
+msgstr ""
+
+
+msgid "Are you sure you want to revert changes?"
+msgstr ""
+
+
+msgid "seconds"
+msgstr ""
+
+
+msgid "wait"
+msgstr ""
+
+
+msgid "Server error. Please try again."
+msgstr ""
+
+
+msgid "Income Amount (Toman)"
+msgstr ""
+
+
+msgid "Example: National"
+msgstr ""
+
+
+msgid "View Payment Details"
+msgstr ""
+
+
+msgid "Showing %1$s to %2$s of %3$s items"
+msgstr ""
+
+
+msgid "Charts"
+msgstr ""
+
+
+msgid "Page %1$s of %2$s"
+msgstr ""
+
+
+msgid "Product"
+msgstr ""
+
+
+msgid "Sale Status"
+msgstr ""
+
+
+msgid "Free!"
+msgstr ""
+
+
+msgid "Alerts"
+msgstr ""
+
+
+msgid "unread"
+msgstr ""
+
+
+msgid "Overview"
+msgstr ""
+
+
+msgid "Expert Reports"
+msgstr ""
+
+
+msgid "Inquiry Details"
+msgstr ""
+
+
+msgid "All Types"
+msgstr ""
+
+
+msgid "Download CSV"
+msgstr ""
+
+
+msgid "%s inquiry has been assigned to you"
+msgstr ""
+
+
+msgid "A %s inquiry has been assigned to you. Please review it."
+msgstr ""
+
+
+msgid "Your request status has changed"
+msgstr ""
+
+
+msgid "Your request status has changed from \"%s\" to \"%s\"."
+msgstr ""
+
+
+msgid "A new installment inquiry from %s for %s has been registered"
+msgstr ""
+
+
+msgid "Follow-up"
+msgstr ""
+
+
+msgid "Attention"
+msgstr ""
+
+
+msgid "Please select a car"
+msgstr ""
+
+
+msgid "Got it"
+msgstr ""
+
+
+msgid "Zarinpal Gateway"
+msgstr ""
+
+
+msgid "Sadad Gateway"
+msgstr ""
+
+
+msgid "Bank Gateway"
+msgstr ""
+
+
+msgid "Inquiry Payment Fee"
+msgstr ""
+
+
+msgid "No experts available."
+msgstr ""
+
+
+msgid "Please select an expert."
+msgstr ""
+
+
+msgid "Select Expert"
+msgstr ""
+
+
+msgid "-- Auto Assign (Round Robin) --"
+msgstr ""
+
+
+msgid "Select Expert:"
+msgstr ""
+
+
+msgid "Select an expert for this inquiry:"
+msgstr ""
+
+
+msgid "Expert assigned successfully."
+msgstr ""
+
+
+msgid "Error assigning expert."
+msgstr ""
+
+
+msgid "Are you sure you want to delete this request? This action cannot be undone."
+msgstr ""
+
+
+msgid "Delete this inquiry?"
+msgstr ""
+
+
+msgid "This action cannot be undone."
+msgstr ""
+
+
+msgid "Do you want to delete this inquiry? This action cannot be undone."
+msgstr ""
+
+
+msgid "Confirm Delete"
+msgstr ""
+
+
+msgid "Error deleting"
+msgstr ""
+
+
+msgid "Edit Inquiry"
+msgstr ""
+
+
+msgid "Submit Down Payment"
+msgstr ""
+
+
+msgid "Reject Inquiry"
+msgstr ""
+
+
+msgid "Enter custom reason..."
+msgstr ""
+
+
+msgid "-- Select Reason --"
+msgstr ""
+
+
+msgid "-- Custom Reason --"
+msgstr ""
+
+
+msgid "Please select or enter a rejection reason."
+msgstr ""
+
+
+msgid "Payment Gateways"
+msgstr ""
+
+
+msgid "Example: White"
+msgstr ""
+
+
+msgid "Write your description or special request..."
+msgstr ""
+
+
+msgid "Help:"
+msgstr ""
+
+
+msgid "Inquiries that need follow-up on specific dates are shown here."
+msgstr ""
+
+
+msgid "Previous Follow-up"
+msgstr ""
+
+
+msgid "Access Denied!"
+msgstr ""
+
+
+msgid "You do not have permission to access this page. Please contact the system administrator."
+msgstr ""
+
+
+msgid "Return to Main Page"
+msgstr ""
+
+
+msgid "Oops, the page you're looking for doesn't exist?"
+msgstr ""
+
+
+msgid "The requested page is not available. It may have been moved, deleted, or never existed."
+msgstr ""
+
+
+msgid "Internal Server Error!"
+msgstr ""
+
+
+msgid "Unfortunately, a problem occurred on the server. Please try again or contact support."
+msgstr ""
+
+
+msgid "No inquiries have been registered in the system yet."
+msgstr ""

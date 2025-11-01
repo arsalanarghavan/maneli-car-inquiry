@@ -100,10 +100,10 @@ class Maneli_Expert_Panel {
             return;
         }
 
-        // 2. Permission Check: Ensure the user is logged in and has sufficient permissions.
-        if (!is_user_logged_in() || !current_user_can('edit_posts')) {
+        // 2. Permission Check: Ensure the user is logged in
+        if (!is_user_logged_in()) {
             wp_send_json_error(
-                ['message' => esc_html__('You do not have sufficient permissions to perform this action.', 'maneli-car-inquiry')],
+                ['message' => esc_html__('You must be logged in to perform this action.', 'maneli-car-inquiry')],
                 403
             );
             return;
@@ -120,11 +120,23 @@ class Maneli_Expert_Panel {
         $like_term = '%' . $wpdb->esc_like($search_term) . '%';
 
         // 4. Database Query: Directly query the database for published products matching the title.
+        // Exclude disabled products for non-admin users
+        $admin_query = '';
+        if (!current_user_can('manage_maneli_inquiries')) {
+            $admin_query = " AND NOT EXISTS (
+                SELECT 1 FROM {$wpdb->postmeta} pm 
+                WHERE pm.post_id = {$wpdb->posts}.ID 
+                AND pm.meta_key = '_maneli_car_status' 
+                AND pm.meta_value = 'disabled'
+            )";
+        }
+        
         $product_ids = $wpdb->get_col($wpdb->prepare(
             "SELECT ID FROM {$wpdb->posts} 
              WHERE post_type = 'product' 
              AND post_status = 'publish' 
              AND post_title LIKE %s 
+             {$admin_query}
              ORDER BY post_title ASC
              LIMIT 20", // Limit results for performance
             $like_term
@@ -136,11 +148,19 @@ class Maneli_Expert_Panel {
                 // Use wc_get_product to safely retrieve product data.
                 $product = wc_get_product($product_id);
                 if ($product) {
+                    // Get product image
+                    $image_url = '';
+                    $thumbnail_id = $product->get_image_id();
+                    if ($thumbnail_id) {
+                        $image_url = wp_get_attachment_image_url($thumbnail_id, 'medium');
+                    }
+                    
                     $results[] = [
                         'id'              => $product->get_id(),
                         'text'            => $product->get_name(), // 'text' is the standard for Select2
                         'price'           => $product->get_price(),
                         'min_downpayment' => get_post_meta($product->get_id(), 'min_downpayment', true) ?: 0,
+                        'image_url'       => $image_url,
                     ];
                 }
             }

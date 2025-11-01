@@ -350,13 +350,36 @@ class Maneli_Reports_Dashboard {
                 ];
             }
             
-            if ($row->post_type === 'cash_inquiry') {
+            // Ensure post_type is string for comparison
+            $post_type = strval($row->post_type);
+            if ($post_type === 'cash_inquiry') {
                 $result[$date]['cash'] = intval($row->count);
-            } else {
+            } else if ($post_type === 'inquiry') {
                 $result[$date]['installment'] = intval($row->count);
             }
-            $result[$date]['total'] += intval($row->count);
+            // Recalculate total to ensure accuracy
+            $result[$date]['total'] = intval($result[$date]['cash']) + intval($result[$date]['installment']);
         }
+        
+        // پر کردن تمام روزها در بازه (حتی اگر استعلامی نداشته باشند)
+        $current_date = strtotime($start_date);
+        $end_timestamp = strtotime($end_date);
+        
+        while ($current_date <= $end_timestamp) {
+            $date_key = date('Y-m-d', $current_date);
+            if (!isset($result[$date_key])) {
+                $result[$date_key] = [
+                    'date' => $date_key,
+                    'cash' => 0,
+                    'installment' => 0,
+                    'total' => 0,
+                ];
+            }
+            $current_date = strtotime('+1 day', $current_date);
+        }
+        
+        // مرتب کردن بر اساس تاریخ
+        ksort($result);
         
         return array_values($result);
     }
@@ -418,7 +441,7 @@ class Maneli_Reports_Dashboard {
         foreach ($products as $product) {
             $formatted_products[] = [
                 'id' => $product->product_id,
-                'name' => $product->product_name ?: 'نامشخص',
+                'name' => $product->product_name ?: esc_html__('N/A', 'maneli-car-inquiry'),
                 'count' => (int)$product->inquiry_count
             ];
         }
@@ -495,10 +518,18 @@ class Maneli_Reports_Dashboard {
      */
     private static function convert_to_persian_month($date) {
         $months = [
-            '01' => 'فروردین', '02' => 'اردیبهشت', '03' => 'خرداد',
-            '04' => 'تیر', '05' => 'مرداد', '06' => 'شهریور',
-            '07' => 'مهر', '08' => 'آبان', '09' => 'آذر',
-            '10' => 'دی', '11' => 'بهمن', '12' => 'اسفند'
+            '01' => esc_html__('Farvardin', 'maneli-car-inquiry'),
+            '02' => esc_html__('Ordibehesht', 'maneli-car-inquiry'),
+            '03' => esc_html__('Khordad', 'maneli-car-inquiry'),
+            '04' => esc_html__('Tir', 'maneli-car-inquiry'),
+            '05' => esc_html__('Mordad', 'maneli-car-inquiry'),
+            '06' => esc_html__('Shahrivar', 'maneli-car-inquiry'),
+            '07' => esc_html__('Mehr', 'maneli-car-inquiry'),
+            '08' => esc_html__('Aban', 'maneli-car-inquiry'),
+            '09' => esc_html__('Azar', 'maneli-car-inquiry'),
+            '10' => esc_html__('Dey', 'maneli-car-inquiry'),
+            '11' => esc_html__('Bahman', 'maneli-car-inquiry'),
+            '12' => esc_html__('Esfand', 'maneli-car-inquiry')
         ];
         
         list($year, $month) = explode('-', $date);
@@ -635,18 +666,18 @@ class Maneli_Reports_Dashboard {
         // BOM برای UTF-8
         fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
         
-        // سرستون‌ها
+        // CSV headers
         fputcsv($output, [
-            'شناسه',
-            'تاریخ',
-            'نوع',
-            'نام مشتری',
-            'تلفن',
-            'کد ملی',
-            'محصول',
-            'وضعیت',
-            'مبلغ',
-            'کارشناس'
+            esc_html__('ID', 'maneli-car-inquiry'),
+            esc_html__('Date', 'maneli-car-inquiry'),
+            esc_html__('Type', 'maneli-car-inquiry'),
+            esc_html__('Customer Name', 'maneli-car-inquiry'),
+            esc_html__('Phone', 'maneli-car-inquiry'),
+            esc_html__('National ID', 'maneli-car-inquiry'),
+            esc_html__('Product', 'maneli-car-inquiry'),
+            esc_html__('Status', 'maneli-car-inquiry'),
+            esc_html__('Amount', 'maneli-car-inquiry'),
+            esc_html__('Expert', 'maneli-car-inquiry')
         ]);
         
         // داده‌ها
@@ -656,13 +687,13 @@ class Maneli_Reports_Dashboard {
             fputcsv($output, [
                 $inquiry->ID,
                 $inquiry->post_date,
-                $inquiry->post_type === 'cash_inquiry' ? 'نقدی' : 'اقساطی',
+                $inquiry->post_type === 'cash_inquiry' ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry'),
                 $inquiry->customer_name,
                 $inquiry->customer_phone,
                 $inquiry->customer_national_id,
                 $inquiry->product_name,
                 self::get_status_label($inquiry->status),
-                number_format($inquiry->amount) . ' تومان',
+                number_format($inquiry->amount) . ' ' . esc_html__('Toman', 'maneli-car-inquiry'),
                 $expert ? $expert->display_name : '-'
             ]);
         }
@@ -679,13 +710,473 @@ class Maneli_Reports_Dashboard {
      */
     private static function get_status_label($status) {
         $labels = [
-            'pending' => 'در انتظار',
-            'approved' => 'تایید شده',
-            'rejected' => 'رد شده',
-            'following' => 'در حال پیگیری',
+            'pending' => esc_html__('Pending Review', 'maneli-car-inquiry'),
+            'approved' => esc_html__('Approved and Referred', 'maneli-car-inquiry'),
+            'rejected' => esc_html__('Rejected', 'maneli-car-inquiry'),
+            'following' => esc_html__('Follow-up in Progress', 'maneli-car-inquiry'),
         ];
         
         return isset($labels[$status]) ? $labels[$status] : $status;
+    }
+    
+    /**
+     * محاسبه سود کارشناس
+     * @param int $expert_id
+     * @param string $start_date
+     * @param string $end_date
+     * @return float
+     */
+    public static function get_expert_profit($expert_id, $start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        // سود = درآمد - هزینه‌ها (می‌تواند بر اساس درصد یا مقدار ثابت باشد)
+        $revenue = self::get_overall_statistics($start_date, $end_date, $expert_id);
+        $revenue_amount = floatval($revenue['revenue'] ?? 0);
+        
+        // محاسبه هزینه‌ها (می‌تواند یک درصد ثابت یا منطق پیچیده‌تری باشد)
+        // به عنوان مثال: 30% از درآمد را به عنوان هزینه در نظر می‌گیریم
+        $cost_percentage = 0.30; // می‌تواند از تنظیمات خوانده شود
+        $costs = $revenue_amount * $cost_percentage;
+        
+        return $revenue_amount - $costs;
+    }
+    
+    /**
+     * دریافت آمار برای بازه زمانی خاص
+     * @param string $period daily, weekly, monthly, yearly, custom, all
+     * @param string $custom_start_date
+     * @param string $custom_end_date
+     * @return array با start_date و end_date
+     */
+    public static function get_period_dates($period = 'monthly', $custom_start_date = null, $custom_end_date = null) {
+        $today = date('Y-m-d');
+        
+        switch ($period) {
+            case 'today':
+                return [
+                    'start_date' => $today,
+                    'end_date' => $today,
+                    'label' => esc_html__('Today', 'maneli-car-inquiry')
+                ];
+                
+            case 'yesterday':
+                $yesterday = date('Y-m-d', strtotime('-1 day'));
+                return [
+                    'start_date' => $yesterday,
+                    'end_date' => $yesterday,
+                    'label' => esc_html__('Yesterday', 'maneli-car-inquiry')
+                ];
+                
+            case 'weekly':
+                return [
+                    'start_date' => date('Y-m-d', strtotime('-7 days')),
+                    'end_date' => $today,
+                    'label' => 'هفته گذشته'
+                ];
+                
+            case 'monthly':
+                return [
+                    'start_date' => date('Y-m-d', strtotime('-30 days')),
+                    'end_date' => $today,
+                    'label' => 'ماه گذشته'
+                ];
+                
+            case 'yearly':
+                return [
+                    'start_date' => date('Y-m-d', strtotime('-365 days')),
+                    'end_date' => $today,
+                    'label' => 'سال گذشته'
+                ];
+                
+            case 'all':
+                // از اولین استعلام تا امروز
+                global $wpdb;
+                $first_date = $wpdb->get_var(
+                    "SELECT MIN(post_date) 
+                    FROM {$wpdb->posts} 
+                    WHERE post_type IN ('cash_inquiry', 'inquiry') 
+                    AND post_status = 'publish'"
+                );
+                
+                if ($first_date) {
+                    return [
+                        'start_date' => date('Y-m-d', strtotime($first_date)),
+                        'end_date' => $today,
+                        'label' => 'کل'
+                    ];
+                }
+                // Fallback
+                return [
+                    'start_date' => date('Y-m-d', strtotime('-1 year')),
+                    'end_date' => $today,
+                    'label' => 'کل'
+                ];
+                
+            case 'custom':
+                return [
+                    'start_date' => $custom_start_date ?: date('Y-m-d', strtotime('-30 days')),
+                    'end_date' => $custom_end_date ?: $today,
+                    'label' => 'بازه دلخواه'
+                ];
+                
+            default:
+                return [
+                    'start_date' => date('Y-m-d', strtotime('-30 days')),
+                    'end_date' => $today,
+                    'label' => 'ماه گذشته'
+                ];
+        }
+    }
+    
+    /**
+     * دریافت آمار کامل کسب و کار
+     * @param string $start_date
+     * @param string $end_date
+     * @return array
+     */
+    public static function get_business_statistics($start_date = null, $end_date = null) {
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        global $wpdb;
+        
+        // آمار کلی
+        $overall = self::get_overall_statistics($start_date, $end_date);
+        
+        // آمار کارشناسان
+        $experts = get_users([
+            'role__in' => ['maneli_expert', 'maneli_admin', 'administrator'],
+            'orderby' => 'display_name',
+            'order' => 'ASC',
+        ]);
+        
+        $experts_detailed = [];
+        foreach ($experts as $expert) {
+            $expert_stats = self::get_overall_statistics($start_date, $end_date, $expert->ID);
+            $expert_profit = self::get_expert_profit($expert->ID, $start_date, $end_date);
+            
+            // محاسبه نرخ موفقیت
+            $success_rate = 0;
+            if ($expert_stats['total_inquiries'] > 0) {
+                $success_rate = round(($expert_stats['completed'] / $expert_stats['total_inquiries']) * 100, 2);
+            }
+            
+            $experts_detailed[] = [
+                'id' => $expert->ID,
+                'name' => $expert->display_name,
+                'email' => $expert->user_email,
+                'total_inquiries' => $expert_stats['total_inquiries'],
+                'cash_inquiries' => $expert_stats['cash_inquiries'],
+                'installment_inquiries' => $expert_stats['installment_inquiries'],
+                'completed' => $expert_stats['completed'],
+                'rejected' => $expert_stats['rejected'],
+                'pending' => $expert_stats['new'] + $expert_stats['in_progress'],
+                'revenue' => floatval($expert_stats['revenue']),
+                'profit' => $expert_profit,
+                'success_rate' => $success_rate,
+                'total_customers' => self::get_expert_customers_count($expert->ID),
+                'new_customers' => self::get_expert_new_customers_count($expert->ID, $start_date, $end_date),
+            ];
+        }
+        
+        // محاسبه آمار محصولات
+        $popular_products = self::get_popular_products($start_date, $end_date, null, 10);
+        
+        // محاسبه آمار روزانه
+        $daily_stats = self::get_daily_statistics($start_date, $end_date);
+        
+        // محاسبه آمار ماهانه
+        $monthly_stats = self::get_monthly_performance(6);
+        
+        // محاسبه کل سود کسب و کار
+        $total_profit = array_sum(array_column($experts_detailed, 'profit'));
+        
+        return [
+            'overall' => $overall,
+            'experts' => $experts_detailed,
+            'popular_products' => $popular_products,
+            'daily' => $daily_stats,
+            'monthly' => $monthly_stats,
+            'total_profit' => $total_profit,
+            'total_experts' => count($experts),
+            'total_customers' => $wpdb->get_var(
+                "SELECT COUNT(DISTINCT pm.meta_value)
+                FROM {$wpdb->posts} p
+                LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'customer_national_id'
+                WHERE p.post_type IN ('cash_inquiry', 'inquiry')
+                AND p.post_status = 'publish'
+                AND p.post_date >= '{$start_date} 00:00:00'
+                AND p.post_date <= '{$end_date} 23:59:59'
+                AND pm.meta_value != ''"
+            ),
+        ];
+    }
+    
+    /**
+     * دریافت آمار پیشرفته یک کارشناس
+     * @param int $expert_id
+     * @param string $start_date
+     * @param string $end_date
+     * @return array
+     */
+    public static function get_expert_detailed_statistics($expert_id, $start_date = null, $end_date = null) {
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $stats = self::get_overall_statistics($start_date, $end_date, $expert_id);
+        $profit = self::get_expert_profit($expert_id, $start_date, $end_date);
+        
+        // محاسبه نرخ موفقیت
+        $success_rate = 0;
+        if ($stats['total_inquiries'] > 0) {
+            $success_rate = round(($stats['completed'] / $stats['total_inquiries']) * 100, 2);
+        }
+        
+        // محاسبه متوسط زمان پاسخ
+        $avg_response_time = self::calculate_avg_response_time($expert_id, $start_date, $end_date);
+        
+        // آمار روزانه کارشناس
+        $daily = self::get_daily_statistics($start_date, $end_date, $expert_id);
+        
+        return [
+            'basic' => $stats,
+            'profit' => $profit,
+            'success_rate' => $success_rate,
+            'total_customers' => self::get_expert_customers_count($expert_id),
+            'new_customers' => self::get_expert_new_customers_count($expert_id, $start_date, $end_date),
+            'avg_response_time' => $avg_response_time,
+            'daily' => $daily,
+        ];
+    }
+    
+    /**
+     * محاسبه متوسط زمان پاسخ کارشناس
+     * @param int $expert_id
+     * @param string $start_date
+     * @param string $end_date
+     * @return float
+     */
+    private static function calculate_avg_response_time($expert_id, $start_date, $end_date) {
+        global $wpdb;
+        
+        // این یک محاسبه ساده است - می‌تواند پیچیده‌تر باشد
+        // زمان بین ایجاد استعلام تا اولین بروزرسانی توسط کارشناس
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                p.ID,
+                p.post_date as inquiry_date,
+                MIN(pm_date.meta_value) as first_update_date
+            FROM {$wpdb->posts} p
+            INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id 
+                AND pm_expert.meta_key = 'assigned_expert_id'
+                AND pm_expert.meta_value = %d
+            LEFT JOIN {$wpdb->postmeta} pm_date ON p.ID = pm_date.post_id 
+                AND pm_date.meta_key LIKE 'expert_update_date_%%'
+            WHERE p.post_type IN ('cash_inquiry', 'inquiry')
+            AND p.post_status = 'publish'
+            AND p.post_date >= %s AND p.post_date <= %s
+            GROUP BY p.ID",
+            $expert_id,
+            $start_date . ' 00:00:00',
+            $end_date . ' 23:59:59'
+        ));
+        
+        if (empty($results)) {
+            return 0;
+        }
+        
+        $total_hours = 0;
+        $count = 0;
+        
+        foreach ($results as $result) {
+            if ($result->first_update_date) {
+                $inquiry_time = strtotime($result->inquiry_date);
+                $update_time = strtotime($result->first_update_date);
+                $hours = ($update_time - $inquiry_time) / 3600;
+                if ($hours > 0 && $hours < 8760) { // معقول بودن (کمتر از یک سال)
+                    $total_hours += $hours;
+                    $count++;
+                }
+            }
+        }
+        
+        return $count > 0 ? round($total_hours / $count, 2) : 0;
+    }
+    
+    /**
+     * محاسبه رشد نسبت به دوره قبل
+     * @param string $start_date
+     * @param string $end_date
+     * @param int $expert_id
+     * @return array
+     */
+    public static function get_growth_statistics($start_date, $end_date, $expert_id = null) {
+        // محاسبه دوره قبل
+        $period_days = (strtotime($end_date) - strtotime($start_date)) / (60 * 60 * 24);
+        $prev_end = date('Y-m-d', strtotime($start_date . ' -1 day'));
+        $prev_start = date('Y-m-d', strtotime($prev_end . ' -' . $period_days . ' days'));
+        
+        $current = self::get_overall_statistics($start_date, $end_date, $expert_id);
+        $previous = self::get_overall_statistics($prev_start, $prev_end, $expert_id);
+        
+        $calculate_growth = function($current, $previous) {
+            if ($previous == 0) {
+                return $current > 0 ? 100 : 0;
+            }
+            return round((($current - $previous) / $previous) * 100, 1);
+        };
+        
+        return [
+            'current' => $current,
+            'previous' => $previous,
+            'total_inquiries_growth' => $calculate_growth($current['total_inquiries'], $previous['total_inquiries']),
+            'revenue_growth' => $calculate_growth($current['revenue'], $previous['revenue']),
+            'completed_growth' => $calculate_growth($current['completed'], $previous['completed']),
+            'cash_inquiries_growth' => $calculate_growth($current['cash_inquiries'], $previous['cash_inquiries']),
+            'installment_inquiries_growth' => $calculate_growth($current['installment_inquiries'], $previous['installment_inquiries']),
+        ];
+    }
+    
+    /**
+     * دریافت کارشناسان برتر
+     * @param string $start_date
+     * @param string $end_date
+     * @param int $limit
+     * @param string $sort_by profit, revenue, success_rate, total_inquiries
+     * @return array
+     */
+    public static function get_top_experts($start_date = null, $end_date = null, $limit = 5, $sort_by = 'profit') {
+        $business_stats = self::get_business_statistics($start_date, $end_date);
+        $experts = $business_stats['experts'];
+        
+        $sort_keys = [
+            'profit' => 'profit',
+            'revenue' => 'revenue',
+            'success_rate' => 'success_rate',
+            'total_inquiries' => 'total_inquiries'
+        ];
+        
+        $key = $sort_keys[$sort_by] ?? 'profit';
+        
+        usort($experts, function($a, $b) use ($key) {
+            return $b[$key] <=> $a[$key];
+        });
+        
+        return array_slice($experts, 0, $limit);
+    }
+    
+    /**
+     * دریافت مشتریان VIP (بیشترین استعلام)
+     * @param string $start_date
+     * @param string $end_date
+     * @param int $limit
+     * @return array
+     */
+    public static function get_vip_customers($start_date = null, $end_date = null, $limit = 10) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                pm.meta_value as national_id,
+                COUNT(*) as inquiry_count,
+                SUM(CAST(pm_amount.meta_value AS DECIMAL(10,2))) as total_amount
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'customer_national_id'
+            LEFT JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id AND pm_amount.meta_key = 'payment_amount'
+            WHERE p.post_type IN ('cash_inquiry', 'inquiry')
+            AND p.post_status = 'publish'
+            AND p.post_date >= %s AND p.post_date <= %s
+            AND pm.meta_value != '' AND pm.meta_value IS NOT NULL
+            GROUP BY pm.meta_value
+            ORDER BY inquiry_count DESC, total_amount DESC
+            LIMIT %d",
+            $start_date . ' 00:00:00',
+            $end_date . ' 23:59:59',
+            $limit
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * دریافت توزیع وضعیت‌ها
+     * @param string $start_date
+     * @param string $end_date
+     * @param int $expert_id
+     * @return array
+     */
+    public static function get_status_distribution($start_date = null, $end_date = null, $expert_id = null) {
+        $stats = self::get_overall_statistics($start_date, $end_date, $expert_id);
+        
+        return [
+            ['status' => 'تکمیل شده', 'count' => $stats['completed'], 'color' => '#10b981'],
+            ['status' => 'در انتظار', 'count' => $stats['new'] + $stats['in_progress'], 'color' => '#f59e0b'],
+            ['status' => 'رد شده', 'count' => $stats['rejected'], 'color' => '#ef4444'],
+            ['status' => 'ارجاع داده شده', 'count' => $stats['referred'], 'color' => '#3b82f6'],
+            ['status' => 'پیگیری برنامه‌ریزی', 'count' => $stats['followup_scheduled'], 'color' => '#8b5cf6'],
+        ];
+    }
+    
+    /**
+     * دریافت استعلامات نیازمند توجه (عقب‌افتاده، بدون کارشناس)
+     * @return array
+     */
+    public static function get_attention_required_inquiries() {
+        global $wpdb;
+        $today = date('Y-m-d');
+        
+        // استعلامات عقب‌افتاده
+        $overdue = $wpdb->get_results($wpdb->prepare(
+            "SELECT p.ID, p.post_type, p.post_date
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'followup_date'
+            WHERE p.post_type IN ('cash_inquiry', 'inquiry')
+            AND p.post_status = 'publish'
+            AND pm.meta_value < %s
+            AND pm.meta_value != ''
+            ORDER BY pm.meta_value ASC
+            LIMIT 20",
+            $today
+        ));
+        
+        // استعلامات بدون کارشناس
+        $unassigned = $wpdb->get_results(
+            "SELECT p.ID, p.post_type, p.post_date
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'assigned_expert_id'
+            WHERE p.post_type IN ('cash_inquiry', 'inquiry')
+            AND p.post_status = 'publish'
+            AND (pm.meta_value IS NULL OR pm.meta_value = '' OR pm.meta_value = '0')
+            ORDER BY p.post_date DESC
+            LIMIT 20"
+        );
+        
+        return [
+            'overdue' => $overdue,
+            'unassigned' => $unassigned,
+        ];
     }
 }
 

@@ -75,7 +75,7 @@ if (!defined('ABSPATH')) {
 
                     <div id="loan-calculator-wrapper"></div>
 
-                    <div id="expert-form-details" style="display: none;">
+                    <div id="expert-form-details" class="maneli-initially-hidden">
                         <h5 class="mb-3 mt-4 pt-4 border-top">
                             <span class="badge bg-primary-transparent me-2">2</span>
                             <?php esc_html_e('Identity Information', 'maneli-car-inquiry'); ?>
@@ -139,18 +139,18 @@ if (!defined('ABSPATH')) {
                                     <label class="form-label"><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?>:</label>
                                     <select name="job_type" id="buyer_job_type" class="form-select">
                                         <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>
-                                        <option value="self"><?php esc_html_e('آزاد', 'maneli-car-inquiry'); ?></option>
-                                        <option value="employee"><?php esc_html_e('کارمند', 'maneli-car-inquiry'); ?></option>
+                                        <option value="self"><?php esc_html_e('Self-Employed', 'maneli-car-inquiry'); ?></option>
+                                        <option value="employee"><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 buyer-job-title-wrapper" style="display:none;">
+                                <div class="col-md-6 buyer-job-title-wrapper maneli-initially-hidden">
                                     <label class="form-label"><?php esc_html_e('Job Title:', 'maneli-car-inquiry'); ?></label>
                                     <input type="text" name="job_title" id="buyer_job_title" class="form-control">
                                 </div>
                             </div>
                             
                             <div class="row g-3 mt-2">
-                                <div class="col-md-6 buyer-property-wrapper" style="display:none;">
+                                <div class="col-md-6 buyer-property-wrapper maneli-initially-hidden">
                                     <label class="form-label"><?php esc_html_e('Residency Status', 'maneli-car-inquiry'); ?>:</label>
                                     <select name="residency_status" id="buyer_residency_status" class="form-select">
                                         <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>
@@ -198,7 +198,7 @@ if (!defined('ABSPATH')) {
                             </div>
                         </div>
                         
-                        <div id="issuer-form-wrapper" style="display: none;">
+                        <div id="issuer-form-wrapper" class="maneli-initially-hidden">
                             <h6 class="mb-3 mt-4"><?php esc_html_e('Cheque Issuer Information Form', 'maneli-car-inquiry'); ?></h6>
                             
                             <div class="row g-3">
@@ -239,18 +239,18 @@ if (!defined('ABSPATH')) {
                                     <label class="form-label"><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?>:</label>
                                     <select name="issuer_job_type" id="issuer_job_type" class="form-select">
                                         <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>
-                                        <option value="self"><?php esc_html_e('آزاد', 'maneli-car-inquiry'); ?></option>
-                                        <option value="employee"><?php esc_html_e('کارمند', 'maneli-car-inquiry'); ?></option>
+                                        <option value="self"><?php esc_html_e('Self-Employed', 'maneli-car-inquiry'); ?></option>
+                                        <option value="employee"><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 issuer-job-title-wrapper" style="display:none;">
+                                <div class="col-md-6 issuer-job-title-wrapper maneli-initially-hidden">
                                     <label class="form-label"><?php esc_html_e('Issuer Job Title:', 'maneli-car-inquiry'); ?></label>
                                     <input type="text" name="issuer_job_title" id="issuer_job_title" class="form-control">
                                 </div>
                             </div>
                             
                             <div class="row g-3 mt-2">
-                                <div class="col-md-6 issuer-property-wrapper" style="display:none;">
+                                <div class="col-md-6 issuer-property-wrapper maneli-initially-hidden">
                                     <label class="form-label"><?php esc_html_e('Issuer Residency Status', 'maneli-car-inquiry'); ?>:</label>
                                     <select name="issuer_residency_status" id="issuer_residency_status" class="form-select">
                                         <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>

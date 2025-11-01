@@ -1,0 +1,409 @@
+/**
+ * Loan Calculator Styles
+ * Styled to match dashboard Bootstrap theme
+ * Using specific selectors to avoid conflicts with theme styles
+ * Note: Some !important may still be necessary for theme compatibility
+ */
+
+/* === Calculator Container - Match Dashboard Card Style === */
+.maneli-calculator-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 1.5rem auto;
+    background: #fff;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e6f1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow: hidden;
+    font-family: 'Peyda', 'Tahoma', sans-serif;
+    padding: 0;
+}
+
+/* === Tab Navigation - Match Dashboard Tab Style === */
+.maneli-calculator-container .calculator-tabs {
+    display: flex;
+    border-bottom: 1px solid #e2e6f1;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.maneli-calculator-container .calculator-tabs .tab-link {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #6e829f;
+    text-decoration: none;
+    position: relative;
+    display: block;
+}
+
+.maneli-calculator-container .calculator-tabs .tab-link:hover {
+    color: #2D89BE;
+    background: rgba(45, 137, 190, 0.05);
+}
+
+.maneli-calculator-container .calculator-tabs .tab-link.active {
+    color: #2D89BE;
+    background: transparent;
+    border-bottom-color: #2D89BE;
+    font-weight: 600;
+}
+
+/* === Tab Content === */
+.maneli-calculator-container .tabs-content-wrapper {
+    padding: 1.5rem;
+}
+
+.maneli-calculator-container .tab-content {
+    display: none;
+}
+
+.maneli-calculator-container .tab-content.active {
+    display: block;
+}
+
+/* === Form Elements === */
+.maneli-calculator-container .loan-calculator-form {
+    font-family: 'Peyda', 'Tahoma', sans-serif;
+}
+
+.maneli-calculator-container .tabs-content-wrapper .loan-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: #212b37;
+    text-align: center;
+    line-height: 1.5;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e6f1;
+}
+
+.maneli-calculator-container .loan-section {
+    margin-bottom: 1.25rem;
+}
+
+.maneli-calculator-container .loan-section:last-child {
+    margin-bottom: 0;
+}
+
+.maneli-calculator-container .loan-row {
+    margin-bottom: 0.875rem;
+}
+
+.maneli-calculator-container .loan-label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+    color: #4d5875;
+}
+
+/* === Input Fields === */
+.maneli-calculator-container .loan-calculator-form input[type="text"],
+.maneli-calculator-container .loan-calculator-form input[type="tel"],
+.maneli-calculator-container .loan-calculator-form input[type="number"],
+.maneli-calculator-container .loan-calculator-form select,
+.maneli-calculator-container .loan-calculator-form textarea {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #dee7f1;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.7;
+    color: #212b37;
+    background-color: #fff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    box-sizing: border-box;
+}
+
+.maneli-calculator-container .loan-calculator-form input[type="text"]:focus,
+.maneli-calculator-container .loan-calculator-form input[type="tel"]:focus,
+.maneli-calculator-container .loan-calculator-form input[type="number"]:focus,
+.maneli-calculator-container .loan-calculator-form select:focus,
+.maneli-calculator-container .loan-calculator-form textarea:focus {
+    border-color: rgba(45, 137, 190, 0.5);
+    background-color: #fff;
+    box-shadow: 0 0 4px rgba(45, 137, 190, 0.5);
+    color: #212b37;
+    outline: 0;
+}
+
+/* === Range Slider === */
+.maneli-calculator-container input[type="range"] {
+    padding: 0 !important;
+    height: 8px !important;
+    background: linear-gradient(
+        to right,
+        #2D89BE var(--value-percent, 0%),
+        #e2e6f1 var(--value-percent, 0%)
+    ) !important;
+    border-radius: 0.25rem !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    cursor: pointer !important;
+    border: none !important;
+    margin: 1rem 0 !important;
+    width: 100% !important;
+}
+
+.maneli-calculator-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    background: #2D89BE !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(45, 137, 190, 0.4) !important;
+    border: 2px solid #fff !important;
+}
+
+.maneli-calculator-container input[type="range"]::-moz-range-thumb {
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    background: #2D89BE !important;
+    cursor: pointer !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 2px 4px rgba(45, 137, 190, 0.4) !important;
+}
+
+/* === Installment Calculator Specific === */
+.maneli-calculator-container .loan-section .loan-note {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #6e829f;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.maneli-calculator-container .loan-section .loan-subtitle {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #212b37;
+    margin-bottom: 0.875rem;
+}
+
+.maneli-calculator-container .loan-section .loan-requirements {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.maneli-calculator-container .loan-section .loan-requirements li {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    background: #f9fafb;
+    border-right: 3px solid #2D89BE;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    line-height: 1.6;
+    font-size: 0.8125rem;
+    color: #212b37;
+}
+
+.maneli-calculator-container .loan-section .loan-requirements li:hover {
+    background: rgba(45, 137, 190, 0.1);
+    transform: translateX(-2px);
+    border-right-color: #2D89BE;
+}
+
+.maneli-calculator-container .loan-section .loan-requirements li:last-child {
+    margin-bottom: 0;
+}
+
+/* === Term Buttons === */
+.maneli-calculator-container .loan-section .loan-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.maneli-calculator-container .loan-section .loan-buttons .term-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e6f1;
+    background: #fff;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    color: #212b37;
+}
+
+.maneli-calculator-container .loan-section .loan-buttons .term-btn:hover:not(.active) {
+    border-color: #2D89BE;
+    color: #2D89BE;
+    background: rgba(45, 137, 190, 0.05);
+}
+
+.maneli-calculator-container .loan-section .loan-buttons .term-btn.active {
+    background: #2D89BE;
+    color: #fff;
+    border-color: #2D89BE;
+    box-shadow: 0 2px 4px rgba(45, 137, 190, 0.2);
+}
+
+.maneli-calculator-container .loan-section .loan-buttons .term-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* === Result Section === */
+.maneli-calculator-container .loan-section.result-section {
+    background: rgba(45, 137, 190, 0.1);
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    border: 1px solid #2D89BE;
+    margin-top: 1rem;
+}
+
+.maneli-calculator-container .loan-section.result-section strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #212b37;
+    font-weight: 600;
+}
+
+.maneli-calculator-container .loan-section.result-section span {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2D89BE;
+    display: inline-block;
+    margin: 0 0.25rem;
+    font-family: 'Peyda', 'Tahoma', sans-serif;
+}
+
+/* === Action Button === */
+.maneli-calculator-container .loan-action-wrapper {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #e2e6f1;
+}
+
+.maneli-calculator-container .loan-action-wrapper .loan-action-btn {
+    background: #2D89BE;
+    color: #fff;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.5;
+}
+
+.maneli-calculator-container .loan-action-wrapper .loan-action-btn:hover:not(:disabled) {
+    background: #4a54e5;
+    box-shadow: 0 4px 8px rgba(45, 137, 190, 0.3);
+    transform: translateY(-1px);
+}
+
+.maneli-calculator-container .loan-action-wrapper .loan-action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.maneli-calculator-container .loan-action-wrapper .loan-action-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* === Cash Request Form === */
+.maneli-calculator-container .cash-request-form .form-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.maneli-calculator-container .cash-request-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.maneli-calculator-container .cash-request-form .form-group {
+    margin-bottom: 0;
+}
+
+.maneli-calculator-container .cash-request-form .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #4d5875;
+}
+
+/* === Price Hidden/Unavailable Styles === */
+.maneli-calculator-container .result-section .unavailable-text {
+    color: #fb4242;
+    font-weight: 600;
+}
+
+.maneli-calculator-container .result-section .price-hidden {
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+/* === Responsive Design === */
+@media (max-width: 768px) {
+    .maneli-calculator-container {
+        margin: 1rem auto !important;
+        border-radius: 0.375rem !important;
+    }
+    
+    .maneli-calculator-container .tabs-content-wrapper {
+        padding: 1rem !important;
+    }
+    
+    .maneli-calculator-container .cash-request-form .form-row {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .maneli-calculator-container .calculator-tabs .tab-link {
+        padding: 0.75rem 0.5rem !important;
+        font-size: 0.8125rem !important;
+    }
+    
+    .maneli-calculator-container .loan-title {
+        font-size: 1rem !important;
+        margin-bottom: 1rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+    
+    .maneli-calculator-container .loan-buttons {
+        gap: 0.375rem !important;
+    }
+    
+    .maneli-calculator-container .term-btn {
+        min-width: 70px !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .maneli-calculator-container .loan-section.result-section {
+        padding: 1rem;
+    }
+    
+    .maneli-calculator-container .loan-section.result-section span {
+        font-size: 1.25rem;
+    }
+}

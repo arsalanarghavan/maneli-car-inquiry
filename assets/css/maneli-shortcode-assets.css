@@ -1,0 +1,14 @@
+/**
+ * Shortcode Assets
+ * Consolidated CSS for all shortcodes
+ */
+
+/* === Load loan calculator styles === */
+@import url('loan-calculator.css');
+
+/* === Load inquiry form styles === */
+@import url('installment-inquiry.css');
+
+/* === Load cash inquiry styles === */
+@import url('cash-inquiry.css');
+

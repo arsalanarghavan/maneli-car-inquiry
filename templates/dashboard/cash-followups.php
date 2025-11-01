@@ -8,18 +8,8 @@
 
 // Check permission
 if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
-    ?>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <strong>دسترسی محدود!</strong> شما به این صفحه دسترسی ندارید.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    </div>
-    <?php
-    return;
+    wp_redirect(home_url('/dashboard'));
+    exit;
 }
 
 // Get current user
@@ -88,82 +78,90 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
     wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
 }
 ?>
+<div class="main-content app-content">
+    <div class="container-fluid">
+
+        <!-- Start::page-header -->
+        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+            <div>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item">
+                        <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Cash Follow-ups', 'maneli-car-inquiry'); ?></li>
+                </ol>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Cash Follow-ups', 'maneli-car-inquiry'); ?></h1>
+            </div>
+        </div>
+        <!-- End::page-header -->
 
 <div class="row">
     <div class="col-xl-12">
         <!-- Statistics Cards -->
         <div class="row mb-4">
-            <div class="col-xl-3 col-lg-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-warning-transparent">
-                                    <i class="la la-clock fs-24"></i>
-                                </span>
-                            </div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">پیگیری‌های امروز</span>
+                                <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e('Today\'s Follow-ups', 'maneli-car-inquiry'); ?></span>
+                                <h4 class="mb-0 fw-semibold"><?php echo number_format_i18n($today_count); ?></h4>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-md avatar-rounded bg-warning-transparent">
+                                    <i class="la la-clock fs-20 text-warning"></i>
                                 </div>
-                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($today_count); ?></h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-danger-transparent">
-                                    <i class="la la-exclamation-triangle fs-24"></i>
-                                </span>
-                            </div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">عقب‌افتاده</span>
+                                <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
+                                <h4 class="mb-0 fw-semibold text-danger"><?php echo number_format_i18n($overdue_count); ?></h4>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-md avatar-rounded bg-danger-transparent">
+                                    <i class="la la-exclamation-triangle fs-20 text-danger"></i>
                                 </div>
-                                <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($overdue_count); ?></h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-info-transparent">
-                                    <i class="la la-calendar-alt fs-24"></i>
-                                </span>
-                            </div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">این هفته</span>
+                                <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></span>
+                                <h4 class="mb-0 fw-semibold"><?php echo number_format_i18n($week_count); ?></h4>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-md avatar-rounded bg-info-transparent">
+                                    <i class="la la-calendar-alt fs-20 text-info"></i>
                                 </div>
-                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($week_count); ?></h4>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-success-transparent">
-                                    <i class="la la-list-alt fs-24"></i>
-                                </span>
-                            </div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">مجموع</span>
+                                <span class="d-block mb-1 text-muted fs-12"><?php esc_html_e('Total', 'maneli-car-inquiry'); ?></span>
+                                <h4 class="mb-0 fw-semibold"><?php echo number_format_i18n($total_count); ?></h4>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-md avatar-rounded bg-primary-transparent">
+                                    <i class="la la-list-alt fs-20 text-primary"></i>
                                 </div>
-                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($total_count); ?></h4>
                             </div>
                         </div>
                     </div>
@@ -173,47 +171,35 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
 
         <!-- Main Card -->
         <div class="card custom-card">
-            <div class="card-header">
+            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div class="card-title">
-                    <i class="la la-dollar-sign me-2"></i>
-                    لیست پیگیری‌های استعلامات نقدی
+                    <?php esc_html_e('Cash Inquiry Follow-ups List', 'maneli-car-inquiry'); ?><span class="badge bg-primary rounded ms-2 fs-12 align-middle"><?php echo number_format_i18n($total_count); ?></span>
                 </div>
             </div>
-            <div class="card-body">
-                <!-- Info Alert -->
-                <div class="alert alert-info border-info d-flex align-items-center" role="alert">
-                    <i class="la la-info-circle fs-20 me-2"></i>
-                    <div>
-                        <strong>راهنما:</strong>
-                        استعلامات نقدی که نیاز به پیگیری در تاریخ‌های مشخص دارند، در اینجا نمایش داده می‌شوند.
-                    </div>
-                </div>
-
+            <div class="card-body p-0">
                 <!-- Table -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover text-nowrap">
-                        <thead class="table-light">
+                    <table class="table text-nowrap table-hover">
+                        <thead>
                             <tr>
-                                <th><i class="la la-hashtag me-1"></i>شناسه</th>
-                                <th><i class="la la-user me-1"></i>مشتری</th>
-                                <th><i class="la la-car me-1"></i>خودرو</th>
-                                <th><i class="la la-calendar me-1"></i>تاریخ پیگیری</th>
-                                <th><i class="la la-info-circle me-1"></i>وضعیت</th>
+                                <th scope="col"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('Follow-up Date', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
                                 <?php if ($is_admin): ?>
-                                    <th><i class="la la-user-tie me-1"></i>کارشناس</th>
+                                    <th scope="col"><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></th>
                                 <?php endif; ?>
-                                <th><i class="la la-clock me-1"></i>تاریخ ثبت</th>
-                                <th><i class="la la-wrench me-1"></i>عملیات</th>
+                                <th scope="col"><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($followups)): ?>
                                 <tr>
-                                    <td colspan="<?php echo $is_admin ? '8' : '7'; ?>" class="text-center">
-                                        <div class="py-5">
-                                            <i class="la la-inbox" style="font-size: 60px; color: #dee2e6;"></i>
-                                            <p class="text-muted mt-3">هیچ پیگیری‌ای یافت نشد.</p>
-                                        </div>
+                                    <td colspan="<?php echo $is_admin ? '8' : '7'; ?>" class="text-center py-4">
+                                        <i class="la la-inbox fs-24 text-muted"></i>
+                                        <p class="text-muted mt-3"><?php esc_html_e('No follow-ups found.', 'maneli-car-inquiry'); ?></p>
                                     </td>
                                 </tr>
                             <?php else: ?>
@@ -239,43 +225,54 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                     $is_overdue = $follow_up_date && $follow_up_date < $today;
                                     $row_class = $is_overdue ? 'table-danger' : '';
                                 ?>
-                                    <tr class="<?php echo $row_class; ?>">
-                                        <td>#<?php echo $inquiry_id; ?></td>
-                                        <td><?php echo esc_html($customer_name ?: 'نامشخص'); ?></td>
-                                        <td><?php echo esc_html(get_the_title($product_id)); ?></td>
-                                        <td>
+                                    <tr class="crm-contact contacts-list <?php echo $row_class; ?>">
+                                        <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">
+                                            <span class="fw-medium">#<?php echo $inquiry_id; ?></span>
+                                        </td>
+                                        <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div>
+                                                    <span class="d-block fw-medium"><?php echo esc_html($customer_name ?: esc_html__('Unknown', 'maneli-car-inquiry')); ?></span>
+                                                    <span class="d-block text-muted fs-11">
+                                                        <i class="la la-user me-1 fs-13 align-middle"></i><?php echo esc_html($created_date); ?>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
+                                        <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">
                                             <?php if ($follow_up_date): ?>
                                                 <strong class="<?php echo $is_overdue ? 'text-danger' : 'text-success'; ?>">
                                                     <?php echo esc_html($follow_up_date); ?>
                                                 </strong>
                                                 <?php if ($is_overdue): ?>
-                                                    <br><small class="badge bg-danger">عقب‌افتاده</small>
+                                                    <br><span class="badge bg-danger-transparent"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
                                                 <?php endif; ?>
                                             <?php else: ?>
                                                 —
                                             <?php endif; ?>
                                         </td>
-                                        <td>
-                                            <span class="badge bg-warning">
+                                        <td data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
+                                            <span class="badge bg-warning-transparent">
                                                 <?php echo esc_html($cash_status_label); ?>
                                             </span>
                                             <?php if (!empty($followup_history)): ?>
-                                                <br><small class="text-muted">
-                                                    (<?php echo count($followup_history); ?> پیگیری قبلی)
+                                                <br><small class="text-muted fs-11">
+                                                    (<?php printf(esc_html__('%d previous follow-ups', 'maneli-car-inquiry'), count($followup_history)); ?>)
                                                 </small>
                                             <?php endif; ?>
                                         </td>
                                         <?php if ($is_admin): ?>
-                                            <td>
+                                            <td data-title="<?php esc_attr_e('Expert', 'maneli-car-inquiry'); ?>">
                                                 <?php echo $expert ? esc_html($expert->display_name) : '<span class="text-muted">—</span>'; ?>
                                             </td>
                                         <?php endif; ?>
-                                        <td><?php echo esc_html($created_date); ?></td>
-                                        <td>
+                                        <td data-title="<?php esc_attr_e('Registration Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($created_date); ?></td>
+                                        <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
                                             <div class="btn-list">
                                                 <a href="<?php echo add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/inquiries/cash')); ?>" 
-                                                   class="btn btn-sm btn-primary-light">
-                                                    <i class="la la-eye"></i> مشاهده
+                                                   class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                    <i class="la la-eye"></i>
                                                 </a>
                                             </div>
                                         </td>
@@ -291,32 +288,5 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
 </div>
 <!-- End::row -->
 
-<style>
-/* Follow-up List Custom Styles */
-.table-warning th {
-    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
-    color: white;
-    font-weight: 600;
-    border: none;
-}
-
-.table-warning th i {
-    opacity: 0.9;
-}
-
-.table-hover tbody tr:hover:not(.table-danger) {
-    background-color: rgba(var(--warning-rgb), 0.03);
-    transform: scale(1.01);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-}
-
-.table-danger {
-    background-color: rgba(220, 53, 69, 0.05) !important;
-}
-
-.table-danger:hover {
-    background-color: rgba(220, 53, 69, 0.1) !important;
-}
-</style>
-
+</div>
+</div>

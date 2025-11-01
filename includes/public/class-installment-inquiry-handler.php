@@ -75,6 +75,19 @@ class Maneli_Installment_Inquiry_Handler {
         $start = $options['meetings_start_hour'] ?? '10:00';
         $end   = $options['meetings_end_hour'] ?? '20:00';
         $slot  = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
+        
+        // Check if the selected date is an excluded day
+        $excluded_days = isset($options['meetings_excluded_days']) && is_array($options['meetings_excluded_days']) 
+            ? $options['meetings_excluded_days'] 
+            : [];
+        
+        if (!empty($excluded_days)) {
+            $day_of_week = strtolower(date('l', strtotime($date)));
+            if (in_array($day_of_week, $excluded_days)) {
+                wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'maneli-car-inquiry')]);
+                return;
+            }
+        }
 
         $start_ts = strtotime($date . ' ' . $start);
         $end_ts   = strtotime($date . ' ' . $end);
@@ -126,6 +139,53 @@ class Maneli_Installment_Inquiry_Handler {
         if (!$start || !$inquiry_id) {
             wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'maneli-car-inquiry')]);
         }
+        
+        // Validate time against settings
+        $options = get_option('maneli_inquiry_all_options', []);
+        $settings_start = $options['meetings_start_hour'] ?? '10:00';
+        $settings_end = $options['meetings_end_hour'] ?? '20:00';
+        $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
+        
+        // Extract date from $start (format: Y-m-d H:i)
+        $start_timestamp = strtotime($start);
+        if ($start_timestamp === false) {
+            wp_send_json_error(['message' => esc_html__('Invalid time format.', 'maneli-car-inquiry')]);
+        }
+        
+        $date = date('Y-m-d', $start_timestamp);
+        
+        // Check if the selected date is an excluded day
+        $excluded_days = isset($options['meetings_excluded_days']) && is_array($options['meetings_excluded_days']) 
+            ? $options['meetings_excluded_days'] 
+            : [];
+        
+        if (!empty($excluded_days)) {
+            $day_of_week = strtolower(date('l', $start_timestamp));
+            if (in_array($day_of_week, $excluded_days)) {
+                wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'maneli-car-inquiry')]);
+                return;
+            }
+        }
+        
+        $workday_start_ts = strtotime($date . ' ' . $settings_start);
+        $workday_end_ts = strtotime($date . ' ' . $settings_end);
+        
+        if ($workday_end_ts <= $workday_start_ts) {
+            wp_send_json_error(['message' => esc_html__('Invalid schedule range in settings.', 'maneli-car-inquiry')]);
+        }
+        
+        // Check if time is within allowed range
+        if ($start_timestamp < $workday_start_ts || $start_timestamp >= $workday_end_ts) {
+            wp_send_json_error(['message' => esc_html__('Selected time is outside allowed working hours.', 'maneli-car-inquiry')]);
+        }
+        
+        // Check if time aligns with slot intervals
+        $time_diff = $start_timestamp - $workday_start_ts;
+        $slot_seconds = $slot_minutes * 60;
+        if ($time_diff % $slot_seconds !== 0) {
+            wp_send_json_error(['message' => esc_html__('Selected time does not match available slot intervals.', 'maneli-car-inquiry')]);
+        }
+        
         // Check conflict
         $exists = get_posts([
             'post_type' => 'maneli_meeting',
@@ -181,8 +241,27 @@ class Maneli_Installment_Inquiry_Handler {
             's'              => $search,
         ];
 
+        // Exclude disabled products for non-admin users
+        if (!current_user_can('manage_maneli_inquiries')) {
+            $args['meta_query'] = [
+                'relation' => 'OR',
+                [
+                    'key'     => '_maneli_car_status',
+                    'value'   => 'disabled',
+                    'compare' => '!=',
+                ],
+                [
+                    'key'     => '_maneli_car_status',
+                    'compare' => 'NOT EXISTS',
+                ],
+            ];
+        }
+
         // Optional: category filter
         if (!empty($_POST['category'])) {
+            if (!isset($args['tax_query'])) {
+                $args['tax_query'] = [];
+            }
             $args['tax_query'][] = [
                 'taxonomy' => 'product_cat',
                 'field'    => 'slug',
@@ -191,6 +270,9 @@ class Maneli_Installment_Inquiry_Handler {
         }
         // Optional: brand filter (via attribute pa_brand)
         if (!empty($_POST['brand'])) {
+            if (!isset($args['tax_query'])) {
+                $args['tax_query'] = [];
+            }
             $args['tax_query'][] = [
                 'taxonomy' => 'pa_brand',
                 'field'    => 'slug',
@@ -372,7 +454,8 @@ class Maneli_Installment_Inquiry_Handler {
         // Always go to step 3 (confirm car) - user must confirm their selected car
         update_user_meta($user_id, 'maneli_inquiry_step', 'confirm_car_pending');
 
-        wp_redirect(home_url('/dashboard/inquiries/installment'));
+        // Redirect to wizard step 3 (confirm car)
+        wp_redirect(home_url('/dashboard/new-inquiry?step=3'));
         exit;
     }
 
@@ -400,12 +483,14 @@ class Maneli_Installment_Inquiry_Handler {
         if ($payment_enabled && $inquiry_fee > 0) {
             // Payment is required - move to payment step
             update_user_meta($user_id, 'maneli_inquiry_step', 'payment_pending');
+            wp_redirect(home_url('/dashboard/new-inquiry?step=4'));
         } else {
             // No payment needed - finalize the inquiry right away
             do_action('maneli_inquiry_payment_successful', $user_id);
+            // Clean up step meta after successful completion
+            delete_user_meta($user_id, 'maneli_inquiry_step');
+            wp_redirect(home_url('/dashboard/installment-inquiries'));
         }
-
-        wp_redirect(home_url('/dashboard/inquiries/installment'));
         exit;
     }
     
@@ -476,7 +561,11 @@ class Maneli_Installment_Inquiry_Handler {
         ]);
 
         if (is_wp_error($post_id)) {
-            error_log('Maneli Inquiry Error: Failed to insert post. ' . $post_id->get_error_message());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Inquiry Error: Failed to insert post. ' . $post_id->get_error_message());
+                }
+            }
             return false;
         }
 
@@ -487,6 +576,58 @@ class Maneli_Installment_Inquiry_Handler {
         
         update_post_meta($post_id, 'inquiry_status', $initial_status);
         update_post_meta($post_id, 'issuer_type', $issuer_type);
+        
+        // Create notification for managers and admins about new installment inquiry
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        $managers = get_users(array(
+            'role__in' => array('administrator', 'maneli_admin'),
+            'fields' => 'ids'
+        ));
+        
+        $customer_name = $buyer_data['first_name'] . ' ' . $buyer_data['last_name'];
+        $car_name = get_the_title($car_id);
+        
+        foreach ($managers as $manager_id) {
+            Maneli_Notification_Handler::create_notification(array(
+                'user_id' => $manager_id,
+                'type' => 'inquiry_new',
+                'title' => esc_html__('New Installment Inquiry', 'maneli-car-inquiry'),
+                'message' => sprintf(esc_html__('A new installment inquiry from %s for %s has been registered', 'maneli-car-inquiry'), $customer_name, $car_name),
+                'link' => home_url('/dashboard/inquiries/installment?inquiry_id=' . $post_id),
+                'related_id' => $post_id,
+            ));
+        }
+        
+        // Mark that payment was completed (even if amount was 0 due to discount or free inquiry)
+        update_post_meta($post_id, 'inquiry_payment_completed', 'yes');
+        update_post_meta($post_id, 'inquiry_payment_date', current_time('mysql'));
+        
+        // Also store the actual amount paid (0 if discount or free)
+        $options = get_option('maneli_inquiry_all_options', []);
+        $inquiry_fee_amount = (int)($options['inquiry_fee'] ?? 0);
+        $discount_applied = get_user_meta($user_id, 'maneli_discount_applied', true) === 'yes';
+        $paid_amount = ($discount_applied || $inquiry_fee_amount == 0) ? 0 : $inquiry_fee_amount;
+        update_post_meta($post_id, 'inquiry_paid_amount', $paid_amount);
+        
+        // Save transaction details if available (from payment gateway)
+        $transaction_data = get_user_meta($user_id, 'maneli_last_payment_transaction', true);
+        if (!empty($transaction_data)) {
+            update_post_meta($post_id, 'payment_gateway', $transaction_data['gateway'] ?? '');
+            if (isset($transaction_data['authority'])) {
+                update_post_meta($post_id, 'payment_authority', $transaction_data['authority']);
+            }
+            if (isset($transaction_data['ref_id'])) {
+                update_post_meta($post_id, 'payment_ref_id', $transaction_data['ref_id']);
+            }
+            if (isset($transaction_data['order_id'])) {
+                update_post_meta($post_id, 'payment_order_id', $transaction_data['order_id']);
+            }
+            if (isset($transaction_data['token'])) {
+                update_post_meta($post_id, 'payment_token', $transaction_data['token']);
+            }
+            // Clean up user meta
+            delete_user_meta($user_id, 'maneli_last_payment_transaction');
+        }
         
         foreach ($buyer_data as $key => $value) { update_post_meta($post_id, $key, $value); }
         if (!empty($issuer_data)) { foreach ($issuer_data as $key => $value) { update_post_meta($post_id, $key, $value); } }
@@ -604,7 +745,7 @@ class Maneli_Installment_Inquiry_Handler {
         wp_delete_post($post_id, true);
         update_user_meta($user_id, 'maneli_inquiry_step', 'form_pending');
         
-        wp_redirect(home_url('/dashboard/inquiries/installment'));
+        wp_redirect(home_url('/dashboard/installment-inquiries'));
         exit;
     }
 

@@ -62,7 +62,7 @@ class Maneli_Admin_Dashboard_Widgets {
         // ویجت گزارشات پیشرفته
         wp_add_dashboard_widget(
             'maneli_advanced_reports',
-            '📊 ' . esc_html__('گزارشات پیشرفته', 'maneli-car-inquiry'),
+            '📊 ' . esc_html__('Advanced Reports', 'maneli-car-inquiry'),
             array(__CLASS__, 'render_advanced_reports_widget')
         );
     }
@@ -109,21 +109,42 @@ class Maneli_Admin_Dashboard_Widgets {
         $statuses = Maneli_CPT_Handler::get_all_statuses();
         
         $stats = [
-            'total'          => ['label' => esc_html__('Total Inquiries', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
-            'pending'        => ['label' => $statuses['pending'], 'count' => $counts['pending'] ?? 0, 'class' => 'pending'],
-            'user_confirmed' => ['label' => $statuses['user_confirmed'], 'count' => $counts['user_confirmed'] ?? 0, 'class' => 'approved'],
-            'more_docs'      => ['label' => $statuses['more_docs'] ?? esc_html__('Docs Req.', 'maneli-car-inquiry'), 'count' => $counts['more_docs'] ?? 0, 'class' => 'more-docs'],
-            'rejected'       => ['label' => $statuses['rejected'], 'count' => $counts['rejected'] ?? 0, 'class' => 'rejected'],
-            'failed'         => ['label' => $statuses['failed'], 'count' => $counts['failed'] ?? 0, 'class' => 'failed'],
+            'total'          => ['label' => esc_html__('کل درخواست‌های اقساطی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+            'pending'        => ['label' => $statuses['pending'] ?? esc_html__('در انتظار', 'maneli-car-inquiry'), 'count' => $counts['pending'] ?? 0, 'class' => 'pending'],
+            'user_confirmed' => ['label' => $statuses['user_confirmed'] ?? esc_html__('تایید شده', 'maneli-car-inquiry'), 'count' => $counts['user_confirmed'] ?? 0, 'class' => 'confirmed'],
+            'rejected'       => ['label' => $statuses['rejected'] ?? esc_html__('رد شد', 'maneli-car-inquiry'), 'count' => $counts['rejected'] ?? 0, 'class' => 'rejected'],
+        ];
+
+        // Define icon and color for each stat
+        $stat_configs = [
+            'total' => ['icon' => 'la-list-alt', 'color' => 'primary', 'bg' => 'bg-primary-transparent'],
+            'pending' => ['icon' => 'la-clock', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
+            'confirmed' => ['icon' => 'la-check-circle', 'color' => 'success', 'bg' => 'bg-success-transparent'],
+            'rejected' => ['icon' => 'la-times-circle', 'color' => 'danger', 'bg' => 'bg-danger-transparent'],
         ];
 
         ob_start();
         ?>
-        <div class="maneli-dashboard-stats-wrapper">
-            <?php foreach ($stats as $stat) : ?>
-                <div class="stat-widget stat-<?php echo esc_attr($stat['class']); ?>">
-                    <span class="stat-count"><?php echo number_format_i18n($stat['count']); ?></span>
-                    <span class="stat-label"><?php echo esc_html($stat['label']); ?></span>
+        <div class="row mb-4">
+            <?php foreach ($stats as $key => $stat) : 
+                $config = $stat_configs[$stat['class']] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
+            ?>
+                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                    <div class="card custom-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1 text-muted fs-12"><?php echo esc_html($stat['label']); ?></span>
+                                    <h4 class="mb-0 fw-semibold"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <div class="avatar avatar-md avatar-rounded <?php echo esc_attr($config['bg']); ?>">
+                                        <i class="la <?php echo esc_attr($config['icon']); ?> fs-20 text-<?php echo esc_attr($config['color']); ?>"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -141,21 +162,42 @@ class Maneli_Admin_Dashboard_Widgets {
         $statuses = Maneli_CPT_Handler::get_all_cash_inquiry_statuses();
         
         $stats = [
-            'total'            => ['label' => esc_html__('Total Cash Requests', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
-            'pending'          => ['label' => $statuses['pending'], 'count' => $counts['pending'] ?? 0, 'class' => 'pending'],
-            'approved'         => ['label' => $statuses['approved'], 'count' => $counts['approved'] ?? 0, 'class' => 'referred'],
-            'awaiting_payment' => ['label' => $statuses['awaiting_payment'], 'count' => $counts['awaiting_payment'] ?? 0, 'class' => 'awaiting'],
-            'completed'        => ['label' => $statuses['completed'], 'count' => $counts['completed'] ?? 0, 'class' => 'approved'],
-            'rejected'         => ['label' => $statuses['rejected'], 'count' => $counts['rejected'] ?? 0, 'class' => 'rejected'],
+            'total'            => ['label' => esc_html__('کل درخواست‌های نقدی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+            'approved'         => ['label' => $statuses['approved'] ?? esc_html__('تایید شده', 'maneli-car-inquiry'), 'count' => $counts['approved'] ?? 0, 'class' => 'approved'],
+            'completed'        => ['label' => $statuses['completed'] ?? esc_html__('تکمیل شده', 'maneli-car-inquiry'), 'count' => $counts['completed'] ?? 0, 'class' => 'completed'],
+            'rejected'         => ['label' => $statuses['rejected'] ?? esc_html__('رد شد', 'maneli-car-inquiry'), 'count' => $counts['rejected'] ?? 0, 'class' => 'rejected'],
+        ];
+
+        // Define icon and color for each stat
+        $stat_configs = [
+            'total' => ['icon' => 'la-dollar-sign', 'color' => 'primary', 'bg' => 'bg-primary-transparent'],
+            'approved' => ['icon' => 'la-check-circle', 'color' => 'success', 'bg' => 'bg-success-transparent'],
+            'completed' => ['icon' => 'la-check-double', 'color' => 'success', 'bg' => 'bg-success-transparent'],
+            'rejected' => ['icon' => 'la-times-circle', 'color' => 'danger', 'bg' => 'bg-danger-transparent'],
         ];
 
         ob_start();
         ?>
-        <div class="maneli-dashboard-stats-wrapper">
-            <?php foreach ($stats as $stat) : ?>
-                <div class="stat-widget stat-<?php echo esc_attr($stat['class']); ?>">
-                    <span class="stat-count"><?php echo number_format_i18n($stat['count']); ?></span>
-                    <span class="stat-label"><?php echo esc_html($stat['label']); ?></span>
+        <div class="row mb-4">
+            <?php foreach ($stats as $key => $stat) : 
+                $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
+            ?>
+                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                    <div class="card custom-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="flex-fill">
+                                    <span class="d-block mb-1 text-muted fs-12"><?php echo esc_html($stat['label']); ?></span>
+                                    <h4 class="mb-0 fw-semibold"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <div class="avatar avatar-md avatar-rounded <?php echo esc_attr($config['bg']); ?>">
+                                        <i class="la <?php echo esc_attr($config['icon']); ?> fs-20 text-<?php echo esc_attr($config['color']); ?>"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -346,7 +388,7 @@ class Maneli_Admin_Dashboard_Widgets {
                 
                 <div class="report-stat-box following">
                     <span class="number"><?php echo number_format($stats['following']); ?></span>
-                    <span class="label">پیگیری</span>
+                    <span class="label"><?php esc_html_e('Follow-up', 'maneli-car-inquiry'); ?></span>
                 </div>
                 
                 <div class="report-stat-box revenue">

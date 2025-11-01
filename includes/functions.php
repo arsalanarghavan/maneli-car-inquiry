@@ -116,7 +116,9 @@ if (!function_exists('maneli_get_template_part')) {
 
         if (!file_exists($template_file)) {
             // گزارش خطا در صورت عدم وجود تمپلیت
-            error_log('Maneli Template Error: Template file not found: ' . $template_file);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Template Error: Template file not found: ' . $template_file);
+            }
             return '';
         }
 
@@ -132,5 +134,70 @@ if (!function_exists('maneli_get_template_part')) {
             include $template_file;
             return ob_get_clean();
         }
+    }
+}
+
+if (!function_exists('maneli_number_format_persian')) {
+    /**
+     * Format number with Persian digits and thousand separators
+     * 
+     * @param int|float $number The number to format
+     * @param int $decimals Number of decimal places
+     * @return string Formatted number with Persian digits
+     */
+    function maneli_number_format_persian($number, $decimals = 0) {
+        if (!is_numeric($number)) {
+            return '۰';
+        }
+        
+        $formatted = number_format((float)$number, $decimals, '.', ',');
+        
+        // Convert English digits to Persian
+        $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        
+        // Convert digits to Persian
+        $result = str_replace($english_digits, $persian_digits, $formatted);
+        
+        return $result;
+    }
+}
+
+// Global helper function to convert any string with numbers to Persian
+if (!function_exists('persian_numbers')) {
+    /**
+     * Convert English digits in a string to Persian digits
+     * 
+     * @param string|int|float $str The string or number to convert
+     * @return string String with Persian digits
+     */
+    function persian_numbers($str) {
+        // Use maneli_number_format_persian if it exists and input is numeric
+        if (function_exists('maneli_number_format_persian') && is_numeric($str)) {
+            return maneli_number_format_persian($str);
+        }
+        
+        // Otherwise just convert digits
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $result = str_replace($english, $persian, (string)$str);
+        
+        return $result;
+    }
+}
+
+// Global helper function to convert numbers to Persian without separators
+if (!function_exists('persian_numbers_no_separator')) {
+    /**
+     * Convert English digits in a string to Persian digits (no thousand separators)
+     * 
+     * @param string|int|float $str The string or number to convert
+     * @return string String with Persian digits
+     */
+    function persian_numbers_no_separator($str) {
+        // Convert digits to Persian
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        return str_replace($english, $persian, (string)$str);
     }
 }

@@ -1,0 +1,57 @@
+/* Peyda Font - مانلی خودرو */
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 100;
+	src: url('../fonts/peyda/woff2/peydaWeb-extralight.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/peydaWeb-extralight.woff') format('woff');
+}
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 300;
+	src: url('../fonts/peyda/woff2/peydaWeb-light.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/peydaWeb-light.woff') format('woff');
+}
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 400;
+	src: url('../fonts/peyda/woff2/PeydaWeb-Regular.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/PeydaWeb-Regular.woff') format('woff');
+}
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 500;
+	src: url('../fonts/peyda/woff2/PeydaWeb-Medium.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/PeydaWeb-Medium.woff') format('woff');
+}
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 600;
+	src: url('../fonts/peyda/woff2/PeydaWeb-SemiBold.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/PeydaWeb-SemiBold.woff') format('woff');
+}
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 700;
+	src: url('../fonts/peyda/woff2/PeydaWeb-Bold.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/PeydaWeb-Bold.woff') format('woff');
+}
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 800;
+	src: url('../fonts/peyda/woff2/PeydaWeb-ExtraBold.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/PeydaWeb-ExtraBold.woff') format('woff');
+}
+@font-face {
+	font-family: Peyda;
+	font-style: normal;
+	font-weight: 900;
+	src: url('../fonts/peyda/woff2/PeydaWeb-Black.woff2') format('woff2'),
+		 url('../fonts/peyda/woff/PeydaWeb-Black.woff') format('woff');
+}

@@ -125,7 +125,7 @@ if (!defined('ABSPATH')) {
                 
                 <div id="user-list-loader" style="display:none; text-align:center; padding: 40px;">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">در حال بارگذاری...</span>
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
                     </div>
                 </div>
                 

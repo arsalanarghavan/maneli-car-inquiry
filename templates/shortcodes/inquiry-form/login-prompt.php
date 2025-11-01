@@ -14,8 +14,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Redirect to the dashboard login page
-$login_url = home_url('/dashboard/');
+// Redirect to the dashboard login page with return URL
+$return_url = home_url('/dashboard/new-inquiry');
+if (!empty($_SERVER['REQUEST_URI'])) {
+    $return_url = home_url($_SERVER['REQUEST_URI']);
+}
+$login_url = add_query_arg('redirect_to', urlencode($return_url), home_url('/dashboard/login'));
 ?>
 
 <div class="row">

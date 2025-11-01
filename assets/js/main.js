@@ -1,22 +1,14 @@
 (function () {
   "use strict";
-  if (localStorage.getItem("xintradarktheme")) {
-    document.querySelector("html").setAttribute("data-theme-mode", "dark");
-    document.querySelector("html").setAttribute("data-menu-styles", "dark");
-    document.querySelector("html").setAttribute("data-header-styles", "transparent");
-  }
   if (localStorage.xintrartl) {
     let html = document.querySelector("html");
     html.setAttribute("dir", "rtl");
-    var pluginUrl = window.MANELI_PLUGIN_URL || '';
-    if (pluginUrl) {
-      document
-        .querySelector("#style")
-        ?.setAttribute(
-          "href",
-          pluginUrl + "assets/libs/bootstrap/css/bootstrap.rtl.min.css"
-        );
-    }
+    document
+      .querySelector("#style")
+      ?.setAttribute(
+        "href",
+        "./assets/libs/bootstrap/css/bootstrap.rtl.min.css"
+      );
   }
   if (localStorage.xintralayout) {
     let html = document.querySelector("html");

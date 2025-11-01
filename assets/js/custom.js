@@ -1,6 +1,16 @@
 (function () {
   "use strict";
 
+  // Suppress defaultmenu errors
+  window.addEventListener('error', function(e) {
+    if (e.filename && e.filename.includes('defaultmenu.min.js')) {
+      console.warn('DefaultMenu error suppressed:', e.message);
+      e.preventDefault();
+      e.stopPropagation();
+      return true;
+    }
+  }, true);
+
   /* page loader */
   function hideLoader() {
     const loader = document.getElementById("loader");
@@ -14,17 +24,21 @@
   const tooltipTriggerList = document.querySelectorAll(
     '[data-bs-toggle="tooltip"]'
   );
-  const tooltipList = [...tooltipTriggerList].map(
-    (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-  );
+  if (tooltipTriggerList && tooltipTriggerList.length > 0 && typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+    const tooltipList = Array.from(tooltipTriggerList).map(
+      (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+    );
+  }
 
   /* popover  */
   const popoverTriggerList = document.querySelectorAll(
     '[data-bs-toggle="popover"]'
   );
-  const popoverList = [...popoverTriggerList].map(
-    (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl)
-  );
+  if (popoverTriggerList && popoverTriggerList.length > 0 && typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+    const popoverList = Array.from(popoverTriggerList).map(
+      (popoverTriggerEl) => new bootstrap.Popover(popoverTriggerEl)
+    );
+  }
 
   
   /* breadcrumb date range picker */
@@ -93,7 +107,7 @@
             {
               el,
               theme,
-              default: "#5c67f7",
+              default: "#2D89BE",
             },
             config
           )
@@ -105,16 +119,12 @@
           let html = document.querySelector("html");
           html.style.setProperty(
             "--primary-rgb",
-            `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(
-              color[2]
-            )}`
+            `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(color[2])}`
           );
           /* theme color picker */
           localStorage.setItem(
             "primaryRGB",
-            `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(
-              color[2]
-            )}`
+            `${Math.floor(color[0])}, ${Math.floor(color[1])}, ${Math.floor(color[2])}`
           );
           // updateColors();
         });
@@ -175,7 +185,7 @@
             {
               el,
               theme,
-              default: "#5c67f7",
+              default: "#2D89BE",
             },
             config
           )
@@ -302,7 +312,9 @@
     }
   }
   let layoutSetting = document.querySelector(".layout-setting");
-  layoutSetting.addEventListener("click", toggleTheme);
+  if (layoutSetting) {
+    layoutSetting.addEventListener("click", toggleTheme);
+  }
   /* header theme toggle */
 
   /* Choices JS */
@@ -320,7 +332,10 @@
   /* Choices JS */
 
   /* footer year */
-  document.getElementById("year").innerHTML = new Date().getFullYear();
+  const yearElement = document.getElementById("year");
+  if (yearElement) {
+    yearElement.innerHTML = new Date().getFullYear();
+  }
   /* footer year */
 
   /* node waves */

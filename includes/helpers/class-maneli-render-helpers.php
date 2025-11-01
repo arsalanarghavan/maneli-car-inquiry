@@ -54,6 +54,10 @@ class Maneli_Render_Helpers {
      * @return string The formatted string.
      */
     public static function format_money($amount) {
+        // Use maneli_number_format_persian for proper Persian formatting with Persian comma
+        if (function_exists('maneli_number_format_persian')) {
+            return maneli_number_format_persian((int)$amount);
+        }
         return number_format_i18n((int)$amount);
     }
     
@@ -97,16 +101,16 @@ class Maneli_Render_Helpers {
     public static function translate_field_value($field_name, $value) {
         $translations = [
             'job_type' => [
-                'self' => 'آزاد',
-                'employee' => 'کارمند',
+                'self' => esc_html__('Freelance', 'maneli-car-inquiry'),
+                'employee' => esc_html__('Employee', 'maneli-car-inquiry'),
             ],
             'residency_status' => [
-                'owner' => 'مالک',
-                'tenant' => 'مستأجر',
+                'owner' => esc_html__('Owner', 'maneli-car-inquiry'),
+                'tenant' => esc_html__('Tenant', 'maneli-car-inquiry'),
             ],
             'workplace_status' => [
-                'owned' => 'ملکی',
-                'rented' => 'استیجاری',
+                'owned' => esc_html__('Owned', 'maneli-car-inquiry'),
+                'rented' => esc_html__('Rented', 'maneli-car-inquiry'),
             ],
         ];
         
@@ -147,7 +151,7 @@ class Maneli_Render_Helpers {
         
         $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
 
-        $output .= '<table class="summary-table" style="margin-top: 20px;">
+        $output .= '<table class="summary-table maneli-summary-table">
                         <tr>
                             <td><strong>' . esc_html__('Sayad Cheque Status:', 'maneli-car-inquiry') . '</strong></td>
                             <td><strong class="cheque-color-' . esc_attr($cheque_color_code) . '">' . esc_html($color_info['text']) . '</strong></td>
@@ -168,40 +172,146 @@ class Maneli_Render_Helpers {
      */
     public static function render_product_editor_row($product) {
         if (!($product instanceof WC_Product)) return;
+        
+        // Helper function to convert numbers to Persian
+        if (!function_exists('persian_numbers')) {
+            function persian_numbers($str) {
+                // Use maneli_number_format_persian if it exists for better formatting
+                if (function_exists('maneli_number_format_persian') && is_numeric($str)) {
+                    return maneli_number_format_persian($str);
+                }
+                $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                return str_replace($english, $persian, $str);
+            }
+        }
+        
         $product_id = $product->get_id();
         $installment_price = get_post_meta($product_id, 'installment_price', true);
         $min_downpayment = get_post_meta($product_id, 'min_downpayment', true);
         $car_colors = get_post_meta($product_id, '_maneli_car_colors', true);
         $car_status = get_post_meta($product_id, '_maneli_car_status', true);
+        
+        // Get product categories
+        $categories = wc_get_product_category_list($product_id, ', ', '', '');
+        if (empty($categories)) {
+            $categories = '-';
+        }
+        
+        // Get product image
+        $image_url = wp_get_attachment_image_url($product->get_image_id(), 'thumbnail');
+        if (!$image_url) {
+            $image_url = wc_placeholder_img_src('thumbnail');
+        }
+        
+        // Status labels in Persian
         $statuses = [
-            'special_sale' => esc_html__('Special Sale (Active)', 'maneli-car-inquiry'),
-            'unavailable'  => esc_html__('Unavailable (Show in site)', 'maneli-car-inquiry'),
-            'disabled'     => esc_html__('Disabled (Hide from site)', 'maneli-car-inquiry'),
+            'special_sale' => ['label' => esc_html__('Special Sale', 'maneli-car-inquiry'), 'class' => 'primary-transparent'],
+            'unavailable'  => ['label' => esc_html__('Unavailable', 'maneli-car-inquiry'), 'class' => 'warning-transparent'],
+            'disabled'     => ['label' => esc_html__('Disabled', 'maneli-car-inquiry'), 'class' => 'danger-transparent'],
         ];
+        $current_status = $statuses[$car_status] ?? $statuses['special_sale'];
+        
+        // Format prices for display (Persian numbers with thousand separators)
+        $regular_price = $product->get_regular_price();
+        $regular_price_formatted = $regular_price ? persian_numbers(number_format($regular_price, 0, '.', ',')) : '';
+        $installment_price_formatted = $installment_price ? persian_numbers(number_format($installment_price, 0, '.', ',')) : '';
+        $min_downpayment_formatted = $min_downpayment ? persian_numbers(number_format($min_downpayment, 0, '.', ',')) : '';
         ?>
-        <tr>
-            <td data-title="<?php esc_attr_e('Car Name', 'maneli-car-inquiry'); ?>">
-                <strong><a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank"><?php echo esc_html($product->get_name()); ?></a></strong>
+        <tr class="product-list">
+            <td>
+                <div class="d-flex">
+                    <span class="avatar avatar-md avatar-square bg-light me-2">
+                        <img src="<?php echo esc_url($image_url); ?>" class="w-100 h-100" alt="<?php echo esc_attr($product->get_name()); ?>">
+                    </span>
+                    <div>
+                        <p class="fw-semibold mb-0 d-flex align-items-center">
+                            <a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank" class="text-primary">
+                                <?php echo persian_numbers(esc_html($product->get_name())); ?>
+                            </a>
+                        </p>
+                    </div>
+                </div>
             </td>
-            <td data-title="<?php esc_attr_e('Cash Price (Toman)', 'maneli-car-inquiry'); ?>">
-                <input type="text" class="manli-data-input manli-price-input" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="regular_price" value="<?php echo esc_attr($product->get_regular_price()); ?>" placeholder="<?php esc_attr_e('Cash Price', 'maneli-car-inquiry'); ?>">
+            <td>
+                <span class="text-muted"><?php echo wp_kses_post($categories); ?></span>
             </td>
-            <td data-title="<?php esc_attr_e('Installment Price (Toman)', 'maneli-car-inquiry'); ?>">
-                <input type="text" class="manli-data-input manli-price-input" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="installment_price" value="<?php echo esc_attr($installment_price); ?>" placeholder="<?php esc_attr_e('Installment Price', 'maneli-car-inquiry'); ?>">
+            <td>
+                <div class="d-flex align-items-center">
+                    <input type="text" class="manli-data-input manli-price-input form-control form-control-sm flex-grow-1" 
+                           data-product-id="<?php echo esc_attr($product_id); ?>" 
+                           data-field-type="regular_price" 
+                           data-raw-value="<?php echo esc_attr($regular_price); ?>"
+                           value="<?php echo esc_attr($regular_price_formatted); ?>" 
+                           placeholder="<?php echo esc_attr__('Cash Price', 'maneli-car-inquiry'); ?>">
+                    <span class="spinner"></span>
+                    <span class="save-status-icon maneli-save-status-icon"></span>
+                </div>
             </td>
-            <td data-title="<?php esc_attr_e('Min. Down Payment (Toman)', 'maneli-car-inquiry'); ?>">
-                <input type="text" class="manli-data-input manli-price-input" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="min_downpayment" value="<?php echo esc_attr($min_downpayment); ?>" placeholder="<?php esc_attr_e('Down Payment Amount', 'maneli-car-inquiry'); ?>">
+            <td>
+                <div class="d-flex align-items-center">
+                    <input type="text" class="manli-data-input manli-price-input form-control form-control-sm flex-grow-1" 
+                           data-product-id="<?php echo esc_attr($product_id); ?>" 
+                           data-field-type="installment_price" 
+                           data-raw-value="<?php echo esc_attr($installment_price); ?>"
+                           value="<?php echo esc_attr($installment_price_formatted); ?>" 
+                           placeholder="<?php echo esc_attr__('Installment Price', 'maneli-car-inquiry'); ?>">
+                    <span class="spinner"></span>
+                    <span class="save-status-icon maneli-save-status-icon"></span>
+                </div>
             </td>
-            <td data-title="<?php esc_attr_e('Available Colors', 'maneli-car-inquiry'); ?>">
-                 <input type="text" class="manli-data-input" style="width:100%;" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="car_colors" value="<?php echo esc_attr($car_colors); ?>" placeholder="<?php esc_attr_e('e.g., White, Black, Silver', 'maneli-car-inquiry'); ?>">
+            <td>
+                <div class="d-flex align-items-center">
+                    <input type="text" class="manli-data-input manli-price-input form-control form-control-sm flex-grow-1" 
+                           data-product-id="<?php echo esc_attr($product_id); ?>" 
+                           data-field-type="min_downpayment" 
+                           data-raw-value="<?php echo esc_attr($min_downpayment); ?>"
+                           value="<?php echo esc_attr($min_downpayment_formatted); ?>" 
+                           placeholder="<?php echo esc_attr__('Minimum Down Payment', 'maneli-car-inquiry'); ?>">
+                    <span class="spinner"></span>
+                    <span class="save-status-icon maneli-save-status-icon"></span>
+                </div>
             </td>
-            <td data-title="<?php esc_attr_e('Sales Status', 'maneli-car-inquiry'); ?>">
-                <select class="manli-data-input" data-product-id="<?php echo esc_attr($product_id); ?>" data-field-type="car_status">
-                    <?php foreach ($statuses as $key => $label) : ?>
-                        <option value="<?php echo esc_attr($key); ?>" <?php selected($car_status, $key); ?>><?php echo esc_html($label); ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <span class="spinner"></span>
+            <td>
+                <div class="d-flex align-items-center">
+                    <input type="text" class="manli-data-input form-control form-control-sm flex-grow-1" 
+                           data-product-id="<?php echo esc_attr($product_id); ?>" 
+                           data-field-type="car_colors" 
+                           value="<?php echo esc_attr($car_colors); ?>" 
+                           placeholder="<?php echo esc_attr__('Colors (e.g., White, Black, Silver)', 'maneli-car-inquiry'); ?>">
+                    <span class="spinner"></span>
+                    <span class="save-status-icon maneli-save-status-icon"></span>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <select class="manli-data-input form-select form-select-sm flex-grow-1" 
+                            data-product-id="<?php echo esc_attr($product_id); ?>" 
+                            data-field-type="car_status">
+                        <?php foreach ($statuses as $key => $status_info) : ?>
+                            <option value="<?php echo esc_attr($key); ?>" <?php selected($car_status, $key); ?>>
+                                <?php echo esc_html($status_info['label']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <span class="spinner"></span>
+                    <span class="save-status-icon maneli-save-status-icon"></span>
+                </div>
+            </td>
+            <td>
+                <div class="hstack gap-2 fs-15">
+                    <a href="<?php echo esc_url(home_url('/dashboard/add-product?edit_product=' . $product_id)); ?>" 
+                       class="btn btn-icon btn-sm btn-primary-light" 
+                       title="<?php esc_attr_e('Edit', 'maneli-car-inquiry'); ?>">
+                        <i class="ri-edit-line"></i>
+                    </a>
+                    <a href="<?php echo esc_url(get_permalink($product_id)); ?>" 
+                       class="btn btn-icon btn-sm btn-info-light" 
+                       target="_blank" 
+                       title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                        <i class="ri-eye-line"></i>
+                    </a>
+                </div>
             </td>
         </tr>
         <?php
@@ -230,10 +340,10 @@ class Maneli_Render_Helpers {
             </td>
             <td data-title="<?php esc_attr_e('Username', 'maneli-car-inquiry'); ?>"><?php echo esc_html($user->user_login); ?></td>
             <td data-title="<?php esc_attr_e('Email', 'maneli-car-inquiry'); ?>"><?php echo esc_html($user->user_email); ?></td>
-            <td data-title="<?php esc_attr_e('Role', 'maneli-car-inquiry'); ?>"><?php echo $role_display; ?></td>
+            <td data-title="<?php esc_attr_e('Role', 'maneli-car-inquiry'); ?>"><?php echo esc_html($role_display); ?></td>
             <td class="woocommerce-orders-table__cell-order-actions">
-                <a href="<?php echo $edit_url; ?>" class="button view"><?php esc_html_e('Edit', 'maneli-car-inquiry'); ?></a>
-                <button class="button delete-user-btn" data-user-id="<?php echo esc_attr($user->ID); ?>" style="background-color: var(--theme-red); border-color: var(--theme-red); margin-top: 5px;">
+                <a href="<?php echo esc_url($edit_url); ?>" class="button view"><?php esc_html_e('Edit', 'maneli-car-inquiry'); ?></a>
+                <button class="button delete-user-btn maneli-btn-delete" data-user-id="<?php echo esc_attr($user->ID); ?>">
                     <?php esc_html_e('Delete', 'maneli-car-inquiry'); ?>
                 </button>
             </td>
@@ -256,7 +366,8 @@ class Maneli_Render_Helpers {
         $expert_status     = get_post_meta( $inquiry_id, 'expert_status', true );
         $customer          = get_userdata( $inquiry_post->post_author );
         $expert_name       = get_post_meta( $inquiry_id, 'assigned_expert_name', true );
-        $report_url        = add_query_arg('inquiry_id', $inquiry_id, $base_url);
+        // Use correct dashboard URL for report link
+        $report_url        = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
         // از کلاس CPT Handler برای گرفتن لیبل وضعیت استفاده می‌کنیم (باید بارگذاری شده باشد).
         $status_label      = Maneli_CPT_Handler::get_status_label($inquiry_status); 
         $is_admin          = current_user_can( 'manage_maneli_inquiries' );
@@ -265,40 +376,88 @@ class Maneli_Render_Helpers {
         $expert_status_info = self::get_expert_status_info($expert_status);
         $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
         $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
+        
+        // Get status badge color class
+        $status_badge_class = 'bg-secondary-transparent';
+        switch ($inquiry_status) {
+            case 'pending':
+                $status_badge_class = 'bg-warning-transparent';
+                break;
+            case 'user_confirmed':
+            case 'approved':
+                $status_badge_class = 'bg-success-transparent';
+                break;
+            case 'rejected':
+            case 'failed':
+                $status_badge_class = 'bg-danger-transparent';
+                break;
+            case 'more_docs':
+                $status_badge_class = 'bg-info-transparent';
+                break;
+            default:
+                $status_badge_class = 'bg-secondary-transparent';
+        }
+        
+        // Helper function to convert numbers to Persian without separators
+        if (!function_exists('persian_numbers_no_separator')) {
+            function persian_numbers_no_separator($str) {
+                $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                return str_replace($english, $persian, (string)$str);
+            }
+        }
+        
+        // Format date with Persian numbers
+        $formatted_date = self::maneli_gregorian_to_jalali($inquiry_post->post_date, 'Y/m/d');
+        $formatted_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($formatted_date) : $formatted_date;
         ?>
-        <tr>
-            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
+        <tr class="crm-contact">
+            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?></td>
             <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer->display_name ?? '—'); ?></td>
-            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
+            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>">
+                <?php echo esc_html(get_the_title($product_id)); ?>
+            </td>
             <?php if ($show_followup_date): ?>
                 <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">
-                    <strong style="color: #d63638;"><?php echo esc_html($follow_up_date ?: '—'); ?></strong>
+                    <strong class="maneli-text-danger"><?php echo esc_html($follow_up_date ? (function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($follow_up_date) : $follow_up_date) : '—'); ?></strong>
                 </td>
             <?php endif; ?>
             <td class="inquiry-status-cell-installment" data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
-                <span class="status-indicator status-<?php echo esc_attr($inquiry_status); ?>"><?php echo esc_html($status_label); ?></span>
-                <?php if ($expert_status_info): ?>
-                    <br><span class="expert-status-badge" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html($expert_status_info['label']); ?></span>
-                <?php endif; ?>
-                <?php if ($tracking_status): ?>
-                    <br><span class="tracking-status-badge" style="background-color: #2271b1; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html(Maneli_CPT_Handler::get_tracking_status_label($tracking_status)); ?></span>
-                <?php endif; ?>
+                <?php
+                // Determine latest/current status to display
+                // Priority: tracking_status > expert_status > inquiry_status
+                if ($tracking_status) {
+                    echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html(Maneli_CPT_Handler::get_tracking_status_label($tracking_status)) . '</span>';
+                } elseif ($expert_status_info) {
+                    echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html($expert_status_info['label']) . '</span>';
+                } else {
+                    echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html($status_label) . '</span>';
+                }
+                ?>
             </td>
             <?php if ($is_admin) : ?>
                 <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
                     <?php if (!empty($expert_name)) : ?>
-                        <?php echo esc_html($expert_name); ?>
+                        <span class="assigned-expert-name"><?php echo esc_html($expert_name); ?></span>
                     <?php else : ?>
-                        <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment"><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?></button>
+                        <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment" title="<?php esc_attr_e('Assign Expert', 'maneli-car-inquiry'); ?>">
+                            <i class="la la-user-plus me-1"></i><?php esc_html_e('تخصیص', 'maneli-car-inquiry'); ?>
+                        </button>
                     <?php endif; ?>
                 </td>
             <?php endif; ?>
-            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo self::maneli_gregorian_to_jalali($inquiry_post->post_date, 'Y/m/d'); ?></td>
+            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($formatted_date); ?></td>
             <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
-                <a href="<?php echo esc_url($report_url); ?>" class="button view"><?php esc_html_e('View Details', 'maneli-car-inquiry'); ?></a>
-                <?php if ($is_admin) : ?>
-                    <button class="button delete-installment-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" style="background-color: var(--theme-red); border-color: var(--theme-red); margin-top: 5px;"><?php esc_html_e('Delete', 'maneli-car-inquiry'); ?></button>
-                <?php endif; ?>
+                <div class="btn-list">
+                    <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'maneli-car-inquiry'); ?>">
+                        <i class="la la-eye"></i>
+                    </a>
+                    <?php if ($is_admin) : ?>
+                        <button class="btn btn-sm btn-danger-light btn-icon delete-installment-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
+                            <i class="la la-trash"></i>
+                        </button>
+                    <?php endif; ?>
+                </div>
             </td>
         </tr>
         <?php
@@ -314,6 +473,11 @@ class Maneli_Render_Helpers {
         $cash_post = get_post($inquiry_id);
         if (!$cash_post) return;
         
+        // CRITICAL: Ensure this is a cash_inquiry post type, not an installment inquiry
+        if (get_post_type($inquiry_id) !== 'cash_inquiry') {
+            return; // Skip if not a cash inquiry
+        }
+        
         $product_id     = get_post_meta( $inquiry_id, 'product_id', true );
         $inquiry_status = get_post_meta( $inquiry_id, 'cash_inquiry_status', true );
         // Handle empty status or 'pending' status - default to 'new' for display purposes
@@ -326,7 +490,8 @@ class Maneli_Render_Helpers {
         $customer_name  = get_post_meta( $inquiry_id, 'cash_first_name', true ) . ' ' . get_post_meta( $inquiry_id, 'cash_last_name', true );
         $customer_mobile= get_post_meta( $inquiry_id, 'mobile_number', true );
         $expert_name    = get_post_meta( $inquiry_id, 'assigned_expert_name', true );
-        $report_url     = add_query_arg('cash_inquiry_id', $inquiry_id, $base_url);
+        // Use correct dashboard URL for report link
+        $report_url     = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
         // از کلاس CPT Handler برای گرفتن لیبل وضعیت استفاده می‌کنیم.
         $status_label   = Maneli_CPT_Handler::get_cash_inquiry_status_label($inquiry_status); 
         $is_admin       = current_user_can( 'manage_maneli_inquiries' );
@@ -334,31 +499,90 @@ class Maneli_Render_Helpers {
         // Get expert status info
         $expert_status_info = self::get_expert_status_info($expert_status);
 
+        // Get status badge color class for cash inquiries
+        $status_badge_class = 'bg-secondary-transparent';
+        switch ($inquiry_status) {
+            case 'new':
+                $status_badge_class = 'bg-primary-transparent';
+                break;
+            case 'referred':
+                $status_badge_class = 'bg-info-transparent';
+                break;
+            case 'in_progress':
+            case 'follow_up_scheduled':
+            case 'awaiting_downpayment':
+                $status_badge_class = 'bg-warning-transparent';
+                break;
+            case 'downpayment_received':
+            case 'meeting_scheduled':
+            case 'completed':
+            case 'approved':
+                $status_badge_class = 'bg-success-transparent';
+                break;
+            case 'rejected':
+                $status_badge_class = 'bg-danger-transparent';
+                break;
+            case 'pending':
+                $status_badge_class = 'bg-secondary-transparent';
+                break;
+            default:
+                $status_badge_class = 'bg-secondary-transparent';
+        }
+
+        // Helper function to convert numbers to Persian without separators
+        if (!function_exists('persian_numbers_no_separator')) {
+            function persian_numbers_no_separator($str) {
+                $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                return str_replace($english, $persian, (string)$str);
+            }
+        }
+        
+        // Format date with Persian numbers
+        $formatted_date = self::maneli_gregorian_to_jalali($cash_post->post_date, 'Y/m/d');
+        $formatted_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($formatted_date) : $formatted_date;
         ?>
-        <tr>
-            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo esc_html($inquiry_id); ?></td>
+        <tr class="crm-contact">
+            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?></td>
             <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer_name); ?></td>
-            <td data-title="<?php esc_attr_e('Mobile', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer_mobile); ?></td>
-            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
+            <td data-title="<?php esc_attr_e('Mobile', 'maneli-car-inquiry'); ?>"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($customer_mobile) : esc_html($customer_mobile); ?></td>
+            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>">
+                <?php echo esc_html(get_the_title($product_id)); ?>
+            </td>
             <td class="inquiry-status-cell-cash" data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
-                <span class="status-indicator status-<?php echo esc_attr($inquiry_status); ?>"><?php echo esc_html($status_label); ?></span>
-                <?php if ($expert_status_info): ?>
-                    <br><span class="expert-status-badge" style="background-color: <?php echo esc_attr($expert_status_info['color']); ?>; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-top: 4px; display: inline-block;"><?php echo esc_html($expert_status_info['label']); ?></span>
-                <?php endif; ?>
+                <?php
+                // Determine latest/current status to display
+                // Priority: expert_status > inquiry_status
+                if ($expert_status_info) {
+                    echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html($expert_status_info['label']) . '</span>';
+                } else {
+                    echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html($status_label) . '</span>';
+                }
+                ?>
             </td>
-            <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
-                <?php if (!empty($expert_name)) : ?>
-                    <?php echo esc_html($expert_name); ?>
-                <?php else : ?>
-                    <button class="button assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash"><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?></button>
-                <?php endif; ?>
-            </td>
-            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo self::maneli_gregorian_to_jalali($cash_post->post_date, 'Y/m/d'); ?></td>
+            <?php if ($is_admin) : ?>
+                <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
+                    <?php if (!empty($expert_name)) : ?>
+                        <span class="assigned-expert-name"><?php echo esc_html($expert_name); ?></span>
+                    <?php else : ?>
+                        <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" title="<?php esc_attr_e('Assign Expert', 'maneli-car-inquiry'); ?>">
+                            <i class="la la-user-plus me-1"></i><?php esc_html_e('تخصیص', 'maneli-car-inquiry'); ?>
+                        </button>
+                    <?php endif; ?>
+                </td>
+            <?php endif; ?>
+            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($formatted_date); ?></td>
             <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
-                <a href="<?php echo esc_url($report_url); ?>" class="button view"><?php esc_html_e('View Details', 'maneli-car-inquiry'); ?></a>
-                <?php if ($is_admin) : ?>
-                    <button class="button delete-cash-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" style="background-color: var(--theme-red); border-color: var(--theme-red); margin-top: 5px;"><?php esc_html_e('Delete', 'maneli-car-inquiry'); ?></button>
-                <?php endif; ?>
+                <div class="btn-list">
+                    <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'maneli-car-inquiry'); ?>">
+                        <i class="la la-eye"></i>
+                    </a>
+                    <?php if ($is_admin) : ?>
+                        <button class="btn btn-sm btn-danger-light btn-icon delete-cash-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
+                            <i class="la la-trash"></i>
+                        </button>
+                    <?php endif; ?>
+                </div>
             </td>
         </tr>
         <?php

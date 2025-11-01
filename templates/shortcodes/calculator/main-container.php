@@ -79,8 +79,14 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="loan-section result-section">
                     <strong><?php esc_html_e('Approximate Price:', 'maneli-car-inquiry'); ?></strong>
-                    <span id="cashPriceAmount"><?php echo esc_html(number_format_i18n($cash_price)); ?></span>
-                    <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                    <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                        <span class="unavailable-text"><?php esc_html_e('ناموجود', 'maneli-car-inquiry'); ?></span>
+                    <?php elseif (isset($can_see_prices) && !$can_see_prices): ?>
+                        <span class="price-hidden"><?php esc_html_e('-', 'maneli-car-inquiry'); ?></span>
+                    <?php else: ?>
+                        <span id="cashPriceAmount"><?php echo esc_html(number_format_i18n($cash_price)); ?></span>
+                        <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="loan-section loan-action-wrapper">
                     <button type="submit" class="loan-action-btn"><?php esc_html_e('Submit Price Inquiry Request', 'maneli-car-inquiry'); ?></button>
@@ -98,7 +104,12 @@ if (!defined('ABSPATH')) {
              <form class="loan-calculator-form" method="post">
                 <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                 <?php wp_nonce_field('maneli_ajax_nonce'); ?>
-                <div id="loan-calculator" data-price="<?php echo esc_attr($installment_price); ?>" data-min-down="<?php echo esc_attr($min_down_payment); ?>" data-max-down="<?php echo esc_attr($max_down_payment); ?>">
+                <div id="loan-calculator" 
+                     data-price="<?php echo esc_attr($installment_price); ?>" 
+                     data-min-down="<?php echo esc_attr($min_down_payment ? $min_down_payment : 0); ?>" 
+                     data-max-down="<?php echo esc_attr($max_down_payment ? $max_down_payment : ($installment_price * 0.8)); ?>"
+                     data-can-see-prices="<?php echo (isset($can_see_prices) && $can_see_prices) ? 'true' : 'false'; ?>"
+                     data-is-unavailable="<?php echo (isset($is_unavailable) && $is_unavailable) ? 'true' : 'false'; ?>">
                     <h2 class="loan-title"><?php esc_html_e('Budgeting and Installment Calculation', 'maneli-car-inquiry'); ?></h2>
                     <div class="loan-section">
                         <div class="loan-row">
@@ -108,7 +119,16 @@ if (!defined('ABSPATH')) {
                         <input type="range" id="downPaymentSlider" step="1000000">
                         <div class="loan-note">
                             <span><?php esc_html_e('Minimum Down Payment:', 'maneli-car-inquiry'); ?></span>
-                            <span><span id="minDownDisplay">0</span> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                            <span>
+                                <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                                    <span class="unavailable-text"><?php esc_html_e('ناموجود', 'maneli-car-inquiry'); ?></span>
+                                <?php elseif (isset($can_see_prices) && !$can_see_prices): ?>
+                                    <span class="price-hidden">-</span>
+                                    <span id="minDownDisplay" style="display:none;"><?php echo esc_html(number_format_i18n($min_down_payment ? $min_down_payment : 0)); ?></span>
+                                <?php else: ?>
+                                    <span id="minDownDisplay"><?php echo esc_html(number_format_i18n($min_down_payment ? $min_down_payment : 0)); ?></span> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?>
+                                <?php endif; ?>
+                            </span>
                         </div>
                     </div>
                     <div class="loan-section">
@@ -131,8 +151,16 @@ if (!defined('ABSPATH')) {
                     </div>
                     <div class="loan-section result-section">
                         <strong><?php esc_html_e('Approximate Installment Amount:', 'maneli-car-inquiry'); ?></strong>
-                        <span id="installmentAmount">0</span>
-                        <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                        <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                            <span class="unavailable-text"><?php esc_html_e('ناموجود', 'maneli-car-inquiry'); ?></span>
+                            <span id="installmentAmount" style="display:none;">0</span>
+                        <?php elseif (isset($can_see_prices) && !$can_see_prices): ?>
+                            <span class="price-hidden">-</span>
+                            <span id="installmentAmount" style="display:none;">0</span>
+                        <?php else: ?>
+                            <span id="installmentAmount">0</span>
+                            <span><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                        <?php endif; ?>
                     </div>
                     <div class="loan-section loan-action-wrapper">
                         <?php if (is_user_logged_in()): ?>
@@ -146,3 +174,13 @@ if (!defined('ABSPATH')) {
         </div>
     </div>
 </div>
+
+<style>
+.unavailable-text {
+    color: #ef4444;
+    font-weight: 600;
+}
+.price-hidden {
+    color: #9ca3af;
+}
+</style>

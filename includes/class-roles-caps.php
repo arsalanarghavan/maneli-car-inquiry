@@ -14,8 +14,9 @@ if (!defined('ABSPATH')) {
 class Maneli_Roles_Caps {
 
     public function __construct() {
-        add_action('init', [$this, 'setup_roles_and_caps']);
-        add_action('init', [$this, 'translate_role_names']);
+        // Use priority 5 to ensure translations are loaded first (load_plugin_textdomain runs at priority 1)
+        add_action('init', [$this, 'setup_roles_and_caps'], 5);
+        add_action('init', [$this, 'translate_role_names'], 5);
     }
 
     /**
@@ -25,7 +26,8 @@ class Maneli_Roles_Caps {
     public function setup_roles_and_caps() {
         // Grant master capability to the administrator role
         $admin_role = get_role('administrator');
-        if ($admin_role && !$admin_role->has_cap('manage_maneli_inquiries')) {
+        if ($admin_role) {
+            // Always ensure administrator has the master capability
             $admin_role->add_cap('manage_maneli_inquiries', true);
         }
 

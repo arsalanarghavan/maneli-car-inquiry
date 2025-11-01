@@ -43,7 +43,9 @@ final class Maneli_Car_Inquiry_Plugin {
      * Register all hooks related to the core functionality of the plugin.
      */
     private function define_hooks() {
-        add_action('init', [$this, 'load_plugin_textdomain'], 0);
+        // Load textdomain on init hook (WordPress 6.7+ requirement)
+        // Translations should be loaded at init action or later
+        add_action('init', [$this, 'load_plugin_textdomain'], 1);
         add_action('plugins_loaded', [$this, 'initialize'], 5);
     }
 
@@ -106,9 +108,10 @@ final class Maneli_Car_Inquiry_Plugin {
         // Frontend Features
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
         
-        // Dashboard
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
+        // Dashboard - Load Session class early
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-session.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
     }
 
     /**
@@ -131,11 +134,11 @@ final class Maneli_Car_Inquiry_Plugin {
             new Maneli_Grouped_Attributes();
         }
         
+        // Initialize Frontend Theme Handler FIRST (needed by dashboard templates)
+        Maneli_Frontend_Theme_Handler::instance();
+        
         // Initialize Dashboard Handler
         Maneli_Dashboard_Handler::instance();
-        
-        // Initialize Frontend Theme Handler
-        Maneli_Frontend_Theme_Handler::instance();
     }
 
     /**

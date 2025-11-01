@@ -25,7 +25,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
             <div class="card-header">
                 <div class="card-title">
                     <i class="la la-dollar-sign me-2"></i>
-                    لیست استعلامات نقدی
+                    <?php esc_html_e('Cash Inquiries List', 'maneli-car-inquiry'); ?>
                 </div>
             </div>
             <div class="card-body">
@@ -37,7 +37,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                                 <span class="input-group-text">
                                     <i class="la la-search"></i>
                                 </span>
-                                <input type="search" id="cash-inquiry-search-input" class="form-control" placeholder="جستجو بر اساس نام مشتری، نام خودرو یا شماره موبایل...">
+                                <input type="search" id="cash-inquiry-search-input" class="form-control" placeholder="<?php esc_attr_e('Search by customer name, car name or mobile number...', 'maneli-car-inquiry'); ?>">
                             </div>
                         </div>
                     </div>
@@ -45,9 +45,9 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                     <!-- Filter Controls -->
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label class="form-label">وضعیت:</label>
+                            <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
                             <select id="cash-inquiry-status-filter" class="form-select">
-                                <option value="">همه وضعیت‌ها</option>
+                                <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
                                 <?php foreach (Maneli_CPT_Handler::get_all_cash_inquiry_statuses() as $key => $label) : ?>
                                     <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
                                 <?php endforeach; ?>
@@ -56,9 +56,9 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                         
                         <?php if (current_user_can('manage_maneli_inquiries') && !empty($experts)) : ?>
                             <div class="col-md-4">
-                                <label class="form-label">کارشناس:</label>
+                                <label class="form-label"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
                                 <select id="cash-expert-filter" class="form-select maneli-select2">
-                                    <option value="">همه کارشناسان</option>
+                                    <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
                                     <?php foreach ($experts as $expert) : ?>
                                         <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
                                     <?php endforeach; ?>
@@ -67,12 +67,12 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                         <?php endif; ?>
                         
                         <div class="col-md-4">
-                            <label class="form-label">مرتب‌سازی:</label>
+                            <label class="form-label"><?php esc_html_e('Sort:', 'maneli-car-inquiry'); ?></label>
                             <select id="cash-inquiry-sort-filter" class="form-select">
-                                <option value="default">پیش‌فرض (جدیدترین قدیمی)</option>
-                                <option value="date_desc">جدیدترین</option>
-                                <option value="date_asc">قدیمی‌ترین</option>
-                                <option value="status">بر اساس وضعیت</option>
+                                <option value="default"><?php esc_html_e('Default (Newest First)', 'maneli-car-inquiry'); ?></option>
+                                <option value="date_desc"><?php esc_html_e('Newest', 'maneli-car-inquiry'); ?></option>
+                                <option value="date_asc"><?php esc_html_e('Oldest', 'maneli-car-inquiry'); ?></option>
+                                <option value="status"><?php esc_html_e('By Status', 'maneli-car-inquiry'); ?></option>
                             </select>
                         </div>
                     </div>
@@ -83,11 +83,11 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                             <div class="d-flex gap-2">
                                 <button type="button" id="cash-inquiry-reset-filters" class="btn btn-outline-secondary btn-sm">
                                     <i class="la la-refresh me-1"></i>
-                                    پاک کردن فیلترها
+                                    <?php esc_html_e('Clear Filters', 'maneli-car-inquiry'); ?>
                                 </button>
                                 <button type="button" id="cash-inquiry-apply-filters" class="btn btn-primary btn-sm">
                                     <i class="la la-filter me-1"></i>
-                                    اعمال فیلتر
+                                    <?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
                                 </button>
                             </div>
                         </div>
@@ -95,32 +95,32 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                 </form>
 
                 <!-- Loading Indicator -->
-                <div id="cash-inquiry-loading" class="text-center py-4" style="display: none;">
+                <div id="cash-inquiry-loading" class="text-center py-4 maneli-initially-hidden">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">در حال بارگذاری...</span>
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
                     </div>
-                    <p class="mt-2 text-muted">در حال بارگذاری استعلامات...</p>
+                    <p class="mt-2 text-muted"><?php esc_html_e('Loading inquiries...', 'maneli-car-inquiry'); ?></p>
                 </div>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover text-nowrap">
                         <thead class="table-light">
                             <tr>
-                                <th>شناسه</th>
-                                <th>مشتری</th>
-                                <th>موبایل</th>
-                                <th>خودرو</th>
-                                <th>وضعیت</th>
-                                <th>کارشناس</th>
-                                <th>تاریخ</th>
-                                <th>عملیات</th>
+                                <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Mobile', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
                             </tr>
                         </thead>
                         <tbody id="maneli-cash-inquiry-list-tbody">
                             <tr>
                                 <td colspan="8" class="text-center py-4">
                                     <i class="la la-spinner la-spin fs-24 text-muted"></i>
-                                    <p class="mt-2 text-muted">در حال بارگذاری...</p>
+                                    <p class="mt-2 text-muted"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></p>
                                 </td>
                             </tr>
                         </tbody>
@@ -131,9 +131,9 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                 <div id="cash-inquiry-pagination" class="d-flex justify-content-center mt-3">
                 </div>
 
-                <div id="cash-inquiry-list-loader" style="display: none; text-align:center; padding: 40px;">
+                <div id="cash-inquiry-list-loader" class="maneli-list-loader">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">در حال بارگذاری...</span>
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
                     </div>
                 </div>
                 

@@ -30,7 +30,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">پیگیری‌های امروز</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e("Today's Follow-ups", 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0" id="today-followups-count">0</h4>
                             </div>
@@ -49,7 +49,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">عقب‌افتاده</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0 text-danger" id="overdue-followups-count">0</h4>
                             </div>
@@ -68,7 +68,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">این هفته</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0" id="week-followups-count">0</h4>
                             </div>
@@ -87,7 +87,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">مجموع</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e('Total', 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0" id="total-followups-count">0</h4>
                             </div>
@@ -110,7 +110,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                 <div class="alert alert-info border-info d-flex align-items-center" role="alert">
                     <i class="la la-info-circle fs-20 me-2"></i>
                     <div>
-                        <strong>راهنما:</strong>
+                        <strong><?php esc_html_e('Guide:', 'maneli-car-inquiry'); ?></strong>
                         <?php esc_html_e('Inquiries that require follow-up contact on the specified dates are displayed here.', 'maneli-car-inquiry'); ?>
                     </div>
                 </div>
@@ -170,9 +170,9 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                                 <td colspan="<?php echo current_user_can('manage_maneli_inquiries') ? '8' : '7'; ?>" class="text-center">
                                     <div class="py-4">
                                         <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">در حال بارگذاری...</span>
+                                            <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
                                         </div>
-                                        <p class="text-muted mt-3">در حال بارگذاری پیگیری‌ها...</p>
+                                        <p class="text-muted mt-3"><?php esc_html_e('Loading follow-ups...', 'maneli-car-inquiry'); ?></p>
                                     </div>
                                 </td>
                             </tr>
@@ -181,9 +181,9 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                 </div>
                 
                 <!-- Loader -->
-                <div id="followup-list-loader" style="display: none; text-align:center; padding: 40px;">
+                <div id="followup-list-loader" class="maneli-list-loader">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">در حال بارگذاری...</span>
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
                     </div>
                 </div>
 
@@ -218,7 +218,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                     </select>
                 </div>
                 
-                <div id="calendar-wrapper" style="display:none;" class="mb-3">
+                <div id="calendar-wrapper" class="maneli-initially-hidden mb-3">
                     <label id="calendar-label" class="form-label fw-semibold">
                         <i class="la la-calendar me-1"></i>
                         <?php esc_html_e('Select Date:', 'maneli-car-inquiry'); ?>

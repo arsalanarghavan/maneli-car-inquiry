@@ -123,7 +123,7 @@ class Maneli_Payment_Handler {
         // If amount is zero, skip payment and finalize the inquiry
         if ($amount_toman <= 0) {
             do_action('maneli_inquiry_payment_successful', $user_id);
-            wp_redirect(home_url('/dashboard/inquiries/installment'));
+            wp_redirect(home_url('/dashboard/installment-inquiries'));
             exit;
         }
 
@@ -323,8 +323,8 @@ class Maneli_Payment_Handler {
         $payment_type = $payment_data['payment_type'] ?? '';
         
         $redirect_url = ($payment_type === 'cash_down_payment')
-            ? home_url('/dashboard/inquiries/cash')
-            : home_url('/dashboard/inquiries/installment');
+            ? home_url('/dashboard/cash-inquiries')
+            : home_url('/dashboard/installment-inquiries');
 
         // 2. SECURITY CHECK: Ensure the token is current for the logged-in user if available
         if (is_user_logged_in() && $current_user_id !== $user_id) {
@@ -362,10 +362,29 @@ class Maneli_Payment_Handler {
             $result = json_decode(wp_remote_retrieve_body($response), true);
 
             if (!empty($result['data']) && in_array($result['data']['code'], [100, 101])) {
+                // Save transaction details before triggering hooks
+                $transaction_data = [
+                    'gateway' => 'zarinpal',
+                    'authority' => $authority,
+                    'ref_id' => $result['data']['ref_id'] ?? '',
+                    'amount' => $amount_toman,
+                    'payment_date' => current_time('mysql')
+                ];
+                
+                // Store transaction data in user meta temporarily (will be saved to inquiry later)
+                update_user_meta($user_id, 'maneli_last_payment_transaction', $transaction_data);
+                
                 // Payment successful, trigger finalization hooks
                 if ($payment_type === 'cash_down_payment') {
                     $inquiry_id = $payment_data['cash_inquiry_id'] ?? 0;
                     if ($inquiry_id) {
+                        // Save transaction details to cash inquiry
+                        update_post_meta($inquiry_id, 'payment_gateway', 'zarinpal');
+                        update_post_meta($inquiry_id, 'payment_authority', $authority);
+                        update_post_meta($inquiry_id, 'payment_ref_id', $result['data']['ref_id'] ?? '');
+                        update_post_meta($inquiry_id, 'payment_amount', $amount_toman);
+                        update_post_meta($inquiry_id, 'payment_date', current_time('mysql'));
+                        
                         do_action('maneli_cash_inquiry_payment_successful', $user_id, $inquiry_id);
                     }
                 } else {
@@ -470,8 +489,8 @@ class Maneli_Payment_Handler {
         $options = get_option('maneli_inquiry_all_options', []);
 
         $redirect_url = ($payment_type === 'cash_down_payment')
-            ? home_url('/dashboard/inquiries/cash')
-            : home_url('/dashboard/inquiries/installment');
+            ? home_url('/dashboard/cash-inquiries')
+            : home_url('/dashboard/installment-inquiries');
 
         // 2. SECURITY CHECK: Ensure token is current for the logged-in user and OrderId matches
         if (is_user_logged_in() && $current_user_id !== $user_id) {
@@ -505,9 +524,26 @@ class Maneli_Payment_Handler {
                 $result = $this->sadad_call_api($verify_url, $verify_data);
     
                 if ($result && isset($result->ResCode) && $result->ResCode == 0) {
+                    // Save transaction details
+                    $transaction_data = [
+                        'gateway' => 'sadad',
+                        'order_id' => $order_id,
+                        'token' => $token,
+                        'amount' => $payment_data['amount'] ?? 0,
+                        'payment_date' => current_time('mysql')
+                    ];
+                    update_user_meta($user_id, 'maneli_last_payment_transaction', $transaction_data);
+                    
                     if ($payment_type === 'cash_down_payment') {
                         $inquiry_id = $payment_data['cash_inquiry_id'] ?? 0;
                         if ($inquiry_id) {
+                            // Save transaction details to cash inquiry
+                            update_post_meta($inquiry_id, 'payment_gateway', 'sadad');
+                            update_post_meta($inquiry_id, 'payment_order_id', $order_id);
+                            update_post_meta($inquiry_id, 'payment_token', $token);
+                            update_post_meta($inquiry_id, 'payment_amount', $payment_data['amount'] ?? 0);
+                            update_post_meta($inquiry_id, 'payment_date', current_time('mysql'));
+                            
                             do_action('maneli_cash_inquiry_payment_successful', $user_id, $inquiry_id);
                         }
                     } else {
@@ -568,7 +604,9 @@ class Maneli_Payment_Handler {
     private function sadad_encrypt_pkcs7($str, $key) {
         // FIX: Check for OpenSSL extension availability
         if (!extension_loaded('openssl')) {
-            error_log('Maneli Sadad Error: The OpenSSL extension is required for Sadad payment gateway but is not enabled.');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Sadad Error: The OpenSSL extension is required for Sadad payment gateway but is not enabled.');
+            }
             // Return a distinct string to be handled in process_sadad_payment
             return 'OPENSSL_NOT_AVAILABLE'; 
         }
@@ -596,7 +634,9 @@ class Maneli_Payment_Handler {
         $response = wp_remote_post($url, $args);
 
         if (is_wp_error($response)) {
-             error_log('Maneli Sadad API Error: ' . $response->get_error_message());
+             if (defined('WP_DEBUG') && WP_DEBUG) {
+                 error_log('Maneli Sadad API Error: ' . $response->get_error_message());
+             }
              return false;
         }
         

@@ -24,7 +24,7 @@ if ($is_admin || $is_expert) {
         <div class="col-xl-12">
             <div class="alert alert-info alert-dismissible fade show">
                 <i class="la la-info-circle me-2"></i>
-                برای ثبت استعلام نقدی، لطفاً از صفحه <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="alert-link">لیست استعلامات نقدی</a> اقدام نمایید.
+                <?php echo esc_html__('To submit a cash inquiry, please use the', 'maneli-car-inquiry'); ?> <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="alert-link"><?php esc_html_e('Cash Inquiry List', 'maneli-car-inquiry'); ?></a> <?php esc_html_e('page.', 'maneli-car-inquiry'); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
@@ -41,9 +41,16 @@ if (!wp_script_is('select2', 'enqueued')) {
     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
 }
 
-// Enqueue SweetAlert2
+// Enqueue SweetAlert2 - Use local version if available
 if (!wp_script_is('sweetalert2', 'enqueued')) {
-    wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+    $sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+    if (file_exists($sweetalert2_path)) {
+        wp_enqueue_style('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+        wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+    } else {
+        // Fallback to CDN
+        wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+    }
 }
 
 // Pre-fill customer data
@@ -52,7 +59,9 @@ $customer_last_name = get_user_meta($current_user->ID, 'last_name', true) ?: $cu
 $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $current_user->user_login;
 ?>
 
-<!-- Start::row -->
+<div class="main-content app-content">
+    <div class="container-fluid">
+
 <div class="row">
     <div class="col-xl-12">
         <?php if (isset($_GET['inquiry_created']) && $_GET['inquiry_created'] == '1') : ?>
@@ -70,9 +79,9 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                     ثبت درخواست خرید نقدی
                 </div>
                 <div class="btn-list">
-                    <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="btn btn-light btn-wave">
+                    <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="btn btn-light btn-wave">
                         <i class="la la-arrow-right me-1"></i>
-                        بازگشت به لیست
+                        <?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?>
                     </a>
                 </div>
             </div>
@@ -105,7 +114,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                     </div>
 
                     <!-- Car Details Display (Hidden by default) -->
-                    <div id="car-details-section" style="display: none;">
+                    <div id="car-details-section" class="maneli-initially-hidden">
                         <div class="mb-4 pb-3 border-bottom">
                             <h5 class="mb-3">
                                 <span class="avatar avatar-sm avatar-rounded bg-success-transparent me-2">
@@ -119,7 +128,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                     <div class="row align-items-center">
                                         <div class="col-md-4 text-center">
                                             <div id="car-image-container" class="mb-3 mb-md-0">
-                                                <img src="" alt="Car Image" id="car-image" class="img-fluid rounded" style="max-height: 200px;">
+                                                <img src="" alt="Car Image" id="car-image" class="img-fluid rounded maneli-img-max-height-200">
                                             </div>
                                         </div>
                                         <div class="col-md-8">
@@ -165,7 +174,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="first_name" class="form-control" value="<?php echo esc_attr($customer_first_name); ?>" placeholder="نام" required>
+                                            <input type="text" name="first_name" class="form-control" value="<?php echo esc_attr($customer_first_name); ?>" placeholder="<?php esc_attr_e('First Name', 'maneli-car-inquiry'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-6">
@@ -173,7 +182,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام خانوادگی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="last_name" class="form-control" value="<?php echo esc_attr($customer_last_name); ?>" placeholder="نام خانوادگی" required>
+                                            <input type="text" name="last_name" class="form-control" value="<?php echo esc_attr($customer_last_name); ?>" placeholder="<?php esc_attr_e('Last Name', 'maneli-car-inquiry'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام خانوادگی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-6">
@@ -189,14 +198,14 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                                 <i class="la la-palette me-1 text-muted"></i>
                                                 رنگ خودرو مورد نظر
                                             </label>
-                                            <input type="text" name="car_color" class="form-control" placeholder="مثال: سفید">
+                                            <input type="text" name="car_color" class="form-control" placeholder="<?php esc_attr_e('Example: White', 'maneli-car-inquiry'); ?>">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label">
                                                 <i class="la la-comment me-1 text-muted"></i>
                                                 توضیحات اضافی
                                             </label>
-                                            <textarea name="description" class="form-control" rows="3" placeholder="توضیحات یا درخواست خاص خود را بنویسید..."></textarea>
+                                            <textarea name="description" class="form-control" rows="3" placeholder="<?php esc_attr_e('Write your description or special request...', 'maneli-car-inquiry'); ?>"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -212,9 +221,9 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                 </button>
                             </div>
                             <div class="text-center mt-3">
-                                <a href="<?php echo home_url('/dashboard'); ?>" class="btn btn-light btn-sm">
+                                <a href="<?php echo esc_url(home_url('/dashboard')); ?>" class="btn btn-light btn-sm">
                                     <i class="la la-arrow-right me-1"></i>
-                                    بازگشت به داشبورد
+                                    <?php esc_html_e('Back to Dashboard', 'maneli-car-inquiry'); ?>
                                 </a>
                             </div>
                         </div>
@@ -225,157 +234,168 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
         </div>
     </div>
 </div>
-<!-- End::row -->
+
+    </div>
+</div>
+<!-- End::main-content -->
 
 <script>
-jQuery(document).ready(function($) {
-    'use strict';
-    
-    const productSelect = $('#product_id_customer');
-    const carDetailsSection = $('#car-details-section');
-    let selectedCarData = null;
-    
-    // Initialize Select2 for car search
-    productSelect.select2({
-        placeholder: 'جستجوی خودرو...',
-        allowClear: true,
-        minimumInputLength: 2,
-        dir: 'rtl',
-        language: {
-            inputTooShort: function() {
-                return 'حداقل 2 حرف تایپ کنید';
-            },
-            searching: function() {
-                return 'در حال جستجو...';
-            },
-            noResults: function() {
-                return 'نتیجه‌ای یافت نشد';
-            }
-        },
-        ajax: {
-            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-            dataType: 'json',
-            delay: 250,
-            method: 'POST',
-            data: function(params) {
-                return {
-                    action: 'maneli_search_cars',
-                    nonce: '<?php echo wp_create_nonce('maneli_expert_car_search_nonce'); ?>',
-                    search: params.term
-                };
-            },
-            processResults: function(data) {
-                if (data.success) {
-                    return { results: data.data.results };
-                } else {
-                    return { results: [] };
-                }
-            },
-            cache: true
-        }
-    });
-    
-    // Handle car selection
-    productSelect.on('select2:select', function(e) {
-        const data = e.params.data;
-        selectedCarData = data;
-        
-        // Update car details
-        $('#car-name').text(data.text);
-        $('#car-price').text(formatMoney(data.price) + ' تومان');
-        $('#car-min-downpayment').text(formatMoney(data.min_downpayment) + ' تومان');
-        
-        // Update car image
-        if (data.image_url) {
-            $('#car-image').attr('src', data.image_url);
-            $('#car-image-container').show();
-        } else {
-            $('#car-image-container').hide();
-        }
-        
-        // Show details section with animation
-        carDetailsSection.slideDown(400);
-    });
-    
-    // Handle car unselect
-    productSelect.on('select2:unselect', function() {
-        selectedCarData = null;
-        carDetailsSection.slideUp(400);
-    });
-    
-    // Helper function to format money
-    function formatMoney(num) {
-        if (isNaN(num) || num === null) return '۰';
-        return Math.ceil(num).toLocaleString('fa-IR');
-    }
-    
-    // Form submission
-    $('#customer-cash-inquiry-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        if (!this.checkValidity()) {
-            e.stopPropagation();
-            $(this).addClass('was-validated');
-            return;
-        }
-        
-        if (!selectedCarData) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'توجه',
-                text: 'لطفاً یک خودرو انتخاب کنید',
-                confirmButtonText: 'متوجه شدم'
-            });
-            return;
-        }
-        
-        const formData = new FormData(this);
-        formData.append('action', 'maneli_create_customer_cash_inquiry');
-        formData.append('nonce', '<?php echo wp_create_nonce('maneli_customer_cash_inquiry'); ?>');
-        
-        // Show loading
-        const submitBtn = $('#submit-cash-inquiry');
-        const originalText = submitBtn.html();
-        submitBtn.prop('disabled', true).html('<i class="la la-spinner la-spin me-2"></i>در حال ارسال...');
-        
-        $.ajax({
-            url: '<?php echo admin_url('admin-ajax.php'); ?>',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'موفق!',
-                        html: response.data.message || 'درخواست نقدی شما ثبت شد و به زودی کارشناس با شما تماس خواهد گرفت.',
-                        confirmButtonText: 'مشاهده درخواست‌ها',
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.href = '<?php echo home_url('/dashboard/inquiries/cash'); ?>';
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'خطا',
-                        text: response.data.message || 'خطا در ثبت درخواست',
-                        confirmButtonText: 'متوجه شدم'
-                    });
-                    submitBtn.prop('disabled', false).html(originalText);
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'خطا',
-                    text: 'خطا در برقراری ارتباط با سرور',
-                    confirmButtonText: 'متوجه شدم'
+(function() {
+    function waitForJQuery() {
+        if (typeof jQuery !== "undefined") {
+            jQuery(document).ready(function($) {
+                'use strict';
+                
+                const productSelect = $('#product_id_customer');
+                const carDetailsSection = $('#car-details-section');
+                let selectedCarData = null;
+                
+                // Initialize Select2 for car search
+                productSelect.select2({
+                    placeholder: 'جستجوی خودرو...',
+                    allowClear: true,
+                    minimumInputLength: 2,
+                    dir: 'rtl',
+                    language: {
+                        inputTooShort: function() {
+                            return 'حداقل 2 حرف تایپ کنید';
+                        },
+                        searching: function() {
+                            return 'در حال جستجو...';
+                        },
+                        noResults: function() {
+                            return 'نتیجه‌ای یافت نشد';
+                        }
+                    },
+                    ajax: {
+                        url: <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>,
+                        dataType: 'json',
+                        delay: 250,
+                        method: 'POST',
+                        data: function(params) {
+                            return {
+                                action: 'maneli_search_cars',
+                                nonce: '<?php echo wp_create_nonce('maneli_expert_car_search_nonce'); ?>',
+                                search: params.term
+                            };
+                        },
+                        processResults: function(data) {
+                            if (data.success) {
+                                return { results: data.data.results };
+                            } else {
+                                return { results: [] };
+                            }
+                        },
+                        cache: true
+                    }
                 });
-                submitBtn.prop('disabled', false).html(originalText);
-            }
-        });
-    });
-});
+                
+                // Handle car selection
+                productSelect.on('select2:select', function(e) {
+                    const data = e.params.data;
+                    selectedCarData = data;
+                    
+                    // Update car details
+                    $('#car-name').text(data.text);
+                    $('#car-price').text(formatMoney(data.price) + ' تومان');
+                    $('#car-min-downpayment').text(formatMoney(data.min_downpayment) + ' تومان');
+                    
+                    // Update car image
+                    if (data.image_url) {
+                        $('#car-image').attr('src', data.image_url);
+                        $('#car-image-container').show();
+                    } else {
+                        $('#car-image-container').hide();
+                    }
+                    
+                    // Show details section with animation
+                    carDetailsSection.slideDown(400);
+                });
+                
+                // Handle car unselect
+                productSelect.on('select2:unselect', function() {
+                    selectedCarData = null;
+                    carDetailsSection.slideUp(400);
+                });
+                
+                // Helper function to format money
+                function formatMoney(num) {
+                    if (isNaN(num) || num === null) return '۰';
+                    return Math.ceil(num).toLocaleString('fa-IR');
+                }
+                
+                // Form submission
+                $('#customer-cash-inquiry-form').on('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (!this.checkValidity()) {
+                        e.stopPropagation();
+                        $(this).addClass('was-validated');
+                        return;
+                    }
+                    
+                    if (!selectedCarData) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: <?php echo wp_json_encode(esc_html__('Attention', 'maneli-car-inquiry')); ?>,
+                            text: <?php echo wp_json_encode(esc_html__('Please select a car', 'maneli-car-inquiry')); ?>,
+                            confirmButtonText: <?php echo wp_json_encode(esc_html__('Got it', 'maneli-car-inquiry')); ?>
+                        });
+                        return;
+                    }
+                    
+                    const formData = new FormData(this);
+                    formData.append('action', 'maneli_create_customer_cash_inquiry');
+                    formData.append('nonce', '<?php echo wp_create_nonce('maneli_customer_cash_inquiry'); ?>');
+                    
+                    // Show loading
+                    const submitBtn = $('#submit-cash-inquiry');
+                    const originalText = submitBtn.html();
+                    submitBtn.prop('disabled', true).html('<i class="la la-spinner la-spin me-2"></i>در حال ارسال...');
+                    
+                    $.ajax({
+                        url: <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>,
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'موفق!',
+                                    html: response.data.message || 'درخواست نقدی شما ثبت شد و به زودی کارشناس با شما تماس خواهد گرفت.',
+                                    confirmButtonText: 'مشاهده درخواست‌ها',
+                                    allowOutsideClick: false
+                                }).then(() => {
+                                    window.location.href = <?php echo wp_json_encode(home_url('/dashboard/inquiries/cash')); ?>;
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'خطا',
+                                    text: response.data.message || 'خطا در ثبت درخواست',
+                                    confirmButtonText: 'متوجه شدم'
+                                });
+                                submitBtn.prop('disabled', false).html(originalText);
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'خطا',
+                                text: 'خطا در برقراری ارتباط با سرور',
+                                confirmButtonText: 'متوجه شدم'
+                            });
+                            submitBtn.prop('disabled', false).html(originalText);
+                        }
+                    });
+                });
+            });
+        } else {
+            setTimeout(waitForJQuery, 50);
+        }
+    }
+    waitForJQuery();
+})();
 </script>
-

@@ -18,9 +18,6 @@
         // Initialize tooltips
         initTooltips();
         
-        // Initialize theme switcher
-        initThemeSwitcher();
-        
         // Initialize sidebar
         initSidebar();
     }
@@ -38,36 +35,23 @@
     }
 
     /**
-     * Initialize theme switcher
-     */
-    function initThemeSwitcher() {
-        // Theme mode switcher
-        $('.layout-setting').on('click', function() {
-            var currentMode = $('html').attr('data-theme-mode');
-            var newMode = currentMode === 'dark' ? 'light' : 'dark';
-            $('html').attr('data-theme-mode', newMode);
-            
-            // Store preference
-            localStorage.setItem('theme-mode', newMode);
-        });
-
-        // Load saved theme
-        var savedTheme = localStorage.getItem('theme-mode');
-        if (savedTheme) {
-            $('html').attr('data-theme-mode', savedTheme);
-        }
-    }
-
-    /**
      * Initialize sidebar
      */
     function initSidebar() {
-        // Sidebar toggle
+        // Check if defaultmenu.min.js is handling sidebar toggle
+        if (typeof window.toggleSidemenu === 'function') {
+            // defaultmenu.min.js already handles the sidebar toggle
+            console.log('Sidebar toggle handled by defaultmenu.min.js');
+            return;
+        }
+        
+        // Sidebar toggle (fallback if defaultmenu.min.js is not loaded)
         $('.sidemenu-toggle').on('click', function() {
             $('body').toggleClass('sidebar-open');
             $('html').attr('data-toggled', function(index, attr){
                 return attr === 'close' ? 'open' : 'close';
             });
+            console.log('Sidebar toggled via dashboard.js fallback');
         });
 
         // Close sidebar on mobile when clicking outside

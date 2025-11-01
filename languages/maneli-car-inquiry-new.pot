@@ -1,0 +1,3511 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-31 06:42+0330\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#, php-format
+msgid "%s inquiry assigned to you"
+msgstr ""
+
+msgid "&laquo; Previous"
+msgstr ""
+
+msgid "-"
+msgstr ""
+
+msgid "-- Automatic Assignment (Round-robin) --"
+msgstr ""
+
+msgid "-- Please Select --"
+msgstr ""
+
+msgid "-- Select --"
+msgstr ""
+
+msgid "-- Select a color --"
+msgstr ""
+
+msgid "02112345678"
+msgstr ""
+
+msgid "09123456789"
+msgstr ""
+
+msgid "1. ID Card - National ID Card"
+msgstr ""
+
+msgid "10 digits"
+msgstr ""
+
+msgid "10-digit national ID"
+msgstr ""
+
+#, php-format
+msgid "100% discount applied successfully."
+msgstr ""
+
+msgid "12 Months"
+msgstr ""
+
+msgid "1370/01/01"
+msgstr ""
+
+msgid "18 Months"
+msgstr ""
+
+msgid "2. Chequebook"
+msgstr ""
+
+msgid "24 Months"
+msgstr ""
+
+msgid "3. Last 3-month bank statement (cheque owner)"
+msgstr ""
+
+msgid "36 Months"
+msgstr ""
+
+msgid "4. Payslip or business license (applicant and cheque owner)"
+msgstr ""
+
+#, php-format
+msgid "A %s inquiry for %s has been assigned to you"
+msgstr ""
+
+#, php-format
+msgid "A new %s inquiry has been registered"
+msgstr ""
+
+#, php-format
+msgid "A new cash inquiry from %s for %s has been registered"
+msgstr ""
+
+msgid "A reason for rejection is required."
+msgstr ""
+
+msgid "A user with this email already exists."
+msgstr ""
+
+msgid "A user with this mobile number already exists."
+msgstr ""
+
+msgid "API Key (Access Token) provided by Finotex. Stored securely encrypted."
+msgstr ""
+
+msgid "Aban"
+msgstr ""
+
+msgid "Access Denied!"
+msgstr ""
+
+msgid "Access Denied: You are not the owner of this inquiry."
+msgstr ""
+
+msgid "Access denied."
+msgstr ""
+
+msgid "Account Number"
+msgstr ""
+
+msgid "Account Number:"
+msgstr ""
+
+msgid "Account Settings:"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Active for Sale"
+msgstr ""
+
+msgid "Activity Timeline"
+msgstr ""
+
+msgid "Add New User"
+msgstr ""
+
+msgid "Add a note..."
+msgstr ""
+
+msgid "Address"
+msgstr ""
+
+msgid "Address:"
+msgstr ""
+
+msgid "Admin Actions"
+msgstr ""
+
+msgid "Admin Mobile Number"
+msgstr ""
+
+msgid "Administrator"
+msgstr ""
+
+msgid "Advanced Reports"
+msgstr ""
+
+msgid ""
+"After submitting your inquiry, our expert will contact you and guide you "
+"through the required documents."
+msgstr ""
+
+msgid "All Brands"
+msgstr ""
+
+msgid "All Cash Requests"
+msgstr ""
+
+msgid "All Categories"
+msgstr ""
+
+msgid "All Experts"
+msgstr ""
+
+msgid "All Inquiries"
+msgstr ""
+
+msgid "All Roles"
+msgstr ""
+
+msgid "All Statuses"
+msgstr ""
+
+msgid "All fields are required."
+msgstr ""
+
+msgid "All notifications marked as read."
+msgstr ""
+
+msgid "All read notifications deleted."
+msgstr ""
+
+msgid "All required fields are required."
+msgstr ""
+
+msgid "All required fields must be filled."
+msgstr ""
+
+msgid "Allow users to login using OTP sent via SMS."
+msgstr ""
+
+msgid "Amount"
+msgstr ""
+
+msgid "An AJAX error occurred."
+msgstr ""
+
+msgid "An email associated with this mobile number already exists."
+msgstr ""
+
+msgid "An error occurred while creating your request. Please try again."
+msgstr ""
+
+msgid "An error occurred while deleting the user."
+msgstr ""
+
+msgid "An error occurred."
+msgstr ""
+
+msgid "An error occurred. Please try again."
+msgstr ""
+
+msgid "An unknown error occurred while communicating with the server."
+msgstr ""
+
+msgid "An unknown error occurred."
+msgstr ""
+
+msgid "Applicant Information"
+msgstr ""
+
+msgid "Apply Filters"
+msgstr ""
+
+msgid "Approved"
+msgstr ""
+
+msgid "Approved and Referred"
+msgstr ""
+
+msgid "Approx. Installment:"
+msgstr ""
+
+msgid "Approximate Installment Amount"
+msgstr ""
+
+msgid "Approximate Installment Amount:"
+msgstr ""
+
+msgid "Approximate Monthly Installment"
+msgstr ""
+
+msgid "Approximate Price:"
+msgstr ""
+
+msgid "Are you sure you want to complete this inquiry?"
+msgstr ""
+
+msgid "Are you sure you want to reject this inquiry?"
+msgstr ""
+
+msgid "Are you sure you want to start follow-up for this inquiry?"
+msgstr ""
+
+msgid "Are you sure?"
+msgstr ""
+
+msgid "Ascending"
+msgstr ""
+
+msgid "Assign Expert"
+msgstr ""
+
+msgid "Assign Responsible Expert"
+msgstr ""
+
+msgid "Assign to Expert"
+msgstr ""
+
+msgid "Assigned"
+msgstr ""
+
+msgid "Assigned Expert:"
+msgstr ""
+
+msgid "Assigned Inquiries"
+msgstr ""
+
+msgid "Assigned to Expert:"
+msgstr ""
+
+msgid "Assigned to Me"
+msgstr ""
+
+msgid "Assigned to:"
+msgstr ""
+
+msgid "Authentication"
+msgstr ""
+
+msgid "Available Colors"
+msgstr ""
+
+msgid "Available for Installment Inquiry:"
+msgstr ""
+
+msgid "Awaiting Down Payment"
+msgstr ""
+
+msgid "Awaiting Payment"
+msgstr ""
+
+msgid "Azar"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "Back to Inquiries List"
+msgstr ""
+
+msgid "Back to List"
+msgstr ""
+
+msgid "Back to Previous Step"
+msgstr ""
+
+msgid "Back to home?"
+msgstr ""
+
+msgid "Bahman"
+msgstr ""
+
+msgid "Bank Credit Check for Car Purchase"
+msgstr ""
+
+msgid "Bank Information"
+msgstr ""
+
+msgid "Bank Information (Cheque Holder)"
+msgstr ""
+
+msgid "Bank Inquiries"
+msgstr ""
+
+msgid "Bank Name"
+msgstr ""
+
+msgid "Bank Name:"
+msgstr ""
+
+msgid "Bank inquiry has not been performed."
+msgstr ""
+
+msgid "Bank inquiry was not performed or failed to return data."
+msgstr ""
+
+msgid "Bank inquiry was not performed."
+msgstr ""
+
+msgid "Birth Date"
+msgstr ""
+
+msgid "Birth Date:"
+msgstr ""
+
+msgid "Branch Code"
+msgstr ""
+
+msgid "Branch Code:"
+msgstr ""
+
+msgid "Branch Name"
+msgstr ""
+
+msgid "Branch Name:"
+msgstr ""
+
+msgid "Brown"
+msgstr ""
+
+msgid "Browse Other Cars"
+msgstr ""
+
+msgid "Budgeting and Installment Calculation"
+msgstr ""
+
+msgid "Business Management Dashboard"
+msgstr ""
+
+msgid "Buy your dream car with easy installments"
+msgstr ""
+
+msgid "Buyer Information"
+msgstr ""
+
+msgid "Buyer Information Form"
+msgstr ""
+
+msgid "Buyer and cheque issuer are the same person."
+msgstr ""
+
+msgid "By Status"
+msgstr ""
+
+msgid "Can only complete after meeting is scheduled."
+msgstr ""
+
+msgid "Can only reject after meeting is scheduled."
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Cancel Inquiry"
+msgstr ""
+
+msgid "Cancellation Reason"
+msgstr ""
+
+msgid "Cancellation Reason:"
+msgstr ""
+
+msgid "Cancellation reason is required."
+msgstr ""
+
+msgid "Cancelled"
+msgstr ""
+
+msgid "Cannot delete administrator."
+msgstr ""
+
+msgid "Car"
+msgstr ""
+
+msgid "Car Color:"
+msgstr ""
+
+msgid "Car Model:"
+msgstr ""
+
+msgid "Car Name"
+msgstr ""
+
+msgid "Car Price & Status List"
+msgstr ""
+
+msgid "Car Selection"
+msgstr ""
+
+msgid "Car selected. Redirecting..."
+msgstr ""
+
+msgid "Car:"
+msgstr ""
+
+msgid "Cash"
+msgstr ""
+
+msgid "Cash Car Purchase"
+msgstr ""
+
+msgid "Cash Inquiries"
+msgstr ""
+
+msgid "Cash Inquiries List"
+msgstr ""
+
+msgid "Cash Inquiries:"
+msgstr ""
+
+msgid "Cash Inquiry Statistics"
+msgstr ""
+
+msgid "Cash Inquiry:"
+msgstr ""
+
+msgid "Cash Price"
+msgstr ""
+
+msgid "Cash Price (Toman)"
+msgstr ""
+
+msgid "Cash Purchase Request"
+msgstr ""
+
+msgid "Cash Purchase Request Details"
+msgstr ""
+
+msgid "Cash Request"
+msgstr ""
+
+msgid "Cash Request Process Settings"
+msgstr ""
+
+msgid "Cash Requests"
+msgstr ""
+
+msgid "Cash Sale"
+msgstr ""
+
+msgid "Cash inquiries"
+msgstr ""
+
+msgid "Cash vs Installment Comparison"
+msgstr ""
+
+msgid "Cash:"
+msgstr ""
+
+msgid "Change Expert"
+msgstr ""
+
+msgid "Change Image"
+msgstr ""
+
+msgid "Check Issuer Information"
+msgstr ""
+
+msgid ""
+"Check this box if customers can submit installment inquiries for this "
+"product."
+msgstr ""
+
+msgid "Cheque Color Inquiry Service"
+msgstr ""
+
+msgid "Cheque Issuer Information"
+msgstr ""
+
+msgid "Cheque Issuer Information Form"
+msgstr ""
+
+msgid "Cheque Status:"
+msgstr ""
+
+msgid "Clear Filters"
+msgstr ""
+
+msgid "Click here"
+msgstr ""
+
+msgid "Client ID provided by Finotex. Stored securely encrypted."
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Color"
+msgstr ""
+
+msgid "Colors (e.g., White, Black, Silver)"
+msgstr ""
+
+msgid "Complete"
+msgstr ""
+
+msgid "Complete Information"
+msgstr ""
+
+msgid "Complete Inquiry"
+msgstr ""
+
+msgid "Complete List of Inquiries"
+msgstr ""
+
+msgid "Complete User List"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Completed / Rejected"
+msgstr ""
+
+msgid "Configure Notifications"
+msgstr ""
+
+msgid "Configure One-Time Password (OTP) settings for login authentication."
+msgstr ""
+
+msgid ""
+"Configure all aspects of the Maneli Car Inquiry plugin from this centralized "
+"settings panel."
+msgstr ""
+
+msgid "Configure dashboard access credentials."
+msgstr ""
+
+msgid "Confirm Car"
+msgstr ""
+
+msgid "Confirm Password"
+msgstr ""
+
+msgid "Confirm Status"
+msgstr ""
+
+msgid "Confirm and Continue"
+msgstr ""
+
+msgid "Confirmed"
+msgstr ""
+
+msgid "Confirmed and Referred"
+msgstr ""
+
+msgid "Congratulations! Your request has been approved"
+msgstr ""
+
+msgid "Connection error (0). Please check your internet connection."
+msgstr ""
+
+msgid "Connection error (Code:"
+msgstr ""
+
+msgid "Contact Information"
+msgstr ""
+
+msgid "Contact Number"
+msgstr ""
+
+msgid "Continue"
+msgstr ""
+
+msgid "Continue to Next Step"
+msgstr ""
+
+msgid "Continue to Payment"
+msgstr ""
+
+msgid "Contract"
+msgstr ""
+
+msgid "Control how profile information is verified for security purposes."
+msgstr ""
+
+msgid "Could not connect to Zarinpal gateway."
+msgstr ""
+
+msgid "Create First Inquiry"
+msgstr ""
+
+msgid "Create New Cash Request"
+msgstr ""
+
+msgid "Create New Inquiry"
+msgstr ""
+
+msgid "Create New Inquiry (Expert Mode)"
+msgstr ""
+
+msgid "Create New Installment Request"
+msgstr ""
+
+msgid "Create Password"
+msgstr ""
+
+msgid "Create Password - Maneli Car Inquiry"
+msgstr ""
+
+msgid "Create User"
+msgstr ""
+
+msgid "Create Your Account"
+msgstr ""
+
+msgid "Created"
+msgstr ""
+
+msgid "Credit Verification Result"
+msgstr ""
+
+msgid "Credit Verification Result (Finotex)"
+msgstr ""
+
+msgid "Current Status"
+msgstr ""
+
+msgid "Current Status:"
+msgstr ""
+
+msgid "Customer"
+msgstr ""
+
+msgid "Customer Name"
+msgstr ""
+
+msgid "Customer name, car name, mobile..."
+msgstr ""
+
+msgid "Customer request will be approved"
+msgstr ""
+
+msgid "Daily"
+msgstr ""
+
+msgid "Daily Inquiry Trend (Last 7 Days)"
+msgstr ""
+
+msgid "Dashboard"
+msgstr ""
+
+msgid "Dashboard Password"
+msgstr ""
+
+msgid "Dashboard Security"
+msgstr ""
+
+msgid ""
+"Dashboard password not configured. Please contact administrator to set up "
+"dashboard access."
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Date Submitted"
+msgstr ""
+
+msgid "Date of Birth"
+msgstr ""
+
+msgid "Date of Birth:"
+msgstr ""
+
+msgid "Decision saved successfully."
+msgstr ""
+
+msgid "Default (Newest First)"
+msgstr ""
+
+msgid "Default Expert Status Key"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Delete Button Works!"
+msgstr ""
+
+msgid "Delete Inquiry"
+msgstr ""
+
+msgid "Delete button clicked! Inquiry ID:"
+msgstr ""
+
+msgid "Deleted"
+msgstr ""
+
+msgid "Descending"
+msgstr ""
+
+msgid "Designation:"
+msgstr ""
+
+msgid "Dey"
+msgstr ""
+
+msgid "Didn't receive code?"
+msgstr ""
+
+msgid "Disabled"
+msgstr ""
+
+msgid "Discount Code"
+msgstr ""
+
+msgid "Discount Code Settings"
+msgstr ""
+
+msgid "Discount Code Success Message"
+msgstr ""
+
+msgid "Display Name"
+msgstr ""
+
+msgid "Do you have a discount code?"
+msgstr ""
+
+msgid "Documents Required"
+msgstr ""
+
+msgid "Down Payment"
+msgstr ""
+
+msgid "Down Payment Amount"
+msgstr ""
+
+msgid "Down Payment Amount (Toman)"
+msgstr ""
+
+msgid "Down Payment Amount (Toman):"
+msgstr ""
+
+msgid "Down Payment Amount:"
+msgstr ""
+
+msgid "Down Payment Received"
+msgstr ""
+
+msgid "Down Payment Requested:"
+msgstr ""
+
+msgid "Down Payment Type:"
+msgstr ""
+
+msgid "Down Payment:"
+msgstr ""
+
+msgid "Down payment amount has not been specified."
+msgstr ""
+
+msgid ""
+"Due to severe market fluctuations, car prices are approximate and may change "
+"until final approval."
+msgstr ""
+
+msgid ""
+"Due to severe market fluctuations, car prices are approximate and may change "
+"until final confirmation."
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Edit User"
+msgstr ""
+
+msgid "Edit User Account"
+msgstr ""
+
+#, php-format
+msgid "Editing User: %s"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Email Notifications"
+msgstr ""
+
+msgid "Email:"
+msgstr ""
+
+msgid "Employee"
+msgstr ""
+
+msgid "Enable Finotex Inquiry"
+msgstr ""
+
+msgid "Enable Meetings"
+msgstr ""
+
+msgid "Enable OTP Login"
+msgstr ""
+
+msgid "Enable Payment Gateway"
+msgstr ""
+
+msgid "Enable Sadad"
+msgstr ""
+
+msgid "Enable Zarinpal"
+msgstr ""
+
+msgid "Enable the cheque color inquiry via the Finotex service."
+msgstr ""
+
+msgid "Enter 0 for free inquiries."
+msgstr ""
+
+msgid "Enter 4-digit code"
+msgstr ""
+
+#, php-format
+msgid "Enter a code for 100% off the inquiry fee."
+msgstr ""
+
+msgid "Enter account number"
+msgstr ""
+
+msgid "Enter address"
+msgstr ""
+
+msgid "Enter bank name"
+msgstr ""
+
+msgid "Enter branch code"
+msgstr ""
+
+msgid "Enter branch name"
+msgstr ""
+
+msgid "Enter designation"
+msgstr ""
+
+msgid "Enter discount code:"
+msgstr ""
+
+msgid "Enter email"
+msgstr ""
+
+msgid "Enter father's name"
+msgstr ""
+
+msgid "Enter mobile number"
+msgstr ""
+
+msgid "Enter name"
+msgstr ""
+
+msgid "Enter occupation or job title"
+msgstr ""
+
+msgid ""
+"Enter one reason per line. These will be shown as a list to the admin when "
+"rejecting a request."
+msgstr ""
+
+msgid ""
+"Enter one reason per line. These will be shown as a list to the admin when "
+"rejecting an installment request."
+msgstr ""
+
+msgid ""
+"Enter only the approved Pattern Code (Body ID) from your SMS panel. Variable "
+"order must match the descriptions."
+msgstr ""
+
+#, php-format
+msgid "Enter the 4-digit code sent to mobile number %s."
+msgstr ""
+
+msgid ""
+"Enter the minimum down payment amount. This can be Toman (if product price "
+"is fixed) or a percentage (if price is variable)."
+msgstr ""
+
+msgid ""
+"Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in "
+"all installment calculations."
+msgstr ""
+
+msgid "Enter your desired color"
+msgstr ""
+
+msgid "Enter your father's name"
+msgstr ""
+
+msgid "Enter your first name"
+msgstr ""
+
+msgid "Enter your last name"
+msgstr ""
+
+msgid "Enter your mobile number"
+msgstr ""
+
+msgid "Enter your note..."
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Error communicating with payment gateway for verification."
+msgstr ""
+
+msgid "Error creating attachment."
+msgstr ""
+
+msgid "Error creating inquiry post."
+msgstr ""
+
+msgid "Error creating new user: "
+msgstr ""
+
+msgid "Error creating user account."
+msgstr ""
+
+msgid "Error deleting inquiry."
+msgstr ""
+
+msgid "Error deleting request."
+msgstr ""
+
+#, php-format
+msgid "Error from Zarinpal: %s"
+msgstr ""
+
+msgid "Error loading chart"
+msgstr ""
+
+msgid "Error loading list"
+msgstr ""
+
+msgid "Error saving meeting:"
+msgstr ""
+
+msgid "Error saving product."
+msgstr ""
+
+msgid ""
+"Error sending SMS. Please check your SMS panel information and pattern code."
+msgstr ""
+
+msgid "Error sending SMS. Please try again."
+msgstr ""
+
+msgid "Error sending code. Please try again."
+msgstr ""
+
+msgid "Error sending information: "
+msgstr ""
+
+msgid "Error updating status"
+msgstr ""
+
+msgid "Error verifying code. Please try again."
+msgstr ""
+
+msgid "Error: Status modal not found. Please contact support."
+msgstr ""
+
+#, php-format
+msgid "Error: The field \"%s\" for the buyer is required."
+msgstr ""
+
+#, php-format
+msgid "Error: The field \"%s\" for the cheque issuer is required."
+msgstr ""
+
+#, php-format
+msgid "Error: The field \"%s\" is required."
+msgstr ""
+
+msgid "Esfand"
+msgstr ""
+
+msgid "Example: 50000000"
+msgstr ""
+
+msgid "Example: Central"
+msgstr ""
+
+msgid "Example: Engineer"
+msgstr ""
+
+msgid "Example: Melli"
+msgstr ""
+
+msgid "Example: unknown|Unknown|#999999"
+msgstr ""
+
+msgid "Expert"
+msgstr ""
+
+msgid "Expert Dashboard"
+msgstr ""
+
+msgid "Expert Decision Settings"
+msgstr ""
+
+msgid "Expert Management"
+msgstr ""
+
+msgid "Expert Name"
+msgstr ""
+
+msgid "Expert Notes"
+msgstr ""
+
+msgid "Expert Status Control"
+msgstr ""
+
+msgid "Expert Status:"
+msgstr ""
+
+msgid "Expert activated successfully."
+msgstr ""
+
+msgid "Expert added successfully."
+msgstr ""
+
+msgid "Expert deactivated successfully."
+msgstr ""
+
+msgid "Expert has not approved yet."
+msgstr ""
+
+msgid "Expert updated successfully."
+msgstr ""
+
+msgid "Expert:"
+msgstr ""
+
+msgid "Experts"
+msgstr ""
+
+msgid "Export CSV"
+msgstr ""
+
+msgid "Failed to delete notification."
+msgstr ""
+
+msgid "Failed to delete read notifications."
+msgstr ""
+
+msgid "Failed to mark notification as read."
+msgstr ""
+
+msgid "Failed to mark notifications as read."
+msgstr ""
+
+msgid "Failed!"
+msgstr ""
+
+msgid "Farvardin"
+msgstr ""
+
+msgid "Father's Name"
+msgstr ""
+
+msgid "Father's Name:"
+msgstr ""
+
+msgid "File size exceeds 2 MB limit."
+msgstr ""
+
+msgid "Filter"
+msgstr ""
+
+msgid "Filter by Expert"
+msgstr ""
+
+msgid "Final Admin Approval"
+msgstr ""
+
+msgid "Final Approval"
+msgstr ""
+
+msgid "Final Approval & Refer to Sales"
+msgstr ""
+
+msgid "Final Approval and Completed"
+msgstr ""
+
+msgid "Final Approval?"
+msgstr ""
+
+msgid "Final Approved"
+msgstr ""
+
+msgid "Final Installment Inquiry Result"
+msgstr ""
+
+msgid "Final Rejection of Request"
+msgstr ""
+
+msgid "Final Result"
+msgstr ""
+
+msgid "Final Result: Your request has been approved."
+msgstr ""
+
+msgid "Final Result: Your request has been rejected."
+msgstr ""
+
+msgid "Finance & Calculator"
+msgstr ""
+
+msgid "Finish"
+msgstr ""
+
+msgid "Finotex"
+msgstr ""
+
+msgid "Finotex API Key"
+msgstr ""
+
+msgid "Finotex Client ID"
+msgstr ""
+
+msgid "First"
+msgstr ""
+
+msgid "First Name"
+msgstr ""
+
+msgid "First Name:"
+msgstr ""
+
+msgid "First and last name are required."
+msgstr ""
+
+msgid ""
+"Five to ten bounced cheques or a maximum of 500 million Rials in returned "
+"commitments."
+msgstr ""
+
+msgid "Fixed Amount (Toman)"
+msgstr ""
+
+msgid "Follow Up Scheduled"
+msgstr ""
+
+msgid "Follow-up Completed (Date:"
+msgstr ""
+
+msgid "Follow-up Date"
+msgstr ""
+
+msgid "Follow-up Date:"
+msgstr ""
+
+msgid "Follow-up Inquiries List"
+msgstr ""
+
+msgid "Follow-up Scheduled"
+msgstr ""
+
+msgid "Follow-up Started by Expert"
+msgstr ""
+
+msgid "Follow-up date is required."
+msgstr ""
+
+msgid "Follow-up in Progress"
+msgstr ""
+
+msgid "Follow-up scheduled successfully."
+msgstr ""
+
+msgid "Follow-ups"
+msgstr ""
+
+msgid "Free"
+msgstr ""
+
+msgid "Freelance"
+msgstr ""
+
+msgid "Friday"
+msgstr ""
+
+msgid "Frontend Messages"
+msgstr ""
+
+msgid "Full Address"
+msgstr ""
+
+msgid "Full address"
+msgstr ""
+
+msgid "Future meetings will be displayed here."
+msgstr ""
+
+msgid "General Manager"
+msgstr ""
+
+msgid "General Payment Settings"
+msgstr ""
+
+msgid "General Settings"
+msgstr ""
+
+msgid "Go to Cars List"
+msgstr ""
+
+msgid "Government"
+msgstr ""
+
+msgid "Guide:"
+msgstr ""
+
+msgid "Have a discount code?"
+msgstr ""
+
+msgid "Hello! Please create a password for your account."
+msgstr ""
+
+msgid "Hidden Products"
+msgstr ""
+
+msgid "Hide Prices from Customers"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "How long the OTP code remains valid (in minutes)."
+msgstr ""
+
+msgid "I agree and confirm this car."
+msgstr ""
+
+msgid "I am both the buyer and the cheque issuer."
+msgstr ""
+
+msgid "ID"
+msgstr ""
+
+msgid "Identity Information"
+msgstr ""
+
+msgid "Identity Information:"
+msgstr ""
+
+msgid ""
+"If enabled, all product prices will be hidden from customers on the website. "
+"Note: Unavailable products will still show \"ناموجود\" text."
+msgstr ""
+
+msgid "If enabled, the inquiry fee payment step will be shown to users."
+msgstr ""
+
+msgid "If not selected, the system will automatically assign an expert."
+msgstr ""
+
+msgid "In Progress"
+msgstr ""
+
+msgid "In-App Notifications"
+msgstr ""
+
+msgid "In-person appointments"
+msgstr ""
+
+msgid "Inactive"
+msgstr ""
+
+msgid "Income Level"
+msgstr ""
+
+msgid "Income Level (Toman)"
+msgstr ""
+
+msgid "Income Level (Toman):"
+msgstr ""
+
+msgid ""
+"Information was not received from Finotex or the inquiry was unsuccessful."
+msgstr ""
+
+msgid ""
+"Inquiries that require follow-up contact on the specified dates are "
+"displayed here."
+msgstr ""
+
+msgid "Inquiry"
+msgstr ""
+
+msgid "Inquiry Failed"
+msgstr ""
+
+msgid "Inquiry Fee (Toman)"
+msgstr ""
+
+msgid "Inquiry Supplementary Information"
+msgstr ""
+
+msgid "Inquiry Unsuccessful"
+msgstr ""
+
+msgid "Inquiry cancelled successfully."
+msgstr ""
+
+msgid "Inquiry completed successfully."
+msgstr ""
+
+msgid "Inquiry created successfully."
+msgstr ""
+
+msgid "Inquiry deleted successfully."
+msgstr ""
+
+msgid "Inquiry for"
+msgstr ""
+
+msgid "Inquiry not found or you do not have access."
+msgstr ""
+
+msgid "Inquiry rejected successfully."
+msgstr ""
+
+msgid "Inquiry status updated to In Progress."
+msgstr ""
+
+#, php-format
+msgid "Inquiry successfully assigned to %s."
+msgstr ""
+
+msgid "Installment"
+msgstr ""
+
+msgid "Installment Car Purchase"
+msgstr ""
+
+msgid "Installment Inquiries"
+msgstr ""
+
+msgid "Installment Inquiries:"
+msgstr ""
+
+msgid "Installment Inquiry"
+msgstr ""
+
+msgid "Installment Inquiry Statistics"
+msgstr ""
+
+msgid "Installment Inquiry:"
+msgstr ""
+
+msgid "Installment Loan Settings"
+msgstr ""
+
+msgid "Installment Period"
+msgstr ""
+
+msgid "Installment Price"
+msgstr ""
+
+msgid "Installment Price (Toman)"
+msgstr ""
+
+msgid "Installment Rejection Reasons"
+msgstr ""
+
+msgid "Installment Request"
+msgstr ""
+
+msgid "Installment Request Details"
+msgstr ""
+
+msgid "Installment Sale"
+msgstr ""
+
+msgid "Installment Term"
+msgstr ""
+
+msgid "Installment Term:"
+msgstr ""
+
+msgid "Installment:"
+msgstr ""
+
+msgid "Invalid action."
+msgstr ""
+
+msgid "Invalid data sent."
+msgstr ""
+
+msgid "Invalid data submitted."
+msgstr ""
+
+msgid "Invalid field type."
+msgstr ""
+
+msgid "Invalid file type. Only JPEG, PNG and GIF are allowed."
+msgstr ""
+
+msgid "Invalid file type. Only images are allowed."
+msgstr ""
+
+msgid "Invalid inquiry ID."
+msgstr ""
+
+msgid "Invalid inquiry type."
+msgstr ""
+
+msgid "Invalid mobile number."
+msgstr ""
+
+msgid "Invalid notification ID."
+msgstr ""
+
+msgid "Invalid or expired verification code."
+msgstr ""
+
+msgid "Invalid phone number or password."
+msgstr ""
+
+#, php-format
+msgid "Invalid product ID: %d"
+msgstr ""
+
+msgid "Invalid request ID."
+msgstr ""
+
+msgid "Invalid request or insufficient permissions."
+msgstr ""
+
+msgid "Invalid request."
+msgstr ""
+
+msgid "Invalid request. Please log in and try again."
+msgstr ""
+
+msgid "Invalid schedule range."
+msgstr ""
+
+msgid "Invalid security token."
+msgstr ""
+
+msgid "Invalid session. Please restart the process."
+msgstr ""
+
+msgid "Invalid status provided."
+msgstr ""
+
+msgid "Invalid token returned from the bank."
+msgstr ""
+
+msgid "Invalid tracking status."
+msgstr ""
+
+msgid "Invalid user ID."
+msgstr ""
+
+msgid "Invalid verification code."
+msgstr ""
+
+msgid "Issuer Account Number"
+msgstr ""
+
+msgid "Issuer Account Number:"
+msgstr ""
+
+msgid "Issuer Address"
+msgstr ""
+
+msgid "Issuer Address:"
+msgstr ""
+
+msgid "Issuer Bank Name"
+msgstr ""
+
+msgid "Issuer Bank Name:"
+msgstr ""
+
+msgid "Issuer Birth Date"
+msgstr ""
+
+msgid "Issuer Branch Code"
+msgstr ""
+
+msgid "Issuer Branch Code:"
+msgstr ""
+
+msgid "Issuer Branch Name"
+msgstr ""
+
+msgid "Issuer Branch Name:"
+msgstr ""
+
+msgid "Issuer Date of Birth:"
+msgstr ""
+
+msgid "Issuer Father's Name"
+msgstr ""
+
+msgid "Issuer Father's Name:"
+msgstr ""
+
+msgid "Issuer First Name"
+msgstr ""
+
+msgid "Issuer First Name:"
+msgstr ""
+
+msgid "Issuer Income Level (Toman)"
+msgstr ""
+
+msgid "Issuer Income Level (Toman):"
+msgstr ""
+
+msgid "Issuer Job Title"
+msgstr ""
+
+msgid "Issuer Job Title:"
+msgstr ""
+
+msgid "Issuer Job Type"
+msgstr ""
+
+msgid "Issuer Landline Phone"
+msgstr ""
+
+msgid "Issuer Last Name"
+msgstr ""
+
+msgid "Issuer Last Name:"
+msgstr ""
+
+msgid "Issuer Mobile Number"
+msgstr ""
+
+msgid "Issuer Mobile Number:"
+msgstr ""
+
+msgid "Issuer National Code"
+msgstr ""
+
+msgid "Issuer National Code:"
+msgstr ""
+
+msgid "Issuer Phone Number:"
+msgstr ""
+
+msgid "Issuer Residency Status"
+msgstr ""
+
+msgid "Items"
+msgstr ""
+
+msgid "Job Information"
+msgstr ""
+
+msgid "Job Title"
+msgstr ""
+
+msgid "Job Title:"
+msgstr ""
+
+msgid "Job Type"
+msgstr ""
+
+msgid "Job Type:"
+msgstr ""
+
+msgid "Khordad"
+msgstr ""
+
+msgid "Landline Phone"
+msgstr ""
+
+msgid "Last 7 Days Summary:"
+msgstr ""
+
+msgid "Last Name"
+msgstr ""
+
+msgid "Last Name:"
+msgstr ""
+
+msgid "Loading follow-ups..."
+msgstr ""
+
+msgid "Loading inquiries..."
+msgstr ""
+
+msgid "Loading more..."
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Loan Amount"
+msgstr ""
+
+msgid "Loan Amount:"
+msgstr ""
+
+msgid "Loan Calculator"
+msgstr ""
+
+msgid "Loan and Car Details"
+msgstr ""
+
+msgid "Log In"
+msgstr ""
+
+msgid "Log in to Start Inquiry"
+msgstr ""
+
+msgid "Logging in..."
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Login - Maneli Car Inquiry"
+msgstr ""
+
+msgid "Login Required"
+msgstr ""
+
+msgid "Login Verification"
+msgstr ""
+
+msgid "Login and Submit Request"
+msgstr ""
+
+msgid "Login error. Please try again."
+msgstr ""
+
+msgid "Login successful."
+msgstr ""
+
+msgid "Login to Dashboard"
+msgstr ""
+
+msgid "Login with SMS"
+msgstr ""
+
+msgid "Login with password"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Managers"
+msgstr ""
+
+msgid "Maneli Admin"
+msgstr ""
+
+msgid "Maneli Car Inquiry Settings"
+msgstr ""
+
+msgid ""
+"Maneli Car Inquiry plugin requires WooCommerce to be installed and "
+"activated. Please activate WooCommerce to continue."
+msgstr ""
+
+msgid ""
+"Maneli Car Inquiry: Please save the Settings once to update rewrite rules."
+msgstr ""
+
+msgid "Maneli Expert"
+msgstr ""
+
+msgid "Maneli Experts"
+msgstr ""
+
+msgid "Maneli Manager"
+msgstr ""
+
+#, php-format
+msgid "Maneli verification code: %s"
+msgstr ""
+
+msgid "Maximum Loan Term (Months):"
+msgstr ""
+
+msgid "Meeting"
+msgstr ""
+
+#, php-format
+msgid "Meeting - %s"
+msgstr ""
+
+msgid "Meeting Calendar"
+msgstr ""
+
+msgid "Meeting Calendar:"
+msgstr ""
+
+msgid "Meeting Date"
+msgstr ""
+
+msgid "Meeting Details"
+msgstr ""
+
+msgid "Meeting Scheduled"
+msgstr ""
+
+msgid "Meeting Scheduled:"
+msgstr ""
+
+msgid "Meeting Time"
+msgstr ""
+
+msgid "Meeting booked successfully."
+msgstr ""
+
+msgid "Meeting date and time are required."
+msgstr ""
+
+msgid "Meeting scheduled successfully."
+msgstr ""
+
+msgid "Meeting time saved successfully."
+msgstr ""
+
+msgid "Meetings"
+msgstr ""
+
+msgid "Meetings & Calendar"
+msgstr ""
+
+msgid "Mehr"
+msgstr ""
+
+msgid "MeliPayamak Panel Information"
+msgstr ""
+
+msgid "Merchant ID"
+msgstr ""
+
+msgid "Message for Free Inquiry"
+msgstr ""
+
+msgid "Messages sent to user email address."
+msgstr ""
+
+msgid "Meta box template missing."
+msgstr ""
+
+msgid "Min. Down Payment (Toman)"
+msgstr ""
+
+msgid "Minimum Down Payment"
+msgstr ""
+
+msgid "Minimum Down Payment Value:"
+msgstr ""
+
+msgid "Minimum Down Payment:"
+msgstr ""
+
+msgid "Minimum recommended down payment:"
+msgstr ""
+
+msgid "Minimum time between OTP resend requests (in seconds)."
+msgstr ""
+
+msgid "Mobile"
+msgstr ""
+
+msgid "Mobile Number"
+msgstr ""
+
+msgid "Mobile Number (Required):"
+msgstr ""
+
+msgid "Mobile Number (Username):"
+msgstr ""
+
+msgid "Mobile Number:"
+msgstr ""
+
+msgid "Mobile number and password are required."
+msgstr ""
+
+msgid "Mobile number is invalid."
+msgstr ""
+
+msgid "Mobile number to receive new request notifications."
+msgstr ""
+
+msgid "Mobile:"
+msgstr ""
+
+msgid "Monday"
+msgstr ""
+
+msgid "Monthly"
+msgstr ""
+
+msgid "Monthly Installment"
+msgstr ""
+
+msgid "Monthly Interest Rate (Decimal)"
+msgstr ""
+
+msgid "Months"
+msgstr ""
+
+msgid "Mordad"
+msgstr ""
+
+msgid "More Documents Required"
+msgstr ""
+
+msgid ""
+"More than ten bounced cheques or more than 500 million Rials in returned "
+"commitments."
+msgstr ""
+
+msgid "My Account"
+msgstr ""
+
+msgid "My Assigned Inquiries Needing Action"
+msgstr ""
+
+msgid "My Cash Inquiries"
+msgstr ""
+
+msgid "My Cash Purchase Inquiries"
+msgstr ""
+
+msgid "My Customers"
+msgstr ""
+
+msgid "My Installment Inquiries"
+msgstr ""
+
+msgid "My Installment Purchase Inquiries"
+msgstr ""
+
+msgid "My Profit"
+msgstr ""
+
+msgid "My Upcoming Follow-ups"
+msgstr ""
+
+msgid "N/A"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Name:"
+msgstr ""
+
+msgid "National Code"
+msgstr ""
+
+msgid "National Code:"
+msgstr ""
+
+msgid "National ID"
+msgstr ""
+
+msgid "Need More Documents"
+msgstr ""
+
+msgid "Need expert assignment"
+msgstr ""
+
+msgid "New"
+msgstr ""
+
+#, php-format
+msgid "New %s inquiry"
+msgstr ""
+
+msgid "New Cash Inquiry"
+msgstr ""
+
+msgid "New Inquiry"
+msgstr ""
+
+msgid "New inquiry has been successfully created for the customer."
+msgstr ""
+
+msgid "Newest"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Next &raquo;"
+msgstr ""
+
+msgid "Next Follow-up Scheduled for:"
+msgstr ""
+
+msgid "Next Step"
+msgstr ""
+
+msgid "Next »"
+msgstr ""
+
+msgid "No Car Selected"
+msgstr ""
+
+msgid "No Cash Inquiries Yet"
+msgstr ""
+
+msgid "No Inquiries Found"
+msgstr ""
+
+msgid "No Inquiries Yet"
+msgstr ""
+
+msgid "No Installment Inquiries Yet"
+msgstr ""
+
+msgid "No Role"
+msgstr ""
+
+msgid "No active payment gateway is configured in the settings."
+msgstr ""
+
+msgid "No car found"
+msgstr ""
+
+msgid "No data available"
+msgstr ""
+
+msgid "No experts are currently registered."
+msgstr ""
+
+msgid "No experts found for automatic assignment."
+msgstr ""
+
+msgid "No file uploaded."
+msgstr ""
+
+msgid "No follow-up inquiries found."
+msgstr ""
+
+msgid "No history of bounced cheques."
+msgstr ""
+
+msgid "No inquiries found matching your criteria."
+msgstr ""
+
+msgid "No inquiries have been registered in the system yet"
+msgstr ""
+
+msgid "No inquiries registered in the last 7 days."
+msgstr ""
+
+msgid "No meetings scheduled"
+msgstr ""
+
+msgid "No notes have been recorded yet."
+msgstr ""
+
+msgid "No products data provided."
+msgstr ""
+
+msgid "No products found matching your criteria."
+msgstr ""
+
+msgid "No products found."
+msgstr ""
+
+msgid "No products were updated."
+msgstr ""
+
+msgid "No requests found."
+msgstr ""
+
+msgid "No users found matching your criteria."
+msgstr ""
+
+msgid "No users found."
+msgstr ""
+
+msgid "Not Specified"
+msgstr ""
+
+msgid "Not set"
+msgstr ""
+
+msgid "Note (Optional)"
+msgstr ""
+
+msgid "Note cannot be empty."
+msgstr ""
+
+msgid "Note saved successfully."
+msgstr ""
+
+msgid "Note:"
+msgstr ""
+
+msgid "Notification Settings:"
+msgstr ""
+
+msgid "Notification deleted."
+msgstr ""
+
+msgid "Notification marked as read."
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Notifications sent to user mobile or desktop devices."
+msgstr ""
+
+msgid "Notifications that appear within the application interface."
+msgstr ""
+
+msgid "OK"
+msgstr ""
+
+msgid "OTP Authentication Settings"
+msgstr ""
+
+msgid "OTP Expiry Time (minutes)"
+msgstr ""
+
+msgid "OTP Pattern Code (Body ID)"
+msgstr ""
+
+msgid ""
+"OTP pattern is not configured. Please go to Settings → Authentication and "
+"enter the pattern code."
+msgstr ""
+
+msgid "Occupation"
+msgstr ""
+
+msgid "Occupation / Position:"
+msgstr ""
+
+msgid "Occupation or Position"
+msgstr ""
+
+msgid "Occupation/Job Title:"
+msgstr ""
+
+msgid "Oldest"
+msgstr ""
+
+msgid ""
+"One bounced cheque or a maximum of 50 million Rials in returned commitments."
+msgstr ""
+
+msgid "Only administrator can perform final approval."
+msgstr ""
+
+msgid "Only assigned expert can make decision."
+msgstr ""
+
+msgid ""
+"OpenSSL PHP extension is not enabled. Sadad payment gateway requires this "
+"extension."
+msgstr ""
+
+msgid "Operation completed successfully."
+msgstr ""
+
+msgid "Orange"
+msgstr ""
+
+msgid "Order By:"
+msgstr ""
+
+msgid "Order:"
+msgstr ""
+
+msgid "Ordibehesht"
+msgstr ""
+
+msgid "Other Specifications"
+msgstr ""
+
+msgid "Our colleagues will contact you soon for final coordination."
+msgstr ""
+
+msgid ""
+"Our experts need more documents to complete the process. Please wait for our "
+"team to contact you."
+msgstr ""
+
+msgid ""
+"Our experts require additional documents to complete the process. Please "
+"wait for our team to contact you."
+msgstr ""
+
+msgid "Overdue"
+msgstr ""
+
+msgid "Overdue Follow-ups"
+msgstr ""
+
+msgid "Owned"
+msgstr ""
+
+msgid "Owner"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Password (Required):"
+msgstr ""
+
+msgid "Password Verification"
+msgstr ""
+
+msgid "Password created successfully. Logging you in..."
+msgstr ""
+
+msgid ""
+"Password for dashboard login. This field is required - no default password "
+"is provided for security reasons."
+msgstr ""
+
+msgid "Password must be at least 6 characters."
+msgstr ""
+
+msgid "Passwords do not match."
+msgstr ""
+
+msgid "Pattern code for OTP SMS. Variable: {0} = OTP Code (4-digit)"
+msgstr ""
+
+msgid "Pattern: \"Approved\" (Installment)"
+msgstr ""
+
+msgid "Pattern: \"Cash Request Approved\""
+msgstr ""
+
+msgid "Pattern: \"Cash Request Referral to Expert\""
+msgstr ""
+
+msgid "Pattern: \"Cash Request Rejected\""
+msgstr ""
+
+msgid "Pattern: \"New Request for Admin\""
+msgstr ""
+
+msgid "Pattern: \"Pending Review\" (Installment)"
+msgstr ""
+
+msgid "Pattern: \"Referral to Expert\" (Installment)"
+msgstr ""
+
+msgid "Pattern: \"Rejected\" (Installment)"
+msgstr ""
+
+msgid "Payment"
+msgstr ""
+
+msgid "Payment Amount"
+msgstr ""
+
+msgid "Payment Details"
+msgstr ""
+
+msgid "Payment Gateway"
+msgstr ""
+
+msgid "Payment completed successfully."
+msgstr ""
+
+#, php-format
+msgid "Payment for order ID %s"
+msgstr ""
+
+msgid "Payment token expired or invalid."
+msgstr ""
+
+msgid "Payment was not completed."
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "Pending Cash Inquiries"
+msgstr ""
+
+msgid "Pending Installment Inquiries"
+msgstr ""
+
+msgid "Pending Review"
+msgstr ""
+
+msgid "Percentage of Price (%)"
+msgstr ""
+
+msgid "Permanent"
+msgstr ""
+
+msgid "Permissions updated successfully."
+msgstr ""
+
+msgid "Permissions:"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+msgid "Phone Number"
+msgstr ""
+
+msgid "Phone Number:"
+msgstr ""
+
+msgid "Phone number and password are required."
+msgstr ""
+
+msgid "Please confirm your selected car to continue."
+msgstr ""
+
+msgid ""
+"Please create a secure password for your account to protect your information."
+msgstr ""
+
+msgid "Please enter a password."
+msgstr ""
+
+msgid "Please enter a valid amount."
+msgstr ""
+
+msgid "Please enter a valid mobile number."
+msgstr ""
+
+msgid "Please enter at least 2 characters..."
+msgstr ""
+
+msgid "Please enter down payment amount"
+msgstr ""
+
+msgid "Please enter follow-up date"
+msgstr ""
+
+msgid "Please enter meeting date and time"
+msgstr ""
+
+msgid "Please enter reason with at least 10 characters"
+msgstr ""
+
+msgid "Please enter reason..."
+msgstr ""
+
+msgid "Please enter rejection reason..."
+msgstr ""
+
+msgid "Please enter the 4-digit code."
+msgstr ""
+
+msgid "Please enter the complete 4-digit code."
+msgstr ""
+
+msgid ""
+"Please enter the verification code sent to your mobile number to continue."
+msgstr ""
+
+msgid "Please fill all required fields."
+msgstr ""
+
+msgid "Please fill out all required fields."
+msgstr ""
+
+msgid "Please log in to start your inquiry."
+msgstr ""
+
+msgid "Please log in to your account."
+msgstr ""
+
+msgid "Please refresh the page."
+msgstr ""
+
+msgid "Please select a car first."
+msgstr ""
+
+msgid "Please select a car."
+msgstr ""
+
+msgid "Please send the additional documents requested."
+msgstr ""
+
+#, php-format
+msgid "Please wait %d seconds."
+msgstr ""
+
+msgid "Plugin Settings"
+msgstr ""
+
+msgid "Popular Products"
+msgstr ""
+
+msgid "Post-Approval Message"
+msgstr ""
+
+msgid "Predefined Rejection Reasons"
+msgstr ""
+
+msgid "Previous"
+msgstr ""
+
+msgid "Price"
+msgstr ""
+
+msgid "Price Disclaimer"
+msgstr ""
+
+msgid "Price Display Settings"
+msgstr ""
+
+msgid "Private"
+msgstr ""
+
+msgid "Proceed to Payment"
+msgstr ""
+
+msgid "Product"
+msgstr ""
+
+msgid "Product Statistics"
+msgstr ""
+
+msgid "Product created successfully."
+msgstr ""
+
+msgid "Product name is required."
+msgstr ""
+
+msgid "Product not found."
+msgstr ""
+
+msgid "Product updated successfully."
+msgstr ""
+
+msgid "Profile Picture"
+msgstr ""
+
+msgid "Profile Settings"
+msgstr ""
+
+msgid "Profile image deleted successfully."
+msgstr ""
+
+msgid "Profile image uploaded successfully."
+msgstr ""
+
+msgid "Profile updated successfully."
+msgstr ""
+
+msgid "Push Notifications"
+msgstr ""
+
+msgid "Reason for Rejection:"
+msgstr ""
+
+msgid "Reason:"
+msgstr ""
+
+msgid "Recent Inquiries"
+msgstr ""
+
+msgid "Red"
+msgstr ""
+
+msgid "Referred"
+msgstr ""
+
+msgid "Referred to Expert"
+msgstr ""
+
+msgid "Registered Inquiries"
+msgstr ""
+
+msgid "Registered Inquiries:"
+msgstr ""
+
+msgid "Registration Date"
+msgstr ""
+
+msgid "Registration Date:"
+msgstr ""
+
+msgid "Reject"
+msgstr ""
+
+msgid "Reject Inquiry"
+msgstr ""
+
+msgid "Rejected"
+msgstr ""
+
+msgid "Rejection Reason"
+msgstr ""
+
+msgid "Rejection Reason:"
+msgstr ""
+
+msgid "Rejection reason is required."
+msgstr ""
+
+msgid "Remember password?"
+msgstr ""
+
+msgid "Rented"
+msgstr ""
+
+msgid "Repayment Period (Months)"
+msgstr ""
+
+msgid "Repayment Period:"
+msgstr ""
+
+msgid "Reports"
+msgstr ""
+
+msgid "Reports and Statistics"
+msgstr ""
+
+msgid "Request Created"
+msgstr ""
+
+msgid "Request Down Payment"
+msgstr ""
+
+msgid "Request Information"
+msgstr ""
+
+msgid "Request Journey"
+msgstr ""
+
+msgid "Request More Documents"
+msgstr ""
+
+msgid "Request Status Management"
+msgstr ""
+
+msgid "Request Summary"
+msgstr ""
+
+msgid "Request deleted successfully."
+msgstr ""
+
+msgid "Request finalized successfully."
+msgstr ""
+
+#, php-format
+msgid "Request successfully assigned to %s."
+msgstr ""
+
+msgid "Request updated successfully."
+msgstr ""
+
+msgid "Requested Color"
+msgstr ""
+
+msgid "Require Personal Details"
+msgstr ""
+
+msgid "Required Conditions"
+msgstr ""
+
+msgid "Requires urgent action"
+msgstr ""
+
+msgid "Resend"
+msgstr ""
+
+msgid "Resend Delay (seconds)"
+msgstr ""
+
+msgid "Resend code"
+msgstr ""
+
+#, php-format
+msgid "Resend in %s seconds"
+msgstr ""
+
+msgid "Reserved"
+msgstr ""
+
+msgid "Reset Changes"
+msgstr ""
+
+msgid "Residency Status"
+msgstr ""
+
+msgid "Residency Status:"
+msgstr ""
+
+msgid "Retry Finotex Inquiry"
+msgstr ""
+
+msgid "Retry and Correct Information"
+msgstr ""
+
+msgid "Revenue Comparison:"
+msgstr ""
+
+msgid "Role"
+msgstr ""
+
+msgid "Role:"
+msgstr ""
+
+msgid "SMS"
+msgstr ""
+
+msgid "SMS Notifications"
+msgstr ""
+
+msgid "SMS Pattern Codes (Body ID) - General & Installment"
+msgstr ""
+
+msgid "SMS Pattern Codes - Cash Request"
+msgstr ""
+
+msgid "SMS messages sent to user mobile phone."
+msgstr ""
+
+msgid ""
+"SMS settings are not configured. Please go to Settings and enter your SMS "
+"panel information."
+msgstr ""
+
+msgid "Sadad (Melli Bank) Settings"
+msgstr ""
+
+msgid "Sadad Encryption Key"
+msgstr ""
+
+#, php-format
+msgid "Sadad Gateway Error: %s"
+msgstr ""
+
+msgid ""
+"Sadad payment gateway information is incomplete (missing IDs or Sadad "
+"Encryption Key)."
+msgstr ""
+
+msgid "Sales Status"
+msgstr ""
+
+msgid "Saturday"
+msgstr ""
+
+msgid "Save Changes"
+msgstr ""
+
+msgid "Save Meeting Time and Update Status"
+msgstr ""
+
+msgid "Save Note"
+msgstr ""
+
+msgid "Save Password"
+msgstr ""
+
+msgid "Saved"
+msgstr ""
+
+msgid "Saving..."
+msgstr ""
+
+msgid "Sayad Cheque Status:"
+msgstr ""
+
+msgid "Schedule"
+msgstr ""
+
+msgid "Schedule Follow-up"
+msgstr ""
+
+msgid "Schedule Meeting"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Search by car name..."
+msgstr ""
+
+msgid "Search by customer name, car name or mobile number..."
+msgstr ""
+
+msgid "Search by customer name, car name, national ID or mobile..."
+msgstr ""
+
+msgid "Search by name, email, mobile, or national ID..."
+msgstr ""
+
+msgid "Search car name..."
+msgstr ""
+
+msgid "Search for a Car"
+msgstr ""
+
+msgid "Search for a car name..."
+msgstr ""
+
+msgid "Search..."
+msgstr ""
+
+msgid "Searching..."
+msgstr ""
+
+msgid "Search…"
+msgstr ""
+
+msgid "Security"
+msgstr ""
+
+msgid "Security Settings:"
+msgstr ""
+
+msgid "Security check failed!"
+msgstr ""
+
+msgid "Security check failed. Order ID mismatch."
+msgstr ""
+
+msgid "Security check failed. Please refresh the page and try again."
+msgstr ""
+
+msgid "Security check failed. Transaction user mismatch."
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "Select Car"
+msgstr ""
+
+msgid "Select Car and Conditions"
+msgstr ""
+
+msgid "Select Date"
+msgstr ""
+
+msgid "Select Date:"
+msgstr ""
+
+msgid "Select Status:"
+msgstr ""
+
+msgid "Select Time:"
+msgstr ""
+
+msgid "Select birth date"
+msgstr ""
+
+msgid "Select login method"
+msgstr ""
+
+msgid "Selected Car"
+msgstr ""
+
+msgid "Selected Car:"
+msgstr ""
+
+msgid "Selected product is invalid."
+msgstr ""
+
+msgid "Selected slot is no longer available."
+msgstr ""
+
+msgid "Self Employed"
+msgstr ""
+
+msgid "Self-Employed"
+msgstr ""
+
+msgid "Send Code"
+msgstr ""
+
+msgid "Send Down Payment Request to Customer"
+msgstr ""
+
+msgid "Send code"
+msgstr ""
+
+msgid "Sending code..."
+msgstr ""
+
+msgid "Sending information..."
+msgstr ""
+
+msgid "Sending..."
+msgstr ""
+
+msgid ""
+"Sent to customer after down payment is set. Variables: 1. Customer Name 2. "
+"Car Name 3. Down Payment Amount"
+msgstr ""
+
+msgid ""
+"Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. "
+"Rejection Reason"
+msgstr ""
+
+msgid ""
+"Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer "
+"Mobile 4. Car Name"
+msgstr ""
+
+msgid "Server error (500). Please contact the administrator."
+msgstr ""
+
+msgid "Server error. Please try again."
+msgstr ""
+
+msgid "Server error:"
+msgstr ""
+
+msgid "Set Down Payment Amount"
+msgstr ""
+
+msgid "Set Tracking Status"
+msgstr ""
+
+msgid "Settings saved successfully."
+msgstr ""
+
+msgid "Setup Verification"
+msgstr ""
+
+msgid "Shahrivar"
+msgstr ""
+
+msgid "Slot Duration (minutes)"
+msgstr ""
+
+msgid "Sort:"
+msgstr ""
+
+msgid "Special Sale"
+msgstr ""
+
+msgid "Specifications"
+msgstr ""
+
+msgid "Staff"
+msgstr ""
+
+msgid "Start Follow-up"
+msgstr ""
+
+msgid "Start Progress"
+msgstr ""
+
+msgid "Start typing the car name to search (at least 2 characters)"
+msgstr ""
+
+msgid "Start typing to search for a car... (minimum 2 characters)"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Status Explanation:"
+msgstr ""
+
+msgid "Status changed successfully."
+msgstr ""
+
+msgid "Status updated successfully"
+msgstr ""
+
+msgid "Status will change to \"In Progress\""
+msgstr ""
+
+msgid "Status:"
+msgstr ""
+
+msgid "Statuses (one per line: key|label|#color)"
+msgstr ""
+
+#, php-format
+msgid "Step %s"
+msgstr ""
+
+msgid "Step 1: Select a Car"
+msgstr ""
+
+msgid "Step 3: Payment of Inquiry Fee"
+msgstr ""
+
+msgid "Step 4: Pending Review"
+msgstr ""
+
+msgid "Step 5: Final Result"
+msgstr ""
+
+msgid "Submit Inquiry and Create User"
+msgstr ""
+
+msgid "Submit Installment Inquiry"
+msgstr ""
+
+msgid "Submit Price Inquiry Request"
+msgstr ""
+
+msgid "Submit Rejection"
+msgstr ""
+
+msgid "Subscriber"
+msgstr ""
+
+msgid "Success"
+msgstr ""
+
+msgid "Success!"
+msgstr ""
+
+msgid "Sunday"
+msgstr ""
+
+msgid "Supplementary Information"
+msgstr ""
+
+msgid "Tenant"
+msgstr ""
+
+msgid "Terminal ID"
+msgstr ""
+
+msgid "Thank You for Your Patience"
+msgstr ""
+
+msgid "Thank you for your patience."
+msgstr ""
+
+msgid ""
+"The announced prices are approximate. The final price of the car will be "
+"determined based on the daily market rate at the time of down payment."
+msgstr ""
+
+msgid ""
+"The announced prices are approximate. The final price will be determined "
+"based on the daily market rate at the time of down payment."
+msgstr ""
+
+msgid "The buyer and check issuer are the same person."
+msgstr ""
+
+msgid "The check issuer is another person."
+msgstr ""
+
+msgid "The cheque issuer is another person."
+msgstr ""
+
+msgid ""
+"The encryption key (TDes key) provided by Sadad. Stored securely encrypted."
+msgstr ""
+
+msgid "The fastest way to buy a car with cash"
+msgstr ""
+
+msgid ""
+"The inquiry fee is free for you. Please click the button below to continue."
+msgstr ""
+
+msgid ""
+"The inquiry fee is waived for you. Please click the button below to continue."
+msgstr ""
+
+msgid "The inquiry will be made for the car below and cannot be changed."
+msgstr ""
+
+msgid "The inquiry will be performed for the car below and cannot be changed."
+msgstr ""
+
+msgid ""
+"The listed price is approximate. Due to market fluctuations, the final price "
+"will be determined upon down payment."
+msgstr ""
+
+msgid ""
+"The new user will be created with the default \"Customer\" role. The "
+"username and email will be automatically generated based on the mobile "
+"number."
+msgstr ""
+
+msgid "The selected expert is not valid."
+msgstr ""
+
+msgid ""
+"The system automatically identifies all users with the <strong>\"Maneli "
+"Expert\"</strong> role. Requests are assigned to them in a round-robin "
+"fashion.<br>To add a new expert, simply create a new user from the "
+"<strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and "
+"enter their mobile number in their profile."
+msgstr ""
+
+msgid "This Week"
+msgstr ""
+
+msgid "This car is currently unavailable for purchase."
+msgstr ""
+
+msgid ""
+"This extra step helps ensure the person trying to change account details is "
+"the real owner."
+msgstr ""
+
+msgid ""
+"This helps protect account from unauthorized access, even if password is "
+"compromised."
+msgstr ""
+
+msgid "This time slot is already booked. Please choose another time."
+msgstr ""
+
+msgid "Thursday"
+msgstr ""
+
+msgid "Time:"
+msgstr ""
+
+msgid "Tir"
+msgstr ""
+
+msgid ""
+"To begin the inquiry process, please first select your desired car from one "
+"of the product pages and click the \"Bank Credit Check\" button."
+msgstr ""
+
+#, php-format
+msgid ""
+"To finalize your request and send it to our experts, please pay the inquiry "
+"fee of %s Toman."
+msgstr ""
+
+msgid "To purchase a car with cash, create your first inquiry."
+msgstr ""
+
+msgid "To purchase a car with installments, use the loan calculator."
+msgstr ""
+
+msgid ""
+"To start the inquiry process, please first select your desired car from the "
+"products page and click on the \"Bank Credit Inquiry\" button."
+msgstr ""
+
+msgid "To submit a cash purchase request, please log in to your account first."
+msgstr ""
+
+msgid "Today"
+msgstr ""
+
+msgid "Today Follow-ups"
+msgstr ""
+
+msgid "Today Inquiries"
+msgstr ""
+
+msgid "Today's Follow-ups"
+msgstr ""
+
+msgid "Today's Meetings"
+msgstr ""
+
+msgid "Today's Task List"
+msgstr ""
+
+msgid "Toman"
+msgstr ""
+
+msgid "Too many login attempts. Please try again in 5 minutes."
+msgstr ""
+
+msgid "Total"
+msgstr ""
+
+msgid "Total Customers"
+msgstr ""
+
+msgid "Total Experts"
+msgstr ""
+
+msgid "Total Inquiries"
+msgstr ""
+
+msgid "Total Inquiries Submitted"
+msgstr ""
+
+msgid "Total Loan Amount"
+msgstr ""
+
+msgid "Total Meetings"
+msgstr ""
+
+msgid "Total Price"
+msgstr ""
+
+msgid "Total Price:"
+msgstr ""
+
+msgid "Total Products"
+msgstr ""
+
+msgid "Total Profit"
+msgstr ""
+
+msgid "Total Repayment Amount"
+msgstr ""
+
+msgid "Total Revenue"
+msgstr ""
+
+msgid "Total Users"
+msgstr ""
+
+msgid "Total:"
+msgstr ""
+
+#, php-format
+msgid "Tracking status updated to: %s"
+msgstr ""
+
+msgid "Transaction details mismatch."
+msgstr ""
+
+msgid "Transaction failed at the final verification step."
+msgstr ""
+
+msgid "Transaction not confirmed by gateway."
+msgstr ""
+
+msgid "Transaction was canceled by the bank."
+msgstr ""
+
+msgid "Tuesday"
+msgstr ""
+
+msgid ""
+"Two to four bounced cheques or a maximum of 200 million Rials in returned "
+"commitments."
+msgstr ""
+
+msgid "Two-step Verification"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Typically within 24 hours."
+msgstr ""
+
+msgid "Unauthorized access (403). Please refresh the page and log in again."
+msgstr ""
+
+msgid "Unauthorized access."
+msgstr ""
+
+msgid "Unavailable"
+msgstr ""
+
+msgid "Undetermined"
+msgstr ""
+
+msgid "Unfortunately all time slots are full today. Please choose another day."
+msgstr ""
+
+msgid ""
+"Unfortunately, an error occurred while attempting to retrieve your inquiry "
+"from the banking system. This issue could be due to incorrect identity "
+"information or temporary system problems."
+msgstr ""
+
+msgid "Unfortunately, your request has been rejected."
+msgstr ""
+
+msgid ""
+"Unfortunately, your transaction was unsuccessful. If any amount was "
+"deducted, it will be returned to your account within 72 hours."
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Unknown error"
+msgstr ""
+
+msgid "Unknown error during token generation."
+msgstr ""
+
+msgid "Unknown error."
+msgstr ""
+
+msgid "Updated."
+msgstr ""
+
+msgid "Upload failed."
+msgstr ""
+
+msgid "Upload failed. Please try again."
+msgstr ""
+
+msgid "Uploading..."
+msgstr ""
+
+msgid ""
+"Use JPEG, PNG or GIF formats. Best size: 200x200 pixels. File size less than "
+"2 MB"
+msgstr ""
+
+msgid "Used for SMS notifications and as the username."
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "User Account"
+msgstr ""
+
+msgid "User Account Information"
+msgstr ""
+
+msgid "User Details"
+msgstr ""
+
+msgid "User ID not specified."
+msgstr ""
+
+msgid "User Management"
+msgstr ""
+
+msgid "User Role:"
+msgstr ""
+
+msgid "User Statistics"
+msgstr ""
+
+msgid "User added successfully."
+msgstr ""
+
+msgid "User deleted successfully."
+msgstr ""
+
+msgid "User is not an expert."
+msgstr ""
+
+msgid "User not found."
+msgstr ""
+
+msgid "User not specified."
+msgstr ""
+
+msgid "User updated successfully."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Username:"
+msgstr ""
+
+msgid ""
+"Users can configure their experience to receive notifications about "
+"important events."
+msgstr ""
+
+msgid "Usually within 24 hours."
+msgstr ""
+
+msgid "Variables: 1. Customer Name 2. Car Name"
+msgstr ""
+
+msgid "Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
+msgstr ""
+
+msgid ""
+"Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
+msgstr ""
+
+msgid "Verification Code"
+msgstr ""
+
+msgid "Verification code"
+msgstr ""
+
+msgid "Verification code sent."
+msgstr ""
+
+msgid "Verification successful. Please create a password."
+msgstr ""
+
+msgid "Verify"
+msgstr ""
+
+msgid "Verify Code - Maneli Car Inquiry"
+msgstr ""
+
+msgid "Verify and Continue"
+msgstr ""
+
+msgid "Verifying..."
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "View & Action"
+msgstr ""
+
+msgid "View All"
+msgstr ""
+
+msgid "View All My Inquiries"
+msgstr ""
+
+msgid "View Cash Inquiries"
+msgstr ""
+
+msgid "View Details"
+msgstr ""
+
+msgid "View Full Cars List"
+msgstr ""
+
+msgid "View Inquiries List"
+msgstr ""
+
+msgid "View Installment Inquiries"
+msgstr ""
+
+msgid "View Reports"
+msgstr ""
+
+msgid "Waiting Review Message"
+msgstr ""
+
+msgid "Wednesday"
+msgstr ""
+
+msgid "Weekly"
+msgstr ""
+
+msgid ""
+"Welcome to the management dashboard. Please log in to manage inquiries and "
+"monitor activities."
+msgstr ""
+
+msgid "Welcome!"
+msgstr ""
+
+#, php-format
+msgid "Welcome, %s"
+msgstr ""
+
+msgid "White"
+msgstr ""
+
+msgid "Workday End (HH:MM)"
+msgstr ""
+
+msgid "Workday Start (HH:MM)"
+msgstr ""
+
+msgid "Workplace Status"
+msgstr ""
+
+msgid "Workplace Status:"
+msgstr ""
+
+msgid "Yellow"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "Yes, Approve"
+msgstr ""
+
+msgid "Yes, Send"
+msgstr ""
+
+msgid "Yes, delete it!"
+msgstr ""
+
+msgid "You can create your first inquiry"
+msgstr ""
+
+msgid "You can edit your information and try again."
+msgstr ""
+
+msgid "You cannot change your own administrative role to a lower-level role."
+msgstr ""
+
+msgid "You cannot delete your own account."
+msgstr ""
+
+msgid "You do not have access to this page."
+msgstr ""
+
+msgid "You do not have permission to access this page."
+msgstr ""
+
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+msgid "You do not have permission to view this report."
+msgstr ""
+
+msgid "You do not have sufficient permissions to perform this action."
+msgstr ""
+
+msgid ""
+"You have cancelled the payment. Your request has not been finalized yet."
+msgstr ""
+
+msgid "You must be logged in to submit a request."
+msgstr ""
+
+msgid "You want to delete your profile image?"
+msgstr ""
+
+msgid "Your Recent Inquiries"
+msgstr ""
+
+msgid "Your Request Summary"
+msgstr ""
+
+msgid "Your Selected Car"
+msgstr ""
+
+msgid ""
+"Your cash request has been successfully submitted. An expert will contact "
+"you soon."
+msgstr ""
+
+msgid ""
+"Your documents have been approved. Our team will contact you shortly for "
+"next steps."
+msgstr ""
+
+msgid ""
+"Your payment was successful. Your request has been submitted to our experts."
+msgstr ""
+
+msgid ""
+"Your request has been approved by our experts and referred to the sales "
+"department. One of our colleagues will contact you soon for final "
+"coordination."
+msgstr ""
+
+msgid ""
+"Your request has been approved by our experts and referred to the sales "
+"unit. One of our colleagues will contact you soon for final coordination."
+msgstr ""
+
+msgid "Your request has been completed successfully"
+msgstr ""
+
+msgid ""
+"Your request has been registered. The result will be announced within the "
+"next 24 hours."
+msgstr ""
+
+msgid ""
+"Your request has been submitted. The result will be announced within the "
+"next 24 hours."
+msgstr ""
+
+msgid "Your request has been successfully submitted. We will contact you soon."
+msgstr ""
+
+msgid "Your request is under review. Please wait."
+msgstr ""
+
+#, php-format
+msgid "Your verification code: %s"
+msgstr ""
+
+msgid "Zarinpal Merchant ID is not configured."
+msgstr ""
+
+msgid "Zarinpal Settings"
+msgstr ""
+
+msgid "e.g., 09123456789"
+msgstr ""
+
+msgid "e.g., 09129876543"
+msgstr ""
+
+msgid "e.g., 1365/04/15"
+msgstr ""
+
+msgid "inquiries"
+msgstr ""
+
+msgid "items"
+msgstr ""
+
+msgid "« Previous"
+msgstr ""
+
+msgid "آزاد"
+msgstr ""
+
+msgid "تایید شده"
+msgstr ""
+
+msgid "تخصیص"
+msgstr ""
+
+msgid "تکمیل شده"
+msgstr ""
+
+msgid "در انتظار"
+msgstr ""
+
+msgid "رد شد"
+msgstr ""
+
+msgid "محصولی یافت نشد."
+msgstr ""
+
+msgid "ناموجود"
+msgstr ""
+
+msgid "کارمند"
+msgstr ""
+
+msgid "کل درخواست‌های اقساطی"
+msgstr ""
+
+msgid "کل درخواست‌های نقدی"
+msgstr ""

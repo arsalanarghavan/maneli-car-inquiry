@@ -23,8 +23,8 @@ class Maneli_Reports_Page {
     public function add_menu_page() {
         add_submenu_page(
             'edit.php?post_type=cash_inquiry',
-            'گزارشات و آمار',
-            '📊 گزارشات',
+            esc_html__('Reports and Statistics', 'maneli-car-inquiry'),
+            '📊 ' . esc_html__('Reports', 'maneli-car-inquiry'),
             'manage_options',
             'maneli-reports',
             [$this, 'render_page']
@@ -47,14 +47,26 @@ class Maneli_Reports_Page {
             '1.0.0'
         );
         
-        // Chart.js برای نمودارها
-        wp_enqueue_script(
-            'chartjs',
-            'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
-            [],
-            '4.4.0',
-            true
-        );
+        // Chart.js برای نمودارها - Use local version if available
+        $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
+        if (file_exists($chartjs_path)) {
+            wp_enqueue_script(
+                'chartjs',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js',
+                [],
+                '4.4.0',
+                true
+            );
+        } else {
+            // Fallback to CDN
+            wp_enqueue_script(
+                'chartjs',
+                'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+                [],
+                '4.4.0',
+                true
+            );
+        }
         
         // اسکریپت اصلی
         wp_enqueue_script(
@@ -70,12 +82,12 @@ class Maneli_Reports_Page {
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('maneli_reports_nonce'),
             'labels' => [
-                'pending' => 'در انتظار',
-                'approved' => 'تایید شده',
-                'rejected' => 'رد شده',
-                'following' => 'در حال پیگیری',
-                'cash' => 'نقدی',
-                'installment' => 'اقساطی',
+                'pending' => esc_html__('Pending Review', 'maneli-car-inquiry'),
+                'approved' => esc_html__('Approved and Referred', 'maneli-car-inquiry'),
+                'rejected' => esc_html__('Rejected', 'maneli-car-inquiry'),
+                'following' => esc_html__('Follow-up in Progress', 'maneli-car-inquiry'),
+                'cash' => esc_html__('Cash', 'maneli-car-inquiry'),
+                'installment' => esc_html__('Installment', 'maneli-car-inquiry'),
             ]
         ]);
     }
@@ -86,7 +98,7 @@ class Maneli_Reports_Page {
     public function render_page() {
         // بررسی دسترسی
         if (!current_user_can('manage_options')) {
-            wp_die('شما دسترسی به این بخش ندارید.');
+            wp_die(esc_html__('You do not have permission to access this page.', 'maneli-car-inquiry'));
         }
         
         ?>
@@ -99,31 +111,31 @@ class Maneli_Reports_Page {
             <!-- فیلترهای بالای صفحه -->
             <div class="maneli-reports-filters">
                 <div class="filter-group">
-                    <label>بازه زمانی:</label>
+                    <label><?php esc_html_e('Time Period:', 'maneli-car-inquiry'); ?></label>
                     <select id="date-range-preset">
-                        <option value="today">امروز</option>
-                        <option value="yesterday">دیروز</option>
-                        <option value="week">هفته گذشته</option>
-                        <option value="month" selected>ماه گذشته</option>
-                        <option value="3months">3 ماه گذشته</option>
-                        <option value="6months">6 ماه گذشته</option>
-                        <option value="year">سال گذشته</option>
-                        <option value="custom">سفارشی</option>
+                        <option value="today"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
+                        <option value="yesterday"><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
+                        <option value="week"><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
+                        <option value="month" selected><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
+                        <option value="3months"><?php esc_html_e('Last 3 Months', 'maneli-car-inquiry'); ?></option>
+                        <option value="6months"><?php esc_html_e('Last 6 Months', 'maneli-car-inquiry'); ?></option>
+                        <option value="year"><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
+                        <option value="custom"><?php esc_html_e('Custom Range', 'maneli-car-inquiry'); ?></option>
                     </select>
                 </div>
                 
                 <div class="filter-group custom-date-range" style="display: none;">
-                    <label>از تاریخ:</label>
+                    <label><?php esc_html_e('From Date:', 'maneli-car-inquiry'); ?></label>
                     <input type="date" id="start-date" value="<?php echo date('Y-m-d', strtotime('-30 days')); ?>">
                     
-                    <label>تا تاریخ:</label>
+                    <label><?php esc_html_e('To Date:', 'maneli-car-inquiry'); ?></label>
                     <input type="date" id="end-date" value="<?php echo date('Y-m-d'); ?>">
                 </div>
                 
                 <div class="filter-group">
-                    <label>کارشناس:</label>
+                    <label><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
                     <select id="expert-filter">
-                        <option value="">همه کارشناسان</option>
+                        <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
                         <?php
                         $experts = get_users(['role__in' => ['expert', 'administrator']]);
                         foreach ($experts as $expert) {
@@ -146,10 +158,10 @@ class Maneli_Reports_Page {
             
             <!-- تب‌های نمایش -->
             <div class="maneli-reports-tabs">
-                <a href="#tab-overview" class="tab-link active">نمای کلی</a>
-                <a href="#tab-experts" class="tab-link">گزارش کارشناسان</a>
-                <a href="#tab-details" class="tab-link">جزئیات استعلام‌ها</a>
-                <a href="#tab-charts" class="tab-link">نمودارها</a>
+                <a href="#tab-overview" class="tab-link active"><?php esc_html_e('Overview', 'maneli-car-inquiry'); ?></a>
+                <a href="#tab-experts" class="tab-link"><?php esc_html_e('Expert Reports', 'maneli-car-inquiry'); ?></a>
+                <a href="#tab-details" class="tab-link"><?php esc_html_e('Inquiry Details', 'maneli-car-inquiry'); ?></a>
+                <a href="#tab-charts" class="tab-link"><?php esc_html_e('Charts', 'maneli-car-inquiry'); ?></a>
             </div>
             
             <!-- محتوای تب نمای کلی -->
@@ -244,9 +256,9 @@ class Maneli_Reports_Page {
                             <span class="dashicons dashicons-cart"></span>
                         </div>
                         <div class="stat-info">
-                            <h3>درآمد</h3>
+                            <h3><?php esc_html_e('Revenue', 'maneli-car-inquiry'); ?></h3>
                             <div class="stat-value" data-stat="revenue">-</div>
-                            <small>تومان</small>
+                            <small><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></small>
                         </div>
                     </div>
                 </div>
@@ -278,22 +290,22 @@ class Maneli_Reports_Page {
             <div id="tab-details" class="tab-content">
                 <div class="details-filters">
                     <select id="details-type">
-                        <option value="all">همه انواع</option>
-                        <option value="cash">نقدی</option>
-                        <option value="installment">اقساطی</option>
+                        <option value="all"><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
+                        <option value="cash"><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></option>
+                        <option value="installment"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></option>
                     </select>
                     
                     <select id="details-status">
-                        <option value="">همه وضعیت‌ها</option>
-                        <option value="pending">در انتظار</option>
-                        <option value="approved">تایید شده</option>
-                        <option value="rejected">رد شده</option>
-                        <option value="following">در حال پیگیری</option>
+                        <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
+                        <option value="pending"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></option>
+                        <option value="approved"><?php esc_html_e('Approved', 'maneli-car-inquiry'); ?></option>
+                        <option value="rejected"><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></option>
+                        <option value="following"><?php esc_html_e('In Progress', 'maneli-car-inquiry'); ?></option>
                     </select>
                     
                     <button type="button" id="export-csv" class="button">
                         <span class="dashicons dashicons-download"></span>
-                        دانلود CSV
+                        <?php esc_html_e('Download CSV', 'maneli-car-inquiry'); ?>
                     </button>
                 </div>
                 
@@ -302,9 +314,9 @@ class Maneli_Reports_Page {
                 </div>
                 
                 <div class="table-pagination">
-                    <button id="prev-page" class="button" disabled>قبلی</button>
-                    <span id="page-info">صفحه 1 از 1</span>
-                    <button id="next-page" class="button" disabled>بعدی</button>
+                    <button id="prev-page" class="button" disabled><?php esc_html_e('Previous', 'maneli-car-inquiry'); ?></button>
+                    <span id="page-info"><?php printf(esc_html__('Page %1$s of %2$s', 'maneli-car-inquiry'), '1', '1'); ?></span>
+                    <button id="next-page" class="button" disabled><?php esc_html_e('Next', 'maneli-car-inquiry'); ?></button>
                 </div>
             </div>
             

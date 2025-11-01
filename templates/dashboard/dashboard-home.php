@@ -1,8 +1,10 @@
 <!-- Start::row-1 -->
 <?php
 /**
- * Dashboard Home - Real Data Implementation
- * Different views for Admin, Expert, and Customer
+ * Premium Dashboard Home - Advanced Implementation
+ * Premium Dashboard for Admin, Expert, and Customer
+ * 
+ * @package Maneli_Car_Inquiry
  */
 
 $current_user = wp_get_current_user();
@@ -16,6 +18,7 @@ require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-reports-dashboard.php'
 // Date range (last 30 days)
 $start_date = date('Y-m-d', strtotime('-30 days'));
 $end_date = date('Y-m-d');
+
 
 if ($is_customer) {
     // ════════════════════════════════════════════════════════════
@@ -72,180 +75,216 @@ if ($is_customer) {
     $recent_inquiries = array_slice($all_recent, 0, 5);
     ?>
     
+    <!-- Start::page-header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item">
+                        <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Home', 'maneli-car-inquiry'); ?></li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0"><?php echo esc_html(sprintf(__('Welcome, %s', 'maneli-car-inquiry'), $current_user->display_name)); ?></h1>
+        </div>
+    </div>
+    <!-- End::page-header -->
+    
+    <!-- Start::row-1 - Statistics Cards -->
+    <div class="row">
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card custom-card crm-card overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-pill">
+                            <span class="avatar avatar-md avatar-rounded bg-primary svg-white">
+                                <i class="la la-list-alt fs-20"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_count); ?></h4>
+                        <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo maneli_number_format_persian(count($cash_inquiries)); ?> <?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card custom-card crm-card overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-circle">
+                            <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
+                                <i class="la la-clock fs-20"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></p>
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo maneli_number_format_persian($pending_count); ?></h4>
+                        <span class="text-warning badge bg-warning-transparent rounded-pill d-flex align-items-center fs-11">
+                            <i class="la la-hourglass-half fs-11"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card custom-card crm-card overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-circle">
+                            <span class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                <i class="la la-check-circle fs-20"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Approved', 'maneli-car-inquiry'); ?></p>
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h4 class="mb-0 d-flex align-items-center text-success"><?php echo maneli_number_format_persian($approved_count); ?></h4>
+                        <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
+                            <i class="la la-check-double fs-11"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card custom-card crm-card overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="p-2 border border-danger border-opacity-10 bg-danger-transparent rounded-circle">
+                            <span class="avatar avatar-md avatar-rounded bg-danger svg-white">
+                                <i class="la la-times-circle fs-20"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></p>
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo maneli_number_format_persian($rejected_count); ?></h4>
+                        <span class="text-danger badge bg-danger-transparent rounded-pill d-flex align-items-center fs-11">
+                            <i class="la la-ban fs-11"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xl">
+            <div class="card custom-card crm-card overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-circle">
+                            <span class="avatar avatar-md avatar-rounded bg-info svg-white">
+                                <i class="la la-credit-card fs-20"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></p>
+                    <div class="d-flex align-items-center justify-content-between mt-1">
+                        <h4 class="mb-0 d-flex align-items-center text-info"><?php echo maneli_number_format_persian(count($installment_inquiries)); ?></h4>
+                        <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $total_count > 0 ? maneli_number_format_persian(round((count($installment_inquiries) / $total_count) * 100), 1) : '۰'; ?>%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-1 -->
+            
+    <!-- Start::row-2 - Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-xl-6 col-lg-12">
+            <div class="card custom-card overflow-hidden border-success">
+                <div class="card-body bg-success-transparent">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-fill">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="avatar avatar-md avatar-rounded bg-success me-3">
+                                    <i class="la la-dollar-sign fs-24 text-white"></i>
+                                </span>
+                                <div>
+                                    <h5 class="mb-1 fw-semibold"><?php esc_html_e('Cash Car Purchase', 'maneli-car-inquiry'); ?></h5>
+                                    <p class="text-muted mb-0 fs-12"><?php esc_html_e('The fastest way to buy a car with cash', 'maneli-car-inquiry'); ?></p>
+                                </div>
+                            </div>
+                            <a href="<?php echo esc_url(home_url('/dashboard/new-cash-inquiry')); ?>" class="btn btn-success btn-wave btn-sm mt-2">
+                                <i class="la la-plus-circle me-1"></i>
+                                <?php esc_html_e('Create New Cash Request', 'maneli-car-inquiry'); ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-lg-12">
+            <div class="card custom-card overflow-hidden border-info">
+                <div class="card-body bg-info-transparent">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-fill">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="avatar avatar-md avatar-rounded bg-info me-3">
+                                    <i class="la la-credit-card fs-24 text-white"></i>
+                                </span>
+                                <div>
+                                    <h5 class="mb-1 fw-semibold"><?php esc_html_e('Installment Car Purchase', 'maneli-car-inquiry'); ?></h5>
+                                    <p class="text-muted mb-0 fs-12"><?php esc_html_e('Buy your dream car with easy installments', 'maneli-car-inquiry'); ?></p>
+                                </div>
+                            </div>
+                            <a href="<?php echo esc_url(home_url('/dashboard/new-inquiry')); ?>" class="btn btn-info btn-wave btn-sm mt-2">
+                                <i class="la la-plus-circle me-1"></i>
+                                <?php esc_html_e('Create New Installment Request', 'maneli-car-inquiry'); ?>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End::row-2 -->
+    
+    <!-- Start::row-3 - Recent Inquiries -->
     <div class="row">
         <div class="col-xl-12">
-            <!-- Welcome Card -->
-            <div class="card custom-card bg-primary-gradient text-white mb-4">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h4 class="text-white mb-2">سلام، <?php echo esc_html($current_user->display_name); ?> عزیز!</h4>
-                            <p class="text-white-50 mb-0">به پنل کاربری مانلی خودرو خوش آمدید</p>
-                        </div>
-                        <div>
-                            <i class="la la-user-circle" style="font-size: 80px; opacity: 0.3;"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Statistics -->
-            <div class="row mb-4">
-                <div class="col-xl-3 col-lg-6">
-                    <div class="card custom-card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3">
-                                    <span class="avatar avatar-md bg-primary-transparent">
-                                        <i class="la la-list-alt fs-24"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-fill">
-                                    <div class="mb-1">
-                                        <span class="text-muted fs-13">کل استعلامات</span>
-                                    </div>
-                                    <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($total_count); ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6">
-                    <div class="card custom-card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3">
-                                    <span class="avatar avatar-md bg-warning-transparent">
-                                        <i class="la la-clock fs-24"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-fill">
-                                    <div class="mb-1">
-                                        <span class="text-muted fs-13">در انتظار</span>
-                                    </div>
-                                    <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($pending_count); ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6">
-                    <div class="card custom-card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3">
-                                    <span class="avatar avatar-md bg-success-transparent">
-                                        <i class="la la-check-circle fs-24"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-fill">
-                                    <div class="mb-1">
-                                        <span class="text-muted fs-13">تایید شده</span>
-                                    </div>
-                                    <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($approved_count); ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-lg-6">
-                    <div class="card custom-card">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="me-3">
-                                    <span class="avatar avatar-md bg-danger-transparent">
-                                        <i class="la la-times-circle fs-24"></i>
-                                    </span>
-                                </div>
-                                <div class="flex-fill">
-                                    <div class="mb-1">
-                                        <span class="text-muted fs-13">رد شده</span>
-                                    </div>
-                                    <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($rejected_count); ?></h4>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Quick Actions -->
-            <div class="row mb-4">
-                <div class="col-xl-6">
-                    <div class="card custom-card bg-success-gradient text-white">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <h5 class="text-white mb-2">
-                                        <i class="la la-dollar-sign me-2"></i>
-                                        خرید نقدی خودرو
-                                    </h5>
-                                    <p class="text-white-50 mb-3">سریع‌ترین راه برای خرید خودرو نقدی</p>
-                                    <a href="<?php echo home_url('/dashboard/new-cash-inquiry'); ?>" class="btn btn-light btn-sm btn-wave">
-                                        <i class="la la-plus-circle me-1"></i>
-                                        ثبت درخواست نقدی جدید
-                                    </a>
-                                </div>
-                                <div>
-                                    <i class="la la-hand-holding-usd" style="font-size: 60px; opacity: 0.3;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-6">
-                    <div class="card custom-card bg-info-gradient text-white">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <h5 class="text-white mb-2">
-                                        <i class="la la-credit-card me-2"></i>
-                                        خرید اقساطی خودرو
-                                    </h5>
-                                    <p class="text-white-50 mb-3">خودرو رویایی خود را با اقساط راحت بخرید</p>
-                                    <a href="<?php echo home_url('/dashboard/new-inquiry'); ?>" class="btn btn-light btn-sm btn-wave">
-                                        <i class="la la-plus-circle me-1"></i>
-                                        ثبت درخواست اقساطی جدید
-                                    </a>
-                                </div>
-                                <div>
-                                    <i class="la la-calendar-check" style="font-size: 60px; opacity: 0.3;"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Recent Inquiries -->
             <div class="card custom-card">
-                <div class="card-header">
+                <div class="card-header justify-content-between">
                     <div class="card-title">
                         <i class="la la-history me-2"></i>
-                        آخرین استعلامات شما
+                        <?php esc_html_e('Your Recent Inquiries', 'maneli-car-inquiry'); ?>
                     </div>
+                    <?php if (!empty($recent_inquiries)): ?>
+                    <div>
+                        <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="btn btn-sm btn-primary-light">
+                            <?php esc_html_e('View All', 'maneli-car-inquiry'); ?>
+                            <i class="la la-arrow-left ms-1"></i>
+                        </a>
+                    </div>
+                    <?php endif; ?>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <?php if (empty($recent_inquiries)): ?>
                         <div class="text-center py-5">
-                            <i class="la la-inbox" style="font-size: 60px; color: #dee2e6;"></i>
-                            <p class="text-muted mt-3">هنوز استعلامی ثبت نکرده‌اید</p>
-                            <a href="<?php echo home_url('/dashboard/new-inquiry'); ?>" class="btn btn-primary">
+                            <span class="avatar avatar-xl avatar-rounded bg-secondary-transparent mb-3">
+                                <i class="la la-inbox fs-40 text-muted"></i>
+                            </span>
+                            <h6 class="fw-medium mb-2"><?php esc_html_e('No Inquiries Yet', 'maneli-car-inquiry'); ?></h6>
+                            <p class="text-muted mb-4"><?php esc_html_e('You can create your first inquiry', 'maneli-car-inquiry'); ?></p>
+                            <a href="<?php echo esc_url(home_url('/dashboard/new-inquiry')); ?>" class="btn btn-primary btn-wave">
                                 <i class="la la-plus me-1"></i>
-                                ثبت اولین استعلام
+                                <?php esc_html_e('Create First Inquiry', 'maneli-car-inquiry'); ?>
                             </a>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table text-nowrap table-hover mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>شناسه</th>
-                                        <th>نوع</th>
-                                        <th>خودرو</th>
-                                        <th>وضعیت</th>
-                                        <th>تاریخ</th>
-                                        <th>عملیات</th>
+                                        <th scope="col"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Type', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -262,26 +301,26 @@ if ($is_customer) {
                                         // تعریف وضعیت‌های مختلف برای نقدی و اقساطی
                                         if ($is_cash) {
                                             $status_badge = [
-                                                'new' => ['label' => 'جدید', 'class' => 'primary'],
-                                                'pending' => ['label' => 'در انتظار', 'class' => 'warning'],
-                                                'approved' => ['label' => 'تایید شده', 'class' => 'success'],
-                                                'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
-                                                'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                                'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
+                                                'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'primary'],
+                                                'pending' => ['label' => esc_html__('Pending', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                                'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
+                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
                                             ];
                                         } else {
                                             $status_badge = [
-                                                'new' => ['label' => 'جدید', 'class' => 'primary'],
-                                                'referred' => ['label' => 'ارجاع شده', 'class' => 'info'],
-                                                'in_progress' => ['label' => 'در حال پیگیری', 'class' => 'warning'],
-                                                'user_confirmed' => ['label' => 'تایید شده', 'class' => 'success'],
-                                                'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
-                                                'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                                'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
-                                                'follow_up_scheduled' => ['label' => 'پیگیری برنامه‌ریزی', 'class' => 'info'],
+                                                'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'primary'],
+                                                'referred' => ['label' => esc_html__('Referred', 'maneli-car-inquiry'), 'class' => 'info'],
+                                                'in_progress' => ['label' => esc_html__('In Progress', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                                'user_confirmed' => ['label' => esc_html__('Confirmed', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
+                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
+                                                'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
                                             ];
                                         }
-                                        $badge = $status_badge[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
+                                        $badge = $status_badge[$status] ?? ['label' => esc_html__('Unknown', 'maneli-car-inquiry'), 'class' => 'secondary'];
                                         
                                         $timestamp = strtotime($inq->post_date);
                                         if (function_exists('maneli_gregorian_to_jalali')) {
@@ -300,23 +339,25 @@ if ($is_customer) {
                                             : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/inquiries/installment'));
                                     ?>
                                         <tr>
-                                            <td>#<?php echo $inq->ID; ?></td>
+                                            <td><strong>#<?php echo $inq->ID; ?></strong></td>
                                             <td>
                                                 <span class="badge bg-<?php echo $is_cash ? 'warning' : 'info'; ?>-transparent">
-                                                    <?php echo $is_cash ? 'نقدی' : 'اقساطی'; ?>
+                                                    <?php echo $is_cash ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry'); ?>
                                                 </span>
                                             </td>
                                             <td><?php echo esc_html(get_the_title($product_id)); ?></td>
                                             <td>
-                                                <span class="badge bg-<?php echo $badge['class']; ?>">
+                                                <span class="badge bg-<?php echo $badge['class']; ?>-transparent">
                                                     <?php echo $badge['label']; ?>
                                                 </span>
                                             </td>
-                                            <td><?php echo $date; ?></td>
+                                            <td><?php echo maneli_number_format_persian($date); ?></td>
                                             <td>
-                                                <a href="<?php echo esc_url($view_url); ?>" class="btn btn-sm btn-primary-light">
-                                                    <i class="la la-eye"></i> مشاهده
-                                                </a>
+                                                <div class="btn-list">
+                                                    <a href="<?php echo esc_url($view_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                        <i class="la la-eye"></i>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -328,10 +369,11 @@ if ($is_customer) {
             </div>
         </div>
     </div>
+    <!-- End::row-3 -->
     
 <?php } else {
     // ════════════════════════════════════════════════════════════
-    // ADMIN / EXPERT DASHBOARD
+    // PREMIUM ADMIN / EXPERT DASHBOARD
     // ════════════════════════════════════════════════════════════
     
     // Determine expert filter
@@ -340,14 +382,64 @@ if ($is_customer) {
         $expert_id = get_current_user_id();
     }
     
-    // Get statistics
-    $stats = Maneli_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
-    $daily_stats = Maneli_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id, 7); // Last 7 days
+    // Get comprehensive statistics
+    if ($is_admin && !$expert_id) {
+        // Full business statistics for admin
+        $business_stats = Maneli_Reports_Dashboard::get_business_statistics($start_date, $end_date);
+        $stats = $business_stats['overall'] ?? [];
+        $monthly_stats = $business_stats['monthly'] ?? [];
+    } else {
+        // Expert or filtered statistics
+        $stats = Maneli_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
+    }
+    
+    // Get daily statistics for last 7 days specifically
+    $daily_start_date = date('Y-m-d', strtotime('-6 days')); // 7 days including today
+    $daily_end_date = date('Y-m-d');
+    $daily_stats = Maneli_Reports_Dashboard::get_daily_statistics($daily_start_date, $daily_end_date, $expert_id);
+    
+    // Debug: بررسی داده‌ها
+    // error_log('Daily Stats Debug - Start Date: ' . $daily_start_date . ', End Date: ' . $daily_end_date);
+    // error_log('Daily Stats Count: ' . count($daily_stats));
+    // error_log('Daily Stats Data: ' . print_r($daily_stats, true));
     $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
     
     // Get separate statistics for cash and installment inquiries
     $cash_stats = get_separate_cash_statistics($start_date, $end_date, $expert_id);
     $installment_stats = get_separate_installment_statistics($start_date, $end_date, $expert_id);
+    
+    // For experts, get detailed stats
+    $expert_detailed = null;
+    if ($is_expert && $expert_id) {
+        $expert_detailed = Maneli_Reports_Dashboard::get_expert_detailed_statistics($expert_id, $start_date, $end_date);
+    }
+    
+    // Calculate growth percentages
+    $prev_start = date('Y-m-d', strtotime('-60 days'));
+    $prev_end = date('Y-m-d', strtotime('-31 days'));
+    $prev_stats = Maneli_Reports_Dashboard::get_overall_statistics($prev_start, $prev_end, $expert_id);
+    
+    $total_growth = $prev_stats['total_inquiries'] > 0 
+        ? round((($stats['total_inquiries'] - $prev_stats['total_inquiries']) / $prev_stats['total_inquiries']) * 100, 1)
+        : 0;
+    $revenue_growth = $prev_stats['revenue'] > 0
+        ? round((($stats['revenue'] - $prev_stats['revenue']) / $prev_stats['revenue']) * 100, 1)
+        : 0;
+    
+    // Get today's followups count for expert
+    $today_followups = 0;
+    if ($is_expert && $expert_id) {
+        $today_followups = count(get_posts([
+            'post_type' => 'inquiry',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => [
+                'relation' => 'AND',
+                ['key' => 'assigned_expert_id', 'value' => $expert_id, 'compare' => '='],
+                ['key' => 'follow_up_date', 'value' => date('Y-m-d'), 'compare' => '=', 'type' => 'DATE']
+            ]
+        ]));
+    }
     
     // Get recent inquiries (both types)
     $recent_args = [
@@ -358,8 +450,10 @@ if ($is_customer) {
         'post_status' => 'publish'
     ];
     
+    // For experts, filter to show ONLY their assigned inquiries
     if ($expert_id) {
         $recent_args['meta_query'] = [
+            'relation' => 'AND',
             [
                 'key' => 'assigned_expert_id',
                 'value' => $expert_id,
@@ -402,6 +496,61 @@ if ($is_customer) {
         ]);
     }
     
+    // Get assigned inquiries that need action (new/referred status) for expert
+    $action_needed_inquiries = [];
+    if ($is_expert && $expert_id) {
+        // Installment inquiries with new/referred status
+        $installment_action_needed = get_posts([
+            'post_type' => 'inquiry',
+            'posts_per_page' => 10,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'post_status' => 'publish',
+            'meta_query' => [
+                'relation' => 'AND',
+                [
+                    'key' => 'assigned_expert_id',
+                    'value' => $expert_id,
+                    'compare' => '='
+                ],
+                [
+                    'key' => 'tracking_status',
+                    'value' => ['new', 'referred'],
+                    'compare' => 'IN'
+                ]
+            ]
+        ]);
+        
+        // Cash inquiries with new status
+        $cash_action_needed = get_posts([
+            'post_type' => 'cash_inquiry',
+            'posts_per_page' => 10,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'post_status' => 'publish',
+            'meta_query' => [
+                'relation' => 'AND',
+                [
+                    'key' => 'assigned_expert_id',
+                    'value' => $expert_id,
+                    'compare' => '='
+                ],
+                [
+                    'key' => 'cash_inquiry_status',
+                    'value' => ['new', 'pending'],
+                    'compare' => 'IN'
+                ]
+            ]
+        ]);
+        
+        $action_needed_inquiries = array_merge($installment_action_needed, $cash_action_needed);
+        // Sort by date
+        usort($action_needed_inquiries, function($a, $b) {
+            return strtotime($b->post_date) - strtotime($a->post_date);
+        });
+        $action_needed_inquiries = array_slice($action_needed_inquiries, 0, 5);
+    }
+    
     // Calculate growth percentages (compare with previous period)
     $prev_start = date('Y-m-d', strtotime('-60 days'));
     $prev_end = date('Y-m-d', strtotime('-31 days'));
@@ -411,432 +560,433 @@ if ($is_customer) {
         ? round((($stats['total_inquiries'] - $prev_stats['total_inquiries']) / $prev_stats['total_inquiries']) * 100, 1)
         : 0;
     
-    // Enqueue Chart.js
-    wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', [], '4.4.0', true);
-    
-    // اضافه کردن Chart.js به صورت inline برای اطمینان
-    wp_add_inline_script('chartjs', '
-        window.addEventListener("load", function() {
-            if (typeof Chart === "undefined") {
-                console.log("Chart.js CDN failed, loading from local...");
-                var script = document.createElement("script");
-                script.src = "' . MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.min.js";
-                script.onload = function() {
-                    console.log("Chart.js loaded from local");
-                };
-                document.head.appendChild(script);
-            }
-        });
-    ');
+    // Enqueue Chart.js - Use local version if available
+    $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
+    if (file_exists($chartjs_path)) {
+        wp_enqueue_script('chartjs', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', [], '4.4.0', true);
+    } else {
+        // Fallback to CDN if local file doesn't exist
+        wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', [], '4.4.0', true);
+    }
     ?>
     
-    <div class="row">
-        <div class="col-xl-8">
-            <!-- Detailed Statistics for Admin -->
-            <?php if ($is_admin): ?>
-            
-            <div class="row mb-4">
-                <!-- Cash Inquiry Detailed Stats -->
-                <div class="col-xl-6">
-                    <div class="card custom-card">
-                        <div class="card-header bg-warning-transparent">
-                            <div class="card-title">
-                                <i class="la la-dollar-sign me-2"></i>
-                                آمار تفصیلی استعلامات نقدی
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-warning"><?php echo number_format_i18n($cash_stats['total']); ?></h4>
-                                        <small class="text-muted">کل نقدی</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-success"><?php echo number_format_i18n($cash_stats['completed']); ?></h4>
-                                        <small class="text-muted">تکمیل شده</small>
-                                    </div>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-secondary"><?php echo number_format_i18n($cash_stats['pending']); ?></h4>
-                                        <small class="text-muted">در انتظار</small>
-                                    </div>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-danger"><?php echo number_format_i18n($cash_stats['rejected']); ?></h4>
-                                        <small class="text-muted">رد شده</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Installment Inquiry Detailed Stats -->
-                <div class="col-xl-6">
-                    <div class="card custom-card">
-                        <div class="card-header bg-info-transparent">
-                            <div class="card-title">
-                                <i class="la la-credit-card me-2"></i>
-                                آمار تفصیلی استعلامات اقساطی
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-info"><?php echo number_format_i18n($installment_stats['total']); ?></h4>
-                                        <small class="text-muted">کل اقساطی</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-success"><?php echo number_format_i18n($installment_stats['user_confirmed']); ?></h4>
-                                        <small class="text-muted">تایید شده</small>
-                                    </div>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-secondary"><?php echo number_format_i18n($installment_stats['pending']); ?></h4>
-                                        <small class="text-muted">در انتظار</small>
-                                    </div>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <div class="text-center p-3 border rounded">
-                                        <h4 class="fw-bold text-danger"><?php echo number_format_i18n($installment_stats['rejected']); ?></h4>
-                                        <small class="text-muted">رد شده</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
-            
-            <!-- Statistics Cards -->
-            <div class="row">
-                <?php if ($is_expert): ?>
-                    <!-- Expert-specific stats -->
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">ارجاع شده به من</span>
-                                        <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($stats['total_inquiries']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-primary">
-                                            <i class="la la-user-check fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    استعلامات محول شده
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">در حال پیگیری</span>
-                                        <h4 class="fw-semibold mb-0 text-primary"><?php echo number_format_i18n($stats['in_progress']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-primary">
-                                            <i class="la la-spinner fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    در حال بررسی توسط شما
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">تکمیل شده</span>
-                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['completed']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-success">
-                                            <i class="la la-check-circle fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    نرخ موفقیت: <span class="text-success"><?php echo $stats['total_inquiries'] > 0 ? round(($stats['completed'] / $stats['total_inquiries']) * 100, 1) : 0; ?>%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">پیگیری امروز</span>
-                                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($today_followups); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-warning">
-                                            <i class="la la-calendar-day fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    نیاز به پیگیری امروز
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Start::page-header -->
+    <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
+        <div>
+            <nav>
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item">
+                        <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Home', 'maneli-car-inquiry'); ?></li>
+                </ol>
+            </nav>
+            <h1 class="page-title fw-medium fs-18 mb-0">
+                <?php if ($is_admin): ?>
+                    <?php esc_html_e('Business Management Dashboard', 'maneli-car-inquiry'); ?>
                 <?php else: ?>
-                    <!-- Cash Inquiry Stats -->
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden border-warning">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">استعلامات نقدی</span>
-                                        <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($cash_stats['total']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-warning">
-                                            <i class="la la-dollar-sign fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    تکمیل شده: <span class="text-success"><?php echo number_format_i18n($cash_stats['completed']); ?></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Installment Inquiry Stats -->
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden border-info">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">استعلامات اقساطی</span>
-                                        <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($installment_stats['total']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-info">
-                                            <i class="la la-credit-card fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    تایید شده: <span class="text-success"><?php echo number_format_i18n($installment_stats['user_confirmed']); ?></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Total Inquiries Stats -->
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden border-primary">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">مجموع استعلامات</span>
-                                        <h4 class="fw-semibold mb-0 text-primary"><?php echo number_format_i18n($stats['total_inquiries']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-primary">
-                                            <i class="la la-list-alt fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    امروز: <span class="text-info"><?php echo number_format_i18n($stats['new_today']); ?></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Revenue Stats -->
-                    <div class="col-xxl-3 col-xl-6">
-                        <div class="card custom-card overflow-hidden border-success">
-                            <div class="card-body">
-                                <div class="d-flex align-items-start justify-content-between mb-2">
-                                    <div>
-                                        <span class="text-muted d-block mb-1">درآمد کل</span>
-                                        <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($stats['revenue']); ?></h4>
-                                    </div>
-                                    <div class="lh-1">
-                                        <span class="avatar avatar-md avatar-rounded bg-success">
-                                            <i class="la la-money-bill-wave fs-20"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="text-muted fs-12">
-                                    تومان
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <?php esc_html_e('Expert Dashboard', 'maneli-car-inquiry'); ?>
                 <?php endif; ?>
+            </h1>
+        </div>
+        <div class="btn-list">
+            <a href="<?php echo home_url('/dashboard/reports'); ?>" class="btn btn-primary btn-wave">
+                <i class="la la-chart-bar me-1"></i>
+                <?php esc_html_e('View Reports', 'maneli-car-inquiry'); ?>
+            </a>
+        </div>
+    </div>
+    <!-- End::page-header -->
+    
+    <!-- Start::row-1 - Premium Statistics Cards -->
+    <div class="row">
+        <?php if ($is_admin && !$expert_id): ?>
+            <!-- Admin Dashboard - Premium Business Overview -->
+            <?php 
+            $business_stats_data = isset($business_stats) ? $business_stats : null;
+            $total_profit = $business_stats_data && isset($business_stats_data['total_profit']) ? $business_stats_data['total_profit'] : 0;
+            $total_experts = $business_stats_data && isset($business_stats_data['total_experts']) ? $business_stats_data['total_experts'] : 0;
+            $total_customers = $business_stats_data && isset($business_stats_data['total_customers']) ? $business_stats_data['total_customers'] : 0;
+            ?>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-pill">
+                                <span class="avatar avatar-md avatar-rounded bg-primary svg-white">
+                                    <i class="la la-list-alt fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries'] ?? 0); ?></h4>
+                            <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
+                                <i class="la la-arrow-up fs-11"></i><?php echo maneli_number_format_persian($total_growth, 1); ?>%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                    <i class="la la-money-bill-wave fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Revenue', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo maneli_number_format_persian($stats['revenue'] ?? 0); ?></h4>
+                            <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
+                                <i class="la la-arrow-up fs-11"></i><?php echo maneli_number_format_persian($revenue_growth, 1); ?>%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-primary1 border-opacity-10 bg-primary1-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-primary1 svg-white">
+                                    <i class="la la-coins fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Profit', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-primary"><?php echo maneli_number_format_persian($total_profit); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-primary2 border-opacity-10 bg-primary2-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-primary2 svg-white">
+                                    <i class="la la-user-tie fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Experts', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_experts); ?></h4>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Staff', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-secondary border-opacity-10 bg-secondary-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-secondary svg-white">
+                                    <i class="la la-users fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Customers', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_customers); ?></h4>
+                            <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <!-- Chart -->
+        <?php elseif ($is_expert): ?>
+            <!-- Expert Dashboard - Personal Performance -->
+            <?php 
+            $expert_profit = $expert_detailed && isset($expert_detailed['profit']) ? $expert_detailed['profit'] : 0;
+            $success_rate = $expert_detailed && isset($expert_detailed['success_rate']) ? $expert_detailed['success_rate'] : 0;
+            $total_customers_expert = $expert_detailed && isset($expert_detailed['total_customers']) ? $expert_detailed['total_customers'] : 0;
+            ?>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-pill">
+                                <span class="avatar avatar-md avatar-rounded bg-primary svg-white">
+                                    <i class="la la-clipboard-list fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Assigned to Me', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries'] ?? 0); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                    <i class="la la-check-double fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo maneli_number_format_persian($stats['completed'] ?? 0); ?></h4>
+                            <span class="text-success badge bg-success-transparent rounded-pill fs-11">
+                                <?php echo maneli_number_format_persian($success_rate, 1); ?>%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-primary1 border-opacity-10 bg-primary1-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-primary1 svg-white">
+                                    <i class="la la-coins fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('My Profit', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-primary"><?php echo maneli_number_format_persian($expert_profit); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-primary2 border-opacity-10 bg-primary2-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-primary2 svg-white">
+                                    <i class="la la-users fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('My Customers', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_customers_expert); ?></h4>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
+                                    <i class="la la-calendar-day fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Today Follow-ups', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo maneli_number_format_persian($today_followups); ?></h4>
+                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Items', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        <?php endif; ?>
+    </div>
+    <!-- End::row-1 -->
+            
+    
+    <!-- Start::row-2 - Main Content -->
+    <div class="row">
+        <div class="col-xl-8 col-lg-12">
+            <!-- Daily Trend Chart -->
             <div class="card custom-card">
-                <div class="card-header">
+                <div class="card-header justify-content-between">
                     <div class="card-title">
                         <i class="la la-chart-line me-2"></i>
-                        روند استعلامات (7 روز اخیر)
+                        <?php esc_html_e('Daily Inquiry Trend (Last 7 Days)', 'maneli-car-inquiry'); ?>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div style="height: 300px; position: relative;">
+                    <?php 
+                    // نمایش خلاصه داده‌ها برای بررسی
+                    if (!empty($daily_stats) && count($daily_stats) > 0): 
+                        $total_inquiries = array_sum(array_column($daily_stats, 'total'));
+                        $total_cash = array_sum(array_column($daily_stats, 'cash'));
+                        $total_installment = array_sum(array_column($daily_stats, 'installment'));
+                    ?>
+                        <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                            <i class="la la-info-circle me-2 fs-18"></i>
+                            <div>
+                                <strong><?php esc_html_e('Last 7 Days Summary:', 'maneli-car-inquiry'); ?></strong>
+                                <?php esc_html_e('Total:', 'maneli-car-inquiry'); ?> <strong><?php echo maneli_number_format_persian($total_inquiries); ?></strong> <?php esc_html_e('inquiries', 'maneli-car-inquiry'); ?> 
+                                (<?php esc_html_e('Cash:', 'maneli-car-inquiry'); ?> <strong><?php echo maneli_number_format_persian($total_cash); ?></strong> | 
+                                <?php esc_html_e('Installment:', 'maneli-car-inquiry'); ?> <strong><?php echo maneli_number_format_persian($total_installment); ?></strong>)
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-warning mb-3" role="alert">
+                            <i class="la la-exclamation-triangle me-2"></i>
+                            <strong><?php esc_html_e('Note:', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('No inquiries registered in the last 7 days.', 'maneli-car-inquiry'); ?>
+                        </div>
+                    <?php endif; ?>
+                    <div class="maneli-chart-container">
                         <canvas id="dailyTrendChart"></canvas>
                     </div>
                 </div>
             </div>
             
-            <!-- Recent Inquiries -->
+            <!-- Recent Inquiries Table -->
             <div class="card custom-card">
                 <div class="card-header justify-content-between">
                     <div class="card-title">
                         <i class="la la-list me-2"></i>
-                        آخرین استعلامات
+                        <?php esc_html_e('Recent Inquiries', 'maneli-car-inquiry'); ?>
                     </div>
                     <div>
                         <a href="<?php echo home_url('/dashboard/inquiries'); ?>" class="btn btn-sm btn-primary-light">
-                            مشاهده همه
+                            <?php esc_html_e('View All', 'maneli-car-inquiry'); ?>
                             <i class="la la-arrow-left ms-1"></i>
                         </a>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table text-nowrap table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>شناسه</th>
-                                    <th>نوع</th>
-                                    <th>مشتری</th>
-                                    <th>خودرو</th>
-                                    <th>وضعیت</th>
-                                    <th>تاریخ</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach (array_slice($recent_inquiries, 0, 5) as $inq):
-                                    $post_type = get_post_type($inq);
-                                    $is_cash = ($post_type === 'cash_inquiry');
-                                    
-                                    if ($is_cash) {
-                                        $customer_name = get_post_meta($inq->ID, 'cash_first_name', true) . ' ' . get_post_meta($inq->ID, 'cash_last_name', true);
-                                        $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
-                                    } else {
-                                        $author = get_userdata($inq->post_author);
-                                        $customer_name = $author ? $author->display_name : 'نامشخص';
-                                        $status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
-                                    }
-                                    
-                                    $product_id = get_post_meta($inq->ID, 'product_id', true);
-                                    
-                                    // تعریف وضعیت‌های مختلف برای نقدی و اقساطی
-                                    if ($is_cash) {
-                                        $status_badges = [
-                                            'new' => ['label' => 'جدید', 'class' => 'primary'],
-                                            'pending' => ['label' => 'در انتظار', 'class' => 'warning'],
-                                            'approved' => ['label' => 'تایید شده', 'class' => 'success'],
-                                            'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
-                                            'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                            'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
-                                        ];
-                                    } else {
-                                        $status_badges = [
-                                            'new' => ['label' => 'جدید', 'class' => 'primary'],
-                                            'referred' => ['label' => 'ارجاع شده', 'class' => 'info'],
-                                            'in_progress' => ['label' => 'در حال پیگیری', 'class' => 'warning'],
-                                            'user_confirmed' => ['label' => 'تایید شده', 'class' => 'success'],
-                                            'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
-                                            'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                            'cancelled' => ['label' => 'لغو شده', 'class' => 'secondary'],
-                                            'follow_up_scheduled' => ['label' => 'پیگیری برنامه‌ریزی', 'class' => 'info'],
-                                        ];
-                                    }
-                                    $badge = $status_badges[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
-                                    
-                                    $timestamp = strtotime($inq->post_date);
-                                    if (function_exists('maneli_gregorian_to_jalali')) {
-                                        $date = maneli_gregorian_to_jalali(
-                                            date('Y', $timestamp),
-                                            date('m', $timestamp),
-                                            date('d', $timestamp),
-                                            'Y/m/d'
-                                        );
-                                    } else {
-                                        $date = date('Y/m/d', $timestamp);
-                                    }
-                                    
-                                    $view_url = $is_cash 
-                                        ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash'))
-                                        : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/inquiries/installment'));
-                                ?>
+                    <?php if (empty($recent_inquiries)): ?>
+                        <div class="text-center py-5">
+                            <span class="avatar avatar-xl avatar-rounded bg-secondary-transparent mb-3">
+                                <i class="la la-inbox fs-40 text-muted"></i>
+                            </span>
+                            <h6 class="fw-medium mb-2"><?php esc_html_e('No Inquiries Found', 'maneli-car-inquiry'); ?></h6>
+                            <p class="text-muted mb-0"><?php esc_html_e('No inquiries have been registered in the system yet', 'maneli-car-inquiry'); ?></p>
+                        </div>
+                    <?php else: ?>
+                        <div class="table-responsive">
+                            <table class="table text-nowrap table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <td>#<?php echo $inq->ID; ?></td>
-                                        <td>
-                                            <span class="badge bg-<?php echo $is_cash ? 'warning' : 'info'; ?>-transparent">
-                                                <?php echo $is_cash ? 'نقدی' : 'اقساطی'; ?>
-                                            </span>
-                                        </td>
-                                        <td><?php echo esc_html($customer_name); ?></td>
-                                        <td><?php echo esc_html(get_the_title($product_id)); ?></td>
-                                        <td>
-                                            <span class="badge bg-<?php echo $badge['class']; ?>-transparent">
-                                                <?php echo $badge['label']; ?>
-                                            </span>
-                                        </td>
-                                        <td><?php echo $date; ?></td>
-                                        <td>
-                                            <a href="<?php echo esc_url($view_url); ?>" class="btn btn-sm btn-icon btn-primary-light">
-                                                <i class="la la-eye"></i>
-                                            </a>
-                                        </td>
+                                        <th scope="col"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Type', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    <?php foreach (array_slice($recent_inquiries, 0, 5) as $inq):
+                                        $post_type = get_post_type($inq);
+                                        $is_cash = ($post_type === 'cash_inquiry');
+                                        
+                                        if ($is_cash) {
+                                            $customer_name = get_post_meta($inq->ID, 'cash_first_name', true) . ' ' . get_post_meta($inq->ID, 'cash_last_name', true);
+                                            $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
+                                        } else {
+                                            $author = get_userdata($inq->post_author);
+                                            $customer_name = $author ? $author->display_name : esc_html__('Unknown', 'maneli-car-inquiry');
+                                            $status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
+                                        }
+                                        
+                                        $product_id = get_post_meta($inq->ID, 'product_id', true);
+                                        
+                                        // تعریف وضعیت‌های مختلف برای نقدی و اقساطی
+                                        if ($is_cash) {
+                                            $status_badges = [
+                                                'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'primary'],
+                                                'pending' => ['label' => esc_html__('Pending', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                                'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
+                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
+                                            ];
+                                        } else {
+                                            $status_badges = [
+                                                'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'primary'],
+                                                'referred' => ['label' => esc_html__('Referred', 'maneli-car-inquiry'), 'class' => 'info'],
+                                                'in_progress' => ['label' => esc_html__('In Progress', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                                'user_confirmed' => ['label' => esc_html__('Confirmed', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
+                                                'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
+                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
+                                                'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
+                                            ];
+                                        }
+                                        $badge = $status_badges[$status] ?? ['label' => esc_html__('Unknown', 'maneli-car-inquiry'), 'class' => 'secondary'];
+                                        
+                                        $timestamp = strtotime($inq->post_date);
+                                        if (function_exists('maneli_gregorian_to_jalali')) {
+                                            $date = maneli_gregorian_to_jalali(
+                                                date('Y', $timestamp),
+                                                date('m', $timestamp),
+                                                date('d', $timestamp),
+                                                'Y/m/d'
+                                            );
+                                        } else {
+                                            $date = date('Y/m/d', $timestamp);
+                                        }
+                                        
+                                        $view_url = $is_cash 
+                                            ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash'))
+                                            : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/inquiries/installment'));
+                                    ?>
+                                        <tr class="crm-contact contacts-list">
+                                            <td><strong>#<?php echo maneli_number_format_persian($inq->ID); ?></strong></td>
+                                            <td>
+                                                <span class="badge bg-<?php echo $is_cash ? 'warning' : 'info'; ?>-transparent">
+                                                    <?php echo $is_cash ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry'); ?>
+                                                </span>
+                                            </td>
+                                            <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer_name); ?></td>
+                                            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
+                                            <td data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
+                                                <span class="badge bg-<?php echo $badge['class']; ?>">
+                                                    <?php echo $badge['label']; ?>
+                                                </span>
+                                            </td>
+                                            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo maneli_number_format_persian($date); ?></td>
+                                            <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
+                                                <div class="btn-list">
+                                                    <a href="<?php echo esc_url($view_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                        <i class="la la-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
         
-        <div class="col-xl-4">
-            <!-- Quick Stats -->
+        <!-- Sidebar -->
+        <div class="col-xl-4 col-lg-12">
+            <!-- Today's Stats -->
             <div class="card custom-card">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3">
-                        <div class="avatar avatar-md bg-primary-transparent">
-                            <i class="la la-chart-bar fs-20"></i>
+                        <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-pill">
+                            <span class="avatar avatar-md avatar-rounded bg-primary">
+                                <i class="la la-calendar-day fs-20 text-white"></i>
+                            </span>
                         </div>
                         <div class="flex-fill">
-                            <span class="fs-12 mb-1 d-block fw-medium">استعلامات امروز</span>
-                            <h4 class="mb-0 d-flex align-items-center">
-                                <?php echo number_format_i18n($stats['new_today']); ?>
-                            </h4>
+                            <span class="fs-12 mb-1 d-block fw-medium text-muted"><?php esc_html_e('Today Inquiries', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['new_today'] ?? 0); ?></h4>
                         </div>
                     </div>
                 </div>
@@ -848,14 +998,16 @@ if ($is_customer) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-star me-2"></i>
-                            محصولات پرطرفدار
+                            <?php esc_html_e('Popular Products', 'maneli-car-inquiry'); ?>
                         </div>
                     </div>
                     <div class="card-body p-0">
                         <?php if (empty($popular_products)): ?>
                             <div class="text-center py-4">
-                                <i class="la la-inbox text-muted fs-40"></i>
-                                <p class="text-muted mt-2 mb-0">داده‌ای موجود نیست</p>
+                                <span class="avatar avatar-xl avatar-rounded bg-secondary-transparent mb-2">
+                                    <i class="la la-inbox fs-40 text-muted"></i>
+                                </span>
+                                <p class="text-muted mb-0"><?php esc_html_e('No data available', 'maneli-car-inquiry'); ?></p>
                             </div>
                         <?php else: ?>
                             <div class="table-responsive">
@@ -872,19 +1024,19 @@ if ($is_customer) {
                                             $color = $colors[($rank - 1) % count($colors)];
                                         ?>
                                             <tr>
-                                                <td style="width: 30px;">
-                                                    <span class="badge bg-<?php echo $color; ?>"><?php echo $rank++; ?></span>
+                                                <td class="maneli-col-width-30">
+                                                    <span class="badge bg-<?php echo esc_attr($color); ?>"><?php echo esc_html(maneli_number_format_persian($rank++)); ?></span>
                                                 </td>
                                                 <td>
                                                     <span class="fw-medium"><?php echo esc_html($product['name']); ?></span>
                                                 </td>
-                                                <td style="width: 80px;">
-                                                    <span class="badge bg-<?php echo $color; ?>-transparent">
-                                                        <?php echo number_format_i18n($product['count']); ?>
+                                                <td class="maneli-col-width-80">
+                                                    <span class="badge bg-<?php echo esc_attr($color); ?>-transparent">
+                                                        <?php echo maneli_number_format_persian($product['count']); ?>
                                                     </span>
                                                 </td>
-                                                <td style="width: 60px;" class="text-end">
-                                                    <span class="text-muted fs-11"><?php echo $percentage; ?>%</span>
+                                                <td class="maneli-col-width-60 text-end">
+                                                    <span class="text-muted fs-11"><?php echo maneli_number_format_persian($percentage, 1); ?>%</span>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -894,6 +1046,158 @@ if ($is_customer) {
                         <?php endif; ?>
                     </div>
                 </div>
+                
+                <!-- Upcoming Followups for Expert -->
+                <?php if (!empty($upcoming_followups)): ?>
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i class="la la-calendar-alt me-2"></i>
+                            <?php esc_html_e('My Upcoming Follow-ups', 'maneli-car-inquiry'); ?>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($upcoming_followups as $followup_inq): 
+                                $followup_date = get_post_meta($followup_inq->ID, 'follow_up_date', true);
+                                $product_id = get_post_meta($followup_inq->ID, 'product_id', true);
+                                $customer = get_userdata($followup_inq->post_author);
+                                $is_today = ($followup_date === date('Y-m-d'));
+                                
+                                // Jalali date
+                                if ($followup_date && function_exists('maneli_gregorian_to_jalali')) {
+                                    $timestamp = strtotime($followup_date);
+                                    $jalali_date = maneli_gregorian_to_jalali(
+                                        date('Y', $timestamp),
+                                        date('m', $timestamp),
+                                        date('d', $timestamp),
+                                        'Y/m/d'
+                                    );
+                                } else {
+                                    $jalali_date = $followup_date;
+                                }
+                            ?>
+                                <div class="list-group-item <?php echo $is_today ? 'bg-warning-transparent' : ''; ?>">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <span class="avatar avatar-sm bg-<?php echo $is_today ? 'danger' : 'info'; ?>-transparent me-2">
+                                                <i class="la la-calendar fs-18"></i>
+                                            </span>
+                                            <div>
+                                                <div class="fw-medium"><?php echo esc_html($customer ? $customer->display_name : esc_html__('Unknown', 'maneli-car-inquiry')); ?></div>
+                                                <small class="text-muted"><?php echo esc_html(get_the_title($product_id)); ?></small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-semibold <?php echo $is_today ? 'text-danger' : 'text-info'; ?>">
+                                                <?php echo esc_html(maneli_number_format_persian($jalali_date)); ?>
+                                            </div>
+                                            <?php if ($is_today): ?>
+                                                <small class="badge bg-danger"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></small>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="<?php echo home_url('/dashboard/followups'); ?>" class="btn btn-sm btn-primary-light">
+                            <?php esc_html_e('View All', 'maneli-car-inquiry'); ?> <?php esc_html_e('Follow-ups', 'maneli-car-inquiry'); ?>
+                            <i class="la la-arrow-left ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Assigned Inquiries Needing Action for Expert -->
+                <?php if (!empty($action_needed_inquiries)): ?>
+                <div class="card custom-card">
+                    <div class="card-header bg-warning-transparent">
+                        <div class="card-title">
+                            <i class="la la-tasks me-2"></i>
+                            <?php esc_html_e('My Assigned Inquiries Needing Action', 'maneli-car-inquiry'); ?>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <?php foreach ($action_needed_inquiries as $inq): 
+                                $post_type = get_post_type($inq);
+                                $is_cash = ($post_type === 'cash_inquiry');
+                                
+                                if ($is_cash) {
+                                    $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
+                                } else {
+                                    $status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
+                                }
+                                
+                                $product_id = get_post_meta($inq->ID, 'product_id', true);
+                                $customer = get_userdata($inq->post_author);
+                                
+                                if ($is_cash) {
+                                    $customer_name = get_post_meta($inq->ID, 'cash_first_name', true) . ' ' . get_post_meta($inq->ID, 'cash_last_name', true);
+                                } else {
+                                    $customer_name = $customer ? $customer->display_name : esc_html__('Unknown', 'maneli-car-inquiry');
+                                }
+                                
+                                $view_url = $is_cash 
+                                    ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash'))
+                                    : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/inquiries/installment'));
+                                
+                                $status_badge_label = $is_cash 
+                                    ? ($status === 'new' ? esc_html__('New', 'maneli-car-inquiry') : esc_html__('Pending', 'maneli-car-inquiry'))
+                                    : ($status === 'new' ? esc_html__('New', 'maneli-car-inquiry') : esc_html__('Referred', 'maneli-car-inquiry'));
+                                
+                                $timestamp = strtotime($inq->post_date);
+                                if (function_exists('maneli_gregorian_to_jalali')) {
+                                    $date = maneli_gregorian_to_jalali(
+                                        date('Y', $timestamp),
+                                        date('m', $timestamp),
+                                        date('d', $timestamp),
+                                        'Y/m/d'
+                                    );
+                                } else {
+                                    $date = date('Y/m/d', $timestamp);
+                                }
+                            ?>
+                                <div class="list-group-item border-start border-warning border-3">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center flex-fill">
+                                            <span class="avatar avatar-sm bg-warning-transparent me-2">
+                                                <i class="la la-exclamation-triangle fs-18"></i>
+                                            </span>
+                                            <div class="flex-fill">
+                                                <div class="fw-medium"><?php echo esc_html($customer_name); ?></div>
+                                                <small class="text-muted d-block"><?php echo esc_html(get_the_title($product_id)); ?></small>
+                                                <small class="badge bg-<?php echo $is_cash ? 'warning' : 'info'; ?>-transparent mt-1">
+                                                    <?php echo $is_cash ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry'); ?>
+                                                </small>
+                                                <small class="badge bg-primary-transparent ms-1">
+                                                    <?php echo esc_html($status_badge_label); ?>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="text-end ms-3">
+                                            <small class="text-muted d-block mb-2"><?php echo maneli_number_format_persian($date); ?></small>
+                                            <a href="<?php echo esc_url($view_url); ?>" class="btn btn-sm btn-primary btn-wave">
+                                                <i class="la la-arrow-left me-1"></i>
+                                                <?php esc_html_e('View & Action', 'maneli-car-inquiry'); ?>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="<?php echo home_url('/dashboard/inquiries/installment'); ?>" class="btn btn-sm btn-primary-light">
+                            <?php esc_html_e('View All My Inquiries', 'maneli-car-inquiry'); ?>
+                            <i class="la la-arrow-left ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
             <?php else: ?>
                 <!-- Task List for Admin -->
                 <?php
@@ -1003,7 +1307,7 @@ if ($is_customer) {
                     <div class="card-header bg-danger-transparent">
                         <div class="card-title">
                             <i class="la la-tasks me-2"></i>
-                            لیست کارهای امروز
+                            <?php esc_html_e("Today's Task List", 'maneli-car-inquiry'); ?>
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -1015,11 +1319,11 @@ if ($is_customer) {
                                         <i class="la la-credit-card"></i>
                                     </span>
                                     <div>
-                                        <div class="fw-medium">استعلامات اقساطی منتظر ارجاع</div>
-                                        <small class="text-muted">نیاز به تخصیص کارشناس</small>
+                                        <div class="fw-medium"><?php esc_html_e('Pending Installment Inquiries', 'maneli-car-inquiry'); ?></div>
+                                        <small class="text-muted"><?php esc_html_e('Need expert assignment', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-danger"><?php echo count($pending_installment); ?></span>
+                                <span class="badge bg-danger"><?php echo maneli_number_format_persian(count($pending_installment)); ?></span>
                             </a>
                             
                             <!-- Pending Cash Assignments -->
@@ -1029,11 +1333,11 @@ if ($is_customer) {
                                         <i class="la la-dollar-sign"></i>
                                     </span>
                                     <div>
-                                        <div class="fw-medium">استعلامات نقدی منتظر ارجاع</div>
-                                        <small class="text-muted">نیاز به تخصیص کارشناس</small>
+                                        <div class="fw-medium"><?php esc_html_e('Pending Cash Inquiries', 'maneli-car-inquiry'); ?></div>
+                                        <small class="text-muted"><?php esc_html_e('Need expert assignment', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-warning"><?php echo count($pending_cash); ?></span>
+                                <span class="badge bg-warning"><?php echo maneli_number_format_persian(count($pending_cash)); ?></span>
                             </a>
                             
                             <!-- Today's Meetings -->
@@ -1043,11 +1347,11 @@ if ($is_customer) {
                                         <i class="la la-calendar"></i>
                                     </span>
                                     <div>
-                                        <div class="fw-medium">جلسات امروز</div>
-                                        <small class="text-muted">برنامه‌های حضوری</small>
+                                        <div class="fw-medium"><?php esc_html_e("Today's Meetings", 'maneli-car-inquiry'); ?></div>
+                                        <small class="text-muted"><?php esc_html_e('In-person appointments', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-info"><?php echo count($today_meetings); ?></span>
+                                <span class="badge bg-info"><?php echo maneli_number_format_persian(count($today_meetings)); ?></span>
                             </a>
                             
                             <!-- Overdue Followups -->
@@ -1057,11 +1361,11 @@ if ($is_customer) {
                                         <i class="la la-exclamation-triangle"></i>
                                     </span>
                                     <div>
-                                        <div class="fw-medium">پیگیری‌های عقب‌افتاده</div>
-                                        <small class="text-muted">نیاز به اقدام فوری</small>
+                                        <div class="fw-medium"><?php esc_html_e('Overdue Follow-ups', 'maneli-car-inquiry'); ?></div>
+                                        <small class="text-muted"><?php esc_html_e('Requires urgent action', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-danger"><?php echo count($overdue_followups); ?></span>
+                                <span class="badge bg-danger"><?php echo maneli_number_format_persian(count($overdue_followups)); ?></span>
                             </a>
                             
                             <!-- Awaiting Payment -->
@@ -1071,11 +1375,11 @@ if ($is_customer) {
                                         <i class="la la-money-bill"></i>
                                     </span>
                                     <div>
-                                        <div class="fw-medium">منتظر پرداخت</div>
-                                        <small class="text-muted">استعلامات نقدی</small>
+                                        <div class="fw-medium"><?php esc_html_e('Awaiting Payment', 'maneli-car-inquiry'); ?></div>
+                                        <small class="text-muted"><?php esc_html_e('Cash inquiries', 'maneli-car-inquiry'); ?></small>
                                     </div>
                                 </div>
-                                <span class="badge bg-success"><?php echo count($awaiting_payment); ?></span>
+                                <span class="badge bg-success"><?php echo maneli_number_format_persian(count($awaiting_payment)); ?></span>
                             </a>
                         </div>
                     </div>
@@ -1088,7 +1392,7 @@ if ($is_customer) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-trophy me-2"></i>
-                            محصولات پرطرفدار
+                            <?php esc_html_e('Popular Products', 'maneli-car-inquiry'); ?>
                         </div>
                     </div>
                     <div class="card-body p-0">
@@ -1106,25 +1410,25 @@ if ($is_customer) {
                                         $color = $colors[($rank - 1) % count($colors)];
                                     ?>
                                         <tr>
-                                            <td style="width: 40px;">
-                                                <span class="badge bg-<?php echo $color; ?> rounded-pill"><?php echo $rank++; ?></span>
+                                                <td class="maneli-col-width-40">
+                                                <span class="badge bg-<?php echo esc_attr($color); ?> rounded-pill"><?php echo esc_html($rank++); ?></span>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <i class="la la-car text-<?php echo $color; ?> me-2 fs-18"></i>
+                                                    <i class="la la-car text-<?php echo esc_attr($color); ?> me-2 fs-18"></i>
                                                     <span class="fw-medium"><?php echo esc_html($product['name']); ?></span>
                                                 </div>
                                             </td>
-                                            <td style="width: 100px;">
-                                                <span class="badge bg-<?php echo $color; ?>-transparent">
-                                                    <?php echo number_format_i18n($product['count']); ?> استعلام
+                                            <td class="maneli-col-width-100">
+                                                <span class="badge bg-<?php echo esc_attr($color); ?>-transparent">
+                                                    <?php echo maneli_number_format_persian($product['count']); ?> <?php esc_html_e('inquiries', 'maneli-car-inquiry'); ?>
                                                 </span>
                                             </td>
-                                            <td style="width: 100px;">
-                                                <div class="progress" style="height: 6px;">
-                                                    <div class="progress-bar bg-<?php echo $color; ?>" style="width: <?php echo $percentage; ?>%;"></div>
+                                            <td class="maneli-col-width-100">
+                                                <div class="progress maneli-progress-sm">
+                                                    <div class="progress-bar bg-<?php echo esc_attr($color); ?>" style="width: <?php echo esc_attr($percentage); ?>%;"></div>
                                                 </div>
-                                                <small class="text-muted"><?php echo $percentage; ?>%</small>
+                                                <small class="text-muted"><?php echo maneli_number_format_persian($percentage, 1); ?>%</small>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -1135,106 +1439,127 @@ if ($is_customer) {
                 </div>
             <?php endif; ?>
             
-            <!-- Cash vs Installment OR Upcoming Followups -->
-            <?php if ($is_expert && !empty($upcoming_followups)): ?>
-                <!-- Upcoming Followups for Expert -->
-                <div class="card custom-card">
-                    <div class="card-header">
-                        <div class="card-title">
-                            <i class="la la-calendar-alt me-2"></i>
-                            پیگیری‌های آتی من
-                        </div>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="list-group list-group-flush">
-                            <?php foreach ($upcoming_followups as $followup_inq): 
-                                $followup_date = get_post_meta($followup_inq->ID, 'follow_up_date', true);
-                                $product_id = get_post_meta($followup_inq->ID, 'product_id', true);
-                                $customer = get_userdata($followup_inq->post_author);
-                                $is_today = ($followup_date === date('Y-m-d'));
-                                
-                                // Jalali date
-                                if ($followup_date && function_exists('maneli_gregorian_to_jalali')) {
-                                    $timestamp = strtotime($followup_date);
-                                    $jalali_date = maneli_gregorian_to_jalali(
-                                        date('Y', $timestamp),
-                                        date('m', $timestamp),
-                                        date('d', $timestamp),
-                                        'Y/m/d'
-                                    );
-                                } else {
-                                    $jalali_date = $followup_date;
-                                }
-                            ?>
-                                <div class="list-group-item <?php echo $is_today ? 'bg-warning-transparent' : ''; ?>">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <span class="avatar avatar-sm bg-<?php echo $is_today ? 'danger' : 'info'; ?>-transparent me-2">
-                                                <i class="la la-calendar fs-18"></i>
-                                            </span>
-                                            <div>
-                                                <div class="fw-medium"><?php echo esc_html($customer ? $customer->display_name : 'نامشخص'); ?></div>
-                                                <small class="text-muted"><?php echo esc_html(get_the_title($product_id)); ?></small>
-                                            </div>
-                                        </div>
-                                        <div class="text-end">
-                                            <div class="fw-semibold <?php echo $is_today ? 'text-danger' : 'text-info'; ?>">
-                                                <?php echo esc_html($jalali_date); ?>
-                                            </div>
-                                            <?php if ($is_today): ?>
-                                                <small class="badge bg-danger">امروز</small>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <div class="card-footer text-center">
-                        <a href="<?php echo home_url('/dashboard/followups'); ?>" class="btn btn-sm btn-primary-light">
-                            مشاهده همه پیگیری‌ها
-                            <i class="la la-arrow-left ms-1"></i>
-                        </a>
-                    </div>
-                </div>
-            <?php else: ?>
+            <!-- Cash vs Installment for Admin -->
+            <?php if (!$is_expert): ?>
                 <!-- Cash vs Installment -->
+                <?php
+                $cash_count = isset($stats['cash_inquiries']) ? $stats['cash_inquiries'] : 0;
+                $installment_count = isset($stats['installment_inquiries']) ? $stats['installment_inquiries'] : 0;
+                $total_count = isset($stats['total_inquiries']) ? $stats['total_inquiries'] : 0;
+                
+                $cash_percentage = $total_count > 0 ? round(($cash_count / $total_count) * 100, 1) : 0;
+                $installment_percentage = $total_count > 0 ? round(($installment_count / $total_count) * 100, 1) : 0;
+                
+                // Calculate revenue (if available from stats)
+                $cash_revenue = 0;
+                $installment_revenue = 0;
+                $total_revenue = isset($stats['revenue']) ? floatval($stats['revenue']) : 0;
+                
+                // Try to get separate revenues from business stats if available
+                if ($is_admin && isset($business_stats) && is_array($business_stats)) {
+                    // We could calculate from business_stats if it has detailed breakdown
+                    // For now, we'll just show the counts comparison
+                    $total_revenue = isset($stats['revenue']) ? floatval($stats['revenue']) : 0;
+                }
+                
+                // If we have total revenue, estimate based on inquiry counts (rough estimate)
+                if ($total_revenue > 0 && $total_count > 0) {
+                    $cash_revenue = ($total_revenue / $total_count) * $cash_count;
+                    $installment_revenue = ($total_revenue / $total_count) * $installment_count;
+                }
+                
+                $cash_revenue_percentage = $total_revenue > 0 ? round(($cash_revenue / $total_revenue) * 100, 1) : 0;
+                $installment_revenue_percentage = $total_revenue > 0 ? round(($installment_revenue / $total_revenue) * 100, 1) : 0;
+                ?>
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-chart-pie me-2"></i>
-                            نقدی vs اقساطی
+                            <?php esc_html_e('Cash vs Installment Comparison', 'maneli-car-inquiry'); ?>
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div class="d-flex align-items-center">
-                                <span class="avatar avatar-sm bg-warning-transparent me-2">
-                                    <i class="la la-dollar-sign"></i>
-                                </span>
-                                <span class="fw-medium">نقدی</span>
+                        <!-- Inquiries Count -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar avatar-sm bg-warning-transparent me-2">
+                                        <i class="la la-dollar-sign"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></div>
+                                        <small class="text-muted"><?php echo maneli_number_format_persian($cash_count); ?> <?php esc_html_e('items', 'maneli-car-inquiry'); ?></small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-warning fs-16">
+                                        <?php echo maneli_number_format_persian($cash_percentage, 1); ?>%
+                                    </span>
+                                </div>
                             </div>
-                            <span class="badge bg-warning-transparent fs-14">
-                                <?php echo number_format_i18n($stats['cash_inquiries']); ?>
-                            </span>
-                        </div>
-                        <div class="progress mb-3" style="height: 8px;">
-                            <div class="progress-bar bg-warning" style="width: <?php echo $stats['total_inquiries'] > 0 ? round(($stats['cash_inquiries'] / $stats['total_inquiries']) * 100) : 0; ?>%;"></div>
+                            <div class="progress mb-4 maneli-progress-md">
+                                <div class="progress-bar bg-warning" style="width: <?php echo esc_attr($cash_percentage); ?>%;" role="progressbar"></div>
+                            </div>
+                            
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="avatar avatar-sm bg-info-transparent me-2">
+                                        <i class="la la-credit-card"></i>
+                                    </span>
+                                    <div>
+                                        <div class="fw-medium"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></div>
+                                        <small class="text-muted"><?php echo maneli_number_format_persian($installment_count); ?> <?php esc_html_e('items', 'maneli-car-inquiry'); ?></small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-info fs-16">
+                                        <?php echo maneli_number_format_persian($installment_percentage, 1); ?>%
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="progress maneli-progress-md">
+                                <div class="progress-bar bg-info" style="width: <?php echo esc_attr($installment_percentage); ?>%;" role="progressbar"></div>
+                            </div>
                         </div>
                         
-                        <div class="d-flex align-items-center justify-content-between mb-3">
-                            <div class="d-flex align-items-center">
-                                <span class="avatar avatar-sm bg-info-transparent me-2">
-                                    <i class="la la-credit-card"></i>
-                                </span>
-                                <span class="fw-medium">اقساطی</span>
-                            </div>
-                            <span class="badge bg-info-transparent fs-14">
-                                <?php echo number_format_i18n($stats['installment_inquiries']); ?>
-                            </span>
+                        <?php if ($total_revenue > 0): ?>
+                        <!-- Revenue Comparison -->
+                        <hr class="my-3">
+                        <div class="mb-2">
+                            <small class="text-muted"><?php esc_html_e('Revenue Comparison:', 'maneli-car-inquiry'); ?></small>
                         </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-info" style="width: <?php echo $stats['total_inquiries'] > 0 ? round(($stats['installment_inquiries'] / $stats['total_inquiries']) * 100) : 0; ?>%;"></div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="la la-dollar-sign text-warning me-2"></i>
+                                <small class="fw-medium"><?php esc_html_e('Cash:', 'maneli-car-inquiry'); ?></small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2"><?php echo maneli_number_format_persian($cash_revenue); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                                <span class="badge bg-warning-transparent"><?php echo maneli_number_format_persian($cash_revenue_percentage, 1); ?>%</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="la la-credit-card text-info me-2"></i>
+                                <small class="fw-medium"><?php esc_html_e('Installment:', 'maneli-car-inquiry'); ?></small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2"><?php echo maneli_number_format_persian($installment_revenue); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                                <span class="badge bg-info-transparent"><?php echo maneli_number_format_persian($installment_revenue_percentage, 1); ?>%</span>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-list">
+                            <a href="<?php echo home_url('/dashboard/inquiries/cash'); ?>" class="btn btn-sm btn-warning-light">
+                                <i class="la la-eye me-1"></i>
+                                <?php esc_html_e('View Cash Inquiries', 'maneli-car-inquiry'); ?>
+                            </a>
+                            <a href="<?php echo home_url('/dashboard/inquiries/installment'); ?>" class="btn btn-sm btn-info-light">
+                                <i class="la la-eye me-1"></i>
+                                <?php esc_html_e('View Installment Inquiries', 'maneli-car-inquiry'); ?>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1286,22 +1611,33 @@ if ($is_customer) {
         }
     }
     
-    jQuery(document).ready(function($) {
-        // تست تابع تبدیل تاریخ
-        console.log('Testing date conversion:');
-        console.log('2024-12-05 ->', convertToJalali('2024-12-05'));
-        console.log('2024-12-04 ->', convertToJalali('2024-12-04'));
-        
-        // Wait for Chart.js to load
-        function initChart() {
-            console.log('Initializing chart...');
-            console.log('Chart.js available:', typeof Chart !== 'undefined');
+    // Wait for both jQuery and Chart.js to be available
+    function waitForDependencies(callback) {
+        if (typeof jQuery !== 'undefined' && typeof Chart !== 'undefined') {
+            callback();
+        } else {
+            console.log('Waiting for dependencies... jQuery:', typeof jQuery !== 'undefined', 'Chart:', typeof Chart !== 'undefined');
+            setTimeout(function() { waitForDependencies(callback); }, 100);
+        }
+    }
+    
+    waitForDependencies(function() {
+        jQuery(document).ready(function($) {
+            // تست تابع تبدیل تاریخ
+            console.log('Testing date conversion:');
+            console.log('2024-12-05 ->', convertToJalali('2024-12-05'));
+            console.log('2024-12-04 ->', convertToJalali('2024-12-04'));
             
-            if (typeof Chart === 'undefined') {
-                console.log('Chart.js not loaded, retrying...');
-                setTimeout(initChart, 100);
-                return;
-            }
+            // Wait for Chart.js to load
+            function initChart() {
+                console.log('Initializing chart...');
+                console.log('Chart.js available:', typeof Chart !== 'undefined');
+                
+                if (typeof Chart === 'undefined') {
+                    console.log('Chart.js not loaded, retrying...');
+                    setTimeout(initChart, 100);
+                    return;
+                }
             
             const ctx = document.getElementById('dailyTrendChart');
             if (!ctx) {
@@ -1311,31 +1647,56 @@ if ($is_customer) {
             
             // ایجاد نمودار ساده
             try {
-                const dailyData = <?php echo json_encode(array_values($daily_stats)); ?>;
-                console.log('Daily stats data:', dailyData);
+                const dailyDataRaw = <?php echo json_encode($daily_stats, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK); ?>;
+                const dailyData = Array.isArray(dailyDataRaw) ? dailyDataRaw : [];
+                console.log('Daily stats data RAW:', dailyDataRaw);
+                console.log('Daily stats data ARRAY:', dailyData);
+                console.log('Daily stats data LENGTH:', dailyData.length);
                 
                 let labels, totalData, cashData, installmentData;
                 
                 if (dailyData && dailyData.length > 0) {
                     // تبدیل تاریخ میلادی به شمسی
                     labels = dailyData.map(item => {
+                        if (!item || !item.date) {
+                            console.warn('Invalid item in dailyData:', item);
+                            return '" . esc_js(__('Unknown', 'maneli-car-inquiry')) . "';
+                        }
                         console.log('Converting date:', item.date);
                         const jalaliDate = convertToJalali(item.date);
                         console.log('Converted to:', jalaliDate);
                         return jalaliDate;
                     });
-                    totalData = dailyData.map(item => parseInt(item.total) || 0);
-                    cashData = dailyData.map(item => parseInt(item.cash) || 0);
-                    installmentData = dailyData.map(item => parseInt(item.installment) || 0);
+                    totalData = dailyData.map(item => {
+                        const val = parseInt(item.total) || 0;
+                        return isNaN(val) ? 0 : val;
+                    });
+                    cashData = dailyData.map(item => {
+                        const val = parseInt(item.cash) || 0;
+                        return isNaN(val) ? 0 : val;
+                    });
+                    installmentData = dailyData.map(item => {
+                        const val = parseInt(item.installment) || 0;
+                        return isNaN(val) ? 0 : val;
+                    });
                 } else {
+                    console.warn('No daily data available, using default values');
                     // داده‌های پیش‌فرض
-                    labels = ['امروز', 'دیروز', '2 روز قبل', '3 روز قبل', '4 روز قبل', '5 روز قبل', '6 روز قبل'];
+                    labels = ['" . esc_js(__('Today', 'maneli-car-inquiry')) . "', '" . esc_js(__('Yesterday', 'maneli-car-inquiry')) . "', '" . esc_js(__('2 days ago', 'maneli-car-inquiry')) . "', '" . esc_js(__('3 days ago', 'maneli-car-inquiry')) . "', '" . esc_js(__('4 days ago', 'maneli-car-inquiry')) . "', '" . esc_js(__('5 days ago', 'maneli-car-inquiry')) . "', '" . esc_js(__('6 days ago', 'maneli-car-inquiry')) . "'];
                     totalData = [0, 0, 0, 0, 0, 0, 0];
                     cashData = [0, 0, 0, 0, 0, 0, 0];
                     installmentData = [0, 0, 0, 0, 0, 0, 0];
                 }
                 
-                console.log('Chart data:', { labels, totalData, cashData, installmentData });
+                console.log('Chart data FINAL:', { 
+                    labels: labels, 
+                    totalData: totalData, 
+                    cashData: cashData, 
+                    installmentData: installmentData,
+                    totalSum: totalData.reduce((a, b) => a + b, 0),
+                    cashSum: cashData.reduce((a, b) => a + b, 0),
+                    installmentSum: installmentData.reduce((a, b) => a + b, 0)
+                });
                 
                 new Chart(ctx, {
                     type: 'line',
@@ -1343,7 +1704,7 @@ if ($is_customer) {
                         labels: labels,
                         datasets: [
                             {
-                                label: 'کل استعلامات',
+                                label: '" . esc_js(__('Total Inquiries', 'maneli-car-inquiry')) . "',
                                 data: totalData,
                                 borderColor: 'rgb(75, 192, 192)',
                                 backgroundColor: 'rgba(75, 192, 192, 0.1)',
@@ -1354,7 +1715,7 @@ if ($is_customer) {
                                 pointHoverRadius: 7
                             },
                             {
-                                label: 'نقدی',
+                                label: '" . esc_js(__('Cash', 'maneli-car-inquiry')) . "',
                                 data: cashData,
                                 borderColor: 'rgb(255, 159, 64)',
                                 backgroundColor: 'rgba(255, 159, 64, 0.1)',
@@ -1365,7 +1726,7 @@ if ($is_customer) {
                                 pointHoverRadius: 6
                             },
                             {
-                                label: 'اقساطی',
+                                label: '" . esc_js(__('Installment', 'maneli-car-inquiry')) . "',
                                 data: installmentData,
                                 borderColor: 'rgb(54, 162, 235)',
                                 backgroundColor: 'rgba(54, 162, 235, 0.1)',
@@ -1439,13 +1800,14 @@ if ($is_customer) {
                 console.log('Chart initialized successfully');
             } catch (error) {
                 console.error('Chart creation failed:', error);
-                ctx.parentElement.innerHTML = '<div class="text-center py-5"><i class="la la-chart-line text-muted" style="font-size: 60px;"></i><p class="text-muted mt-3">خطا در بارگذاری نمودار</p></div>';
+                ctx.parentElement.innerHTML = '<div class="text-center py-5"><i class="la la-chart-line text-muted" style="font-size: 60px;"></i><p class="text-muted mt-3"><?php echo esc_js(__('Error loading chart', 'maneli-car-inquiry')); ?></p></div>';
             }
         }
         
         // Start initialization
         initChart();
-    });
+        }); // end jQuery ready
+    }); // end waitForDependencies
     </script>
     
 <?php } ?>

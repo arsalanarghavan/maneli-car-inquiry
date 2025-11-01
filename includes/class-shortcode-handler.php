@@ -31,26 +31,6 @@ class Maneli_Shortcode_Handler {
         // Active Shortcodes
         require_once $shortcode_path . 'class-loan-calculator-shortcode.php';
         new Maneli_Loan_Calculator_Shortcode();
-        
-        // Disabled Shortcodes - Functionality moved to dashboard pages
-        // These are kept for backward compatibility but not initialized
-        /*
-        require_once $shortcode_path . 'class-inquiry-form-shortcode.php';
-        require_once $shortcode_path . 'class-inquiry-lists-shortcode.php';
-        require_once $shortcode_path . 'class-followup-list-shortcode.php';
-        require_once $shortcode_path . 'class-user-management-shortcodes.php';
-        require_once $shortcode_path . 'class-admin-shortcodes.php';
-        require_once $shortcode_path . 'class-system-report-shortcode.php';
-        require_once $shortcode_path . 'class-product-editor-shortcode.php';
-
-        new Maneli_Inquiry_Form_Shortcode();
-        new Maneli_Inquiry_Lists_Shortcode();
-        new Maneli_Followup_List_Shortcode();
-        new Maneli_User_Management_Shortcodes();
-        new Maneli_Admin_Shortcodes();
-        new Maneli_System_Report_Shortcode();
-        new Maneli_Product_Editor_Shortcode();
-        */
     }
 
     /**
@@ -62,27 +42,61 @@ class Maneli_Shortcode_Handler {
             return;
         }
 
-        // Get file modification times for cache busting
-        $css_version = filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css');
-
-        // Line Awesome Complete - فایل CSS کامل و مستقل
-        wp_enqueue_style('maneli-line-awesome-complete', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css', [], '1.0.0');
+        // Line Awesome Complete - فایل CSS کامل و مستقل - check if file exists
+        $line_awesome_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-line-awesome-complete.css';
+        if (file_exists($line_awesome_path)) {
+            wp_enqueue_style('maneli-line-awesome-complete', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css', [], '1.0.0');
+        }
         
-        // Global styles and libraries
-        wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', ['maneli-line-awesome-complete'], $css_version);
-        wp_enqueue_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
+        // Global styles and libraries - Check if frontend.css exists before enqueuing
+        $frontend_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css';
+        if (file_exists($frontend_css_path)) {
+            $css_version = filemtime($frontend_css_path);
+            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', ['maneli-line-awesome-complete'], $css_version);
+        } else {
+            // Use maneli-shortcode-assets.css as fallback if frontend.css doesn't exist
+            $fallback_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-shortcode-assets.css';
+            if (file_exists($fallback_css_path)) {
+                $css_version = filemtime($fallback_css_path);
+                wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-shortcode-assets.css', ['maneli-line-awesome-complete'], $css_version);
+            }
+        }
+        
+        // Shortcode Xintra compat - check if file exists
+        $xintra_compat_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
+        if (file_exists($xintra_compat_path)) {
+            wp_enqueue_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
+        }
+        
+        // Separate CSS files for shortcodes
+        wp_enqueue_style('maneli-loan-calculator', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css', ['maneli-frontend-styles'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css'));
+        wp_enqueue_style('maneli-installment-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/installment-inquiry.css', ['maneli-frontend-styles'], '1.0.0');
+        wp_enqueue_style('maneli-cash-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/cash-inquiry.css', ['maneli-frontend-styles'], '1.0.0');
+        
+        // Bootstrap RTL
         wp_enqueue_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
         
         // Enqueue jQuery (required for all scripts)
         wp_enqueue_script('jquery');
         
-        // Enqueue SweetAlert2 with jQuery dependency
-        wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+        // Enqueue SweetAlert2 with jQuery dependency - Use local version
+        $sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+        if (file_exists($sweetalert2_path)) {
+            wp_enqueue_style('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+            wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+        } else {
+            // Fallback to CDN if local file doesn't exist
+            wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+        }
+        
+        // NOTE: calculator.js is enqueued conditionally by Maneli_Loan_Calculator_Shortcode
+        // Only on product pages to ensure proper localization and avoid duplicate loading
 
         
         // Conditionally load assets for pages containing specific shortcodes that need Select2
         global $post;
         if (is_a($post, 'WP_Post') && $this->post_has_shortcodes($post)) {
+             // Note: Select2 is not available locally, keep CDN
              wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
              wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
         }

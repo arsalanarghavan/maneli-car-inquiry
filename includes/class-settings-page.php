@@ -117,18 +117,58 @@ class Maneli_Settings_Page {
 
         switch ($type) {
             case 'textarea':
-                echo "<textarea name='" . esc_attr($field_name) . "' id='" . esc_attr($this->options_name . '_' . $name) . "' rows='5' class='large-text'>" . esc_textarea($value) . "</textarea>";
+                echo "<textarea name='" . esc_attr($field_name) . "' id='" . esc_attr($this->options_name . '_' . $name) . "' rows='3' class='form-control'>" . esc_textarea($value) . "</textarea>";
                 break;
             case 'switch':
                 echo '<label class="maneli-switch">';
                 echo "<input type='checkbox' name='" . esc_attr($field_name) . "' value='1' " . checked('1', $value, false) . '>';
                 echo '<span class="maneli-slider round"></span></label>';
                 break;
+            case 'multiselect':
+                // Handle multi-select field for excluded days
+                if ($name === 'meetings_excluded_days') {
+                    $days = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+                    $day_labels = [
+                        'saturday' => esc_html__('Saturday', 'maneli-car-inquiry'),
+                        'sunday' => esc_html__('Sunday', 'maneli-car-inquiry'),
+                        'monday' => esc_html__('Monday', 'maneli-car-inquiry'),
+                        'tuesday' => esc_html__('Tuesday', 'maneli-car-inquiry'),
+                        'wednesday' => esc_html__('Wednesday', 'maneli-car-inquiry'),
+                        'thursday' => esc_html__('Thursday', 'maneli-car-inquiry'),
+                        'friday' => esc_html__('Friday', 'maneli-car-inquiry'),
+                    ];
+                    
+                    // Value might be array or comma-separated string
+                    $selected = is_array($value) ? $value : (empty($value) ? [] : explode(',', $value));
+                    
+                    echo '<div class="row g-2">';
+                    foreach ($days as $day) {
+                        echo '<div class="col-6 col-md-4">';
+                        echo '<label class="form-check">';
+                        echo '<input type="checkbox" name="' . esc_attr($field_name) . '[]" value="' . esc_attr($day) . '" class="form-check-input" ' . checked(in_array($day, $selected), true, false) . '>';
+                        echo '<span class="form-check-label">' . esc_html($day_labels[$day]) . '</span>';
+                        echo '</label>';
+                        echo '</div>';
+                    }
+                    echo '</div>';
+                } else {
+                    // Generic multi-select
+                    $options = $args['options'] ?? [];
+                    echo '<select name="' . esc_attr($field_name) . '[]" id="' . esc_attr($this->options_name . '_' . $name) . '" class="form-select" multiple>';
+                    foreach ($options as $opt_val => $opt_label) {
+                        $selected = is_array($value) ? in_array($opt_val, $value) : ($value == $opt_val);
+                        echo '<option value="' . esc_attr($opt_val) . '" ' . selected($selected, true, false) . '>' . esc_html($opt_label) . '</option>';
+                    }
+                    echo '</select>';
+                }
+                break;
             case 'html':
                  // برای نوع 'html'، محتوا در کلید 'desc' است.
                  break;
             default: // شامل text, number, password و غیره
-                echo "<input type='" . esc_attr($type) . "' name='" . esc_attr($field_name) . "' id='" . esc_attr($this->options_name . '_' . $name) . "' value='" . esc_attr($value) . "' class='regular-text' dir='ltr'>";
+                $input_class = 'form-control';
+                $dir = ($type === 'password' || $type === 'number' || $type === 'email') ? 'dir="ltr"' : '';
+                echo "<input type='" . esc_attr($type) . "' name='" . esc_attr($field_name) . "' id='" . esc_attr($this->options_name . '_' . $name) . "' value='" . esc_attr($value) . "' class='" . esc_attr($input_class) . "' " . $dir . ">";
                 break;
         }
 
@@ -137,7 +177,7 @@ class Maneli_Settings_Page {
             if ($type === 'html') {
                  echo wp_kses_post($args['desc']);
             } else {
-                 echo "<p class='description'>" . wp_kses_post($args['desc']) . "</p>";
+                 echo "<p class='description text-muted fs-12 mt-1 mb-0'>" . wp_kses_post($args['desc']) . "</p>";
             }
         }
     }
@@ -165,15 +205,53 @@ class Maneli_Settings_Page {
                     if (isset($input[$key])) {
                         $value = $input[$key];
                         
+                        // Handle dashboard password - hash it if provided
+                        if ($key === 'dashboard_password' && !empty($value)) {
+                            // Check if it's already hashed (old password from database)
+                            $old_password = $old_options['dashboard_password'] ?? '';
+                            
+                            // If new password is different from old one, hash it
+                            if ($value !== $old_password) {
+                                $value = password_hash(sanitize_text_field($value), PASSWORD_DEFAULT);
+                            } else {
+                                // Keep the old hashed password
+                                $value = $old_password;
+                            }
+                        }
                         // رمزنگاری فیلدهای حساس
-                        if (in_array($key, $sensitive_keys, true)) {
+                        elseif (in_array($key, $sensitive_keys, true)) {
                             if (!empty($value)) {
                                 $value = $this->encrypt_data(sanitize_text_field($value));
                             } else {
                                 $value = '';
                             }
                         } elseif ($field['type'] === 'number' && ($key === 'loan_interest_rate' || $key === 'inquiry_fee')) {
-                            $value = sanitize_text_field($value);
+                            // Proper validation for numeric fields
+                            if ($key === 'loan_interest_rate') {
+                                $value = floatval($value);
+                                if ($value < 0 || $value > 1) {
+                                    $value = 0.035; // Default 3.5% monthly
+                                }
+                            } elseif ($key === 'inquiry_fee') {
+                                $value = intval($value);
+                                if ($value < 0) {
+                                    $value = 0;
+                                }
+                            }
+                        } elseif ($field['type'] === 'multiselect') {
+                            // Handle multiselect field - validate array values
+                            if (is_array($value)) {
+                                $valid_days = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+                                if ($key === 'meetings_excluded_days') {
+                                    // Filter to only valid day values
+                                    $value = array_intersect($value, $valid_days);
+                                } else {
+                                    // Generic multiselect - sanitize each value
+                                    $value = array_map('sanitize_text_field', $value);
+                                }
+                            } else {
+                                $value = [];
+                            }
                         } else {
                             $value = ($field['type'] === 'textarea') ? sanitize_textarea_field($value) : sanitize_text_field($value);
                         }
@@ -185,6 +263,11 @@ class Maneli_Settings_Page {
                     // مدیریت فیلدهای Switch که در صورت Uncheck بودن در POST وجود ندارند.
                     if ($field['type'] === 'switch' && !isset($input[$key])) {
                         $sanitized_input[$key] = '0';
+                    }
+                    
+                    // مدیریت فیلدهای multiselect که اگر چیزی انتخاب نشده در POST وجود ندارند.
+                    if ($field['type'] === 'multiselect' && !isset($input[$key])) {
+                        $sanitized_input[$key] = [];
                     }
                 }
             }
@@ -240,113 +323,6 @@ class Maneli_Settings_Page {
      */
     private function get_all_settings_fields() {
         return [
-            // THEME & STYLE TAB
-            'theme' => [
-                'title' => esc_html__('Theme & Style', 'maneli-car-inquiry'),
-                'icon' => 'fas fa-palette',
-                'sections' => [
-                    'maneli_theme_logos_section' => [
-                        'title' => esc_html__('Logo Settings', 'maneli-car-inquiry'),
-                        'desc' => esc_html__('Upload different versions of your logo for various display modes.', 'maneli-car-inquiry'),
-                        'fields' => [
-                            [
-                                'name' => 'theme_logo_desktop',
-                                'label' => esc_html__('Desktop Logo (Light Mode)', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'desc' => esc_html__('Main logo for desktop view in light mode.', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_logo_desktop-dark',
-                                'label' => esc_html__('Desktop Logo (Dark Mode)', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'desc' => esc_html__('Logo for desktop view in dark mode.', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_logo_desktop-white',
-                                'label' => esc_html__('Desktop Logo (White)', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'desc' => esc_html__('White version of logo for desktop.', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_logo_toggle',
-                                'label' => esc_html__('Mobile/Toggle Logo (Light Mode)', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'desc' => esc_html__('Logo for collapsed sidebar/mobile view in light mode.', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_logo_toggle-dark',
-                                'label' => esc_html__('Mobile/Toggle Logo (Dark Mode)', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'desc' => esc_html__('Logo for collapsed sidebar/mobile view in dark mode.', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_logo_toggle-white',
-                                'label' => esc_html__('Mobile/Toggle Logo (White)', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'desc' => esc_html__('White version of logo for mobile/toggle.', 'maneli-car-inquiry')
-                            ],
-                        ]
-                    ],
-                    'maneli_theme_colors_section' => [
-                        'title' => esc_html__('Color Settings', 'maneli-car-inquiry'),
-                        'desc' => esc_html__('Customize the color scheme of your dashboard.', 'maneli-car-inquiry'),
-                        'fields' => [
-                            [
-                                'name' => 'theme_primary_color',
-                                'label' => esc_html__('Primary Color', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'default' => '#5c67f7',
-                                'desc' => esc_html__('Main theme color (hex format: #5c67f7)', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_secondary_color',
-                                'label' => esc_html__('Secondary Color', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'default' => '#9e5cf7',
-                                'desc' => esc_html__('Secondary theme color (hex format: #9e5cf7)', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_header_bg',
-                                'label' => esc_html__('Header Background Color', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'default' => '#ffffff',
-                                'desc' => esc_html__('Background color for header (hex format: #ffffff)', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_menu_bg',
-                                'label' => esc_html__('Menu Background Color', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'default' => '#ffffff',
-                                'desc' => esc_html__('Background color for sidebar menu (hex format: #ffffff)', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_menu_dark_mode',
-                                'label' => esc_html__('Menu Dark Mode', 'maneli-car-inquiry'),
-                                'type' => 'switch',
-                                'default' => '1',
-                                'desc' => esc_html__('Enable dark mode for sidebar menu', 'maneli-car-inquiry')
-                            ],
-                        ]
-                    ],
-                    'maneli_theme_general_section' => [
-                        'title' => esc_html__('General Theme Settings', 'maneli-car-inquiry'),
-                        'fields' => [
-                            [
-                                'name' => 'theme_site_title',
-                                'label' => esc_html__('Site Title', 'maneli-car-inquiry'),
-                                'type' => 'text',
-                                'desc' => esc_html__('Custom site title for dashboard (leave empty to use WordPress site name)', 'maneli-car-inquiry')
-                            ],
-                            [
-                                'name' => 'theme_footer_text',
-                                'label' => esc_html__('Footer Text', 'maneli-car-inquiry'),
-                                'type' => 'textarea',
-                                'desc' => esc_html__('Custom footer text (HTML allowed)', 'maneli-car-inquiry')
-                            ],
-                        ]
-                    ]
-                ]
-            ],
             // NEW TAB
             'finance' => [
                 'title' => esc_html__('Finance & Calculator', 'maneli-car-inquiry'),
@@ -361,6 +337,18 @@ class Maneli_Settings_Page {
                                 'type' => 'text', // Use text to allow decimals better, will sanitize as text
                                 'default' => '0.035', 
                                 'desc' => esc_html__('Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in all installment calculations.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_price_display_section' => [
+                        'title' => esc_html__('Price Display Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'hide_prices_for_customers', 
+                                'label' => esc_html__('Hide Prices from Customers', 'maneli-car-inquiry'), 
+                                'type' => 'switch', 
+                                'default' => '0',
+                                'desc' => esc_html__('If enabled, all product prices will be hidden from customers on the website. Note: Unavailable products will still show "ناموجود" text.', 'maneli-car-inquiry')
                             ],
                         ]
                     ]
@@ -409,6 +397,18 @@ class Maneli_Settings_Page {
                 'title' => esc_html__('Authentication', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-shield-alt',
                 'sections' => [
+                    'maneli_dashboard_security_section' => [
+                        'title' => esc_html__('Dashboard Security', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure dashboard access credentials.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'dashboard_password',
+                                'label' => esc_html__('Dashboard Password', 'maneli-car-inquiry'),
+                                'type' => 'password',
+                                'desc' => esc_html__('Password for dashboard login. This field is required - no default password is provided for security reasons.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
                     'maneli_otp_settings_section' => [
                         'title' => esc_html__('OTP Authentication Settings', 'maneli-car-inquiry'),
                         'desc' => esc_html__('Configure One-Time Password (OTP) settings for login authentication.', 'maneli-car-inquiry'),
@@ -539,6 +539,12 @@ class Maneli_Settings_Page {
                         'fields' => [
                              ['name' => 'installment_rejection_reasons', 'label' => esc_html__('Predefined Rejection Reasons', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request.', 'maneli-car-inquiry')],
                         ]
+                    ],
+                    'maneli_installment_required_documents_section' => [
+                        'title' => esc_html__('Required Documents', 'maneli-car-inquiry'),
+                        'fields' => [
+                             ['name' => 'installment_required_documents', 'label' => esc_html__('Document List', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one document name per line. These will be shown to the manager when requesting additional documents from customers.', 'maneli-car-inquiry')],
+                        ]
                     ]
                 ]
             ],
@@ -579,6 +585,7 @@ class Maneli_Settings_Page {
                             ['name' => 'meetings_start_hour', 'label' => esc_html__('Workday Start (HH:MM)', 'maneli-car-inquiry'), 'type' => 'text', 'default' => '10:00'],
                             ['name' => 'meetings_end_hour',   'label' => esc_html__('Workday End (HH:MM)', 'maneli-car-inquiry'),   'type' => 'text', 'default' => '20:00'],
                             ['name' => 'meetings_slot_minutes','label' => esc_html__('Slot Duration (minutes)', 'maneli-car-inquiry'), 'type' => 'number', 'default' => '30'],
+                            ['name' => 'meetings_excluded_days', 'label' => esc_html__('Excluded Days', 'maneli-car-inquiry'), 'type' => 'multiselect', 'default' => [], 'desc' => esc_html__('Select days when meetings cannot be scheduled', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]

@@ -158,8 +158,11 @@
     }
   }
 
-  var chart = new ApexCharts(document.querySelector("#sales-overview"), options);
-  chart.render();
+  const salesOverviewEl = document.querySelector("#sales-overview");
+  if (salesOverviewEl) {
+    var chart = new ApexCharts(salesOverviewEl, options);
+    chart.render();
+  }
   /* Sales Overview */
 
   /* Order Statistics */
@@ -239,8 +242,11 @@
     },
     colors: ["var(--primary-color)", "rgba(227, 84, 212, 1)", "rgba(255, 93, 159, 1)", "rgba(255, 142, 111, 1)"],
   };
-  var chart = new ApexCharts(document.querySelector("#orders"), options);
-  chart.render();
+  const ordersEl = document.querySelector("#orders");
+  if (ordersEl) {
+    var chart = new ApexCharts(ordersEl, options);
+    chart.render();
+  }
   /* Order Statistics */
 
   /* Sales Statistics */
@@ -297,8 +303,11 @@
     colors: ["var(--primary-color)", "rgba(227, 84, 212, 1)", "rgba(255, 142, 111, 1)"],
     labels: ['شنبه', 'یکشنبه', 'دوشنبه', 'سه شنبه', 'چهارشنبه', 'پنج شنبه', 'جمعه'],
   };
-  var chart1 = new ApexCharts(document.querySelector("#sales-statistics"), options);
-  chart1.render();
+  const salesStatisticsEl = document.querySelector("#sales-statistics");
+  if (salesStatisticsEl) {
+    var chart1 = new ApexCharts(salesStatisticsEl, options);
+    chart1.render();
+  }
   /* Sales Statistics */
 
    // linegraph1
@@ -338,8 +347,11 @@
     },
     colors: ['rgb(126, 103, 221)'],
 };
-var chart = new ApexCharts(document.querySelector("#line-graph1"), options);
-chart.render();
+const lineGraph1El = document.querySelector("#line-graph1");
+if (lineGraph1El) {
+  var chart = new ApexCharts(lineGraph1El, options);
+  chart.render();
+}
 
 //linegarph2
 var options = {
@@ -378,8 +390,11 @@ var options = {
     },
     colors: ['rgb(227, 84, 212)'],
 };
-var chart = new ApexCharts(document.querySelector("#line-graph2"), options);
-chart.render();
+const lineGraph2El = document.querySelector("#line-graph2");
+if (lineGraph2El) {
+  var chart = new ApexCharts(lineGraph2El, options);
+  chart.render();
+}
 
 //linegraph3
 var options = {
@@ -418,8 +433,11 @@ var options = {
     },
     colors: ['rgb(255, 93, 159)'],
 };
-var chart = new ApexCharts(document.querySelector("#line-graph3"), options);
-chart.render();
+const lineGraph3El = document.querySelector("#line-graph3");
+if (lineGraph3El) {
+  var chart = new ApexCharts(lineGraph3El, options);
+  chart.render();
+}
 
 //linegraph4
 var options = {
@@ -458,8 +476,11 @@ var options = {
     },
     colors: ['rgb(255, 142, 111)'],
 };
-var chart = new ApexCharts(document.querySelector("#line-graph4"), options);
-chart.render();
+const lineGraph4El = document.querySelector("#line-graph4");
+if (lineGraph4El) {
+  var chart = new ApexCharts(lineGraph4El, options);
+  chart.render();
+}
 
 //linegraph5
 var options = {
@@ -498,7 +519,10 @@ var options = {
     },
     colors: ['rgb(158, 92, 247)'],
 };
-var chart = new ApexCharts(document.querySelector("#line-graph5"), options);
-chart.render();
+const lineGraph5El = document.querySelector("#line-graph5");
+if (lineGraph5El) {
+  var chart = new ApexCharts(lineGraph5El, options);
+  chart.render();
+}
 
 })();

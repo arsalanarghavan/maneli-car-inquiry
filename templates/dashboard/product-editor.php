@@ -7,18 +7,8 @@
 
 // Permission check - Only Admin can access
 if (!current_user_can('manage_maneli_inquiries')) {
-    ?>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <strong>دسترسی محدود!</strong> شما به این صفحه دسترسی ندارید.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    </div>
-    <?php
-    return;
+    wp_redirect(home_url('/dashboard'));
+    exit;
 }
 
 // استفاده از همان لاجیک shortcode قدیمی
@@ -40,6 +30,8 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
     $published_count = $total_products->publish ?? 0;
 }
 ?>
+?><div class="main-content app-content">
+    <div class="container-fluid">
 
 <div class="row">
     <div class="col-xl-12">
@@ -77,7 +69,7 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                             <span class="input-group-text">
                                 <i class="la la-search"></i>
                             </span>
-                            <input type="search" id="product-search-input" class="form-control" placeholder="جستجوی نام خودرو...">
+                            <input type="search" id="product-search-input" class="form-control" placeholder="<?php esc_attr_e('Search car name...', 'maneli-car-inquiry'); ?>">
                         </div>
                     </div>
                 </div>
@@ -138,3 +130,5 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
 </div>
 <!-- End::row -->
 
+</div>
+</div>

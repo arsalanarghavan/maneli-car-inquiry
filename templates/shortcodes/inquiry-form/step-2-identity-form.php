@@ -162,8 +162,8 @@ $loan_amount = (int)$total_price - (int)$down_payment;
                                 <select name="job_type" id="buyer_job_type" class="form-select">
                                     <?php $saved_job_type = get_user_meta($user_id, 'job_type', true); ?>
                                     <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>
-                                    <option value="self" <?php selected($saved_job_type, 'self'); ?>><?php esc_html_e('آزاد', 'maneli-car-inquiry'); ?></option>
-                                    <option value="employee" <?php selected($saved_job_type, 'employee'); ?>><?php esc_html_e('کارمند', 'maneli-car-inquiry'); ?></option>
+                                    <option value="self" <?php selected($saved_job_type, 'self'); ?>><?php esc_html_e('Self-employed', 'maneli-car-inquiry'); ?></option>
+                                    <option value="employee" <?php selected($saved_job_type, 'employee'); ?>><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
                                 </select>
                             </div>
                             <div class="col-md-6 buyer-job-title-wrapper" style="display:none;">
@@ -262,8 +262,8 @@ $loan_amount = (int)$total_price - (int)$down_payment;
                                 <label class="form-label"><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?>:</label>
                                 <select name="issuer_job_type" id="issuer_job_type" class="form-select">
                                     <option value=""><?php esc_html_e('-- Select --', 'maneli-car-inquiry'); ?></option>
-                                    <option value="self"><?php esc_html_e('آزاد', 'maneli-car-inquiry'); ?></option>
-                                    <option value="employee"><?php esc_html_e('کارمند', 'maneli-car-inquiry'); ?></option>
+                                    <option value="self"><?php esc_html_e('Self-employed', 'maneli-car-inquiry'); ?></option>
+                                    <option value="employee"><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
                                 </select>
                             </div>
                             <div class="col-md-6 issuer-job-title-wrapper" style="display:none;">

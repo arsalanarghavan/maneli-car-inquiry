@@ -21,15 +21,15 @@ if (!defined('ABSPATH')) {
             <div class="card-header bg-info-transparent">
                 <div class="card-title">
                     <i class="la la-credit-card me-2 fs-20"></i>
-                    استعلامات خرید اقساطی من
+                    <?php esc_html_e('My Installment Purchase Inquiries', 'maneli-car-inquiry'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <div class="alert alert-info border-info d-flex align-items-start" role="alert">
                     <i class="la la-lightbulb fs-20 me-2 mt-1"></i>
                     <div>
-                        <strong>راهنما:</strong>
-                        پس از ثبت استعلام، کارشناس ما با شما تماس خواهد گرفت و مدارک مورد نیاز را راهنمایی خواهد کرد.
+                        <strong><?php esc_html_e('Guide:', 'maneli-car-inquiry'); ?></strong>
+                        <?php esc_html_e('After submitting your inquiry, our expert will contact you and guide you through the required documents.', 'maneli-car-inquiry'); ?>
                     </div>
                 </div>
 
@@ -39,11 +39,11 @@ if (!defined('ABSPATH')) {
                         <div class="mb-4">
                             <i class="la la-file-invoice" style="font-size: 80px; color: #dee2e6;"></i>
                         </div>
-                        <h5 class="text-muted mb-2">هنوز استعلام اقساطی ثبت نکرده‌اید</h5>
-                        <p class="text-muted mb-4">برای خرید اقساطی خودرو، از محاسبه‌گر وام استفاده کنید.</p>
-                        <a href="<?php echo home_url('/loan-calculator'); ?>" class="btn btn-info btn-wave">
+                        <h5 class="text-muted mb-2"><?php esc_html_e('No Installment Inquiries Yet', 'maneli-car-inquiry'); ?></h5>
+                        <p class="text-muted mb-4"><?php esc_html_e('To purchase a car with installments, use the loan calculator.', 'maneli-car-inquiry'); ?></p>
+                        <a href="<?php echo esc_url(home_url('/loan-calculator')); ?>" class="btn btn-info btn-wave">
                             <i class="la la-calculator me-1"></i>
-                            محاسبه‌گر وام
+                            <?php esc_html_e('Loan Calculator', 'maneli-car-inquiry'); ?>
                         </a>
                     </div>
                 <?php else: ?>
@@ -51,11 +51,11 @@ if (!defined('ABSPATH')) {
                         <table class="table table-bordered table-hover">
                             <thead class="table-info">
                                 <tr>
-                                    <th><i class="la la-hashtag me-1"></i>شناسه</th>
-                                    <th><i class="la la-car me-1"></i>خودرو</th>
-                                    <th><i class="la la-info-circle me-1"></i>وضعیت</th>
-                                    <th><i class="la la-calendar me-1"></i>تاریخ ثبت</th>
-                                    <th><i class="la la-wrench me-1"></i>عملیات</th>
+                                    <th><i class="la la-hashtag me-1"></i><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-car me-1"></i><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-info-circle me-1"></i><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-calendar me-1"></i><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-wrench me-1"></i><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -69,13 +69,13 @@ if (!defined('ABSPATH')) {
                                     $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
                                     
                                     $status_data = [
-                                        'pending' => ['label' => 'در انتظار بررسی', 'class' => 'warning'],
-                                        'user_confirmed' => ['label' => 'تایید و ارجاع شده', 'class' => 'success'],
-                                        'approved' => ['label' => 'تایید نهایی', 'class' => 'success'],
-                                        'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                        'more_docs' => ['label' => 'نیاز به مدارک', 'class' => 'warning'],
+                                        'pending' => ['label' => esc_html__('Pending Review', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                        'user_confirmed' => ['label' => esc_html__('Confirmed and Referred', 'maneli-car-inquiry'), 'class' => 'success'],
+                                        'approved' => ['label' => esc_html__('Final Approval', 'maneli-car-inquiry'), 'class' => 'success'],
+                                        'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
+                                        'more_docs' => ['label' => esc_html__('Documents Required', 'maneli-car-inquiry'), 'class' => 'warning'],
                                     ];
-                                    $badge = $status_data[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
+                                    $badge = $status_data[$status] ?? ['label' => esc_html__('Unknown', 'maneli-car-inquiry'), 'class' => 'secondary'];
                                     
                                     // Convert to Jalali
                                     $timestamp = strtotime(get_the_date('Y-m-d', $inquiry_id));
@@ -112,7 +112,7 @@ if (!defined('ABSPATH')) {
                                         <td>
                                             <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light">
                                                 <i class="la la-eye me-1"></i>
-                                                مشاهده جزئیات
+                                                <?php esc_html_e('View Details', 'maneli-car-inquiry'); ?>
                                             </a>
                                         </td>
                                     </tr>
@@ -131,8 +131,8 @@ if (!defined('ABSPATH')) {
                                     'format' => '?paged=%#%',
                                     'current' => max(1, get_query_var('paged')),
                                     'total' => $inquiries_query->max_num_pages,
-                                    'prev_text' => '<i class="la la-angle-right"></i> قبلی',
-                                    'next_text' => 'بعدی <i class="la la-angle-left"></i>',
+                                    'prev_text' => '<i class="la la-angle-right"></i> ' . esc_html__('Previous', 'maneli-car-inquiry'),
+                                    'next_text' => esc_html__('Next', 'maneli-car-inquiry') . ' <i class="la la-angle-left"></i>',
                                     'type' => 'plain',
                                     'before_page_number' => '<span class="btn btn-sm btn-light mx-1">',
                                     'after_page_number' => '</span>',

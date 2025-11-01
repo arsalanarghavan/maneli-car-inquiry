@@ -1,4 +1,3 @@
-<!-- Start::row -->
 <?php
 /**
  * Payments Management Page
@@ -7,467 +6,395 @@
 
 // Permission check - Only Admin can access
 if (!current_user_can('manage_maneli_inquiries')) {
-    ?>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <strong>دسترسی محدود!</strong> شما به این صفحه دسترسی ندارید.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    </div>
-    <?php
-    return;
+    wp_redirect(home_url('/dashboard'));
+    exit;
 }
+
+// Helper function to convert numbers to Persian
+if (!function_exists('persian_numbers')) {
+    function persian_numbers($str) {
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        return str_replace($english, $persian, $str);
+    }
+}
+
+// Get options
+$options = get_option('maneli_inquiry_all_options', []);
+$active_gateway = $options['active_gateway'] ?? 'zarinpal';
+$inquiry_fee = (int)($options['inquiry_fee'] ?? 0);
+
+// Get search and filter parameters
+$search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+$status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+$gateway_filter = isset($_GET['gateway']) ? sanitize_text_field($_GET['gateway']) : '';
+$payment_type_filter = isset($_GET['payment_type']) ? sanitize_text_field($_GET['payment_type']) : '';
+$paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+$per_page = 10;
+
+// Fetch payments
+$payments_list = [];
+
+// 1. Installment inquiries (payment type: inquiry_fee)
+// Only show inquiries where payment was actually completed (has inquiry_payment_completed meta)
+$installment_inquiries = get_posts([
+    'post_type' => 'inquiry',
+    'posts_per_page' => -1,
+    'post_status' => 'publish',
+    'orderby' => 'date',
+    'order' => 'DESC',
+    'meta_query' => [
+        [
+            'key' => 'inquiry_payment_completed',
+            'value' => 'yes',
+            'compare' => '='
+        ]
+    ]
+]);
+
+foreach ($installment_inquiries as $inquiry) {
+    $user_id = $inquiry->post_author;
+    $user = get_userdata($user_id);
+    if (!$user) continue;
+    
+    $product_id = get_post_meta($inquiry->ID, 'product_id', true);
+    $product = wc_get_product($product_id);
+    $mobile_number = get_user_meta($user_id, 'mobile_number', true);
+    
+    // Get the actual paid amount stored in meta (handles discount and free cases)
+    $paid_amount = get_post_meta($inquiry->ID, 'inquiry_paid_amount', true);
+    if ($paid_amount === '') {
+        // Fallback: if meta doesn't exist, calculate from current settings
+        $discount_applied = get_user_meta($user_id, 'maneli_discount_applied', true) === 'yes';
+        $paid_amount = ($discount_applied || $inquiry_fee == 0) ? 0 : $inquiry_fee;
+    } else {
+        $paid_amount = (int)$paid_amount;
+    }
+    
+    // Get payment date from meta if available, otherwise use post date
+    $payment_date = get_post_meta($inquiry->ID, 'inquiry_payment_date', true);
+    if (empty($payment_date)) {
+        $payment_date = $inquiry->post_date;
+    }
+    
+    $payments_list[] = [
+        'inquiry_id' => $inquiry->ID,
+        'inquiry_type' => 'installment',
+        'payment_type' => 'inquiry_fee',
+        'payment_type_label' => 'پرداخت هزینه استعلام',
+        'product_id' => $product_id,
+        'product_name' => $product ? $product->get_name() : '-',
+        'user_id' => $user_id,
+        'user_name' => $user->display_name,
+        'mobile_number' => $mobile_number,
+        'amount' => $paid_amount,
+        'gateway' => $active_gateway,
+        'gateway_label' => $active_gateway === 'zarinpal' ? 'درگاه زرین پال' : ($active_gateway === 'sadad' ? 'درگاه سداد' : 'درگاه بانکی'),
+        'payment_date' => $payment_date,
+        'status' => 'completed'
+    ];
+}
+
+// 2. Cash inquiries with downpayment (payment type: cash_down_payment)
+$cash_inquiries = get_posts([
+    'post_type' => 'cash_inquiry',
+    'posts_per_page' => -1,
+    'post_status' => 'publish',
+    'orderby' => 'date',
+    'order' => 'DESC',
+    'meta_query' => [
+        [
+            'key' => 'downpayment_paid_date',
+            'compare' => 'EXISTS'
+        ]
+    ]
+]);
+
+foreach ($cash_inquiries as $inquiry) {
+    $user_id = $inquiry->post_author;
+    $user = get_userdata($user_id);
+    if (!$user) continue;
+    
+    $product_id = get_post_meta($inquiry->ID, 'product_id', true);
+    $product = wc_get_product($product_id);
+    $mobile_number = get_user_meta($user_id, 'mobile_number', true);
+    $downpayment = get_post_meta($inquiry->ID, 'cash_down_payment', true);
+    $payment_date = get_post_meta($inquiry->ID, 'downpayment_paid_date', true);
+    
+    $payments_list[] = [
+        'inquiry_id' => $inquiry->ID,
+        'inquiry_type' => 'cash',
+        'payment_type' => 'cash_down_payment',
+        'payment_type_label' => 'پیش پرداخت خودروی نقدی',
+        'product_id' => $product_id,
+        'product_name' => $product ? $product->get_name() : '-',
+        'user_id' => $user_id,
+        'user_name' => $user->display_name,
+        'mobile_number' => $mobile_number,
+        'amount' => (int)$downpayment,
+        'gateway' => $active_gateway,
+        'gateway_label' => $active_gateway === 'zarinpal' ? 'درگاه زرین پال' : ($active_gateway === 'sadad' ? 'درگاه سداد' : 'درگاه بانکی'),
+        'payment_date' => $payment_date ?: $inquiry->post_date,
+        'status' => 'completed'
+    ];
+}
+
+// Apply filters
+if ($search) {
+    $payments_list = array_filter($payments_list, function($payment) use ($search) {
+        return stripos($payment['inquiry_id'], $search) !== false ||
+               stripos($payment['user_name'], $search) !== false ||
+               stripos($payment['mobile_number'], $search) !== false ||
+               stripos($payment['product_name'], $search) !== false;
+    });
+}
+
+if ($status_filter) {
+    $payments_list = array_filter($payments_list, function($payment) use ($status_filter) {
+        return $payment['status'] === $status_filter;
+    });
+}
+
+if ($gateway_filter) {
+    $payments_list = array_filter($payments_list, function($payment) use ($gateway_filter) {
+        return $payment['gateway'] === $gateway_filter;
+    });
+}
+
+if ($payment_type_filter) {
+    $payments_list = array_filter($payments_list, function($payment) use ($payment_type_filter) {
+        return $payment['payment_type'] === $payment_type_filter;
+    });
+}
+
+// Sort by payment date (newest first)
+usort($payments_list, function($a, $b) {
+    return strtotime($b['payment_date']) - strtotime($a['payment_date']);
+});
+
+// Pagination
+$total_payments = count($payments_list);
+$total_pages = ceil($total_payments / $per_page);
+$offset = ($paged - 1) * $per_page;
+$payments_list = array_slice($payments_list, $offset, $per_page);
+
+// Statistics
+$total_amount = array_sum(array_column($payments_list, 'amount'));
 ?>
 
-<div class="row">
-    <div class="col-xl-12">
-        <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <?php
-            global $wpdb;
-            
-            // Total payments count
-            $total_payments = $wpdb->get_var("SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status'");
-            
-            // Count by status
-            $completed_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'completed'");
-            $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'pending'");
-            $failed_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'failed'");
-            $cancelled_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'cancelled'");
-            $refunded_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_status' AND meta_value = 'refunded'");
-            
-            // Amount calculations
-            $total_amount = $wpdb->get_var("SELECT SUM(CAST(meta_value AS UNSIGNED)) FROM {$wpdb->postmeta} WHERE meta_key = 'payment_amount'") ?: 0;
-            $completed_amount = $wpdb->get_var("
-                SELECT SUM(CAST(pm_amount.meta_value AS UNSIGNED)) 
-                FROM {$wpdb->postmeta} pm_status
-                INNER JOIN {$wpdb->postmeta} pm_amount ON pm_status.post_id = pm_amount.post_id 
-                WHERE pm_status.meta_key = 'payment_status' 
-                AND pm_status.meta_value = 'completed' 
-                AND pm_amount.meta_key = 'payment_amount'
-            ") ?: 0;
-            $pending_amount = $wpdb->get_var("
-                SELECT SUM(CAST(pm_amount.meta_value AS UNSIGNED)) 
-                FROM {$wpdb->postmeta} pm_status
-                INNER JOIN {$wpdb->postmeta} pm_amount ON pm_status.post_id = pm_amount.post_id 
-                WHERE pm_status.meta_key = 'payment_status' 
-                AND pm_status.meta_value = 'pending' 
-                AND pm_amount.meta_key = 'payment_amount'
-            ") ?: 0;
-            
-            // Today's payments
-            $today_start = date('Y-m-d 00:00:00');
-            $today_end = date('Y-m-d 23:59:59');
-            $today_payments = $wpdb->get_var($wpdb->prepare("
-                SELECT COUNT(DISTINCT p.ID)
-                FROM {$wpdb->posts} p
-                INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-                WHERE pm.meta_key = 'payment_status'
-                AND p.post_date >= %s
-                AND p.post_date <= %s
-            ", $today_start, $today_end));
-            
-            $today_amount = $wpdb->get_var($wpdb->prepare("
-                SELECT SUM(CAST(pm_amount.meta_value AS UNSIGNED))
-                FROM {$wpdb->posts} p
-                INNER JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id
-                INNER JOIN {$wpdb->postmeta} pm_amount ON p.ID = pm_amount.post_id
-                WHERE pm_status.meta_key = 'payment_status'
-                AND pm_status.meta_value = 'completed'
-                AND pm_amount.meta_key = 'payment_amount'
-                AND p.post_date >= %s
-                AND p.post_date <= %s
-            ", $today_start, $today_end)) ?: 0;
-            ?>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-primary-transparent">
-                                    <i class="la la-list-alt fs-24"></i>
-                                </span>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">کل پرداخت‌ها</span>
-                                </div>
-                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($total_payments); ?></h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-success-transparent">
-                                    <i class="la la-check-circle fs-24"></i>
-                                </span>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">موفق</span>
-                                </div>
-                                <h4 class="fw-semibold mb-0 text-success"><?php echo number_format_i18n($completed_count); ?></h4>
-                                <?php if ($completed_amount > 0): ?>
-                                    <small class="text-muted d-block mt-1"><?php echo number_format_i18n($completed_amount); ?> تومان</small>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-warning-transparent">
-                                    <i class="la la-clock fs-24"></i>
-                                </span>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">در انتظار</span>
-                                </div>
-                                <h4 class="fw-semibold mb-0 text-warning"><?php echo number_format_i18n($pending_count); ?></h4>
-                                <?php if ($pending_amount > 0): ?>
-                                    <small class="text-muted d-block mt-1"><?php echo number_format_i18n($pending_amount); ?> تومان</small>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-danger-transparent">
-                                    <i class="la la-times-circle fs-24"></i>
-                                </span>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">ناموفق</span>
-                                </div>
-                                <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($failed_count); ?></h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-secondary-transparent">
-                                    <i class="la la-times-circle fs-24"></i>
-                                </span>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">لغو شده</span>
-                                </div>
-                                <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($cancelled_count); ?></h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-info-transparent">
-                                    <i class="la la-reply fs-24"></i>
-                                </span>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">برگشت داده شده</span>
-                                </div>
-                                <h4 class="fw-semibold mb-0 text-info"><?php echo number_format_i18n($refunded_count); ?></h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <span class="avatar avatar-md bg-cyan-transparent">
-                                    <i class="la la-calendar-check fs-24"></i>
-                                </span>
-                            </div>
-                            <div class="flex-fill">
-                                <div class="mb-1">
-                                    <span class="text-muted fs-13">امروز</span>
-                                </div>
-                                <h4 class="fw-semibold mb-0 text-cyan"><?php echo number_format_i18n($today_payments); ?></h4>
-                                <?php if ($today_amount > 0): ?>
-                                    <small class="text-muted d-block mt-1"><?php echo number_format_i18n($today_amount); ?> تومان</small>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="card custom-card bg-gradient-success">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <div>
-                                <h6 class="text-white mb-2">
-                                    <i class="la la-wallet fs-20 me-1"></i>
-                                    کل مبلغ (تومان)
-                                </h6>
-                                <h3 class="fw-bold mb-0 text-white"><?php echo number_format_i18n($total_amount); ?></h3>
-                            </div>
-                            <div>
-                                <span class="avatar avatar-lg bg-white-transparent">
-                                    <i class="la la-wallet fs-32"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="main-content app-content">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+            <div>
+                <nav>
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?></li>
+                    </ol>
+                </nav>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?></h1>
             </div>
         </div>
-
-        <!-- Main Card -->
-        <div class="card custom-card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="card-title">
-                    <i class="la la-money-bill-wave me-2"></i>
-                    مدیریت پرداخت‌ها
-                </div>
-                <div class="btn-list">
-                    <button class="btn btn-success" onclick="refreshPayments()">
-                        <i class="la la-sync me-1"></i>
-                        بروزرسانی
-                    </button>
-                </div>
-            </div>
-            <div class="card-body">
-                <!-- Filters -->
-                <div class="row mb-4 g-3">
-                    <div class="col-md-3">
-                        <label class="form-label fw-semibold">
-                            <i class="la la-filter me-1"></i>
-                            وضعیت:
-                        </label>
-                        <select class="form-select" id="payment-status">
-                            <option value="">همه وضعیت‌ها</option>
-                            <option value="completed">تکمیل شده</option>
-                            <option value="pending">در انتظار</option>
-                            <option value="failed">ناموفق</option>
-                            <option value="cancelled">لغو شده</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-semibold">
-                            <i class="la la-credit-card me-1"></i>
-                            درگاه:
-                        </label>
-                        <select class="form-select" id="payment-gateway">
-                            <option value="">همه درگاه‌ها</option>
-                            <option value="zarinpal">زرین‌پال</option>
-                            <option value="sadad">سداد</option>
-                            <option value="bank">بانکی</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">
-                            <i class="la la-search me-1"></i>
-                            جستجو:
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light">
-                                <i class="la la-search"></i>
-                            </span>
-                            <input type="text" class="form-control" id="payment-search" placeholder="جستجوی شناسه، مبلغ...">
-                            <button class="btn btn-primary" onclick="filterPayments()">
-                                فیلتر
-                            </button>
+        <!-- Page Header Close -->
+            
+        <!-- Start::row-1 -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card custom-card">
+                    <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="card-title">
+                            <?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?>
+                        </div>
+                        <div class="btn-list">
+                            <div class="custom-form-group flex-grow-1 me-2">
+                                <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search payments...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>" id="payment-search-input">
+                                <a href="javascript:void(0);" class="text-muted custom-form-btn" onclick="filterPayments()"><i class="ti ti-search"></i></a>
+                            </div>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-primary-light btn-sm btn-wave" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="ri-filter-3-line align-middle me-1 d-inline-block"></i><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?>
+                                </button>
+                                <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="<?php echo esc_url(home_url('/dashboard/payments')); ?>"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></a></li>
+                                <li><a class="dropdown-item" href="<?php echo esc_url(add_query_arg(['payment_type' => 'inquiry_fee'], home_url('/dashboard/payments'))); ?>"><?php esc_html_e('Inquiry Fee Payment', 'maneli-car-inquiry'); ?></a></li>
+                                <li><a class="dropdown-item" href="<?php echo esc_url(add_query_arg(['payment_type' => 'cash_down_payment'], home_url('/dashboard/payments'))); ?>"><?php esc_html_e('Cash Car Down Payment', 'maneli-car-inquiry'); ?></a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"><?php esc_html_e('Inquiry ID', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Mobile', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Payment Date', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Payment Type', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Payment Method', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Amount', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if (empty($payments_list)): ?>
+                                        <tr>
+                                            <td colspan="9" class="text-center py-4">
+                                                <div class="text-muted">
+                                                    <i class="la la-inbox fs-48 mb-3 d-block"></i>
+                                                    پرداختی یافت نشد
                 </div>
-
-                <!-- Table -->
-                <div class="table-responsive">
-                    <table id="payments-table" class="table table-bordered table-hover text-nowrap">
-                        <thead class="table-primary">
-                            <tr>
-                                <th><i class="la la-hashtag me-1"></i>شناسه</th>
-                                <th><i class="la la-file-alt me-1"></i>استعلام</th>
-                                <th><i class="la la-money-bill me-1"></i>مبلغ</th>
-                                <th><i class="la la-credit-card me-1"></i>درگاه</th>
-                                <th><i class="la la-info-circle me-1"></i>وضعیت</th>
-                                <th><i class="la la-calendar me-1"></i>تاریخ</th>
-                                <th><i class="la la-wrench me-1"></i>عملیات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            // Get payment data from postmeta
-                            global $wpdb;
-
-                            $payments = $wpdb->get_results("
-                                SELECT pm.post_id, pm.meta_value as payment_data, p.post_title
-                                FROM {$wpdb->postmeta} pm
-                                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                                WHERE pm.meta_key = 'payment_data'
-                                AND p.post_type = 'inquiry'
-                                AND p.post_status = 'publish'
-                                ORDER BY p.post_date DESC
-                                LIMIT 20
-                            ");
-
-                            foreach ($payments as $payment) {
-                                $payment_data = maybe_unserialize($payment->meta_value);
-                                if (!$payment_data) continue;
-
-                                $status = isset($payment_data['status']) ? $payment_data['status'] : 'unknown';
-                                $amount = isset($payment_data['amount']) ? number_format($payment_data['amount']) : 'نامشخص';
-                                $gateway = isset($payment_data['gateway']) ? $payment_data['gateway'] : 'نامشخص';
-                                $date = isset($payment_data['date']) ? $payment_data['date'] : get_the_date('Y/m/d H:i', $payment->post_id);
-
-                                $status_badge = '';
-                                switch ($status) {
-                                    case 'completed':
-                                        $status_badge = '<span class="badge bg-success">تکمیل شده</span>';
-                                        break;
-                                    case 'pending':
-                                        $status_badge = '<span class="badge bg-warning">در انتظار</span>';
-                                        break;
-                                    case 'failed':
-                                        $status_badge = '<span class="badge bg-danger">ناموفق</span>';
-                                        break;
-                                    case 'cancelled':
-                                        $status_badge = '<span class="badge bg-secondary">لغو شده</span>';
-                                        break;
-                                    default:
-                                        $status_badge = '<span class="badge bg-info">نامشخص</span>';
-                                }
-                                ?>
-                                <tr>
-                                    <td><?php echo esc_html($payment->post_id); ?></td>
-                                    <td><?php echo esc_html($payment->post_title); ?></td>
-                                    <td><?php echo esc_html($amount); ?> تومان</td>
-                                    <td><?php echo esc_html($gateway); ?></td>
-                                    <td><?php echo $status_badge; ?></td>
-                                    <td><?php echo esc_html($date); ?></td>
-                                    <td>
-                                        <div class="btn-list">
-                                            <button class="btn btn-sm btn-primary-light" onclick="viewPaymentDetails(<?php echo $payment->post_id; ?>)" title="جزئیات">
-                                                <i class="la la-eye"></i>
-                                            </button>
-                                            <?php if ($status === 'completed'): ?>
-                                            <button class="btn btn-sm btn-warning-light" onclick="refundPayment(<?php echo $payment->post_id; ?>)" title="استرداد">
-                                                <i class="la la-undo"></i>
-                                            </button>
+                                            </td>
+                                        </tr>
+                                    <?php else: ?>
+                                        <?php foreach ($payments_list as $payment): ?>
+                                            <tr class="order-list">
+                                                <td>#<?php echo persian_numbers(esc_html($payment['inquiry_id'])); ?></td>
+                                                <td>
+                        <div class="d-flex align-items-center">
+                                                        <div class="ms-2">
+                                                            <p class="fw-semibold mb-0 d-flex align-items-center">
+                                                                <?php echo persian_numbers(esc_html($payment['product_name'])); ?>
+                                                            </p>
+                            </div>
+                        </div>
+                                                </td>
+                                                <td>
+                        <div class="d-flex align-items-center">
+                                                        <span class="fw-medium"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($payment['user_name'])) : esc_html($payment['user_name']); ?></span>
+                            </div>
+                                                </td>
+                                                <td>
+                                                    <?php if (!empty($payment['mobile_number'])): ?>
+                                                        <a href="tel:<?php echo esc_attr($payment['mobile_number']); ?>" class="text-primary text-decoration-none">
+                                                            <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($payment['mobile_number'])) : esc_html($payment['mobile_number']); ?>
+                                                        </a>
+                                                    <?php else: ?>
+                                                        <span class="text-muted">-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <?php
+                                                    $timestamp = strtotime($payment['payment_date']);
+                                                    if (function_exists('maneli_gregorian_to_jalali')) {
+                                                        echo persian_numbers(maneli_gregorian_to_jalali(
+                                                            date('Y', $timestamp),
+                                                            date('m', $timestamp),
+                                                            date('d', $timestamp),
+                                                            'Y/m/d'
+                                                        ));
+                                                    } else {
+                                                        echo persian_numbers(date_i18n('Y/m/d', $timestamp));
+                                                    }
+                                                    ?>
+                                                </td>
+                                                <td><?php echo esc_html($payment['payment_type_label']); ?></td>
+                                                <td><?php echo esc_html($payment['gateway_label']); ?></td>
+                                                <td class="fw-semibold">
+                                                    <?php if ($payment['amount'] > 0): ?>
+                                                        <?php echo persian_numbers(number_format_i18n($payment['amount'])); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?>
+                                                    <?php else: ?>
+                                                        <span class="text-success"><?php esc_html_e('Free!', 'maneli-car-inquiry'); ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <a href="<?php echo esc_url(add_query_arg('view_payment', $payment['inquiry_id'], home_url('/dashboard/payments'))); ?>" class="btn btn-icon btn-sm btn-primary-light btn-wave waves-effect waves-light" title="<?php esc_attr_e('View Payment Details', 'maneli-car-inquiry'); ?>">
+                                                        <i class="ri-eye-line"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <?php if ($total_pages > 1): ?>
+                        <div class="card-footer border-top-0">
+                            <div class="d-flex align-items-center flex-wrap overflow-auto">
+                                <div class="mb-2 mb-sm-0">
+                                    <?php printf(esc_html__('Showing %1$s to %2$s of %3$s items', 'maneli-car-inquiry'), '<b>' . persian_numbers($offset + 1) . '</b>', '<b>' . persian_numbers(min($offset + $per_page, $total_payments)) . '</b>', '<b>' . persian_numbers($total_payments) . '</b>'); ?> <i class="bi bi-arrow-left ms-2 fw-semibold"></i>
+                                </div>
+                                <div class="ms-auto">
+                                    <?php
+                                    $base_url = remove_query_arg('paged');
+                                    $base_url = add_query_arg([
+                                        'search' => $search,
+                                        'status' => $status_filter,
+                                        'gateway' => $gateway_filter,
+                                        'payment_type' => $payment_type_filter
+                                    ], $base_url);
+                                    ?>
+                                    <ul class="pagination mb-0 overflow-auto">
+                                        <?php
+                                        // Previous button
+                                        $prev_link = $paged > 1 ? add_query_arg('paged', $paged - 1, $base_url) : 'javascript:void(0);';
+                                        $prev_disabled = $paged <= 1 ? ' disabled' : '';
+                                        echo '<li class="page-item' . $prev_disabled . '">';
+                                        echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'maneli-car-inquiry') . '</a>';
+                                        echo '</li>';
+                                        
+                                        // Page numbers
+                                        $start_page = max(1, $paged - 2);
+                                        $end_page = min($total_pages, $paged + 2);
+                                        
+                                        if ($start_page > 1) {
+                                            echo '<li class="page-item">';
+                                            echo '<a class="page-link" href="' . esc_url(add_query_arg('paged', 1, $base_url)) . '">' . persian_numbers('1') . '</a>';
+                                            echo '</li>';
+                                            if ($start_page > 2) {
+                                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                            }
+                                        }
+                                        
+                                        for ($i = $start_page; $i <= $end_page; $i++) {
+                                            $current_class = ($i == $paged) ? ' active' : '';
+                                            $page_link = add_query_arg('paged', $i, $base_url);
+                                            echo '<li class="page-item' . $current_class . '">';
+                                            echo '<a class="page-link" href="' . esc_url($page_link) . '">' . persian_numbers($i) . '</a>';
+                                            echo '</li>';
+                                        }
+                                        
+                                        if ($end_page < $total_pages) {
+                                            if ($end_page < $total_pages - 1) {
+                                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                                            }
+                                            echo '<li class="page-item">';
+                                            echo '<a class="page-link" href="' . esc_url(add_query_arg('paged', $total_pages, $base_url)) . '">' . persian_numbers($total_pages) . '</a>';
+                                            echo '</li>';
+                                        }
+                                        
+                                        // Next button
+                                        $next_link = $paged < $total_pages ? add_query_arg('paged', $paged + 1, $base_url) : 'javascript:void(0);';
+                                        $next_disabled = $paged >= $total_pages ? ' disabled' : '';
+                                        echo '<li class="page-item' . $next_disabled . '">';
+                                        echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'maneli-car-inquiry') . '</a>';
+                                        echo '</li>';
+                                        ?>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                                             <?php endif; ?>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php
-                            }
-                            ?>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
+        <!--End::row-1 -->
     </div>
 </div>
-<!-- End::row -->
 
 <script>
 function filterPayments() {
-    const status = document.getElementById('payment-status').value;
-    const gateway = document.getElementById('payment-gateway').value;
-    const search = document.getElementById('payment-search').value.toLowerCase();
-
-    const rows = document.querySelectorAll('#payments-table tbody tr');
-
-    rows.forEach(row => {
-        const rowText = row.textContent.toLowerCase();
-        const shouldShow = (!search || rowText.includes(search));
-
-        if (shouldShow) {
-            row.style.display = 'table-row';
+    const search = document.getElementById('payment-search-input').value;
+    const url = new URL(window.location.href);
+    if (search) {
+        url.searchParams.set('search', search);
         } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-function refreshPayments() {
-    location.reload();
-}
-
-function viewPaymentDetails(paymentId) {
-    Swal.fire({
-        title: 'جزئیات پرداخت',
-        html: '<p>در حال بارگذاری...</p>',
-        icon: 'info'
-    });
-}
-
-function refundPayment(paymentId) {
-    Swal.fire({
-        title: 'استرداد پرداخت؟',
-        text: 'آیا از استرداد این پرداخت اطمینان دارید؟',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'بله، استرداد کن',
-        cancelButtonText: 'انصراف'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire('استرداد شد!', 'پرداخت با موفقیت استرداد شد.', 'success');
-        }
-    });
+        url.searchParams.delete('search');
+    }
+    window.location.href = url.toString();
 }
 </script>
-
-<style>
-.table-primary th {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
-    color: white;
-    font-weight: 600;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(var(--primary-rgb), 0.03);
-    transition: all 0.3s ease;
-}
-
-.bg-gradient-success {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-}
-
-.bg-white-transparent {
-    background: rgba(255, 255, 255, 0.2);
-}
-</style>
-

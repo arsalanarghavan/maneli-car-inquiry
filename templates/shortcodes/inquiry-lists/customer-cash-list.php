@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
             <div class="card-header bg-warning-transparent">
                 <div class="card-title">
                     <i class="la la-dollar-sign me-2 fs-20"></i>
-                    استعلامات خرید نقدی من
+                    <?php esc_html_e('My Cash Purchase Inquiries', 'maneli-car-inquiry'); ?>
                 </div>
             </div>
             <div class="card-body">
@@ -31,9 +31,9 @@ if (!defined('ABSPATH')) {
                 if (isset($payment_status)) {
                     $reason = isset($_GET['reason']) ? sanitize_text_field(urldecode($_GET['reason'])) : '';
                     if ($payment_status === 'success') {
-                        echo '<div class="alert alert-success border-success d-flex align-items-center"><i class="la la-check-circle fs-20 me-2"></i><div><strong>موفق!</strong> پرداخت با موفقیت انجام شد.</div></div>';
+                        echo '<div class="alert alert-success border-success d-flex align-items-center"><i class="la la-check-circle fs-20 me-2"></i><div><strong>' . esc_html__('Success!', 'maneli-car-inquiry') . '</strong> ' . esc_html__('Payment completed successfully.', 'maneli-car-inquiry') . '</div></div>';
                     } elseif ($payment_status === 'failed') {
-                        echo '<div class="alert alert-danger border-danger d-flex align-items-center"><i class="la la-times-circle fs-20 me-2"></i><div><strong>ناموفق!</strong> پرداخت انجام نشد. ' . esc_html($reason) . '</div></div>';
+                        echo '<div class="alert alert-danger border-danger d-flex align-items-center"><i class="la la-times-circle fs-20 me-2"></i><div><strong>' . esc_html__('Failed!', 'maneli-car-inquiry') . '</strong> ' . esc_html__('Payment was not completed.', 'maneli-car-inquiry') . ' ' . esc_html($reason) . '</div></div>';
                     }
                 }
                 ?>
@@ -41,8 +41,8 @@ if (!defined('ABSPATH')) {
                 <div class="alert alert-info border-info d-flex align-items-start" role="alert">
                     <i class="la la-info-circle fs-20 me-2 mt-1"></i>
                     <div>
-                        <strong>توجه:</strong>
-                        قیمت‌های اعلام شده تقریبی هستند. قیمت نهایی بر اساس نرخ روز بازار در زمان پرداخت پیش‌پرداخت تعیین خواهد شد.
+                        <strong><?php esc_html_e('Note:', 'maneli-car-inquiry'); ?></strong>
+                        <?php esc_html_e('The announced prices are approximate. The final price will be determined based on the daily market rate at the time of down payment.', 'maneli-car-inquiry'); ?>
                     </div>
                 </div>
 
@@ -52,11 +52,11 @@ if (!defined('ABSPATH')) {
                         <div class="mb-4">
                             <i class="la la-inbox" style="font-size: 80px; color: #dee2e6;"></i>
                         </div>
-                        <h5 class="text-muted mb-2">هنوز استعلام نقدی ثبت نکرده‌اید</h5>
-                        <p class="text-muted mb-4">برای خرید نقدی خودرو، اولین استعلام خود را ثبت کنید.</p>
-                        <a href="<?php echo home_url('/cash-inquiry'); ?>" class="btn btn-primary btn-wave">
+                        <h5 class="text-muted mb-2"><?php esc_html_e('No Cash Inquiries Yet', 'maneli-car-inquiry'); ?></h5>
+                        <p class="text-muted mb-4"><?php esc_html_e('To purchase a car with cash, create your first inquiry.', 'maneli-car-inquiry'); ?></p>
+                        <a href="<?php echo esc_url(home_url('/cash-inquiry')); ?>" class="btn btn-primary btn-wave">
                             <i class="la la-plus me-1"></i>
-                            ثبت درخواست نقدی جدید
+                            <?php esc_html_e('Create New Cash Request', 'maneli-car-inquiry'); ?>
                         </a>
                     </div>
                 <?php else: ?>
@@ -64,11 +64,11 @@ if (!defined('ABSPATH')) {
                         <table class="table table-bordered table-hover">
                             <thead class="table-warning">
                                 <tr>
-                                    <th><i class="la la-hashtag me-1"></i>شناسه</th>
-                                    <th><i class="la la-car me-1"></i>خودرو</th>
-                                    <th><i class="la la-info-circle me-1"></i>وضعیت</th>
-                                    <th><i class="la la-calendar me-1"></i>تاریخ ثبت</th>
-                                    <th><i class="la la-wrench me-1"></i>عملیات</th>
+                                    <th><i class="la la-hashtag me-1"></i><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-car me-1"></i><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-info-circle me-1"></i><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-calendar me-1"></i><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-wrench me-1"></i><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -82,19 +82,19 @@ if (!defined('ABSPATH')) {
                                     $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
                                     
                                     $status_data = [
-                                        'new' => ['label' => 'جدید', 'class' => 'primary'],
-                                        'pending' => ['label' => 'در انتظار بررسی', 'class' => 'warning'],
-                                        'referred' => ['label' => 'ارجاع داده شده', 'class' => 'info'],
-                                        'in_progress' => ['label' => 'در حال پیگیری', 'class' => 'warning'],
-                                        'follow_up_scheduled' => ['label' => 'پیگیری بعدی', 'class' => 'info'],
-                                        'awaiting_downpayment' => ['label' => 'در انتظار پیش پرداخت', 'class' => 'info'],
-                                        'downpayment_received' => ['label' => 'پیش پرداخت دریافت شد', 'class' => 'success'],
-                                        'meeting_scheduled' => ['label' => 'مراجعه حضوری', 'class' => 'info'],
-                                        'approved' => ['label' => 'تایید شده', 'class' => 'success'],
-                                        'rejected' => ['label' => 'رد شده', 'class' => 'danger'],
-                                        'completed' => ['label' => 'تکمیل شده', 'class' => 'success'],
+                                        'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'primary'],
+                                        'pending' => ['label' => esc_html__('Pending Review', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                        'referred' => ['label' => esc_html__('Referred', 'maneli-car-inquiry'), 'class' => 'info'],
+                                        'in_progress' => ['label' => esc_html__('In Progress', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                        'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
+                                        'awaiting_downpayment' => ['label' => esc_html__('Awaiting Down Payment', 'maneli-car-inquiry'), 'class' => 'info'],
+                                        'downpayment_received' => ['label' => esc_html__('Down Payment Received', 'maneli-car-inquiry'), 'class' => 'success'],
+                                        'meeting_scheduled' => ['label' => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
+                                        'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
+                                        'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
+                                        'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
                                     ];
-                                    $badge = $status_data[$status] ?? ['label' => 'نامشخص', 'class' => 'secondary'];
+                                    $badge = $status_data[$status] ?? ['label' => esc_html__('Unknown', 'maneli-car-inquiry'), 'class' => 'secondary'];
                                     
                                     // Convert to Jalali
                                     $timestamp = strtotime(get_the_date('Y-m-d', $inquiry_id));
@@ -131,7 +131,7 @@ if (!defined('ABSPATH')) {
                                         <td>
                                             <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light">
                                                 <i class="la la-eye me-1"></i>
-                                                مشاهده جزئیات
+                                                <?php esc_html_e('View Details', 'maneli-car-inquiry'); ?>
                                             </a>
                                         </td>
                                     </tr>
@@ -148,8 +148,8 @@ if (!defined('ABSPATH')) {
                                 echo paginate_links([
                                     'total' => $inquiries_query->max_num_pages,
                                     'current' => max(1, get_query_var('paged')),
-                                    'prev_text' => '<i class="la la-angle-right"></i> قبلی',
-                                    'next_text' => 'بعدی <i class="la la-angle-left"></i>',
+                                    'prev_text' => '<i class="la la-angle-right"></i> ' . esc_html__('Previous', 'maneli-car-inquiry'),
+                                    'next_text' => esc_html__('Next', 'maneli-car-inquiry') . ' <i class="la la-angle-left"></i>',
                                     'type' => 'plain',
                                     'before_page_number' => '<span class="btn btn-sm btn-light mx-1">',
                                     'after_page_number' => '</span>',

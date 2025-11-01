@@ -14,16 +14,13 @@ if (!defined('ABSPATH')) {
 if (!wp_style_is('dashicons', 'enqueued')) {
     wp_enqueue_style('dashicons');
 }
-?>
-
-<link rel="stylesheet" href="<?php echo includes_url('css/dashicons.min.css'); ?>" type="text/css" media="all" />
 
 <div class="maneli-system-report-shortcode">
     <!-- هدر و فیلترها -->
     <div class="report-header">
         <div class="header-title">
             <span class="la la-chart-bar"></span>
-            <h2><?php echo $is_expert ? 'گزارش عملکرد من' : 'گزارشات سیستم'; ?></h2>
+            <h2><?php echo esc_html($is_expert ? esc_html__('My Performance Report', 'maneli-car-inquiry') : esc_html__('System Reports', 'maneli-car-inquiry')); ?></h2>
         </div>
         
         <!-- فیلترهای پیشرفته -->
@@ -31,28 +28,28 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             <div class="filter-group">
                 <label>
                     <span class="la la-calendar"></span>
-                    بازه زمانی:
+                    <?php esc_html_e('Time Period:', 'maneli-car-inquiry'); ?>
                 </label>
                 <select id="maneli-date-preset" class="filter-input">
-                    <option value="today">امروز</option>
-                    <option value="yesterday">دیروز</option>
-                    <option value="week">هفته گذشته</option>
-                    <option value="month" <?php echo $days == 30 ? 'selected' : ''; ?>>ماه گذشته</option>
-                    <option value="3months">3 ماه گذشته</option>
-                    <option value="6months">6 ماه گذشته</option>
-                    <option value="year">سال گذشته</option>
-                    <option value="custom">سفارشی</option>
+                    <option value="today"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
+                    <option value="yesterday"><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
+                    <option value="week"><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
+                    <option value="month" <?php selected($days, 30); ?>><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
+                    <option value="3months"><?php esc_html_e('Last 3 Months', 'maneli-car-inquiry'); ?></option>
+                    <option value="6months"><?php esc_html_e('Last 6 Months', 'maneli-car-inquiry'); ?></option>
+                    <option value="year"><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
+                    <option value="custom"><?php esc_html_e('Custom', 'maneli-car-inquiry'); ?></option>
                 </select>
             </div>
             
-            <div class="filter-group custom-dates" style="display: none;">
+            <div class="filter-group custom-dates maneli-initially-hidden">
                 <label>
                     <span class="la la-calendar-alt"></span>
-                    از تاریخ:
+                    <?php esc_html_e('From Date:', 'maneli-car-inquiry'); ?>
                 </label>
                 <input type="date" id="maneli-start-date" class="filter-input" value="<?php echo esc_attr($start_date); ?>">
                 
-                <label>تا تاریخ:</label>
+                <label><?php esc_html_e('To Date:', 'maneli-car-inquiry'); ?></label>
                 <input type="date" id="maneli-end-date" class="filter-input" value="<?php echo esc_attr($end_date); ?>">
             </div>
             
@@ -60,10 +57,10 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             <div class="filter-group">
                 <label>
                     <span class="la la-users-cog"></span>
-                    کارشناس:
+                    <?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?>
                 </label>
                 <select id="maneli-expert-filter" class="filter-input">
-                    <option value="">همه کارشناسان</option>
+                    <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
                     <?php
                     $experts = get_users(['role__in' => ['maneli_expert', 'maneli_admin', 'administrator']]);
                     foreach ($experts as $expert) {
@@ -77,30 +74,30 @@ if (!wp_style_is('dashicons', 'enqueued')) {
             <div class="filter-group">
                 <button type="button" id="maneli-apply-filter" class="btn-primary">
                     <span class="la la-filter"></span>
-                    اعمال فیلتر
+                    <?php esc_html_e('Apply Filter', 'maneli-car-inquiry'); ?>
                 </button>
                 <button type="button" id="maneli-refresh-data" class="btn-secondary">
                     <span class="la la-sync"></span>
-                    بروزرسانی
+                    <?php esc_html_e('Refresh', 'maneli-car-inquiry'); ?>
                 </button>
             </div>
         </div>
         
         <div class="report-period-info">
             <span class="la la-info-circle"></span>
-            <span id="period-text">بازه زمانی: <strong><?php echo esc_html($days); ?> روز گذشته</strong></span>
+            <span id="period-text"><?php printf(esc_html__('Time Period: %s days ago', 'maneli-car-inquiry'), '<strong>' . esc_html($days) . '</strong>'); ?></span>
             <?php if ($is_expert): ?>
                 <span class="separator">|</span>
-                کارشناس: <strong><?php echo esc_html($current_user->display_name); ?></strong>
+                <?php printf(esc_html__('Expert: %s', 'maneli-car-inquiry'), '<strong>' . esc_html($current_user->display_name) . '</strong>'); ?>
             <?php endif; ?>
         </div>
     </div>
     
     <!-- Loading -->
-    <div id="maneli-loading" class="loading-overlay" style="display: none;">
+    <div id="maneli-loading" class="loading-overlay maneli-loading-overlay">
         <div class="loading-spinner">
             <span class="la la-sync"></span>
-            <p>در حال بارگذاری...</p>
+            <p><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></p>
         </div>
     </div>
     
@@ -113,11 +110,11 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-list"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="total_inquiries"><?php echo number_format($stats['total_inquiries']); ?></div>
-                    <div class="stat-label">کل استعلام‌ها</div>
+                    <div class="stat-value" data-stat="total_inquiries"><?php echo esc_html(number_format($stats['total_inquiries'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></div>
                     <div class="stat-meta">
                         <span class="la la-calendar-alt"></span>
-                        امروز: <span data-stat="new_today"><?php echo number_format($stats['new_today']); ?></span>
+                        <?php esc_html_e('Today:', 'maneli-car-inquiry'); ?> <span data-stat="new_today"><?php echo esc_html(number_format($stats['new_today'])); ?></span>
                     </div>
                 </div>
             </div>
@@ -127,8 +124,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-dollar-sign"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="cash_inquiries"><?php echo number_format($stats['cash_inquiries']); ?></div>
-                    <div class="stat-label">استعلام نقدی</div>
+                    <div class="stat-value" data-stat="cash_inquiries"><?php echo esc_html(number_format($stats['cash_inquiries'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
             
@@ -137,8 +134,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-calculator"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="installment_inquiries"><?php echo number_format($stats['installment_inquiries']); ?></div>
-                    <div class="stat-label">استعلام اقساطی</div>
+                    <div class="stat-value" data-stat="installment_inquiries"><?php echo esc_html(number_format($stats['installment_inquiries'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
             
@@ -147,8 +144,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-check-circle"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="approved"><?php echo number_format($stats['approved']); ?></div>
-                    <div class="stat-label">تایید شده</div>
+                    <div class="stat-value" data-stat="approved"><?php echo esc_html(number_format($stats['approved'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Approved', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
             
@@ -157,8 +154,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-clock"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="pending"><?php echo number_format($stats['pending']); ?></div>
-                    <div class="stat-label">در انتظار</div>
+                    <div class="stat-value" data-stat="pending"><?php echo esc_html(number_format($stats['pending'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
             
@@ -167,8 +164,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-times-circle"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="rejected"><?php echo number_format($stats['rejected']); ?></div>
-                    <div class="stat-label">رد شده</div>
+                    <div class="stat-value" data-stat="rejected"><?php echo esc_html(number_format($stats['rejected'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
             
@@ -177,8 +174,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-eye"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="following"><?php echo number_format($stats['following']); ?></div>
-                    <div class="stat-label">در حال پیگیری</div>
+                    <div class="stat-value" data-stat="following"><?php echo esc_html(number_format($stats['following'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('In Progress', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
             
@@ -187,8 +184,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-calendar-alt"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="next_followup"><?php echo number_format($stats['next_followup']); ?></div>
-                    <div class="stat-label">پیگیری آینده</div>
+                    <div class="stat-value" data-stat="next_followup"><?php echo esc_html(number_format($stats['next_followup'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Future Followup', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
             
@@ -197,8 +194,8 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                     <span class="la la-shopping-cart"></span>
                 </div>
                 <div class="stat-content">
-                    <div class="stat-value" data-stat="revenue"><?php echo number_format($stats['revenue']); ?></div>
-                    <div class="stat-label">درآمد (تومان)</div>
+                    <div class="stat-value" data-stat="revenue"><?php echo esc_html(number_format($stats['revenue'])); ?></div>
+                    <div class="stat-label"><?php esc_html_e('Revenue (Toman)', 'maneli-car-inquiry'); ?></div>
                 </div>
             </div>
         </div>
@@ -208,7 +205,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <div class="chart-section">
             <h3>
                 <span class="la la-chart-line"></span>
-                روند استعلام‌های روزانه
+                <?php esc_html_e('Daily Inquiry Trend', 'maneli-car-inquiry'); ?>
             </h3>
             <div class="chart-container">
                 <canvas id="shortcode-daily-trend-chart"></canvas>
@@ -221,17 +218,17 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <div class="popular-products-section">
             <h3>
                 <span class="la la-star"></span>
-                محصولات پرطرفدار
+                <?php esc_html_e('Popular Products', 'maneli-car-inquiry'); ?>
             </h3>
             <div class="products-list" id="products-list">
                 <?php foreach ($popular_products as $index => $product): ?>
                 <div class="product-item">
-                    <div class="product-rank"><?php echo $index + 1; ?></div>
+                    <div class="product-rank"><?php echo esc_html($index + 1); ?></div>
                     <div class="product-info">
-                        <div class="product-name"><?php echo esc_html($product->product_name ?: 'نامشخص'); ?></div>
+                        <div class="product-name"><?php echo esc_html($product->product_name ?: esc_html__('Unknown', 'maneli-car-inquiry')); ?></div>
                         <div class="product-count">
                             <span class="la la-chart-line"></span>
-                            <?php echo number_format($product->inquiry_count); ?> استعلام
+                            <?php echo esc_html(number_format($product->inquiry_count)); ?> <?php esc_html_e('inquiries', 'maneli-car-inquiry'); ?>
                         </div>
                     </div>
                 </div>
@@ -245,7 +242,7 @@ if (!wp_style_is('dashicons', 'enqueued')) {
         <div class="experts-section">
             <h3>
                 <span class="la la-users"></span>
-                عملکرد کارشناسان
+                <?php esc_html_e('Expert Performance', 'maneli-car-inquiry'); ?>
             </h3>
             <div class="experts-table-wrapper">
                 <table class="experts-table" id="experts-table">
@@ -253,35 +250,35 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                         <tr>
                             <th>
                                 <span class="la la-users-cog"></span>
-                                کارشناس
+                                <?php esc_html_e('Expert', 'maneli-car-inquiry'); ?>
                             </th>
                             <th>
                                 <span class="la la-list"></span>
-                                کل استعلام‌ها
+                                <?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?>
                             </th>
                             <th>
                                 <span class="la la-dollar-sign"></span>
-                                نقدی
+                                <?php esc_html_e('Cash', 'maneli-car-inquiry'); ?>
                             </th>
                             <th>
                                 <span class="la la-calculator"></span>
-                                اقساطی
+                                <?php esc_html_e('Installment', 'maneli-car-inquiry'); ?>
                             </th>
                             <th>
                                 <span class="la la-check-circle"></span>
-                                تایید شده
+                                <?php esc_html_e('Approved', 'maneli-car-inquiry'); ?>
                             </th>
                             <th>
                                 <span class="la la-times-circle"></span>
-                                رد شده
+                                <?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?>
                             </th>
                             <th>
                                 <span class="la la-users"></span>
-                                مشتریان
+                                <?php esc_html_e('Customers', 'maneli-car-inquiry'); ?>
                             </th>
                             <th>
                                 <span class="la la-shopping-cart"></span>
-                                درآمد
+                                <?php esc_html_e('Revenue', 'maneli-car-inquiry'); ?>
                             </th>
                         </tr>
                     </thead>
@@ -289,13 +286,13 @@ if (!wp_style_is('dashicons', 'enqueued')) {
                         <?php foreach ($experts_stats as $expert): ?>
                         <tr>
                             <td class="expert-name"><?php echo esc_html($expert['expert_name']); ?></td>
-                            <td><?php echo number_format($expert['total_inquiries']); ?></td>
-                            <td><?php echo number_format($expert['cash_inquiries']); ?></td>
-                            <td><?php echo number_format($expert['installment_inquiries']); ?></td>
-                            <td><span class="badge approved"><?php echo number_format($expert['approved']); ?></span></td>
-                            <td><span class="badge rejected"><?php echo number_format($expert['rejected']); ?></span></td>
-                            <td><?php echo number_format($expert['total_customers']); ?></td>
-                            <td><?php echo number_format($expert['revenue']); ?></td>
+                            <td><?php echo esc_html(number_format($expert['total_inquiries'])); ?></td>
+                            <td><?php echo esc_html(number_format($expert['cash_inquiries'])); ?></td>
+                            <td><?php echo esc_html(number_format($expert['installment_inquiries'])); ?></td>
+                            <td><span class="badge approved"><?php echo esc_html(number_format($expert['approved'])); ?></span></td>
+                            <td><span class="badge rejected"><?php echo esc_html(number_format($expert['rejected'])); ?></span></td>
+                            <td><?php echo esc_html(number_format($expert['total_customers'])); ?></td>
+                            <td><?php echo esc_html(number_format($expert['revenue'])); ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -311,9 +308,20 @@ jQuery(document).ready(function($) {
     'use strict';
     
     const isExpert = <?php echo $is_expert ? 'true' : 'false'; ?>;
-    const expertId = <?php echo $is_expert ? $current_user->ID : 'null'; ?>;
-    const ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-    const nonce = '<?php echo wp_create_nonce('maneli_reports_shortcode_nonce'); ?>';
+    const expertId = <?php echo $is_expert ? (int)$current_user->ID : 'null'; ?>;
+    const ajaxUrl = <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>;
+    const nonce = <?php echo wp_json_encode(wp_create_nonce('maneli_reports_shortcode_nonce')); ?>;
+    
+    // Translation object
+    const translations = {
+        cash: <?php echo json_encode(esc_html__('Cash', 'maneli-car-inquiry')); ?>,
+        installment: <?php echo json_encode(esc_html__('Installment', 'maneli-car-inquiry')); ?>,
+        unknown: <?php echo json_encode(esc_html__('Unknown', 'maneli-car-inquiry')); ?>,
+        inquiries: <?php echo json_encode(esc_html__('inquiries', 'maneli-car-inquiry')); ?>,
+        timePeriod: <?php echo json_encode(esc_html__('Time Period:', 'maneli-car-inquiry')); ?>,
+        days: <?php echo json_encode(esc_html__('days', 'maneli-car-inquiry')); ?>,
+        to: <?php echo json_encode(esc_html__('to', 'maneli-car-inquiry')); ?>
+    };
     
     // مدیریت تغییر بازه زمانی
     $('#maneli-date-preset').on('change', function() {
@@ -381,7 +389,7 @@ jQuery(document).ready(function($) {
                 $('#maneli-loading').fadeOut();
             },
             error: function() {
-                alert('خطا در بارگذاری داده‌ها');
+                alert(<?php echo json_encode(esc_html__('Error loading data', 'maneli-car-inquiry')); ?>);
                 $('#maneli-loading').fadeOut();
             }
         });
@@ -427,7 +435,7 @@ jQuery(document).ready(function($) {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'نقدی',
+                        label: translations.cash,
                         data: cashData,
                         borderColor: '#00a32a',
                         backgroundColor: 'rgba(0, 163, 42, 0.1)',
@@ -435,7 +443,7 @@ jQuery(document).ready(function($) {
                         fill: true
                     },
                     {
-                        label: 'اقساطی',
+                        label: translations.installment,
                         data: installmentData,
                         borderColor: '#8c6d1f',
                         backgroundColor: 'rgba(140, 109, 31, 0.1)',
@@ -472,10 +480,10 @@ jQuery(document).ready(function($) {
                 <div class="product-item">
                     <div class="product-rank">${index + 1}</div>
                     <div class="product-info">
-                        <div class="product-name">${product.product_name || 'نامشخص'}</div>
+                        <div class="product-name">${product.product_name || translations.unknown}</div>
                         <div class="product-count">
                             <span class="la la-chart-line"></span>
-                            ${formatNumber(product.inquiry_count)} استعلام
+                            ${formatNumber(product.inquiry_count)} ${translations.inquiries}
                         </div>
                     </div>
                 </div>
@@ -513,7 +521,7 @@ jQuery(document).ready(function($) {
         const start = new Date(startDate);
         const end = new Date(endDate);
         const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-        $('#period-text').html(`بازه زمانی: <strong>${days} روز</strong> (${startDate} تا ${endDate})`);
+        $('#period-text').html(`${translations.timePeriod} <strong>${days} ${translations.days}</strong> (${startDate} ${translations.to} ${endDate})`);
     }
     
     // محاسبه بازه زمانی از پیش‌فرض
@@ -581,7 +589,7 @@ jQuery(document).ready(function($) {
     
     // رسم نمودار اولیه
     <?php if ($show_charts && !empty($daily_stats)): ?>
-    const initialDailyData = <?php echo json_encode($daily_stats); ?>;
+    const initialDailyData = <?php echo wp_json_encode($daily_stats); ?>;
     updateChart(initialDailyData);
     <?php endif; ?>
     
@@ -608,9 +616,9 @@ jQuery(document).ready(function($) {
 /* Dashicons Font Face - برای اطمینان از بارگذاری */
 @font-face {
     font-family: dashicons;
-    src: url(<?php echo includes_url('fonts/dashicons.woff2'); ?>) format("woff2"),
-         url(<?php echo includes_url('fonts/dashicons.woff'); ?>) format("woff"),
-         url(<?php echo includes_url('fonts/dashicons.ttf'); ?>) format("truetype");
+    src: url(<?php echo esc_url(includes_url('fonts/dashicons.woff2')); ?>) format("woff2"),
+         url(<?php echo esc_url(includes_url('fonts/dashicons.woff')); ?>) format("woff"),
+         url(<?php echo esc_url(includes_url('fonts/dashicons.ttf')); ?>) format("truetype");
     font-weight: 400;
     font-style: normal;
 }

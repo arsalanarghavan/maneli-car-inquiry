@@ -1,0 +1,713 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ArsalanArghavan
+# This file is distributed under the same license as the Maneli Car Inquiry package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Maneli Car Inquiry 1.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/maneli-car-"
+"inquiry\n"
+"POT-Creation-Date: 2025-10-31 06:43+0330\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#, php-format
+msgid "%d product updated successfully."
+msgid_plural "%d products updated successfully."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Access Denied!"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "All Experts"
+msgstr ""
+
+msgid "All Statuses"
+msgstr ""
+
+msgid "Amount"
+msgstr ""
+
+msgid "An error occurred."
+msgstr ""
+
+msgid "An error occurred. Please try again."
+msgstr ""
+
+msgid "Apply Filters"
+msgstr ""
+
+msgid "Approved"
+msgstr ""
+
+msgid "Are you sure you want to complete this inquiry?"
+msgstr ""
+
+msgid "Are you sure you want to reject this inquiry?"
+msgstr ""
+
+msgid "Are you sure you want to start follow-up for this inquiry?"
+msgstr ""
+
+msgid "Assign Expert"
+msgstr ""
+
+msgid "Assigned"
+msgstr ""
+
+msgid "Assigned Expert:"
+msgstr ""
+
+msgid "Assigned Inquiries"
+msgstr ""
+
+msgid "Assigned to Me"
+msgstr ""
+
+msgid "Available for Installment Inquiry:"
+msgstr ""
+
+msgid "Awaiting Payment"
+msgstr ""
+
+msgid "Back to home?"
+msgstr ""
+
+msgid "Business Management Dashboard"
+msgstr ""
+
+msgid "Buy your dream car with easy installments"
+msgstr ""
+
+msgid "By Status"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Cancel Inquiry"
+msgstr ""
+
+msgid "Cancellation Reason"
+msgstr ""
+
+msgid "Car"
+msgstr ""
+
+msgid "Car:"
+msgstr ""
+
+msgid "Cash"
+msgstr ""
+
+msgid "Cash Car Purchase"
+msgstr ""
+
+msgid "Cash Inquiries"
+msgstr ""
+
+msgid "Cash Price"
+msgstr ""
+
+msgid "Cash inquiries"
+msgstr ""
+
+msgid "Cash vs Installment Comparison"
+msgstr ""
+
+msgid "Cash:"
+msgstr ""
+
+msgid ""
+"Check this box if customers can submit installment inquiries for this "
+"product."
+msgstr ""
+
+msgid "Clear Filters"
+msgstr ""
+
+msgid "Click here"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Colors (e.g., White, Black, Silver)"
+msgstr ""
+
+msgid "Complete Inquiry"
+msgstr ""
+
+msgid "Completed"
+msgstr ""
+
+msgid "Confirm Password"
+msgstr ""
+
+msgid "Confirm Status"
+msgstr ""
+
+msgid "Connection error (0). Please check your internet connection."
+msgstr ""
+
+msgid "Connection error (Code:"
+msgstr ""
+
+msgid "Create First Inquiry"
+msgstr ""
+
+msgid "Create New Cash Request"
+msgstr ""
+
+msgid "Create New Inquiry"
+msgstr ""
+
+msgid "Create New Installment Request"
+msgstr ""
+
+msgid "Create Password"
+msgstr ""
+
+msgid "Create Password - Maneli Car Inquiry"
+msgstr ""
+
+msgid "Create Your Account"
+msgstr ""
+
+msgid "Customer"
+msgstr ""
+
+msgid "Customer request will be approved"
+msgstr ""
+
+msgid "Daily"
+msgstr ""
+
+msgid "Daily Inquiry Trend (Last 7 Days)"
+msgstr ""
+
+msgid "Dashboard"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Default (Newest First)"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Display Name"
+msgstr ""
+
+msgid "Down Payment Type:"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid ""
+"Enter the minimum down payment amount. This can be Toman (if product price "
+"is fixed) or a percentage (if price is variable)."
+msgstr ""
+
+msgid "Enter your note..."
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Error loading chart"
+msgstr ""
+
+msgid "Error loading list"
+msgstr ""
+
+msgid "Error updating status"
+msgstr ""
+
+msgid "Error: Status modal not found. Please contact support."
+msgstr ""
+
+msgid "Expert"
+msgstr ""
+
+msgid "Expert Dashboard"
+msgstr ""
+
+msgid "Expert:"
+msgstr ""
+
+msgid "Export CSV"
+msgstr ""
+
+msgid "Final Approval?"
+msgstr ""
+
+msgid "Fixed Amount (Toman)"
+msgstr ""
+
+msgid "Follow-up Date"
+msgstr ""
+
+msgid "Follow-ups"
+msgstr ""
+
+msgid "Future meetings will be displayed here."
+msgstr ""
+
+msgid "Hello! Please create a password for your account."
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "ID"
+msgstr ""
+
+msgid "In-person appointments"
+msgstr ""
+
+msgid "Inquiry"
+msgstr ""
+
+msgid "Installment"
+msgstr ""
+
+msgid "Installment Car Purchase"
+msgstr ""
+
+msgid "Installment Inquiries"
+msgstr ""
+
+msgid "Installment Price"
+msgstr ""
+
+msgid "Installment:"
+msgstr ""
+
+#, php-format
+msgid "Invalid product ID: %d"
+msgstr ""
+
+msgid "Items"
+msgstr ""
+
+msgid "Last 7 Days Summary:"
+msgstr ""
+
+msgid "Loading inquiries..."
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid ""
+"Maneli Car Inquiry plugin requires WooCommerce to be installed and "
+"activated. Please activate WooCommerce to continue."
+msgstr ""
+
+msgid ""
+"Maneli Car Inquiry: Please save the Settings once to update rewrite rules."
+msgstr ""
+
+msgid "Maximum Loan Term (Months):"
+msgstr ""
+
+msgid "Meeting Calendar"
+msgstr ""
+
+msgid "Meeting Date"
+msgstr ""
+
+msgid "Meeting Details"
+msgstr ""
+
+msgid "Meeting Time"
+msgstr ""
+
+msgid "Minimum Down Payment"
+msgstr ""
+
+msgid "Minimum Down Payment Value:"
+msgstr ""
+
+msgid "Mobile"
+msgstr ""
+
+msgid "Mobile:"
+msgstr ""
+
+msgid "Monthly"
+msgstr ""
+
+msgid "My Assigned Inquiries Needing Action"
+msgstr ""
+
+msgid "My Cash Inquiries"
+msgstr ""
+
+msgid "My Cash Purchase Inquiries"
+msgstr ""
+
+msgid "My Customers"
+msgstr ""
+
+msgid "My Installment Inquiries"
+msgstr ""
+
+msgid "My Installment Purchase Inquiries"
+msgstr ""
+
+msgid "My Profit"
+msgstr ""
+
+msgid "My Upcoming Follow-ups"
+msgstr ""
+
+msgid "Need expert assignment"
+msgstr ""
+
+msgid "New Inquiry"
+msgstr ""
+
+msgid "Newest"
+msgstr ""
+
+msgid "No Inquiries Found"
+msgstr ""
+
+msgid "No Inquiries Yet"
+msgstr ""
+
+msgid "No data available"
+msgstr ""
+
+msgid "No inquiries have been registered in the system yet"
+msgstr ""
+
+msgid "No inquiries registered in the last 7 days."
+msgstr ""
+
+msgid "No meetings scheduled"
+msgstr ""
+
+msgid "Note (Optional)"
+msgstr ""
+
+msgid "Note saved successfully."
+msgstr ""
+
+msgid "Note:"
+msgstr ""
+
+msgid "OK"
+msgstr ""
+
+msgid "Oldest"
+msgstr ""
+
+msgid "Operation completed successfully."
+msgstr ""
+
+msgid "Overdue Follow-ups"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Password must be at least 6 characters."
+msgstr ""
+
+msgid "Passwords do not match."
+msgstr ""
+
+msgid "Pending"
+msgstr ""
+
+msgid "Pending Cash Inquiries"
+msgstr ""
+
+msgid "Pending Installment Inquiries"
+msgstr ""
+
+msgid "Percentage of Price (%)"
+msgstr ""
+
+msgid ""
+"Please create a secure password for your account to protect your information."
+msgstr ""
+
+msgid "Please enter a password."
+msgstr ""
+
+msgid "Please enter down payment amount"
+msgstr ""
+
+msgid "Please enter follow-up date"
+msgstr ""
+
+msgid "Please enter meeting date and time"
+msgstr ""
+
+msgid "Please enter reason with at least 10 characters"
+msgstr ""
+
+msgid "Please enter reason..."
+msgstr ""
+
+msgid "Please enter rejection reason..."
+msgstr ""
+
+msgid "Please refresh the page."
+msgstr ""
+
+msgid "Popular Products"
+msgstr ""
+
+msgid "Recent Inquiries"
+msgstr ""
+
+msgid "Reject Inquiry"
+msgstr ""
+
+msgid "Rejected"
+msgstr ""
+
+msgid "Rejection Reason"
+msgstr ""
+
+msgid "Remember password?"
+msgstr ""
+
+msgid "Requires urgent action"
+msgstr ""
+
+msgid "Reserved"
+msgstr ""
+
+msgid "Revenue Comparison:"
+msgstr ""
+
+msgid "Role"
+msgstr ""
+
+msgid "Save Password"
+msgstr ""
+
+msgid "Saved"
+msgstr ""
+
+msgid "Saving..."
+msgstr ""
+
+msgid "Schedule"
+msgstr ""
+
+msgid "Schedule Follow-up"
+msgstr ""
+
+msgid "Schedule Meeting"
+msgstr ""
+
+msgid "Search by car name..."
+msgstr ""
+
+msgid "Search by customer name, car name or mobile number..."
+msgstr ""
+
+msgid "Search by customer name, car name, national ID or mobile..."
+msgstr ""
+
+msgid "Select Date"
+msgstr ""
+
+msgid "Select Date:"
+msgstr ""
+
+msgid "Select Status:"
+msgstr ""
+
+msgid "Server error (500). Please contact the administrator."
+msgstr ""
+
+msgid "Server error. Please try again."
+msgstr ""
+
+msgid "Set Tracking Status"
+msgstr ""
+
+msgid "Sort:"
+msgstr ""
+
+msgid "Staff"
+msgstr ""
+
+msgid "Start Follow-up"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Status updated successfully"
+msgstr ""
+
+msgid "Status will change to \"In Progress\""
+msgstr ""
+
+msgid "Status:"
+msgstr ""
+
+msgid "Submit Rejection"
+msgstr ""
+
+msgid "Success"
+msgstr ""
+
+msgid "The fastest way to buy a car with cash"
+msgstr ""
+
+msgid ""
+"The system automatically identifies all users with the <strong>\"Maneli "
+"Expert\"</strong> role. Requests are assigned to them in a round-robin "
+"fashion.<br>To add a new expert, simply create a new user from the "
+"<strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and "
+"enter their mobile number in their profile."
+msgstr ""
+
+msgid "This Week"
+msgstr ""
+
+msgid "Time:"
+msgstr ""
+
+msgid "Today"
+msgstr ""
+
+msgid "Today Follow-ups"
+msgstr ""
+
+msgid "Today Inquiries"
+msgstr ""
+
+msgid "Today's Meetings"
+msgstr ""
+
+msgid "Today's Task List"
+msgstr ""
+
+msgid "Toman"
+msgstr ""
+
+msgid "Total Customers"
+msgstr ""
+
+msgid "Total Experts"
+msgstr ""
+
+msgid "Total Inquiries"
+msgstr ""
+
+msgid "Total Inquiries Submitted"
+msgstr ""
+
+msgid "Total Meetings"
+msgstr ""
+
+msgid "Total Profit"
+msgstr ""
+
+msgid "Total Revenue"
+msgstr ""
+
+msgid "Total:"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Unauthorized access (403). Please refresh the page and log in again."
+msgstr ""
+
+msgid "Unknown error"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "View & Action"
+msgstr ""
+
+msgid "View All"
+msgstr ""
+
+msgid "View All My Inquiries"
+msgstr ""
+
+msgid "View Cash Inquiries"
+msgstr ""
+
+msgid "View Details"
+msgstr ""
+
+msgid "View Installment Inquiries"
+msgstr ""
+
+msgid "View Reports"
+msgstr ""
+
+msgid "Weekly"
+msgstr ""
+
+msgid "Welcome!"
+msgstr ""
+
+#, php-format
+msgid "Welcome, %s"
+msgstr ""
+
+msgid "Yes"
+msgstr ""
+
+msgid "Yes, Approve"
+msgstr ""
+
+msgid "Yes, Send"
+msgstr ""
+
+msgid "You can create your first inquiry"
+msgstr ""
+
+msgid "You do not have access to this page."
+msgstr ""
+
+msgid "Your Recent Inquiries"
+msgstr ""
+
+msgid "inquiries"
+msgstr ""
+
+msgid "items"
+msgstr ""
+
+msgid "تخصیص"
+msgstr ""

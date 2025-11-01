@@ -8,18 +8,8 @@
 
 // Check permission
 if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
-    ?>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <strong>دسترسی محدود!</strong> شما به این صفحه دسترسی ندارید.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </div>
-    </div>
-    <?php
-    return;
+    wp_redirect(home_url('/dashboard'));
+    exit;
 }
 
 // Get current user
@@ -88,6 +78,8 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
     wp_enqueue_style('maneli-datepicker-theme', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-datepicker-theme.css', [], '1.0.0');
 }
 ?>
+?><div class="main-content app-content">
+    <div class="container-fluid">
 
 <div class="row">
     <div class="col-xl-12">
@@ -104,7 +96,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">پیگیری‌های امروز</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e('Today\'s Follow-ups', 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($today_count); ?></h4>
                             </div>
@@ -123,7 +115,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">عقب‌افتاده</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0 text-danger"><?php echo number_format_i18n($overdue_count); ?></h4>
                             </div>
@@ -142,7 +134,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">این هفته</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($week_count); ?></h4>
                             </div>
@@ -161,7 +153,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                             </div>
                             <div class="flex-fill">
                                 <div class="mb-1">
-                                    <span class="text-muted fs-13">مجموع</span>
+                                    <span class="text-muted fs-13"><?php esc_html_e('Total', 'maneli-car-inquiry'); ?></span>
                                 </div>
                                 <h4 class="fw-semibold mb-0"><?php echo number_format_i18n($total_count); ?></h4>
                             </div>
@@ -176,7 +168,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
             <div class="card-header">
                 <div class="card-title">
                     <i class="la la-tasks me-2"></i>
-                    لیست پیگیری‌های استعلامات اقساطی
+                    <?php esc_html_e('Installment Inquiry Follow-ups List', 'maneli-car-inquiry'); ?>
                 </div>
             </div>
             <div class="card-body">
@@ -184,8 +176,8 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                 <div class="alert alert-info border-info d-flex align-items-center" role="alert">
                     <i class="la la-info-circle fs-20 me-2"></i>
                     <div>
-                        <strong>راهنما:</strong>
-                        استعلاماتی که نیاز به پیگیری در تاریخ‌های مشخص دارند، در اینجا نمایش داده می‌شوند.
+                        <strong><?php esc_html_e('Help:', 'maneli-car-inquiry'); ?></strong>
+                        <?php esc_html_e('Inquiries that need follow-up on specific dates are shown here.', 'maneli-car-inquiry'); ?>
                     </div>
                 </div>
 
@@ -194,16 +186,16 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                     <table class="table table-bordered table-hover text-nowrap">
                         <thead class="table-primary">
                             <tr>
-                                <th><i class="la la-hashtag me-1"></i>شناسه</th>
-                                <th><i class="la la-user me-1"></i>مشتری</th>
-                                <th><i class="la la-car me-1"></i>خودرو</th>
-                                <th><i class="la la-calendar me-1"></i>تاریخ پیگیری</th>
-                                <th><i class="la la-info-circle me-1"></i>وضعیت</th>
+                                <th><i class="la la-hashtag me-1"></i><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                                <th><i class="la la-user me-1"></i><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
+                                <th><i class="la la-car me-1"></i><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
+                                <th><i class="la la-calendar me-1"></i><?php esc_html_e('Follow-up Date', 'maneli-car-inquiry'); ?></th>
+                                <th><i class="la la-info-circle me-1"></i><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
                                 <?php if ($is_admin): ?>
-                                    <th><i class="la la-user-tie me-1"></i>کارشناس</th>
+                                    <th><i class="la la-user-tie me-1"></i><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></th>
                                 <?php endif; ?>
-                                <th><i class="la la-clock me-1"></i>تاریخ ثبت</th>
-                                <th><i class="la la-wrench me-1"></i>عملیات</th>
+                                <th><i class="la la-clock me-1"></i><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
+                                <th><i class="la la-wrench me-1"></i><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -212,7 +204,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                     <td colspan="<?php echo $is_admin ? '8' : '7'; ?>" class="text-center">
                                         <div class="py-5">
                                             <i class="la la-inbox" style="font-size: 60px; color: #dee2e6;"></i>
-                                            <p class="text-muted mt-3">هیچ پیگیری‌ای یافت نشد.</p>
+                                            <p class="text-muted mt-3"><?php esc_html_e('No follow-ups found.', 'maneli-car-inquiry'); ?></p>
                                         </div>
                                     </td>
                                 </tr>
@@ -262,7 +254,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                 ?>
                                     <tr class="<?php echo $row_class; ?>">
                                         <td>#<?php echo $inquiry_id; ?></td>
-                                        <td><?php echo esc_html($customer ? $customer->display_name : 'نامشخص'); ?></td>
+                                        <td><?php echo esc_html($customer ? $customer->display_name : esc_html__('Unknown', 'maneli-car-inquiry')); ?></td>
                                         <td><?php echo esc_html(get_the_title($product_id)); ?></td>
                                         <td>
                                             <?php if ($follow_up_date): ?>
@@ -270,7 +262,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                                     <?php echo esc_html($follow_up_date); ?>
                                                 </strong>
                                                 <?php if ($is_overdue): ?>
-                                                    <br><small class="badge bg-danger">عقب‌افتاده</small>
+                                                    <br><small class="badge bg-danger"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></small>
                                                 <?php endif; ?>
                                             <?php else: ?>
                                                 —
@@ -282,7 +274,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                             </span>
                                             <?php if (!empty($followup_history)): ?>
                                                 <br><small class="text-muted">
-                                                    (<?php echo count($followup_history); ?> پیگیری قبلی)
+                                                    (<?php echo count($followup_history); ?> <?php esc_html_e('Previous Follow-up', 'maneli-car-inquiry'); ?>)
                                                 </small>
                                             <?php endif; ?>
                                         </td>
@@ -296,7 +288,7 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
                                             <div class="btn-list">
                                                 <a href="<?php echo add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/inquiries/installment')); ?>" 
                                                    class="btn btn-sm btn-primary-light">
-                                                    <i class="la la-eye"></i> مشاهده
+                                                    <i class="la la-eye"></i> <?php esc_html_e('View', 'maneli-car-inquiry'); ?>
                                                 </a>
                                             </div>
                                         </td>
@@ -340,3 +332,5 @@ if (!wp_script_is('maneli-jalali-datepicker', 'enqueued')) {
     background-color: rgba(220, 53, 69, 0.1) !important;
 }
 </style>
+</div>
+</div>

@@ -113,7 +113,7 @@ jQuery(document).ready(function($) {
                         const name = selected.text();
                         
                         $('#swal-product-name').text(name);
-                        $('#swal-product-price').text(parseInt(price).toLocaleString('fa-IR'));
+                        $('#swal-product-price').text(parseInt(price).toLocaleString('fa-IR').replace(/٬/g, ','));
                         $('#swal-product-image').attr('src', image || '');
                         $('#swal-product-info').slideDown(300);
                     } else {
