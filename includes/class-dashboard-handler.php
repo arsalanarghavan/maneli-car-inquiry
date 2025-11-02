@@ -1188,8 +1188,8 @@ class Maneli_Dashboard_Handler {
         
         // Default capabilities based on role
         $role_caps = [
-            'administrator' => ['manage_maneli_inquiries', 'edit_products', 'edit_posts', 'delete_users'],
-            'maneli_manager' => ['manage_maneli_inquiries', 'edit_products', 'edit_posts', 'delete_users'],
+            'administrator' => ['manage_maneli_inquiries', 'edit_products', 'edit_product', 'edit_posts', 'delete_users'],
+            'maneli_manager' => ['manage_maneli_inquiries', 'edit_products', 'edit_product', 'edit_posts', 'delete_users'],
             'maneli_expert' => ['edit_products', 'edit_posts'],
             'customer' => []
         ];
@@ -1519,7 +1519,7 @@ class Maneli_Dashboard_Handler {
                 'title' => esc_html__('Edit Products', 'maneli-car-inquiry'),
                 'url' => home_url('/dashboard/products'),
                 'icon' => 'ri-store-line',
-                'capability' => 'edit_product'
+                'capability' => 'manage_maneli_inquiries'
             ];
             $menu_items[] = [
                 'title' => esc_html__('Payment Management', 'maneli-car-inquiry'),

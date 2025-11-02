@@ -30,8 +30,22 @@ if (!defined('ABSPATH')) {
     
     <div class="tabs-content-wrapper">
 
-        <div id="cash-tab" class="tab-content">
-             <form class="loan-calculator-form cash-request-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+        <div id="cash-tab" class="tab-content<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-tab' : ''; ?>">
+            <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                <?php 
+                $options = get_option('maneli_inquiry_all_options', []);
+                $unavailable_message = isset($options['unavailable_product_message']) && !empty($options['unavailable_product_message']) 
+                    ? $options['unavailable_product_message'] 
+                    : esc_html__('This product is currently unavailable for purchase.', 'maneli-car-inquiry');
+                ?>
+                <div class="unavailable-overlay-message">
+                    <div class="unavailable-message-content">
+                        <i class="la la-exclamation-circle"></i>
+                        <p><?php echo esc_html($unavailable_message); ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
+             <form class="loan-calculator-form cash-request-form<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-form' : ''; ?>" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <input type="hidden" name="action" value="maneli_submit_cash_inquiry">
                 <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                 <?php wp_nonce_field('maneli_cash_inquiry_nonce'); ?>
@@ -100,8 +114,22 @@ if (!defined('ABSPATH')) {
             </form>
         </div>
 
-        <div id="installment-tab" class="tab-content active">
-             <form class="loan-calculator-form" method="post">
+        <div id="installment-tab" class="tab-content active<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-tab' : ''; ?>">
+            <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                <?php 
+                $options = get_option('maneli_inquiry_all_options', []);
+                $unavailable_message = isset($options['unavailable_product_message']) && !empty($options['unavailable_product_message']) 
+                    ? $options['unavailable_product_message'] 
+                    : esc_html__('This product is currently unavailable for installment purchase.', 'maneli-car-inquiry');
+                ?>
+                <div class="unavailable-overlay-message">
+                    <div class="unavailable-message-content">
+                        <i class="la la-exclamation-circle"></i>
+                        <p><?php echo esc_html($unavailable_message); ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
+             <form class="loan-calculator-form<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-form' : ''; ?>" method="post">
                 <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                 <?php wp_nonce_field('maneli_ajax_nonce'); ?>
                 <div id="loan-calculator" 

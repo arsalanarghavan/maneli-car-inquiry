@@ -1629,6 +1629,18 @@ msgid "Hidden Products"
 msgstr "محصولات مخفی"
 
 
+msgid "Available"
+msgstr "موجود"
+
+
+msgid "Out of Stock"
+msgstr "نا‌موجود"
+
+
+msgid "Hidden"
+msgstr "مخفی"
+
+
 # Credit Report
 
 
@@ -5294,3 +5306,159 @@ msgstr "ساعت:"
 
 msgid "Close"
 msgstr "بستن"
+
+
+msgid "Price Display Settings"
+msgstr "تنظیمات نمایش قیمت"
+
+
+msgid "Hide Prices from Customers"
+msgstr "مخفی کردن قیمت‌ها از مشتریان"
+
+
+msgid "If enabled, all product prices will be hidden from customers on the website. Note: Unavailable products will still show \"ناموجود\" text."
+msgstr "در صورت فعال بودن، تمام قیمت‌های محصولات از مشتریان در وب‌سایت مخفی می‌شود. توجه: محصولات ناموجود همچنان متن \"ناموجود\" را نمایش می‌دهند."
+
+
+msgid "Dashboard Security"
+msgstr "امنیت داشبورد"
+
+
+msgid "Configure dashboard access credentials."
+msgstr "تنظیم اعتبارنامه‌های دسترسی داشبورد."
+
+
+msgid "Dashboard Password"
+msgstr "کلمه عبور داشبورد"
+
+
+msgid "Dashboard Password :"
+msgstr "کلمه عبور داشبورد:"
+
+
+msgid "Password for dashboard login. This field is required - no default password is provided for security reasons."
+msgstr "کلمه عبور برای ورود به داشبورد. این فیلد الزامی است - به دلایل امنیتی هیچ کلمه عبور پیش‌فرضی ارائه نشده است."
+
+
+msgid "OTP Authentication Settings"
+msgstr "تنظیمات احراز هویت OTP"
+
+
+msgid "Configure One-Time Password (OTP) settings for login authentication."
+msgstr "تنظیمات رمز یکبار مصرف (OTP) برای احراز هویت ورود."
+
+
+msgid "Enable OTP Login"
+msgstr "فعال‌سازی ورود با OTP"
+
+
+msgid "Allow users to login using OTP sent via SMS."
+msgstr "اجازه ورود کاربران با استفاده از OTP ارسال شده از طریق پیامک."
+
+
+msgid "OTP Pattern Code (Body ID)"
+msgstr "کد الگوی OTP (شناسه بدنه)"
+
+
+msgid "OTP Pattern Code (Body ID) :"
+msgstr "کد الگوی OTP (شناسه بدنه):"
+
+
+msgid "Pattern code for OTP SMS. Variable: {0} = OTP Code (4-digit)"
+msgstr "کد الگو برای پیامک OTP. متغیر: {0} = کد OTP (4 رقمی)"
+
+
+msgid "OTP Expiry Time (minutes)"
+msgstr "زمان انقضای OTP (دقیقه)"
+
+
+msgid "OTP Expiry Time (minutes) :"
+msgstr "زمان انقضای OTP (دقیقه):"
+
+
+msgid "How long the OTP code remains valid (in minutes)."
+msgstr "مدت زمان اعتبار کد OTP (به دقیقه)."
+
+
+msgid "Resend Delay (seconds)"
+msgstr "تأخیر ارسال مجدد (ثانیه)"
+
+
+msgid "Resend Delay (seconds) :"
+msgstr "تأخیر ارسال مجدد (ثانیه):"
+
+
+msgid "Minimum time between OTP resend requests (in seconds)."
+msgstr "حداقل زمان بین درخواست‌های ارسال مجدد OTP (به ثانیه)."
+
+
+msgid "Pattern: \"Pending Review\" (Installment)"
+msgstr "الگو: \"در انتظار بررسی\" (قسطی)"
+
+
+msgid "Pattern: \"Pending Review\" (Installment) :"
+msgstr "الگو: \"در انتظار بررسی\" (قسطی):"
+
+
+msgid "Pattern: \"Approved\" (Installment)"
+msgstr "الگو: \"تأیید شده\" (قسطی)"
+
+
+msgid "Pattern: \"Approved\" (Installment) :"
+msgstr "الگو: \"تأیید شده\" (قسطی):"
+
+
+msgid "Pattern: \"Rejected\" (Installment)"
+msgstr "الگو: \"رد شده\" (قسطی)"
+
+
+msgid "Pattern: \"Rejected\" (Installment) :"
+msgstr "الگو: \"رد شده\" (قسطی):"
+
+
+msgid "Pattern: \"Referral to Expert\" (Installment)"
+msgstr "الگو: \"ارجاع به کارشناس\" (قسطی)"
+
+
+msgid "Pattern: \"Referral to Expert\" (Installment) :"
+msgstr "الگو: \"ارجاع به کارشناس\" (قسطی):"
+
+
+msgid "Pattern: \"Cash Request Approved\""
+msgstr "الگو: \"درخواست نقدی تأیید شده\""
+
+
+msgid "Pattern: \"Cash Request Approved\" :"
+msgstr "الگو: \"درخواست نقدی تأیید شده\":"
+
+
+msgid "Send to customer after setting down payment. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount"
+msgstr "ارسال به مشتری پس از تنظیم پیش پرداخت. متغیرها: ۱. نام مشتری ۲. نام خودرو ۳. مبلغ پیش پرداخت"
+
+
+msgid "Pattern: \"Cash Request Rejected\""
+msgstr "الگو: \"درخواست نقدی رد شده\""
+
+
+msgid "Pattern: \"Cash Request Rejected\" :"
+msgstr "الگو: \"درخواست نقدی رد شده\":"
+
+
+msgid "Send to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
+msgstr "ارسال به مشتری پس از رد. متغیرها: ۱. نام مشتری ۲. نام خودرو ۳. دلیل رد"
+
+
+msgid "Pattern: \"Cash Request Referral to Expert\""
+msgstr "الگو: \"ارجاع درخواست نقدی به کارشناس\""
+
+
+msgid "Pattern: \"Cash Request Referral to Expert\" :"
+msgstr "الگو: \"ارجاع درخواست نقدی به کارشناس\":"
+
+
+msgid "Send to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
+msgstr "ارسال به کارشناس. متغیرها: ۱. نام کارشناس ۲. نام مشتری ۳. موبایل مشتری ۴. نام خودرو"
+
+
+msgid "Edit Products"
+msgstr "ویرایش محصولات"

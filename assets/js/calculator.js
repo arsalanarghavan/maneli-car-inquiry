@@ -120,6 +120,56 @@
         // Handle cash form submission with AJAX for logged-in users
         const cashForm = document.querySelector('.cash-request-form');
         if (cashForm) {
+            // Check if product is unavailable
+            const cashTab = document.getElementById('cash-tab');
+            const calc = document.getElementById('loan-calculator');
+            const isUnavailable = calc ? (calc.getAttribute('data-is-unavailable') === 'true') : false;
+            
+            if (isUnavailable) {
+                console.log('Maneli Cash Form: Product unavailable - form disabled');
+                
+                // Add unavailable-form class if not already added
+                if (!cashForm.classList.contains('unavailable-form')) {
+                    cashForm.classList.add('unavailable-form');
+                    console.log('Maneli Cash Form: Added unavailable-form class to form');
+                }
+                
+                // Ensure overlay message is visible (should be in tab-content, not form)
+                let overlayMessage = cashTab.querySelector('.unavailable-overlay-message');
+                if (!overlayMessage) {
+                    // Create overlay if it doesn't exist (fallback) - add to tab, not form
+                    overlayMessage = document.createElement('div');
+                    overlayMessage.className = 'unavailable-overlay-message';
+                    overlayMessage.innerHTML = `
+                        <div class="unavailable-message-content">
+                            <i class="la la-exclamation-circle"></i>
+                            <p>این محصول در حال حاضر برای خرید نقدی در دسترس نیست.</p>
+                        </div>
+                    `;
+                    cashTab.style.position = 'relative';
+                    cashTab.insertBefore(overlayMessage, cashForm);
+                    console.log('Maneli Cash Form: Created unavailable overlay message');
+                }
+                
+                // Add unavailable-tab class to tab-content
+                if (!cashTab.classList.contains('unavailable-tab')) {
+                    cashTab.classList.add('unavailable-tab');
+                }
+                
+                // Disable all form inputs
+                cashForm.querySelectorAll('input, select, button').forEach(element => {
+                    element.disabled = true;
+                    element.style.pointerEvents = 'none';
+                });
+                
+                // Disable submit button specifically
+                const submitBtn = cashForm.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.style.pointerEvents = 'none';
+                }
+            }
+            
             const submitBtn = cashForm.querySelector('button[type="submit"]');
             if (submitBtn) {
                 cashForm.addEventListener('submit', function(e) {
@@ -131,6 +181,15 @@
                                       maneli_ajax_object.ajax_url !== '' &&
                                       maneli_ajax_object.nonce && 
                                       maneli_ajax_object.nonce !== '';
+                    
+                    // Check if product is unavailable (prevent submission)
+                    const calc = document.getElementById('loan-calculator');
+                    const isUnavailable = calc ? (calc.getAttribute('data-is-unavailable') === 'true') : false;
+                    if (isUnavailable) {
+                        console.log('Maneli Cash Form: Cannot submit - product unavailable');
+                        alert('این محصول در حال حاضر برای خرید نقدی در دسترس نیست.');
+                        return;
+                    }
                     
                     if (!isLoggedIn) {
                         // Save form data to localStorage and redirect to login
@@ -328,9 +387,50 @@
         // If prices are hidden, calculator should still work, just hide the display
         if (isUnavailable) {
             console.log('Maneli Calculator: Product unavailable - calculator disabled');
+            
+            // Add unavailable-form class to the form if not already added
+            const form = installmentTab.querySelector('.loan-calculator-form');
+            if (form && !form.classList.contains('unavailable-form')) {
+                form.classList.add('unavailable-form');
+                console.log('Maneli Calculator: Added unavailable-form class to form');
+            }
+            
+            // Ensure overlay message is visible (should be in tab-content, not form)
+            let overlayMessage = installmentTab.querySelector('.unavailable-overlay-message');
+            if (!overlayMessage) {
+                // Create overlay if it doesn't exist (fallback) - add to tab, not form
+                overlayMessage = document.createElement('div');
+                overlayMessage.className = 'unavailable-overlay-message';
+                overlayMessage.innerHTML = `
+                    <div class="unavailable-message-content">
+                        <i class="la la-exclamation-circle"></i>
+                        <p>این محصول در حال حاضر برای خرید اقساطی در دسترس نیست.</p>
+                    </div>
+                `;
+                installmentTab.style.position = 'relative';
+                if (form) {
+                    installmentTab.insertBefore(overlayMessage, form);
+                } else {
+                    installmentTab.appendChild(overlayMessage);
+                }
+                console.log('Maneli Calculator: Created unavailable overlay message');
+            }
+            
+            // Add unavailable-tab class to tab-content
+            if (!installmentTab.classList.contains('unavailable-tab')) {
+                installmentTab.classList.add('unavailable-tab');
+            }
+            
             if (input) input.disabled = true;
             if (slider) slider.disabled = true;
             installmentTab.querySelectorAll(".term-btn").forEach(btn => btn.disabled = true);
+            
+            // Disable action button
+            if (actionBtn) {
+                actionBtn.disabled = true;
+                actionBtn.style.pointerEvents = 'none';
+            }
+            
             return true; // Initialized but disabled
         }
 
@@ -346,6 +446,7 @@
         // Helper: Update slider visual fill
         function updateSliderVisual() {
             if (!slider || !slider.max || slider.max === slider.min) return;
+            // Calculate percentage based on full range (0 to maxDown)
             const percentage = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
             slider.style.setProperty('--value-percent', percentage + '%');
         }
@@ -415,8 +516,8 @@
             }
 
             try {
-                // Set slider min and max correctly - min should be minDown, max should be maxDown
-                slider.min = minDown || 0;
+                // Set slider min to 0 and max to the full price range for proper visual display
+                slider.min = 0;
                 slider.max = maxDown || productPrice || 1000000;
                 slider.value = minDown || 0;
 
@@ -446,8 +547,8 @@
 
         // Slider events
         slider.addEventListener("input", function() {
-            // Ensure min and max are set correctly
-            if (this.min != minDown) this.min = minDown || 0;
+            // Keep min at 0 for proper visual display
+            if (this.min != 0) this.min = 0;
             if (this.max != maxDown) this.max = maxDown || productPrice || 1000000;
             
             if (input) {
@@ -458,8 +559,8 @@
         });
 
         slider.addEventListener("change", function() {
-            // Ensure min and max are set correctly
-            if (this.min != minDown) this.min = minDown || 0;
+            // Keep min at 0 for proper visual display
+            if (this.min != 0) this.min = 0;
             if (this.max != maxDown) this.max = maxDown || productPrice || 1000000;
             
             let value = parseInt(this.value) || 0;
@@ -486,7 +587,7 @@
             let value = parseMoney(this.value) || 0;
             let clamped = clamp(value, minDown, maxDown);
             if (slider) {
-                slider.min = minDown;
+                slider.min = 0;
                 slider.max = maxDown;
                 slider.value = clamped;
             }

@@ -325,3 +325,129 @@
         width: 12.5rem !important;
     }
 }
+
+/* Product Editor Statistics Cards - Enhanced Styling */
+.card.custom-card.crm-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 0.5rem !important;
+    background: #fff !important;
+}
+
+.card.custom-card.crm-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%) !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease !important;
+    opacity: 0 !important;
+}
+
+.card.custom-card.crm-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.card.custom-card.crm-card:hover::before {
+    opacity: 1 !important;
+}
+
+.card.custom-card.crm-card .card-body {
+    position: relative !important;
+    z-index: 1 !important;
+    padding: 1.5rem !important;
+}
+
+.card.custom-card.crm-card .p-2 {
+    transition: all 0.3s ease !important;
+}
+
+.card.custom-card.crm-card:hover .p-2 {
+    transform: scale(1.1) !important;
+}
+
+.card.custom-card.crm-card:hover .avatar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card.custom-card.crm-card .avatar {
+    transition: all 0.3s ease !important;
+}
+
+.card.custom-card.crm-card h4 {
+    transition: color 0.3s ease !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    font-size: 1.75rem !important;
+    color: #1f2937 !important;
+}
+
+.card.custom-card.crm-card:hover h4 {
+    color: #5e72e4 !important;
+}
+
+.card.custom-card.crm-card .badge {
+    transition: all 0.3s ease !important;
+    font-weight: 600 !important;
+}
+
+.card.custom-card.crm-card:hover .badge {
+    transform: translateX(-2px) !important;
+}
+
+/* Primary Card Specific */
+.card.custom-card.crm-card .border-primary,
+.card.custom-card.crm-card .bg-primary {
+    background: linear-gradient(135deg, #5e72e4 0%, #7c3aed 100%) !important;
+    border-color: rgba(94, 114, 228, 0.2) !important;
+}
+
+/* Success Card Specific */
+.card.custom-card.crm-card .border-success,
+.card.custom-card.crm-card .bg-success {
+    background: linear-gradient(135deg, #2dce89 0%, #20c997 100%) !important;
+    border-color: rgba(45, 206, 137, 0.2) !important;
+}
+
+/* Warning Card Specific */
+.card.custom-card.crm-card .border-warning,
+.card.custom-card.crm-card .bg-warning {
+    background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important;
+    border-color: rgba(251, 99, 64, 0.2) !important;
+}
+
+/* Secondary Card Specific */
+.card.custom-card.crm-card .border-secondary,
+.card.custom-card.crm-card .bg-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+    border-color: rgba(108, 117, 125, 0.2) !important;
+}
+
+/* Responsive adjustments for product stats cards */
+@media (max-width: 1200px) {
+    .card.custom-card.crm-card h4 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card.custom-card.crm-card {
+        margin-bottom: 1rem;
+    }
+    
+    .card.custom-card.crm-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .card.custom-card.crm-card h4 {
+        font-size: 1.25rem;
+    }
+}

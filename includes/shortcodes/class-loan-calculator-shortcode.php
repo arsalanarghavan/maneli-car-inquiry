@@ -104,20 +104,20 @@ class Maneli_Loan_Calculator_Shortcode {
 
         $product_id = $product->get_id();
         $car_status = get_post_meta($product_id, '_maneli_car_status', true);
+        
+        // Normalize car_status - handle empty or invalid values
+        if (empty($car_status) || !in_array($car_status, ['special_sale', 'unavailable', 'disabled'], true)) {
+            $car_status = 'special_sale'; // Default status
+        }
+        
+        // Debug: Log car status for troubleshooting
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log("Maneli Calculator: Product ID {$product_id}, Car Status: " . $car_status);
+        }
 
         // اگر وضعیت خودرو 'disabled' باشد، محصول نباید نمایش داده شود (فقط برای غیر-ادمین)
         if (!current_user_can('manage_maneli_inquiries') && $car_status === 'disabled') {
             return ''; // Return empty for disabled products for non-admin users
-        }
-
-        // اگر وضعیت خودرو 'unavailable' باشد، یک پیام و ماشین حساب غیرفعال نمایش داده می‌شود.
-        if ($car_status === 'unavailable') {
-            $options = get_option('maneli_inquiry_all_options', []);
-            $message = $options['unavailable_product_message'] ?? esc_html__('This car is currently unavailable for purchase.', 'maneli-car-inquiry');
-            
-            maneli_get_template_part('shortcodes/calculator/unavailable-product-overlay', ['message' => $message]);
-            
-            return ob_get_clean();
         }
 
         // آماده‌سازی داده‌ها برای ارسال به تمپلیت
@@ -167,6 +167,14 @@ class Maneli_Loan_Calculator_Shortcode {
             $min_down_payment = (int)($installment_price * 0.2); // ۲۰٪ پیش‌فرض
         }
 
+        // Determine if product is unavailable
+        $is_unavailable = ($car_status === 'unavailable');
+        
+        // Debug: Log availability status for troubleshooting
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log("Maneli Calculator: Product ID {$product_id}, is_unavailable: " . ($is_unavailable ? 'true' : 'false'));
+        }
+
         $template_args = [
             'product'           => $product,
             'cash_price'        => $cash_price,
@@ -176,7 +184,7 @@ class Maneli_Loan_Calculator_Shortcode {
             'car_colors'        => $car_colors,
             'car_status'        => $car_status,
             'can_see_prices'    => $can_see_prices,
-            'is_unavailable'    => ($car_status === 'unavailable'),
+            'is_unavailable'    => $is_unavailable,
         ];
         
         // رندر کردن کانتینر اصلی ماشین حساب با تب‌ها و محتوای آن
