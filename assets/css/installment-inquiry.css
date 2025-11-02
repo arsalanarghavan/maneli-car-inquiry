@@ -1,6 +1,7 @@
 /**
  * Installment Inquiry Form Styles
  * Separate CSS file for installment inquiry forms
+ * Version: 1.1.0 - Fixed form grid conflicts
  */
 
 /* === Form Container === */
@@ -46,12 +47,12 @@
 }
 
 /* === Form Grid === */
-.form-grid {
+.maneli-inquiry-form .form-grid {
     display: grid;
     gap: 20px;
 }
 
-.form-row {
+.maneli-inquiry-form .form-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
@@ -99,7 +100,7 @@
 
 /* === Responsive === */
 @media (max-width: 768px) {
-    .form-row {
+    .maneli-inquiry-form .form-row {
         grid-template-columns: 1fr;
     }
 }

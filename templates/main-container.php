@@ -21,6 +21,13 @@ if (!defined('ABSPATH')) {
     exit;
 }
 ?>
+<style>
+@media (max-width: 768px) {
+    .maneli-calculator-container .cash-request-form .form-row {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
 
 <div class="maneli-calculator-container">
     <div class="calculator-tabs">
@@ -42,23 +49,23 @@ if (!defined('ABSPATH')) {
                     $current_user = wp_get_current_user();
                 ?>
                 <div class="loan-section">
-                    <div class="form-grid">
-                        <div class="form-row">
-                            <div class="form-group">
+                    <div class="form-grid" style="display: grid !important; gap: 1rem !important;">
+                        <div class="form-row" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 1rem !important;">
+                            <div class="form-group" style="margin-bottom: 0;">
                                 <label for="cash_first_name"><?php esc_html_e('First Name:', 'maneli-car-inquiry'); ?></label>
                                 <input type="text" id="cash_first_name" name="cash_first_name" value="<?php echo esc_attr($current_user->first_name); ?>" required>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="margin-bottom: 0;">
                                 <label for="cash_last_name"><?php esc_html_e('Last Name:', 'maneli-car-inquiry'); ?></label>
                                 <input type="text" id="cash_last_name" name="cash_last_name" value="<?php echo esc_attr($current_user->last_name); ?>" required>
                             </div>
                         </div>
-                        <div class="form-row">
-                             <div class="form-group">
+                        <div class="form-row" style="display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 1rem !important;">
+                             <div class="form-group" style="margin-bottom: 0;">
                                 <label for="cash_mobile_number"><?php esc_html_e('Mobile Number:', 'maneli-car-inquiry'); ?></label>
                                 <input type="tel" id="cash_mobile_number" name="cash_mobile_number" value="<?php echo esc_attr(get_user_meta($current_user->ID, 'mobile_number', true)); ?>" required>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="margin-bottom: 0;">
                                 <label for="cash_car_color"><?php esc_html_e('Car Color:', 'maneli-car-inquiry'); ?></label>
                                 <?php if (!empty($car_colors)): ?>
                                     <select id="cash_car_color" name="cash_car_color" required>

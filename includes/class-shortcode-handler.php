@@ -62,19 +62,19 @@ class Maneli_Shortcode_Handler {
             }
         }
         
+        // Bootstrap RTL - Load early to avoid conflicts
+        wp_enqueue_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        
         // Shortcode Xintra compat - check if file exists
         $xintra_compat_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
         if (file_exists($xintra_compat_path)) {
             wp_enqueue_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
         }
         
-        // Separate CSS files for shortcodes
-        wp_enqueue_style('maneli-loan-calculator', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css', ['maneli-frontend-styles'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css'));
-        wp_enqueue_style('maneli-installment-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/installment-inquiry.css', ['maneli-frontend-styles'], '1.0.0');
-        wp_enqueue_style('maneli-cash-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/cash-inquiry.css', ['maneli-frontend-styles'], '1.0.0');
-        
-        // Bootstrap RTL
-        wp_enqueue_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        // Separate CSS files for shortcodes - Load AFTER Bootstrap to override
+        wp_enqueue_style('maneli-loan-calculator', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css', ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css'));
+        wp_enqueue_style('maneli-installment-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/installment-inquiry.css', ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/installment-inquiry.css'));
+        wp_enqueue_style('maneli-cash-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/cash-inquiry.css', ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'], '1.0.0');
         
         // Enqueue jQuery (required for all scripts)
         wp_enqueue_script('jquery');

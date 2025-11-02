@@ -3,6 +3,7 @@
  * Styled to match dashboard Bootstrap theme
  * Using specific selectors to avoid conflicts with theme styles
  * Note: Some !important may still be necessary for theme compatibility
+ * Version: 1.1.0 - Fixed form grid layout issue
  */
 
 /* === Calculator Container - Match Dashboard Card Style === */
@@ -330,18 +331,19 @@
 
 /* === Cash Request Form === */
 .maneli-calculator-container .cash-request-form .form-grid {
-    display: grid;
-    gap: 1rem;
+    display: grid !important;
+    gap: 1rem !important;
 }
 
 .maneli-calculator-container .cash-request-form .form-row {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
 }
 
 .maneli-calculator-container .cash-request-form .form-group {
-    margin-bottom: 0;
+    margin-bottom: 0 !important;
+    display: block !important;
 }
 
 .maneli-calculator-container .cash-request-form .form-group label {
@@ -350,6 +352,29 @@
     font-weight: 500;
     font-size: 0.8rem;
     color: #4d5875;
+}
+
+.maneli-calculator-container .cash-request-form .form-group input,
+.maneli-calculator-container .cash-request-form .form-group select {
+    display: block !important;
+    width: 100% !important;
+}
+
+/* Remove any ::before and ::after pseudo-elements from form elements */
+.maneli-calculator-container .cash-request-form .form-group::before,
+.maneli-calculator-container .cash-request-form .form-group::after,
+.maneli-calculator-container .cash-request-form .form-row::before,
+.maneli-calculator-container .cash-request-form .form-row::after,
+.maneli-calculator-container .cash-request-form .form-grid::before,
+.maneli-calculator-container .cash-request-form .form-grid::after,
+.maneli-calculator-container .cash-request-form .form-group label::before,
+.maneli-calculator-container .cash-request-form .form-group label::after,
+.maneli-calculator-container .cash-request-form .form-group input::before,
+.maneli-calculator-container .cash-request-form .form-group input::after,
+.maneli-calculator-container .cash-request-form .form-group select::before,
+.maneli-calculator-container .cash-request-form .form-group select::after {
+    display: none !important;
+    content: none !important;
 }
 
 /* === Price Hidden/Unavailable Styles === */
