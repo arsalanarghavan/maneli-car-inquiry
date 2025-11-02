@@ -5462,3 +5462,35 @@ msgstr "ارسال به کارشناس. متغیرها: ۱. نام کارشنا�
 
 msgid "Edit Products"
 msgstr "ویرایش محصولات"
+
+
+msgid "Reset"
+msgstr "بازنشانی"
+
+
+msgid "Filters Active"
+msgstr "فیلترها فعال"
+
+
+msgid "Total Notifications"
+msgstr "کل اعلان‌ها"
+
+
+msgid "Unread"
+msgstr "خوانده نشده"
+
+
+msgid "Read"
+msgstr "خوانده شده"
+
+
+msgid "Total Payments"
+msgstr "کل پرداخت‌ها"
+
+
+msgid "Inquiry Fee Payments"
+msgstr "پرداخت‌های هزینه استعلام"
+
+
+msgid "Cash Down Payments"
+msgstr "پیش‌پرداخت‌های نقدی"

@@ -139,6 +139,13 @@ foreach ($cash_inquiries as $inquiry) {
     ];
 }
 
+// Calculate statistics BEFORE filtering
+$all_payments_list = $payments_list; // Keep a copy for statistics
+$total_payments_unfiltered = count($all_payments_list);
+$total_amount_unfiltered = array_sum(array_column($all_payments_list, 'amount'));
+$inquiry_fee_count = count(array_filter($all_payments_list, function($p) { return $p['payment_type'] === 'inquiry_fee'; }));
+$cash_downpayment_count = count(array_filter($all_payments_list, function($p) { return $p['payment_type'] === 'cash_down_payment'; }));
+
 // Apply filters
 if ($search) {
     $payments_list = array_filter($payments_list, function($payment) use ($search) {
@@ -197,6 +204,175 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
             </div>
         </div>
         <!-- Page Header Close -->
+        
+<style>
+/* Payment Statistics Cards - Inline Styles for Immediate Effect */
+.card.custom-card.crm-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 0.5rem !important;
+    background: #fff !important;
+}
+
+.card.custom-card.crm-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%) !important;
+    pointer-events: none !important;
+    transition: opacity 0.3s ease !important;
+    opacity: 0 !important;
+}
+
+.card.custom-card.crm-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.card.custom-card.crm-card:hover::before {
+    opacity: 1 !important;
+}
+
+.card.custom-card.crm-card .card-body {
+    position: relative !important;
+    z-index: 1 !important;
+    padding: 1.5rem !important;
+}
+
+.card.custom-card.crm-card:hover .p-2 {
+    transform: scale(1.1) !important;
+}
+
+.card.custom-card.crm-card:hover .avatar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.card.custom-card.crm-card h4 {
+    font-weight: 700 !important;
+    letter-spacing: -0.5px !important;
+    font-size: 1.75rem !important;
+    color: #1f2937 !important;
+    transition: color 0.3s ease !important;
+}
+
+.card.custom-card.crm-card:hover h4 {
+    color: #5e72e4 !important;
+}
+
+.card.custom-card.crm-card .border-primary,
+.card.custom-card.crm-card .bg-primary {
+    background: linear-gradient(135deg, #5e72e4 0%, #7c3aed 100%) !important;
+}
+
+.card.custom-card.crm-card .border-success,
+.card.custom-card.crm-card .bg-success {
+    background: linear-gradient(135deg, #2dce89 0%, #20c997 100%) !important;
+}
+
+.card.custom-card.crm-card .border-warning,
+.card.custom-card.crm-card .bg-warning {
+    background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important;
+}
+
+.card.custom-card.crm-card .border-secondary,
+.card.custom-card.crm-card .bg-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+}
+
+.card.custom-card.crm-card .border-danger,
+.card.custom-card.crm-card .bg-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+</style>
+
+<div class="row mb-4">
+    <!-- کارت مجموع پرداخت‌ها -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+        <div class="card custom-card crm-card overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-pill">
+                        <span class="avatar avatar-md avatar-rounded bg-primary svg-white">
+                            <i class="la la-money-bill-wave fs-20"></i>
+                        </span>
+                    </div>
+                </div>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Payments', 'maneli-car-inquiry'); ?></p>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($total_payments_unfiltered)); ?></h4>
+                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- کارت مجموع مبلغ پرداخت‌ها -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+        <div class="card custom-card crm-card overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-pill">
+                        <span class="avatar avatar-md avatar-rounded bg-success svg-white">
+                            <i class="la la-coins fs-20"></i>
+                        </span>
+                    </div>
+                </div>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Amount', 'maneli-car-inquiry'); ?></p>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($total_amount_unfiltered)); ?></h4>
+                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- کارت پرداخت‌های هزینه استعلام -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+        <div class="card custom-card crm-card overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-pill">
+                        <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
+                            <i class="la la-file-invoice fs-20"></i>
+                        </span>
+                    </div>
+                </div>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Inquiry Fee Payments', 'maneli-car-inquiry'); ?></p>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($inquiry_fee_count)); ?></h4>
+                    <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- کارت پیش پرداخت‌های نقدی -->
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+        <div class="card custom-card crm-card overflow-hidden">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <div class="p-2 border border-secondary border-opacity-10 bg-secondary-transparent rounded-pill">
+                        <span class="avatar avatar-md avatar-rounded bg-secondary svg-white">
+                            <i class="la la-car fs-20"></i>
+                        </span>
+                    </div>
+                </div>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Down Payments', 'maneli-car-inquiry'); ?></p>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($cash_downpayment_count)); ?></h4>
+                    <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
             
         <!-- Start::row-1 -->
         <div class="row">

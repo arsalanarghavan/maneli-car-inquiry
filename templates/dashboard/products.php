@@ -20,9 +20,12 @@ if (!current_user_can('manage_maneli_inquiries')) {
     exit;
 }
 
-// Load product data
+// Load product data and filters
 $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+$filter_status = isset($_GET['filter_status']) ? sanitize_text_field($_GET['filter_status']) : '';
+$filter_brand = isset($_GET['filter_brand']) ? sanitize_text_field($_GET['filter_brand']) : '';
+$filter_category = isset($_GET['filter_category']) ? absint($_GET['filter_category']) : 0;
 
 // Get products - Include all statuses including disabled products for admin
 // Note: The hooks check for is_admin() OR current_user_can('manage_maneli_inquiries')
@@ -44,8 +47,69 @@ $query_args = [
     'suppress_filters' => true // Bypass all filters to show ALL products
 ];
 
+// Search filter
 if (!empty($search)) {
     $query_args['s'] = $search;
+}
+
+// Status filter (car_status meta)
+if (!empty($filter_status)) {
+    $query_args['meta_query'][] = [
+        'key' => '_maneli_car_status',
+        'value' => $filter_status,
+        'compare' => '='
+    ];
+}
+
+// Brand filter
+if (!empty($filter_brand)) {
+    // First try taxonomy pa_brand
+    $brand_tax_check = get_terms(['taxonomy' => 'pa_brand', 'hide_empty' => false]);
+    if (!empty($brand_tax_check) && !is_wp_error($brand_tax_check)) {
+        // Use taxonomy
+        if (!isset($query_args['tax_query'])) {
+            $query_args['tax_query'] = [];
+        }
+        $query_args['tax_query'][] = [
+            'taxonomy' => 'pa_brand',
+            'field' => 'slug',
+            'terms' => $filter_brand,
+            'operator' => 'IN'
+        ];
+    } else {
+        // Use meta _maneli_car_brand
+        if (!isset($query_args['meta_query'])) {
+            $query_args['meta_query'] = [];
+        }
+        $query_args['meta_query'][] = [
+            'key' => '_maneli_car_brand',
+            'value' => $filter_brand,
+            'compare' => 'LIKE'
+        ];
+    }
+}
+
+// Category filter
+if (!empty($filter_category)) {
+    if (!isset($query_args['tax_query'])) {
+        $query_args['tax_query'] = [];
+    }
+    $query_args['tax_query'][] = [
+        'taxonomy' => 'product_cat',
+        'field' => 'term_id',
+        'terms' => $filter_category,
+        'operator' => 'IN'
+    ];
+}
+
+// Set relation for multiple tax queries
+if (isset($query_args['tax_query']) && count($query_args['tax_query']) > 1) {
+    $query_args['tax_query']['relation'] = 'AND';
+}
+
+// Set relation for multiple meta queries
+if (isset($query_args['meta_query']) && count($query_args['meta_query']) > 1) {
+    $query_args['meta_query']['relation'] = 'AND';
 }
 
 $wp_query_products = new WP_Query($query_args);
@@ -118,6 +182,37 @@ $popular_products_query = new WP_Query([
     'meta_key' => 'total_sales',
     'orderby' => 'meta_value_num',
     'order' => 'DESC'
+]);
+
+// Get brands for filter (try taxonomy first, then get unique from meta)
+$brands = [];
+$brand_taxonomy = get_terms([
+    'taxonomy' => 'pa_brand',
+    'hide_empty' => false,
+]);
+if (!empty($brand_taxonomy) && !is_wp_error($brand_taxonomy)) {
+    foreach ($brand_taxonomy as $brand_term) {
+        $brands[$brand_term->slug] = $brand_term->name;
+    }
+} else {
+    // Get unique brands from meta
+    global $wpdb;
+    $meta_brands = $wpdb->get_col("
+        SELECT DISTINCT meta_value 
+        FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_maneli_car_brand' 
+        AND meta_value != '' 
+        ORDER BY meta_value ASC
+    ");
+    foreach ($meta_brands as $brand_value) {
+        $brands[$brand_value] = $brand_value;
+    }
+}
+
+// Get product categories for filter
+$product_categories = get_terms([
+    'taxonomy' => 'product_cat',
+    'hide_empty' => false,
 ]);
 ?>
 <style>
@@ -204,6 +299,30 @@ $popular_products_query = new WP_Query([
 .card.custom-card.crm-card .border-danger,
 .card.custom-card.crm-card .bg-danger {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+/* Filter Form Styles */
+#product-filter-form .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+#product-filter-form .form-select,
+#product-filter-form .form-control {
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+#product-filter-form .form-select:focus,
+#product-filter-form .form-control:focus {
+    border-color: var(--primary-color, #5e72e4);
+    box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.1);
+}
+
+#product-filter-form .btn {
+    min-width: 120px;
 }
 </style>
 
@@ -309,17 +428,78 @@ $popular_products_query = new WP_Query([
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-12">
-                        <form method="get" action="">
+                        <form method="get" action="" id="product-filter-form">
                             <input type="hidden" name="page" value="products">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="la la-search"></i>
-                                </span>
-                                <input type="search" name="search" id="product-search-input" class="form-control" placeholder="<?php esc_attr_e('Search car name...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="la la-search me-1"></i>
-                                    <?php esc_html_e('Search', 'maneli-car-inquiry'); ?>
-                                </button>
+                            
+                            <!-- Search Row - Full Width -->
+                            <div class="mb-3">
+                                <label for="product-search-input" class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="la la-search"></i>
+                                    </span>
+                                    <input type="search" name="search" id="product-search-input" class="form-control" placeholder="<?php esc_attr_e('Search car name...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
+                                </div>
+                            </div>
+                            
+                            <!-- Filters Row - Full Width in One Line -->
+                            <div class="row g-2 align-items-end">
+                                <!-- Status Filter -->
+                                <div class="col-md-3">
+                                    <label for="filter_status" class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
+                                    <select name="filter_status" id="filter_status" class="form-control form-select">
+                                        <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
+                                        <option value="special_sale" <?php selected($filter_status, 'special_sale'); ?>><?php esc_html_e('Active for Sale', 'maneli-car-inquiry'); ?></option>
+                                        <option value="unavailable" <?php selected($filter_status, 'unavailable'); ?>><?php esc_html_e('Unavailable', 'maneli-car-inquiry'); ?></option>
+                                        <option value="disabled" <?php selected($filter_status, 'disabled'); ?>><?php esc_html_e('Hidden', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Brand Filter -->
+                                <div class="col-md-3">
+                                    <label for="filter_brand" class="form-label"><?php esc_html_e('Brand', 'maneli-car-inquiry'); ?></label>
+                                    <select name="filter_brand" id="filter_brand" class="form-control form-select">
+                                        <option value=""><?php esc_html_e('All Brands', 'maneli-car-inquiry'); ?></option>
+                                        <?php
+                                        if (!empty($brands)) {
+                                            foreach ($brands as $brand_slug => $brand_name) {
+                                                $selected = ($filter_brand === $brand_slug) ? 'selected' : '';
+                                                echo '<option value="' . esc_attr($brand_slug) . '" ' . $selected . '>' . esc_html($brand_name) . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                
+                                <!-- Category Filter -->
+                                <div class="col-md-3">
+                                    <label for="filter_category" class="form-label"><?php esc_html_e('Category', 'maneli-car-inquiry'); ?></label>
+                                    <select name="filter_category" id="filter_category" class="form-control form-select">
+                                        <option value=""><?php esc_html_e('All Categories', 'maneli-car-inquiry'); ?></option>
+                                        <?php
+                                        if (!empty($product_categories) && !is_wp_error($product_categories)) {
+                                            foreach ($product_categories as $category) {
+                                                $selected = ($filter_category == $category->term_id) ? 'selected' : '';
+                                                echo '<option value="' . esc_attr($category->term_id) . '" ' . $selected . '>' . esc_html($category->name) . '</option>';
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="col-md-3">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-wave flex-fill">
+                                            <i class="la la-filter me-1"></i>
+                                            <?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
+                                        </button>
+                                        <a href="<?php echo esc_url(home_url('/dashboard/products')); ?>" class="btn btn-secondary btn-wave">
+                                            <i class="la la-times me-1"></i>
+                                            <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -380,27 +560,42 @@ $popular_products_query = new WP_Query([
                                 <nav aria-label="Page navigation" class="pagination-style-4">
                                     <ul class="pagination mb-0">
                                         <?php
-                                        // Previous button
-                                        $prev_link = $paged > 1 ? add_query_arg('paged', $paged - 1) : 'javascript:void(0);';
+                                        // Previous button - preserve filters
+                                        $pagination_args = [];
+                                        if (!empty($search)) $pagination_args['search'] = $search;
+                                        if (!empty($filter_status)) $pagination_args['filter_status'] = $filter_status;
+                                        if (!empty($filter_brand)) $pagination_args['filter_brand'] = $filter_brand;
+                                        if (!empty($filter_category)) $pagination_args['filter_category'] = $filter_category;
+                                        $pagination_args['paged'] = $paged - 1;
+                                        $prev_link = $paged > 1 ? add_query_arg($pagination_args, home_url('/dashboard/products')) : 'javascript:void(0);';
                                         $prev_disabled = $paged <= 1 ? ' disabled' : '';
                                         echo '<li class="page-item' . $prev_disabled . '">';
                                         echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'maneli-car-inquiry') . '</a>';
                                         echo '</li>';
                                         
-                                        // Page numbers
+                                        // Page numbers - preserve filters
                                         $range = 2;
                                         $show_all = false;
                                         
+                                        // Build base query args with filters
+                                        $pagination_args = [];
+                                        if (!empty($search)) $pagination_args['search'] = $search;
+                                        if (!empty($filter_status)) $pagination_args['filter_status'] = $filter_status;
+                                        if (!empty($filter_brand)) $pagination_args['filter_brand'] = $filter_brand;
+                                        if (!empty($filter_category)) $pagination_args['filter_category'] = $filter_category;
+                                        
                                         for ($i = 1; $i <= $max_num_pages; $i++) {
                                             $current_class = ($i == $paged) ? ' active' : '';
-                                            $page_link = add_query_arg('paged', $i);
+                                            $pagination_args['paged'] = $i;
+                                            $page_link = add_query_arg($pagination_args, home_url('/dashboard/products'));
                                             echo '<li class="page-item' . $current_class . '">';
                                             echo '<a class="page-link" href="' . esc_url($page_link) . '">' . persian_numbers($i) . '</a>';
                                             echo '</li>';
                                         }
                                         
-                                        // Next button
-                                        $next_link = $paged < $max_num_pages ? add_query_arg('paged', $paged + 1) : 'javascript:void(0);';
+                                        // Next button - preserve filters
+                                        $pagination_args['paged'] = $paged + 1;
+                                        $next_link = $paged < $max_num_pages ? add_query_arg($pagination_args, home_url('/dashboard/products')) : 'javascript:void(0);';
                                         $next_disabled = $paged >= $max_num_pages ? ' disabled' : '';
                                         echo '<li class="page-item' . $next_disabled . '">';
                                         echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'maneli-car-inquiry') . '</a>';

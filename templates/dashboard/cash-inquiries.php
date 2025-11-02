@@ -96,22 +96,43 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
                             </div>
                         </div>
                         
-                        <!-- Filter Controls -->
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-4">
-                                <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
-                                <select id="cash-inquiry-status-filter" class="form-select">
+                        <!-- Filter Controls - All in one line -->
+                        <?php
+                        // Get initial status from URL query parameter
+                        $initial_status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+                        ?>
+                        <style>
+                        .filter-row-single-line {
+                            display: flex;
+                            flex-wrap: wrap;
+                            align-items: flex-end;
+                            gap: 0.5rem;
+                            width: 100%;
+                        }
+                        .filter-row-single-line > div {
+                            flex-shrink: 0;
+                        }
+                        .filter-row-single-line label {
+                            font-size: 0.875rem;
+                            margin-bottom: 0.25rem;
+                            white-space: nowrap;
+                        }
+                        </style>
+                        <div class="filter-row-single-line mb-3">
+                            <div>
+                                <label class="form-label mb-1 d-block"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
+                                <select id="cash-inquiry-status-filter" class="form-select form-select-sm" style="min-width: 150px;">
                                     <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
                                     <?php foreach (Maneli_CPT_Handler::get_all_cash_inquiry_statuses() as $key => $label) : ?>
-                                        <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
+                                        <option value="<?php echo esc_attr($key); ?>" <?php selected($initial_status, $key); ?>><?php echo esc_html($label); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                             
                             <?php if ($is_admin && !empty($experts)) : ?>
-                                <div class="col-md-4">
-                                    <label class="form-label"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
-                                    <select id="cash-expert-filter" class="form-select maneli-select2">
+                                <div>
+                                    <label class="form-label mb-1 d-block"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
+                                    <select id="cash-expert-filter" class="form-select form-select-sm maneli-select2" style="min-width: 150px;">
                                         <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
                                         <?php foreach ($experts as $expert) : ?>
                                             <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
@@ -120,30 +141,28 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
                                 </div>
                             <?php endif; ?>
                             
-                            <div class="col-md-4">
-                                <label class="form-label"><?php esc_html_e('Sort:', 'maneli-car-inquiry'); ?></label>
-                                <select id="cash-inquiry-sort-filter" class="form-select">
+                            <div>
+                                <label class="form-label mb-1 d-block"><?php esc_html_e('Sort:', 'maneli-car-inquiry'); ?></label>
+                                <select id="cash-inquiry-sort-filter" class="form-select form-select-sm" style="min-width: 150px;">
                                     <option value="default"><?php esc_html_e('Default (Newest First)', 'maneli-car-inquiry'); ?></option>
                                     <option value="date_desc"><?php esc_html_e('Newest', 'maneli-car-inquiry'); ?></option>
                                     <option value="date_asc"><?php esc_html_e('Oldest', 'maneli-car-inquiry'); ?></option>
                                     <option value="status"><?php esc_html_e('By Status', 'maneli-car-inquiry'); ?></option>
                                 </select>
                             </div>
-                        </div>
-                        
-                        <!-- Filter Actions -->
-                        <div class="row g-3 mb-0">
-                            <div class="col-md-12">
-                                <div class="d-flex gap-2">
-                                    <button type="button" id="cash-inquiry-reset-filters" class="btn btn-outline-secondary btn-sm">
-                                        <i class="la la-refresh me-1"></i>
-                                        <?php esc_html_e('Clear Filters', 'maneli-car-inquiry'); ?>
-                                    </button>
-                                    <button type="button" id="cash-inquiry-apply-filters" class="btn btn-primary btn-sm">
-                                        <i class="la la-filter me-1"></i>
-                                        <?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
-                                    </button>
-                                </div>
+                            
+                            <div>
+                                <button type="button" id="cash-inquiry-reset-filters" class="btn btn-outline-secondary btn-sm">
+                                    <i class="la la-refresh me-1"></i>
+                                    <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
+                                </button>
+                            </div>
+                            
+                            <div>
+                                <button type="button" id="cash-inquiry-apply-filters" class="btn btn-primary btn-sm">
+                                    <i class="la la-filter me-1"></i>
+                                    <?php esc_html_e('Apply', 'maneli-car-inquiry'); ?>
+                                </button>
                             </div>
                         </div>
                     </form>

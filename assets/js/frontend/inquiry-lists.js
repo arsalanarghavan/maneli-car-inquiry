@@ -661,12 +661,25 @@ function toPersianNumber(num) {
             const baseUrl = urlObj.toString(); 
             const colspan = listType === 'installment' ? 7 : 8; // Number of columns in the table
 
+            // For installment inquiries, check if status value is a tracking_status
+            let statusParam = statusFilter.val();
+            let trackingStatusParam = '';
+            
+            if (listType === 'installment') {
+                const trackingStatuses = ['new', 'referred', 'in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'cancelled', 'completed', 'rejected'];
+                if (statusParam && trackingStatuses.includes(statusParam)) {
+                    trackingStatusParam = statusParam;
+                    statusParam = ''; // Don't use inquiry_status for tracking statuses
+                }
+            }
+            
             const formData = {
                 action: ajaxAction,
                 nonce: nonce,  // Changed from _ajax_nonce to nonce for compatibility
                 _ajax_nonce: nonce,  // Also send as _ajax_nonce for installment inquiries compatibility
                 search: searchInput.val(),
-                status: statusFilter.val(),
+                status: statusParam,
+                tracking_status: trackingStatusParam,  // Send tracking_status for installment inquiries
                 expert: expertFilter.val(),
                 sort: sortFilter.val(),
                 page: page,
@@ -739,14 +752,10 @@ function toPersianNumber(num) {
             }, 500);
         });
 
-        // Handle change events on filter dropdowns
-        statusFilter.on('change', function() { fetchInquiries(1); });
-        
-        // Handle expert filter change (using change event on the original select element)
-        expertFilter.on('change', function() { fetchInquiries(1); });
-        
-        // Handle sort filter change
-        sortFilter.on('change', function() { fetchInquiries(1); });
+        // Handle change events on filter dropdowns - REMOVED: Filters now work with button only
+        // statusFilter.on('change', function() { fetchInquiries(1); });
+        // expertFilter.on('change', function() { fetchInquiries(1); });
+        // sortFilter.on('change', function() { fetchInquiries(1); });
         
         // Handle reset filters button
         resetButton.on('click', function() {
@@ -1055,25 +1064,53 @@ function toPersianNumber(num) {
         // Hide initial loading state in tbody
         $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center py-2 text-muted">' + getText('loading', 'Loading...') + '</td></tr>');
         
-        // Load initial list
-        const requestData = {
-            action: 'maneli_filter_cash_inquiries_ajax',
-            nonce: ajaxNonce,
-            _ajax_nonce: ajaxNonce, // Fallback for compatibility
-            page: 1,
-            search: '',
-            status: '',
-            sort: 'default'
-        };
+        // Load initial list - Check for status query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialStatus = urlParams.get('status') || '';
         
-        console.log('=== AJAX REQUEST DATA ===');
-        console.log('URL:', ajaxUrl);
-        console.log('Action:', requestData.action);
-        console.log('Nonce present:', !!ajaxNonce);
-        console.log('Nonce value (first 10 chars):', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
-        console.log('Full request data:', requestData);
+        // Set status filter if provided in URL (wait a bit for DOM to be ready)
+        if (initialStatus && $('#cash-inquiry-status-filter').length) {
+            $('#cash-inquiry-status-filter').val(initialStatus);
+            // Wait a moment for select to update
+            setTimeout(function() {
+                // Re-read value from DOM to ensure it's set correctly
+                const statusFromDOM = $('#cash-inquiry-status-filter').val();
+                const requestData = {
+                    action: 'maneli_filter_cash_inquiries_ajax',
+                    nonce: ajaxNonce,
+                    _ajax_nonce: ajaxNonce, // Fallback for compatibility
+                    page: 1,
+                    search: '',
+                    status: statusFromDOM || initialStatus,
+                    sort: 'default'
+                };
+                sendCashInquiryRequest(requestData);
+            }, 100);
+        } else {
+            // No status parameter, use default values from DOM
+            const requestData = {
+                action: 'maneli_filter_cash_inquiries_ajax',
+                nonce: ajaxNonce,
+                _ajax_nonce: ajaxNonce, // Fallback for compatibility
+                page: 1,
+                search: '',
+                status: $('#cash-inquiry-status-filter').val() || '',
+                sort: $('#cash-inquiry-sort-filter').val() || 'default'
+            };
+            sendCashInquiryRequest(requestData);
+        }
         
-        $.ajax({
+        function sendCashInquiryRequest(requestData) {
+        
+            console.log('=== AJAX REQUEST DATA ===');
+            console.log('URL:', ajaxUrl);
+            console.log('Action:', requestData.action);
+            console.log('Nonce present:', !!ajaxNonce);
+            console.log('Nonce value (first 10 chars):', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
+            console.log('Full request data:', requestData);
+            console.log('Status filter value:', requestData.status);
+            
+            $.ajax({
             url: ajaxUrl,
             type: 'POST',
             data: requestData,
@@ -1176,7 +1213,8 @@ function toPersianNumber(num) {
                 
                 $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + errorMessage + '<br><small>' + getText('please_refresh', 'Please refresh the page.') + '</small></td></tr>');
             }
-        });
+            });
+        }
     }
     
     // Make function globally accessible for template fallback
@@ -1361,34 +1399,35 @@ function toPersianNumber(num) {
             }, 500);
         });
         
-        $(document).off('change', '#cash-inquiry-status-filter').on('change', '#cash-inquiry-status-filter', function() { 
-            console.log('Status filter changed, fetching...');
-            if (typeof window.fetchCashInquiries === 'function') {
-                window.fetchCashInquiries(1);
-            } else {
-                console.error('fetchCashInquiries function not available!');
-            }
-        });
-        
-        if ($('#cash-expert-filter').length) {
-            $(document).off('change', '#cash-expert-filter').on('change', '#cash-expert-filter', function() { 
-                console.log('Expert filter changed, fetching...');
-                if (typeof window.fetchCashInquiries === 'function') {
-                    window.fetchCashInquiries(1);
-                } else {
-                    console.error('fetchCashInquiries function not available!');
-                }
-            });
-        }
-        
-        $(document).off('change', '#cash-inquiry-sort-filter').on('change', '#cash-inquiry-sort-filter', function() { 
-            console.log('Sort filter changed, fetching...');
-            if (typeof window.fetchCashInquiries === 'function') {
-                window.fetchCashInquiries(1);
-            } else {
-                console.error('fetchCashInquiries function not available!');
-            }
-        });
+        // REMOVED: Change event listeners for cash filters - now work with button only
+        // $(document).off('change', '#cash-inquiry-status-filter').on('change', '#cash-inquiry-status-filter', function() { 
+        //     console.log('Status filter changed, fetching...');
+        //     if (typeof window.fetchCashInquiries === 'function') {
+        //         window.fetchCashInquiries(1);
+        //     } else {
+        //         console.error('fetchCashInquiries function not available!');
+        //     }
+        // });
+        // 
+        // if ($('#cash-expert-filter').length) {
+        //     $(document).off('change', '#cash-expert-filter').on('change', '#cash-expert-filter', function() { 
+        //         console.log('Expert filter changed, fetching...');
+        //         if (typeof window.fetchCashInquiries === 'function') {
+        //             window.fetchCashInquiries(1);
+        //         } else {
+        //             console.error('fetchCashInquiries function not available!');
+        //         }
+        //     });
+        // }
+        // 
+        // $(document).off('change', '#cash-inquiry-sort-filter').on('change', '#cash-inquiry-sort-filter', function() { 
+        //     console.log('Sort filter changed, fetching...');
+        //     if (typeof window.fetchCashInquiries === 'function') {
+        //         window.fetchCashInquiries(1);
+        //     } else {
+        //         console.error('fetchCashInquiries function not available!');
+        //     }
+        // });
         
         $(document).off('click', '#cash-inquiry-reset-filters').on('click', '#cash-inquiry-reset-filters', function(e) {
             e.preventDefault();
@@ -1496,25 +1535,64 @@ function toPersianNumber(num) {
             nonce_present: ajaxNonce ? 'Yes (' + ajaxNonce.substring(0, 10) + '...)' : 'No'
         });
         
-        // Load initial list
-        const installmentRequestData = {
-            action: 'maneli_filter_inquiries_ajax',
-            nonce: ajaxNonce,
-            _ajax_nonce: ajaxNonce,  // Also send as _ajax_nonce for compatibility
-            page: 1,
-            search: '',
-            status: '',
-            sort: 'default'
-        };
+        // Load initial list - Check for status query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialStatus = urlParams.get('status') || '';
         
-        console.log('=== AJAX REQUEST DATA (Installment) ===');
-        console.log('URL:', ajaxUrl);
-        console.log('Action:', installmentRequestData.action);
-        console.log('Nonce present:', !!ajaxNonce);
-        console.log('Nonce value (first 10 chars):', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
-        console.log('Full request data:', installmentRequestData);
+        // For installment inquiries, if status is 'referred', it's actually a tracking_status
+        // Map tracking_status values to appropriate handling
+        let statusParam = initialStatus;
+        let trackingStatusParam = '';
         
-        $.ajax({
+        // Check if this is a tracking_status value
+        const trackingStatuses = ['new', 'referred', 'in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'cancelled', 'completed', 'rejected'];
+        if (initialStatus && trackingStatuses.includes(initialStatus)) {
+            trackingStatusParam = initialStatus;
+            statusParam = ''; // Don't use inquiry_status for tracking statuses
+            console.log('✓ Detected tracking_status from URL:', initialStatus);
+            // Note: We can't set a filter value for tracking_status as there's no dropdown for it in the template
+            // But we'll send it to the AJAX handler which will filter correctly
+        } else if (initialStatus) {
+            console.log('⚠ Status from URL is not a tracking_status:', initialStatus);
+        }
+        
+        // Set status filter if provided in URL (but tracking_status takes priority)
+        if (statusParam && $('#status-filter').length) {
+            $('#status-filter').val(statusParam);
+        }
+        
+        // Wait a moment for DOM to be ready, then send request
+        setTimeout(function() {
+            // Re-read values from DOM to ensure they're set correctly
+            const statusFromDOM = $('#status-filter').val() || statusParam;
+            const finalStatusParam = statusFromDOM;
+            
+            const installmentRequestData = {
+                action: 'maneli_filter_inquiries_ajax',
+                nonce: ajaxNonce,
+                _ajax_nonce: ajaxNonce,  // Also send as _ajax_nonce for compatibility
+                page: 1,
+                search: '',
+                status: finalStatusParam,
+                tracking_status: trackingStatusParam,  // Send tracking_status separately
+                sort: $('#inquiry-sort-filter').val() || 'default'
+            };
+            
+            console.log('=== AJAX REQUEST DATA (Installment) ===');
+            console.log('URL:', ajaxUrl);
+            console.log('Action:', installmentRequestData.action);
+            console.log('Nonce present:', !!ajaxNonce);
+            console.log('Nonce value (first 10 chars):', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
+            console.log('Full request data:', installmentRequestData);
+            console.log('Initial status from URL:', initialStatus);
+            console.log('Status from DOM:', statusFromDOM);
+            console.log('Tracking status param:', trackingStatusParam);
+            
+            sendInstallmentInquiryRequest(installmentRequestData);
+        }, 100);
+        
+        function sendInstallmentInquiryRequest(installmentRequestData) {
+            $.ajax({
             url: ajaxUrl,
             type: 'POST',
             data: installmentRequestData,
@@ -1544,10 +1622,23 @@ function toPersianNumber(num) {
                     
                     if (response.data.html && response.data.html.trim() !== '') {
                         $('#maneli-inquiry-list-tbody').html(response.data.html);
-                        // Update count badge
+                        // Update count badge - count actual rows (not loading messages)
                         const rowCount = $('#maneli-inquiry-list-tbody tr.crm-contact').length;
-                        $('#inquiry-count-badge').text(toPersianNumber(rowCount));
-                        console.log('✓ Table rows inserted:', rowCount);
+                        const hasContent = rowCount > 0;
+                        console.log('✓ HTML received, checking for rows...');
+                        console.log('✓ Total tr elements:', $('#maneli-inquiry-list-tbody tr').length);
+                        console.log('✓ Rows with crm-contact class:', rowCount);
+                        console.log('✓ HTML preview:', response.data.html.substring(0, 500));
+                        
+                        if (hasContent) {
+                            $('#inquiry-count-badge').text(toPersianNumber(rowCount));
+                            console.log('✓ Table rows inserted:', rowCount);
+                            console.log('✓ Badge updated to:', toPersianNumber(rowCount));
+                        } else {
+                            $('#inquiry-count-badge').text('۰');
+                            console.log('⚠ No inquiry rows found in HTML');
+                            console.log('⚠ Full HTML content:', response.data.html);
+                        }
                     } else {
                         console.log('⚠ No HTML content - showing empty message');
                         $('#maneli-inquiry-list-tbody').html(`<tr><td colspan="7" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
@@ -1609,7 +1700,8 @@ function toPersianNumber(num) {
                 $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + errorMessage + '<br><small>' + getText('please_refresh', 'Please refresh the page.') + '</small></td></tr>');
                 $('#inquiry-count-badge').text('0');
             }
-        });
+            });
+        }
     }
     
     // Make function globally accessible for template fallback

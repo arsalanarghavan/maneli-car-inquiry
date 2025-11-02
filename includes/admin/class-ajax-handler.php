@@ -283,55 +283,191 @@ class Maneli_Ajax_Handler {
         // Check if tracking_status filter is provided
         $tracking_status_query = isset($_POST['tracking_status']) ? sanitize_text_field($_POST['tracking_status']) : '';
         
-        if ($is_admin || $is_manager) {
-            if (!empty($_POST['expert'])) {
-                $meta_query[] = ['key' => 'assigned_expert_id', 'value' => absint($_POST['expert']), 'compare' => '='];
+        // Debug logging for tracking_status
+        if (!empty($tracking_status_query)) {
+            error_log('Maneli Debug: tracking_status_query = ' . $tracking_status_query);
+        }
+        
+        // Handle tracking_status filter if provided (before expert filter to avoid conflicts)
+        $is_referred_status = false;
+        if (!empty($tracking_status_query)) {
+            // If filtering by a specific tracking_status, apply that filter
+            $meta_query[] = ['key' => 'tracking_status', 'value' => $tracking_status_query, 'compare' => '='];
+            
+            // Special handling for 'referred' status: only show inquiries without assigned expert
+            if ($tracking_status_query === 'referred') {
+                $is_referred_status = true;
+                // For 'referred' status, we want only inquiries without assigned expert
+                // This is critical: must exclude inquiries that already have an expert assigned
+                // WordPress meta_query: For 'referred' status, we want inquiries WITHOUT assigned expert
+                // We need to check: NOT EXISTS OR empty string OR zero
+                // Note: assigned_expert_id might be stored as numeric, so we check multiple cases
+                $meta_query[] = [
+                    'relation' => 'OR',
+                    [
+                        'key' => 'assigned_expert_id',
+                        'compare' => 'NOT EXISTS'
+                    ],
+                    [
+                        'key' => 'assigned_expert_id',
+                        'value' => '',
+                        'compare' => '='
+                    ],
+                    [
+                        'key' => 'assigned_expert_id',
+                        'value' => '0',
+                        'compare' => '='
+                    ],
+                    [
+                        'key' => 'assigned_expert_id',
+                        'value' => 0,
+                        'compare' => '=',
+                        'type' => 'NUMERIC'
+                    ]
+                ];
             }
-        } elseif ($is_expert && !$is_admin && !$is_manager) {
-            // Expert sees only assigned inquiries
-            $meta_query[] = ['key' => 'assigned_expert_id', 'value' => get_current_user_id(), 'compare' => '='];
+        }
+        
+        // Expert filter (only if not filtering by referred status)
+        if (!$is_referred_status) {
+            if ($is_admin || $is_manager) {
+                if (!empty($_POST['expert'])) {
+                    $meta_query[] = ['key' => 'assigned_expert_id', 'value' => absint($_POST['expert']), 'compare' => '='];
+                }
+            } elseif ($is_expert && !$is_admin && !$is_manager) {
+                // Expert sees only assigned inquiries
+                $meta_query[] = ['key' => 'assigned_expert_id', 'value' => get_current_user_id(), 'compare' => '='];
+            }
         }
         // For customers, we already filtered by author, so no expert filter needed
         
-        // CRITICAL: Exclude follow_up_scheduled from normal list (only show in followups page)
-        // Unless specifically filtering by follow_up_scheduled tracking_status
-        if (empty($tracking_status_query) || $tracking_status_query !== 'follow_up_scheduled') {
+        // Continue with other filters if tracking_status was not provided
+        if (empty($tracking_status_query)) {
+            // CRITICAL: Exclude follow_up_scheduled from normal list (only show in followups page)
+            // Only exclude follow_up_scheduled if not filtering by tracking_status
             $meta_query[] = [
                 'relation' => 'OR',
                 ['key' => 'tracking_status', 'value' => 'follow_up_scheduled', 'compare' => '!='],
                 ['key' => 'tracking_status', 'value' => 'follow_up_scheduled', 'compare' => 'NOT EXISTS']
             ];
-        } else {
-            // If filtering by follow_up_scheduled, only show those
-            $meta_query[] = ['key' => 'tracking_status', 'value' => 'follow_up_scheduled', 'compare' => '='];
         }
         
-        if (count($meta_query) > 1) $args['meta_query'] = $meta_query;
+        // Apply meta_query if we have any conditions (relation counts as 1, so we need at least 2 items total)
+        $meta_query_count = count($meta_query);
+        if ($meta_query_count > 1) {
+            $args['meta_query'] = $meta_query;
+            // Debug logging
+            if (!empty($tracking_status_query)) {
+                error_log('Maneli Debug: meta_query count = ' . $meta_query_count);
+                error_log('Maneli Debug: meta_query structure = ' . print_r($meta_query, true));
+            }
+        } elseif ($meta_query_count === 1 && isset($meta_query[0]['relation'])) {
+            // Only relation, no actual queries - don't add meta_query
+            // This should not happen, but handle it gracefully
+        }
+    
+        // Debug logging for final query args
+        if (!empty($tracking_status_query)) {
+            error_log('Maneli Debug: Final query args = ' . print_r($args, true));
+        }
     
         $inquiry_query = new WP_Query($args);
-        ob_start();
-        if ($inquiry_query->have_posts()) {
+        
+        // Debug logging for query results
+        if (!empty($tracking_status_query)) {
+            error_log('Maneli Debug: Query found ' . $inquiry_query->found_posts . ' posts');
+            error_log('Maneli Debug: Query post_count = ' . $inquiry_query->post_count);
+        }
+        
+        // For 'referred' status, we need additional filtering if meta_query didn't work perfectly
+        // This is a fallback to ensure we only show inquiries without assigned expert
+        $posts_to_render = [];
+        if ($inquiry_query->have_posts() && $is_referred_status) {
             while ($inquiry_query->have_posts()) {
                 $inquiry_query->the_post();
-                Maneli_Render_Helpers::render_inquiry_row(get_the_ID(), $base_url);
+                $post_id = get_the_ID();
+                $expert_id = get_post_meta($post_id, 'assigned_expert_id', true);
+                // Only include if expert_id is empty, 0, or not set
+                if (empty($expert_id) || $expert_id === '0' || $expert_id === 0 || $expert_id === '') {
+                    $posts_to_render[] = $post_id;
+                    if (!empty($tracking_status_query)) {
+                        error_log('Maneli Debug: Post #' . $post_id . ' passed filter - expert_id: ' . var_export($expert_id, true));
+                    }
+                } else {
+                    if (!empty($tracking_status_query)) {
+                        error_log('Maneli Debug: Post #' . $post_id . ' filtered out - has expert_id: ' . var_export($expert_id, true));
+                    }
+                }
             }
+            wp_reset_postdata();
+        }
+        
+        ob_start();
+        if ($is_referred_status && !empty($posts_to_render)) {
+            // Render only the filtered posts
+            $rendered_count = 0;
+            foreach ($posts_to_render as $post_id) {
+                Maneli_Render_Helpers::render_inquiry_row($post_id, $base_url);
+                $rendered_count++;
+            }
+            if (!empty($tracking_status_query)) {
+                error_log('Maneli Debug: Rendered ' . $rendered_count . ' inquiry rows (after filtering)');
+            }
+        } elseif ($inquiry_query->have_posts()) {
+            // Normal rendering for non-referred status
+            $rendered_count = 0;
+            while ($inquiry_query->have_posts()) {
+                $inquiry_query->the_post();
+                $post_id = get_the_ID();
+                // Debug: log each post being rendered
+                if (!empty($tracking_status_query)) {
+                    $tracking_status_debug = get_post_meta($post_id, 'tracking_status', true);
+                    $expert_id_debug = get_post_meta($post_id, 'assigned_expert_id', true);
+                    error_log('Maneli Debug: Rendering post #' . $post_id . ' - tracking_status: ' . $tracking_status_debug . ', expert_id: ' . var_export($expert_id_debug, true));
+                }
+                Maneli_Render_Helpers::render_inquiry_row($post_id, $base_url);
+                $rendered_count++;
+            }
+            if (!empty($tracking_status_query)) {
+                error_log('Maneli Debug: Rendered ' . $rendered_count . ' inquiry rows');
+            }
+        } elseif ($is_referred_status && $inquiry_query->found_posts > 0 && empty($posts_to_render)) {
+            // Query found posts but all were filtered out (all have experts assigned)
+            $columns = $is_admin ? 7 : 6;
+            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No inquiries found without assigned expert.', 'maneli-car-inquiry') . '</td></tr>';
         } else {
             // Calculate columns based on user role (admin sees assigned column, customer/expert don't)
             $columns = $is_admin ? 7 : 6;
             echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No inquiries found matching your criteria.', 'maneli-car-inquiry') . '</td></tr>';
         }
         $html = ob_get_clean();
-        wp_reset_postdata();
+        if (!$is_referred_status || empty($posts_to_render)) {
+            wp_reset_postdata();
+        }
         
-        $pagination_html = paginate_links([
-            'base' => add_query_arg('paged', '%#%'), 
-            'format' => '?paged=%#%', 
-            'current' => $paged, 
-            'total' => $inquiry_query->max_num_pages, 
-            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'), 
-            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'), 
-            'type'  => 'plain'
-        ]);
+        // Calculate pagination based on actual rendered count for referred status
+        if ($is_referred_status && !empty($posts_to_render)) {
+            // For referred status, pagination should be based on filtered results
+            // Since we filtered client-side, we'll show all results on first page
+            // TODO: Implement proper pagination for filtered results if needed
+            $pagination_html = ''; // No pagination for filtered results for now
+        } else {
+            $pagination_html = paginate_links([
+                'base' => add_query_arg('paged', '%#%'), 
+                'format' => '?paged=%#%', 
+                'current' => $paged, 
+                'total' => $inquiry_query->max_num_pages, 
+                'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'), 
+                'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'), 
+                'type'  => 'plain'
+            ]);
+        }
+        
+        // Debug logging for final HTML
+        if (!empty($tracking_status_query)) {
+            error_log('Maneli Debug: Final HTML length = ' . strlen($html));
+            error_log('Maneli Debug: HTML preview (first 500 chars) = ' . substr($html, 0, 500));
+        }
     
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }

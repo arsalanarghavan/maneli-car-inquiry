@@ -125,23 +125,81 @@ class Maneli_Admin_Dashboard_Widgets {
 
         ob_start();
         ?>
+        <style>
+        /* Inquiry Statistics Cards - Inline Styles for Immediate Effect */
+        .card.custom-card.crm-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            border-radius: 0.5rem !important;
+            background: #fff !important;
+        }
+        .card.custom-card.crm-card::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%) !important;
+            pointer-events: none !important;
+            transition: opacity 0.3s ease !important;
+            opacity: 0 !important;
+        }
+        .card.custom-card.crm-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+        .card.custom-card.crm-card:hover::before {
+            opacity: 1 !important;
+        }
+        .card.custom-card.crm-card .card-body {
+            position: relative !important;
+            z-index: 1 !important;
+            padding: 1.5rem !important;
+        }
+        .card.custom-card.crm-card:hover .p-2 {
+            transform: scale(1.1) !important;
+        }
+        .card.custom-card.crm-card:hover .avatar {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+        .card.custom-card.crm-card h4 {
+            font-weight: 700 !important;
+            letter-spacing: -0.5px !important;
+            font-size: 1.75rem !important;
+            color: #1f2937 !important;
+            transition: color 0.3s ease !important;
+        }
+        .card.custom-card.crm-card:hover h4 {
+            color: #5e72e4 !important;
+        }
+        .card.custom-card.crm-card .border-primary, .card.custom-card.crm-card .bg-primary { background: linear-gradient(135deg, #5e72e4 0%, #7c3aed 100%) !important; }
+        .card.custom-card.crm-card .border-success, .card.custom-card.crm-card .bg-success { background: linear-gradient(135deg, #2dce89 0%, #20c997 100%) !important; }
+        .card.custom-card.crm-card .border-warning, .card.custom-card.crm-card .bg-warning { background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important; }
+        .card.custom-card.crm-card .border-danger, .card.custom-card.crm-card .bg-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; }
+        </style>
         <div class="row mb-4">
             <?php foreach ($stats as $key => $stat) : 
                 $config = $stat_configs[$stat['class']] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                    <div class="card custom-card">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                    <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="flex-fill">
-                                    <span class="d-block mb-1 text-muted fs-12"><?php echo esc_html($stat['label']); ?></span>
-                                    <h4 class="mb-0 fw-semibold"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                            <div class="d-flex justify-content-between mb-2">
+                                <div class="p-2 border border-<?php echo esc_attr($config['color']); ?> border-opacity-10 bg-<?php echo esc_attr($config['color']); ?>-transparent rounded-pill">
+                                    <span class="avatar avatar-md avatar-rounded bg-<?php echo esc_attr($config['color']); ?> svg-white">
+                                        <i class="la <?php echo esc_attr($config['icon']); ?> fs-20"></i>
+                                    </span>
                                 </div>
-                                <div class="flex-shrink-0">
-                                    <div class="avatar avatar-md avatar-rounded <?php echo esc_attr($config['bg']); ?>">
-                                        <i class="la <?php echo esc_attr($config['icon']); ?> fs-20 text-<?php echo esc_attr($config['color']); ?>"></i>
-                                    </div>
-                                </div>
+                            </div>
+                            <p class="flex-fill text-muted fs-14 mb-1"><?php echo esc_html($stat['label']); ?></p>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                                <span class="badge bg-<?php echo esc_attr($config['color']); ?>-transparent rounded-pill fs-11"><?php echo esc_html($stat['label']); ?></span>
                             </div>
                         </div>
                     </div>
@@ -178,23 +236,81 @@ class Maneli_Admin_Dashboard_Widgets {
 
         ob_start();
         ?>
+        <style>
+        /* Cash Inquiry Statistics Cards - Inline Styles for Immediate Effect */
+        .card.custom-card.crm-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            border-radius: 0.5rem !important;
+            background: #fff !important;
+        }
+        .card.custom-card.crm-card::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%) !important;
+            pointer-events: none !important;
+            transition: opacity 0.3s ease !important;
+            opacity: 0 !important;
+        }
+        .card.custom-card.crm-card:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+        .card.custom-card.crm-card:hover::before {
+            opacity: 1 !important;
+        }
+        .card.custom-card.crm-card .card-body {
+            position: relative !important;
+            z-index: 1 !important;
+            padding: 1.5rem !important;
+        }
+        .card.custom-card.crm-card:hover .p-2 {
+            transform: scale(1.1) !important;
+        }
+        .card.custom-card.crm-card:hover .avatar {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+        .card.custom-card.crm-card h4 {
+            font-weight: 700 !important;
+            letter-spacing: -0.5px !important;
+            font-size: 1.75rem !important;
+            color: #1f2937 !important;
+            transition: color 0.3s ease !important;
+        }
+        .card.custom-card.crm-card:hover h4 {
+            color: #5e72e4 !important;
+        }
+        .card.custom-card.crm-card .border-primary, .card.custom-card.crm-card .bg-primary { background: linear-gradient(135deg, #5e72e4 0%, #7c3aed 100%) !important; }
+        .card.custom-card.crm-card .border-success, .card.custom-card.crm-card .bg-success { background: linear-gradient(135deg, #2dce89 0%, #20c997 100%) !important; }
+        .card.custom-card.crm-card .border-warning, .card.custom-card.crm-card .bg-warning { background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important; }
+        .card.custom-card.crm-card .border-danger, .card.custom-card.crm-card .bg-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; }
+        </style>
         <div class="row mb-4">
             <?php foreach ($stats as $key => $stat) : 
                 $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                    <div class="card custom-card">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                    <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="flex-fill">
-                                    <span class="d-block mb-1 text-muted fs-12"><?php echo esc_html($stat['label']); ?></span>
-                                    <h4 class="mb-0 fw-semibold"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                            <div class="d-flex justify-content-between mb-2">
+                                <div class="p-2 border border-<?php echo esc_attr($config['color']); ?> border-opacity-10 bg-<?php echo esc_attr($config['color']); ?>-transparent rounded-pill">
+                                    <span class="avatar avatar-md avatar-rounded bg-<?php echo esc_attr($config['color']); ?> svg-white">
+                                        <i class="la <?php echo esc_attr($config['icon']); ?> fs-20"></i>
+                                    </span>
                                 </div>
-                                <div class="flex-shrink-0">
-                                    <div class="avatar avatar-md avatar-rounded <?php echo esc_attr($config['bg']); ?>">
-                                        <i class="la <?php echo esc_attr($config['icon']); ?> fs-20 text-<?php echo esc_attr($config['color']); ?>"></i>
-                                    </div>
-                                </div>
+                            </div>
+                            <p class="flex-fill text-muted fs-14 mb-1"><?php echo esc_html($stat['label']); ?></p>
+                            <div class="d-flex align-items-center justify-content-between mt-1">
+                                <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                                <span class="badge bg-<?php echo esc_attr($config['color']); ?>-transparent rounded-pill fs-11"><?php echo esc_html($stat['label']); ?></span>
                             </div>
                         </div>
                     </div>
