@@ -131,7 +131,14 @@ if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js')) {
         <?php
         // Include wizard form template
         maneli_get_template_part('shortcodes/inquiry-form/inquiry-form-wizard');
+        
+        // Include installment calculator modal (for step 3 car replacement)
+        $current_step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
+        if ($current_step === 3) {
+            maneli_get_template_part('dashboard/installment-calculator-modal');
+        }
         ?>
     </div>
 </div>
 <!-- End::main-content -->
+

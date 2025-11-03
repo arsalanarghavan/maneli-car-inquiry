@@ -329,6 +329,246 @@ document.addEventListener('DOMContentLoaded', function() {
                         fetchCatalog(next);
                     });
                 });
+                
+                // Hook clicks on product cards to select/replace car
+                catalog.querySelectorAll('.selectable-car').forEach(card=>{
+                    card.addEventListener('click', function(){
+                        const productId = this.getAttribute('data-product-id');
+                        const productPrice = parseFloat(this.getAttribute('data-product-price')) || 0;
+                        const productName = this.querySelector('.title')?.textContent?.trim() || '';
+                        const productImage = this.querySelector('.thumb')?.innerHTML || '';
+                        
+                        if (!productId) return;
+                        
+                        // Check if we're on dashboard/new-inquiry page (step 3) - if so, open modal
+                        const isDashboardNewInquiry = window.location.pathname.includes('/dashboard/new-inquiry') && 
+                                                       (new URLSearchParams(window.location.search).get('step') === '3' || 
+                                                        window.location.search.includes('step=3'));
+                        
+                        if (isDashboardNewInquiry) {
+                            // Open installment calculator modal
+                            openCalculatorModal(productId, productPrice, productName, productImage);
+                            return;
+                        }
+                        
+                        // For other pages, use the old behavior (SweetAlert confirmation)
+                        // Get localized texts
+                        const texts = (window.maneliInquiryForm && window.maneliInquiryForm.texts) ? window.maneliInquiryForm.texts : {};
+                        const confirmText = texts.replace_car_confirm || 'Are you sure you want to replace the current car with this one?';
+                        const successText = texts.car_replaced_success || 'Car replaced successfully. Page is being refreshed...';
+                        const errorPrefix = texts.error_replacing_car || 'Error replacing car';
+                        const serverError = texts.server_error || 'Server connection error. Please try again.';
+                        
+                        // Debug: log available nonces
+                        console.log('Available nonces:', {
+                            maneliInquiryForm: window.maneliInquiryForm?.nonces,
+                            maneli_ajax: window.maneli_ajax?.nonce,
+                            maneli_ajax_object: window.maneli_ajax_object?.nonce,
+                            shared: shared
+                        });
+                        
+                        // Show SweetAlert confirmation dialog
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: confirmText,
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonText: (texts.confirm || 'Yes'),
+                                cancelButtonText: (texts.cancel || 'Cancel'),
+                                confirmButtonColor: '#5e72e4',
+                                cancelButtonColor: '#6c757d',
+                                reverseButtons: true // Put cancel button on right (RTL support)
+                            }).then((result) => {
+                                if (!result.isConfirmed) return;
+                                
+                                replaceCar();
+                            });
+                        } else {
+                            // Fallback to native confirm if SweetAlert is not available
+                            if (!confirm(confirmText)) {
+                                return;
+                            }
+                            replaceCar();
+                        }
+                        
+                        function replaceCar() {
+                            // Get current calculator values from page
+                            const dataRow = document.querySelector('[data-down-payment]');
+                            const currentDownPayment = dataRow?.getAttribute('data-down-payment') || '0';
+                            const currentTermMonths = dataRow?.getAttribute('data-term-months') || '12';
+                            const currentTotalPrice = productPrice > 0 ? productPrice : (dataRow?.getAttribute('data-total-price') || currentDownPayment);
+                            
+                            // Get AJAX URL from various sources (must be defined before params)
+                            let ajaxUrl = '';
+                            if (window.maneli_ajax && window.maneli_ajax.url) {
+                                ajaxUrl = window.maneli_ajax.url;
+                            } else if (window.maneli_ajax_object && window.maneli_ajax_object.ajax_url) {
+                                ajaxUrl = window.maneli_ajax_object.ajax_url;
+                            } else if (window.maneliInquiryForm && window.maneliInquiryForm.ajax_url) {
+                                ajaxUrl = window.maneliInquiryForm.ajax_url;
+                            } else if (window.ajaxurl) {
+                                ajaxUrl = window.ajaxurl;
+                            } else {
+                                ajaxUrl = '/wp-admin/admin-ajax.php';
+                            }
+                            
+                            // Call AJAX to replace selected car using existing handler
+                            const params = new URLSearchParams();
+                            params.append('action', 'maneli_select_car_ajax');
+                            // Try to get nonce from various sources (priority: select_car > maneli_ajax > maneli_ajax_object > confirm_catalog)
+                            let ajaxNonce = '';
+                            if (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.select_car) {
+                                ajaxNonce = window.maneliInquiryForm.nonces.select_car;
+                            } else if (window.maneli_ajax && window.maneli_ajax.nonce) {
+                                ajaxNonce = window.maneli_ajax.nonce;
+                            } else if (window.maneli_ajax_object && window.maneli_ajax_object.nonce) {
+                                ajaxNonce = window.maneli_ajax_object.nonce;
+                            } else if (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) {
+                                ajaxNonce = window.maneliInquiryForm.nonces.confirm_catalog;
+                            } else {
+                                ajaxNonce = shared || '';
+                            }
+                            params.append('nonce', ajaxNonce);
+                            params.append('product_id', productId);
+                            params.append('total_price', currentTotalPrice);
+                            params.append('down_payment', currentDownPayment);
+                            params.append('term_months', currentTermMonths);
+                            
+                            // Debug: log request parameters
+                            console.log('=== CAR REPLACEMENT AJAX REQUEST ===');
+                            console.log('Action: maneli_select_car_ajax');
+                            console.log('AJAX URL:', ajaxUrl);
+                            console.log('Nonce:', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
+                            console.log('Product ID:', productId);
+                            console.log('Total Price:', currentTotalPrice);
+                            console.log('Down Payment:', currentDownPayment);
+                            console.log('Term Months:', currentTermMonths);
+                            console.log('Full params:', params.toString());
+                            
+                            fetch(ajaxUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                                body: params.toString()
+                            }).then(r=>{
+                                // Log response for debugging
+                                console.log('AJAX Response status:', r.status);
+                                if (!r.ok) {
+                                    throw new Error('HTTP error! status: ' + r.status);
+                                }
+                                return r.json();
+                            }).then(res=>{
+                                console.log('AJAX Response data:', res);
+                                if (res && res.success) {
+                                    // Update page with new car data if provided
+                                    if (res.data && res.data.car_data) {
+                                        const carData = res.data.car_data;
+                                        console.log('Updating page with new car data:', carData);
+                                        
+                                        // Update data attributes
+                                        const dataRow = document.querySelector('[data-down-payment]');
+                                        if (dataRow) {
+                                            dataRow.setAttribute('data-down-payment', carData.down_payment);
+                                            dataRow.setAttribute('data-term-months', carData.term_months);
+                                            dataRow.setAttribute('data-total-price', carData.total_price);
+                                            
+                                            // Update displayed values
+                                            const downPaymentEl = dataRow.querySelector('.col-md-6:first-child .text-success strong');
+                                            const termMonthsEl = dataRow.querySelector('.col-md-6:nth-child(2) .text-info strong');
+                                            const installmentEl = dataRow.querySelector('.col-md-12 .text-primary strong');
+                                            
+                                            // Format and update displayed values (will be replaced after reload)
+                                            if (downPaymentEl) {
+                                                const formattedDown = new Intl.NumberFormat('fa-IR').format(carData.down_payment);
+                                                downPaymentEl.textContent = formattedDown + ' تومان';
+                                            }
+                                            if (termMonthsEl) {
+                                                termMonthsEl.textContent = carData.term_months + ' ماه';
+                                            }
+                                            if (installmentEl) {
+                                                const formattedInstallment = new Intl.NumberFormat('fa-IR').format(carData.installment);
+                                                installmentEl.textContent = formattedInstallment + ' تومان';
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            title: successText,
+                                            icon: 'success',
+                                            confirmButtonColor: '#5e72e4',
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        }).then(() => {
+                                            window.location.reload();
+                                        });
+                                    } else {
+                                        alert(successText);
+                                        window.location.reload();
+                                    }
+                                } else {
+                                    // Handle different error types
+                                    let errorMsg = serverError;
+                                    if (res && res.data) {
+                                        if (res.data.message) {
+                                            errorMsg = res.data.message;
+                                        } else if (typeof res.data === 'string') {
+                                            errorMsg = res.data;
+                                        }
+                                    }
+                                    
+                                    // Check for common error messages and translate them
+                                    const invalidRequestText = texts.invalid_request || 'Invalid request. Please log in and try again.';
+                                    if (errorMsg.includes('Invalid request') || errorMsg.includes('nonce') || errorMsg.includes('security') || errorMsg.includes('security token')) {
+                                        errorMsg = texts.invalid_request || invalidRequestText;
+                                    } else if (errorMsg.includes('log in') || errorMsg.includes('Please log in')) {
+                                        errorMsg = texts.please_login || 'Please log in to continue.';
+                                    } else if (errorMsg.includes('Product ID')) {
+                                        errorMsg = texts.product_id_required || 'Product ID is required.';
+                                    }
+                                    
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            title: errorPrefix,
+                                            text: errorMsg,
+                                            icon: 'error',
+                                            confirmButtonColor: '#dc3545'
+                                        });
+                                    } else {
+                                        alert(errorPrefix + ': ' + errorMsg);
+                                    }
+                                    
+                                    // Log for debugging
+                                    console.error('Car replacement error:', {
+                                        response: res,
+                                        nonce: ajaxNonce,
+                                        nonceSource: window.maneliInquiryForm?.nonces?.select_car ? 'maneliInquiryForm.nonces.select_car' : 
+                                                    window.maneli_ajax?.nonce ? 'maneli_ajax.nonce' :
+                                                    window.maneli_ajax_object?.nonce ? 'maneli_ajax_object.nonce' : 'other',
+                                        ajaxUrl: ajaxUrl
+                                    });
+                                }
+                            }).catch(err=>{
+                                console.error('Error replacing car:', err);
+                                console.error('Error details:', {
+                                    message: err.message,
+                                    stack: err.stack,
+                                    ajaxUrl: ajaxUrl,
+                                    params: params.toString()
+                                });
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        title: errorPrefix,
+                                        text: serverError + ' (Error: ' + err.message + ')',
+                                        icon: 'error',
+                                        confirmButtonColor: '#dc3545'
+                                    });
+                                } else {
+                                    alert(serverError + ' (Error: ' + err.message + ')');
+                                }
+                            });
+                        }
+                    });
+                });
             });
         }
 
@@ -336,6 +576,262 @@ document.addEventListener('DOMContentLoaded', function() {
         if (searchInput) searchInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); fetchCatalog(1);} });
         fetchCatalog(1);
     })();
+
+    // Function to open calculator modal for car replacement (dashboard step 3)
+    function openCalculatorModal(productId, productPrice, productName, productImage) {
+        const modal = document.getElementById('installmentCalculatorModal');
+        if (!modal) {
+            console.error('Calculator modal not found');
+            return;
+        }
+
+        // Store product data in modal data attributes
+        const modalInstance = new bootstrap.Modal(modal);
+        
+        // Set product data on a temporary element that modal-calculator.js can read
+        if (!window.maneliModalProductData) {
+            window.maneliModalProductData = {};
+        }
+        
+        window.maneliModalProductData = {
+            id: productId,
+            price: productPrice,
+            name: productName,
+            image: productImage
+        };
+
+        // Show modal
+        modalInstance.show();
+    }
+
+    // Listen for custom event from modal calculator
+    document.addEventListener('maneliReplaceCarFromModal', function(event) {
+        const data = event.detail;
+        console.log('🔵 Event received - maneliReplaceCarFromModal:', data);
+        replaceCarWithData(data.product_id, data.down_payment, data.term_months, data.installment_amount, data.total_price);
+    });
+
+    // Function to update car info cards with new data
+    // Flag to prevent multiple updates
+    let isUpdatingCards = false;
+    
+    function updateCarInfoCards(carData) {
+        // Prevent multiple simultaneous updates
+        if (isUpdatingCards) {
+            console.warn('updateCarInfoCards: Already updating, skipping...');
+            return;
+        }
+        
+        isUpdatingCards = true;
+        
+        try {
+            // Find the data row with car information
+            const dataRow = document.querySelector('[data-down-payment]');
+            if (!dataRow || !carData) {
+                console.log('updateCarInfoCards: dataRow or carData not found', { dataRow, carData });
+                return;
+            }
+            
+            // Update data attributes
+            if (carData.down_payment !== undefined) {
+                dataRow.setAttribute('data-down-payment', carData.down_payment);
+            }
+            if (carData.term_months !== undefined) {
+                dataRow.setAttribute('data-term-months', carData.term_months);
+            }
+            if (carData.total_price !== undefined) {
+                dataRow.setAttribute('data-total-price', carData.total_price);
+            }
+            
+            // Format number function
+            function formatPersianNumber(num) {
+                if (!num && num !== 0) return '0';
+                const numValue = parseInt(num);
+                if (isNaN(numValue)) return '0';
+                return new Intl.NumberFormat('fa-IR').format(numValue);
+            }
+            
+            // Update displayed values - completely replace content
+            // Down Payment (first col-md-6)
+            const downPaymentBox = dataRow.querySelector('.col-md-6:first-child .bg-success-transparent');
+            if (downPaymentBox && carData.down_payment !== undefined) {
+                const downPaymentStrong = downPaymentBox.querySelector('strong.fs-16.text-success');
+                if (downPaymentStrong) {
+                    // Get current content for comparison
+                    const currentText = downPaymentStrong.textContent || downPaymentStrong.innerText || '';
+                    const newText = formatPersianNumber(carData.down_payment) + ' تومان';
+                    
+                    // Only update if different
+                    if (currentText !== newText) {
+                        // Completely replace: clear and set new
+                        downPaymentStrong.replaceChildren(document.createTextNode(newText));
+                        console.log('✓ Down payment updated:', currentText, '→', newText);
+                    }
+                } else {
+                    console.warn('⚠ Down payment strong element not found in:', downPaymentBox);
+                }
+            }
+            
+            // Term Months (second col-md-6)
+            const termMonthsBox = dataRow.querySelector('.col-md-6:nth-child(2) .bg-info-transparent');
+            if (termMonthsBox && carData.term_months !== undefined) {
+                const termMonthsStrong = termMonthsBox.querySelector('strong.fs-16.text-info');
+                if (termMonthsStrong) {
+                    const currentText = termMonthsStrong.textContent || termMonthsStrong.innerText || '';
+                    const newText = carData.term_months.toString() + ' ماه';
+                    
+                    if (currentText !== newText) {
+                        termMonthsStrong.replaceChildren(document.createTextNode(newText));
+                        console.log('✓ Term months updated:', currentText, '→', newText);
+                    }
+                } else {
+                    console.warn('⚠ Term months strong element not found in:', termMonthsBox);
+                }
+            }
+            
+            // Installment Amount (col-md-12)
+            const installmentBox = dataRow.querySelector('.col-md-12 .bg-primary-transparent');
+            if (installmentBox && carData.installment !== undefined) {
+                const installmentStrong = installmentBox.querySelector('strong.fs-18.text-primary');
+                if (installmentStrong) {
+                    const currentText = installmentStrong.textContent || installmentStrong.innerText || '';
+                    const newText = formatPersianNumber(carData.installment) + ' تومان';
+                    
+                    if (currentText !== newText) {
+                        installmentStrong.replaceChildren(document.createTextNode(newText));
+                        console.log('✓ Installment updated:', currentText, '→', newText);
+                    }
+                } else {
+                    console.warn('⚠ Installment strong element not found in:', installmentBox);
+                }
+            }
+            
+            console.log('✓ updateCarInfoCards: Completed', carData);
+        } finally {
+            // Reset flag after a short delay
+            setTimeout(() => {
+                isUpdatingCards = false;
+            }, 100);
+        }
+    }
+
+    // Function to replace car with calculated data
+    function replaceCarWithData(productId, downPayment, termMonths, installmentAmount, totalPrice) {
+        // Debug: log incoming parameters
+        console.log('🔵 replaceCarWithData called with:', {
+            productId: productId,
+            downPayment: downPayment,
+            termMonths: termMonths,
+            installmentAmount: installmentAmount,
+            totalPrice: totalPrice
+        });
+        
+        // Get localized texts
+        const texts = (window.maneliInquiryForm && window.maneliInquiryForm.texts) ? window.maneliInquiryForm.texts : {};
+        const successText = texts.car_replaced_success || 'Car replaced successfully. Page is being refreshed...';
+        const errorPrefix = texts.error_replacing_car || 'Error replacing car';
+        const serverError = texts.server_error || 'Server connection error. Please try again.';
+
+        // Get AJAX URL and nonce
+        let ajaxUrl = '';
+        if (window.maneli_ajax && window.maneli_ajax.url) {
+            ajaxUrl = window.maneli_ajax.url;
+        } else if (window.maneli_ajax_object && window.maneli_ajax_object.ajax_url) {
+            ajaxUrl = window.maneli_ajax_object.ajax_url;
+        } else if (window.maneliInquiryForm && window.maneliInquiryForm.ajax_url) {
+            ajaxUrl = window.maneliInquiryForm.ajax_url;
+        } else {
+            ajaxUrl = '/wp-admin/admin-ajax.php';
+        }
+
+        let ajaxNonce = '';
+        if (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.select_car) {
+            ajaxNonce = window.maneliInquiryForm.nonces.select_car;
+        } else if (window.maneli_ajax && window.maneli_ajax.nonce) {
+            ajaxNonce = window.maneli_ajax.nonce;
+        } else if (window.maneli_ajax_object && window.maneli_ajax_object.nonce) {
+            ajaxNonce = window.maneli_ajax_object.nonce;
+        }
+
+        // Call AJAX to replace car
+        const params = new URLSearchParams();
+        params.append('action', 'maneli_select_car_ajax');
+        params.append('nonce', ajaxNonce);
+        params.append('product_id', productId);
+        params.append('total_price', totalPrice);
+        params.append('down_payment', downPayment);
+        params.append('term_months', termMonths);
+
+        console.log('🔵 Sending AJAX request with params:', {
+            action: 'maneli_select_car_ajax',
+            product_id: productId,
+            total_price: totalPrice,
+            down_payment: downPayment,
+            term_months: termMonths
+        });
+
+        fetch(ajaxUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: params.toString()
+        }).then(r => r.json()).then(res => {
+            console.log('🔵 AJAX Response received:', res);
+            if (res && res.success) {
+                // Update car data cards immediately before reload
+                if (res.data && res.data.car_data) {
+                    const carData = res.data.car_data;
+                    console.log('🔵 Updating cards with server data:', carData);
+                    updateCarInfoCards(carData);
+                } else {
+                    console.warn('⚠ No car_data in response:', res.data);
+                }
+            } else {
+                console.error('❌ AJAX failed:', res);
+                
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: successText,
+                        icon: 'success',
+                        confirmButtonColor: '#5e72e4',
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    alert(successText);
+                    window.location.reload();
+                }
+            } else {
+                let errorMsg = serverError;
+                if (res && res.data && res.data.message) {
+                    errorMsg = res.data.message;
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: errorPrefix,
+                        text: errorMsg,
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                } else {
+                    alert(errorPrefix + ': ' + errorMsg);
+                }
+            }
+        }).catch(err => {
+            console.error('Error replacing car:', err);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: errorPrefix,
+                    text: serverError,
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545'
+                });
+            } else {
+                alert(serverError);
+            }
+        });
+    }
 
     // --- 5. Meetings: load slots and book ---
     (function initMeetings(){

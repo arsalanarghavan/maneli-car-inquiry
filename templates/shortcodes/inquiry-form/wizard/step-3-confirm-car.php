@@ -24,9 +24,9 @@ $options = get_option('maneli_inquiry_all_options', []);
 $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe market fluctuations, car prices are approximate and may change until final confirmation.', 'maneli-car-inquiry');
 ?>
 
-<div class="alert alert-warning mb-4" role="alert">
-    <i class="la la-exclamation-triangle me-2"></i>
-    <?php esc_html_e('The inquiry will be made for the car below and cannot be changed.', 'maneli-car-inquiry'); ?>
+<div class="alert alert-info mb-4" role="alert">
+    <i class="la la-info-circle me-2"></i>
+    <?php echo esc_html__('You can click on any car below to replace the current selected car. The inquiry will be made for the selected car.', 'maneli-car-inquiry'); ?>
 </div>
 
 <!-- Selected Car Card - Product Style -->
@@ -54,7 +54,7 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
                         </p>
                     <?php endif; ?>
                     
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 mb-3" data-down-payment="<?php echo esc_attr($down_payment); ?>" data-term-months="<?php echo esc_attr($term_months); ?>" data-total-price="<?php echo esc_attr($total_price); ?>">
                         <div class="col-md-6">
                             <div class="border rounded p-3 bg-success-transparent">
                                 <div class="text-muted fs-12 mb-1">
@@ -121,52 +121,4 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
         </div>
     </div>
 </form>
-
-<!-- Browse Other Cars Section - Now below confirmation -->
-<div class="row">
-    <div class="col-xl-12">
-        <div class="card border mb-4">
-            <div class="card-header bg-light">
-                <h6 class="card-title mb-0">
-                    <i class="la la-car me-2"></i>
-                    <?php esc_html_e('Browse Other Cars', 'maneli-car-inquiry'); ?>
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <input type="text" id="confirm_car_search" class="form-control" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
-                    </div>
-                    <div class="col-md-3">
-                        <select id="confirm_car_brand" class="form-select">
-                            <option value=""><?php esc_html_e('All Brands', 'maneli-car-inquiry'); ?></option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select id="confirm_car_category" class="form-select">
-                            <option value=""><?php esc_html_e('All Categories', 'maneli-car-inquiry'); ?></option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button id="confirm_car_filter_btn" class="btn btn-primary w-100" type="button">
-                            <i class="la la-filter me-1"></i>
-                            <?php esc_html_e('Filter', 'maneli-car-inquiry'); ?>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="confirm_car_catalog" class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
-                    <!-- AJAX cards inserted here -->
-                </div>
-                
-                <div class="d-flex justify-content-between align-items-center mt-3">
-                    <a href="<?php echo esc_url(get_post_type_archive_link('product')); ?>" class="btn btn-light">
-                        <?php esc_html_e('View Full Cars List', 'maneli-car-inquiry'); ?>
-                    </a>
-                    <div id="confirm_car_pagination"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 

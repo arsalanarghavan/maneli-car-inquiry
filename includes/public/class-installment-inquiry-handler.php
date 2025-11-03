@@ -17,6 +17,7 @@ class Maneli_Installment_Inquiry_Handler {
     public function __construct() {
         // Step 1: Handle car selection from the product page calculator.
         add_action('wp_ajax_maneli_select_car_ajax', [$this, 'handle_car_selection_ajax']);
+        add_action('wp_ajax_nopriv_maneli_select_car_ajax', '__return_false'); // Must be logged in
 
         // Step 2: Handle identity form submission.
         add_action('admin_post_nopriv_maneli_submit_identity', '__return_false');
@@ -287,9 +288,12 @@ class Maneli_Installment_Inquiry_Handler {
             while ($query->have_posts()) { $query->the_post();
                 $pid = get_the_ID();
                 $img = get_the_post_thumbnail($pid, 'medium');
-                echo '<div class="product-card">';
+                $product = wc_get_product($pid);
+                $price = $product ? $product->get_price() : 0;
+                echo '<div class="product-card selectable-car" data-product-id="' . esc_attr($pid) . '" data-product-price="' . esc_attr($price) . '" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform=\'scale(1.02)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.1)\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'none\';">';
                 echo '<div class="thumb">' . wp_kses_post($img) . '</div>';
                 echo '<div class="title" style="text-align:center; margin-top:8px;">' . esc_html(get_the_title()) . '</div>';
+                echo '<div class="text-center mt-2"><small class="text-muted">' . esc_html__('Click to select', 'maneli-car-inquiry') . '</small></div>';
                 echo '</div>';
             }
         }
@@ -301,8 +305,8 @@ class Maneli_Installment_Inquiry_Handler {
             'format'    => '?paged=%#%',
             'current'   => $paged,
             'total'     => max(1, (int)$query->max_num_pages),
-            'prev_text' => esc_html__('« Previous', 'maneli-car-inquiry'),
-            'next_text' => esc_html__('Next »', 'maneli-car-inquiry'),
+            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'),
+            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'),
             'type'      => 'plain'
         ]);
 
@@ -346,37 +350,213 @@ class Maneli_Installment_Inquiry_Handler {
      * It recalculates the installment on the server to prevent client-side tampering.
      */
     public function handle_car_selection_ajax() {
-        check_ajax_referer('maneli_ajax_nonce', 'nonce');
+        try {
+            // Debug logging
+            error_log('Maneli Debug: handle_car_selection_ajax called');
+            error_log('Maneli Debug: POST data: ' . print_r($_POST, true));
+            error_log('Maneli Debug: User logged in: ' . (is_user_logged_in() ? 'yes' : 'no'));
+            error_log('Maneli Debug: Nonce received: ' . (isset($_POST['nonce']) ? substr($_POST['nonce'], 0, 10) . '...' : 'MISSING'));
+            
+            // Check nonce - try both 'nonce' and '_ajax_nonce' parameters
+            $nonce = isset($_POST['nonce']) ? sanitize_text_field($_POST['nonce']) : (isset($_POST['_ajax_nonce']) ? sanitize_text_field($_POST['_ajax_nonce']) : '');
+            
+            // Verify nonce with the expected action 'maneli_ajax_nonce'
+            $nonce_valid = !empty($nonce) && wp_verify_nonce($nonce, 'maneli_ajax_nonce');
+            
+            if (!$nonce_valid) {
+                error_log('Maneli Debug: Nonce verification failed');
+                error_log('Maneli Debug: Expected action: maneli_ajax_nonce');
+                error_log('Maneli Debug: Received nonce: ' . ($nonce ? substr($nonce, 0, 20) . '...' : 'EMPTY'));
+                error_log('Maneli Debug: POST keys: ' . implode(', ', array_keys($_POST)));
+                wp_send_json_error(['message' => esc_html__('Invalid security token. Please refresh the page and try again.', 'maneli-car-inquiry')]);
+                return;
+            }
+            
+            error_log('Maneli Debug: Nonce verified successfully');
 
-        if (!is_user_logged_in() || empty($_POST['product_id'])) {
-            wp_send_json_error(['message' => esc_html__('Invalid request. Please log in and try again.', 'maneli-car-inquiry')]);
+            if (!is_user_logged_in()) {
+                error_log('Maneli Debug: User not logged in');
+                wp_send_json_error(['message' => esc_html__('Please log in to continue.', 'maneli-car-inquiry')]);
+                return;
+            }
+            
+            if (empty($_POST['product_id'])) {
+                error_log('Maneli Debug: Product ID missing');
+                wp_send_json_error(['message' => esc_html__('Product ID is required.', 'maneli-car-inquiry')]);
+                return;
+            }
+
+            $user_id = get_current_user_id();
+            $product_id = intval($_POST['product_id']);
+            
+            // Get product information for the new car
+            $product = wc_get_product($product_id);
+            if (!$product) {
+                error_log('Maneli Debug: Product not found: ' . $product_id);
+                wp_send_json_error(['message' => esc_html__('Product not found.', 'maneli-car-inquiry')]);
+                return;
+            }
+            
+            // Get product prices and settings
+            $cash_price = (int)$product->get_regular_price();
+            
+            // Get installment_price
+            $installment_price_raw = get_post_meta($product_id, 'installment_price', true);
+            if (is_string($installment_price_raw) && !empty($installment_price_raw)) {
+                $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                $installment_price_raw = str_replace($persian_digits, $english_digits, $installment_price_raw);
+                $installment_price_raw = preg_replace('/[^\d]/', '', $installment_price_raw);
+            }
+            $installment_price = !empty($installment_price_raw) ? (int)$installment_price_raw : 0;
+            if (empty($installment_price)) {
+                $installment_price = $cash_price;
+            }
+            
+            // Get min_downpayment for the new car
+            $min_down_payment_raw = get_post_meta($product_id, 'min_downpayment', true);
+            if (is_string($min_down_payment_raw) && !empty($min_down_payment_raw)) {
+                $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                $min_down_payment_raw = str_replace($persian_digits, $english_digits, $min_down_payment_raw);
+                $min_down_payment_raw = preg_replace('/[^\d]/', '', $min_down_payment_raw);
+            }
+            $min_down_payment = !empty($min_down_payment_raw) ? (int)$min_down_payment_raw : 0;
+            
+            // If min_downpayment is not set or is 0, calculate 20% of installment_price as default
+            if ($min_down_payment <= 0 && $installment_price > 0) {
+                $min_down_payment = (int)($installment_price * 0.2);
+            }
+            
+            // Get total price - use POST value if provided (from modal calculator), otherwise use installment_price
+            $total_price_post = sanitize_text_field($_POST['total_price'] ?? 0);
+            $total_price_post = (int)preg_replace('/[^\d]/', '', str_replace(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'], ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], $total_price_post));
+            
+            // Use POST total_price if valid (greater than 0), otherwise fallback to installment_price
+            if ($total_price_post > 0) {
+                $total_price = $total_price_post;
+                error_log('Maneli Debug: Using POST total_price: ' . $total_price);
+            } else {
+                $total_price = $installment_price;
+                error_log('Maneli Debug: Using product installment_price: ' . $total_price);
+            }
+            
+            // Calculate max down payment (80% of total_price, not installment_price!)
+            $max_down_payment = (int)($total_price * 0.8);
+            
+            // Get down payment - use POST value if provided and valid, otherwise use min_down_payment
+            $down_payment_post = sanitize_text_field($_POST['down_payment'] ?? 0);
+            $down_payment_post = (int)preg_replace('/[^\d]/', '', str_replace(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'], ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], $down_payment_post));
+            
+            error_log('Maneli Debug: Down payment validation - POST: ' . $down_payment_post . ', Min: ' . $min_down_payment . ', Max: ' . $max_down_payment . ', Total Price: ' . $total_price);
+            
+            // Use POST down payment if it's valid (between min and max), otherwise use min
+            if ($down_payment_post >= $min_down_payment && $down_payment_post <= $max_down_payment) {
+                $down_payment = $down_payment_post;
+                error_log('Maneli Debug: Using POST down_payment: ' . $down_payment);
+            } else {
+                $down_payment = $min_down_payment;
+                error_log('Maneli Debug: POST down_payment invalid, using min_down_payment: ' . $down_payment);
+            }
+            
+            // Get term months - use POST value if provided, otherwise default to 12
+            $term_months = (int)sanitize_text_field($_POST['term_months'] ?? 12);
+            if ($term_months < 12) {
+                $term_months = 12;
+            } elseif ($term_months > 36) {
+                $term_months = 36;
+            }
+            
+            // Validate loan amount
+            $loan_amount = (int)$total_price - (int)$down_payment;
+            if ($loan_amount <= 0) {
+                error_log('Maneli Debug: Invalid loan amount calculated: ' . $loan_amount);
+                wp_send_json_error(['message' => esc_html__('Invalid loan amount. Please check the down payment.', 'maneli-car-inquiry')]);
+                return;
+            }
+            
+            // Recalculate installment using server-side configured rate
+            // Check if class exists
+            if (!class_exists('Maneli_Render_Helpers')) {
+                error_log('Maneli Debug: Maneli_Render_Helpers class not found');
+                wp_send_json_error(['message' => esc_html__('Server error: Helper class not found.', 'maneli-car-inquiry')]);
+                return;
+            }
+            
+            // Check if method exists
+            if (!method_exists('Maneli_Render_Helpers', 'calculate_installment_amount')) {
+                error_log('Maneli Debug: calculate_installment_amount method not found');
+                wp_send_json_error(['message' => esc_html__('Server error: Calculation method not found.', 'maneli-car-inquiry')]);
+                return;
+            }
+            
+            try {
+                $recalculated_installment = Maneli_Render_Helpers::calculate_installment_amount($loan_amount, $term_months);
+                
+                if ($recalculated_installment <= 0) {
+                    error_log('Maneli Debug: Invalid installment calculated: ' . $recalculated_installment);
+                    wp_send_json_error(['message' => esc_html__('Invalid installment amount calculated. Please try again.', 'maneli-car-inquiry')]);
+                    return;
+                }
+            } catch (Exception $e) {
+                error_log('Maneli Debug: Exception in calculate_installment_amount: ' . $e->getMessage());
+                error_log('Maneli Debug: Stack trace: ' . $e->getTraceAsString());
+                wp_send_json_error(['message' => esc_html__('Server error: Failed to calculate installment.', 'maneli-car-inquiry') . ' ' . $e->getMessage()]);
+                return;
+            } catch (Error $e) {
+                error_log('Maneli Debug: Fatal error in calculate_installment_amount: ' . $e->getMessage());
+                error_log('Maneli Debug: Stack trace: ' . $e->getTraceAsString());
+                wp_send_json_error(['message' => esc_html__('Server error: Failed to calculate installment.', 'maneli-car-inquiry') . ' ' . $e->getMessage()]);
+                return;
+            }
+            
+            error_log('Maneli Debug: Car replacement calculation: ' . print_r([
+                'product_id' => $product_id,
+                'total_price' => $total_price,
+                'down_payment' => $down_payment,
+                'term_months' => $term_months,
+                'loan_amount' => $loan_amount,
+                'installment' => $recalculated_installment
+            ], true));
+            
+            $meta_to_save = [
+                'maneli_selected_car_id'      => $product_id,
+                'maneli_inquiry_step'         => 'form_pending',
+                'maneli_inquiry_down_payment' => $down_payment,
+                'maneli_inquiry_term_months'  => $term_months,
+                'maneli_inquiry_total_price'  => $total_price,
+                'maneli_inquiry_installment'  => $recalculated_installment, // Use server-calculated value
+            ];
+
+            foreach ($meta_to_save as $key => $value) {
+                update_user_meta($user_id, $key, $value);
+            }
+
+            error_log('Maneli Debug: Car selection successful for user ' . $user_id . ', product ' . $product_id);
+            
+            // Return updated values so frontend can display them
+            wp_send_json_success([
+                'message' => esc_html__('Car replaced successfully.', 'maneli-car-inquiry'),
+                'car_data' => [
+                    'total_price' => $total_price,
+                    'down_payment' => $down_payment,
+                    'term_months' => $term_months,
+                    'installment' => $recalculated_installment,
+                    'min_down_payment' => $min_down_payment,
+                    'max_down_payment' => $max_down_payment,
+                ]
+            ]);
+        } catch (Exception $e) {
+            error_log('Maneli Debug: Exception in handle_car_selection_ajax: ' . $e->getMessage());
+            error_log('Maneli Debug: Exception file: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('Maneli Debug: Stack trace: ' . $e->getTraceAsString());
+            wp_send_json_error(['message' => esc_html__('Server error occurred. Please try again.', 'maneli-car-inquiry') . ' ' . (defined('WP_DEBUG') && WP_DEBUG ? $e->getMessage() : '')]);
+        } catch (Error $e) {
+            error_log('Maneli Debug: Fatal error in handle_car_selection_ajax: ' . $e->getMessage());
+            error_log('Maneli Debug: Fatal error file: ' . $e->getFile() . ':' . $e->getLine());
+            error_log('Maneli Debug: Stack trace: ' . $e->getTraceAsString());
+            wp_send_json_error(['message' => esc_html__('Server error occurred. Please try again.', 'maneli-car-inquiry') . ' ' . (defined('WP_DEBUG') && WP_DEBUG ? $e->getMessage() : '')]);
         }
-
-        $user_id = get_current_user_id();
-        
-        // Validate and re-calculate installment here using the *server-side* configured rate
-        $total_price = sanitize_text_field($_POST['total_price'] ?? 0);
-        $down_payment = sanitize_text_field($_POST['down_payment'] ?? 0);
-        $term_months = (int)sanitize_text_field($_POST['term_months'] ?? 12);
-        $loan_amount = (int)$total_price - (int)$down_payment;
-        
-        // USE CENTRALIZED HELPER
-        $recalculated_installment = Maneli_Render_Helpers::calculate_installment_amount($loan_amount, $term_months);
-        
-        $meta_to_save = [
-            'maneli_selected_car_id'      => intval($_POST['product_id']),
-            'maneli_inquiry_step'         => 'form_pending',
-            'maneli_inquiry_down_payment' => $down_payment,
-            'maneli_inquiry_term_months'  => $term_months,
-            'maneli_inquiry_total_price'  => $total_price,
-            'maneli_inquiry_installment'  => $recalculated_installment, // Use server-calculated value
-        ];
-
-        foreach ($meta_to_save as $key => $value) {
-            update_user_meta($user_id, $key, $value);
-        }
-
-        wp_send_json_success(['message' => esc_html__('Car selected. Redirecting...', 'maneli-car-inquiry')]);
     }
 
     /**

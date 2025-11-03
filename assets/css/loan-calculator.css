@@ -149,21 +149,41 @@
 /* === Range Slider === */
 .maneli-calculator-container input[type="range"] {
     padding: 0 !important;
-    height: 8px !important;
-    background: linear-gradient(
-        to right,
-        #e2e6f1 0%,
-        #e2e6f1 calc(100% - var(--value-percent, 0%)),
-        #2D89BE calc(100% - var(--value-percent, 0%)),
-        #2D89BE 100%
-    ) !important;
-    border-radius: 0.25rem !important;
+    height: 10px !important;
+    background: #e2e6f1 !important;
+    border-radius: 5px !important;
     -webkit-appearance: none !important;
     appearance: none !important;
     cursor: pointer !important;
     border: none !important;
     margin: 1rem 0 !important;
     width: 100% !important;
+    position: relative !important;
+    transition: background 0.2s ease !important;
+}
+
+/* Slider track background and fill - Webkit (Chrome, Safari, Edge) */
+.maneli-calculator-container input[type="range"]::-webkit-slider-runnable-track {
+    height: 10px !important;
+    background: inherit !important;
+    border-radius: 5px !important;
+    border: none !important;
+}
+
+/* Slider track background - Firefox */
+.maneli-calculator-container input[type="range"]::-moz-range-track {
+    height: 10px !important;
+    background: #e2e6f1 !important;
+    border-radius: 5px !important;
+    border: none !important;
+}
+
+/* Slider fill with gradient - Firefox */
+.maneli-calculator-container input[type="range"]::-moz-range-progress {
+    height: 10px !important;
+    background: linear-gradient(90deg, #2D89BE 0%, #4a54e5 100%) !important;
+    border-radius: 5px 0 0 5px !important;
+    border: none !important;
 }
 
 .maneli-calculator-container input[type="range"]::-webkit-slider-thumb {

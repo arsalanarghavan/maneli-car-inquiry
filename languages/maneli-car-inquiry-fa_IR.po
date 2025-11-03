@@ -5494,3 +5494,51 @@ msgstr "پرداخت‌های هزینه استعلام"
 
 msgid "Cash Down Payments"
 msgstr "پیش‌پرداخت‌های نقدی"
+
+
+msgid "You can click on any car below to replace the current selected car. The inquiry will be made for the selected car."
+msgstr "می‌توانید روی هر خودروی زیر کلیک کنید تا خودروی فعلی را جایگزین کنید. استعلام برای خودروی انتخاب شده انجام خواهد شد."
+
+
+msgid "Click to select"
+msgstr "کلیک کنید تا انتخاب شود"
+
+
+msgid "Are you sure you want to replace the current car with this one?"
+msgstr "آیا مطمئن هستید که می‌خواهید این خودرو را جایگزین خودروی فعلی کنید؟"
+
+
+msgid "Car replaced successfully. Page is being refreshed..."
+msgstr "خودرو با موفقیت تغییر کرد. در حال به‌روزرسانی صفحه..."
+
+
+msgid "Error replacing car"
+msgstr "خطا در تغییر خودرو"
+
+
+msgid "Invalid security token. Please refresh the page and try again."
+msgstr "توکن امنیتی نامعتبر است. لطفاً صفحه را به‌روزرسانی کرده و دوباره تلاش کنید."
+
+
+msgid "Please log in to continue."
+msgstr "لطفاً برای ادامه وارد شوید."
+
+
+msgid "Product ID is required."
+msgstr "شناسه محصول الزامی است."
+
+
+msgid "Car replaced successfully."
+msgstr "خودرو با موفقیت جایگزین شد."
+
+
+msgid "Invalid loan amount. Please check the down payment."
+msgstr "مبلغ وام نامعتبر است. لطفاً پیش‌پرداخت را بررسی کنید."
+
+
+msgid "Calculate Installment"
+msgstr "محاسبه اقساط"
+
+
+msgid "Confirm and Replace Car"
+msgstr "تأیید و جایگزینی خودرو"

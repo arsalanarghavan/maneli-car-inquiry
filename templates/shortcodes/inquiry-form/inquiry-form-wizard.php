@@ -48,6 +48,13 @@ if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js')) {
     wp_enqueue_script('form-wizard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/form-wizard.js', ['jquery', 'vanilla-wizard'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js'), true);
 }
 
+// Enqueue SweetAlert2 for confirmation dialogs
+if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js')) {
+    wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+} else {
+    wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+}
+
 // Enqueue datepicker and inquiry frontend behaviors (for wizard steps)
 // Use the same persianDatepicker library that's used in expert reports
 if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
@@ -57,14 +64,28 @@ if (!wp_style_is('maneli-persian-datepicker', 'enqueued')) {
     wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
 }
 if (!wp_script_is('maneli-inquiry-form-js', 'enqueued')) {
-    wp_enqueue_script('maneli-inquiry-form-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js', ['jquery', 'maneli-persian-datepicker'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'), true);
+    wp_enqueue_script('maneli-inquiry-form-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js', ['jquery', 'maneli-persian-datepicker', 'sweetalert2'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'), true);
 }
 
-// Localize AJAX and nonces for inquiry frontend (confirm car catalog, meetings)
+// Localize AJAX and nonces for inquiry frontend (confirm car catalog, meetings, car selection)
+// CRITICAL: Generate nonce fresh for each page load
+$select_car_nonce = wp_create_nonce('maneli_ajax_nonce');
 wp_localize_script('maneli-inquiry-form-js', 'maneliInquiryForm', [
     'ajax_url' => admin_url('admin-ajax.php'),
     'nonces' => [
         'confirm_catalog' => wp_create_nonce('maneli_confirm_car_catalog_nonce'),
+        'select_car' => $select_car_nonce, // For replacing car - must match action 'maneli_ajax_nonce'
+    ],
+    'texts' => [
+        'replace_car_confirm' => esc_html__('Are you sure you want to replace the current car with this one?', 'maneli-car-inquiry'),
+        'car_replaced_success' => esc_html__('Car replaced successfully. Page is being refreshed...', 'maneli-car-inquiry'),
+        'error_replacing_car' => esc_html__('Error replacing car', 'maneli-car-inquiry'),
+        'server_error' => esc_html__('Server connection error. Please try again.', 'maneli-car-inquiry'),
+        'confirm' => esc_html__('Yes', 'maneli-car-inquiry'),
+        'cancel' => esc_html__('Cancel', 'maneli-car-inquiry'),
+        'invalid_request' => esc_html__('Invalid security token. Please refresh the page and try again.', 'maneli-car-inquiry'),
+        'please_login' => esc_html__('Please log in to continue.', 'maneli-car-inquiry'),
+        'product_id_required' => esc_html__('Product ID is required.', 'maneli-car-inquiry'),
     ],
 ]);
 
@@ -238,5 +259,181 @@ if (is_user_logged_in()) {
     </div>
 </div>
 
-<!-- Wizard initialization is handled in dashboard.php for dashboard context -->
+<?php
+// Show "Browse Other Cars" section only on step 3, below everything else
+if ($current_step === 3):
+    // Get selected car data for step 3
+    $step3_car_data = null;
+    if (is_user_logged_in() && isset($selected_car_data)) {
+        $step3_car_data = $selected_car_data;
+    }
+    if ($step3_car_data):
+?>
+<!-- Browse Other Cars Section - Moved to bottom of page -->
+<style>
+/* Pagination Styles for confirm_car_pagination */
+#confirm_car_pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+/* For plain pagination (default WordPress output) */
+#confirm_car_pagination > a,
+#confirm_car_pagination > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--default-border, #e0e7ed);
+    border-radius: 0.3rem;
+    color: var(--default-text-color, #495057);
+    background-color: var(--custom-white, #fff);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    transition: all 0.3s ease;
+    margin: 0 0.125rem;
+}
+
+#confirm_car_pagination > a:hover {
+    color: var(--primary-color, #5e72e4);
+    background-color: rgba(var(--primary-rgb, 94, 114, 228), 0.1);
+    border-color: var(--primary-color, #5e72e4);
+}
+
+#confirm_car_pagination > span.current,
+#confirm_car_pagination > a.current {
+    color: #fff;
+    background-color: var(--primary-color, #5e72e4);
+    border-color: var(--primary-color, #5e72e4);
+    font-weight: 500;
+}
+
+#confirm_car_pagination > span.dots {
+    border: none;
+    background: transparent;
+    cursor: default;
+    min-width: auto;
+}
+
+/* For list-based pagination (if type is 'list') */
+#confirm_car_pagination .page-numbers {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+
+#confirm_car_pagination .page-numbers li {
+    margin: 0;
+}
+
+#confirm_car_pagination .page-numbers a,
+#confirm_car_pagination .page-numbers span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--default-border, #e0e7ed);
+    border-radius: 0.3rem;
+    color: var(--default-text-color, #495057);
+    background-color: var(--custom-white, #fff);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    transition: all 0.3s ease;
+}
+
+#confirm_car_pagination .page-numbers a:hover {
+    color: var(--primary-color, #5e72e4);
+    background-color: rgba(var(--primary-rgb, 94, 114, 228), 0.1);
+    border-color: var(--primary-color, #5e72e4);
+}
+
+#confirm_car_pagination .page-numbers .current,
+#confirm_car_pagination .page-numbers .page-numbers.current {
+    color: #fff;
+    background-color: var(--primary-color, #5e72e4);
+    border-color: var(--primary-color, #5e72e4);
+    font-weight: 500;
+}
+
+#confirm_car_pagination .page-numbers .dots,
+#confirm_car_pagination .page-numbers .page-numbers.dots {
+    border: none;
+    background: transparent;
+    cursor: default;
+}
+
+@media (max-width: 575.98px) {
+    #confirm_car_pagination {
+        width: 100%;
+        justify-content: center;
+    }
+    #confirm_car_pagination > a,
+    #confirm_car_pagination > span {
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+</style>
+<div class="row mt-4">
+    <div class="col-xl-12">
+        <div class="card border mb-4">
+            <div class="card-header bg-light">
+                <h6 class="card-title mb-0">
+                    <i class="la la-car me-2"></i>
+                    <?php esc_html_e('Browse Other Cars', 'maneli-car-inquiry'); ?>
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <input type="text" id="confirm_car_search" class="form-control" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <select id="confirm_car_brand" class="form-select">
+                            <option value=""><?php esc_html_e('All Brands', 'maneli-car-inquiry'); ?></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="confirm_car_category" class="form-select">
+                            <option value=""><?php esc_html_e('All Categories', 'maneli-car-inquiry'); ?></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button id="confirm_car_filter_btn" class="btn btn-primary w-100" type="button">
+                            <i class="la la-filter me-1"></i>
+                            <?php esc_html_e('Filter', 'maneli-car-inquiry'); ?>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="confirm_car_catalog" class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+                    <!-- AJAX cards inserted here -->
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-3">
+                    <a href="<?php echo esc_url(get_post_type_archive_link('product')); ?>" class="btn btn-light">
+                        <?php esc_html_e('View Full Cars List', 'maneli-car-inquiry'); ?>
+                    </a>
+                    <div id="confirm_car_pagination" class="pagination-style-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php
+    endif;
+endif;
+?>
 

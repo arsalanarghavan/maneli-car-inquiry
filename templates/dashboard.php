@@ -25,7 +25,7 @@ if (empty($dashboard_page)) {
 
 // Define AJAX URL and nonce
 $ajax_url = admin_url('admin-ajax.php');
-$ajax_nonce = wp_create_nonce('maneli-ajax-nonce');
+$ajax_nonce = wp_create_nonce('maneli_ajax_nonce'); // Match the action name used in handler
 
 // Render dynamic sidebar menu
 ob_start();
@@ -556,6 +556,25 @@ if ($need_inquiry_scripts) {
         if (file_exists($inquiry_form_file)) {
             $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js?v=' . filemtime($inquiry_form_file)) . '"></script>' . PHP_EOL;
         }
+        
+        // Add modal calculator for step 3 (car replacement)
+        $current_step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
+        if ($current_step === 3) {
+            // Modal calculator CSS (reuse loan-calculator.css)
+            $calculator_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css';
+            if (file_exists($calculator_css)) {
+                $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css?v=' . filemtime($calculator_css)) . '">' . PHP_EOL;
+            }
+            // Modal calculator JS
+            $modal_calculator_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/modal-calculator.js';
+            if (file_exists($modal_calculator_js)) {
+                $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/modal-calculator.js?v=' . filemtime($modal_calculator_js)) . '"></script>' . PHP_EOL;
+            }
+            // Localize modal calculator
+            $options = get_option('maneli_inquiry_all_options', []);
+            $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
+            $scripts_html .= '<script>window.maneli_ajax_object={interestRate:' . esc_js($interest_rate) . ',ajax_url:"' . admin_url('admin-ajax.php') . '",nonce:"' . wp_create_nonce('maneli_ajax_nonce') . '"};</script>' . PHP_EOL;
+        }
     }
     
     // Add datepicker scripts for profile-settings page
@@ -689,7 +708,26 @@ if ($need_inquiry_scripts) {
     
     // Add localization for new-inquiry wizard
     if ($page === 'new-inquiry') {
-        $scripts_html .= 'window.maneliInquiryForm={ajax_url:"' . admin_url('admin-ajax.php') . '",nonces:{confirm_catalog:"' . wp_create_nonce('maneli_confirm_car_catalog_nonce') . '"}};';
+        $select_car_nonce = wp_create_nonce('maneli_ajax_nonce');
+        $inquiry_form_localize = [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonces' => [
+                'confirm_catalog' => wp_create_nonce('maneli_confirm_car_catalog_nonce'),
+                'select_car' => $select_car_nonce,
+            ],
+            'texts' => [
+                'replace_car_confirm' => esc_html__('Are you sure you want to replace the current car with this one?', 'maneli-car-inquiry'),
+                'car_replaced_success' => esc_html__('Car replaced successfully. Page is being refreshed...', 'maneli-car-inquiry'),
+                'error_replacing_car' => esc_html__('Error replacing car', 'maneli-car-inquiry'),
+                'server_error' => esc_html__('Server connection error. Please try again.', 'maneli-car-inquiry'),
+                'confirm' => esc_html__('Yes', 'maneli-car-inquiry'),
+                'cancel' => esc_html__('Cancel', 'maneli-car-inquiry'),
+                'invalid_request' => esc_html__('Invalid security token. Please refresh the page and try again.', 'maneli-car-inquiry'),
+                'please_login' => esc_html__('Please log in to continue.', 'maneli-car-inquiry'),
+                'product_id_required' => esc_html__('Product ID is required.', 'maneli-car-inquiry'),
+            ],
+        ];
+        $scripts_html .= 'window.maneliInquiryForm=' . json_encode($inquiry_form_localize, JSON_UNESCAPED_UNICODE) . ';';
     }
     
     $scripts_html .= 'console.log("✅ Inquiry scripts loaded");</script>' . PHP_EOL;
