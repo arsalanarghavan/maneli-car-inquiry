@@ -1736,8 +1736,20 @@ function toPersianNumber(num) {
             return;
         }
         
-        const nonce = maneliInquiryLists.nonces.save_installment_note || maneliInquiryLists.nonces.tracking_status || '';
-        console.log('🔵 Using nonce:', nonce ? 'PRESENT' : 'EMPTY');
+        const nonce = maneliInquiryLists.nonces?.save_installment_note || maneliInquiryLists.nonces?.tracking_status || '';
+        console.log('🔵 Using nonce:', nonce ? 'PRESENT' : 'EMPTY', nonce ? nonce.substring(0, 10) + '...' : '');
+        console.log('🔵 All nonces available:', maneliInquiryLists.nonces);
+        
+        if (!nonce) {
+            console.error('❌ Nonce is missing for save note!');
+            Swal.fire({
+                title: getText('error', 'Error') + '!',
+                text: 'Security token is missing. Please refresh the page.',
+                icon: 'error',
+                confirmButtonText: getText('ok_button', 'OK')
+            });
+            return;
+        }
         
         $.ajax({
             url: maneliInquiryLists.ajax_url,
@@ -1767,10 +1779,25 @@ function toPersianNumber(num) {
                 });
             }
         }).fail(function(xhr) {
-            console.error('🔵 AJAX Error:', xhr.responseJSON);
+            console.error('🔵 AJAX Error:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                response: xhr.responseJSON,
+                responseText: xhr.responseText
+            });
+            
+            let errorMessage = getText('error_occurred', 'An error occurred.');
+            if (xhr.responseJSON?.data?.message) {
+                errorMessage = xhr.responseJSON.data.message;
+            } else if (xhr.status === 403) {
+                errorMessage = 'Security verification failed. Please refresh the page and try again.';
+            } else if (xhr.status === 0) {
+                errorMessage = 'Network error. Please check your connection.';
+            }
+            
             Swal.fire({
                 title: getText('error', 'Error') + '!',
-                text: xhr.responseJSON?.data?.message || getText('error_occurred', 'An error occurred.'),
+                text: errorMessage,
                 icon: 'error',
                 confirmButtonText: getText('ok_button', 'OK')
             });
@@ -1875,13 +1902,24 @@ function toPersianNumber(num) {
         
         // Handle different actions
         if (action === 'schedule_meeting') {
-            // Get meeting settings first
+            // Check if maneliInquiryLists is available
+            if (typeof maneliInquiryLists === 'undefined') {
+                console.error('❌ maneliInquiryLists is not defined for schedule_meeting!');
+                Swal.fire({
+                    title: getText('error', 'Error') + '!',
+                    text: 'Script initialization error. Please refresh the page.',
+                    icon: 'error',
+                    confirmButtonText: getText('ok_button', 'OK')
+                });
+                return;
+            }
+            
+            // Get meeting settings first (no nonce needed - only checks user login)
             jQuery.ajax({
-                url: maneli_ajax_object.ajaxurl,
+                url: maneliInquiryLists.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_meeting_settings',
-                    nonce: maneli_ajax_object.nonce || ''
+                    action: 'maneli_get_meeting_settings'
                 },
                 success: function(response) {
                     if (response.success) {
@@ -1945,12 +1983,19 @@ function toPersianNumber(num) {
                     } else {
                         Swal.fire({
                             icon: 'error',
-                            title: getText('error_title', 'Error'),
-                            text: response.data?.message || getText('unknown_error', 'Unknown error occurred')
+                            title: getText('error', 'Error') + '!',
+                            text: response.data?.message || getText('server_error', 'Server error. Please try again.')
                         });
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('❌ Error getting meeting settings:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        response: xhr.responseJSON,
+                        error: error
+                    });
+                    
                     // Fallback without restrictions if AJAX fails
                     Swal.fire({
                         title: getText('schedule_meeting_title', 'Schedule Meeting'),
@@ -2114,16 +2159,54 @@ function toPersianNumber(num) {
             confirmButtonColor: '#ffc107'
         }).then((result) => {
             if (result.isConfirmed) {
+                if (typeof maneliInquiryLists === 'undefined') {
+                    console.error('❌ maneliInquiryLists is not defined!');
+                    Swal.fire({
+                        title: getText('error', 'Error') + '!',
+                        text: 'Script initialization error. Please refresh the page.',
+                        icon: 'error',
+                        confirmButtonText: getText('ok_button', 'OK')
+                    });
+                    return;
+                }
+                
+                const nonce = maneliInquiryLists.nonces?.update_installment_status || 
+                              maneliInquiryLists.nonces?.update_inquiry || 
+                              maneliInquiryLists.nonces?.tracking_status || '';
+                
+                if (!nonce) {
+                    console.error('❌ Nonce is missing for cancel meeting!', {
+                        nonces: maneliInquiryLists.nonces,
+                        inquiryId: inquiryId
+                    });
+                    Swal.fire({
+                        title: getText('error', 'Error') + '!',
+                        text: 'Security token is missing. Please refresh the page.',
+                        icon: 'error',
+                        confirmButtonText: getText('ok_button', 'OK')
+                    });
+                    return;
+                }
+                
+                console.log('🔵 Sending cancel meeting AJAX request:', {
+                    action: 'maneli_cancel_meeting',
+                    inquiryId: inquiryId,
+                    inquiryType: inquiryType,
+                    hasNonce: !!nonce
+                });
+                
                 $.ajax({
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
                         action: 'maneli_cancel_meeting',
-                        nonce: maneliInquiryLists.nonces.update_inquiry || maneliInquiryLists.nonces.tracking_status || '',
+                        nonce: nonce,
                         inquiry_id: inquiryId,
                         inquiry_type: inquiryType
                     }
                 }).done(function(response) {
+                    console.log('✅ Cancel meeting AJAX response:', response);
+                    
                     if (response.success) {
                         Swal.fire({
                             title: getText('success', 'Success') + '!',
@@ -2140,9 +2223,28 @@ function toPersianNumber(num) {
                         });
                     }
                 }).fail(function(xhr) {
+                    console.error('❌ Cancel meeting AJAX request failed:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        response: xhr.responseJSON,
+                        responseText: xhr.responseText
+                    });
+                    
+                    let errorMessage = getText('server_error', 'Server error. Please try again.');
+                    
+                    if (xhr.responseJSON?.data?.message) {
+                        errorMessage = xhr.responseJSON.data.message;
+                    } else if (xhr.status === 0) {
+                        errorMessage = 'Network error. Please check your connection.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Security verification failed. Please refresh the page and try again.';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Server error. Please contact support if the problem persists.';
+                    }
+                    
                     Swal.fire({
                         title: getText('error', 'Error') + '!',
-                        text: xhr.responseJSON?.data?.message || getText('server_error', 'Server error. Please try again.'),
+                        text: errorMessage,
                         icon: 'error',
                         confirmButtonText: getText('ok_button', 'OK')
                     });
@@ -2196,22 +2298,52 @@ function toPersianNumber(num) {
             actionType: actionType,
             hasNonce: !!nonce,
             nonceLength: nonce ? nonce.length : 0,
-            nonceValue: nonce ? nonce.substring(0, 10) + '...' : 'MISSING',
-            allNonces: maneliInquiryLists.nonces
+            nonceValue: nonce ? nonce.substring(0, 20) : 'MISSING',
+            fullNonce: nonce, // برای debug
+            allNonces: maneliInquiryLists.nonces,
+            ajaxUrl: maneliInquiryLists.ajax_url
+        });
+        
+        const ajaxData = {
+            action: 'maneli_update_installment_status',
+            nonce: nonce,
+            inquiry_id: inquiryId,
+            action_type: actionType,
+            ...data
+        };
+        
+        console.log('🔵 AJAX Data being sent:', {
+            ...ajaxData,
+            nonce: nonce ? nonce.substring(0, 20) + '...' : 'MISSING'
         });
         
         $.ajax({
             url: maneliInquiryLists.ajax_url,
             type: 'POST',
-            data: {
-                action: 'maneli_update_installment_status',
-                nonce: nonce,
-                inquiry_id: inquiryId,
-                action_type: actionType,
-                ...data
-            }
+            data: ajaxData
         }).done(function(response) {
             console.log('✅ AJAX response received:', response);
+            console.log('✅ Response data:', response.data);
+            console.log('✅ Response message:', response.data?.message);
+            console.log('✅ Response debug:', response.data?.debug);
+            
+            // اگر debug info وجود دارد، آن را نمایش بده
+            if (response.data?.debug) {
+                console.error('❌ DEBUG INFO:', {
+                    nonce_received: response.data.debug.nonce_received,
+                    nonce_length: response.data.debug.nonce_length,
+                    nonce_first_10: response.data.debug.nonce_first_10,
+                    user_logged_in: response.data.debug.user_logged_in,
+                    user_id: response.data.debug.user_id,
+                    fresh_nonce_first_10: response.data.debug.fresh_nonce_first_10
+                });
+                
+                // اگر nonce منقضی شده، سعی کن دوباره با nonce جدید تلاش کن
+                if (response.data.debug.nonce_received && response.data.debug.fresh_nonce_first_10) {
+                    console.warn('⚠️ Nonce ممکن است منقضی شده باشد. لطفاً صفحه را رفرش کنید.');
+                }
+            }
+            
             if (response.success) {
                 Swal.fire({
                     title: getText('success', 'Success') + '!',
@@ -2437,12 +2569,24 @@ function toPersianNumber(num) {
             });
         } else if (action === 'schedule_meeting') {
             // Get meeting settings first
+            // Check if maneliInquiryLists is available
+            if (typeof maneliInquiryLists === 'undefined') {
+                console.error('❌ maneliInquiryLists is not defined!');
+                Swal.fire({
+                    title: getText('error', 'Error') + '!',
+                    text: 'Script initialization error. Please refresh the page.',
+                    icon: 'error',
+                    confirmButtonText: getText('ok_button', 'OK')
+                });
+                return;
+            }
+            
+            // Get meeting settings first (no nonce needed - only checks user login)
             jQuery.ajax({
-                url: maneli_ajax_object.ajaxurl,
+                url: maneliInquiryLists.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_meeting_settings',
-                    nonce: maneli_ajax_object.nonce || ''
+                    action: 'maneli_get_meeting_settings'
                 },
                 success: function(response) {
                     if (response.success) {
@@ -2672,16 +2816,55 @@ function toPersianNumber(num) {
             confirmButtonColor: '#ffc107'
         }).then((result) => {
             if (result.isConfirmed) {
+                if (typeof maneliInquiryLists === 'undefined') {
+                    console.error('❌ maneliInquiryLists is not defined!');
+                    Swal.fire({
+                        title: getText('error', 'Error') + '!',
+                        text: 'Script initialization error. Please refresh the page.',
+                        icon: 'error',
+                        confirmButtonText: getText('ok_button', 'OK')
+                    });
+                    return;
+                }
+                
+                const nonce = maneliInquiryLists.nonces?.update_cash_status || 
+                              maneliInquiryLists.nonces?.update_installment_status ||
+                              maneliInquiryLists.nonces?.update_inquiry || 
+                              maneliInquiryLists.nonces?.tracking_status || '';
+                
+                if (!nonce) {
+                    console.error('❌ Nonce is missing for cancel meeting (cash)!', {
+                        nonces: maneliInquiryLists.nonces,
+                        inquiryId: inquiryId
+                    });
+                    Swal.fire({
+                        title: getText('error', 'Error') + '!',
+                        text: 'Security token is missing. Please refresh the page.',
+                        icon: 'error',
+                        confirmButtonText: getText('ok_button', 'OK')
+                    });
+                    return;
+                }
+                
+                console.log('🔵 Sending cancel meeting AJAX request (cash):', {
+                    action: 'maneli_cancel_meeting',
+                    inquiryId: inquiryId,
+                    inquiryType: inquiryType,
+                    hasNonce: !!nonce
+                });
+                
                 $.ajax({
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
                         action: 'maneli_cancel_meeting',
-                        nonce: maneliInquiryLists.nonces.update_inquiry || maneliInquiryLists.nonces.update_cash_status || '',
+                        nonce: nonce,
                         inquiry_id: inquiryId,
                         inquiry_type: inquiryType
                     }
                 }).done(function(response) {
+                    console.log('✅ Cancel meeting AJAX response (cash):', response);
+                    
                     if (response.success) {
                         Swal.fire({
                             title: getText('success', 'Success') + '!',
@@ -2698,9 +2881,28 @@ function toPersianNumber(num) {
                         });
                     }
                 }).fail(function(xhr) {
+                    console.error('❌ Cancel meeting AJAX request failed (cash):', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        response: xhr.responseJSON,
+                        responseText: xhr.responseText
+                    });
+                    
+                    let errorMessage = getText('server_error', 'Server error. Please try again.');
+                    
+                    if (xhr.responseJSON?.data?.message) {
+                        errorMessage = xhr.responseJSON.data.message;
+                    } else if (xhr.status === 0) {
+                        errorMessage = 'Network error. Please check your connection.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Security verification failed. Please refresh the page and try again.';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Server error. Please contact support if the problem persists.';
+                    }
+                    
                     Swal.fire({
                         title: getText('error', 'Error') + '!',
-                        text: xhr.responseJSON?.data?.message || getText('server_error', 'Server error. Please try again.'),
+                        text: errorMessage,
                         icon: 'error',
                         confirmButtonText: getText('ok_button', 'OK')
                     });

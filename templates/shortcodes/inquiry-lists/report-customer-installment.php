@@ -352,8 +352,14 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                     <p class="mb-0 fw-semibold"><?php 
                         $income_level = $post_meta['income_level'][0] ?? '—';
                         if ($income_level && $income_level !== '—') {
-                            // If it's a number, format it with Persian number separators
-                            $income_level = function_exists('persian_numbers') ? persian_numbers(number_format($income_level, 0, '.', ',')) : $income_level;
+                            // Convert Persian digits to English and remove commas
+                            $income_clean = str_replace(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', ',', ' '], ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '', ''], $income_level);
+                            // Convert to number
+                            $income_numeric = is_numeric($income_clean) ? floatval($income_clean) : 0;
+                            if ($income_numeric > 0) {
+                                // If it's a number, format it with Persian number separators
+                                $income_level = function_exists('persian_numbers') ? persian_numbers(number_format($income_numeric, 0, '.', ',')) : number_format($income_numeric, 0, '.', ',');
+                            }
                         }
                         echo esc_html($income_level);
                     ?></p>

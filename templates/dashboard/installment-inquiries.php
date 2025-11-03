@@ -56,6 +56,35 @@ if ($is_customer) {
 // Check if viewing a single inquiry report
 $inquiry_id = isset($_GET['inquiry_id']) ? intval($_GET['inquiry_id']) : 0;
 if ($inquiry_id > 0) {
+    // CRITICAL: Ensure nonces are set BEFORE loading report template
+    // Add inline script to ensure maneliInquiryLists has update_installment_status nonce
+    ?>
+    <script>
+    // Ensure maneliInquiryLists has update_installment_status nonce for single report view
+    (function() {
+        if (typeof maneliInquiryLists === 'undefined') {
+            window.maneliInquiryLists = {
+                ajax_url: '<?php echo esc_js(admin_url("admin-ajax.php")); ?>',
+                nonces: {},
+                text: {}
+            };
+        }
+        if (!maneliInquiryLists.nonces) {
+            maneliInquiryLists.nonces = {};
+        }
+        if (!maneliInquiryLists.nonces.update_installment_status) {
+            maneliInquiryLists.nonces.update_installment_status = '<?php echo esc_js(wp_create_nonce("maneli_installment_status")); ?>';
+            console.log('🟢 REPORT: Added update_installment_status nonce to maneliInquiryLists');
+        }
+        if (!maneliInquiryLists.nonces.save_installment_note) {
+            maneliInquiryLists.nonces.save_installment_note = '<?php echo esc_js(wp_create_nonce("maneli_installment_note")); ?>';
+            console.log('🟢 REPORT: Added save_installment_note nonce to maneliInquiryLists');
+        }
+        console.log('🟢 REPORT: maneliInquiryLists nonces:', maneliInquiryLists.nonces);
+    })();
+    </script>
+    <?php
+    
     if ($is_customer) {
         // Customer sees customer report - needs wrapper
         ?>

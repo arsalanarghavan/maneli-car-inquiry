@@ -14,6 +14,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Ensure required classes are loaded
+if (!class_exists('Maneli_Permission_Helpers')) {
+    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+}
+if (!class_exists('Maneli_CPT_Handler')) {
+    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
+}
+if (!class_exists('Maneli_Render_Helpers')) {
+    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+}
+
 // Permission Check
 $can_view = Maneli_Permission_Helpers::can_user_view_inquiry($inquiry_id, get_current_user_id());
 
@@ -845,8 +856,14 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                             <p class="mb-0 fw-semibold"><?php 
                                 $income_level = $post_meta['income_level'][0] ?? '—';
                                 if ($income_level && $income_level !== '—') {
-                                    // اگر عدد است، با جداکننده فارسی کن
-                                    $income_level = function_exists('persian_numbers') ? persian_numbers(number_format($income_level, 0, '.', ',')) : $income_level;
+                                    // Convert Persian digits to English and remove commas
+                                    $income_clean = str_replace(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹', ',', ' '], ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '', ''], $income_level);
+                                    // Convert to number
+                                    $income_numeric = is_numeric($income_clean) ? floatval($income_clean) : 0;
+                                    if ($income_numeric > 0) {
+                                        // اگر عدد است، با جداکننده فارسی کن
+                                        $income_level = function_exists('persian_numbers') ? persian_numbers(number_format($income_numeric, 0, '.', ',')) : number_format($income_numeric, 0, '.', ',');
+                                    }
                                 }
                                 echo esc_html($income_level);
                             ?></p>
