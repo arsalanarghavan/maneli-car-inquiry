@@ -1837,9 +1837,41 @@ function toPersianNumber(num) {
     $(document.body).on('click', '.installment-status-btn', function() {
         const button = $(this);
         const action = button.data('action');
-        const inquiryId = $('#installment-inquiry-details').data('inquiry-id');
         
-        if (!action || !inquiryId) return;
+        // Try multiple ways to get inquiryId
+        let inquiryId = $('#installment-inquiry-details').data('inquiry-id') || 
+                       button.closest('[data-inquiry-id]').data('inquiry-id') ||
+                       button.data('inquiry-id') ||
+                       $('.frontend-expert-report').data('inquiry-id') ||
+                       $('#installment-inquiry-details').attr('data-inquiry-id');
+        
+        // Convert to number if it's a string
+        if (inquiryId) {
+            inquiryId = parseInt(inquiryId, 10);
+        }
+        
+        if (!action || !inquiryId) {
+            console.error('❌ Installment status button: Missing action or inquiryId', {
+                action: action,
+                inquiryId: inquiryId,
+                button: button[0]
+            });
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: getText('error', 'Error') + '!',
+                    text: 'Unable to find inquiry ID. Please refresh the page.',
+                    icon: 'error',
+                    confirmButtonText: getText('ok_button', 'OK')
+                });
+            }
+            return;
+        }
+        
+        console.log('🔵 Installment status button clicked:', {
+            action: action,
+            inquiryId: inquiryId
+        });
         
         // Handle different actions
         if (action === 'schedule_meeting') {
@@ -2123,17 +2155,63 @@ function toPersianNumber(num) {
      * Helper function to update installment inquiry status
      */
     function updateInstallmentStatus(inquiryId, actionType, data = {}) {
+        // Check if maneliInquiryLists is available
+        if (typeof maneliInquiryLists === 'undefined') {
+            console.error('❌ maneliInquiryLists is not defined!');
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: getText('error', 'Error') + '!',
+                    text: 'Script initialization error. Please refresh the page.',
+                    icon: 'error',
+                    confirmButtonText: getText('ok_button', 'OK')
+                });
+            }
+            return;
+        }
+        
+        // Get nonce with proper fallback
+        const nonce = maneliInquiryLists.nonces?.update_installment_status || 
+                     maneliInquiryLists.nonces?.tracking_status || '';
+        
+        if (!nonce) {
+            console.error('❌ Nonce is missing!', {
+                nonces: maneliInquiryLists.nonces,
+                inquiryId: inquiryId,
+                actionType: actionType
+            });
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: getText('error', 'Error') + '!',
+                    text: 'Security token is missing. Please refresh the page.',
+                    icon: 'error',
+                    confirmButtonText: getText('ok_button', 'OK')
+                });
+            }
+            return;
+        }
+        
+        console.log('🔵 Sending AJAX request:', {
+            action: 'maneli_update_installment_status',
+            inquiryId: inquiryId,
+            actionType: actionType,
+            hasNonce: !!nonce,
+            nonceLength: nonce ? nonce.length : 0,
+            nonceValue: nonce ? nonce.substring(0, 10) + '...' : 'MISSING',
+            allNonces: maneliInquiryLists.nonces
+        });
+        
         $.ajax({
             url: maneliInquiryLists.ajax_url,
             type: 'POST',
             data: {
                 action: 'maneli_update_installment_status',
-                nonce: maneliInquiryLists.nonces.update_installment_status || maneliInquiryLists.nonces.tracking_status || '',
+                nonce: nonce,
                 inquiry_id: inquiryId,
                 action_type: actionType,
                 ...data
             }
         }).done(function(response) {
+            console.log('✅ AJAX response received:', response);
             if (response.success) {
                 Swal.fire({
                     title: getText('success', 'Success') + '!',
@@ -2150,9 +2228,28 @@ function toPersianNumber(num) {
                 });
             }
         }).fail(function(xhr) {
+            console.error('❌ AJAX request failed:', {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                response: xhr.responseJSON,
+                responseText: xhr.responseText
+            });
+            
+            let errorMessage = getText('error_occurred', 'An error occurred.');
+            
+            if (xhr.responseJSON?.data?.message) {
+                errorMessage = xhr.responseJSON.data.message;
+            } else if (xhr.status === 0) {
+                errorMessage = 'Network error. Please check your connection.';
+            } else if (xhr.status === 403) {
+                errorMessage = 'Security verification failed. Please refresh the page and try again.';
+            } else if (xhr.status === 500) {
+                errorMessage = 'Server error. Please contact support if the problem persists.';
+            }
+            
             Swal.fire({
                 title: getText('error', 'Error') + '!',
-                text: xhr.responseJSON?.data?.message || getText('error_occurred', 'An error occurred.'),
+                text: errorMessage,
                 icon: 'error',
                 confirmButtonText: getText('ok_button', 'OK')
             });

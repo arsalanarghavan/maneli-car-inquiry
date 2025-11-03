@@ -311,10 +311,73 @@
       localStorage.removeItem("bodyBgRGB");
     }
   }
-  let layoutSetting = document.querySelector(".layout-setting");
-  if (layoutSetting) {
-    layoutSetting.addEventListener("click", toggleTheme);
+  // Dark mode toggle - initialize with better timing and multiple retries
+  let darkModeToggleInitialized = false;
+  let darkModeToggleRetries = 0;
+  const MAX_RETRIES = 20; // Try for up to 2 seconds (20 * 100ms)
+  
+  function initDarkModeToggle() {
+    // Prevent multiple initializations
+    if (darkModeToggleInitialized) {
+      return;
+    }
+    
+    let layoutSetting = document.querySelector(".layout-setting");
+    
+    if (layoutSetting) {
+      console.log("Found .layout-setting element, initializing dark mode toggle");
+      
+      // Remove any existing listeners by cloning
+      const parent = layoutSetting.parentNode;
+      if (!parent) {
+        console.warn("Parent not found for .layout-setting");
+        return;
+      }
+      
+      const newLayoutSetting = layoutSetting.cloneNode(true);
+      parent.replaceChild(newLayoutSetting, layoutSetting);
+      
+      // Attach our listener
+      newLayoutSetting.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Dark mode toggle clicked from custom.js");
+        toggleTheme();
+        return false;
+      });
+      
+      darkModeToggleInitialized = true;
+      console.log("Dark mode toggle initialized successfully from custom.js");
+    } else {
+      darkModeToggleRetries++;
+      if (darkModeToggleRetries < MAX_RETRIES) {
+        console.log("Element .layout-setting not found, retrying... (" + darkModeToggleRetries + "/" + MAX_RETRIES + ")");
+        setTimeout(initDarkModeToggle, 100);
+      } else {
+        console.error("Failed to initialize dark mode toggle: element .layout-setting not found after " + MAX_RETRIES + " retries");
+      }
+    }
   }
+  
+  // Initialize immediately and also on DOM ready
+  console.log("Setting up dark mode toggle initialization...");
+  initDarkModeToggle(); // Try immediately
+  
+  // Also try on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOMContentLoaded fired, retrying dark mode toggle initialization");
+      setTimeout(initDarkModeToggle, 50);
+    });
+  }
+  
+  // Also try after window load as fallback
+  window.addEventListener('load', function() {
+    if (!darkModeToggleInitialized) {
+      console.log("Window load fired, final attempt to initialize dark mode toggle");
+      setTimeout(initDarkModeToggle, 100);
+    }
+  });
   /* header theme toggle */
 
   /* Choices JS */

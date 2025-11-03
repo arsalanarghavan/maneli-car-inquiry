@@ -136,6 +136,12 @@ class Maneli_Admin_Dashboard_Widgets {
             border-radius: 0.5rem !important;
             background: #fff !important;
         }
+        [data-theme-mode=dark] .card.custom-card.crm-card {
+            background: rgb(25, 25, 28) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
         .card.custom-card.crm-card::before {
             content: '' !important;
             position: absolute !important;
@@ -174,8 +180,18 @@ class Maneli_Admin_Dashboard_Widgets {
             color: #1f2937 !important;
             transition: color 0.3s ease !important;
         }
+        [data-theme-mode=dark] .card.custom-card.crm-card h4 {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
         .card.custom-card.crm-card:hover h4 {
             color: #5e72e4 !important;
+        }
+        [data-theme-mode=dark] .card.custom-card.crm-card:hover h4 {
+            color: var(--primary-color) !important;
+        }
+        [data-theme-mode=dark] .card.custom-card.crm-card .text-muted,
+        [data-theme-mode=dark] .card.custom-card.crm-card p {
+            color: rgba(255, 255, 255, 0.6) !important;
         }
         .card.custom-card.crm-card .border-primary, .card.custom-card.crm-card .bg-primary { background: linear-gradient(135deg, #5e72e4 0%, #7c3aed 100%) !important; }
         .card.custom-card.crm-card .border-success, .card.custom-card.crm-card .bg-success { background: linear-gradient(135deg, #2dce89 0%, #20c997 100%) !important; }
@@ -247,6 +263,12 @@ class Maneli_Admin_Dashboard_Widgets {
             border-radius: 0.5rem !important;
             background: #fff !important;
         }
+        [data-theme-mode=dark] .card.custom-card.crm-card {
+            background: rgb(25, 25, 28) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
         .card.custom-card.crm-card::before {
             content: '' !important;
             position: absolute !important;
@@ -285,8 +307,18 @@ class Maneli_Admin_Dashboard_Widgets {
             color: #1f2937 !important;
             transition: color 0.3s ease !important;
         }
+        [data-theme-mode=dark] .card.custom-card.crm-card h4 {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
         .card.custom-card.crm-card:hover h4 {
             color: #5e72e4 !important;
+        }
+        [data-theme-mode=dark] .card.custom-card.crm-card:hover h4 {
+            color: var(--primary-color) !important;
+        }
+        [data-theme-mode=dark] .card.custom-card.crm-card .text-muted,
+        [data-theme-mode=dark] .card.custom-card.crm-card p {
+            color: rgba(255, 255, 255, 0.6) !important;
         }
         .card.custom-card.crm-card .border-primary, .card.custom-card.crm-card .bg-primary { background: linear-gradient(135deg, #5e72e4 0%, #7c3aed 100%) !important; }
         .card.custom-card.crm-card .border-success, .card.custom-card.crm-card .bg-success { background: linear-gradient(135deg, #2dce89 0%, #20c997 100%) !important; }
@@ -294,7 +326,7 @@ class Maneli_Admin_Dashboard_Widgets {
         .card.custom-card.crm-card .border-danger, .card.custom-card.crm-card .bg-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; }
         </style>
         <div class="row mb-4">
-            <?php foreach ($stats as $key => $stat) : 
+            <?php foreach ($stats as $key => $stat) :
                 $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
                 <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">

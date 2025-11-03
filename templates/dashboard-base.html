@@ -25,6 +25,104 @@
         <!-- Main Theme Js -->
         <script src="./assets/js/main.js"></script>
         
+        <!-- CRITICAL: Dark Mode Text Color Fix - Must be before any content -->
+        <style>
+        [data-theme-mode=dark] {
+            --default-text-color: rgba(255, 255, 255, 0.9) !important;
+            --text-muted: rgba(255, 255, 255, 0.5) !important;
+        }
+        [data-theme-mode=dark] * {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+        [data-theme-mode=dark] button,
+        [data-theme-mode=dark] .btn,
+        [data-theme-mode=dark] input,
+        [data-theme-mode=dark] textarea,
+        [data-theme-mode=dark] select,
+        [data-theme-mode=dark] a,
+        [data-theme-mode=dark] .badge,
+        [data-theme-mode=dark] i,
+        [data-theme-mode=dark] svg,
+        [data-theme-mode=dark] svg *,
+        [data-theme-mode=dark] .text-primary,
+        [data-theme-mode=dark] .text-success,
+        [data-theme-mode=dark] .text-warning,
+        [data-theme-mode=dark] .text-danger,
+        [data-theme-mode=dark] .text-info,
+        [data-theme-mode=dark] .text-secondary,
+        [data-theme-mode=dark] .text-muted {
+            color: inherit !important;
+        }
+        [data-theme-mode=dark] .text-muted,
+        [data-theme-mode=dark] small,
+        [data-theme-mode=dark] .small {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        [data-theme-mode=dark] .text-primary {
+            color: var(--primary-color) !important;
+        }
+        [data-theme-mode=dark] .text-success {
+            color: rgb(var(--success-rgb)) !important;
+        }
+        [data-theme-mode=dark] .text-warning {
+            color: rgb(var(--warning-rgb)) !important;
+        }
+        [data-theme-mode=dark] .text-danger {
+            color: rgb(var(--danger-rgb)) !important;
+        }
+        [data-theme-mode=dark] .text-info {
+            color: rgb(var(--info-rgb)) !important;
+        }
+        [data-theme-mode=dark] .text-secondary {
+            color: rgb(var(--secondary-rgb)) !important;
+        }
+        </style>
+        
+        <!-- CRITICAL: Early Dark Mode Initialization - Must run before page render -->
+        <script>
+        (function() {
+            // Initialize dark mode immediately from localStorage to prevent flash
+            if (typeof document !== 'undefined') {
+                var html = document.documentElement;
+                if (!html) return;
+                
+                // Check localStorage for dark theme
+                if (localStorage.getItem("xintradarktheme")) {
+                    html.setAttribute("data-theme-mode", "dark");
+                    
+                    // Set header and menu styles from localStorage
+                    var menuStyle = localStorage.getItem("xintraMenu");
+                    var headerStyle = localStorage.getItem("xintraHeader");
+                    
+                    if (menuStyle) {
+                        html.setAttribute("data-menu-styles", menuStyle);
+                    } else {
+                        html.setAttribute("data-menu-styles", "dark");
+                    }
+                    
+                    if (headerStyle) {
+                        html.setAttribute("data-header-styles", headerStyle);
+                    } else {
+                        html.setAttribute("data-header-styles", "dark");
+                    }
+                    
+                    // Set CSS variables for dark mode if not custom background
+                    if (!localStorage.getItem("bodyBgRGB")) {
+                        html.style.setProperty("--body-bg-rgb", "25, 25, 28");
+                        html.style.setProperty("--body-bg-rgb2", "45, 45, 48");
+                        html.style.setProperty("--light-rgb", "43, 46, 49");
+                        html.style.setProperty("--form-control-bg", "rgb(25, 25, 28)");
+                        html.style.setProperty("--input-border", "rgba(255, 255, 255, 0.1)");
+                        html.style.setProperty("--default-body-bg-color", "rgb(45, 45, 48)");
+                        html.style.setProperty("--menu-bg", "rgb(25, 25, 28)");
+                        html.style.setProperty("--header-bg", "rgb(25, 25, 28)");
+                        html.style.setProperty("--custom-white", "rgb(25, 25, 28)");
+                    }
+                }
+            }
+        })();
+        </script>
+        
         <!-- Bootstrap Css -->
         <link id="style" href="./assets/libs/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
 

@@ -428,7 +428,8 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                         <div class="d-flex gap-2 flex-wrap justify-content-center mt-3">
                             <?php if (($tracking_status === 'new' || $tracking_status === 'referred') && $is_assigned_expert && !$is_admin): ?>
                                 <button type="button" class="btn btn-primary btn-wave installment-status-btn" 
-                                        data-action="start_progress">
+                                        data-action="start_progress"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-play-circle me-1"></i>
                                     <?php esc_html_e('Start Progress', 'maneli-car-inquiry'); ?>
                                 </button>
@@ -436,31 +437,36 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                             
                             <?php if ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled'): ?>
                                 <button type="button" class="btn btn-success btn-wave installment-status-btn" 
-                                        data-action="approve">
+                                        data-action="approve"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-check-circle me-1"></i>
                                     <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-danger btn-wave installment-status-btn" 
-                                        data-action="reject">
+                                        data-action="reject"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-times-circle me-1"></i>
                                     <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-info btn-wave installment-status-btn" 
-                                        data-action="schedule_meeting">
+                                        data-action="schedule_meeting"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-calendar-check me-1"></i>
                                     <?php esc_html_e('Schedule Meeting', 'maneli-car-inquiry'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-warning btn-wave installment-status-btn" 
-                                        data-action="schedule_followup">
+                                        data-action="schedule_followup"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-clock me-1"></i>
                                     <?php esc_html_e('Schedule Follow-up', 'maneli-car-inquiry'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-secondary btn-wave installment-status-btn" 
-                                        data-action="cancel">
+                                        data-action="cancel"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-ban me-1"></i>
                                     <?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>
                                 </button>
@@ -468,13 +474,15 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                             
                             <?php if ($tracking_status === 'meeting_scheduled'): ?>
                                 <button type="button" class="btn btn-success btn-wave installment-status-btn" 
-                                        data-action="complete">
+                                        data-action="complete"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-check-circle me-1"></i>
                                     <?php esc_html_e('Complete', 'maneli-car-inquiry'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-danger btn-wave installment-status-btn" 
-                                        data-action="reject">
+                                        data-action="reject"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-times-circle me-1"></i>
                                     <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
                                 </button>
@@ -487,7 +495,8 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                                 </button>
                                 
                                 <button type="button" class="btn btn-info btn-wave installment-status-btn" 
-                                        data-action="schedule_followup">
+                                        data-action="schedule_followup"
+                                        data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-clock me-1"></i>
                                     <?php esc_html_e('Schedule Follow-up', 'maneli-car-inquiry'); ?>
                                 </button>

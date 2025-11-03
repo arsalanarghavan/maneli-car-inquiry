@@ -303,6 +303,7 @@ function toPersianNumber(num) {
 }
 
 // CRITICAL: Initialize maneliInquiryLists immediately if not already set
+// Also ensure update_installment_status nonce exists even if object already exists
 if (typeof maneliInquiryLists === 'undefined') {
     console.warn('🟢 TEMPLATE: maneliInquiryLists is undefined! Creating fallback...');
     window.maneliInquiryLists = {
@@ -312,7 +313,9 @@ if (typeof maneliInquiryLists === 'undefined') {
             details: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_details_nonce")); ?>',
             inquiry_delete: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_delete_nonce")); ?>',
             assign_expert: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_assign_expert_nonce")); ?>',
-            tracking_status: '<?php echo esc_js(wp_create_nonce("maneli_tracking_status_nonce")); ?>'
+            tracking_status: '<?php echo esc_js(wp_create_nonce("maneli_tracking_status_nonce")); ?>',
+            update_installment_status: '<?php echo esc_js(wp_create_nonce("maneli_installment_status")); ?>',
+            save_installment_note: '<?php echo esc_js(wp_create_nonce("maneli_installment_note")); ?>'
         },
         experts: <?php 
             $experts_list = [];
@@ -389,6 +392,18 @@ if (typeof maneliInquiryLists === 'undefined') {
     console.log('🟢 TEMPLATE: maneliInquiryLists fallback created:', window.maneliInquiryLists);
 } else {
     console.log('🟢 TEMPLATE: maneliInquiryLists already exists:', maneliInquiryLists);
+    // Ensure update_installment_status nonce exists even if object already exists
+    if (!maneliInquiryLists.nonces || !maneliInquiryLists.nonces.update_installment_status) {
+        console.warn('🟢 TEMPLATE: Adding missing update_installment_status nonce to existing maneliInquiryLists');
+        if (!maneliInquiryLists.nonces) {
+            maneliInquiryLists.nonces = {};
+        }
+        maneliInquiryLists.nonces.update_installment_status = '<?php echo esc_js(wp_create_nonce("maneli_installment_status")); ?>';
+        if (!maneliInquiryLists.nonces.save_installment_note) {
+            maneliInquiryLists.nonces.save_installment_note = '<?php echo esc_js(wp_create_nonce("maneli_installment_note")); ?>';
+        }
+        console.log('🟢 TEMPLATE: Updated maneliInquiryLists with missing nonces:', maneliInquiryLists);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

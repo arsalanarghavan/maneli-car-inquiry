@@ -404,12 +404,56 @@
     overflow: hidden !important;
     border-radius: 0.5rem !important;
     background: #fff !important;
+    color: #1f2937 !important;
 }
 
 [data-theme-mode=dark] .card.custom-card.crm-card {
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
     background: rgb(var(--body-bg-rgb)) !important;
+    color: var(--default-text-color) !important;
+}
+
+/* Text colors inside crm-card in dark mode */
+[data-theme-mode=dark] .card.custom-card.crm-card .card-body {
+    color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card p {
+    color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card .text-muted {
+    color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card span {
+    color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card .badge {
+    color: #fff !important;
+}
+
+/* Additional text elements in crm-card */
+[data-theme-mode=dark] .card.custom-card.crm-card .fs-14,
+[data-theme-mode=dark] .card.custom-card.crm-card .fs-12,
+[data-theme-mode=dark] .card.custom-card.crm-card .fs-11 {
+    color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card .mb-0,
+[data-theme-mode=dark] .card.custom-card.crm-card .mb-1 {
+    color: var(--default-text-color) !important;
+}
+
+/* Avatar and icon containers */
+[data-theme-mode=dark] .card.custom-card.crm-card .avatar {
+    color: #fff !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card .svg-white {
+    color: #fff !important;
 }
 
 .card.custom-card.crm-card::before {
@@ -538,4 +582,93 @@
     .card.custom-card.crm-card h4 {
         font-size: 1.25rem;
     }
+}
+
+/* Dark Mode Fixes - Ensure sidebar and header are visible */
+[data-theme-mode=dark] .app-sidebar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+[data-theme-mode=dark] .app-header {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+[data-theme-mode=dark] .app-sidebar .main-sidebar {
+    display: block !important;
+    visibility: visible !important;
+}
+
+[data-theme-mode=dark] .app-sidebar .main-sidebar-header {
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Dark mode body background - matching xintra template */
+[data-theme-mode=dark] body {
+    background-color: var(--default-body-bg-color) !important;
+    color: var(--default-text-color) !important;
+}
+
+/* Dark mode ensure proper colors for text - matching xintra template */
+/* Note: Main dark mode CSS variables are defined in styles.css */
+
+/* FORCE ALL TEXT COLORS IN DARK MODE */
+[data-theme-mode=dark] * {
+    color: var(--default-text-color) !important;
+}
+
+/* Exclude specific elements */
+[data-theme-mode=dark] button,
+[data-theme-mode=dark] .btn,
+[data-theme-mode=dark] input,
+[data-theme-mode=dark] textarea,
+[data-theme-mode=dark] select,
+[data-theme-mode=dark] a,
+[data-theme-mode=dark] .badge,
+[data-theme-mode=dark] i,
+[data-theme-mode=dark] svg,
+[data-theme-mode=dark] .text-primary,
+[data-theme-mode=dark] .text-success,
+[data-theme-mode=dark] .text-warning,
+[data-theme-mode=dark] .text-danger,
+[data-theme-mode=dark] .text-info,
+[data-theme-mode=dark] .text-secondary,
+[data-theme-mode=dark] .text-muted {
+    color: inherit !important;
+}
+
+/* Set text-muted */
+[data-theme-mode=dark] .text-muted,
+[data-theme-mode=dark] small,
+[data-theme-mode=dark] .small {
+    color: var(--text-muted) !important;
+}
+
+/* Set colored text classes */
+[data-theme-mode=dark] .text-primary {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .text-success {
+    color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-warning {
+    color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-danger {
+    color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-info {
+    color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-secondary {
+    color: rgb(var(--secondary-rgb)) !important;
 }

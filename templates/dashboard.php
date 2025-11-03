@@ -537,6 +537,109 @@ window.addEventListener("error", function(e) {
 }, true);
 </script>';
 
+// CRITICAL: Add dark mode toggle initialization inline
+// This ensures it runs even if custom.js has issues
+$dark_mode_toggle_script = '<script>
+(function() {
+    console.log("Maneli: Initializing dark mode toggle from dashboard.php");
+    
+    function maneliToggleTheme() {
+        var html = document.querySelector("html");
+        if (!html) return;
+        
+        if (html.getAttribute("data-theme-mode") === "dark") {
+            html.setAttribute("data-theme-mode", "light");
+            html.setAttribute("data-header-styles", "light");
+            html.setAttribute("data-menu-styles", "dark");
+            if (!localStorage.getItem("primaryRGB")) {
+                html.setAttribute("style", "");
+            }
+            html.style.removeProperty("--body-bg-rgb");
+            html.style.removeProperty("--body-bg-rgb2");
+            html.style.removeProperty("--light-rgb");
+            html.style.removeProperty("--form-control-bg");
+            html.style.removeProperty("--input-border");
+            localStorage.removeItem("xintradarktheme");
+            localStorage.removeItem("xintraMenu");
+            localStorage.removeItem("xintraHeader");
+            localStorage.removeItem("bodylightRGB");
+            localStorage.removeItem("bodyBgRGB");
+            console.log("Maneli: Switched to light mode");
+        } else {
+            html.setAttribute("data-theme-mode", "dark");
+            html.setAttribute("data-header-styles", "dark");
+            html.setAttribute("data-menu-styles", "dark");
+            if (!localStorage.getItem("primaryRGB")) {
+                html.setAttribute("style", "");
+            }
+            
+            // Set CSS variables for dark mode if not custom background is set (matching xintra template)
+            if (!localStorage.getItem("bodyBgRGB")) {
+                // Default dark mode colors from xintra template
+                html.style.setProperty("--body-bg-rgb", "25, 25, 28");
+                html.style.setProperty("--body-bg-rgb2", "45, 45, 48");
+                html.style.setProperty("--light-rgb", "43, 46, 49");
+                html.style.setProperty("--form-control-bg", "rgb(25, 25, 28)");
+                html.style.setProperty("--input-border", "rgba(255, 255, 255, 0.1)");
+                html.style.setProperty("--default-body-bg-color", "rgb(45, 45, 48)");
+                html.style.setProperty("--menu-bg", "rgb(25, 25, 28)");
+                html.style.setProperty("--header-bg", "rgb(25, 25, 28)");
+                html.style.setProperty("--custom-white", "rgb(25, 25, 28)");
+            }
+            
+            localStorage.setItem("xintradarktheme", "true");
+            localStorage.setItem("xintraMenu", "dark");
+            localStorage.setItem("xintraHeader", "dark");
+            localStorage.removeItem("bodylightRGB");
+            localStorage.removeItem("bodyBgRGB");
+            console.log("Maneli: Switched to dark mode");
+        }
+    }
+    
+    function initManeliDarkModeToggle() {
+        var layoutSetting = document.querySelector(".layout-setting");
+        if (layoutSetting) {
+            console.log("Maneli: Found .layout-setting element");
+            
+            // Clone to remove existing listeners
+            var parent = layoutSetting.parentNode;
+            if (parent) {
+                var newLayoutSetting = layoutSetting.cloneNode(true);
+                parent.replaceChild(newLayoutSetting, layoutSetting);
+                
+                newLayoutSetting.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Maneli: Dark mode toggle button clicked");
+                    maneliToggleTheme();
+                    return false;
+                });
+                
+                console.log("Maneli: Dark mode toggle initialized successfully");
+            }
+        } else {
+            console.warn("Maneli: .layout-setting element not found, will retry");
+            setTimeout(initManeliDarkModeToggle, 100);
+        }
+    }
+    
+    // Try multiple times to ensure it works
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(initManeliDarkModeToggle, 100);
+        });
+    } else {
+        setTimeout(initManeliDarkModeToggle, 100);
+    }
+    
+    // Also try after window load
+    window.addEventListener("load", function() {
+        setTimeout(initManeliDarkModeToggle, 200);
+    });
+})();
+</script>';
+$dashboard_html .= $dark_mode_toggle_script;
+
 // CRITICAL FIX: Print scripts manually since wp_footer is not called
 // This ensures inquiry scripts are loaded on inquiry pages
 $page = get_query_var('maneli_dashboard_page');
@@ -820,6 +923,179 @@ jQuery(document).ready(function($) {
     }
     $dashboard_html = str_replace('</body>', $scripts_html . '</body>', $dashboard_html);
 }
+
+// CRITICAL: Add inline CSS at the end to force dark mode text colors - Highest priority
+$dark_mode_text_fix = '<style id="maneli-dark-mode-text-force">
+/* Force all text colors in dark mode - Highest priority inline styles */
+[data-theme-mode=dark] {
+    --default-text-color: rgba(255, 255, 255, 0.9) !important;
+    --text-muted: rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-theme-mode=dark] * {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] body,
+[data-theme-mode=dark] body div,
+[data-theme-mode=dark] body p,
+[data-theme-mode=dark] body span,
+[data-theme-mode=dark] body h1,
+[data-theme-mode=dark] body h2,
+[data-theme-mode=dark] body h3,
+[data-theme-mode=dark] body h4,
+[data-theme-mode=dark] body h5,
+[data-theme-mode=dark] body h6,
+[data-theme-mode=dark] body td,
+[data-theme-mode=dark] body th,
+[data-theme-mode=dark] body li,
+[data-theme-mode=dark] body label,
+[data-theme-mode=dark] body strong,
+[data-theme-mode=dark] body em,
+[data-theme-mode=dark] body b,
+[data-theme-mode=dark] body section,
+[data-theme-mode=dark] body article,
+[data-theme-mode=dark] body main,
+[data-theme-mode=dark] body header,
+[data-theme-mode=dark] body footer,
+[data-theme-mode=dark] body nav,
+[data-theme-mode=dark] body ul,
+[data-theme-mode=dark] body ol {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] button,
+[data-theme-mode=dark] .btn,
+[data-theme-mode=dark] input,
+[data-theme-mode=dark] textarea,
+[data-theme-mode=dark] select,
+[data-theme-mode=dark] a,
+[data-theme-mode=dark] .badge,
+[data-theme-mode=dark] i,
+[data-theme-mode=dark] svg,
+[data-theme-mode=dark] .text-primary,
+[data-theme-mode=dark] .text-success,
+[data-theme-mode=dark] .text-warning,
+[data-theme-mode=dark] .text-danger,
+[data-theme-mode=dark] .text-info,
+[data-theme-mode=dark] .text-secondary,
+[data-theme-mode=dark] .text-muted {
+    color: inherit !important;
+}
+
+[data-theme-mode=dark] .text-muted,
+[data-theme-mode=dark] small,
+[data-theme-mode=dark] .small {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-theme-mode=dark] .text-primary {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .text-success {
+    color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-warning {
+    color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-danger {
+    color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-info {
+    color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-secondary {
+    color: rgb(var(--secondary-rgb)) !important;
+}
+</style>';
+
+// Insert before closing body tag - this ensures it loads last and has highest priority
+$dashboard_html = str_replace('</body>', $dark_mode_text_fix . PHP_EOL . '</body>', $dashboard_html);
+
+// CRITICAL: JavaScript fallback to force text colors directly via DOM manipulation
+$dark_mode_js_fix = '<script>
+(function() {
+    function forceDarkModeTextColors() {
+        if (document.documentElement.getAttribute("data-theme-mode") !== "dark") {
+            return;
+        }
+        
+        // Get all text elements (excluding buttons, inputs, etc.)
+        var textElements = document.querySelectorAll("body *");
+        
+        textElements.forEach(function(el) {
+            // Skip interactive elements and elements with specific classes
+            if (el.tagName === "BUTTON" || 
+                el.tagName === "INPUT" || 
+                el.tagName === "TEXTAREA" || 
+                el.tagName === "SELECT" || 
+                el.tagName === "A" || 
+                el.tagName === "I" || 
+                el.tagName === "SVG" ||
+                el.tagName === "PATH" ||
+                el.tagName === "CIRCLE" ||
+                el.classList.contains("badge") ||
+                el.classList.contains("btn") ||
+                el.classList.contains("text-primary") ||
+                el.classList.contains("text-success") ||
+                el.classList.contains("text-warning") ||
+                el.classList.contains("text-danger") ||
+                el.classList.contains("text-info") ||
+                el.classList.contains("text-secondary") ||
+                el.classList.contains("text-muted")) {
+                return;
+            }
+            
+            // Force white text color
+            if (window.getComputedStyle(el).color !== "rgb(229, 229, 229)" && 
+                window.getComputedStyle(el).color !== "rgba(255, 255, 255, 0.9)") {
+                el.style.setProperty("color", "rgba(255, 255, 255, 0.9)", "important");
+            }
+        });
+        
+        // Handle text-muted separately
+        var mutedElements = document.querySelectorAll(".text-muted, small, .small");
+        mutedElements.forEach(function(el) {
+            el.style.setProperty("color", "rgba(255, 255, 255, 0.5)", "important");
+        });
+    }
+    
+    // Run immediately
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(forceDarkModeTextColors, 100);
+        });
+    } else {
+        setTimeout(forceDarkModeTextColors, 100);
+    }
+    
+    // Also run after window load
+    window.addEventListener("load", function() {
+        setTimeout(forceDarkModeTextColors, 200);
+    });
+    
+    // Watch for theme changes
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === "attributes" && mutation.attributeName === "data-theme-mode") {
+                setTimeout(forceDarkModeTextColors, 50);
+            }
+        });
+    });
+    
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme-mode"]
+    });
+})();
+</script>';
+
+$dashboard_html = str_replace('</body>', $dark_mode_js_fix . PHP_EOL . '</body>', $dashboard_html);
 
 echo $dashboard_html;
 ?>

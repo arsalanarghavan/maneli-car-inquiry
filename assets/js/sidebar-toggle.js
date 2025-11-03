@@ -59,49 +59,8 @@
         initDarkMode();
     }
 
-    // Flag to track if toggle button is initialized
-    let toggleButtonInitialized = false;
-
-    // Initialize dark mode toggle button using event delegation
-    // This ensures our handler runs even if custom.js also attaches a listener
-    function initToggleButton() {
-        if (toggleButtonInitialized) {
-            return; // Already initialized
-        }
-
-        // Use event delegation on document to catch all clicks on .layout-setting
-        // Using capture phase ensures our handler runs before others
-        document.addEventListener("click", function(e) {
-            // Check if the click target is .layout-setting or inside it
-            const layoutSetting = e.target.closest(".layout-setting");
-            if (layoutSetting) {
-                // Only handle if it's the actual button, not dropdowns inside it
-                if (layoutSetting === e.target || e.target.closest(".layout-setting") === layoutSetting) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation(); // Stop all other handlers
-                    toggleTheme();
-                    return false;
-                }
-            }
-        }, true); // Use capture phase to run before other handlers
-        
-        toggleButtonInitialized = true;
-    }
-
-    // Wait for DOM to be ready for button initialization
-    function waitAndInit() {
-        if (document.querySelector(".layout-setting") && !toggleButtonInitialized) {
-            initToggleButton();
-        } else if (!toggleButtonInitialized) {
-            setTimeout(waitAndInit, 50);
-        }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', waitAndInit);
-    } else {
-        // Initialize immediately
-        waitAndInit();
-    }
+    // Dark mode toggle is now handled by custom.js which loads earlier
+    // Keeping this file for sidebar toggle functionality if needed in the future
+    // But dark mode toggle initialization is disabled here to avoid conflicts
 })();
 

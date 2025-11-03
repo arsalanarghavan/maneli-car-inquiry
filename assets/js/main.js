@@ -85,6 +85,19 @@
       } else {
         html.setAttribute("data-menu-styles", "dark");
       }
+      
+      // Set CSS variables for dark mode if not custom background
+      if (!localStorage.getItem("bodyBgRGB")) {
+        html.style.setProperty("--body-bg-rgb", "25, 25, 28");
+        html.style.setProperty("--body-bg-rgb2", "45, 45, 48");
+        html.style.setProperty("--light-rgb", "43, 46, 49");
+        html.style.setProperty("--form-control-bg", "rgb(25, 25, 28)");
+        html.style.setProperty("--input-border", "rgba(255, 255, 255, 0.1)");
+        html.style.setProperty("--default-body-bg-color", "rgb(45, 45, 48)");
+        html.style.setProperty("--menu-bg", "rgb(25, 25, 28)");
+        html.style.setProperty("--header-bg", "rgb(25, 25, 28)");
+        html.style.setProperty("--custom-white", "rgb(25, 25, 28)");
+      }
     }
     if (localStorage.xintralayout) {
       let html = document.querySelector("html");

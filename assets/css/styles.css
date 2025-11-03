@@ -141,6 +141,62 @@ typography
   --black-8: rgba(0, 0, 0, 0.8);
   --black-9: rgba(0, 0, 0, 0.9);
 }
+/* Dark Mode CSS Variables - Imported from xintra template */
+[data-theme-mode=dark] {
+  --body-bg-rgb: 25, 25, 28;
+  --body-bg-rgb2: 45, 45, 48;
+  --menu-bg: rgb(var(--body-bg-rgb));
+  --menu-border-color: rgba(255, 255, 255, 0.1);
+  --menu-prime-color: rgba(255,255,255,0.4);
+  --header-bg: rgb(var(--body-bg-rgb));
+  --header-prime-color: rgba(255,255,255,0.4);
+  --header-border-color: rgba(255, 255, 255, 0.1);
+  --custom-white: rgb(var(--body-bg-rgb));
+  --custom-black: #fff;
+  --default-border: rgba(255, 255, 255, 0.1);
+  --default-text-color: rgba(255, 255, 255, 0.9);
+  color: var(--default-text-color) !important;
+  --light-rgb: 43, 46, 49;
+  --dark-rgb: 240, 245, 248;
+  --bootstrap-card-border: rgba(255, 255, 255, 0.1);
+  --list-hover-focus-bg: rgba(255, 255, 255, 0.1);
+  --default-background: rgb(var(--body-bg-rgb2));
+  --default-body-bg-color: rgb(var(--body-bg-rgb2));
+  --text-muted: rgba(255, 255, 255, 0.5);
+  --input-border: rgba(255, 255, 255, 0.1);
+  --form-control-bg: rgb(var(--body-bg-rgb));
+  color-scheme: dark;
+  /* Gray Set */
+  --gray-1: #110f0f;
+  --gray-2: rgba(255, 255, 255, 0.1);
+  --gray-3: #393946;
+  --gray-4: rgba(255, 255, 255, 0.2);
+  --gray-5: #73738c;
+  --gray-6: #8f8fa3;
+  --gray-7: #ababba;
+  --gray-8: #c7c7d1;
+  --gray-9: #e3e3e8;
+  /* white set */
+  --white-1: rgba(0, 0, 0, 0.1);
+  --white-2: rgba(0, 0, 0, 0.2);
+  --white-3: rgba(0, 0, 0, 0.3);
+  --white-4: rgba(0, 0, 0, 0.4);
+  --white-5: rgba(0, 0, 0, 0.5);
+  --white-6: rgba(0, 0, 0, 0.6);
+  --white-7: rgba(0, 0, 0, 0.7);
+  --white-8: rgba(0, 0, 0, 0.8);
+  --white-9: rgba(0, 0, 0, 0.9);
+  /* black set */
+  --black-1: rgba(255, 255, 255, 0.1);
+  --black-2: rgba(255, 255, 255, 0.2);
+  --black-3: rgba(255, 255, 255, 0.3);
+  --black-4: rgba(255, 255, 255, 0.4);
+  --black-5: rgba(255, 255, 255, 0.5);
+  --black-6: rgba(255, 255, 255, 0.6);
+  --black-7: rgba(255, 255, 255, 0.7);
+  --black-8: rgba(255, 255, 255, 0.8);
+  --black-9: rgba(255, 255, 255, 0.9);
+}
 /*Font Family*/
 /*Font Size*/
 /*Font Weight*/
@@ -10357,6 +10413,15 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+}
+
+/* CRITICAL: Force dark mode text colors - Must be after body definition */
+[data-theme-mode=dark] body {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] body * {
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 body ::-webkit-scrollbar {
   width: 0;
@@ -23786,4 +23851,1481 @@ a.link-underline-dark {
 
 [data-vertical-style=closed][data-toggled=close-menu-close] .app-sidebar .main-sidebar-header .header-logo img.toggle-logo {
   display: block !important;
+}
+
+/* ============================================
+   Dark Mode Styles for UI Elements - From xintra
+   ============================================ */
+
+/* Dropdown Menu - Additional dark mode styles */
+[data-theme-mode=dark] .dropdown-menu {
+  background-color: rgb(var(--light-rgb));
+}
+
+/* Form Controls - Dark mode styles */
+[data-theme-mode=dark] .form-control,
+[data-theme-mode=dark] .form-select {
+  background-color: var(--form-control-bg);
+  border-color: var(--input-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .form-control:focus,
+[data-theme-mode=dark] .form-select:focus {
+  background-color: var(--form-control-bg);
+  border-color: var(--primary05);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .form-control::placeholder {
+  color: var(--text-muted);
+}
+
+[data-theme-mode=dark] .input-group-text {
+  background-color: rgb(var(--light-rgb));
+  border-color: var(--input-border);
+  color: var(--default-text-color);
+}
+
+/* List Groups - Dark mode styles */
+[data-theme-mode=dark] .list-group-item {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .list-group-item-action:hover,
+[data-theme-mode=dark] .list-group-item-action:focus {
+  background-color: var(--list-hover-focus-bg);
+  color: var(--default-text-color);
+}
+
+/* Modals - Dark mode styles */
+[data-theme-mode=dark] .modal-content {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .modal-header {
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .modal-footer {
+  border-color: var(--default-border);
+}
+
+[data-theme-mode=dark] .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Tables - Additional dark mode styles */
+[data-theme-mode=dark] .table {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .table > :not(caption) > * > * {
+  background-color: transparent;
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .table-striped > tbody > tr:nth-of-type(odd) > td,
+[data-theme-mode=dark] .table-striped > tbody > tr:nth-of-type(odd) > th {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme-mode=dark] .table-hover > tbody > tr:hover > td,
+[data-theme-mode=dark] .table-hover > tbody > tr:hover > th {
+  background-color: var(--list-hover-focus-bg);
+  color: var(--default-text-color);
+}
+
+/* Pagination - Dark mode styles */
+[data-theme-mode=dark] .page-link {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .page-link:hover {
+  background-color: var(--list-hover-focus-bg);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+[data-theme-mode=dark] .page-item.disabled .page-link {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--text-muted);
+}
+
+/* Breadcrumbs - Dark mode styles */
+[data-theme-mode=dark] .breadcrumb {
+  background-color: transparent;
+}
+
+[data-theme-mode=dark] .breadcrumb-item a {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .breadcrumb-item.active {
+  color: var(--text-muted);
+}
+
+/* Progress Bars - Dark mode styles */
+[data-theme-mode=dark] .progress {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme-mode=dark] .progress-bar {
+  color: var(--default-text-color);
+}
+
+/* Badges - Dark mode styles (if not already styled) */
+[data-theme-mode=dark] .badge {
+  color: #fff;
+}
+
+/* Alerts - Dark mode styles */
+[data-theme-mode=dark] .alert {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .alert-primary {
+  background-color: var(--primary01);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] .alert-success {
+  background-color: rgba(var(--success-rgb), 0.1);
+  border-color: rgb(var(--success-rgb));
+  color: rgb(var(--success-rgb));
+}
+
+[data-theme-mode=dark] .alert-danger {
+  background-color: rgba(var(--danger-rgb), 0.1);
+  border-color: rgb(var(--danger-rgb));
+  color: rgb(var(--danger-rgb));
+}
+
+[data-theme-mode=dark] .alert-warning {
+  background-color: rgba(var(--warning-rgb), 0.1);
+  border-color: rgb(var(--warning-rgb));
+  color: rgb(var(--warning-rgb));
+}
+
+[data-theme-mode=dark] .alert-info {
+  background-color: rgba(var(--info-rgb), 0.1);
+  border-color: rgb(var(--info-rgb));
+  color: rgb(var(--info-rgb));
+}
+
+/* Charts - Additional dark mode styles */
+[data-theme-mode=dark] .apexcharts-legend-text {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .apexcharts-datalabel {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .apexcharts-canvas .apexcharts-title-text {
+  fill: var(--default-text-color) !important;
+}
+
+/* Tooltips - Dark mode styles */
+[data-theme-mode=dark] .tooltip .tooltip-inner {
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #fff;
+}
+
+/* Popovers - Dark mode styles */
+[data-theme-mode=dark] .popover {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .popover-header {
+  background-color: rgb(var(--light-rgb));
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .popover-body {
+  color: var(--default-text-color);
+}
+
+/* Accordion - Dark mode styles */
+[data-theme-mode=dark] .accordion-item {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+}
+
+[data-theme-mode=dark] .accordion-button {
+  background-color: var(--custom-white);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .accordion-button:not(.collapsed) {
+  background-color: rgb(var(--light-rgb));
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .accordion-button:focus {
+  border-color: var(--primary05);
+  box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25);
+}
+
+[data-theme-mode=dark] .accordion-body {
+  background-color: var(--custom-white);
+  color: var(--default-text-color);
+}
+
+/* Navs/Tabs - Dark mode styles */
+[data-theme-mode=dark] .nav-link {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .nav-link:hover,
+[data-theme-mode=dark] .nav-link:focus {
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] .nav-tabs .nav-link.active {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] .nav-tabs {
+  border-color: var(--default-border);
+}
+
+[data-theme-mode=dark] .nav-tabs .nav-link:hover {
+  border-color: var(--default-border);
+}
+
+/* Offcanvas - Dark mode styles */
+[data-theme-mode=dark] .offcanvas {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .offcanvas-header {
+  border-color: var(--default-border);
+}
+
+[data-theme-mode=dark] .offcanvas-body {
+  color: var(--default-text-color);
+}
+
+/* Toast - Dark mode styles */
+[data-theme-mode=dark] .toast {
+  background-color: var(--custom-white);
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .toast-header {
+  background-color: rgb(var(--light-rgb));
+  border-color: var(--default-border);
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .toast-body {
+  color: var(--default-text-color);
+}
+
+/* ============================================
+   Sidebar Dark Mode Styles - From xintra
+   ============================================ */
+
+/* Sidebar Menu Items - Text Colors */
+[data-theme-mode=dark] .app-sidebar .side-menu__item {
+  color: var(--menu-prime-color);
+}
+
+[data-theme-mode=dark] .app-sidebar .side-menu__item.active {
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] .app-sidebar .side-menu__item.active .side-menu__label,
+[data-theme-mode=dark] .app-sidebar .side-menu__item.active .side-menu__angle {
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] .app-sidebar .side-menu__item.active .side-menu__icon {
+  color: var(--menu-prime-color);
+}
+
+/* Sidebar Hover States */
+[data-theme-mode=dark] .app-sidebar .side-menu__item:hover {
+  background-color: var(--list-hover-focus-bg);
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] .app-sidebar .side-menu__item:hover .side-menu__icon,
+[data-theme-mode=dark] .app-sidebar .side-menu__item:hover .side-menu__label,
+[data-theme-mode=dark] .app-sidebar .side-menu__item:hover .side-menu__angle {
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] .app-sidebar .slide-menu.child1 .side-menu__item:hover,
+[data-theme-mode=dark] .app-sidebar .slide-menu.child2 .side-menu__item:hover,
+[data-theme-mode=dark] .app-sidebar .slide-menu.child3 .side-menu__item:hover {
+  color: var(--primary-color);
+}
+
+/* Sidebar Labels and Icons */
+[data-theme-mode=dark] .app-sidebar .side-menu__label {
+  color: var(--menu-prime-color);
+}
+
+[data-theme-mode=dark] .app-sidebar .side-menu__icon {
+  color: var(--menu-prime-color);
+}
+
+[data-theme-mode=dark] .app-sidebar .slide__category {
+  color: var(--menu-prime-color);
+}
+
+/* Sidebar Icons in Minimized State - Dark Mode */
+[data-theme-mode=dark][data-nav-style=icon-click][data-toggled=icon-click-closed] .app-sidebar .side-menu__icon,
+[data-theme-mode=dark][data-nav-style=icon-hover][data-toggled=icon-hover-closed] .app-sidebar .side-menu__icon {
+  color: var(--menu-prime-color);
+}
+
+[data-theme-mode=dark][data-nav-style=icon-click][data-toggled=icon-click-closed] .app-sidebar .side-menu__item.active .side-menu__icon,
+[data-theme-mode=dark][data-nav-style=icon-hover][data-toggled=icon-hover-closed] .app-sidebar .side-menu__item.active .side-menu__icon {
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark][data-nav-style=icon-click][data-toggled=icon-click-closed] .app-sidebar .side-menu__item:hover .side-menu__icon,
+[data-theme-mode=dark][data-nav-style=icon-hover][data-toggled=icon-hover-closed] .app-sidebar .side-menu__item:hover .side-menu__icon {
+  color: var(--primary-color);
+}
+
+/* Sidebar Badges in Dark Mode */
+[data-theme-mode=dark] .app-sidebar .side-menu__item .badge {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+/* Text Colors - General Dark Mode - COMPREHENSIVE OVERRIDE */
+[data-theme-mode=dark] {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] * {
+  color: inherit;
+}
+
+[data-theme-mode=dark] body,
+[data-theme-mode=dark] p,
+[data-theme-mode=dark] span,
+[data-theme-mode=dark] div,
+[data-theme-mode=dark] section,
+[data-theme-mode=dark] article,
+[data-theme-mode=dark] aside,
+[data-theme-mode=dark] main,
+[data-theme-mode=dark] footer,
+[data-theme-mode=dark] header,
+[data-theme-mode=dark] nav {
+  color: var(--default-text-color) !important;
+}
+
+/* Force text color on all elements - highest priority */
+[data-theme-mode=dark] body *:not(i):not(button):not(.btn):not(input):not(textarea):not(select):not(a):not(.badge) {
+  color: var(--default-text-color) !important;
+}
+
+/* Override any inline styles or other color definitions */
+[data-theme-mode=dark] [style*="color"]:not([style*="background"]):not([style*="border"]) {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .text-muted,
+[data-theme-mode=dark] [class*="text-muted"],
+[data-theme-mode=dark] small,
+[data-theme-mode=dark] .small {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .text-primary {
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .text-secondary {
+  color: rgb(var(--secondary-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-success {
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-danger {
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-warning {
+  color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-info {
+  color: rgb(var(--info-rgb)) !important;
+}
+
+/* Headings in Dark Mode - FORCE */
+[data-theme-mode=dark] h1,
+[data-theme-mode=dark] h2,
+[data-theme-mode=dark] h3,
+[data-theme-mode=dark] h4,
+[data-theme-mode=dark] h5,
+[data-theme-mode=dark] h6,
+[data-theme-mode=dark] .h1,
+[data-theme-mode=dark] .h2,
+[data-theme-mode=dark] .h3,
+[data-theme-mode=dark] .h4,
+[data-theme-mode=dark] .h5,
+[data-theme-mode=dark] .h6 {
+  color: var(--default-text-color) !important;
+}
+
+/* Force headings even with text-* classes */
+[data-theme-mode=dark] h1.text-primary,
+[data-theme-mode=dark] h2.text-primary,
+[data-theme-mode=dark] h3.text-primary,
+[data-theme-mode=dark] h4.text-primary,
+[data-theme-mode=dark] h5.text-primary,
+[data-theme-mode=dark] h6.text-primary {
+  color: var(--primary-color) !important;
+}
+
+/* Links in Dark Mode */
+[data-theme-mode=dark] a {
+  color: var(--primary-color);
+}
+
+[data-theme-mode=dark] a:hover {
+  color: var(--primary-color);
+  opacity: 0.8;
+}
+
+[data-theme-mode=dark] a.text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] a.text-muted:hover {
+  color: var(--default-text-color) !important;
+}
+
+/* COMPREHENSIVE TEXT COLOR FIX - Override everything */
+[data-theme-mode=dark] .app-content *:not(button):not(.btn):not(input):not(textarea):not(select):not(a):not(.badge):not(i):not(svg) {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .app-content .text-muted,
+[data-theme-mode=dark] .app-content small,
+[data-theme-mode=dark] .app-content .small {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .main-content *:not(button):not(.btn):not(input):not(textarea):not(select):not(a):not(.badge):not(i):not(svg) {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .main-content .text-muted,
+[data-theme-mode=dark] .main-content small,
+[data-theme-mode=dark] .main-content .small {
+  color: var(--text-muted) !important;
+}
+
+/* Override for container-fluid */
+[data-theme-mode=dark] .container-fluid *:not(button):not(.btn):not(input):not(textarea):not(select):not(a):not(.badge):not(i):not(svg) {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .container-fluid .text-muted,
+[data-theme-mode=dark] .container-fluid small,
+[data-theme-mode=dark] .container-fluid .small {
+  color: var(--text-muted) !important;
+}
+
+/* Specific overrides for common classes that might have inline colors */
+[data-theme-mode=dark] .mb-0,
+[data-theme-mode=dark] .mb-1,
+[data-theme-mode=dark] .mb-2,
+[data-theme-mode=dark] .mb-3,
+[data-theme-mode=dark] .mb-4,
+[data-theme-mode=dark] .mt-1,
+[data-theme-mode=dark] .mt-2,
+[data-theme-mode=dark] .mt-3,
+[data-theme-mode=dark] .mt-4,
+[data-theme-mode=dark] .py-4,
+[data-theme-mode=dark] .py-5,
+[data-theme-mode=dark] .px-2,
+[data-theme-mode=dark] .px-3,
+[data-theme-mode=dark] .p-2,
+[data-theme-mode=dark] .p-3,
+[data-theme-mode=dark] .p-4 {
+  color: inherit !important;
+}
+
+/* Card Body and Card Header - Dark Mode Text Colors */
+[data-theme-mode=dark] .card-body {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .card-header {
+  color: var(--default-text-color);
+  border-color: var(--default-border);
+}
+
+[data-theme-mode=dark] .card-title {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .card-text {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .card-footer {
+  color: var(--default-text-color);
+  border-color: var(--default-border);
+}
+
+/* All Cards - Ensure text is visible */
+[data-theme-mode=dark] .card,
+[data-theme-mode=dark] .card.custom-card {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .card * {
+  color: inherit;
+}
+
+/* Override for specific elements inside cards */
+[data-theme-mode=dark] .card .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .card .text-primary {
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .card .text-success {
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .card .text-warning {
+  color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .card .text-danger {
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .card .text-info {
+  color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .card .text-secondary {
+  color: rgb(var(--secondary-rgb)) !important;
+}
+
+/* Paragraphs and spans inside cards */
+[data-theme-mode=dark] .card p {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .card p.text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .card span {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .card h1,
+[data-theme-mode=dark] .card h2,
+[data-theme-mode=dark] .card h3,
+[data-theme-mode=dark] .card h4,
+[data-theme-mode=dark] .card h5,
+[data-theme-mode=dark] .card h6 {
+  color: var(--default-text-color);
+}
+
+/* Small text and labels */
+[data-theme-mode=dark] .card small,
+[data-theme-mode=dark] .card .small {
+  color: var(--text-muted);
+}
+
+[data-theme-mode=dark] .card label {
+  color: var(--default-text-color);
+}
+
+/* Ensure all card variants have proper dark mode colors */
+[data-theme-mode=dark] .card.bg-primary,
+[data-theme-mode=dark] .card.bg-success,
+[data-theme-mode=dark] .card.bg-warning,
+[data-theme-mode=dark] .card.bg-danger,
+[data-theme-mode=dark] .card.bg-info,
+[data-theme-mode=dark] .card.bg-secondary {
+  color: #fff;
+}
+
+[data-theme-mode=dark] .card.bg-primary *,
+[data-theme-mode=dark] .card.bg-success *,
+[data-theme-mode=dark] .card.bg-warning *,
+[data-theme-mode=dark] .card.bg-danger *,
+[data-theme-mode=dark] .card.bg-info *,
+[data-theme-mode=dark] .card.bg-secondary * {
+  color: #fff;
+}
+
+/* Card with transparent backgrounds */
+[data-theme-mode=dark] .card.bg-primary-transparent,
+[data-theme-mode=dark] .card.bg-success-transparent,
+[data-theme-mode=dark] .card.bg-warning-transparent,
+[data-theme-mode=dark] .card.bg-danger-transparent,
+[data-theme-mode=dark] .card.bg-info-transparent {
+  color: var(--default-text-color);
+}
+
+/* All text elements in cards - comprehensive */
+[data-theme-mode=dark] .card div,
+[data-theme-mode=dark] .card section,
+[data-theme-mode=dark] .card article {
+  color: inherit;
+}
+
+/* Fix for cards without custom-card class */
+[data-theme-mode=dark] .card:not(.custom-card) {
+  background-color: var(--custom-white) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card:not(.custom-card) .card-body {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card:not(.custom-card) .card-header {
+  background-color: rgb(var(--light-rgb)) !important;
+  color: var(--default-text-color) !important;
+  border-color: var(--default-border) !important;
+}
+
+/* Statistics widgets and dashboard cards */
+[data-theme-mode=dark] .statistics-widget,
+[data-theme-mode=dark] .widget-card,
+[data-theme-mode=dark] .stat-card {
+  background-color: var(--custom-white) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .statistics-widget *,
+[data-theme-mode=dark] .widget-card *,
+[data-theme-mode=dark] .stat-card * {
+  color: inherit;
+}
+
+[data-theme-mode=dark] .statistics-widget .text-muted,
+[data-theme-mode=dark] .widget-card .text-muted,
+[data-theme-mode=dark] .stat-card .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Override inline styles from class-admin-dashboard-widgets.php */
+[data-theme-mode=dark] .card.custom-card.crm-card[style*="background"] {
+  background: rgb(var(--body-bg-rgb)) !important;
+  color: var(--default-text-color) !important;
+}
+
+/* Force dark mode colors for all cards - high specificity */
+[data-theme-mode=dark] .row .card.custom-card.crm-card {
+  background-color: rgb(var(--body-bg-rgb)) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .row .card.custom-card.crm-card .card-body {
+  background-color: transparent !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .row .card.custom-card.crm-card .card-body * {
+  color: inherit;
+}
+
+[data-theme-mode=dark] .row .card.custom-card.crm-card .card-body .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .row .card.custom-card.crm-card .card-body h4 {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .row .card.custom-card.crm-card .card-body p {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .row .card.custom-card.crm-card .card-body span {
+  color: var(--default-text-color) !important;
+}
+
+/* Ensure overflow-hidden cards are styled correctly */
+[data-theme-mode=dark] .card.overflow-hidden,
+[data-theme-mode=dark] .card.custom-card.overflow-hidden,
+[data-theme-mode=dark] .card.custom-card.crm-card.overflow-hidden {
+  background-color: rgb(var(--body-bg-rgb)) !important;
+  color: var(--default-text-color) !important;
+}
+
+/* All col-* containing cards */
+[data-theme-mode=dark] [class*="col-"] .card.custom-card.crm-card {
+  background-color: rgb(var(--body-bg-rgb)) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] [class*="col-"] .card.custom-card.crm-card * {
+  color: inherit;
+}
+
+[data-theme-mode=dark] [class*="col-"] .card.custom-card.crm-card .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] [class*="col-"] .card.custom-card.crm-card h4 {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] [class*="col-"] .card.custom-card.crm-card p {
+  color: var(--text-muted) !important;
+}
+
+/* ============================================
+   Dashboard Home Page - Complete Dark Mode Fixes
+   ============================================ */
+
+/* Quick Action Cards - bg-success-transparent and bg-info-transparent */
+[data-theme-mode=dark] .card.bg-success-transparent,
+[data-theme-mode=dark] .card-body.bg-success-transparent {
+  background-color: rgba(var(--success-rgb), 0.1) !important;
+  border-color: rgba(var(--success-rgb), 0.3) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card.bg-info-transparent,
+[data-theme-mode=dark] .card-body.bg-info-transparent {
+  background-color: rgba(var(--info-rgb), 0.1) !important;
+  border-color: rgba(var(--info-rgb), 0.3) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card.bg-success-transparent h5,
+[data-theme-mode=dark] .card-body.bg-success-transparent h5,
+[data-theme-mode=dark] .card.bg-info-transparent h5,
+[data-theme-mode=dark] .card-body.bg-info-transparent h5 {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card.bg-success-transparent .text-muted,
+[data-theme-mode=dark] .card-body.bg-success-transparent .text-muted,
+[data-theme-mode=dark] .card.bg-info-transparent .text-muted,
+[data-theme-mode=dark] .card-body.bg-info-transparent .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Light Buttons - btn-primary-light, btn-success-light, btn-info-light */
+[data-theme-mode=dark] .btn-primary-light {
+  background-color: rgba(var(--primary-rgb), 0.1) !important;
+  border-color: rgba(var(--primary-rgb), 0.3) !important;
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .btn-primary-light:hover,
+[data-theme-mode=dark] .btn-primary-light:focus,
+[data-theme-mode=dark] .btn-primary-light:active {
+  background-color: rgba(var(--primary-rgb), 0.2) !important;
+  border-color: rgba(var(--primary-rgb), 0.4) !important;
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .btn-success-light {
+  background-color: rgba(var(--success-rgb), 0.1) !important;
+  border-color: rgba(var(--success-rgb), 0.3) !important;
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .btn-success-light:hover,
+[data-theme-mode=dark] .btn-success-light:focus,
+[data-theme-mode=dark] .btn-success-light:active {
+  background-color: rgba(var(--success-rgb), 0.2) !important;
+  border-color: rgba(var(--success-rgb), 0.4) !important;
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .btn-info-light {
+  background-color: rgba(var(--info-rgb), 0.1) !important;
+  border-color: rgba(var(--info-rgb), 0.3) !important;
+  color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .btn-info-light:hover,
+[data-theme-mode=dark] .btn-info-light:focus,
+[data-theme-mode=dark] .btn-info-light:active {
+  background-color: rgba(var(--info-rgb), 0.2) !important;
+  border-color: rgba(var(--info-rgb), 0.4) !important;
+  color: rgb(var(--info-rgb)) !important;
+}
+
+/* Table Light Header */
+[data-theme-mode=dark] .table-light {
+  background-color: rgb(var(--light-rgb)) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .table-light th {
+  background-color: rgb(var(--light-rgb)) !important;
+  color: var(--default-text-color) !important;
+  border-color: var(--default-border) !important;
+}
+
+[data-theme-mode=dark] .table-light td {
+  background-color: transparent !important;
+  color: var(--default-text-color) !important;
+  border-color: var(--default-border) !important;
+}
+
+/* Table Hover Effects */
+[data-theme-mode=dark] .table-hover tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .table-hover tbody tr:hover td {
+  color: var(--default-text-color) !important;
+}
+
+/* Table Body Rows */
+[data-theme-mode=dark] .table tbody tr {
+  border-color: var(--default-border) !important;
+}
+
+[data-theme-mode=dark] .table tbody tr td {
+  color: var(--default-text-color) !important;
+  border-color: var(--default-border) !important;
+}
+
+[data-theme-mode=dark] .table tbody tr td strong {
+  color: var(--default-text-color) !important;
+}
+
+/* Badges with transparent backgrounds */
+[data-theme-mode=dark] .badge.bg-primary-transparent {
+  background-color: rgba(var(--primary-rgb), 0.15) !important;
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .badge.bg-success-transparent {
+  background-color: rgba(var(--success-rgb), 0.15) !important;
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .badge.bg-warning-transparent {
+  background-color: rgba(var(--warning-rgb), 0.15) !important;
+  color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .badge.bg-danger-transparent {
+  background-color: rgba(var(--danger-rgb), 0.15) !important;
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .badge.bg-info-transparent {
+  background-color: rgba(var(--info-rgb), 0.15) !important;
+  color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .badge.bg-secondary-transparent {
+  background-color: rgba(var(--secondary-rgb), 0.15) !important;
+  color: rgb(var(--secondary-rgb)) !important;
+}
+
+/* Page Header and Breadcrumbs */
+[data-theme-mode=dark] .page-header-breadcrumb {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .page-title {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .breadcrumb {
+  background-color: transparent !important;
+}
+
+[data-theme-mode=dark] .breadcrumb-item a {
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .breadcrumb-item.active {
+  color: var(--text-muted) !important;
+}
+
+/* Empty States */
+[data-theme-mode=dark] .text-center.py-5 {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .text-center.py-5 h6 {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .text-center.py-5 .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .avatar.bg-secondary-transparent {
+  background-color: rgba(var(--secondary-rgb), 0.15) !important;
+}
+
+[data-theme-mode=dark] .avatar.bg-secondary-transparent i {
+  color: var(--text-muted) !important;
+}
+
+/* Chart Container */
+[data-theme-mode=dark] .maneli-chart-container {
+  background-color: transparent;
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .maneli-chart-container canvas {
+  background-color: transparent;
+}
+
+/* Card Headers with Icons */
+[data-theme-mode=dark] .card-header .card-title {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .card-header .card-title i {
+  color: var(--primary-color) !important;
+}
+
+/* Border Colors for Cards */
+[data-theme-mode=dark] .card.border-success {
+  border-color: rgba(var(--success-rgb), 0.3) !important;
+}
+
+[data-theme-mode=dark] .card.border-info {
+  border-color: rgba(var(--info-rgb), 0.3) !important;
+}
+
+/* Avatar with rounded backgrounds */
+[data-theme-mode=dark] .avatar.bg-primary,
+[data-theme-mode=dark] .avatar.bg-success,
+[data-theme-mode=dark] .avatar.bg-warning,
+[data-theme-mode=dark] .avatar.bg-danger,
+[data-theme-mode=dark] .avatar.bg-info {
+  color: #fff !important;
+}
+
+[data-theme-mode=dark] .avatar.bg-primary i,
+[data-theme-mode=dark] .avatar.bg-success i,
+[data-theme-mode=dark] .avatar.bg-warning i,
+[data-theme-mode=dark] .avatar.bg-danger i,
+[data-theme-mode=dark] .avatar.bg-info i {
+  color: #fff !important;
+}
+
+/* Text Color Classes in Dark Mode */
+[data-theme-mode=dark] .text-warning {
+  color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-success {
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-danger {
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-info {
+  color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-primary {
+  color: var(--primary-color) !important;
+}
+
+/* P-2 containers with borders and backgrounds */
+[data-theme-mode=dark] .p-2.bg-primary-transparent,
+[data-theme-mode=dark] .p-2.bg-success-transparent,
+[data-theme-mode=dark] .p-2.bg-warning-transparent,
+[data-theme-mode=dark] .p-2.bg-danger-transparent,
+[data-theme-mode=dark] .p-2.bg-info-transparent {
+  background-color: rgba(var(--primary-rgb), 0.1) !important;
+  border-color: rgba(var(--primary-rgb), 0.2) !important;
+}
+
+[data-theme-mode=dark] .p-2.bg-success-transparent {
+  background-color: rgba(var(--success-rgb), 0.1) !important;
+  border-color: rgba(var(--success-rgb), 0.2) !important;
+}
+
+[data-theme-mode=dark] .p-2.bg-warning-transparent {
+  background-color: rgba(var(--warning-rgb), 0.1) !important;
+  border-color: rgba(var(--warning-rgb), 0.2) !important;
+}
+
+[data-theme-mode=dark] .p-2.bg-danger-transparent {
+  background-color: rgba(var(--danger-rgb), 0.1) !important;
+  border-color: rgba(var(--danger-rgb), 0.2) !important;
+}
+
+[data-theme-mode=dark] .p-2.bg-info-transparent {
+  background-color: rgba(var(--info-rgb), 0.1) !important;
+  border-color: rgba(var(--info-rgb), 0.2) !important;
+}
+
+/* Button Lists and Icon Buttons */
+[data-theme-mode=dark] .btn-list {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .btn-icon {
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .btn-icon:hover {
+  background-color: rgba(var(--primary-rgb), 0.1) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Font Size and Weight Classes */
+[data-theme-mode=dark] .fs-12,
+[data-theme-mode=dark] .fs-14,
+[data-theme-mode=dark] .fs-18,
+[data-theme-mode=dark] .fs-20,
+[data-theme-mode=dark] .fs-24,
+[data-theme-mode=dark] .fs-40 {
+  color: inherit;
+}
+
+[data-theme-mode=dark] .fw-medium,
+[data-theme-mode=dark] .fw-semibold {
+  color: inherit;
+}
+
+/* Sidebar Stats Card */
+[data-theme-mode=dark] .card.custom-card .d-flex.gap-3 {
+  color: var(--default-text-color);
+}
+
+[data-theme-mode=dark] .card.custom-card .fs-12.fw-medium.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Popular Products List */
+[data-theme-mode=dark] .list-group-item {
+  background-color: transparent !important;
+  border-color: var(--default-border) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .list-group-item:hover {
+  background-color: var(--list-hover-focus-bg) !important;
+  color: var(--default-text-color) !important;
+}
+
+[data-theme-mode=dark] .list-group-item .badge {
+  background-color: rgba(var(--primary-rgb), 0.15) !important;
+  color: var(--primary-color) !important;
+}
+
+/* Today's Stats Card */
+[data-theme-mode=dark] .card-body.p-4 {
+  background-color: transparent !important;
+  color: var(--default-text-color);
+}
+
+/* Chart.js Dark Mode Support */
+[data-theme-mode=dark] canvas {
+  filter: brightness(0.9) contrast(1.1);
+}
+
+/* Container Fluid */
+[data-theme-mode=dark] .container-fluid {
+  background-color: transparent;
+  color: var(--default-text-color);
+}
+
+/* All Row Elements */
+[data-theme-mode=dark] .row {
+  color: inherit;
+}
+
+/* Col Elements */
+[data-theme-mode=dark] [class*="col-"] {
+  color: inherit;
+}
+
+/* MB and MT Utilities with Text */
+[data-theme-mode=dark] .mb-0,
+[data-theme-mode=dark] .mb-1,
+[data-theme-mode=dark] .mb-2,
+[data-theme-mode=dark] .mb-3,
+[data-theme-mode=dark] .mb-4,
+[data-theme-mode=dark] .mt-1,
+[data-theme-mode=dark] .mt-2 {
+  color: inherit;
+}
+
+/* Gap Utilities */
+[data-theme-mode=dark] .gap-2,
+[data-theme-mode=dark] .gap-3 {
+  color: inherit;
+}
+
+/* Flex Fill */
+[data-theme-mode=dark] .flex-fill {
+  color: inherit;
+}
+
+/* D-flex Utilities */
+[data-theme-mode=dark] .d-flex {
+  color: inherit;
+}
+
+[data-theme-mode=dark] .d-block {
+  color: inherit;
+}
+
+/* Justify and Align */
+[data-theme-mode=dark] .justify-content-between,
+[data-theme-mode=dark] .align-items-center,
+[data-theme-mode=dark] .align-items-start {
+  color: inherit;
+}
+
+/* Text Nowrap */
+[data-theme-mode=dark] .text-nowrap {
+  color: inherit;
+}
+
+/* Table Responsive */
+[data-theme-mode=dark] .table-responsive {
+  background-color: transparent;
+}
+
+/* Strong Tags */
+[data-theme-mode=dark] strong {
+  color: var(--default-text-color);
+  font-weight: 600;
+}
+
+/* Flex Wrap */
+[data-theme-mode=dark] .flex-wrap {
+  color: inherit;
+}
+
+/* Data Title Attributes in Tables */
+[data-theme-mode=dark] [data-title] {
+  color: var(--default-text-color) !important;
+}
+
+/* ULTIMATE TEXT COLOR FIX - Force on all text elements */
+[data-theme-mode=dark] body {
+  color: var(--default-text-color) !important;
+}
+
+/* GLOBAL TEXT COLOR OVERRIDE - Apply to everything first */
+[data-theme-mode=dark] body,
+[data-theme-mode=dark] body * {
+  color: var(--default-text-color) !important;
+}
+
+/* Then exclude and set specific elements */
+[data-theme-mode=dark] body button,
+[data-theme-mode=dark] body .btn,
+[data-theme-mode=dark] body input:not([type="button"]):not([type="submit"]):not([type="reset"]),
+[data-theme-mode=dark] body textarea,
+[data-theme-mode=dark] body select,
+[data-theme-mode=dark] body a,
+[data-theme-mode=dark] body .badge,
+[data-theme-mode=dark] body i,
+[data-theme-mode=dark] body svg,
+[data-theme-mode=dark] body .text-primary,
+[data-theme-mode=dark] body .text-success,
+[data-theme-mode=dark] body .text-warning,
+[data-theme-mode=dark] body .text-danger,
+[data-theme-mode=dark] body .text-info,
+[data-theme-mode=dark] body .text-secondary,
+[data-theme-mode=dark] body .text-muted,
+[data-theme-mode=dark] body input[type="button"],
+[data-theme-mode=dark] body input[type="submit"],
+[data-theme-mode=dark] body input[type="reset"] {
+  color: inherit !important;
+}
+
+/* Then set text-muted separately */
+[data-theme-mode=dark] body .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Set colored text classes */
+[data-theme-mode=dark] body .text-primary {
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] body .text-success {
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] body .text-warning {
+  color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] body .text-danger {
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] body .text-info {
+  color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] body .text-secondary {
+  color: rgb(var(--secondary-rgb)) !important;
+}
+
+/* ADDITIONAL COMPREHENSIVE FIXES - Override all possible color definitions */
+/* Force color on all text elements with highest specificity */
+[data-theme-mode=dark] html body,
+[data-theme-mode=dark] html body div,
+[data-theme-mode=dark] html body p,
+[data-theme-mode=dark] html body span,
+[data-theme-mode=dark] html body h1,
+[data-theme-mode=dark] html body h2,
+[data-theme-mode=dark] html body h3,
+[data-theme-mode=dark] html body h4,
+[data-theme-mode=dark] html body h5,
+[data-theme-mode=dark] html body h6,
+[data-theme-mode=dark] html body section,
+[data-theme-mode=dark] html body article,
+[data-theme-mode=dark] html body aside,
+[data-theme-mode=dark] html body main,
+[data-theme-mode=dark] html body header,
+[data-theme-mode=dark] html body footer,
+[data-theme-mode=dark] html body nav,
+[data-theme-mode=dark] html body ul,
+[data-theme-mode=dark] html body ol,
+[data-theme-mode=dark] html body li,
+[data-theme-mode=dark] html body td,
+[data-theme-mode=dark] html body th,
+[data-theme-mode=dark] html body label {
+  color: var(--default-text-color) !important;
+}
+
+/* Override inline color styles */
+[data-theme-mode=dark] [style*="color:"] {
+  color: var(--default-text-color) !important;
+}
+
+/* Override Bootstrap default text colors */
+[data-theme-mode=dark] .text-dark,
+[data-theme-mode=dark] .text-black {
+  color: var(--default-text-color) !important;
+}
+
+/* FINAL COMPREHENSIVE TEXT COLOR FIX - Highest Priority */
+/* Set default color on html element first */
+[data-theme-mode=dark] html {
+  color: var(--default-text-color) !important;
+}
+
+/* Apply to body and all descendants */
+[data-theme-mode=dark] html,
+[data-theme-mode=dark] html body {
+  color: var(--default-text-color) !important;
+}
+
+/* Apply to all text elements globally */
+[data-theme-mode=dark] html *:not(button):not(.btn):not(input):not(textarea):not(select):not(a):not(.badge):not(i):not(svg):not(path):not(circle):not(rect):not(line):not(polygon):not(use):not(.text-primary):not(.text-success):not(.text-warning):not(.text-danger):not(.text-info):not(.text-secondary):not(.text-muted) {
+  color: var(--default-text-color) !important;
+}
+
+/* Set text-muted after */
+[data-theme-mode=dark] html .text-muted,
+[data-theme-mode=dark] html small,
+[data-theme-mode=dark] html .small {
+  color: var(--text-muted) !important;
+}
+
+/* Force override any remaining color definitions with inline or computed styles */
+[data-theme-mode=dark] * {
+  color: var(--default-text-color) !important;
+}
+
+/* Then restore colors for interactive elements and colored text classes */
+[data-theme-mode=dark] button,
+[data-theme-mode=dark] .btn,
+[data-theme-mode=dark] input[type="text"],
+[data-theme-mode=dark] input[type="email"],
+[data-theme-mode=dark] input[type="password"],
+[data-theme-mode=dark] input[type="number"],
+[data-theme-mode=dark] input[type="search"],
+[data-theme-mode=dark] input[type="tel"],
+[data-theme-mode=dark] input[type="url"],
+[data-theme-mode=dark] input[type="date"],
+[data-theme-mode=dark] input[type="time"],
+[data-theme-mode=dark] input[type="datetime-local"],
+[data-theme-mode=dark] textarea,
+[data-theme-mode=dark] select,
+[data-theme-mode=dark] a,
+[data-theme-mode=dark] .badge,
+[data-theme-mode=dark] .text-primary,
+[data-theme-mode=dark] .text-success,
+[data-theme-mode=dark] .text-warning,
+[data-theme-mode=dark] .text-danger,
+[data-theme-mode=dark] .text-info,
+[data-theme-mode=dark] .text-secondary,
+[data-theme-mode=dark] .text-muted,
+[data-theme-mode=dark] i,
+[data-theme-mode=dark] svg,
+[data-theme-mode=dark] svg * {
+  color: inherit !important;
+}
+
+/* Now set the specific colors for utility classes */
+[data-theme-mode=dark] .text-muted {
+  color: var(--text-muted) !important;
+}
+
+[data-theme-mode=dark] .text-primary {
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .text-success {
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-warning {
+  color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-danger {
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-info {
+  color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-secondary {
+  color: rgb(var(--secondary-rgb)) !important;
+}
+
+/* Force input and textarea text color */
+[data-theme-mode=dark] input[type="text"],
+[data-theme-mode=dark] input[type="email"],
+[data-theme-mode=dark] input[type="password"],
+[data-theme-mode=dark] input[type="number"],
+[data-theme-mode=dark] input[type="search"],
+[data-theme-mode=dark] input[type="tel"],
+[data-theme-mode=dark] input[type="url"],
+[data-theme-mode=dark] input[type="date"],
+[data-theme-mode=dark] input[type="time"],
+[data-theme-mode=dark] input[type="datetime-local"],
+[data-theme-mode=dark] textarea {
+  color: var(--default-text-color) !important;
+}
+
+/* ============================================
+   ABSOLUTE FINAL FIX - Override EVERYTHING
+   ============================================ */
+/* This must be at the end of the file to ensure highest priority */
+
+[data-theme-mode=dark] {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Apply to ALL elements first */
+[data-theme-mode=dark] * {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Then restore specific elements */
+[data-theme-mode=dark] button,
+[data-theme-mode=dark] .btn,
+[data-theme-mode=dark] input,
+[data-theme-mode=dark] textarea,
+[data-theme-mode=dark] select,
+[data-theme-mode=dark] a,
+[data-theme-mode=dark] .badge,
+[data-theme-mode=dark] i:before,
+[data-theme-mode=dark] i:after,
+[data-theme-mode=dark] svg,
+[data-theme-mode=dark] svg *,
+[data-theme-mode=dark] .text-primary,
+[data-theme-mode=dark] .text-success,
+[data-theme-mode=dark] .text-warning,
+[data-theme-mode=dark] .text-danger,
+[data-theme-mode=dark] .text-info,
+[data-theme-mode=dark] .text-secondary,
+[data-theme-mode=dark] .text-muted,
+[data-theme-mode=dark] .btn-primary,
+[data-theme-mode=dark] .btn-success,
+[data-theme-mode=dark] .btn-warning,
+[data-theme-mode=dark] .btn-danger,
+[data-theme-mode=dark] .btn-info,
+[data-theme-mode=dark] .btn-secondary {
+  color: inherit !important;
+}
+
+/* Set text-muted */
+[data-theme-mode=dark] .text-muted,
+[data-theme-mode=dark] small,
+[data-theme-mode=dark] .small,
+[data-theme-mode=dark] .fs-12.text-muted,
+[data-theme-mode=dark] .fs-11.text-muted {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Set colored text classes */
+[data-theme-mode=dark] .text-primary {
+  color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .text-success {
+  color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-warning {
+  color: rgb(var(--warning-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-danger {
+  color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-info {
+  color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-secondary {
+  color: rgb(var(--secondary-rgb)) !important;
 }
