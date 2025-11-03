@@ -82,6 +82,10 @@
     color: #d63638;
 }
 
+[data-theme-mode=dark] .maneli-text-danger {
+    color: #f87171;
+}
+
 .maneli-text-center {
     text-align: center;
 }
@@ -120,6 +124,12 @@
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
+}
+
+[data-theme-mode=dark] .maneli-price-disclaimer {
+    color: var(--text-muted);
+    border-top-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 /* ========================================
@@ -162,6 +172,12 @@
     color: #6c757d;
 }
 
+[data-theme-mode=dark] .maneli-placeholder-image {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+}
+
 .maneli-placeholder-image i {
     font-size: 40px;
 }
@@ -199,6 +215,10 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 9999;
+}
+
+[data-theme-mode=dark] .maneli-loading-overlay {
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 .maneli-loading-overlay.maneli-visible {

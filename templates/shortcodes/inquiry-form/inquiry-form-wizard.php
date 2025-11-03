@@ -98,10 +98,27 @@ if (is_user_logged_in()) {
     if ($car_id && $car_id > 0) {
         $product = wc_get_product($car_id);
         if ($product) {
-            $down_payment = get_user_meta($user_id, 'maneli_inquiry_down_payment', true);
-            $term_months = get_user_meta($user_id, 'maneli_inquiry_term_months', true);
-            $total_price = get_user_meta($user_id, 'maneli_inquiry_total_price', true);
-            $installment_amount = get_user_meta($user_id, 'maneli_inquiry_installment', true);
+            // Get values and ensure they are clean integers/strings (not concatenated)
+            $down_payment_raw = get_user_meta($user_id, 'maneli_inquiry_down_payment', true);
+            $term_months_raw = get_user_meta($user_id, 'maneli_inquiry_term_months', true);
+            $total_price_raw = get_user_meta($user_id, 'maneli_inquiry_total_price', true);
+            $installment_amount_raw = get_user_meta($user_id, 'maneli_inquiry_installment', true);
+            
+            // Clean and convert to proper types
+            // For down_payment and installment_amount: remove any non-numeric chars except digits
+            $down_payment = is_numeric($down_payment_raw) ? (int)$down_payment_raw : (int)preg_replace('/[^\d]/', '', (string)$down_payment_raw);
+            $term_months = is_numeric($term_months_raw) ? (int)$term_months_raw : (int)preg_replace('/[^\d]/', '', (string)$term_months_raw);
+            $total_price = is_numeric($total_price_raw) ? (int)$total_price_raw : (int)preg_replace('/[^\d]/', '', (string)$total_price_raw);
+            $installment_amount = is_numeric($installment_amount_raw) ? (int)$installment_amount_raw : (int)preg_replace('/[^\d]/', '', (string)$installment_amount_raw);
+            
+            // Debug: Log values read from user meta
+            error_log('Maneli Debug: Reading user meta for step 3:');
+            error_log('  User ID: ' . $user_id);
+            error_log('  Car ID: ' . $car_id);
+            error_log('  Down Payment Raw: ' . $down_payment_raw . ' -> Cleaned: ' . $down_payment);
+            error_log('  Term Months Raw: ' . $term_months_raw . ' -> Cleaned: ' . $term_months);
+            error_log('  Total Price Raw: ' . $total_price_raw . ' -> Cleaned: ' . $total_price);
+            error_log('  Installment Raw: ' . $installment_amount_raw . ' -> Cleaned: ' . $installment_amount);
             
             $selected_car_data = [
                 'car_id' => $car_id,

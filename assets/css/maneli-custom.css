@@ -11,6 +11,10 @@
     align-items: center;
 }
 
+[data-theme-mode=dark] .authentication-background {
+    background: linear-gradient(135deg, #4c5fd5 0%, #6a3a8f 100%);
+}
+
 /* Custom Dashboard Styles */
 .maneli-dashboard {
     min-height: 100vh;
@@ -21,6 +25,10 @@
     padding: 1.5rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+}
+
+[data-theme-mode=dark] .maneli-card-stat {
+    background: linear-gradient(135deg, #4c5fd5 0%, #6a3a8f 100%);
 }
 
 .maneli-card-stat .stat-value {
@@ -53,11 +61,24 @@
     color: #d97706;
 }
 
+[data-theme-mode=dark] .status-indicator.status-pending,
+[data-theme-mode=dark] .status-indicator.status-new {
+    background-color: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
+}
+
 .status-indicator.status-user_confirmed,
 .status-indicator.status-approved,
 .status-indicator.status-completed {
     background-color: #d1fae5;
     color: #059669;
+}
+
+[data-theme-mode=dark] .status-indicator.status-user_confirmed,
+[data-theme-mode=dark] .status-indicator.status-approved,
+[data-theme-mode=dark] .status-indicator.status-completed {
+    background-color: rgba(5, 150, 105, 0.2);
+    color: #34d399;
 }
 
 .status-indicator.status-rejected,
@@ -66,9 +87,20 @@
     color: #dc2626;
 }
 
+[data-theme-mode=dark] .status-indicator.status-rejected,
+[data-theme-mode=dark] .status-indicator.status-failed {
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #f87171;
+}
+
 .status-indicator.status-more_docs {
     background-color: #dbeafe;
     color: #2563eb;
+}
+
+[data-theme-mode=dark] .status-indicator.status-more_docs {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
 }
 
 .status-indicator.status-in_progress,
@@ -77,10 +109,21 @@
     color: #4f46e5;
 }
 
+[data-theme-mode=dark] .status-indicator.status-in_progress,
+[data-theme-mode=dark] .status-indicator.status-referred {
+    background-color: rgba(79, 70, 229, 0.2);
+    color: #818cf8;
+}
+
 /* Cash Inquiry Status Colors */
 .status-indicator.status-awaiting_downpayment {
     background-color: #fef3c7;
     color: #d97706;
+}
+
+[data-theme-mode=dark] .status-indicator.status-awaiting_downpayment {
+    background-color: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
 }
 
 .status-indicator.status-downpayment_received {
@@ -88,9 +131,19 @@
     color: #2563eb;
 }
 
+[data-theme-mode=dark] .status-indicator.status-downpayment_received {
+    background-color: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+}
+
 .status-indicator.status-meeting_scheduled {
     background-color: #e0e7ff;
     color: #4f46e5;
+}
+
+[data-theme-mode=dark] .status-indicator.status-meeting_scheduled {
+    background-color: rgba(79, 70, 229, 0.2);
+    color: #818cf8;
 }
 
 .status-indicator.status-follow_up_scheduled {
@@ -98,10 +151,20 @@
     color: #d97706;
 }
 
+[data-theme-mode=dark] .status-indicator.status-follow_up_scheduled {
+    background-color: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
+}
+
 /* Tracking Status Colors */
 .status-indicator.status-follow_up {
     background-color: #fef3c7;
     color: #d97706;
+}
+
+[data-theme-mode=dark] .status-indicator.status-follow_up {
+    background-color: rgba(217, 119, 6, 0.2);
+    color: #fbbf24;
 }
 
 /* Assigned Expert Name Style - Colored */
@@ -116,6 +179,12 @@
     font-size: 12px;
     font-weight: 500;
     white-space: nowrap;
+}
+
+[data-theme-mode=dark] .maneli-expert-name,
+[data-theme-mode=dark] .assigned-expert-name {
+    background-color: rgba(79, 70, 229, 0.2);
+    color: #818cf8;
 }
 
 /* Loading States */
@@ -337,6 +406,12 @@
     background: #fff !important;
 }
 
+[data-theme-mode=dark] .card.custom-card.crm-card {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    background: rgb(var(--body-bg-rgb)) !important;
+}
+
 .card.custom-card.crm-card::before {
     content: '' !important;
     position: absolute !important;
@@ -354,6 +429,11 @@
     transform: translateY(-4px) !important;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
     border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 .card.custom-card.crm-card:hover::before {
@@ -390,8 +470,16 @@
     color: #1f2937 !important;
 }
 
+[data-theme-mode=dark] .card.custom-card.crm-card h4 {
+    color: var(--default-text-color) !important;
+}
+
 .card.custom-card.crm-card:hover h4 {
     color: #5e72e4 !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card:hover h4 {
+    color: var(--primary-color) !important;
 }
 
 .card.custom-card.crm-card .badge {

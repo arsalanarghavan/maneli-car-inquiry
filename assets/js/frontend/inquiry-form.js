@@ -296,9 +296,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const pagination = document.getElementById('confirm_car_pagination');
         const searchInput = document.getElementById('confirm_car_search');
         const filterBtn = document.getElementById('confirm_car_filter_btn');
-        if (!catalog || !pagination) return;
+        // Only catalog is required, pagination is optional
+        if (!catalog) {
+            console.log('Confirm car catalog: catalog element not found');
+            return;
+        }
 
         function fetchCatalog(page=1){
+            console.log('🔵 fetchCatalog called with page:', page);
             const params = new URLSearchParams();
             params.append('action', 'maneli_confirm_car_catalog');
             const shared = (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) ? window.maneliInquiryForm.nonces.confirm_catalog : '';
@@ -312,23 +317,86 @@ document.addEventListener('DOMContentLoaded', function() {
             if (catSel && catSel.value) params.append('category', catSel.value);
 
             const ajaxUrl = (window.maneliInquiryForm && maneliInquiryForm.ajax_url) ? maneliInquiryForm.ajax_url : (window.ajaxurl || '/wp-admin/admin-ajax.php');
+            
+            console.log('🔵 Sending catalog request:', {
+                ajaxUrl: ajaxUrl,
+                action: 'maneli_confirm_car_catalog',
+                nonce: shared ? shared.substring(0, 10) + '...' : 'MISSING',
+                page: page,
+                maneliInquiryForm: window.maneliInquiryForm
+            });
+            
             fetch(ajaxUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                 body: params.toString()
-            }).then(r=>r.json()).then(res=>{
-                if (!res || !res.success) return;
-                catalog.innerHTML = res.data.html || '';
-                pagination.innerHTML = res.data.pagination_html || '';
-                // Hook clicks on pagination links
-                pagination.querySelectorAll('a').forEach(a=>{
-                    a.addEventListener('click', function(e){
-                        e.preventDefault();
-                        const m = this.href.match(/paged=(\d+)/);
-                        const next = m ? parseInt(m[1], 10) : 1;
-                        fetchCatalog(next);
+            }).then(r=>{
+                console.log('🔵 Catalog response status:', r.status, r.statusText);
+                if (!r.ok) {
+                    throw new Error('HTTP error! status: ' + r.status);
+                }
+                return r.json();
+            }).then(res=>{
+                console.log('🔵 Catalog response data:', res);
+                if (!res || !res.success) {
+                    console.error('❌ Catalog fetch failed:', res);
+                    if (res && res.data && res.data.message) {
+                        console.error('Error message:', res.data.message);
+                    }
+                    // Show empty state or error message
+                    if (catalog) {
+                        catalog.innerHTML = '<div class="col-12"><div class="alert alert-warning">' + 
+                            (res && res.data && res.data.message ? res.data.message : 'Failed to load catalog. Please refresh the page.') + 
+                            '</div></div>';
+                    }
+                    return;
+                }
+                
+                const html = res.data.html || '';
+                const paginationHtml = res.data.pagination_html || '';
+                
+                console.log('🔵 Catalog HTML length:', html.length, 'Pagination HTML length:', paginationHtml.length);
+                
+                if (catalog) {
+                    catalog.innerHTML = html;
+                    const cards = catalog.querySelectorAll('.selectable-car');
+                    console.log('✅ Catalog HTML inserted, cards count:', cards.length);
+                    
+                    // Debug: Check if cards are visible
+                    if (cards.length > 0) {
+                        const firstCard = cards[0];
+                        const computedStyle = window.getComputedStyle(firstCard);
+                        console.log('🔵 First card visibility check:', {
+                            display: computedStyle.display,
+                            visibility: computedStyle.visibility,
+                            opacity: computedStyle.opacity,
+                            width: computedStyle.width,
+                            height: computedStyle.height,
+                            offsetParent: firstCard.offsetParent !== null,
+                            element: firstCard
+                        });
+                    } else {
+                        console.warn('⚠️ No cards found after inserting HTML');
+                    }
+                } else {
+                    console.error('❌ Catalog element not found!');
+                }
+                
+                if (pagination && paginationHtml) {
+                    pagination.innerHTML = paginationHtml;
+                    console.log('✅ Pagination HTML inserted');
+                    // Hook clicks on pagination links
+                    pagination.querySelectorAll('a').forEach(a=>{
+                        a.addEventListener('click', function(e){
+                            e.preventDefault();
+                            const m = this.href.match(/paged=(\d+)/);
+                            const next = m ? parseInt(m[1], 10) : 1;
+                            fetchCatalog(next);
+                        });
                     });
-                });
+                } else if (pagination) {
+                    console.log('⚠ Pagination element exists but no pagination HTML received');
+                }
                 
                 // Hook clicks on product cards to select/replace car
                 catalog.querySelectorAll('.selectable-car').forEach(card=>{
@@ -569,11 +637,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                 });
+            }).catch(err=>{
+                console.error('❌ Error fetching catalog:', err);
+                console.error('Error details:', {
+                    message: err.message,
+                    stack: err.stack,
+                    ajaxUrl: ajaxUrl,
+                    params: params.toString()
+                });
+                if (catalog) {
+                    catalog.innerHTML = '<div class="col-12"><div class="alert alert-danger">خطا در بارگذاری کاتالوگ. لطفاً صفحه را refresh کنید.<br><small>' + err.message + '</small></div></div>';
+                }
             });
         }
 
         if (filterBtn) filterBtn.addEventListener('click', ()=>fetchCatalog(1));
         if (searchInput) searchInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); fetchCatalog(1);} });
+        
+        // Initialize catalog on page load
+        console.log('Initializing confirm car catalog...');
         fetchCatalog(1);
     })();
 
@@ -616,9 +698,11 @@ document.addEventListener('DOMContentLoaded', function() {
     let isUpdatingCards = false;
     
     function updateCarInfoCards(carData) {
+        console.log('🔵 updateCarInfoCards called with:', carData);
+        
         // Prevent multiple simultaneous updates
         if (isUpdatingCards) {
-            console.warn('updateCarInfoCards: Already updating, skipping...');
+            console.warn('⚠️ updateCarInfoCards: Already updating, skipping...');
             return;
         }
         
@@ -627,10 +711,19 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Find the data row with car information
             const dataRow = document.querySelector('[data-down-payment]');
-            if (!dataRow || !carData) {
-                console.log('updateCarInfoCards: dataRow or carData not found', { dataRow, carData });
+            console.log('🔵 dataRow found:', dataRow ? 'YES' : 'NO');
+            if (!dataRow) {
+                console.error('❌ updateCarInfoCards: dataRow not found! Searching for [data-down-payment]...');
+                const allDataRows = document.querySelectorAll('[data-down-payment]');
+                console.error('❌ Found', allDataRows.length, 'elements with [data-down-payment]');
                 return;
             }
+            if (!carData) {
+                console.error('❌ updateCarInfoCards: carData is missing!', carData);
+                return;
+            }
+            
+            console.log('🔵 dataRow found, carData:', carData);
             
             // Update data attributes
             if (carData.down_payment !== undefined) {
@@ -652,58 +745,107 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Update displayed values - completely replace content
+            // Strategy: Find strong element directly and replace ALL its text content
+            
             // Down Payment (first col-md-6)
             const downPaymentBox = dataRow.querySelector('.col-md-6:first-child .bg-success-transparent');
+            console.log('🔵 Down payment box found:', downPaymentBox ? 'YES' : 'NO');
+            console.log('🔵 carData.down_payment:', carData.down_payment);
+            
             if (downPaymentBox && carData.down_payment !== undefined) {
-                const downPaymentStrong = downPaymentBox.querySelector('strong.fs-16.text-success');
-                if (downPaymentStrong) {
-                    // Get current content for comparison
-                    const currentText = downPaymentStrong.textContent || downPaymentStrong.innerText || '';
-                    const newText = formatPersianNumber(carData.down_payment) + ' تومان';
-                    
-                    // Only update if different
-                    if (currentText !== newText) {
-                        // Completely replace: clear and set new
-                        downPaymentStrong.replaceChildren(document.createTextNode(newText));
-                        console.log('✓ Down payment updated:', currentText, '→', newText);
-                    }
-                } else {
-                    console.warn('⚠ Down payment strong element not found in:', downPaymentBox);
+                // Try multiple selectors to find the strong element
+                let downPaymentStrong = downPaymentBox.querySelector('strong.fs-16.text-success');
+                if (!downPaymentStrong) {
+                    downPaymentStrong = downPaymentBox.querySelector('strong.text-success');
                 }
+                if (!downPaymentStrong) {
+                    downPaymentStrong = downPaymentBox.querySelector('strong');
+                }
+                
+                console.log('🔵 Down payment strong found:', downPaymentStrong ? 'YES' : 'NO');
+                if (downPaymentStrong) {
+                    const oldText = downPaymentStrong.textContent;
+                    const newText = formatPersianNumber(carData.down_payment) + ' تومان';
+                    console.log('🔵 Down payment - Old:', oldText, 'New:', newText);
+                    // Force complete replacement by clearing and setting
+                    downPaymentStrong.textContent = '';
+                    downPaymentStrong.textContent = newText;
+                    console.log('✅ Down payment updated to:', downPaymentStrong.textContent);
+                } else {
+                    console.error('❌ Down payment strong element not found in:', downPaymentBox);
+                    console.error('❌ Down payment box HTML:', downPaymentBox.innerHTML);
+                }
+            } else {
+                console.error('❌ Down payment box or carData.down_payment missing:', {
+                    downPaymentBox: !!downPaymentBox,
+                    down_payment: carData.down_payment
+                });
             }
             
             // Term Months (second col-md-6)
             const termMonthsBox = dataRow.querySelector('.col-md-6:nth-child(2) .bg-info-transparent');
+            console.log('🔵 Term months box found:', termMonthsBox ? 'YES' : 'NO');
+            console.log('🔵 carData.term_months:', carData.term_months);
+            
             if (termMonthsBox && carData.term_months !== undefined) {
-                const termMonthsStrong = termMonthsBox.querySelector('strong.fs-16.text-info');
-                if (termMonthsStrong) {
-                    const currentText = termMonthsStrong.textContent || termMonthsStrong.innerText || '';
-                    const newText = carData.term_months.toString() + ' ماه';
-                    
-                    if (currentText !== newText) {
-                        termMonthsStrong.replaceChildren(document.createTextNode(newText));
-                        console.log('✓ Term months updated:', currentText, '→', newText);
-                    }
-                } else {
-                    console.warn('⚠ Term months strong element not found in:', termMonthsBox);
+                let termMonthsStrong = termMonthsBox.querySelector('strong.fs-16.text-info');
+                if (!termMonthsStrong) {
+                    termMonthsStrong = termMonthsBox.querySelector('strong.text-info');
                 }
+                if (!termMonthsStrong) {
+                    termMonthsStrong = termMonthsBox.querySelector('strong');
+                }
+                
+                console.log('🔵 Term months strong found:', termMonthsStrong ? 'YES' : 'NO');
+                if (termMonthsStrong) {
+                    const oldText = termMonthsStrong.textContent;
+                    const newText = carData.term_months.toString() + ' ماه';
+                    console.log('🔵 Term months - Old:', oldText, 'New:', newText);
+                    termMonthsStrong.textContent = '';
+                    termMonthsStrong.textContent = newText;
+                    console.log('✅ Term months updated to:', termMonthsStrong.textContent);
+                } else {
+                    console.error('❌ Term months strong element not found in:', termMonthsBox);
+                    console.error('❌ Term months box HTML:', termMonthsBox.innerHTML);
+                }
+            } else {
+                console.error('❌ Term months box or carData.term_months missing:', {
+                    termMonthsBox: !!termMonthsBox,
+                    term_months: carData.term_months
+                });
             }
             
             // Installment Amount (col-md-12)
             const installmentBox = dataRow.querySelector('.col-md-12 .bg-primary-transparent');
+            console.log('🔵 Installment box found:', installmentBox ? 'YES' : 'NO');
+            console.log('🔵 carData.installment:', carData.installment);
+            
             if (installmentBox && carData.installment !== undefined) {
-                const installmentStrong = installmentBox.querySelector('strong.fs-18.text-primary');
-                if (installmentStrong) {
-                    const currentText = installmentStrong.textContent || installmentStrong.innerText || '';
-                    const newText = formatPersianNumber(carData.installment) + ' تومان';
-                    
-                    if (currentText !== newText) {
-                        installmentStrong.replaceChildren(document.createTextNode(newText));
-                        console.log('✓ Installment updated:', currentText, '→', newText);
-                    }
-                } else {
-                    console.warn('⚠ Installment strong element not found in:', installmentBox);
+                let installmentStrong = installmentBox.querySelector('strong.fs-18.text-primary');
+                if (!installmentStrong) {
+                    installmentStrong = installmentBox.querySelector('strong.text-primary');
                 }
+                if (!installmentStrong) {
+                    installmentStrong = installmentBox.querySelector('strong');
+                }
+                
+                console.log('🔵 Installment strong found:', installmentStrong ? 'YES' : 'NO');
+                if (installmentStrong) {
+                    const oldText = installmentStrong.textContent;
+                    const newText = formatPersianNumber(carData.installment) + ' تومان';
+                    console.log('🔵 Installment - Old:', oldText, 'New:', newText);
+                    installmentStrong.textContent = '';
+                    installmentStrong.textContent = newText;
+                    console.log('✅ Installment updated to:', installmentStrong.textContent);
+                } else {
+                    console.error('❌ Installment strong element not found in:', installmentBox);
+                    console.error('❌ Installment box HTML:', installmentBox.innerHTML);
+                }
+            } else {
+                console.error('❌ Installment box or carData.installment missing:', {
+                    installmentBox: !!installmentBox,
+                    installment: carData.installment
+                });
             }
             
             console.log('✓ updateCarInfoCards: Completed', carData);
@@ -781,32 +923,89 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (res.data && res.data.car_data) {
                     const carData = res.data.car_data;
                     console.log('🔵 Updating cards with server data:', carData);
-                    updateCarInfoCards(carData);
+                    console.log('🔵 Calling updateCarInfoCards...');
+                    try {
+                        updateCarInfoCards(carData);
+                        console.log('🔵 updateCarInfoCards called successfully');
+                        
+                        // Wait a bit to ensure DOM is updated before reload
+                        setTimeout(() => {
+                            console.log('🔵 DOM update complete, showing success message...');
+                            // Show success message and reload
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    title: successText,
+                                    icon: 'success',
+                                    confirmButtonColor: '#5e72e4',
+                                    timer: 2000,
+                                    timerProgressBar: true
+                                }).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                alert(successText);
+                                window.location.reload();
+                            }
+                        }, 300); // 300ms delay to ensure DOM updates are visible
+                    } catch (err) {
+                        console.error('❌ Error in updateCarInfoCards:', err);
+                        // Even if update fails, show success and reload
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: successText,
+                                icon: 'success',
+                                confirmButtonColor: '#5e72e4',
+                                timer: 2000,
+                                timerProgressBar: true
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            alert(successText);
+                            window.location.reload();
+                        }
+                    }
                 } else {
                     console.warn('⚠ No car_data in response:', res.data);
-                }
-            } else {
-                console.error('❌ AJAX failed:', res);
-                
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: successText,
-                        icon: 'success',
-                        confirmButtonColor: '#5e72e4',
-                        timer: 2000,
-                        timerProgressBar: true
-                    }).then(() => {
+                    console.warn('⚠ Full response:', res);
+                    // Even without car_data, show success and reload (server has saved the data)
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: successText,
+                            icon: 'success',
+                            confirmButtonColor: '#5e72e4',
+                            timer: 2000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        alert(successText);
                         window.location.reload();
-                    });
-                } else {
-                    alert(successText);
-                    window.location.reload();
+                    }
                 }
             } else {
+                // Handle error
+                console.error('❌ AJAX failed:', res);
                 let errorMsg = serverError;
-                if (res && res.data && res.data.message) {
-                    errorMsg = res.data.message;
+                if (res && res.data) {
+                    if (res.data.message) {
+                        errorMsg = res.data.message;
+                    } else if (typeof res.data === 'string') {
+                        errorMsg = res.data;
+                    }
                 }
+                
+                // Check for common error messages and translate them
+                const invalidRequestText = texts.invalid_request || 'Invalid request. Please log in and try again.';
+                if (errorMsg.includes('Invalid request') || errorMsg.includes('nonce') || errorMsg.includes('security') || errorMsg.includes('security token')) {
+                    errorMsg = texts.invalid_request || invalidRequestText;
+                } else if (errorMsg.includes('log in') || errorMsg.includes('Please log in')) {
+                    errorMsg = texts.please_login || 'Please log in to continue.';
+                } else if (errorMsg.includes('Product ID')) {
+                    errorMsg = texts.product_id_required || 'Product ID is required.';
+                }
+                
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         title: errorPrefix,

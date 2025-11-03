@@ -74,6 +74,17 @@
     if (localStorage.xintradarktheme) {
       let html = document.querySelector("html");
       html.setAttribute("data-theme-mode", "dark");
+      // Also set header and menu styles from localStorage if available
+      if (localStorage.xintraHeader) {
+        html.setAttribute("data-header-styles", localStorage.xintraHeader);
+      } else {
+        html.setAttribute("data-header-styles", "dark");
+      }
+      if (localStorage.xintraMenu) {
+        html.setAttribute("data-menu-styles", localStorage.xintraMenu);
+      } else {
+        html.setAttribute("data-menu-styles", "dark");
+      }
     }
     if (localStorage.xintralayout) {
       let html = document.querySelector("html");

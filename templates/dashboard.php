@@ -111,6 +111,41 @@ if (strpos($dashboard_html, $jquery_url) === false && strpos($dashboard_html, 'j
     );
 }
 
+// CRITICAL: Add inline dark mode initialization script in head before page renders
+// This prevents flash of light mode when dark mode is enabled
+$dark_mode_init_script = '<script>
+(function() {
+    // Initialize dark mode immediately before page renders
+    try {
+        if (typeof Storage !== "undefined" && localStorage.getItem("xintradarktheme")) {
+            var html = document.documentElement;
+            if (html) {
+                html.setAttribute("data-theme-mode", "dark");
+                if (localStorage.getItem("xintraHeader")) {
+                    html.setAttribute("data-header-styles", localStorage.getItem("xintraHeader"));
+                } else {
+                    html.setAttribute("data-header-styles", "dark");
+                }
+                if (localStorage.getItem("xintraMenu")) {
+                    html.setAttribute("data-menu-styles", localStorage.getItem("xintraMenu"));
+                } else {
+                    html.setAttribute("data-menu-styles", "dark");
+                }
+            }
+        }
+    } catch(e) {
+        // Silently fail if localStorage is not available
+    }
+})();
+</script>';
+// Insert dark mode init script right after head tag
+$dashboard_html = preg_replace(
+    '/(<head[^>]*>)/i',
+    '$1' . PHP_EOL . '        ' . $dark_mode_init_script . PHP_EOL,
+    $dashboard_html,
+    1
+);
+
 // CRITICAL FIX: Wrap all inline scripts that use jQuery to wait for jQuery to load
 // Replace $(document).ready with safe version that checks for jQuery first
 $dashboard_html = preg_replace_callback(

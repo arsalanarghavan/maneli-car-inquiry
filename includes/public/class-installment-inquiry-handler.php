@@ -290,11 +290,14 @@ class Maneli_Installment_Inquiry_Handler {
                 $img = get_the_post_thumbnail($pid, 'medium');
                 $product = wc_get_product($pid);
                 $price = $product ? $product->get_price() : 0;
-                echo '<div class="product-card selectable-car" data-product-id="' . esc_attr($pid) . '" data-product-price="' . esc_attr($price) . '" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform=\'scale(1.02)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.1)\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'none\';">';
-                echo '<div class="thumb">' . wp_kses_post($img) . '</div>';
-                echo '<div class="title" style="text-align:center; margin-top:8px;">' . esc_html(get_the_title()) . '</div>';
+                // Wrap in col for Bootstrap grid system
+                echo '<div class="col">';
+                echo '<div class="product-card selectable-car border rounded p-3 h-100" data-product-id="' . esc_attr($pid) . '" data-product-price="' . esc_attr($price) . '" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform=\'scale(1.02)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.1)\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'none\';">';
+                echo '<div class="thumb text-center mb-2">' . wp_kses_post($img) . '</div>';
+                echo '<div class="title" style="text-align:center; margin-top:8px; font-weight:500;">' . esc_html(get_the_title()) . '</div>';
                 echo '<div class="text-center mt-2"><small class="text-muted">' . esc_html__('Click to select', 'maneli-car-inquiry') . '</small></div>';
                 echo '</div>';
+                echo '</div>'; // Close col
             }
         }
         $html = ob_get_clean();
@@ -423,12 +426,7 @@ class Maneli_Installment_Inquiry_Handler {
             }
             $min_down_payment = !empty($min_down_payment_raw) ? (int)$min_down_payment_raw : 0;
             
-            // If min_downpayment is not set or is 0, calculate 20% of installment_price as default
-            if ($min_down_payment <= 0 && $installment_price > 0) {
-                $min_down_payment = (int)($installment_price * 0.2);
-            }
-            
-            // Get total price - use POST value if provided (from modal calculator), otherwise use installment_price
+            // Get total price FIRST - use POST value if provided (from modal calculator), otherwise use installment_price
             $total_price_post = sanitize_text_field($_POST['total_price'] ?? 0);
             $total_price_post = (int)preg_replace('/[^\d]/', '', str_replace(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'], ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], $total_price_post));
             
@@ -441,22 +439,54 @@ class Maneli_Installment_Inquiry_Handler {
                 error_log('Maneli Debug: Using product installment_price: ' . $total_price);
             }
             
-            // Calculate max down payment (80% of total_price, not installment_price!)
+            // Recalculate min_down_payment based on total_price (not installment_price!)
+            // If min_downpayment from product meta is not set or is 0, calculate 20% of total_price as default
+            if ($min_down_payment <= 0 && $total_price > 0) {
+                $min_down_payment = (int)($total_price * 0.2);
+                error_log('Maneli Debug: Recalculated min_down_payment from total_price: ' . $min_down_payment);
+            } elseif ($min_down_payment > 0 && $total_price > 0) {
+                // Adjust min_down_payment proportionally if total_price changed
+                // If total_price is different from installment_price, adjust min proportionally
+                if ($installment_price > 0 && $total_price != $installment_price) {
+                    $ratio = $total_price / $installment_price;
+                    $min_down_payment = (int)($min_down_payment * $ratio);
+                    error_log('Maneli Debug: Adjusted min_down_payment by ratio ' . $ratio . ': ' . $min_down_payment);
+                }
+            }
+            
+            // Calculate max down payment (80% of total_price)
             $max_down_payment = (int)($total_price * 0.8);
             
             // Get down payment - use POST value if provided and valid, otherwise use min_down_payment
             $down_payment_post = sanitize_text_field($_POST['down_payment'] ?? 0);
             $down_payment_post = (int)preg_replace('/[^\d]/', '', str_replace(['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'], ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], $down_payment_post));
             
-            error_log('Maneli Debug: Down payment validation - POST: ' . $down_payment_post . ', Min: ' . $min_down_payment . ', Max: ' . $max_down_payment . ', Total Price: ' . $total_price);
+            error_log('Maneli Debug: Down payment validation - POST: ' . $down_payment_post . ', Min: ' . $min_down_payment . ', Max: ' . $max_down_payment . ', Total Price: ' . $total_price . ', Installment Price: ' . $installment_price);
             
-            // Use POST down payment if it's valid (between min and max), otherwise use min
-            if ($down_payment_post >= $min_down_payment && $down_payment_post <= $max_down_payment) {
-                $down_payment = $down_payment_post;
-                error_log('Maneli Debug: Using POST down_payment: ' . $down_payment);
+            // Use POST down payment - be more flexible with validation
+            // If POST value is provided and reasonable (at least 10% of total_price), use it
+            // Otherwise, check if it's in the min-max range
+            if ($down_payment_post > 0) {
+                $min_threshold = (int)($total_price * 0.1); // At least 10% of total price
+                if ($down_payment_post >= $min_threshold && $down_payment_post <= $max_down_payment) {
+                    $down_payment = $down_payment_post;
+                    error_log('Maneli Debug: ✅ Using POST down_payment (passed flexible validation): ' . $down_payment);
+                } elseif ($down_payment_post >= $min_down_payment && $down_payment_post <= $max_down_payment) {
+                    $down_payment = $down_payment_post;
+                    error_log('Maneli Debug: ✅ Using POST down_payment (passed strict validation): ' . $down_payment);
+                } else {
+                    // POST value is outside range - use it anyway if it's at least 10% of total_price
+                    if ($down_payment_post >= $min_threshold) {
+                        $down_payment = $down_payment_post;
+                        error_log('Maneli Debug: ✅ Using POST down_payment (below min but above 10% threshold): ' . $down_payment);
+                    } else {
+                        $down_payment = max($min_down_payment, $min_threshold);
+                        error_log('Maneli Debug: ⚠️ POST down_payment (' . $down_payment_post . ') too small, using: ' . $down_payment);
+                    }
+                }
             } else {
                 $down_payment = $min_down_payment;
-                error_log('Maneli Debug: POST down_payment invalid, using min_down_payment: ' . $down_payment);
+                error_log('Maneli Debug: No POST down_payment, using min_down_payment: ' . $down_payment);
             }
             
             // Get term months - use POST value if provided, otherwise default to 12
@@ -528,8 +558,40 @@ class Maneli_Installment_Inquiry_Handler {
                 'maneli_inquiry_installment'  => $recalculated_installment, // Use server-calculated value
             ];
 
+            error_log('Maneli Debug: Saving user meta:');
+            error_log('  User ID: ' . $user_id);
+            error_log('  Product ID: ' . $product_id);
+            error_log('  Down Payment: ' . $down_payment);
+            error_log('  Term Months: ' . $term_months);
+            error_log('  Total Price: ' . $total_price);
+            error_log('  Installment: ' . $recalculated_installment);
+
             foreach ($meta_to_save as $key => $value) {
-                update_user_meta($user_id, $key, $value);
+                // Ensure value is properly cleaned before saving
+                // Convert to appropriate type
+                if (in_array($key, ['maneli_inquiry_down_payment', 'maneli_inquiry_total_price', 'maneli_inquiry_installment', 'maneli_selected_car_id'])) {
+                    $value = (int)$value;
+                } elseif ($key === 'maneli_inquiry_term_months') {
+                    $value = (int)$value;
+                }
+                
+                // Delete existing meta first to ensure clean replacement (not append)
+                delete_user_meta($user_id, $key);
+                
+                // Now add/update the meta
+                $result = update_user_meta($user_id, $key, $value);
+                error_log('  Saved ' . $key . ' = ' . $value . ' (type: ' . gettype($value) . ', result: ' . ($result !== false ? 'true' : 'false') . ')');
+                
+                // Verify it was saved correctly
+                $saved_value = get_user_meta($user_id, $key, true);
+                error_log('  Retrieved ' . $key . ' = ' . $saved_value . ' (type: ' . gettype($saved_value) . ')');
+                
+                // Compare values (handle type differences)
+                if ((string)$saved_value !== (string)$value && (int)$saved_value !== (int)$value) {
+                    error_log('  ⚠️ WARNING: Value mismatch for ' . $key . ' - Expected: ' . $value . ' (' . gettype($value) . '), Got: ' . $saved_value . ' (' . gettype($saved_value) . ')');
+                } else {
+                    error_log('  ✅ Verified: ' . $key . ' saved correctly');
+                }
             }
 
             error_log('Maneli Debug: Car selection successful for user ' . $user_id . ', product ' . $product_id);
