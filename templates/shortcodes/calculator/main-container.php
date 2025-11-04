@@ -30,13 +30,20 @@ if (!defined('ABSPATH')) {
     
     <div class="tabs-content-wrapper">
 
-        <div id="cash-tab" class="tab-content<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-tab' : ''; ?>">
-            <?php if (isset($is_unavailable) && $is_unavailable): ?>
+        <div id="cash-tab" class="tab-content<?php echo (isset($cash_unavailable) && $cash_unavailable) ? ' unavailable-tab' : ''; ?>">
+            <?php if (isset($cash_unavailable) && $cash_unavailable): ?>
                 <?php 
                 $options = get_option('maneli_inquiry_all_options', []);
-                $unavailable_message = isset($options['unavailable_product_message']) && !empty($options['unavailable_product_message']) 
-                    ? $options['unavailable_product_message'] 
-                    : esc_html__('This product is currently unavailable for purchase.', 'maneli-car-inquiry');
+                // Check if both are unavailable (status unavailable) or just cash
+                if (isset($is_unavailable) && $is_unavailable) {
+                    $unavailable_message = isset($options['unavailable_product_message']) && !empty($options['unavailable_product_message']) 
+                        ? $options['unavailable_product_message'] 
+                        : esc_html__('This product is currently unavailable for purchase.', 'maneli-car-inquiry');
+                } else {
+                    $unavailable_message = isset($options['unavailable_cash_message']) && !empty($options['unavailable_cash_message']) 
+                        ? $options['unavailable_cash_message'] 
+                        : esc_html__('This product is currently unavailable for cash purchase.', 'maneli-car-inquiry');
+                }
                 ?>
                 <div class="unavailable-overlay-message">
                     <div class="unavailable-message-content">
@@ -45,7 +52,9 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
             <?php endif; ?>
-             <form class="loan-calculator-form cash-request-form<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-form' : ''; ?>" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+             <form class="loan-calculator-form cash-request-form<?php echo (isset($cash_unavailable) && $cash_unavailable) ? ' unavailable-form' : ''; ?>" 
+                   method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>"
+                   data-is-unavailable="<?php echo (isset($cash_unavailable) && $cash_unavailable) ? 'true' : 'false'; ?>">
                 <input type="hidden" name="action" value="maneli_submit_cash_inquiry">
                 <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                 <?php wp_nonce_field('maneli_cash_inquiry_nonce'); ?>
@@ -93,7 +102,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <div class="loan-section result-section">
                     <strong><?php esc_html_e('Approximate Price:', 'maneli-car-inquiry'); ?></strong>
-                    <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                    <?php if (isset($cash_unavailable) && $cash_unavailable): ?>
                         <span class="unavailable-text"><?php esc_html_e('ناموجود', 'maneli-car-inquiry'); ?></span>
                     <?php elseif (isset($can_see_prices) && !$can_see_prices): ?>
                         <span class="price-hidden"><?php esc_html_e('-', 'maneli-car-inquiry'); ?></span>
@@ -114,13 +123,20 @@ if (!defined('ABSPATH')) {
             </form>
         </div>
 
-        <div id="installment-tab" class="tab-content active<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-tab' : ''; ?>">
-            <?php if (isset($is_unavailable) && $is_unavailable): ?>
+        <div id="installment-tab" class="tab-content active<?php echo (isset($installment_unavailable) && $installment_unavailable) ? ' unavailable-tab' : ''; ?>">
+            <?php if (isset($installment_unavailable) && $installment_unavailable): ?>
                 <?php 
                 $options = get_option('maneli_inquiry_all_options', []);
-                $unavailable_message = isset($options['unavailable_product_message']) && !empty($options['unavailable_product_message']) 
-                    ? $options['unavailable_product_message'] 
-                    : esc_html__('This product is currently unavailable for installment purchase.', 'maneli-car-inquiry');
+                // Check if both are unavailable (status unavailable) or just installment
+                if (isset($is_unavailable) && $is_unavailable) {
+                    $unavailable_message = isset($options['unavailable_product_message']) && !empty($options['unavailable_product_message']) 
+                        ? $options['unavailable_product_message'] 
+                        : esc_html__('This product is currently unavailable for purchase.', 'maneli-car-inquiry');
+                } else {
+                    $unavailable_message = isset($options['unavailable_installment_message']) && !empty($options['unavailable_installment_message']) 
+                        ? $options['unavailable_installment_message'] 
+                        : esc_html__('This product is currently unavailable for installment purchase.', 'maneli-car-inquiry');
+                }
                 ?>
                 <div class="unavailable-overlay-message">
                     <div class="unavailable-message-content">
@@ -129,7 +145,7 @@ if (!defined('ABSPATH')) {
                     </div>
                 </div>
             <?php endif; ?>
-             <form class="loan-calculator-form<?php echo (isset($is_unavailable) && $is_unavailable) ? ' unavailable-form' : ''; ?>" method="post">
+             <form class="loan-calculator-form<?php echo (isset($installment_unavailable) && $installment_unavailable) ? ' unavailable-form' : ''; ?>" method="post">
                 <input type="hidden" name="product_id" value="<?php echo esc_attr($product->get_id()); ?>">
                 <?php wp_nonce_field('maneli_ajax_nonce'); ?>
                 <div id="loan-calculator" 
@@ -137,7 +153,7 @@ if (!defined('ABSPATH')) {
                      data-min-down="<?php echo esc_attr($min_down_payment ? $min_down_payment : 0); ?>" 
                      data-max-down="<?php echo esc_attr($max_down_payment ? $max_down_payment : ($installment_price * 0.8)); ?>"
                      data-can-see-prices="<?php echo (isset($can_see_prices) && $can_see_prices) ? 'true' : 'false'; ?>"
-                     data-is-unavailable="<?php echo (isset($is_unavailable) && $is_unavailable) ? 'true' : 'false'; ?>">
+                     data-is-unavailable="<?php echo (isset($installment_unavailable) && $installment_unavailable) ? 'true' : 'false'; ?>">
                     <h2 class="loan-title"><?php esc_html_e('Budgeting and Installment Calculation', 'maneli-car-inquiry'); ?></h2>
                     <div class="loan-section">
                         <div class="loan-row">
@@ -148,7 +164,7 @@ if (!defined('ABSPATH')) {
                         <div class="loan-note">
                             <span><?php esc_html_e('Minimum Down Payment:', 'maneli-car-inquiry'); ?></span>
                             <span>
-                                <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                                <?php if (isset($installment_unavailable) && $installment_unavailable): ?>
                                     <span class="unavailable-text"><?php esc_html_e('ناموجود', 'maneli-car-inquiry'); ?></span>
                                 <?php elseif (isset($can_see_prices) && !$can_see_prices): ?>
                                     <span class="price-hidden">-</span>
@@ -179,7 +195,7 @@ if (!defined('ABSPATH')) {
                     </div>
                     <div class="loan-section result-section">
                         <strong><?php esc_html_e('Approximate Installment Amount:', 'maneli-car-inquiry'); ?></strong>
-                        <?php if (isset($is_unavailable) && $is_unavailable): ?>
+                        <?php if (isset($installment_unavailable) && $installment_unavailable): ?>
                             <span class="unavailable-text"><?php esc_html_e('ناموجود', 'maneli-car-inquiry'); ?></span>
                             <span id="installmentAmount" style="display:none;">0</span>
                         <?php elseif (isset($can_see_prices) && !$can_see_prices): ?>

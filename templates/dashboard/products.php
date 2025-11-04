@@ -26,6 +26,7 @@ $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
 $filter_status = isset($_GET['filter_status']) ? sanitize_text_field($_GET['filter_status']) : '';
 $filter_brand = isset($_GET['filter_brand']) ? sanitize_text_field($_GET['filter_brand']) : '';
 $filter_category = isset($_GET['filter_category']) ? absint($_GET['filter_category']) : 0;
+$filter_price = isset($_GET['filter_price']) ? sanitize_text_field($_GET['filter_price']) : '';
 
 // Get products - Include all statuses including disabled products for admin
 // Note: The hooks check for is_admin() OR current_user_can('manage_maneli_inquiries')
@@ -100,6 +101,76 @@ if (!empty($filter_category)) {
         'terms' => $filter_category,
         'operator' => 'IN'
     ];
+}
+
+// Price availability filter
+if (!empty($filter_price)) {
+    if (!isset($query_args['meta_query'])) {
+        $query_args['meta_query'] = [];
+    }
+    
+    switch ($filter_price) {
+        case 'cash_available':
+            // Cash price > 0
+            $query_args['meta_query'][] = [
+                'key' => '_regular_price',
+                'value' => '0',
+                'compare' => '>',
+                'type' => 'NUMERIC'
+            ];
+            break;
+        case 'cash_unavailable':
+            // Cash price = 0 or empty
+            $query_args['meta_query'][] = [
+                'relation' => 'OR',
+                [
+                    'key' => '_regular_price',
+                    'value' => '0',
+                    'compare' => '=',
+                    'type' => 'NUMERIC'
+                ],
+                [
+                    'key' => '_regular_price',
+                    'compare' => 'NOT EXISTS'
+                ],
+                [
+                    'key' => '_regular_price',
+                    'value' => '',
+                    'compare' => '='
+                ]
+            ];
+            break;
+        case 'installment_available':
+            // Installment price > 0
+            $query_args['meta_query'][] = [
+                'key' => 'installment_price',
+                'value' => '0',
+                'compare' => '>',
+                'type' => 'NUMERIC'
+            ];
+            break;
+        case 'installment_unavailable':
+            // Installment price = 0 or empty
+            $query_args['meta_query'][] = [
+                'relation' => 'OR',
+                [
+                    'key' => 'installment_price',
+                    'value' => '0',
+                    'compare' => '=',
+                    'type' => 'NUMERIC'
+                ],
+                [
+                    'key' => 'installment_price',
+                    'compare' => 'NOT EXISTS'
+                ],
+                [
+                    'key' => 'installment_price',
+                    'value' => '',
+                    'compare' => '='
+                ]
+            ];
+            break;
+    }
 }
 
 // Set relation for multiple tax queries
@@ -445,7 +516,7 @@ $product_categories = get_terms([
                             <!-- Filters Row - Full Width in One Line -->
                             <div class="row g-2 align-items-end">
                                 <!-- Status Filter -->
-                                <div class="col-md-3">
+                                <div class="col">
                                     <label for="filter_status" class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
                                     <select name="filter_status" id="filter_status" class="form-control form-select">
                                         <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
@@ -456,7 +527,7 @@ $product_categories = get_terms([
                                 </div>
                                 
                                 <!-- Brand Filter -->
-                                <div class="col-md-3">
+                                <div class="col">
                                     <label for="filter_brand" class="form-label"><?php esc_html_e('Brand', 'maneli-car-inquiry'); ?></label>
                                     <select name="filter_brand" id="filter_brand" class="form-control form-select">
                                         <option value=""><?php esc_html_e('All Brands', 'maneli-car-inquiry'); ?></option>
@@ -472,7 +543,7 @@ $product_categories = get_terms([
                                 </div>
                                 
                                 <!-- Category Filter -->
-                                <div class="col-md-3">
+                                <div class="col">
                                     <label for="filter_category" class="form-label"><?php esc_html_e('Category', 'maneli-car-inquiry'); ?></label>
                                     <select name="filter_category" id="filter_category" class="form-control form-select">
                                         <option value=""><?php esc_html_e('All Categories', 'maneli-car-inquiry'); ?></option>
@@ -487,10 +558,23 @@ $product_categories = get_terms([
                                     </select>
                                 </div>
                                 
+                                <!-- Price Availability Filter -->
+                                <div class="col">
+                                    <label for="filter_price" class="form-label"><?php esc_html_e('Price Availability', 'maneli-car-inquiry'); ?></label>
+                                    <select name="filter_price" id="filter_price" class="form-control form-select">
+                                        <option value=""><?php esc_html_e('All Products', 'maneli-car-inquiry'); ?></option>
+                                        <option value="cash_available" <?php selected($filter_price, 'cash_available'); ?>><?php esc_html_e('Cash Available', 'maneli-car-inquiry'); ?></option>
+                                        <option value="cash_unavailable" <?php selected($filter_price, 'cash_unavailable'); ?>><?php esc_html_e('Cash Unavailable', 'maneli-car-inquiry'); ?></option>
+                                        <option value="installment_available" <?php selected($filter_price, 'installment_available'); ?>><?php esc_html_e('Installment Available', 'maneli-car-inquiry'); ?></option>
+                                        <option value="installment_unavailable" <?php selected($filter_price, 'installment_unavailable'); ?>><?php esc_html_e('Installment Unavailable', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+                                
                                 <!-- Action Buttons -->
-                                <div class="col-md-3">
+                                <div class="col-auto">
+                                    <label class="form-label d-block" style="visibility: hidden;">&nbsp;</label>
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary btn-wave flex-fill">
+                                        <button type="submit" class="btn btn-primary btn-wave">
                                             <i class="la la-filter me-1"></i>
                                             <?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
                                         </button>
@@ -566,6 +650,7 @@ $product_categories = get_terms([
                                         if (!empty($filter_status)) $pagination_args['filter_status'] = $filter_status;
                                         if (!empty($filter_brand)) $pagination_args['filter_brand'] = $filter_brand;
                                         if (!empty($filter_category)) $pagination_args['filter_category'] = $filter_category;
+                                        if (!empty($filter_price)) $pagination_args['filter_price'] = $filter_price;
                                         $pagination_args['paged'] = $paged - 1;
                                         $prev_link = $paged > 1 ? add_query_arg($pagination_args, home_url('/dashboard/products')) : 'javascript:void(0);';
                                         $prev_disabled = $paged <= 1 ? ' disabled' : '';
@@ -583,6 +668,7 @@ $product_categories = get_terms([
                                         if (!empty($filter_status)) $pagination_args['filter_status'] = $filter_status;
                                         if (!empty($filter_brand)) $pagination_args['filter_brand'] = $filter_brand;
                                         if (!empty($filter_category)) $pagination_args['filter_category'] = $filter_category;
+                                        if (!empty($filter_price)) $pagination_args['filter_price'] = $filter_price;
                                         
                                         for ($i = 1; $i <= $max_num_pages; $i++) {
                                             $current_class = ($i == $paged) ? ' active' : '';
@@ -843,8 +929,10 @@ $product_categories = get_terms([
             // Calculate new cursor position
             // Count commas before cursor in original value
             const textBeforeCursor = value.substring(0, cursorPos);
-            const commasBeforeCursor = (textBeforeCursor.match(/,/g) || []).length;
-            const digitsBeforeCursor = textBeforeCursor.replace(/[^\d]/g, '').length;
+            // Convert to English first to correctly count both Persian and English digits
+            const textBeforeCursorEnglish = persianToEnglish(textBeforeCursor);
+            const commasBeforeCursor = (textBeforeCursor.match(/[،,]/g) || []).length;
+            const digitsBeforeCursor = textBeforeCursorEnglish.replace(/[^\d]/g, '').length;
             
             // Find new position in formatted string
             let newCursorPos = 0;

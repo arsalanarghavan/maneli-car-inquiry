@@ -120,10 +120,9 @@
         // Handle cash form submission with AJAX for logged-in users
         const cashForm = document.querySelector('.cash-request-form');
         if (cashForm) {
-            // Check if product is unavailable
+            // Check if cash tab is unavailable (use form's own data attribute, not installment calculator's)
             const cashTab = document.getElementById('cash-tab');
-            const calc = document.getElementById('loan-calculator');
-            const isUnavailable = calc ? (calc.getAttribute('data-is-unavailable') === 'true') : false;
+            const isUnavailable = cashForm.getAttribute('data-is-unavailable') === 'true';
             
             if (isUnavailable) {
                 console.log('Maneli Cash Form: Product unavailable - form disabled');
@@ -182,11 +181,10 @@
                                       maneli_ajax_object.nonce && 
                                       maneli_ajax_object.nonce !== '';
                     
-                    // Check if product is unavailable (prevent submission)
-                    const calc = document.getElementById('loan-calculator');
-                    const isUnavailable = calc ? (calc.getAttribute('data-is-unavailable') === 'true') : false;
+                    // Check if cash tab is unavailable (prevent submission)
+                    const isUnavailable = cashForm.getAttribute('data-is-unavailable') === 'true';
                     if (isUnavailable) {
-                        console.log('Maneli Cash Form: Cannot submit - product unavailable');
+                        console.log('Maneli Cash Form: Cannot submit - cash tab unavailable');
                         alert('این محصول در حال حاضر برای خرید نقدی در دسترس نیست.');
                         return;
                     }

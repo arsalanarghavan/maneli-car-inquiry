@@ -700,6 +700,27 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-info svg-white">
+                                    <i class="la la-sms fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('SMS Credit', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center" id="sms-credit-display">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
+                            </h4>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('SMS', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
         <?php elseif ($is_expert): ?>
             <!-- Expert Dashboard - Personal Performance -->
@@ -1597,6 +1618,64 @@ if ($is_customer) {
         
         jQuery(document).ready(function($) {
             initDailyTrendChart($);
+            
+            // Fetch SMS Credit (only for admin)
+            <?php 
+            // Determine expert filter for admin check
+            $expert_id_for_check = null;
+            if ($is_expert) {
+                $expert_id_for_check = get_current_user_id();
+            }
+            if ($is_admin && !$expert_id_for_check): ?>
+            function fetchSmsCredit() {
+                const creditDisplay = document.getElementById('sms-credit-display');
+                if (!creditDisplay) return;
+                
+                $.ajax({
+                    url: '<?php echo esc_js(admin_url('admin-ajax.php')); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_get_sms_credit',
+                        nonce: '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            const credit = response.data.credit || 0;
+                            const formatted = response.data.formatted || credit;
+                            
+                            // Convert to Persian digits
+                            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                            let persianCredit = String(formatted);
+                            for (let i = 0; i < 10; i++) {
+                                persianCredit = persianCredit.split(englishDigits[i]).join(persianDigits[i]);
+                            }
+                            
+                            // Determine color based on credit amount
+                            let creditClass = 'text-info';
+                            if (credit < 1000) {
+                                creditClass = 'text-danger';
+                            } else if (credit < 5000) {
+                                creditClass = 'text-warning';
+                            }
+                            
+                            creditDisplay.innerHTML = '<span class="' + creditClass + '">' + persianCredit + '</span>';
+                        } else {
+                            creditDisplay.innerHTML = '<span class="text-danger"><?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?></span>';
+                        }
+                    },
+                    error: function() {
+                        const creditDisplay = document.getElementById('sms-credit-display');
+                        if (creditDisplay) {
+                            creditDisplay.innerHTML = '<span class="text-muted"><?php echo esc_js(__('N/A', 'maneli-car-inquiry')); ?></span>';
+                        }
+                    }
+                });
+            }
+            
+            // Fetch SMS credit on page load
+            fetchSmsCredit();
+            <?php endif; ?>
         });
     }
     

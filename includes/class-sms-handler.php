@@ -344,4 +344,127 @@ class Maneli_SMS_Handler {
             return false;
         }
     }
+
+    /**
+     * Gets the SMS credit balance from MeliPayamak panel using REST API.
+     *
+     * @return float|false Credit balance on success, false on failure.
+     */
+    public function get_credit() {
+        $username = $this->options['sms_username'] ?? '';
+        $password = $this->options['sms_password'] ?? '';
+
+        // Validate required credentials
+        if (empty($username) || empty($password)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS Error: Missing required credentials (username or password) for getting credit.');
+            }
+            return false;
+        }
+
+        try {
+            // Use REST API for getCredit (SOAP doesn't support it)
+        // Try different REST API endpoints
+        $rest_urls = [
+            'https://rest.payamak-panel.com/api/SendSMS/GetCredit',
+            'https://api.payamak-panel.com/rest/SendSMS/GetCredit',
+            'https://rest.payamak-panel.com/api/GetCredit',
+        ];
+        
+        $credit_result = null;
+        $last_error = null;
+        
+        foreach ($rest_urls as $rest_url) {
+            try {
+                // Prepare POST data
+                $post_data = [
+                    'username' => $username,
+                    'password' => $password,
+                ];
+                
+                // Make REST API request
+                $response = wp_remote_post($rest_url, [
+                    'body' => $post_data,
+                    'timeout' => 30,
+                    'sslverify' => true,
+                    'headers' => [
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                    ],
+                ]);
+                
+                // Check for errors
+                if (is_wp_error($response)) {
+                    $last_error = $response->get_error_message();
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log('Maneli SMS REST API Error (URL: ' . $rest_url . '): ' . $last_error);
+                    }
+                    continue; // Try next URL
+                }
+                
+                $response_code = wp_remote_retrieve_response_code($response);
+                $response_body = wp_remote_retrieve_body($response);
+                
+                if ($response_code !== 200) {
+                    $last_error = 'HTTP ' . $response_code . ' - ' . $response_body;
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log('Maneli SMS REST API Error (URL: ' . $rest_url . '): ' . $last_error);
+                    }
+                    continue; // Try next URL
+                }
+                
+                // Parse response
+                // The API might return JSON or plain text/number
+                
+                // Try to decode as JSON first
+                $json_data = json_decode($response_body, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($json_data)) {
+                    // Check common JSON response formats
+                    $credit_result = $json_data['Value'] ?? $json_data['value'] ?? $json_data['Credit'] ?? $json_data['credit'] ?? $json_data['result'] ?? $json_data['StrRetStatus'] ?? null;
+                } else {
+                    // If not JSON, treat as plain number
+                    $credit_result = trim($response_body);
+                }
+                
+                // If we got a valid result, break the loop
+                if ($credit_result !== null && $credit_result !== '' && is_numeric($credit_result)) {
+                    break;
+                }
+                
+            } catch (Exception $e) {
+                $last_error = $e->getMessage();
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli SMS REST API Exception (URL: ' . $rest_url . '): ' . $last_error);
+                }
+                continue; // Try next URL
+            }
+        }
+        
+        // Check if we got a valid result
+        if ($credit_result === null || $credit_result === '') {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS API Error: getCredit returned null/empty result after trying all URLs. Last error: ' . $last_error);
+            }
+            return false;
+        }
+        
+        // Convert to float/numeric
+        $credit = is_numeric($credit_result) ? floatval($credit_result) : false;
+        
+        // Check if it's a valid positive number
+        if ($credit === false || $credit < 0) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS API Error: Invalid credit value returned: ' . var_export($credit_result, true) . ' (Type: ' . gettype($credit_result) . ')');
+            }
+            return false;
+        }
+
+        return $credit;
+
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS General Exception (getCredit): ' . $e->getMessage());
+            }
+            return false;
+        }
+    }
 }

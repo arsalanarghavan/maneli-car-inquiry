@@ -88,6 +88,9 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Handlers
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-telegram-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-email-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-shortcode-handler.php';

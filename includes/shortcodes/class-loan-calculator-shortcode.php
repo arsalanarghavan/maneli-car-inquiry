@@ -126,10 +126,28 @@ class Maneli_Loan_Calculator_Shortcode {
         $hide_prices = !empty($options['hide_prices_for_customers']) && $options['hide_prices_for_customers'] == '1';
         $can_see_prices = current_user_can('manage_maneli_inquiries') || !$hide_prices;
         
-        $cash_price = (int)$product->get_regular_price();
+        // Get cash_price - handle empty/null values properly
+        // get_regular_price() can return empty string, null, false, 0, float, int, or formatted string
+        $cash_price_raw = $product->get_regular_price();
+        
+        // Always treat as string first to handle formatting, then convert
+        if ($cash_price_raw === '' || $cash_price_raw === null || $cash_price_raw === false || $cash_price_raw === 0 || $cash_price_raw === '0') {
+            $cash_price = 0;
+        } else {
+            // Convert to string and process formatting
+            $cash_price_str = (string)$cash_price_raw;
+            // Convert Persian digits to English
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $cash_price_str = str_replace($persian_digits, $english_digits, $cash_price_str);
+            // Remove all non-numeric characters (commas, spaces, decimal points, etc.)
+            $cash_price_str = preg_replace('/[^\d]/', '', $cash_price_str);
+            $cash_price = (!empty($cash_price_str) && $cash_price_str !== '0') ? (int)$cash_price_str : 0;
+        }
         
         // Get installment_price - handle both string and integer values from database
         // Convert to integer - remove any formatting (commas, spaces, Persian digits, etc)
+        // IMPORTANT: Don't fallback to cash_price - this allows independent control of cash and installment tabs
         $installment_price_raw = get_post_meta($product_id, 'installment_price', true);
         if (is_string($installment_price_raw) && !empty($installment_price_raw)) {
             // Convert Persian digits to English
@@ -139,10 +157,9 @@ class Maneli_Loan_Calculator_Shortcode {
             // Remove all non-numeric characters
             $installment_price_raw = preg_replace('/[^\d]/', '', $installment_price_raw);
         }
-        $installment_price = !empty($installment_price_raw) ? (int)$installment_price_raw : 0;
-        if (empty($installment_price)) {
-            $installment_price = $cash_price;
-        }
+        // Get installment_price - if not set or empty, keep it as 0 (don't fallback to cash_price)
+        // This allows independent control of cash and installment tabs
+        $installment_price = (!empty($installment_price_raw) && $installment_price_raw !== '0') ? (int)$installment_price_raw : 0;
 
         $car_colors_str = get_post_meta($product_id, '_maneli_car_colors', true);
         $car_colors = !empty($car_colors_str) ? array_map('trim', explode(',', $car_colors_str)) : [];
@@ -167,24 +184,41 @@ class Maneli_Loan_Calculator_Shortcode {
             $min_down_payment = (int)($installment_price * 0.2); // ۲۰٪ پیش‌فرض
         }
 
-        // Determine if product is unavailable
+        // Determine if product is unavailable based on status
         $is_unavailable = ($car_status === 'unavailable');
+        
+        // Check if prices are missing - mark respective tabs as unavailable
+        // Each tab is unavailable if: status is unavailable OR price is 0 or empty
+        // This allows independent control: cash can be available while installment is unavailable and vice versa
+        $cash_unavailable = ($is_unavailable || $cash_price <= 0);
+        $installment_unavailable = ($is_unavailable || $installment_price <= 0);
         
         // Debug: Log availability status for troubleshooting
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("Maneli Calculator: Product ID {$product_id}, is_unavailable: " . ($is_unavailable ? 'true' : 'false'));
+            $cash_price_raw_debug = $product->get_regular_price();
+            error_log("Maneli Calculator: Product ID {$product_id}");
+            error_log("  - cash_price_raw: " . var_export($cash_price_raw_debug, true));
+            error_log("  - cash_price (after processing): {$cash_price}");
+            error_log("  - installment_price_raw: " . var_export(get_post_meta($product_id, 'installment_price', true), true));
+            error_log("  - installment_price (after processing): {$installment_price}");
+            error_log("  - car_status: {$car_status}");
+            error_log("  - is_unavailable: " . ($is_unavailable ? 'true' : 'false'));
+            error_log("  - cash_unavailable: " . ($cash_unavailable ? 'true' : 'false'));
+            error_log("  - installment_unavailable: " . ($installment_unavailable ? 'true' : 'false'));
         }
 
         $template_args = [
-            'product'           => $product,
-            'cash_price'        => $cash_price,
-            'installment_price' => $installment_price,
-            'min_down_payment'  => $min_down_payment,
-            'max_down_payment'  => (int)($installment_price * 0.8), // ۸۰٪ از قیمت کل
-            'car_colors'        => $car_colors,
-            'car_status'        => $car_status,
-            'can_see_prices'    => $can_see_prices,
-            'is_unavailable'    => $is_unavailable,
+            'product'                => $product,
+            'cash_price'             => $cash_price,
+            'installment_price'      => $installment_price,
+            'min_down_payment'       => $min_down_payment,
+            'max_down_payment'       => (int)($installment_price * 0.8), // ۸۰٪ از قیمت کل
+            'car_colors'             => $car_colors,
+            'car_status'             => $car_status,
+            'can_see_prices'         => $can_see_prices,
+            'is_unavailable'         => $is_unavailable,
+            'cash_unavailable'       => $cash_unavailable,
+            'installment_unavailable' => $installment_unavailable,
         ];
         
         // رندر کردن کانتینر اصلی ماشین حساب با تب‌ها و محتوای آن

@@ -1535,9 +1535,10 @@ function toPersianNumber(num) {
             nonce_present: ajaxNonce ? 'Yes (' + ajaxNonce.substring(0, 10) + '...)' : 'No'
         });
         
-        // Load initial list - Check for status query parameter
+        // Load initial list - Check for status and assigned_expert query parameters
         const urlParams = new URLSearchParams(window.location.search);
         const initialStatus = urlParams.get('status') || '';
+        const initialAssignedExpert = urlParams.get('assigned_expert') || '';
         
         // For installment inquiries, if status is 'referred', it's actually a tracking_status
         // Map tracking_status values to appropriate handling
@@ -1561,34 +1562,76 @@ function toPersianNumber(num) {
             $('#status-filter').val(statusParam);
         }
         
+        // Set expert filter if provided in URL
+        if (initialAssignedExpert && $('#expert-filter').length) {
+            $('#expert-filter').val(initialAssignedExpert);
+            // Trigger Select2 update if it's initialized
+            if ($('#expert-filter').hasClass('select2-hidden-accessible')) {
+                $('#expert-filter').trigger('change');
+            }
+            console.log('✓ Set expert filter from URL:', initialAssignedExpert);
+        }
+        
         // Wait a moment for DOM to be ready, then send request
+        // Use fetchInstallmentInquiries if available (for consistency with URL parameter handling)
+        // Wait a bit longer to ensure fetchInstallmentInquiries is defined (it's defined after this function)
         setTimeout(function() {
             // Re-read values from DOM to ensure they're set correctly
             const statusFromDOM = $('#status-filter').val() || statusParam;
             const finalStatusParam = statusFromDOM;
+            const expertFromDOM = $('#expert-filter').val() || initialAssignedExpert;
             
-            const installmentRequestData = {
-                action: 'maneli_filter_inquiries_ajax',
-                nonce: ajaxNonce,
-                _ajax_nonce: ajaxNonce,  // Also send as _ajax_nonce for compatibility
-                page: 1,
-                search: '',
-                status: finalStatusParam,
-                tracking_status: trackingStatusParam,  // Send tracking_status separately
-                sort: $('#inquiry-sort-filter').val() || 'default'
+            // Try to wait for fetchInstallmentInquiries to be defined (max 5 attempts = 500ms)
+            let attempts = 0;
+            const maxAttempts = 5;
+            const checkForFetchFunction = function() {
+                attempts++;
+                if (typeof window.fetchInstallmentInquiries === 'function') {
+                    console.log('✓ Using fetchInstallmentInquiries for initial load');
+                    console.log('✓ Tracking status param:', trackingStatusParam);
+                    console.log('✓ Status param:', statusParam);
+                    // Note: Don't set tracking_status values on the status filter dropdown
+                    // as it's for inquiry_status, not tracking_status
+                    // fetchInstallmentInquiries will read from URL and handle correctly
+                    window.fetchInstallmentInquiries(1);
+                } else if (attempts < maxAttempts) {
+                    // Wait a bit more and try again
+                    setTimeout(checkForFetchFunction, 100);
+                } else {
+                    // Fallback to original method
+                    console.log('⚠ fetchInstallmentInquiries not available after ' + maxAttempts + ' attempts, using original method');
+                    const installmentRequestData = {
+                    action: 'maneli_filter_inquiries_ajax',
+                    nonce: ajaxNonce,
+                    _ajax_nonce: ajaxNonce,  // Also send as _ajax_nonce for compatibility
+                    page: 1,
+                    search: '',
+                    status: finalStatusParam,
+                    tracking_status: trackingStatusParam,  // Send tracking_status separately
+                    expert: expertFromDOM,  // Send expert filter
+                    sort: $('#inquiry-sort-filter').val() || 'default'
+                };
+                
+                console.log('=== AJAX REQUEST DATA (Installment) ===');
+                console.log('URL:', ajaxUrl);
+                console.log('Action:', installmentRequestData.action);
+                console.log('Nonce present:', !!ajaxNonce);
+                console.log('Nonce value (first 10 chars):', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
+                console.log('Full request data:', installmentRequestData);
+                console.log('Initial status from URL:', initialStatus);
+                console.log('Status from DOM:', statusFromDOM);
+                console.log('Tracking status param:', trackingStatusParam);
+                console.log('Initial assigned_expert from URL:', initialAssignedExpert);
+                console.log('Expert from DOM:', expertFromDOM);
+                console.log('Current URL:', window.location.href);
+                console.log('URL Search Params:', window.location.search);
+                
+                    sendInstallmentInquiryRequest(installmentRequestData);
+                }
             };
             
-            console.log('=== AJAX REQUEST DATA (Installment) ===');
-            console.log('URL:', ajaxUrl);
-            console.log('Action:', installmentRequestData.action);
-            console.log('Nonce present:', !!ajaxNonce);
-            console.log('Nonce value (first 10 chars):', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
-            console.log('Full request data:', installmentRequestData);
-            console.log('Initial status from URL:', initialStatus);
-            console.log('Status from DOM:', statusFromDOM);
-            console.log('Tracking status param:', trackingStatusParam);
-            
-            sendInstallmentInquiryRequest(installmentRequestData);
+            // Start checking
+            checkForFetchFunction();
         }, 100);
         
         function sendInstallmentInquiryRequest(installmentRequestData) {
@@ -1706,6 +1749,253 @@ function toPersianNumber(num) {
     
     // Make function globally accessible for template fallback
     window.loadInstallmentInquiriesList = loadInstallmentInquiriesList;
+    
+    // Setup filter handlers for installment inquiries - wait for everything to be ready
+    console.log('Setting up installment inquiry filter handlers...');
+    const installmentFilterFormSetup = $('#maneli-inquiry-filter-form');
+    
+    if (installmentFilterFormSetup.length > 0) {
+        console.log('Installment filter form found, attaching handlers...');
+        const installmentSearchInput = $('#inquiry-search-input');
+        const installmentStatusFilter = $('#status-filter');
+        const installmentExpertFilter = $('#expert-filter');
+        const installmentSortFilter = $('#inquiry-sort-filter');
+        const installmentResetButton = $('#inquiry-reset-filters');
+        const installmentApplyButton = $('#inquiry-apply-filters');
+        const installmentListBody = $('#maneli-inquiry-list-tbody');
+        const installmentPaginationWrapper = $('.maneli-pagination-wrapper');
+        const installmentLoader = $('#inquiry-list-loader');
+        
+        // Store references globally for debugging
+        window.maneliInstallmentInquiryRefs = {
+            searchInput: installmentSearchInput,
+            statusFilter: installmentStatusFilter,
+            expertFilter: installmentExpertFilter,
+            sortFilter: installmentSortFilter,
+            listBody: installmentListBody,
+            paginationWrapper: installmentPaginationWrapper,
+            loader: installmentLoader
+        };
+        
+        // Function to fetch installment inquiries - make it accessible globally
+        window.fetchInstallmentInquiries = function(page = 1) {
+            console.log('=== fetchInstallmentInquiries START ===');
+            console.log('Page:', page);
+            
+            // Use global reference for XHR
+            if (window.maneliInstallmentXhr && window.maneliInstallmentXhr.readyState !== 4) {
+                window.maneliInstallmentXhr.abort();
+            }
+            window.maneliInstallmentXhr = null;
+            
+            // Get references again to ensure they exist
+            const $listBody = $('#maneli-inquiry-list-tbody');
+            const $paginationWrapper = $('.maneli-pagination-wrapper');
+            const $loader = $('#inquiry-list-loader');
+            
+            // Check if maneliInquiryLists is available
+            if (typeof maneliInquiryLists === 'undefined' || !maneliInquiryLists.nonces || !maneliInquiryLists.nonces.inquiry_filter) {
+                console.error('maneliInquiryLists not available in fetchInstallmentInquiries!', typeof maneliInquiryLists);
+                if ($listBody.length) {
+                    $listBody.html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': maneliInquiryLists is not available. Please refresh the page.</td></tr>');
+                }
+                if ($loader.length) $loader.hide();
+                if ($listBody.length) $listBody.css('opacity', 1);
+                if ($paginationWrapper.length) $paginationWrapper.css('opacity', 1);
+                console.log('=== fetchInstallmentInquiries END (error) ===');
+                return;
+            }
+            
+            console.log('maneliInquiryLists OK:', {
+                ajax_url: maneliInquiryLists.ajax_url,
+                has_nonce: !!maneliInquiryLists.nonces.inquiry_filter
+            });
+            
+            if ($loader.length) $loader.show();
+            if ($listBody.length) $listBody.css('opacity', 0.5);
+            if ($paginationWrapper.length) $paginationWrapper.css('opacity', 0.5);
+            
+            const urlObj = new URL(window.location.href);
+            const paramsToRemove = ['inquiry_id', 'installment_inquiry_id', 'paged', 'page'];
+            paramsToRemove.forEach(param => urlObj.searchParams.delete(param));
+            const baseUrl = urlObj.toString();
+            
+            // Read URL parameters first (if any), then fall back to DOM values
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlStatus = urlParams.get('status') || '';
+            const urlExpert = urlParams.get('assigned_expert') || '';
+            
+            // Get current values from DOM (URL params take priority if set)
+            const searchVal = $('#inquiry-search-input').val() || '';
+            let statusVal = urlStatus || $('#status-filter').val() || '';
+            let expertVal = urlExpert || ($('#expert-filter').length ? $('#expert-filter').val() || '' : '');
+            const sortVal = $('#inquiry-sort-filter').val() || 'default';
+            
+            // For installment inquiries, check if status value is a tracking_status
+            // This must be done BEFORE updating DOM, so we can properly separate tracking_status from inquiry_status
+            let statusParam = statusVal;
+            let trackingStatusParam = '';
+            
+            const trackingStatuses = ['new', 'referred', 'in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'cancelled', 'completed', 'rejected'];
+            if (statusVal && trackingStatuses.includes(statusVal)) {
+                trackingStatusParam = statusVal;
+                statusParam = ''; // Don't use inquiry_status for tracking statuses
+                console.log('✓ Detected tracking_status from URL/DOM:', statusVal);
+                // Don't set this on the status filter dropdown (it's for inquiry_status, not tracking_status)
+            } else if (statusVal) {
+                // This is an inquiry_status, not a tracking_status
+                statusParam = statusVal;
+                trackingStatusParam = '';
+                // If URL params exist, update DOM to reflect them
+                if (urlStatus && $('#status-filter').length) {
+                    $('#status-filter').val(urlStatus);
+                }
+            }
+            
+            if (urlExpert && $('#expert-filter').length) {
+                $('#expert-filter').val(urlExpert);
+                expertVal = urlExpert;
+            }
+            
+            console.log('Sending AJAX request for installment inquiries:', {
+                url: maneliInquiryLists.ajax_url,
+                search: searchVal,
+                status: statusParam,
+                tracking_status: trackingStatusParam,
+                expert: expertVal,
+                sort: sortVal,
+                page: page
+            });
+            
+            window.maneliInstallmentXhr = $.ajax({
+                url: maneliInquiryLists.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'maneli_filter_inquiries_ajax',
+                    nonce: maneliInquiryLists.nonces.inquiry_filter,
+                    _ajax_nonce: maneliInquiryLists.nonces.inquiry_filter,
+                    search: searchVal,
+                    status: statusParam,
+                    tracking_status: trackingStatusParam,
+                    expert: expertVal,
+                    sort: sortVal,
+                    page: page,
+                    base_url: baseUrl
+                },
+                success: function(response) {
+                    console.log('AJAX Success Response:', response);
+                    if (response.success && response.data) {
+                        if (response.data.html && response.data.html.trim() !== '') {
+                            if ($listBody.length) {
+                                $listBody.html(response.data.html);
+                                // Update count badge
+                                const rowCount = $listBody.find('tr.crm-contact').length;
+                                $('#inquiry-count-badge').text(toPersianNumber(rowCount));
+                            }
+                        } else {
+                            if ($listBody.length) {
+                                $listBody.html(`<tr><td colspan="7" class="text-center text-muted">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
+                            }
+                            $('#inquiry-count-badge').text('۰');
+                        }
+                        if ($paginationWrapper.length) {
+                            $paginationWrapper.html(response.data.pagination_html || '');
+                        }
+                    } else {
+                        if ($listBody.length) {
+                            $listBody.html('<tr><td colspan="7" class="text-center text-danger">' + (response.data?.message || getText('loading_inquiries_error', 'Error loading list')) + '</td></tr>');
+                        }
+                        $('#inquiry-count-badge').text('۰');
+                    }
+                    console.log('=== fetchInstallmentInquiries END (success) ===');
+                },
+                error: function(xhr, status, error) {
+                    console.error('=== AJAX ERROR ===');
+                    console.error('Status:', status);
+                    console.error('Error:', error);
+                    console.error('Response:', xhr.responseText);
+                    if (status !== 'abort') {
+                        if ($listBody.length) {
+                            $listBody.html('<tr><td colspan="7" class="text-center text-danger">' + getText('server_error', 'Server error. Please try again.') + '</td></tr>');
+                        }
+                    }
+                    console.log('=== fetchInstallmentInquiries END (error) ===');
+                },
+                complete: function() {
+                    if ($loader.length) $loader.hide();
+                    if ($listBody.length) $listBody.css('opacity', 1);
+                    if ($paginationWrapper.length) $paginationWrapper.css('opacity', 1);
+                    const $expertFilter = $('#expert-filter');
+                    if ($expertFilter.length && $expertFilter.is(':visible') && typeof $.fn.select2 !== 'undefined') {
+                        $expertFilter.select2({ width: '100%' });
+                    }
+                }
+            });
+        }
+        
+        // Attach filter handlers for installment inquiries using event delegation for reliability
+        console.log('Attaching event handlers for installment inquiry filters...');
+        
+        // Use document.on for better reliability with current values
+        $(document).off('keyup', '#inquiry-search-input').on('keyup', '#inquiry-search-input', function() {
+            if (window.maneliInstallmentSearchTimeout) {
+                clearTimeout(window.maneliInstallmentSearchTimeout);
+            }
+            window.maneliInstallmentSearchTimeout = setTimeout(function() {
+                console.log('Search input changed, fetching...');
+                if (typeof window.fetchInstallmentInquiries === 'function') {
+                    window.fetchInstallmentInquiries(1);
+                } else {
+                    console.error('fetchInstallmentInquiries function not available!');
+                }
+            }, 500);
+        });
+        
+        $(document).off('click', '#inquiry-reset-filters').on('click', '#inquiry-reset-filters', function(e) {
+            e.preventDefault();
+            console.log('Reset filters clicked');
+            $('#inquiry-search-input').val('');
+            $('#status-filter').val('');
+            if ($('#expert-filter').length) $('#expert-filter').val('');
+            $('#inquiry-sort-filter').val('default');
+            if (typeof window.fetchInstallmentInquiries === 'function') {
+                window.fetchInstallmentInquiries(1);
+            } else {
+                console.error('fetchInstallmentInquiries function not available!');
+            }
+        });
+        
+        $(document).off('click', '#inquiry-apply-filters').on('click', '#inquiry-apply-filters', function(e) {
+            e.preventDefault();
+            console.log('Apply filters clicked');
+            if (typeof window.fetchInstallmentInquiries === 'function') {
+                window.fetchInstallmentInquiries(1);
+            } else {
+                console.error('fetchInstallmentInquiries function not available!');
+            }
+        });
+        
+        // Handle pagination using event delegation
+        $(document).off('click', '.maneli-pagination-wrapper a.page-numbers').on('click', '.maneli-pagination-wrapper a.page-numbers', function(e) {
+            e.preventDefault();
+            console.log('Pagination clicked');
+            const pageUrl = $(this).attr('href');
+            let pageNum = 1;
+            const matches = pageUrl.match(/paged=(\d+)/);
+            if (matches) {
+                pageNum = parseInt(matches[1], 10);
+            }
+            if (typeof window.fetchInstallmentInquiries === 'function') {
+                window.fetchInstallmentInquiries(pageNum);
+            } else {
+                console.error('fetchInstallmentInquiries function not available!');
+            }
+        });
+        
+        console.log('Installment inquiry filter setup complete!');
+    } else {
+        console.warn('Installment filter form not found! (#maneli-inquiry-filter-form)');
+    }
 
     //======================================================================
     //  REPORT PAGE EVENT HANDLERS (for both cash and installment)
@@ -2990,6 +3280,201 @@ function toPersianNumber(num) {
             });
         });
     }
+
+    /**
+     * Handle document approval button
+     */
+    $(document.body).on('click', '.approve-doc-btn', function() {
+        const $btn = $(this);
+        const userId = $btn.data('user-id');
+        const docName = $btn.data('doc-name');
+        const inquiryId = $btn.data('inquiry-id') || 0;
+        
+        Swal.fire({
+            title: getText('approve_document_title', 'Approve Document?'),
+            text: getText('approve_document_confirm', 'Are you sure you want to approve this document?'),
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: getText('yes_approve', 'Yes, Approve'),
+            cancelButtonText: getText('cancel', 'Cancel')
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: maneliInquiryLists.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_approve_customer_document',
+                        security: maneliInquiryLists.nonces.ajax || '',
+                        user_id: userId,
+                        document_name: docName,
+                        inquiry_id: inquiryId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: getText('success', 'Success'),
+                                text: response.data.message || getText('document_approved_success', 'Document approved successfully.'),
+                                icon: 'success'
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: response.data?.message || getText('approve_error', 'Error approving document.'),
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: getText('error', 'Error'),
+                            text: getText('server_error', 'Server error. Please try again.'),
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    });
+    
+    /**
+     * Handle document rejection button with predefined reasons
+     */
+    $(document.body).on('click', '.reject-doc-btn', function() {
+        const $btn = $(this);
+        const userId = $btn.data('user-id');
+        const docName = $btn.data('doc-name');
+        const inquiryId = $btn.data('inquiry-id') || 0;
+        const rejectionReasons = $btn.data('rejection-reasons') || [];
+        
+        let html = '<div class="text-start">';
+        html += '<label class="form-label">' + getText('rejection_reason_label', 'Rejection Reason:') + '</label>';
+        
+        if (rejectionReasons.length > 0) {
+            html += '<select id="swal-rejection-reason" class="form-select mb-3">';
+            html += '<option value="">' + getText('select_reason', 'Select a reason...') + '</option>';
+            rejectionReasons.forEach(function(reason) {
+                html += '<option value="' + $('<div>').text(reason).html() + '">' + $('<div>').text(reason).html() + '</option>';
+            });
+            html += '</select>';
+            html += '<label class="form-label">' + getText('custom_reason_label', 'Or enter custom reason:') + '</label>';
+        }
+        
+        html += '<textarea id="swal-rejection-reason-custom" class="form-control" rows="4" placeholder="' + getText('enter_reason', 'Please enter reason...') + '"></textarea>';
+        html += '</div>';
+        
+        Swal.fire({
+            title: getText('reject_document_title', 'Reject Document?'),
+            html: html,
+            showCancelButton: true,
+            confirmButtonText: getText('yes_reject', 'Yes, Reject'),
+            cancelButtonText: getText('cancel', 'Cancel'),
+            confirmButtonColor: '#dc3545',
+            width: '600px',
+            preConfirm: () => {
+                const selectedReason = $('#swal-rejection-reason').val();
+                const customReason = $('#swal-rejection-reason-custom').val();
+                const finalReason = selectedReason || customReason;
+                
+                if (!finalReason || finalReason.trim().length < 3) {
+                    Swal.showValidationMessage(getText('reason_required_min', 'Please enter or select a rejection reason with at least 3 characters'));
+                    return false;
+                }
+                return finalReason.trim();
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                $.ajax({
+                    url: maneliInquiryLists.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_reject_customer_document',
+                        security: maneliInquiryLists.nonces.ajax || '',
+                        user_id: userId,
+                        document_name: docName,
+                        inquiry_id: inquiryId,
+                        rejection_reason: result.value
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: getText('success', 'Success'),
+                                text: response.data.message || getText('document_rejected_success', 'Document rejected successfully.'),
+                                icon: 'success'
+                            }).then(() => location.reload());
+                        } else {
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: response.data?.message || getText('reject_error', 'Error rejecting document.'),
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: getText('error', 'Error'),
+                            text: getText('server_error', 'Server error. Please try again.'),
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    });
+    
+    /**
+     * Handle document request button
+     */
+    $(document.body).on('click', '.request-doc-btn', function() {
+        const $btn = $(this);
+        const userId = $btn.data('user-id');
+        const docName = $btn.data('doc-name');
+        const inquiryId = $btn.data('inquiry-id') || 0;
+        
+        Swal.fire({
+            title: getText('request_document_title', 'Request Document?'),
+            text: getText('request_document_confirm', 'Send a request to the customer to upload this document?'),
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: getText('yes_request', 'Yes, Request'),
+            cancelButtonText: getText('cancel', 'Cancel')
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: maneliInquiryLists.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_request_customer_document',
+                        security: maneliInquiryLists.nonces.ajax || '',
+                        user_id: userId,
+                        document_name: docName,
+                        inquiry_id: inquiryId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: getText('success', 'Success'),
+                                text: response.data.message || getText('document_request_sent', 'Document request sent to customer successfully.'),
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: response.data?.message || getText('request_error', 'Error sending document request.'),
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: getText('error', 'Error'),
+                            text: getText('server_error', 'Server error. Please try again.'),
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    });
     
     }); // End of document.ready callback
 })(); // End of waitForJQuery function

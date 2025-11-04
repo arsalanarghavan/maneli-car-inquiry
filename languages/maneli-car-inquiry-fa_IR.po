@@ -5542,3 +5542,478 @@ msgstr "محاسبه اقساط"
 
 msgid "Confirm and Replace Car"
 msgstr "تأیید و جایگزینی خودرو"
+
+
+msgid "Note Saved Successfully."
+msgstr "یادداشت با موفقیت ذخیره شد."
+
+
+msgid "Complete Inquiry"
+msgstr "تکمیل استعلام"
+
+
+msgid "Are you sure you want to complete this inquiry?"
+msgstr "آیا مطمئن هستید که می‌خواهید این استعلام را تکمیل کنید؟"
+
+
+msgid "Note (Optional):"
+msgstr "یادداشت (اختیاری):"
+
+
+msgid "Meeting cancelled successfully."
+msgstr "جلسه با موفقیت لغو شد."
+
+
+msgid "Time must be between"
+msgstr "زمان باید بین"
+
+
+msgid "Selected time is outside allowed working hours."
+msgstr "زمان انتخاب شده خارج از ساعات کاری مجاز است."
+
+
+msgid "Meeting scheduled successfully."
+msgstr "جلسه با موفقیت برنامه‌ریزی شد."
+
+
+msgid "Follow-up scheduled successfully."
+msgstr "پیگیری با موفقیت برنامه‌ریزی شد."
+
+
+msgid "Requested Product Price (at time of request)"
+msgstr "قیمت محصول درخواستی (در زمان ثبت درخواست)"
+
+
+msgid "Not Available"
+msgstr "در دسترس نیست"
+
+
+msgid "Customer Documents:"
+msgstr "مستندات مشتری:"
+
+
+msgid "Required Documents"
+msgstr "مستندات مورد نیاز"
+
+
+msgid "SMS Credit"
+msgstr "اعتبار پیامک"
+
+
+msgid "SMS credentials are not configured. Please go to Settings and enter your SMS panel information."
+msgstr "اطلاعات ورود پنل پیامک تنظیم نشده است. لطفاً به تنظیمات بروید و اطلاعات پنل پیامک خود را وارد کنید."
+
+
+msgid "Unable to retrieve SMS credit. Please check your SMS panel settings and credentials."
+msgstr "امکان دریافت اعتبار پیامک وجود ندارد. لطفاً تنظیمات و اطلاعات ورود پنل پیامک خود را بررسی کنید."
+
+
+msgid "Availability"
+msgstr "موجودی"
+
+
+msgid "Unavailable Product Messages"
+msgstr "پیام‌های عدم موجودی محصول"
+
+
+msgid "Configure messages shown to customers when products are unavailable for different purchase methods."
+msgstr "تنظیم پیام‌های نمایش داده شده به مشتریان هنگام عدم موجودی محصول برای روش‌های خرید مختلف."
+
+
+msgid "Installment Unavailable Message"
+msgstr "پیام عدم موجودی اقساطی"
+
+
+msgid "This product is currently unavailable for installment purchase."
+msgstr "در حال حاضر امکان خرید این خودرو میسر نمی‌باشد."
+
+
+msgid "Message shown when installment price is not available (0 or empty)."
+msgstr "پیامی که هنگام عدم موجودی قیمت اقساطی (0 یا خالی) نمایش داده می‌شود."
+
+
+msgid "Cash Unavailable Message"
+msgstr "پیام عدم موجودی نقدی"
+
+
+msgid "This product is currently unavailable for cash purchase."
+msgstr "این محصول در حال حاضر برای خرید نقدی در دسترس نیست."
+
+
+msgid "Message shown when cash price is not available (0 or empty)."
+msgstr "پیامی که هنگام عدم موجودی قیمت نقدی (0 یا خالی) نمایش داده می‌شود."
+
+
+msgid "Product Unavailable Message (Both)"
+msgstr "پیام عدم موجودی محصول (هر دو)"
+
+
+msgid "This product is currently unavailable for purchase."
+msgstr "این محصول در حال حاضر برای خرید در دسترس نیست."
+
+
+msgid "Message shown when product status is set to \"Unavailable\" or both prices are unavailable."
+msgstr "پیامی که هنگام تنظیم وضعیت محصول به \"ناموجود\" یا عدم موجودی هر دو قیمت نمایش داده می‌شود."
+
+
+msgid "Document Rejection Reasons"
+msgstr "دلایل رد مدارک"
+
+msgid "Enter one reason per line. These will be shown as a dropdown list when rejecting a document."
+msgstr "هر دلیل را در یک خط وارد کنید. این دلایل هنگام رد کردن مدرک به صورت لیست کشویی نمایش داده می‌شوند."
+
+msgid "Request Document"
+msgstr "درخواست مدرک"
+
+msgid "No documents have been configured in settings."
+msgstr "هیچ مدرکی در تنظیمات پیکربندی نشده است."
+
+msgid "Select a reason..."
+msgstr "انتخاب دلیل..."
+
+msgid "Or enter custom reason:"
+msgstr "یا وارد کردن دلیل سفارشی:"
+
+msgid "Please enter or select a rejection reason with at least 3 characters"
+msgstr "لطفاً یک دلیل رد انتخاب کنید یا وارد کنید (حداقل 3 کاراکتر)"
+
+msgid "Request Document?"
+msgstr "درخواست مدرک؟"
+
+msgid "Send a request to the customer to upload this document?"
+msgstr "ارسال درخواست به مشتری برای آپلود این مدرک؟"
+
+msgid "Yes, Request"
+msgstr "بله، درخواست کن"
+
+msgid "Document request sent to customer successfully."
+msgstr "درخواست مدرک با موفقیت به مشتری ارسال شد."
+
+msgid "Error approving document."
+msgstr "خطا در تایید مدرک."
+
+msgid "Error rejecting document."
+msgstr "خطا در رد مدرک."
+
+msgid "Error sending document request."
+msgstr "خطا در ارسال درخواست مدرک."
+
+msgid "Please upload the document \"%s\" in your profile."
+msgstr "لطفاً مدرک \"%s\" را در پروفایل خود آپلود کنید."
+
+msgid "Document requested"
+msgstr "مدرک درخواست شده"
+
+msgid "Please upload the document \"%s\"."
+msgstr "لطفاً مدرک \"%s\" را آپلود کنید."
+
+msgid "Price Availability"
+msgstr "وضعیت قیمت"
+
+msgid "Cash Available"
+msgstr "نقدی موجود"
+
+msgid "Cash Unavailable"
+msgstr "نقدی ناموجود"
+
+msgid "Installment Available"
+msgstr "اقساطی موجود"
+
+msgid "Installment Unavailable"
+msgstr "اقساطی ناموجود"
+
+# Notification Center Translations
+msgid "Notification Center"
+msgstr "مرکز اطلاع‌رسانی"
+
+msgid "Total Sent"
+msgstr "ارسال شده"
+
+msgid "Failed"
+msgstr "ناموفق"
+
+msgid "Date From"
+msgstr "از تاریخ"
+
+msgid "Date To"
+msgstr "تا تاریخ"
+
+msgid "Filters"
+msgstr "فیلترها"
+
+msgid "Send Bulk"
+msgstr "ارسال انبوه"
+
+msgid "In-App Notification"
+msgstr "اعلان درون‌برنامه‌ای"
+
+msgid "Notification Logs"
+msgstr "تاریخچه اطلاع‌رسانی"
+
+msgid "Recipient"
+msgstr "گیرنده"
+
+msgid "No notifications found."
+msgstr "اطلاع‌رسانی‌ای یافت نشد."
+
+msgid "Send Bulk Notification"
+msgstr "ارسال اطلاع‌رسانی انبوه"
+
+msgid "Channels"
+msgstr "کانال‌ها"
+
+msgid "Recipients"
+msgstr "گیرندگان"
+
+msgid "All Users"
+msgstr "همه کاربران"
+
+msgid "Customers Only"
+msgstr "فقط مشتریان"
+
+msgid "Experts Only"
+msgstr "فقط کارشناسان"
+
+msgid "Admins Only"
+msgstr "فقط مدیران"
+
+msgid "Or enter custom recipients (phone numbers, emails, or user IDs - one per line)"
+msgstr "یا گیرندگان سفارشی را وارد کنید (شماره تلفن، ایمیل یا شناسه کاربری - هر خط یک مورد)"
+
+msgid "Schedule Notification Dialog"
+msgstr "زمان‌بندی اطلاع‌رسانی"
+
+msgid "Channel"
+msgstr "کانال"
+
+msgid "Scheduled Date & Time"
+msgstr "تاریخ و زمان برنامه‌ریزی شده"
+
+msgid "Notification Scheduled Successfully"
+msgstr "اطلاع‌رسانی با موفقیت زمان‌بندی شد!"
+
+msgid "Notifications sent successfully!"
+msgstr "اطلاع‌رسانی‌ها با موفقیت ارسال شدند!"
+
+msgid "Retry sending this notification?"
+msgstr "تلاش مجدد برای ارسال این اطلاع‌رسانی؟"
+
+msgid "Notification retried successfully!"
+msgstr "اطلاع‌رسانی با موفقیت دوباره ارسال شد!"
+
+msgid "SMS sent successfully!"
+msgstr "پیامک با موفقیت ارسال شد!"
+
+msgid "Failed to send SMS"
+msgstr "ارسال پیامک ناموفق بود"
+
+msgid "Send SMS"
+msgstr "ارسال پیامک"
+
+msgid "Enter your message..."
+msgstr "پیام خود را وارد کنید..."
+
+msgid "Please enter a message"
+msgstr "لطفاً یک پیام وارد کنید"
+
+msgid "Sending..."
+msgstr "در حال ارسال..."
+
+msgid "Please wait"
+msgstr "لطفاً صبر کنید"
+
+msgid "Recipient:"
+msgstr "گیرنده:"
+
+msgid "Message:"
+msgstr "پیام:"
+
+# Settings Translations
+msgid "Meeting Reminders"
+msgstr "یادآوری جلسات"
+
+msgid "Remind Hours Before Meeting"
+msgstr "ساعت قبل از جلسه یادآوری شود"
+
+msgid "Comma-separated hours (e.g., 2,6,24). Reminders will be sent these hours before the meeting."
+msgstr "ساعت‌ها با کاما جدا شده (مثال: 2,6,24). یادآوری‌ها این ساعت‌ها قبل از جلسه ارسال می‌شوند."
+
+msgid "Remind Days Before Meeting"
+msgstr "روز قبل از جلسه یادآوری شود"
+
+msgid "Comma-separated days (e.g., 1,3). Reminders will be sent these days before the meeting."
+msgstr "روزها با کاما جدا شده (مثال: 1,3). یادآوری‌ها این روزها قبل از جلسه ارسال می‌شوند."
+
+msgid "Enable SMS Reminders"
+msgstr "فعال‌سازی یادآوری پیامکی"
+
+msgid "Enable Telegram Reminders"
+msgstr "فعال‌سازی یادآوری تلگرامی"
+
+msgid "Enable Email Reminders"
+msgstr "فعال‌سازی یادآوری ایمیل"
+
+msgid "Enable In-App Notification Reminders"
+msgstr "فعال‌سازی یادآوری اعلان درون‌برنامه‌ای"
+
+msgid "Scheduled SMS"
+msgstr "پیامک زماندار"
+
+msgid "Enable Scheduled SMS"
+msgstr "فعال‌سازی پیامک زماندار"
+
+msgid "Allow scheduling SMS messages for future delivery."
+msgstr "اجازه زمان‌بندی پیامک‌ها برای ارسال در آینده."
+
+msgid "Bulk SMS"
+msgstr "پیامک انبوه"
+
+msgid "Maximum Recipients per Bulk Send"
+msgstr "حداکثر گیرنده در هر ارسال انبوه"
+
+msgid "Maximum number of recipients allowed in a single bulk send operation."
+msgstr "حداکثر تعداد گیرنده مجاز در هر عملیات ارسال انبوه."
+
+msgid "Recipient Filter Options"
+msgstr "گزینه‌های فیلتر گیرنده"
+
+msgid "Allow filtering recipients by user role (customers, experts, admins)."
+msgstr "اجازه فیلتر کردن گیرندگان بر اساس نقش کاربری (مشتریان، کارشناسان، مدیران)."
+
+msgid "Telegram"
+msgstr "تلگرام"
+
+msgid "Telegram Bot Configuration"
+msgstr "تنظیمات ربات تلگرام"
+
+msgid "Bot Token"
+msgstr "توکن ربات"
+
+msgid "Get your bot token from @BotFather on Telegram."
+msgstr "توکن ربات خود را از @BotFather در تلگرام دریافت کنید."
+
+msgid "Default Chat IDs"
+msgstr "شناسه‌های چت پیش‌فرض"
+
+msgid "Comma-separated chat IDs. These will be used for bulk notifications and meeting reminders."
+msgstr "شناسه‌های چت با کاما جدا شده. این‌ها برای اطلاع‌رسانی‌های انبوه و یادآوری جلسات استفاده می‌شوند."
+
+msgid "Telegram Settings"
+msgstr "تنظیمات تلگرام"
+
+msgid "Enable Telegram Notifications"
+msgstr "فعال‌سازی اطلاع‌رسانی تلگرام"
+
+msgid "Email Settings"
+msgstr "تنظیمات ایمیل"
+
+msgid "SMTP Configuration"
+msgstr "تنظیمات SMTP"
+
+msgid "Use SMTP"
+msgstr "استفاده از SMTP"
+
+msgid "If disabled, WordPress default wp_mail will be used."
+msgstr "در صورت غیرفعال بودن، wp_mail پیش‌فرض وردپرس استفاده خواهد شد."
+
+msgid "SMTP Host"
+msgstr "میزبان SMTP"
+
+msgid "e.g., smtp.gmail.com"
+msgstr "مثال: smtp.gmail.com"
+
+msgid "SMTP Port"
+msgstr "پورت SMTP"
+
+msgid "Common ports: 587 (TLS), 465 (SSL)"
+msgstr "پورت‌های رایج: 587 (TLS)، 465 (SSL)"
+
+msgid "SMTP Username"
+msgstr "نام کاربری SMTP"
+
+msgid "SMTP Password"
+msgstr "رمز عبور SMTP"
+
+msgid "Encryption"
+msgstr "رمزنگاری"
+
+msgid "TLS"
+msgstr "TLS"
+
+msgid "SSL"
+msgstr "SSL"
+
+msgid "Email From Settings"
+msgstr "تنظیمات فرستنده ایمیل"
+
+msgid "From Email"
+msgstr "ایمیل فرستنده"
+
+msgid "Default sender email address."
+msgstr "آدرس ایمیل فرستنده پیش‌فرض."
+
+msgid "From Name"
+msgstr "نام فرستنده"
+
+msgid "Default sender name."
+msgstr "نام فرستنده پیش‌فرض."
+
+msgid "Enable Email Notifications"
+msgstr "فعال‌سازی اطلاع‌رسانی ایمیل"
+
+msgid "Channels and message are required."
+msgstr "کانال و پیام الزامی است."
+
+msgid "No recipients found."
+msgstr "گیرنده‌ای یافت نشد."
+
+msgid "Maximum %d recipients allowed. You have %d recipients."
+msgstr "حداکثر %d گیرنده مجاز است. شما %d گیرنده دارید."
+
+msgid "Sent: %d, Failed: %d"
+msgstr "ارسال شده: %d، ناموفق: %d"
+
+msgid "All fields are required."
+msgstr "همه فیلدها الزامی است."
+
+msgid "Scheduled time must be in the future."
+msgstr "زمان برنامه‌ریزی شده باید در آینده باشد."
+
+msgid "Notification scheduled successfully."
+msgstr "اطلاع‌رسانی با موفقیت زمان‌بندی شد."
+
+msgid "Failed to schedule notification."
+msgstr "زمان‌بندی اطلاع‌رسانی ناموفق بود."
+
+msgid "Invalid log ID."
+msgstr "شناسه لاگ نامعتبر است."
+
+msgid "Log entry not found or not failed."
+msgstr "ورودی لاگ یافت نشد یا ناموفق نیست."
+
+msgid "Notification sent successfully."
+msgstr "اطلاع‌رسانی با موفقیت ارسال شد."
+
+msgid "Failed to send notification: "
+msgstr "ارسال اطلاع‌رسانی ناموفق بود: "
+
+msgid "Recipient and message are required."
+msgstr "گیرنده و پیام الزامی است."
+
+msgid "Invalid phone number."
+msgstr "شماره تلفن نامعتبر است."
+
+msgid "SMS sent successfully."
+msgstr "پیامک با موفقیت ارسال شد."
+
+msgid "Failed to send SMS: "
+msgstr "ارسال پیامک ناموفق بود: "
+
+msgid "Meeting Reminder"
+msgstr "یادآوری جلسه"
+
+msgid "Reminder: You have a meeting scheduled for %s. Car: %s"
+msgstr "یادآوری: شما یک جلسه برای %s برنامه‌ریزی کرده‌اید. خودرو: %s"
+
+msgid "Reminder: You have a meeting scheduled for %s (%d days). Car: %s"
+msgstr "یادآوری: شما یک جلسه برای %s (%d روز) برنامه‌ریزی کرده‌اید. خودرو: %s"

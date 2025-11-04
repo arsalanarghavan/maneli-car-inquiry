@@ -88,10 +88,44 @@ class Maneli_Activator {
             KEY type (type)
         ) $charset_collate;";
 
+        // Notification logs table
+        $table_notification_logs = $wpdb->prefix . 'maneli_notification_logs';
+        $sql_notification_logs = "CREATE TABLE IF NOT EXISTS $table_notification_logs (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            type varchar(50) NOT NULL COMMENT 'sms, telegram, email, notification',
+            recipient varchar(255) NOT NULL,
+            message text NOT NULL,
+            status varchar(50) DEFAULT 'pending' COMMENT 'pending, sent, failed',
+            error_message text DEFAULT NULL,
+            scheduled_at datetime DEFAULT NULL,
+            sent_at datetime DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            related_id bigint(20) DEFAULT NULL COMMENT 'ID of related inquiry, user, or other item',
+            user_id bigint(20) DEFAULT NULL COMMENT 'User who triggered the notification',
+            PRIMARY KEY (id),
+            KEY type (type),
+            KEY status (status),
+            KEY recipient (recipient(100)),
+            KEY scheduled_at (scheduled_at),
+            KEY created_at (created_at),
+            KEY related_id (related_id),
+            KEY user_id (user_id)
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_inquiries);
         dbDelta($sql_followups);
         dbDelta($sql_notifications);
+        dbDelta($sql_notification_logs);
+        
+        // Schedule cron jobs
+        if (!wp_next_scheduled('maneli_send_meeting_reminders')) {
+            wp_schedule_event(time(), 'hourly', 'maneli_send_meeting_reminders');
+        }
+        
+        if (!wp_next_scheduled('maneli_process_scheduled_notifications')) {
+            wp_schedule_event(time(), 'hourly', 'maneli_process_scheduled_notifications');
+        }
     }
 
     /**

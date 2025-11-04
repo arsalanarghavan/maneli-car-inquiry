@@ -20,6 +20,7 @@ $status_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($status_key);
 $car_color = get_post_meta($inquiry_id, 'cash_car_color', true);
 $down_payment = get_post_meta($inquiry_id, 'cash_down_payment', true);
 $rejection_reason = get_post_meta($inquiry_id, 'cash_rejection_reason', true);
+$original_product_price = get_post_meta($inquiry_id, 'original_product_price', true);
 $back_link = remove_query_arg('cash_inquiry_id');
 
 // Product data
@@ -144,6 +145,22 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
                                                 }
                                                 ?>
                                             </strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="border rounded p-3 bg-primary-transparent">
+                                            <div class="text-muted fs-12 mb-1">
+                                                <i class="la la-tag me-1"></i>
+                                                <?php esc_html_e('Requested Product Price (at time of request)', 'maneli-car-inquiry'); ?>
+                                            </div>
+                                            <strong class="fs-20 text-primary"><?php 
+                                                if (!empty($original_product_price) && $original_product_price > 0) {
+                                                    echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($original_product_price)) : number_format_i18n($original_product_price);
+                                                    echo ' ' . esc_html__('Toman', 'maneli-car-inquiry');
+                                                } else {
+                                                    esc_html_e('Not Available', 'maneli-car-inquiry');
+                                                }
+                                            ?></strong>
                                         </div>
                                     </div>
                                 </div>

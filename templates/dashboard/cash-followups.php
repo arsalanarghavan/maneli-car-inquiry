@@ -273,6 +273,64 @@ if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
                 </div>
             </div>
             <div class="card-body p-0">
+                <!-- Filter Section -->
+                <div class="p-3 border-bottom">
+                    <form id="maneli-cash-followup-filter-form" onsubmit="return false;">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="la la-search"></i>
+                                    </span>
+                                    <input type="search" id="cash-followup-search-input" class="form-control" placeholder="<?php esc_attr_e('Search by customer name, car name...', 'maneli-car-inquiry'); ?>">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filter Controls - All in one line -->
+                        <div class="row g-2 align-items-end mb-3">
+                            <?php if ($is_admin && !empty($experts)): ?>
+                                <!-- Expert Filter -->
+                                <div class="col">
+                                    <label class="form-label"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
+                                    <select id="cash-followup-expert-filter" class="form-select form-select-sm maneli-select2">
+                                        <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
+                                        <?php foreach ($experts as $expert) : ?>
+                                            <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Sort Filter -->
+                            <div class="col">
+                                <label class="form-label"><?php esc_html_e('Sort:', 'maneli-car-inquiry'); ?></label>
+                                <select id="cash-followup-sort-filter" class="form-select form-select-sm">
+                                    <option value="date_asc"><?php esc_html_e('Follow-up Date (Earliest)', 'maneli-car-inquiry'); ?></option>
+                                    <option value="date_desc"><?php esc_html_e('Follow-up Date (Latest)', 'maneli-car-inquiry'); ?></option>
+                                    <option value="created_desc"><?php esc_html_e('Newest First', 'maneli-car-inquiry'); ?></option>
+                                    <option value="created_asc"><?php esc_html_e('Oldest First', 'maneli-car-inquiry'); ?></option>
+                                </select>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="col-auto">
+                                <label class="form-label d-block" style="visibility: hidden;">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="button" id="cash-followup-reset-filters" class="btn btn-outline-secondary btn-sm">
+                                        <i class="la la-refresh me-1"></i>
+                                        <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
+                                    </button>
+                                    <button type="button" id="cash-followup-apply-filters" class="btn btn-primary btn-sm">
+                                        <i class="la la-filter me-1"></i>
+                                        <?php esc_html_e('Apply', 'maneli-car-inquiry'); ?>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Table -->
                 <div class="table-responsive">
                     <table class="table text-nowrap table-hover">

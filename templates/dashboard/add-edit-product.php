@@ -210,21 +210,21 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                     <label for="product-regular-price" class="form-label"><?php esc_html_e('Cash Price', 'maneli-car-inquiry'); ?></label>
                                     <input type="text" class="form-control manli-price-input" id="product-regular-price" 
                                            name="product_regular_price" value="<?php echo esc_attr($regular_price_formatted); ?>" 
-                                           placeholder="<?php esc_attr_e('Cash Price', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo esc_attr($regular_price); ?>">
+                                           placeholder="<?php esc_attr_e('Cash Price', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo ($regular_price > 0) ? esc_attr($regular_price) : ''; ?>">
                                 </div>
                                 
                                 <div class="col-xl-4 col-lg-4 col-md-6">
                                     <label for="product-installment-price" class="form-label"><?php esc_html_e('Installment Price', 'maneli-car-inquiry'); ?></label>
                                     <input type="text" class="form-control manli-price-input" id="product-installment-price" 
                                            name="product_installment_price" value="<?php echo esc_attr($installment_price_formatted); ?>" 
-                                           placeholder="<?php esc_attr_e('Installment Price', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo esc_attr($installment_price); ?>">
+                                           placeholder="<?php esc_attr_e('Installment Price', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo ($installment_price > 0) ? esc_attr($installment_price) : ''; ?>">
                                 </div>
                                 
                                 <div class="col-xl-4 col-lg-4 col-md-6">
                                     <label for="product-min-downpayment" class="form-label"><?php esc_html_e('Minimum Down Payment', 'maneli-car-inquiry'); ?></label>
                                     <input type="text" class="form-control manli-price-input" id="product-min-downpayment" 
                                            name="product_min_downpayment" value="<?php echo esc_attr($min_downpayment_formatted); ?>" 
-                                           placeholder="<?php esc_attr_e('Minimum Down Payment', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo esc_attr($min_downpayment); ?>">
+                                           placeholder="<?php esc_attr_e('Minimum Down Payment', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo ($min_downpayment > 0) ? esc_attr($min_downpayment) : ''; ?>">
                                 </div>
                                 
                                 <!-- Description -->
@@ -389,12 +389,12 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         },
         
         getRawNumber: function(value) {
-            if (!value) return '0';
+            if (!value || value.trim() === '') return '';
             // Convert Persian to English
             let numStr = window.maneliPersianHelpers.persianToEnglish(String(value));
             // Remove all non-digit characters (commas, spaces, etc.)
             numStr = numStr.replace(/[^\d]/g, '');
-            return numStr || '0';
+            return numStr || '';
         }
     };
     
@@ -499,8 +499,12 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         $('.manli-price-input').each(function() {
             const $input = $(this);
             const rawValue = $input.data('raw-value') || $input.attr('data-raw-value');
-            if (rawValue && window.maneliPersianHelpers) {
+            if (rawValue && rawValue !== '0' && rawValue !== 0 && window.maneliPersianHelpers) {
                 $input.val(formatNumberWithSeparators(rawValue));
+            } else {
+                // If price is 0 or empty, leave the input empty
+                $input.val('');
+                $input.attr('data-raw-value', '');
             }
         });
         
@@ -528,8 +532,10 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
             
             // Calculate new cursor position
             const textBeforeCursor = value.substring(0, cursorPos);
+            // Convert to English first to correctly count both Persian and English digits
+            const textBeforeCursorEnglish = persianToEnglish(textBeforeCursor);
             const commasBeforeCursor = (textBeforeCursor.match(/[،,]/g) || []).length;
-            const digitsBeforeCursor = textBeforeCursor.replace(/[^\d]/g, '').length;
+            const digitsBeforeCursor = textBeforeCursorEnglish.replace(/[^\d]/g, '').length;
             
             // Find new position in formatted string
             let newCursorPos = 0;
@@ -557,15 +563,16 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         $('.manli-price-input').on('blur', function() {
             const $input = $(this);
             let value = $input.val();
-            if (!value) {
-                $input.attr('data-raw-value', '0');
+            if (!value || value.trim() === '') {
+                $input.val('');
+                $input.attr('data-raw-value', '');
                 return;
             }
             
             const rawValue = getRawNumber(value);
-            if (!rawValue || rawValue === '0') {
+            if (!rawValue || rawValue === '' || rawValue === '0') {
                 $input.val('');
-                $input.attr('data-raw-value', '0');
+                $input.attr('data-raw-value', '');
                 return;
             }
             
@@ -914,15 +921,16 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                 return false;
             }
             
-            // Ensure prices are valid numbers
-            if (!formData.product_regular_price || formData.product_regular_price === '0') {
-                formData.product_regular_price = '0';
+            // Allow empty prices - send empty string if price is empty or 0
+            // Backend will handle empty strings as 0
+            if (!formData.product_regular_price || formData.product_regular_price === '0' || formData.product_regular_price === '') {
+                formData.product_regular_price = '';
             }
-            if (!formData.product_installment_price || formData.product_installment_price === '0') {
-                formData.product_installment_price = '0';
+            if (!formData.product_installment_price || formData.product_installment_price === '0' || formData.product_installment_price === '') {
+                formData.product_installment_price = '';
             }
-            if (!formData.product_min_downpayment || formData.product_min_downpayment === '0') {
-                formData.product_min_downpayment = '0';
+            if (!formData.product_min_downpayment || formData.product_min_downpayment === '0' || formData.product_min_downpayment === '') {
+                formData.product_min_downpayment = '';
             }
             
             // Show loading

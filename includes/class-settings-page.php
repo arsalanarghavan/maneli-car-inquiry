@@ -474,6 +474,79 @@ class Maneli_Settings_Page {
                             ['name' => 'cash_inquiry_rejected_pattern', 'label' => esc_html__('Pattern: "Cash Request Rejected"', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
                             ['name' => 'cash_inquiry_expert_referral_pattern', 'label' => esc_html__('Pattern: "Cash Request Referral to Expert"', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
                         ]
+                    ],
+                    'maneli_sms_meeting_reminders_section' => [
+                        'title' => esc_html__('Meeting Reminders', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'meeting_reminder_hours', 'label' => esc_html__('Remind Hours Before Meeting', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Comma-separated hours (e.g., 2,6,24). Reminders will be sent these hours before the meeting.', 'maneli-car-inquiry')],
+                            ['name' => 'meeting_reminder_days', 'label' => esc_html__('Remind Days Before Meeting', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Comma-separated days (e.g., 1,3). Reminders will be sent these days before the meeting.', 'maneli-car-inquiry')],
+                            ['name' => 'meeting_reminder_sms_enabled', 'label' => esc_html__('Enable SMS Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1'],
+                            ['name' => 'meeting_reminder_telegram_enabled', 'label' => esc_html__('Enable Telegram Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
+                            ['name' => 'meeting_reminder_email_enabled', 'label' => esc_html__('Enable Email Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
+                            ['name' => 'meeting_reminder_notification_enabled', 'label' => esc_html__('Enable In-App Notification Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1'],
+                        ]
+                    ],
+                    'maneli_sms_scheduled_section' => [
+                        'title' => esc_html__('Scheduled SMS', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'scheduled_sms_enabled', 'label' => esc_html__('Enable Scheduled SMS', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1', 'desc' => esc_html__('Allow scheduling SMS messages for future delivery.', 'maneli-car-inquiry')],
+                        ]
+                    ],
+                    'maneli_sms_bulk_section' => [
+                        'title' => esc_html__('Bulk SMS', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'bulk_sms_limit', 'label' => esc_html__('Maximum Recipients per Bulk Send', 'maneli-car-inquiry'), 'type' => 'number', 'default' => '100', 'desc' => esc_html__('Maximum number of recipients allowed in a single bulk send operation.', 'maneli-car-inquiry')],
+                            ['name' => 'bulk_sms_recipient_filter', 'label' => esc_html__('Recipient Filter Options', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1', 'desc' => esc_html__('Allow filtering recipients by user role (customers, experts, admins).', 'maneli-car-inquiry')],
+                        ]
+                    ]
+                ]
+            ],
+            'telegram' => [
+                'title' => esc_html__('Telegram', 'maneli-car-inquiry'),
+                'icon' => 'fab fa-telegram',
+                'sections' => [
+                    'maneli_telegram_api_section' => [
+                        'title' => esc_html__('Telegram Bot Configuration', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'telegram_bot_token', 'label' => esc_html__('Bot Token', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Get your bot token from @BotFather on Telegram.', 'maneli-car-inquiry')],
+                            ['name' => 'telegram_chat_ids', 'label' => esc_html__('Default Chat IDs', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Comma-separated chat IDs. These will be used for bulk notifications and meeting reminders.', 'maneli-car-inquiry')],
+                        ]
+                    ],
+                    'maneli_telegram_settings_section' => [
+                        'title' => esc_html__('Telegram Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'telegram_enabled', 'label' => esc_html__('Enable Telegram Notifications', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
+                        ]
+                    ]
+                ]
+            ],
+            'email' => [
+                'title' => esc_html__('Email', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-envelope',
+                'sections' => [
+                    'maneli_email_smtp_section' => [
+                        'title' => esc_html__('SMTP Configuration', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'email_use_smtp', 'label' => esc_html__('Use SMTP', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0', 'desc' => esc_html__('If disabled, WordPress default wp_mail will be used.', 'maneli-car-inquiry')],
+                            ['name' => 'email_smtp_host', 'label' => esc_html__('SMTP Host', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('e.g., smtp.gmail.com', 'maneli-car-inquiry')],
+                            ['name' => 'email_smtp_port', 'label' => esc_html__('SMTP Port', 'maneli-car-inquiry'), 'type' => 'number', 'default' => '587', 'desc' => esc_html__('Common ports: 587 (TLS), 465 (SSL)', 'maneli-car-inquiry')],
+                            ['name' => 'email_smtp_username', 'label' => esc_html__('SMTP Username', 'maneli-car-inquiry'), 'type' => 'text'],
+                            ['name' => 'email_smtp_password', 'label' => esc_html__('SMTP Password', 'maneli-car-inquiry'), 'type' => 'password'],
+                            ['name' => 'email_smtp_encryption', 'label' => esc_html__('Encryption', 'maneli-car-inquiry'), 'type' => 'select', 'options' => ['tls' => 'TLS', 'ssl' => 'SSL'], 'default' => 'tls'],
+                        ]
+                    ],
+                    'maneli_email_from_section' => [
+                        'title' => esc_html__('Email From Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'email_from_email', 'label' => esc_html__('From Email', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Default sender email address.', 'maneli-car-inquiry')],
+                            ['name' => 'email_from_name', 'label' => esc_html__('From Name', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Default sender name.', 'maneli-car-inquiry')],
+                        ]
+                    ],
+                    'maneli_email_settings_section' => [
+                        'title' => esc_html__('Email Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'email_enabled', 'label' => esc_html__('Enable Email Notifications', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
+                        ]
                     ]
                 ]
             ],
@@ -539,12 +612,6 @@ class Maneli_Settings_Page {
                         'fields' => [
                              ['name' => 'installment_rejection_reasons', 'label' => esc_html__('Predefined Rejection Reasons', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request.', 'maneli-car-inquiry')],
                         ]
-                    ],
-                    'maneli_installment_required_documents_section' => [
-                        'title' => esc_html__('Required Documents', 'maneli-car-inquiry'),
-                        'fields' => [
-                             ['name' => 'installment_required_documents', 'label' => esc_html__('Document List', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one document name per line. These will be shown to the manager when requesting additional documents from customers.', 'maneli-car-inquiry')],
-                        ]
                     ]
                 ]
             ],
@@ -598,6 +665,45 @@ class Maneli_Settings_Page {
                         'title' => esc_html__('Customer Documents', 'maneli-car-inquiry'),
                         'fields' => [
                             ['name' => 'customer_required_documents', 'label' => esc_html__('Required Documents List', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one document name per line. These documents will be shown to customers in their profile to upload.', 'maneli-car-inquiry')],
+                        ]
+                    ],
+                    'maneli_document_rejection_reasons_section' => [
+                        'title' => esc_html__('Document Rejection Reasons', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'document_rejection_reasons', 'label' => esc_html__('Predefined Rejection Reasons', 'maneli-car-inquiry'), 'type' => 'textarea', 'desc' => esc_html__('Enter one reason per line. These will be shown as a dropdown list when rejecting a document.', 'maneli-car-inquiry')],
+                        ]
+                    ]
+                ]
+            ],
+            'availability' => [
+                'title' => esc_html__('Availability', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-box-open',
+                'sections' => [
+                    'maneli_availability_messages_section' => [
+                        'title' => esc_html__('Unavailable Product Messages', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure messages shown to customers when products are unavailable for different purchase methods.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'unavailable_installment_message',
+                                'label' => esc_html__('Installment Unavailable Message', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'default' => esc_html__('This product is currently unavailable for installment purchase.', 'maneli-car-inquiry'),
+                                'desc' => esc_html__('Message shown when installment price is not available (0 or empty).', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'unavailable_cash_message',
+                                'label' => esc_html__('Cash Unavailable Message', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'default' => esc_html__('This product is currently unavailable for cash purchase.', 'maneli-car-inquiry'),
+                                'desc' => esc_html__('Message shown when cash price is not available (0 or empty).', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'unavailable_product_message',
+                                'label' => esc_html__('Product Unavailable Message (Both)', 'maneli-car-inquiry'),
+                                'type' => 'textarea',
+                                'default' => esc_html__('This product is currently unavailable for purchase.', 'maneli-car-inquiry'),
+                                'desc' => esc_html__('Message shown when product status is set to "Unavailable" or both prices are unavailable.', 'maneli-car-inquiry')
+                            ],
                         ]
                     ]
                 ]

@@ -200,6 +200,19 @@ class Maneli_Cash_Inquiry_Handler {
             return false;
         }
         
+        // Get original product price at the time of request
+        $product = wc_get_product($product_id);
+        $original_price = 0;
+        if ($product) {
+            $original_price = $product->get_regular_price();
+            // Convert to integer if it's a valid price
+            if (!empty($original_price) && $original_price !== '' && is_numeric($original_price)) {
+                $original_price = (int) $original_price;
+            } else {
+                $original_price = 0;
+            }
+        }
+        
         // Add post meta data
         $meta_data = [
             'product_id'          => $product_id,
@@ -208,6 +221,7 @@ class Maneli_Cash_Inquiry_Handler {
             'mobile_number'       => $mobile,
             'cash_car_color'      => $inquiry_data['cash_car_color'],
             'cash_inquiry_status' => 'new', // Initial status: جدید
+            'original_product_price' => $original_price, // Save original price at request time
         ];
         foreach ($meta_data as $key => $value) {
             update_post_meta($post_id, $key, $value);

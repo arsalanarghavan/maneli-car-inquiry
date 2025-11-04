@@ -409,17 +409,12 @@ if ($workplace_status === 'owner') {
                                     <div class="fw-semibold d-block fs-15"><?php esc_html_e('Customer Documents:', 'maneli-car-inquiry'); ?></div>
                                 </div>
                                 <?php 
-                                // Get required documents from settings - merge both customer and installment documents
+                                // Get required documents from settings
                                 $options = get_option('maneli_inquiry_all_options', []);
                                 $customer_docs_raw = $options['customer_required_documents'] ?? '';
-                                $installment_docs_raw = $options['installment_required_documents'] ?? '';
                                 
-                                // Merge and deduplicate documents
-                                $all_docs = array_merge(
-                                    array_filter(array_map('trim', explode("\n", $customer_docs_raw))),
-                                    array_filter(array_map('trim', explode("\n", $installment_docs_raw)))
-                                );
-                                $required_docs = array_unique($all_docs);
+                                // Get documents list
+                                $required_docs = array_filter(array_map('trim', explode("\n", $customer_docs_raw)));
                                 
                                 // Get uploaded documents for this user
                                 $uploaded_docs = get_user_meta($user_id, 'customer_uploaded_documents', true) ?: [];

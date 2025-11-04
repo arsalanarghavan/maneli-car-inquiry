@@ -36,7 +36,8 @@ $tab_persian_names = [
     'experts' => esc_html__('Experts', 'maneli-car-inquiry'),
     'finotex' => esc_html__('Finotex', 'maneli-car-inquiry'),
     'meetings' => esc_html__('Meetings & Calendar', 'maneli-car-inquiry'),
-    'documents' => esc_html__('Documents', 'maneli-car-inquiry')
+    'documents' => esc_html__('Documents', 'maneli-car-inquiry'),
+    'availability' => esc_html__('Availability', 'maneli-car-inquiry')
 ];
 ?>
 <div class="main-content app-content">
@@ -88,7 +89,8 @@ $tab_persian_names = [
                                 'experts' => 'la-user-tie',
                                 'finotex' => 'la-university',
                                 'meetings' => 'la-calendar',
-                                'documents' => 'la-file-alt'
+                                'documents' => 'la-file-alt',
+                                'availability' => 'la-box-open'
                             ];
                             foreach ($all_settings as $tab_key => $tab_data) : 
                                 $icon = $tab_icons[$tab_key] ?? 'la-cog';

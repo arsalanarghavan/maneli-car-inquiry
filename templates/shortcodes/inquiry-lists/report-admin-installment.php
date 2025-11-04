@@ -705,6 +705,18 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                                 </button>
                             <?php endif; ?>
 
+                            <?php 
+                            $customer_mobile = $post_meta['mobile_number'][0] ?? '';
+                            if (!empty($customer_mobile)): ?>
+                            <button type="button" class="btn btn-success btn-wave send-sms-report-btn" 
+                                    data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                    data-phone="<?php echo esc_attr($customer_mobile); ?>"
+                                    data-customer-name="<?php echo esc_attr($customer_name); ?>">
+                                <i class="la la-sms me-1"></i>
+                                <?php esc_html_e('Send SMS', 'maneli-car-inquiry'); ?>
+                            </button>
+                            <?php endif; ?>
+
                             <button type="button" class="btn btn-danger btn-wave delete-inquiry-report-btn" 
                                     data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
                                     data-inquiry-type="installment">
@@ -768,10 +780,6 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                         <i class="la la-user me-2"></i>
                         <?php esc_html_e('Buyer Information', 'maneli-car-inquiry'); ?>
                     </span>
-                    <a href="<?php echo esc_url(add_query_arg(['view_user' => $customer_id], home_url('/dashboard/users'))); ?>#documents-tab" class="btn btn-sm btn-warning btn-wave">
-                        <i class="la la-file-alt me-1"></i>
-                        <?php esc_html_e('View Documents', 'maneli-car-inquiry'); ?>
-                    </a>
                 </div>
             </div>
             <div class="card-body">
@@ -891,8 +899,175 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
             </div>
         </div>
 
-        <?php if ($issuer_type === 'self'): ?>
-        <!-- Bank Information Card (Self) -->
+        <!-- Documents Section -->
+        <?php if ($is_admin_or_expert): ?>
+        <?php
+        // Get required documents from settings
+        $options = get_option('maneli_inquiry_all_options', []);
+        $customer_docs_raw = $options['customer_required_documents'] ?? '';
+        $required_docs = array_filter(array_map('trim', explode("\n", $customer_docs_raw)));
+        
+        // Get uploaded documents for this customer
+        $uploaded_docs = get_user_meta($customer_id, 'customer_uploaded_documents', true) ?: [];
+        
+        // Get rejection reasons
+        $rejection_reasons_raw = $options['document_rejection_reasons'] ?? '';
+        $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_reasons_raw)));
+        ?>
+        <div class="card custom-card mt-3">
+            <div class="card-header bg-info-transparent">
+                <div class="card-title mb-0">
+                    <i class="la la-file-alt text-info me-2"></i>
+                    <?php esc_html_e('Documents', 'maneli-car-inquiry'); ?>
+                </div>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($required_docs)): ?>
+                    <div class="row g-3">
+                        <?php foreach ($required_docs as $doc_name): ?>
+                            <?php 
+                            // Check if this document has been uploaded
+                            $is_uploaded = false;
+                            $uploaded_file_url = '';
+                            $doc_status = 'pending';
+                            $doc_reviewed_at = '';
+                            $doc_reviewed_by = '';
+                            $doc_rejection_reason = '';
+                            
+                            foreach ($uploaded_docs as $uploaded) {
+                                if (isset($uploaded['name']) && $uploaded['name'] === $doc_name) {
+                                    $is_uploaded = true;
+                                    $uploaded_file_url = $uploaded['file'] ?? '';
+                                    $doc_status = $uploaded['status'] ?? 'pending';
+                                    $doc_reviewed_at = $uploaded['reviewed_at'] ?? '';
+                                    $doc_reviewed_by = $uploaded['reviewed_by'] ?? '';
+                                    $doc_rejection_reason = $uploaded['rejection_reason'] ?? '';
+                                    break;
+                                }
+                            }
+                            ?>
+                            <div class="col-md-6 col-lg-4 col-xl-3">
+                                <div class="border rounded p-3 h-100">
+                                    <div class="d-flex flex-column">
+                                        <label class="fw-semibold mb-2">
+                                            <i class="la la-file me-2"></i>
+                                            <?php echo esc_html($doc_name); ?>
+                                        </label>
+                                            
+                                            <?php if ($is_uploaded && $doc_status === 'approved'): ?>
+                                                <div class="alert alert-success border-success py-2 px-3 mb-2">
+                                                    <i class="la la-check-circle me-2"></i>
+                                                    <?php esc_html_e('Approved', 'maneli-car-inquiry'); ?>
+                                                    <?php if ($doc_reviewed_at): ?>
+                                                        <small class="d-block mt-1 text-muted">
+                                                            <?php 
+                                                            $reviewed_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($doc_reviewed_at, 'Y/m/d H:i');
+                                                            $reviewed_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($reviewed_date) : $reviewed_date;
+                                                            echo esc_html($reviewed_date);
+                                                            ?>
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php if ($uploaded_file_url): ?>
+                                                    <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary w-100 mb-2">
+                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                    </a>
+                                                <?php endif; ?>
+                                            <?php elseif ($is_uploaded && $doc_status === 'rejected'): ?>
+                                                <div class="alert alert-danger border-danger py-2 px-3 mb-2">
+                                                    <i class="la la-times-circle me-2"></i>
+                                                    <?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?>
+                                                    <?php if ($doc_rejection_reason): ?>
+                                                        <div class="mt-2">
+                                                            <strong><?php esc_html_e('Reason:', 'maneli-car-inquiry'); ?></strong>
+                                                            <p class="mb-0 mt-1"><?php echo esc_html($doc_rejection_reason); ?></p>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <?php if ($doc_reviewed_at): ?>
+                                                        <small class="d-block mt-1 text-muted">
+                                                            <?php 
+                                                            $reviewed_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($doc_reviewed_at, 'Y/m/d H:i');
+                                                            $reviewed_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($reviewed_date) : $reviewed_date;
+                                                            echo esc_html($reviewed_date);
+                                                            ?>
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php if ($uploaded_file_url): ?>
+                                                    <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary w-100 mb-2">
+                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                    </a>
+                                                <?php endif; ?>
+                                                <?php if ($is_admin_or_expert): ?>
+                                                    <button class="btn btn-sm btn-success approve-doc-btn w-100" 
+                                                            data-user-id="<?php echo esc_attr($customer_id); ?>" 
+                                                            data-doc-name="<?php echo esc_attr($doc_name); ?>"
+                                                            data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
+                                                            data-inquiry-type="installment">
+                                                        <i class="la la-check"></i> <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
+                                                    </button>
+                                                <?php endif; ?>
+                                            <?php elseif ($is_uploaded): ?>
+                                                <div class="alert alert-info border-info py-2 px-3 mb-2">
+                                                    <i class="la la-clock me-2"></i>
+                                                    <?php esc_html_e('Awaiting Review', 'maneli-car-inquiry'); ?>
+                                                </div>
+                                                <?php if ($uploaded_file_url): ?>
+                                                    <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary w-100 mb-2">
+                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                    </a>
+                                                <?php endif; ?>
+                                                <?php if ($is_admin_or_expert): ?>
+                                                    <div class="d-flex gap-2 flex-wrap">
+                                                        <button class="btn btn-sm btn-success approve-doc-btn flex-fill" 
+                                                                data-user-id="<?php echo esc_attr($customer_id); ?>" 
+                                                                data-doc-name="<?php echo esc_attr($doc_name); ?>"
+                                                                data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
+                                                                data-inquiry-type="installment">
+                                                            <i class="la la-check"></i> <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-danger reject-doc-btn flex-fill" 
+                                                                data-user-id="<?php echo esc_attr($customer_id); ?>" 
+                                                                data-doc-name="<?php echo esc_attr($doc_name); ?>"
+                                                                data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
+                                                                data-inquiry-type="installment"
+                                                                data-rejection-reasons='<?php echo wp_json_encode($rejection_reasons); ?>'>
+                                                            <i class="la la-times"></i> <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
+                                                        </button>
+                                                    </div>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <div class="alert alert-warning border-warning py-2 px-3 mb-0">
+                                                    <i class="la la-exclamation-triangle me-2"></i>
+                                                    <?php esc_html_e('Not Uploaded', 'maneli-car-inquiry'); ?>
+                                                </div>
+                                                <?php if ($is_admin_or_expert): ?>
+                                                    <button class="btn btn-sm btn-warning mt-2 w-100 request-doc-btn" 
+                                                            data-user-id="<?php echo esc_attr($customer_id); ?>" 
+                                                            data-doc-name="<?php echo esc_attr($doc_name); ?>"
+                                                            data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
+                                                            data-inquiry-type="installment">
+                                                        <i class="la la-paper-plane"></i> <?php esc_html_e('Request Document', 'maneli-car-inquiry'); ?>
+                                                    </button>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-info">
+                        <i class="la la-info-circle me-2"></i>
+                        <?php esc_html_e('No documents have been configured in settings.', 'maneli-car-inquiry'); ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($issuer_type === 'self' && $is_admin): ?>
+        <!-- Bank Information Card (Self) - Admin Only -->
         <div class="card custom-card mt-3">
             <div class="card-header bg-success-transparent">
                 <div class="card-title">
@@ -1030,7 +1205,8 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                     </div>
                 </div>
 
-                <!-- Issuer Bank Information -->
+                <?php if ($is_admin): ?>
+                <!-- Issuer Bank Information - Admin Only -->
                 <h5 class="mt-4 mb-3 pt-3 border-top fw-semibold">
                     <i class="la la-university text-success me-1"></i>
                     <?php esc_html_e('Bank Information (Cheque Holder)', 'maneli-car-inquiry'); ?>
@@ -1061,11 +1237,13 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
         </div>
         <?php endif; ?>
 
-        <!-- Credit Verification Card (Finotex) -->
+        <?php if ($is_admin): ?>
+        <!-- Credit Verification Card (Finotex) - Admin Only -->
         <div class="card custom-card mt-3">
             <div class="card-header bg-primary-transparent">
                 <div class="card-title">
@@ -1084,6 +1262,7 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 <?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -1342,6 +1521,79 @@ if (typeof jQuery !== 'undefined') {
         console.log('✅ Template emergency handlers attached');
         console.log('Button count - .assign-expert-btn:', $('.assign-expert-btn').length);
         console.log('Button count - .delete-inquiry-report-btn:', $('.delete-inquiry-report-btn').length);
+        
+        // Send SMS handler
+        $('.send-sms-report-btn').on('click', function() {
+            var phone = $(this).data('phone');
+            var customerName = $(this).data('customer-name');
+            var inquiryId = $(this).data('inquiry-id');
+            
+            if (typeof Swal === 'undefined') {
+                alert('<?php echo esc_js(__('SweetAlert is not loaded', 'maneli-car-inquiry')); ?>');
+                return;
+            }
+            
+            Swal.fire({
+                title: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+                html: `
+                    <div class="text-start">
+                        <p><strong><?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?></strong> ${customerName} (${phone})</p>
+                        <div class="mb-3">
+                            <label class="form-label"><?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?></label>
+                            <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>"></textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
+                cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
+                preConfirm: function() {
+                    var message = $('#sms-message').val();
+                    if (!message.trim()) {
+                        Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>');
+                        return false;
+                    }
+                    return { message: message };
+                }
+            }).then(function(result) {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire({
+                        title: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
+                        text: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: function() {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    $.ajax({
+                        url: maneli_ajax.url,
+                        type: 'POST',
+                        data: {
+                            action: 'maneli_send_single_sms',
+                            nonce: maneli_ajax.nonce,
+                            recipient: phone,
+                            message: result.value.message,
+                            related_id: inquiryId
+                        },
+                        success: function(response) {
+                            Swal.close();
+                            if (response.success) {
+                                Swal.fire('<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>', 'success');
+                            } else {
+                                Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', response.data?.message || '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>', 'error');
+                            }
+                        },
+                        error: function() {
+                            Swal.close();
+                            Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>', 'error');
+                        }
+                    });
+                }
+            });
+        });
     });
 } else {
     console.error('❌ jQuery not available for template emergency handlers!');

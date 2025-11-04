@@ -39,6 +39,10 @@ class Maneli_Hooks {
         add_action('maneli_daily_followup_notifications', [$this, 'send_followup_notifications']);
         add_action('init', [$this, 'schedule_followup_notifications_cron']);
         
+        // Notification center cron jobs
+        add_action('maneli_send_meeting_reminders', [$this, 'send_meeting_reminders']);
+        add_action('maneli_process_scheduled_notifications', [$this, 'process_scheduled_notifications']);
+        
     }
 
     /**
@@ -317,6 +321,268 @@ class Maneli_Hooks {
         
         // Log the result
         error_log(sprintf('Maneli Followup Notifications: %d notifications created', $count));
+    }
+
+    /**
+     * Send meeting reminders
+     * Called hourly by WordPress cron
+     */
+    public function send_meeting_reminders() {
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        
+        $options = get_option('maneli_inquiry_all_options', []);
+        
+        // Get reminder settings - parse comma-separated values
+        $hours_before_raw = $options['meeting_reminder_hours'] ?? '2,6,24';
+        if (is_array($hours_before_raw)) {
+            $hours_before = $hours_before_raw;
+        } else {
+            $hours_before = array_filter(array_map('intval', explode(',', $hours_before_raw)));
+            if (empty($hours_before)) {
+                $hours_before = [2, 6, 24];
+            }
+        }
+        
+        $days_before_raw = $options['meeting_reminder_days'] ?? '1';
+        if (is_array($days_before_raw)) {
+            $days_before = $days_before_raw;
+        } else {
+            $days_before = array_filter(array_map('intval', explode(',', $days_before_raw)));
+            if (empty($days_before)) {
+                $days_before = [1];
+            }
+        }
+        
+        // Get active channels
+        $channels = [];
+        if (!empty($options['meeting_reminder_sms_enabled'])) {
+            $channels[] = 'sms';
+        }
+        if (!empty($options['meeting_reminder_telegram_enabled'])) {
+            $channels[] = 'telegram';
+        }
+        if (!empty($options['meeting_reminder_email_enabled'])) {
+            $channels[] = 'email';
+        }
+        if (!empty($options['meeting_reminder_notification_enabled'])) {
+            $channels[] = 'notification';
+        }
+        
+        if (empty($channels)) {
+            return; // No channels enabled
+        }
+        
+        // Get all upcoming meetings
+        $now = current_time('mysql');
+        $meetings = get_posts([
+            'post_type' => 'maneli_meeting',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'meta_query' => [
+                [
+                    'key' => 'meeting_start',
+                    'value' => $now,
+                    'compare' => '>='
+                ]
+            ],
+            'orderby' => 'meta_value',
+            'meta_key' => 'meeting_start',
+            'order' => 'ASC'
+        ]);
+        
+        $reminders_sent = 0;
+        
+        foreach ($meetings as $meeting) {
+            $meeting_start = get_post_meta($meeting->ID, 'meeting_start', true);
+            if (empty($meeting_start)) {
+                continue;
+            }
+            
+            $meeting_time = strtotime($meeting_start);
+            $now_time = current_time('timestamp');
+            $time_diff = $meeting_time - $now_time;
+            
+            // Check hours before
+            foreach ($hours_before as $hours) {
+                $hours_seconds = $hours * 3600;
+                $reminder_time = $meeting_time - $hours_seconds;
+                
+                // Check if reminder should be sent now (within current hour)
+                if ($now_time >= $reminder_time && $now_time < $reminder_time + 3600) {
+                    // Check if already sent
+                    $existing_reminder = Maneli_Database::get_notification_logs([
+                        'related_id' => $meeting->ID,
+                        'type' => 'sms', // Check for any type
+                        'search' => 'meeting_reminder_' . $hours . 'h'
+                    ]);
+                    
+                    if (empty($existing_reminder)) {
+                        // Get customer info
+                        $customer_id = get_post_field('post_author', $meeting->ID);
+                        $customer = get_userdata($customer_id);
+                        $customer_name = $customer ? $customer->display_name : '';
+                        $customer_phone = get_user_meta($customer_id, 'mobile_number', true);
+                        
+                        // Get inquiry info
+                        $inquiry_id = get_post_meta($meeting->ID, 'related_inquiry_id', true);
+                        $car_name = '';
+                        if ($inquiry_id) {
+                            $product_id = get_post_meta($inquiry_id, 'product_id', true);
+                            $car_name = $product_id ? get_the_title($product_id) : '';
+                        }
+                        
+                        // Format meeting date
+                        $meeting_date_formatted = date_i18n('Y/m/d H:i', $meeting_time);
+                        
+                        // Prepare message
+                        $message = sprintf(
+                            esc_html__('Reminder: You have a meeting scheduled for %s. Car: %s', 'maneli-car-inquiry'),
+                            $meeting_date_formatted,
+                            $car_name
+                        );
+                        
+                        // Prepare recipients
+                        $recipients = [];
+                        if (!empty($customer_phone)) {
+                            $recipients['sms'] = $customer_phone;
+                        }
+                        // Parse telegram chat IDs
+                        $telegram_chat_ids = $options['telegram_chat_ids'] ?? '';
+                        if (!empty($telegram_chat_ids)) {
+                            if (is_array($telegram_chat_ids)) {
+                                $recipients['telegram'] = $telegram_chat_ids;
+                            } else {
+                                // Parse comma-separated values
+                                $chat_ids = array_filter(array_map('trim', explode(',', $telegram_chat_ids)));
+                                if (!empty($chat_ids)) {
+                                    $recipients['telegram'] = $chat_ids;
+                                }
+                            }
+                        }
+                        if ($customer && !empty($customer->user_email)) {
+                            $recipients['email'] = $customer->user_email;
+                        }
+                        $recipients['notification'] = $customer_id;
+                        
+                        // Send reminders
+                        foreach ($channels as $channel) {
+                            if (isset($recipients[$channel])) {
+                                Maneli_Notification_Center_Handler::send(
+                                    $channel,
+                                    $recipients[$channel],
+                                    $message,
+                                    [
+                                        'related_id' => $meeting->ID,
+                                        'title' => esc_html__('Meeting Reminder', 'maneli-car-inquiry'),
+                                    ]
+                                );
+                            }
+                        }
+                        
+                        $reminders_sent++;
+                    }
+                }
+            }
+            
+            // Check days before
+            foreach ($days_before as $days) {
+                $days_seconds = $days * 86400;
+                $reminder_time = $meeting_time - $days_seconds;
+                $reminder_day = date('Y-m-d', $reminder_time);
+                $today = date('Y-m-d', $now_time);
+                
+                // Check if reminder should be sent today
+                if ($reminder_day === $today) {
+                    // Check if already sent
+                    $existing_reminder = Maneli_Database::get_notification_logs([
+                        'related_id' => $meeting->ID,
+                        'type' => 'sms',
+                        'search' => 'meeting_reminder_' . $days . 'd'
+                    ]);
+                    
+                    if (empty($existing_reminder)) {
+                        // Similar logic as hours before
+                        $customer_id = get_post_field('post_author', $meeting->ID);
+                        $customer = get_userdata($customer_id);
+                        $customer_name = $customer ? $customer->display_name : '';
+                        $customer_phone = get_user_meta($customer_id, 'mobile_number', true);
+                        
+                        $inquiry_id = get_post_meta($meeting->ID, 'related_inquiry_id', true);
+                        $car_name = '';
+                        if ($inquiry_id) {
+                            $product_id = get_post_meta($inquiry_id, 'product_id', true);
+                            $car_name = $product_id ? get_the_title($product_id) : '';
+                        }
+                        
+                        $meeting_date_formatted = date_i18n('Y/m/d H:i', $meeting_time);
+                        
+                        $message = sprintf(
+                            esc_html__('Reminder: You have a meeting scheduled for %s (%d days). Car: %s', 'maneli-car-inquiry'),
+                            $meeting_date_formatted,
+                            $days,
+                            $car_name
+                        );
+                        
+                        $recipients = [];
+                        if (!empty($customer_phone)) {
+                            $recipients['sms'] = $customer_phone;
+                        }
+                        // Parse telegram chat IDs
+                        $telegram_chat_ids = $options['telegram_chat_ids'] ?? '';
+                        if (!empty($telegram_chat_ids)) {
+                            if (is_array($telegram_chat_ids)) {
+                                $recipients['telegram'] = $telegram_chat_ids;
+                            } else {
+                                // Parse comma-separated values
+                                $chat_ids = array_filter(array_map('trim', explode(',', $telegram_chat_ids)));
+                                if (!empty($chat_ids)) {
+                                    $recipients['telegram'] = $chat_ids;
+                                }
+                            }
+                        }
+                        if ($customer && !empty($customer->user_email)) {
+                            $recipients['email'] = $customer->user_email;
+                        }
+                        $recipients['notification'] = $customer_id;
+                        
+                        foreach ($channels as $channel) {
+                            if (isset($recipients[$channel])) {
+                                Maneli_Notification_Center_Handler::send(
+                                    $channel,
+                                    $recipients[$channel],
+                                    $message,
+                                    [
+                                        'related_id' => $meeting->ID,
+                                        'title' => esc_html__('Meeting Reminder', 'maneli-car-inquiry'),
+                                    ]
+                                );
+                            }
+                        }
+                        
+                        $reminders_sent++;
+                    }
+                }
+            }
+        }
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf('Maneli Meeting Reminders: %d reminders sent', $reminders_sent));
+        }
+    }
+
+    /**
+     * Process scheduled notifications
+     * Called hourly by WordPress cron
+     */
+    public function process_scheduled_notifications() {
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        
+        $count = Maneli_Notification_Center_Handler::process_scheduled();
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf('Maneli Scheduled Notifications: %d notifications processed', $count));
+        }
     }
     
 }

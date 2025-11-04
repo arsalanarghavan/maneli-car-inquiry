@@ -5474,3 +5474,86 @@ msgstr ""
 
 msgid "No inquiries have been registered in the system yet."
 msgstr ""
+
+
+msgid "Requested Product Price (at time of request)"
+msgstr "Requested Product Price (at time of request)"
+
+
+msgid "Not Available"
+msgstr "Not Available"
+
+
+msgid "Customer Documents:"
+msgstr "Customer Documents:"
+
+
+msgid "Required Documents"
+msgstr "Required Documents"
+
+
+msgid "Document Rejection Reasons"
+msgstr "Document Rejection Reasons"
+
+msgid "Enter one reason per line. These will be shown as a dropdown list when rejecting a document."
+msgstr "Enter one reason per line. These will be shown as a dropdown list when rejecting a document."
+
+msgid "Request Document"
+msgstr "Request Document"
+
+msgid "No documents have been configured in settings."
+msgstr "No documents have been configured in settings."
+
+msgid "Select a reason..."
+msgstr "Select a reason..."
+
+msgid "Or enter custom reason:"
+msgstr "Or enter custom reason:"
+
+msgid "Please enter or select a rejection reason with at least 3 characters"
+msgstr "Please enter or select a rejection reason with at least 3 characters"
+
+msgid "Request Document?"
+msgstr "Request Document?"
+
+msgid "Send a request to the customer to upload this document?"
+msgstr "Send a request to the customer to upload this document?"
+
+msgid "Yes, Request"
+msgstr "Yes, Request"
+
+msgid "Document request sent to customer successfully."
+msgstr "Document request sent to customer successfully."
+
+msgid "Error approving document."
+msgstr "Error approving document."
+
+msgid "Error rejecting document."
+msgstr "Error rejecting document."
+
+msgid "Error sending document request."
+msgstr "Error sending document request."
+
+msgid "Please upload the document \"%s\" in your profile."
+msgstr "Please upload the document \"%s\" in your profile."
+
+msgid "Document requested"
+msgstr "Document requested"
+
+msgid "Please upload the document \"%s\"."
+msgstr "Please upload the document \"%s\"."
+
+msgid "Price Availability"
+msgstr "Price Availability"
+
+msgid "Cash Available"
+msgstr "Cash Available"
+
+msgid "Cash Unavailable"
+msgstr "Cash Unavailable"
+
+msgid "Installment Available"
+msgstr "Installment Available"
+
+msgid "Installment Unavailable"
+msgstr "Installment Unavailable"

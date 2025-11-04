@@ -333,6 +333,15 @@ $active_users_count = $active_users_query->get_total();
                                                         <button class="btn btn-sm btn-info-light" onclick="editUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('Edit', 'maneli-car-inquiry'); ?>">
                                                             <i class="la la-edit"></i>
                                                         </button>
+                                                        <?php if (!empty($mobile_number)): ?>
+                                                        <button class="btn btn-sm btn-success-light send-sms-btn" 
+                                                                data-user-id="<?php echo esc_attr($user->ID); ?>" 
+                                                                data-phone="<?php echo esc_attr($mobile_number); ?>"
+                                                                data-user-name="<?php echo esc_attr($user->display_name); ?>"
+                                                                title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                                            <i class="la la-sms"></i>
+                                                        </button>
+                                                        <?php endif; ?>
                                                         <button class="btn btn-sm btn-danger-light" onclick="deleteUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
                                                             <i class="la la-trash"></i>
                                                         </button>
@@ -609,6 +618,76 @@ function deleteUser(userId) {
         }
     });
 }
+
+// Send SMS handler
+jQuery(document).ready(function($) {
+    $('.send-sms-btn').on('click', function() {
+        var phone = $(this).data('phone');
+        var userName = $(this).data('user-name');
+        var userId = $(this).data('user-id');
+        
+        Swal.fire({
+            title: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+            html: `
+                <div class="text-start">
+                    <p><strong><?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?></strong> ${userName} (${phone})</p>
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?></label>
+                        <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>"></textarea>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
+            cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
+            preConfirm: function() {
+                var message = $('#sms-message').val();
+                if (!message.trim()) {
+                    Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>');
+                    return false;
+                }
+                return { message: message };
+            }
+        }).then(function(result) {
+            if (result.isConfirmed && result.value) {
+                Swal.fire({
+                    title: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
+                    text: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: function() {
+                        Swal.showLoading();
+                    }
+                });
+                
+                $.ajax({
+                    url: maneli_ajax.url,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_send_single_sms',
+                        nonce: maneli_ajax.nonce,
+                        recipient: phone,
+                        message: result.value.message,
+                        related_id: userId
+                    },
+                    success: function(response) {
+                        Swal.close();
+                        if (response.success) {
+                            Swal.fire('<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>', 'success');
+                        } else {
+                            Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', response.data?.message || '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>', 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.close();
+                        Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
 </script>
 
 <style>

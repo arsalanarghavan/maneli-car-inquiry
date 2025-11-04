@@ -946,6 +946,60 @@ class Maneli_Notification_Handler {
     }
 
     /**
+     * Notify customer when a document is requested
+     *
+     * @param int $user_id Customer user ID
+     * @param string $document_name Name of the requested document
+     * @param int|null $inquiry_id Optional inquiry ID
+     * @return bool Success status
+     */
+    public static function notify_document_requested($user_id, $document_name, $inquiry_id = null) {
+        if (!$user_id || !$document_name) {
+            return false;
+        }
+
+        $user = get_userdata($user_id);
+        if (!$user) {
+            return false;
+        }
+
+        $mobile = get_user_meta($user_id, 'mobile_number', true);
+        if (!$mobile) {
+            return false;
+        }
+
+        // Determine inquiry type and get URLs
+        $link = home_url('/dashboard/profile-settings');
+        if ($inquiry_id) {
+            $post_type = get_post_type($inquiry_id);
+            if ($post_type === 'cash_inquiry') {
+                $link = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+            } else {
+                $link = add_query_arg('view_inquiry', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            }
+        }
+
+        // Send SMS notification
+        $message = sprintf(
+            esc_html__('Please upload the document "%s" in your profile.', 'maneli-car-inquiry'),
+            $document_name
+        );
+        self::send_sms_notification($mobile, $message);
+
+        // Create in-app notification
+        self::create_notification($user_id, [
+            'type' => 'document_requested',
+            'title' => esc_html__('Document requested', 'maneli-car-inquiry'),
+            'message' => sprintf(
+                esc_html__('Please upload the document "%s".', 'maneli-car-inquiry'),
+                $document_name
+            ),
+            'link' => $link,
+            'related_id' => $inquiry_id ? $inquiry_id : 0,
+        ]);
+    }
+
+    /**
      * Notify expert and customer when expert is assigned to an inquiry
      *
      * @param int $inquiry_id Inquiry post ID (cash_inquiry or inquiry)

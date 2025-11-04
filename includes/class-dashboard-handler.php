@@ -559,7 +559,7 @@ class Maneli_Dashboard_Handler {
                     $localize_data['installment_rejection_reasons'] = $installment_rejection_reasons;
                     
                     // Add required documents list
-                    $required_docs_raw = $options['installment_required_documents'] ?? '';
+                    $required_docs_raw = $options['customer_required_documents'] ?? '';
                     $required_docs = array_filter(array_map('trim', explode("\n", $required_docs_raw)));
                     $localize_data['required_documents'] = $required_docs;
                     $localize_data['text']['request_docs_title'] = esc_html__('Request More Documents', 'maneli-car-inquiry');
@@ -1540,6 +1540,15 @@ class Maneli_Dashboard_Handler {
                 'title' => esc_html__('Experts', 'maneli-car-inquiry'),
                 'url' => home_url('/dashboard/experts'),
                 'icon' => 'ri-user-star-line',
+                'capability' => 'manage_maneli_inquiries'
+            ];
+            
+            // دسته: اطلاع‌رسانی
+            $menu_items[] = ['title' => esc_html__('Notifications', 'maneli-car-inquiry'), 'category' => true];
+            $menu_items[] = [
+                'title' => esc_html__('Notification Center', 'maneli-car-inquiry'),
+                'url' => home_url('/dashboard/notifications-center'),
+                'icon' => 'ri-notification-3-line',
                 'capability' => 'manage_maneli_inquiries'
             ];
             
