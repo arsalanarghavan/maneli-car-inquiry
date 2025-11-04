@@ -10,6 +10,7 @@
     
     // Wait for jQuery to be available
     function initVisitorStats() {
+        console.log('initVisitorStats called');
         console.log('jQuery available:', typeof jQuery !== 'undefined');
         console.log('ApexCharts available:', typeof ApexCharts !== 'undefined');
         console.log('maneliVisitorStats available:', typeof maneliVisitorStats !== 'undefined');
