@@ -330,4 +330,152 @@ class Maneli_Database {
         
         return $stats;
     }
+
+    /**
+     * Get notification templates
+     */
+    public static function get_notification_templates($args = array()) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_notification_templates';
+        
+        $defaults = array(
+            'type' => '',
+            'is_active' => '',
+            'search' => '',
+            'limit' => 100,
+            'offset' => 0,
+            'order_by' => 'created_at',
+            'order' => 'DESC',
+        );
+        
+        $args = wp_parse_args($args, $defaults);
+        $where = array('1=1');
+        
+        if (!empty($args['type'])) {
+            $where[] = $wpdb->prepare("type = %s", $args['type']);
+        }
+        
+        if ($args['is_active'] !== '') {
+            $where[] = $wpdb->prepare("is_active = %d", (int)$args['is_active']);
+        }
+        
+        if (!empty($args['search'])) {
+            $search_term = '%' . $wpdb->esc_like($args['search']) . '%';
+            $where[] = $wpdb->prepare("(name LIKE %s OR message LIKE %s)", $search_term, $search_term);
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        $order_by = sanitize_sql_orderby($args['order_by'] . ' ' . $args['order']);
+        if (!$order_by) {
+            $order_by = 'created_at DESC';
+        }
+        
+        $query = "SELECT * FROM $table WHERE $where_clause ORDER BY $order_by LIMIT %d OFFSET %d";
+        $query = $wpdb->prepare($query, $args['limit'], $args['offset']);
+        
+        return $wpdb->get_results($query);
+    }
+
+    /**
+     * Get notification template by ID
+     */
+    public static function get_notification_template($id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_notification_templates';
+        return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $id));
+    }
+
+    /**
+     * Create notification template
+     */
+    public static function create_notification_template($data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_notification_templates';
+        
+        $defaults = array(
+            'type' => 'sms',
+            'name' => '',
+            'subject' => '',
+            'message' => '',
+            'variables' => null,
+            'is_active' => 1,
+        );
+        
+        $data = wp_parse_args($data, $defaults);
+        
+        if (is_array($data['variables'])) {
+            $data['variables'] = json_encode($data['variables']);
+        }
+        
+        $result = $wpdb->insert($table, array(
+            'type' => sanitize_text_field($data['type']),
+            'name' => sanitize_text_field($data['name']),
+            'subject' => !empty($data['subject']) ? sanitize_text_field($data['subject']) : null,
+            'message' => wp_kses_post($data['message']),
+            'variables' => $data['variables'],
+            'is_active' => (int)$data['is_active'],
+        ), array('%s', '%s', '%s', '%s', '%s', '%d'));
+        
+        return $result ? $wpdb->insert_id : false;
+    }
+
+    /**
+     * Update notification template
+     */
+    public static function update_notification_template($id, $data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_notification_templates';
+        
+        if (isset($data['variables']) && is_array($data['variables'])) {
+            $data['variables'] = json_encode($data['variables']);
+        }
+        
+        $update_data = array();
+        $format = array();
+        
+        if (isset($data['type'])) {
+            $update_data['type'] = sanitize_text_field($data['type']);
+            $format[] = '%s';
+        }
+        
+        if (isset($data['name'])) {
+            $update_data['name'] = sanitize_text_field($data['name']);
+            $format[] = '%s';
+        }
+        
+        if (isset($data['subject'])) {
+            $update_data['subject'] = !empty($data['subject']) ? sanitize_text_field($data['subject']) : null;
+            $format[] = '%s';
+        }
+        
+        if (isset($data['message'])) {
+            $update_data['message'] = wp_kses_post($data['message']);
+            $format[] = '%s';
+        }
+        
+        if (isset($data['variables'])) {
+            $update_data['variables'] = $data['variables'];
+            $format[] = '%s';
+        }
+        
+        if (isset($data['is_active'])) {
+            $update_data['is_active'] = (int)$data['is_active'];
+            $format[] = '%d';
+        }
+        
+        if (empty($update_data)) {
+            return false;
+        }
+        
+        return $wpdb->update($table, $update_data, array('id' => $id), $format, array('%d'));
+    }
+
+    /**
+     * Delete notification template
+     */
+    public static function delete_notification_template($id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_notification_templates';
+        return $wpdb->delete($table, array('id' => $id), array('%d'));
+    }
 }

@@ -814,6 +814,13 @@ class Maneli_Installment_Inquiry_Handler {
 
         $finotex_result = $this->execute_finotex_inquiry($national_code_for_api);
 
+        // Execute additional Finnotech APIs if enabled
+        $finnotech_handler = new Maneli_Finnotech_API_Handler();
+        $credit_risk_result = $finnotech_handler->execute_credit_risk_inquiry($national_code_for_api);
+        $credit_score_result = $finnotech_handler->execute_credit_score_inquiry($national_code_for_api);
+        $collaterals_result = $finnotech_handler->execute_collaterals_inquiry($national_code_for_api);
+        $cheque_color_result = $finnotech_handler->execute_cheque_color_inquiry($national_code_for_api);
+
         $car_id = get_user_meta($user_id, 'maneli_selected_car_id', true);
         $post_title = sprintf(
             '%s: %s - %s',
@@ -924,6 +931,26 @@ class Maneli_Installment_Inquiry_Handler {
         
         update_post_meta($post_id, 'product_id', $car_id);
         update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
+        
+        // Save Finnotech API results
+        // Save if we got a result (DONE or FAILED), or if we're creating a new post (to mark that we checked)
+        // For existing posts, if API is disabled (SKIPPED), preserve existing data by not overwriting
+        if ($credit_risk_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_credit_risk_data', $credit_risk_result['data']);
+            update_post_meta($post_id, '_finnotech_credit_risk_fetched_at', current_time('mysql'));
+        }
+        if ($credit_score_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_credit_score_data', $credit_score_result['data']);
+            update_post_meta($post_id, '_finnotech_credit_score_fetched_at', current_time('mysql'));
+        }
+        if ($collaterals_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_collaterals_data', $collaterals_result['data']);
+            update_post_meta($post_id, '_finnotech_collaterals_fetched_at', current_time('mysql'));
+        }
+        if ($cheque_color_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_cheque_color_data', $cheque_color_result['data']);
+            update_post_meta($post_id, '_finnotech_cheque_color_fetched_at', current_time('mysql'));
+        }
         
         // Ensure the installment amount is calculated with the current server-side rate and is saved to the post meta.
         $down_payment = get_user_meta($user_id, 'maneli_inquiry_down_payment', true);

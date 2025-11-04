@@ -94,6 +94,7 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-shortcode-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/public/class-finnotech-api-handler.php';
 
         // Admin & Settings
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-settings-page.php';

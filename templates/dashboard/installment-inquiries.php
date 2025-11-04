@@ -155,11 +155,11 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
                     <form id="maneli-inquiry-filter-form" onsubmit="return false;">
                         <div class="row g-3 mb-3">
                             <div class="col-md-12">
-                                <div class="input-group">
+                                <div class="input-group input-group-sm">
                                     <span class="input-group-text">
                                         <i class="la la-search"></i>
                                     </span>
-                                    <input type="search" id="inquiry-search-input" class="form-control" placeholder="<?php esc_attr_e('Search by customer name, car name, national ID or mobile...', 'maneli-car-inquiry'); ?>">
+                                    <input type="search" id="inquiry-search-input" class="form-control form-control-sm" placeholder="<?php esc_attr_e('Search by customer name, car name, national ID or mobile...', 'maneli-car-inquiry'); ?>">
                                 </div>
                             </div>
                         </div>

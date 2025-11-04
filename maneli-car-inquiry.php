@@ -41,6 +41,13 @@ define('MANELI_VERSION', '0.2.20');
  * External API Endpoints (Centralized for Security and Maintenance)
  */
 define('MANELI_FINOTEX_API_URL', 'https://api.finnotech.ir/credit/v2/clients/%s/chequeColorInquiry');
+
+// Finnotech Credit APIs
+define('MANELI_FINNOTECH_CREDIT_RISK_API_URL', 'https://api.finnotech.ir/kyc/v2/clients/%s/users/%s/transanctionCreditReport');
+define('MANELI_FINNOTECH_CREDIT_SCORE_API_URL', 'https://api.finnotech.ir/kyc/v2/clients/%s/users/%s/transactionCreditInquiryReport');
+define('MANELI_FINNOTECH_COLLATERALS_API_URL', 'https://api.finnotech.ir/credit/v2/clients/%s/users/%s/guaranteeCollaterals');
+define('MANELI_FINNOTECH_CHEQUE_COLOR_API_URL', 'https://api.finnotech.ir/credit/v2/clients/%s/chequeColorInquiry');
+
 define('MANELI_SMS_API_WSDL', 'https://api.payamak-panel.com/post/send.asmx?wsdl');
 
 // Zarinpal Gateway

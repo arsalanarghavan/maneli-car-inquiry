@@ -23,12 +23,16 @@ if (empty($payment_id)) {
 
 if (empty($payment_id)) {
     ?>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <strong>خطا!</strong> شناسه پرداخت مشخص نشده است.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="main-content app-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="la la-exclamation-triangle me-2"></i>
+                        <strong>خطا!</strong> شناسه پرداخت مشخص نشده است.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -46,12 +50,16 @@ if (!current_user_can('manage_maneli_inquiries')) {
 $inquiry = get_post($payment_id);
 if (!$inquiry) {
     ?>
-    <div class="row">
-        <div class="col-xl-12">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <strong>خطا!</strong> استعلام یافت نشد.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="main-content app-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="la la-exclamation-triangle me-2"></i>
+                        <strong>خطا!</strong> استعلام یافت نشد.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -144,7 +152,9 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
 }
 ?>
 
-<div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
+<div class="main-content app-content">
+    <div class="container-fluid">
+        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
     <div>
         <nav>
             <ol class="breadcrumb mb-1">
@@ -337,6 +347,8 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                 </table>
             </div>
         </div>
+    </div>
+</div>
     </div>
 </div>
 <!-- End::row -->

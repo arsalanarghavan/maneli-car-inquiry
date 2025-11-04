@@ -377,6 +377,37 @@ class Maneli_Render_Helpers {
         $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
         $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
         
+        // Check Finnotech API data availability
+        $options = get_option('maneli_inquiry_all_options', []);
+        $credit_risk_data = get_post_meta($inquiry_id, '_finnotech_credit_risk_data', true);
+        $credit_score_data = get_post_meta($inquiry_id, '_finnotech_credit_score_data', true);
+        $collaterals_data = get_post_meta($inquiry_id, '_finnotech_collaterals_data', true);
+        $cheque_color_data = get_post_meta($inquiry_id, '_finnotech_cheque_color_data', true);
+        
+        $credit_risk_enabled = !empty($options['finnotech_credit_risk_enabled']) && $options['finnotech_credit_risk_enabled'] === '1';
+        $credit_score_enabled = !empty($options['finnotech_credit_score_enabled']) && $options['finnotech_credit_score_enabled'] === '1';
+        $collaterals_enabled = !empty($options['finnotech_collaterals_enabled']) && $options['finnotech_collaterals_enabled'] === '1';
+        $cheque_color_enabled = !empty($options['finnotech_cheque_color_enabled']) && $options['finnotech_cheque_color_enabled'] === '1';
+        
+        $has_finnotech_data = false;
+        $finnotech_indicators = [];
+        if ($credit_risk_enabled && !empty($credit_risk_data)) {
+            $has_finnotech_data = true;
+            $finnotech_indicators[] = '<i class="la la-exclamation-circle text-danger" title="' . esc_attr__('Credit Risk Available', 'maneli-car-inquiry') . '"></i>';
+        }
+        if ($credit_score_enabled && !empty($credit_score_data)) {
+            $has_finnotech_data = true;
+            $finnotech_indicators[] = '<i class="la la-chart-line text-warning" title="' . esc_attr__('Credit Score Available', 'maneli-car-inquiry') . '"></i>';
+        }
+        if ($collaterals_enabled && !empty($collaterals_data)) {
+            $has_finnotech_data = true;
+            $finnotech_indicators[] = '<i class="la la-file-contract text-info" title="' . esc_attr__('Contracts Available', 'maneli-car-inquiry') . '"></i>';
+        }
+        if ($cheque_color_enabled && !empty($cheque_color_data)) {
+            $has_finnotech_data = true;
+            $finnotech_indicators[] = '<i class="la la-shield-alt text-primary" title="' . esc_attr__('Cheque Status Available', 'maneli-car-inquiry') . '"></i>';
+        }
+        
         // Get status badge color class
         $status_badge_class = 'bg-secondary-transparent';
         switch ($inquiry_status) {
@@ -415,7 +446,14 @@ class Maneli_Render_Helpers {
             <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?></td>
             <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer->display_name ?? '—'); ?></td>
             <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>">
-                <?php echo esc_html(get_the_title($product_id)); ?>
+                <div class="d-flex align-items-center">
+                    <?php echo esc_html(get_the_title($product_id)); ?>
+                    <?php if ($has_finnotech_data && $is_admin): ?>
+                        <span class="ms-2" style="font-size: 14px;" title="<?php esc_attr_e('Credit Information Available', 'maneli-car-inquiry'); ?>">
+                            <?php echo implode(' ', $finnotech_indicators); ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
             </td>
             <?php if ($show_followup_date): ?>
                 <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">

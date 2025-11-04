@@ -69,6 +69,9 @@ $stats = Maneli_Status_Migration::get_migration_stats();
                                     <?php if ($stats['installment']['cancelled'] > 0): ?>
                                         <p class="mb-0 text-danger"><strong><?php esc_html_e('Cancelled:', 'maneli-car-inquiry'); ?></strong> <?php echo number_format_i18n($stats['installment']['cancelled']); ?></p>
                                     <?php endif; ?>
+                                    <?php if ($stats['installment']['new_with_expert'] > 0): ?>
+                                        <p class="mb-0 text-warning"><strong><?php esc_html_e('New with Assigned Expert (should be Referred):', 'maneli-car-inquiry'); ?></strong> <?php echo number_format_i18n($stats['installment']['new_with_expert']); ?></p>
+                                    <?php endif; ?>
                                     <?php if (!empty($stats['installment']['other_invalid'])): ?>
                                         <div class="mt-2">
                                             <strong><?php esc_html_e('Other Invalid Statuses:', 'maneli-car-inquiry'); ?></strong>
@@ -93,6 +96,9 @@ $stats = Maneli_Status_Migration::get_migration_stats();
                                     <p class="mb-1 text-warning"><strong><?php esc_html_e('Empty Statuses:', 'maneli-car-inquiry'); ?></strong> <?php echo number_format_i18n($stats['cash']['empty']); ?></p>
                                     <?php if ($stats['cash']['pending'] > 0): ?>
                                         <p class="mb-0 text-warning"><strong><?php esc_html_e('Pending:', 'maneli-car-inquiry'); ?></strong> <?php echo number_format_i18n($stats['cash']['pending']); ?></p>
+                                    <?php endif; ?>
+                                    <?php if ($stats['cash']['new_with_expert'] > 0): ?>
+                                        <p class="mb-0 text-warning"><strong><?php esc_html_e('New with Assigned Expert (should be Referred):', 'maneli-car-inquiry'); ?></strong> <?php echo number_format_i18n($stats['cash']['new_with_expert']); ?></p>
                                     <?php endif; ?>
                                     <?php if (!empty($stats['cash']['other_invalid'])): ?>
                                         <div class="mt-2">
@@ -119,12 +125,18 @@ $stats = Maneli_Status_Migration::get_migration_stats();
                                 <li><?php esc_html_e('Total:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['installment']['total']); ?></li>
                                 <li><?php esc_html_e('Updated:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['installment']['updated']); ?></li>
                                 <li><?php esc_html_e('Skipped:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['installment']['skipped']); ?></li>
+                                <?php if (isset($migration_results['referred_fixes']['installment']['fixed']) && $migration_results['referred_fixes']['installment']['fixed'] > 0): ?>
+                                    <li class="text-success"><strong><?php esc_html_e('Fixed to Referred:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['referred_fixes']['installment']['fixed']); ?></strong></li>
+                                <?php endif; ?>
                             </ul>
                             <h6><?php esc_html_e('Cash Inquiries:', 'maneli-car-inquiry'); ?></h6>
                             <ul>
                                 <li><?php esc_html_e('Total:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['cash']['total']); ?></li>
                                 <li><?php esc_html_e('Updated:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['cash']['updated']); ?></li>
                                 <li><?php esc_html_e('Skipped:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['cash']['skipped']); ?></li>
+                                <?php if (isset($migration_results['referred_fixes']['cash']['fixed']) && $migration_results['referred_fixes']['cash']['fixed'] > 0): ?>
+                                    <li class="text-success"><strong><?php esc_html_e('Fixed to Referred:', 'maneli-car-inquiry'); ?> <?php echo number_format_i18n($migration_results['referred_fixes']['cash']['fixed']); ?></strong></li>
+                                <?php endif; ?>
                             </ul>
                         </div>
                     <?php endif; ?>

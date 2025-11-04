@@ -475,28 +475,26 @@ class Maneli_Settings_Page {
                             ['name' => 'cash_inquiry_expert_referral_pattern', 'label' => esc_html__('Pattern: "Cash Request Referral to Expert"', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
                         ]
                     ],
-                    'maneli_sms_meeting_reminders_section' => [
-                        'title' => esc_html__('Meeting Reminders', 'maneli-car-inquiry'),
+                    'maneli_sms_meeting_reminder_patterns_section' => [
+                        'title' => esc_html__('Meeting Reminder Patterns', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Pattern codes for meeting reminder notifications. These will be used when sending reminders before meetings.', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'meeting_reminder_hours', 'label' => esc_html__('Remind Hours Before Meeting', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Comma-separated hours (e.g., 2,6,24). Reminders will be sent these hours before the meeting.', 'maneli-car-inquiry')],
-                            ['name' => 'meeting_reminder_days', 'label' => esc_html__('Remind Days Before Meeting', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('Comma-separated days (e.g., 1,3). Reminders will be sent these days before the meeting.', 'maneli-car-inquiry')],
-                            ['name' => 'meeting_reminder_sms_enabled', 'label' => esc_html__('Enable SMS Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1'],
-                            ['name' => 'meeting_reminder_telegram_enabled', 'label' => esc_html__('Enable Telegram Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
-                            ['name' => 'meeting_reminder_email_enabled', 'label' => esc_html__('Enable Email Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
-                            ['name' => 'meeting_reminder_notification_enabled', 'label' => esc_html__('Enable In-App Notification Reminders', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1'],
+                            ['name' => 'meeting_reminder_sms_pattern', 'label' => esc_html__('SMS Pattern: Meeting Reminder', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for SMS meeting reminders. Variables: 1. Customer Name 2. Meeting Date 3. Meeting Time 4. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'meeting_reminder_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Meeting Reminder', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for Telegram meeting reminders. Variables: 1. Customer Name 2. Meeting Date 3. Meeting Time 4. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'meeting_reminder_email_pattern', 'label' => esc_html__('Email Pattern: Meeting Reminder', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for Email meeting reminders. Variables: 1. Customer Name 2. Meeting Date 3. Meeting Time 4. Car Name', 'maneli-car-inquiry')],
                         ]
                     ],
                     'maneli_sms_scheduled_section' => [
                         'title' => esc_html__('Scheduled SMS', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'scheduled_sms_enabled', 'label' => esc_html__('Enable Scheduled SMS', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1', 'desc' => esc_html__('Allow scheduling SMS messages for future delivery.', 'maneli-car-inquiry')],
+                            ['name' => 'scheduled_sms_enabled', 'label' => esc_html__('Enable Scheduled SMS', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1', 'desc' => esc_html__('Allow scheduling SMS messages for future delivery.', 'maneli-car-inquiry')],
                         ]
                     ],
                     'maneli_sms_bulk_section' => [
                         'title' => esc_html__('Bulk SMS', 'maneli-car-inquiry'),
                         'fields' => [
                             ['name' => 'bulk_sms_limit', 'label' => esc_html__('Maximum Recipients per Bulk Send', 'maneli-car-inquiry'), 'type' => 'number', 'default' => '100', 'desc' => esc_html__('Maximum number of recipients allowed in a single bulk send operation.', 'maneli-car-inquiry')],
-                            ['name' => 'bulk_sms_recipient_filter', 'label' => esc_html__('Recipient Filter Options', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '1', 'desc' => esc_html__('Allow filtering recipients by user role (customers, experts, admins).', 'maneli-car-inquiry')],
+                            ['name' => 'bulk_sms_recipient_filter', 'label' => esc_html__('Recipient Filter Options', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1', 'desc' => esc_html__('Allow filtering recipients by user role (customers, experts, admins).', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]
@@ -515,7 +513,7 @@ class Maneli_Settings_Page {
                     'maneli_telegram_settings_section' => [
                         'title' => esc_html__('Telegram Settings', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'telegram_enabled', 'label' => esc_html__('Enable Telegram Notifications', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
+                            ['name' => 'telegram_enabled', 'label' => esc_html__('Enable Telegram Notifications', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0'],
                         ]
                     ]
                 ]
@@ -527,7 +525,7 @@ class Maneli_Settings_Page {
                     'maneli_email_smtp_section' => [
                         'title' => esc_html__('SMTP Configuration', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'email_use_smtp', 'label' => esc_html__('Use SMTP', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0', 'desc' => esc_html__('If disabled, WordPress default wp_mail will be used.', 'maneli-car-inquiry')],
+                            ['name' => 'email_use_smtp', 'label' => esc_html__('Use SMTP', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0', 'desc' => esc_html__('If disabled, WordPress default wp_mail will be used.', 'maneli-car-inquiry')],
                             ['name' => 'email_smtp_host', 'label' => esc_html__('SMTP Host', 'maneli-car-inquiry'), 'type' => 'text', 'desc' => esc_html__('e.g., smtp.gmail.com', 'maneli-car-inquiry')],
                             ['name' => 'email_smtp_port', 'label' => esc_html__('SMTP Port', 'maneli-car-inquiry'), 'type' => 'number', 'default' => '587', 'desc' => esc_html__('Common ports: 587 (TLS), 465 (SSL)', 'maneli-car-inquiry')],
                             ['name' => 'email_smtp_username', 'label' => esc_html__('SMTP Username', 'maneli-car-inquiry'), 'type' => 'text'],
@@ -545,7 +543,7 @@ class Maneli_Settings_Page {
                     'maneli_email_settings_section' => [
                         'title' => esc_html__('Email Settings', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'email_enabled', 'label' => esc_html__('Enable Email Notifications', 'maneli-car-inquiry'), 'type' => 'checkbox', 'default' => '0'],
+                            ['name' => 'email_enabled', 'label' => esc_html__('Enable Email Notifications', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0'],
                         ]
                     ]
                 ]
@@ -612,13 +610,23 @@ class Maneli_Settings_Page {
                 'title' => esc_html__('Finotex', 'maneli-car-inquiry'),
                 'icon' => 'fas fa-university',
                 'sections' => [
-                    'maneli_finotex_cheque_section' => [
-                        'title' => esc_html__('Cheque Color Inquiry Service', 'maneli-car-inquiry'),
+                    'maneli_finotex_credentials_section' => [
+                        'title' => esc_html__('Finnotech API Credentials', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('These credentials are used for all Finnotech API services including Credit Risk, Credit Score, Collaterals, and Cheque Color inquiries.', 'maneli-car-inquiry'),
                         'fields' => [
-                            ['name' => 'finotex_enabled', 'label' => esc_html__('Enable Finotex Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable the cheque color inquiry via the Finotex service.', 'maneli-car-inquiry')],
-                            // Encrypted Fields
-                            ['name' => 'finotex_username', 'label' => esc_html__('Finotex Client ID', 'maneli-car-inquiry'), 'type' => 'password', 'desc' => esc_html__('Client ID provided by Finotex. Stored securely encrypted.', 'maneli-car-inquiry')],
-                            ['name' => 'finotex_password', 'label' => esc_html__('Finotex API Key', 'maneli-car-inquiry'), 'type' => 'password', 'desc' => esc_html__('API Key (Access Token) provided by Finotex. Stored securely encrypted.', 'maneli-car-inquiry')],
+                            ['name' => 'finotex_username', 'label' => esc_html__('Finnotech Client ID', 'maneli-car-inquiry'), 'type' => 'password', 'desc' => esc_html__('Client ID provided by Finnotech. Stored securely encrypted.', 'maneli-car-inquiry')],
+                            ['name' => 'finotex_password', 'label' => esc_html__('Finnotech API Key', 'maneli-car-inquiry'), 'type' => 'password', 'desc' => esc_html__('API Key (Access Token) provided by Finnotech. Stored securely encrypted.', 'maneli-car-inquiry')],
+                            ['name' => 'finotex_enabled', 'label' => esc_html__('Enable Legacy Finotex API', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead).', 'maneli-car-inquiry'), 'default' => '0'],
+                        ]
+                    ],
+                    'maneli_finnotech_apis_section' => [
+                        'title' => esc_html__('Finnotech API Services', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Enable or disable individual Finnotech API services. When disabled, the data will be hidden from reports but preserved in the database.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'finnotech_credit_risk_enabled', 'label' => esc_html__('Enable Credit Risk Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable banking risk inquiry for individuals (ریسک بانکی شخص).', 'maneli-car-inquiry')],
+                            ['name' => 'finnotech_credit_score_enabled', 'label' => esc_html__('Enable Credit Score Report', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری).', 'maneli-car-inquiry')],
+                            ['name' => 'finnotech_collaterals_enabled', 'label' => esc_html__('Enable Collaterals Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable contracts summary inquiry (وام‌ها/تسهیلات).', 'maneli-car-inquiry')],
+                            ['name' => 'finnotech_cheque_color_enabled', 'label' => esc_html__('Enable Cheque Color Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی).', 'maneli-car-inquiry')],
                         ]
                     ]
                 ]
@@ -688,6 +696,67 @@ class Maneli_Settings_Page {
                             ],
                         ]
                     ]
+                ]
+            ],
+            'notifications' => [
+                'title' => esc_html__('Notifications', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-bell',
+                'sections' => [
+                    'maneli_meeting_reminders_section' => [
+                        'title' => esc_html__('Meeting Reminders', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure automatic reminders sent before scheduled meetings.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'meeting_reminder_hours', 'label' => esc_html__('Remind Hours Before Meeting', 'maneli-car-inquiry'), 'type' => 'text', 'default' => '2', 'desc' => esc_html__('Comma-separated hours (e.g., 2,6,24). Reminders will be sent these hours before the meeting.', 'maneli-car-inquiry')],
+                            ['name' => 'meeting_reminder_days', 'label' => esc_html__('Remind Days Before Meeting', 'maneli-car-inquiry'), 'type' => 'text', 'default' => '1', 'desc' => esc_html__('Comma-separated days (e.g., 1,3). Reminders will be sent these days before the meeting.', 'maneli-car-inquiry')],
+                            ['name' => 'meeting_reminder_sms_enabled', 'label' => esc_html__('Enable SMS Reminders', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1'],
+                            ['name' => 'meeting_reminder_telegram_enabled', 'label' => esc_html__('Enable Telegram Reminders', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0'],
+                            ['name' => 'meeting_reminder_email_enabled', 'label' => esc_html__('Enable Email Reminders', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0'],
+                            ['name' => 'meeting_reminder_notification_enabled', 'label' => esc_html__('Enable In-App Notification Reminders', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1'],
+                        ]
+                    ],
+                    'maneli_installment_status_notifications_section' => [
+                        'title' => esc_html__('Installment Inquiry Status Notifications', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure notification patterns for different installment inquiry statuses.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'installment_pending_sms_pattern', 'label' => esc_html__('SMS Pattern: Pending Review', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for pending status. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_pending_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Pending Review', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for pending status. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_pending_email_pattern', 'label' => esc_html__('Email Pattern: Pending Review', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for pending status. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_approved_sms_pattern', 'label' => esc_html__('SMS Pattern: Approved', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for approved status. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_approved_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Approved', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for approved status. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_approved_email_pattern', 'label' => esc_html__('Email Pattern: Approved', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for approved status. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_rejected_sms_pattern', 'label' => esc_html__('SMS Pattern: Rejected', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for rejected status. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'installment_rejected_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Rejected', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for rejected status. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'installment_rejected_email_pattern', 'label' => esc_html__('Email Pattern: Rejected', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for rejected status. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'installment_expert_referral_sms_pattern', 'label' => esc_html__('SMS Pattern: Referral to Expert', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for expert referral. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_expert_referral_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Referral to Expert', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for expert referral. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'installment_expert_referral_email_pattern', 'label' => esc_html__('Email Pattern: Referral to Expert', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for expert referral. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
+                        ]
+                    ],
+                    'maneli_cash_status_notifications_section' => [
+                        'title' => esc_html__('Cash Inquiry Status Notifications', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure notification patterns for different cash inquiry statuses.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'cash_approved_sms_pattern', 'label' => esc_html__('SMS Pattern: Cash Request Approved', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for approved cash request. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount', 'maneli-car-inquiry')],
+                            ['name' => 'cash_approved_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Cash Request Approved', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for approved cash request. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount', 'maneli-car-inquiry')],
+                            ['name' => 'cash_approved_email_pattern', 'label' => esc_html__('Email Pattern: Cash Request Approved', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for approved cash request. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount', 'maneli-car-inquiry')],
+                            ['name' => 'cash_rejected_sms_pattern', 'label' => esc_html__('SMS Pattern: Cash Request Rejected', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for rejected cash request. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'cash_rejected_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Cash Request Rejected', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for rejected cash request. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'cash_rejected_email_pattern', 'label' => esc_html__('Email Pattern: Cash Request Rejected', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for rejected cash request. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason', 'maneli-car-inquiry')],
+                            ['name' => 'cash_expert_referral_sms_pattern', 'label' => esc_html__('SMS Pattern: Cash Request Referral to Expert', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for expert referral. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'cash_expert_referral_telegram_pattern', 'label' => esc_html__('Telegram Pattern: Cash Request Referral to Expert', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for expert referral. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'cash_expert_referral_email_pattern', 'label' => esc_html__('Email Pattern: Cash Request Referral to Expert', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for expert referral. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name', 'maneli-car-inquiry')],
+                        ]
+                    ],
+                    'maneli_new_inquiry_notifications_section' => [
+                        'title' => esc_html__('New Inquiry Notifications', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure notifications sent to administrators when a new inquiry is submitted.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            ['name' => 'new_inquiry_sms_pattern', 'label' => esc_html__('SMS Pattern: New Request for Admin', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for new inquiry notification to admin. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'new_inquiry_telegram_pattern', 'label' => esc_html__('Telegram Pattern: New Request for Admin', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for new inquiry notification to admin. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'new_inquiry_email_pattern', 'label' => esc_html__('Email Pattern: New Request for Admin', 'maneli-car-inquiry'), 'type' => 'number', 'desc' => esc_html__('Pattern code for new inquiry notification to admin. Variables: 1. Customer Name 2. Car Name', 'maneli-car-inquiry')],
+                            ['name' => 'new_inquiry_notification_enabled', 'label' => esc_html__('Enable In-App Notification for New Inquiries', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1', 'desc' => esc_html__('Send in-app notification to admins when a new inquiry is submitted.', 'maneli-car-inquiry')],
+                        ]
+                    ],
                 ]
             ],
         ];

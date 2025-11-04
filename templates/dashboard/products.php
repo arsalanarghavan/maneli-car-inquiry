@@ -712,7 +712,7 @@ $product_categories = get_terms([
                     </table>
                 </div>
 
-                <div id="product-list-loader" class="maneli-list-loader">
+                <div id="product-list-loader" class="maneli-list-loader" style="display: none;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">در حال بارگذاری...</span>
                     </div>

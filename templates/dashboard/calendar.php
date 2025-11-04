@@ -528,8 +528,16 @@ $total_meetings = count($meetings_data);
     transition: color 0.3s ease !important;
 }
 
+[data-theme-mode=dark] .card.custom-card.crm-card h4 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
 .card.custom-card.crm-card:hover h4 {
     color: #5e72e4 !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card:hover h4 {
+    color: var(--primary-color) !important;
 }
 
 .card.custom-card.crm-card .border-primary,
@@ -1836,6 +1844,307 @@ $total_meetings = count($meetings_data);
     .monthly-day-cell {
         min-height: 80px;
         padding: 8px;
+    }
+}
+
+/* ============================================
+   DARK MODE STYLES FOR CALENDAR
+   ============================================ */
+
+[data-theme-mode=dark] .card.custom-card.crm-card {
+    background: rgb(var(--body-bg-rgb)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card h4 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card:hover h4 {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card.crm-card .text-muted,
+[data-theme-mode=dark] .card.custom-card.crm-card p {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .timeline-container::before {
+    background: linear-gradient(to bottom, var(--primary-color) 0%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+[data-theme-mode=dark] .day-header {
+    background: linear-gradient(135deg, rgb(var(--body-bg-rgb)) 0%, rgb(var(--body-bg-rgb2)) 100%) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .day-header.today {
+    background: linear-gradient(135deg, rgba(var(--danger-rgb), 0.15) 0%, rgb(var(--body-bg-rgb)) 100%) !important;
+    border-color: rgb(var(--danger-rgb)) !important;
+}
+
+[data-theme-mode=dark] .day-info {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .day-info h5 {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .day-info .day-date-display {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .calendar-event-card {
+    background: rgb(var(--body-bg-rgb)) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .calendar-event-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    border-color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .calendar-event-card::before {
+    background: var(--primary-color) !important;
+    border: 3px solid rgb(var(--body-bg-rgb)) !important;
+    box-shadow: 0 0 0 2px var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .event-time {
+    color: var(--primary-color) !important;
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.2) 0%, transparent 100%) !important;
+}
+
+[data-theme-mode=dark] .event-time i {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .event-customer {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .event-customer i {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .event-info {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .event-info i {
+    color: rgb(var(--success-rgb)) !important;
+}
+
+[data-theme-mode=dark] .event-info .la-la-car {
+    color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .event-scheduled-badge {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.2) 0%, rgba(13, 110, 253, 0.1) 100%) !important;
+    border: 1px solid rgba(13, 110, 253, 0.3) !important;
+    color: rgb(173, 216, 230) !important;
+}
+
+[data-theme-mode=dark] .event-scheduled-badge i {
+    color: rgb(var(--info-rgb)) !important;
+}
+
+[data-theme-mode=dark] .text-center.py-5 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .text-center.py-5 h5 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .text-center.py-5 p {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .text-center.py-5 .la-la-calendar-times {
+    color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Weekly Calendar Dark Mode */
+[data-theme-mode=dark] .weekly-calendar-grid {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode=dark] .weekly-time-column {
+    background: rgb(var(--body-bg-rgb)) !important;
+    border-right: 2px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode=dark] .weekly-time-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .weekly-time-slot {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .weekly-day-column {
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode=dark] .weekly-day-column.today-column {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+[data-theme-mode=dark] .weekly-day-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgb(var(--body-bg-rgb)) !important;
+}
+
+[data-theme-mode=dark] .weekly-day-header .day-name {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .weekly-day-header .day-number {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .weekly-day-header .day-number.today {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+[data-theme-mode=dark] .weekly-day-header .day-month-small {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .weekly-time-cell {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode=dark] .weekly-time-cell:hover {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+[data-theme-mode=dark] .weekly-meeting-item {
+    color: white !important;
+}
+
+/* Monthly Calendar Dark Mode */
+[data-theme-mode=dark] .monthly-calendar-grid {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode=dark] .monthly-weekday-header {
+    background: var(--primary-color) !important;
+    color: white !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme-mode=dark] .monthly-day-cell {
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgb(var(--body-bg-rgb)) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .monthly-day-cell.empty {
+    background: rgb(var(--body-bg-rgb2)) !important;
+}
+
+[data-theme-mode=dark] .monthly-day-cell:hover:not(.empty) {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+[data-theme-mode=dark] .monthly-day-cell.today {
+    background: rgba(var(--primary-rgb), 0.15) !important;
+}
+
+[data-theme-mode=dark] .monthly-day-cell.today .monthly-day-number {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+[data-theme-mode=dark] .monthly-day-number {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .meeting-more {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .meeting-list-item {
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgb(var(--body-bg-rgb)) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .meeting-list-item:hover {
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    border-color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .meeting-list-item strong {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .meeting-list-item .text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode=dark] .calendar-header h5 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card .card-header .card-title {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode=dark] .card.custom-card .card-header .card-title i {
+    color: var(--primary-color) !important;
+}
+
+[data-theme-mode=dark] .nav-tabs .nav-link {
+    color: rgba(255, 255, 255, 0.7) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode=dark] .nav-tabs .nav-link:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+[data-theme-mode=dark] .nav-tabs .nav-link.active {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) var(--primary-color) transparent !important;
+    background-color: rgb(var(--body-bg-rgb)) !important;
+}
+
+[data-theme-mode=dark] .nav-tabs .nav-link i {
+    color: inherit !important;
+}
+
+[data-theme-mode=dark] .badge.bg-danger-gradient {
+    background: linear-gradient(135deg, rgb(var(--danger-rgb)) 0%, rgba(var(--danger-rgb), 0.8) 100%) !important;
+    box-shadow: 0 2px 8px rgba(var(--danger-rgb), 0.4) !important;
+}
+
+[data-theme-mode=dark] .badge.bg-danger-gradient {
+    animation: pulse-badge-dark 2s infinite;
+}
+
+@keyframes pulse-badge-dark {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(var(--danger-rgb), 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(var(--danger-rgb), 0.6);
     }
 }
 </style>

@@ -230,6 +230,13 @@ class Maneli_Admin_Actions_Handler {
         // 1. Execute Finotex Inquiry (Handler manages decryption internally)
         $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
         
+        // Execute additional Finnotech APIs if enabled
+        $finnotech_handler = new Maneli_Finnotech_API_Handler();
+        $credit_risk_result = $finnotech_handler->execute_credit_risk_inquiry($national_code_for_api);
+        $credit_score_result = $finnotech_handler->execute_credit_score_inquiry($national_code_for_api);
+        $collaterals_result = $finnotech_handler->execute_collaterals_inquiry($national_code_for_api);
+        $cheque_color_result = $finnotech_handler->execute_cheque_color_inquiry($national_code_for_api);
+        
         // 2. Calculate Loan Details (Replicating JS calculator logic)
         $product = wc_get_product($product_id);
         $total_price = (int)get_post_meta($product_id, 'installment_price', true);
@@ -272,6 +279,26 @@ class Maneli_Admin_Actions_Handler {
         // Save initial status
         update_post_meta($post_id, 'inquiry_status', $initial_status);
         update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
+        
+        // Save Finnotech API results
+        // Save if we got a result (DONE or FAILED)
+        // If API is disabled (SKIPPED), existing data is preserved automatically (not overwritten)
+        if ($credit_risk_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_credit_risk_data', $credit_risk_result['data']);
+            update_post_meta($post_id, '_finnotech_credit_risk_fetched_at', current_time('mysql'));
+        }
+        if ($credit_score_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_credit_score_data', $credit_score_result['data']);
+            update_post_meta($post_id, '_finnotech_credit_score_fetched_at', current_time('mysql'));
+        }
+        if ($collaterals_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_collaterals_data', $collaterals_result['data']);
+            update_post_meta($post_id, '_finnotech_collaterals_fetched_at', current_time('mysql'));
+        }
+        if ($cheque_color_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_cheque_color_data', $cheque_color_result['data']);
+            update_post_meta($post_id, '_finnotech_cheque_color_fetched_at', current_time('mysql'));
+        }
         
         // Mark that payment was completed (admin-created inquiries are considered as paid with 0 amount)
         update_post_meta($post_id, 'inquiry_payment_completed', 'yes');
@@ -443,8 +470,33 @@ class Maneli_Admin_Actions_Handler {
         // Handler now manages decryption internally
         $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
 
+        // Retry additional Finnotech APIs
+        $finnotech_handler = new Maneli_Finnotech_API_Handler();
+        $credit_risk_result = $finnotech_handler->execute_credit_risk_inquiry($national_code_for_api);
+        $credit_score_result = $finnotech_handler->execute_credit_score_inquiry($national_code_for_api);
+        $collaterals_result = $finnotech_handler->execute_collaterals_inquiry($national_code_for_api);
+        $cheque_color_result = $finnotech_handler->execute_cheque_color_inquiry($national_code_for_api);
+
         wp_update_post(['ID' => $post_id, 'post_content' => "Finotex API raw response (Retried by Admin):\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>"]);
         update_post_meta($post_id, '_finotex_response_data', $finotex_result['data']);
+
+        // Save Finnotech API results (retry)
+        if ($credit_risk_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_credit_risk_data', $credit_risk_result['data']);
+            update_post_meta($post_id, '_finnotech_credit_risk_fetched_at', current_time('mysql'));
+        }
+        if ($credit_score_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_credit_score_data', $credit_score_result['data']);
+            update_post_meta($post_id, '_finnotech_credit_score_fetched_at', current_time('mysql'));
+        }
+        if ($collaterals_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_collaterals_data', $collaterals_result['data']);
+            update_post_meta($post_id, '_finnotech_collaterals_fetched_at', current_time('mysql'));
+        }
+        if ($cheque_color_result['status'] !== 'SKIPPED') {
+            update_post_meta($post_id, '_finnotech_cheque_color_data', $cheque_color_result['data']);
+            update_post_meta($post_id, '_finnotech_cheque_color_fetched_at', current_time('mysql'));
+        }
 
         $old_status = get_post_meta($post_id, 'inquiry_status', true);
         $new_status = ($finotex_result['status'] === 'DONE' || $finotex_result['status'] === 'SKIPPED') ? 'pending' : 'failed';

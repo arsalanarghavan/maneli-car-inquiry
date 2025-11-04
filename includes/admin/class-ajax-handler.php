@@ -228,6 +228,13 @@ class Maneli_Ajax_Handler {
 
         $post_meta = get_post_meta($inquiry_id);
         $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
+        
+        // Finnotech API data
+        $credit_risk_data = get_post_meta($inquiry_id, '_finnotech_credit_risk_data', true);
+        $credit_score_data = get_post_meta($inquiry_id, '_finnotech_credit_score_data', true);
+        $collaterals_data = get_post_meta($inquiry_id, '_finnotech_collaterals_data', true);
+        $cheque_color_data = get_post_meta($inquiry_id, '_finnotech_cheque_color_data', true);
+        
         $product_id = $post_meta['product_id'][0] ?? 0;
         $status = $post_meta['inquiry_status'][0] ?? 'pending';
 
@@ -247,6 +254,12 @@ class Maneli_Ajax_Handler {
             'buyer' => ['first_name' => $post_meta['first_name'][0] ?? '', 'last_name' => $post_meta['last_name'][0] ?? ''],
             'issuer_type' => $post_meta['issuer_type'][0] ?? 'self',
             'finotex' => ['skipped' => (empty($finotex_data) || ($finotex_data['status'] ?? '') === 'SKIPPED'), 'color_code' => $finotex_data['result']['chequeColor'] ?? 0],
+            'finnotech' => [
+                'credit_risk' => !empty($credit_risk_data),
+                'credit_score' => !empty($credit_score_data),
+                'collaterals' => !empty($collaterals_data),
+                'cheque_color' => !empty($cheque_color_data),
+            ],
         ];
         wp_send_json_success($data);
     }

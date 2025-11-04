@@ -52,6 +52,79 @@ class Maneli_Status_Migration {
     ];
 
     /**
+     * Fix inquiries that have assigned expert but status is 'new'
+     * These should be 'referred' status
+     * 
+     * @return array Fix results
+     */
+    public static function fix_referred_statuses() {
+        $results = [
+            'installment' => [
+                'fixed' => 0,
+                'details' => []
+            ],
+            'cash' => [
+                'fixed' => 0,
+                'details' => []
+            ]
+        ];
+
+        // Fix installment inquiries - get all with 'new' status that have assigned expert
+        $installment_args = [
+            'post_type' => 'inquiry',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ];
+        $installment_ids = get_posts($installment_args);
+        
+        foreach ($installment_ids as $inquiry_id) {
+            $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
+            $expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+            
+            // If status is 'new' (or empty) and has assigned expert, change to 'referred'
+            if (($tracking_status === 'new' || empty($tracking_status)) && !empty($expert_id) && $expert_id !== '0' && $expert_id !== 0 && $expert_id !== '') {
+                update_post_meta($inquiry_id, 'tracking_status', 'referred');
+                $results['installment']['fixed']++;
+                $results['installment']['details'][] = [
+                    'id' => $inquiry_id,
+                    'expert_id' => $expert_id,
+                    'old_status' => $tracking_status ?: 'empty',
+                    'new_status' => 'referred'
+                ];
+            }
+        }
+
+        // Fix cash inquiries - get all with 'new' status that have assigned expert
+        $cash_args = [
+            'post_type' => 'cash_inquiry',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids'
+        ];
+        $cash_ids = get_posts($cash_args);
+        
+        foreach ($cash_ids as $inquiry_id) {
+            $cash_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
+            $expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
+            
+            // If status is 'new' (or empty) and has assigned expert, change to 'referred'
+            if (($cash_status === 'new' || empty($cash_status)) && !empty($expert_id) && $expert_id !== '0' && $expert_id !== 0 && $expert_id !== '') {
+                update_post_meta($inquiry_id, 'cash_inquiry_status', 'referred');
+                $results['cash']['fixed']++;
+                $results['cash']['details'][] = [
+                    'id' => $inquiry_id,
+                    'expert_id' => $expert_id,
+                    'old_status' => $cash_status ?: 'empty',
+                    'new_status' => 'referred'
+                ];
+            }
+        }
+
+        return $results;
+    }
+
+    /**
      * Run migration for all inquiries
      * 
      * @return array Migration results
@@ -81,6 +154,10 @@ class Maneli_Status_Migration {
         // Migrate cash inquiries
         $cash_results = self::migrate_cash_statuses();
         $results['cash'] = $cash_results;
+
+        // Fix inquiries that have assigned expert but status is 'new'
+        $referred_fixes = self::fix_referred_statuses();
+        $results['referred_fixes'] = $referred_fixes;
 
         return $results;
     }
@@ -258,6 +335,11 @@ class Maneli_Status_Migration {
                 'invalid' => 0,
                 'empty' => 0,
                 'cancelled' => 0,
+                'pending' => 0,
+                'user_confirmed' => 0,
+                'more_docs' => 0,
+                'failed' => 0,
+                'new_with_expert' => 0, // new status but has assigned expert (should be referred)
                 'other_invalid' => []
             ],
             'cash' => [
@@ -265,6 +347,11 @@ class Maneli_Status_Migration {
                 'invalid' => 0,
                 'empty' => 0,
                 'pending' => 0,
+                'cancelled' => 0,
+                'user_confirmed' => 0,
+                'more_docs' => 0,
+                'failed' => 0,
+                'new_with_expert' => 0, // new status but has assigned expert (should be referred)
                 'other_invalid' => []
             ]
         ];
@@ -281,12 +368,28 @@ class Maneli_Status_Migration {
 
         foreach ($installment_ids as $id) {
             $status = get_post_meta($id, 'tracking_status', true);
+            $expert_id = get_post_meta($id, 'assigned_expert_id', true);
+            
+            // Check if has assigned expert but status is 'new' (should be 'referred')
+            if (($status === 'new' || empty($status)) && !empty($expert_id) && $expert_id !== '0' && $expert_id !== 0) {
+                $stats['installment']['new_with_expert']++;
+            }
+            
             if (empty($status)) {
                 $stats['installment']['empty']++;
             } elseif (!in_array($status, self::$valid_tracking_statuses, true)) {
                 $stats['installment']['invalid']++;
+                // Count specific old statuses
                 if ($status === 'cancelled') {
                     $stats['installment']['cancelled']++;
+                } elseif ($status === 'pending') {
+                    $stats['installment']['pending']++;
+                } elseif ($status === 'user_confirmed') {
+                    $stats['installment']['user_confirmed']++;
+                } elseif ($status === 'more_docs') {
+                    $stats['installment']['more_docs']++;
+                } elseif ($status === 'failed') {
+                    $stats['installment']['failed']++;
                 } else {
                     if (!isset($stats['installment']['other_invalid'][$status])) {
                         $stats['installment']['other_invalid'][$status] = 0;
@@ -308,12 +411,28 @@ class Maneli_Status_Migration {
 
         foreach ($cash_ids as $id) {
             $status = get_post_meta($id, 'cash_inquiry_status', true);
+            $expert_id = get_post_meta($id, 'assigned_expert_id', true);
+            
+            // Check if has assigned expert but status is 'new' (should be 'referred')
+            if (($status === 'new' || empty($status)) && !empty($expert_id) && $expert_id !== '0' && $expert_id !== 0) {
+                $stats['cash']['new_with_expert']++;
+            }
+            
             if (empty($status)) {
                 $stats['cash']['empty']++;
             } elseif (!in_array($status, self::$valid_cash_statuses, true)) {
                 $stats['cash']['invalid']++;
+                // Count specific old statuses
                 if ($status === 'pending') {
                     $stats['cash']['pending']++;
+                } elseif ($status === 'cancelled') {
+                    $stats['cash']['cancelled']++;
+                } elseif ($status === 'user_confirmed') {
+                    $stats['cash']['user_confirmed']++;
+                } elseif ($status === 'more_docs') {
+                    $stats['cash']['more_docs']++;
+                } elseif ($status === 'failed') {
+                    $stats['cash']['failed']++;
                 } else {
                     if (!isset($stats['cash']['other_invalid'][$status])) {
                         $stats['cash']['other_invalid'][$status] = 0;

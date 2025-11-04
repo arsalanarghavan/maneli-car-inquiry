@@ -976,7 +976,7 @@ msgstr "همان متقاضی"
 
 
 msgid "Credit Verification Result (Finotex)"
-msgstr "نتیجه بررسی اعتبار (فینوتکس)"
+msgstr "نتیجه بررسی اعتبار (فینوتک)"
 
 
 msgid "Bank inquiry was not performed or failed to return data."
@@ -1026,7 +1026,7 @@ msgstr "تخصیص کارشناس"
 
 
 msgid "Retry Finotex Inquiry"
-msgstr "تلاش مجدد استعلام فینوتکس"
+msgstr "تلاش مجدد استعلام فینوتک"
 
 
 msgid "Request More Documents"
@@ -1749,7 +1749,7 @@ msgstr "تعیین نشده"
 
 
 msgid "Information was not received from Finotex or the inquiry was unsuccessful."
-msgstr "اطلاعاتی از فینوتکس دریافت نشد یا استعلام ناموفق بود."
+msgstr "اطلاعاتی از فینوتک دریافت نشد یا استعلام ناموفق بود."
 
 
 msgid "Raw Service Response:"
@@ -2038,7 +2038,7 @@ msgstr "سیستم به صورت خودکار تمام کاربرانی که ن�
 
 
 msgid "Finotex"
-msgstr "فینوتکس"
+msgstr "فینوتک"
 
 
 msgid "Cheque Color Inquiry Service"
@@ -2046,27 +2046,27 @@ msgstr "سرویس استعلام رنگ چک"
 
 
 msgid "Enable Finotex Inquiry"
-msgstr "فعال کردن استعلام فینوتکس"
+msgstr "فعال کردن استعلام فینوتک"
 
 
 msgid "Enable the cheque color inquiry via the Finotex service."
-msgstr "فعال کردن استعلام رنگ چک از طریق سرویس فینوتکس."
+msgstr "فعال کردن استعلام رنگ چک از طریق سرویس فینوتک."
 
 
 msgid "Finotex Client ID"
-msgstr "شناسه کلاینت فینوتکس"
+msgstr "شناسه کلاینت فینوتک"
 
 
 msgid "Client ID provided by Finotex. Stored securely encrypted."
-msgstr "شناسه کلاینت ارائه شده توسط فینوتکس. به صورت امن رمزنگاری شده ذخیره می‌شود."
+msgstr "شناسه کلاینت ارائه شده توسط فینوتک. به صورت امن رمزنگاری شده ذخیره می‌شود."
 
 
 msgid "Finotex API Key"
-msgstr "کلید API فینوتکس"
+msgstr "کلید API فینوتک"
 
 
 msgid "API Key (Access Token) provided by Finotex. Stored securely encrypted."
-msgstr "کلید API (Access Token) ارائه شده توسط فینوتکس. به صورت امن رمزنگاری شده ذخیره می‌شود."
+msgstr "کلید API (Access Token) ارائه شده توسط فینوتک. به صورت امن رمزنگاری شده ذخیره می‌شود."
 
 
 # Frontend Messages
@@ -6039,3 +6039,536 @@ msgstr "تاریخ پیگیری (جدیدترین)"
 
 msgid "Products Management"
 msgstr "مدیریت محصولات"
+
+
+msgid "Finnotech API Services"
+msgstr "سرویس‌های API فینوتک"
+
+msgid "Enable or disable individual Finnotech API services. When disabled, the data will be hidden from reports but preserved in the database."
+msgstr "فعال یا غیرفعال کردن سرویس‌های API فینوتک. در صورت غیرفعال بودن، داده‌ها از گزارش‌ها مخفی می‌شوند اما در دیتابیس حفظ می‌شوند."
+
+msgid "Enable Credit Risk Inquiry"
+msgstr "فعال‌سازی استعلام ریسک اعتباری"
+
+msgid "Enable banking risk inquiry for individuals (ریسک بانکی شخص)."
+msgstr "فعال‌سازی استعلام ریسک بانکی برای اشخاص (ریسک بانکی شخص)."
+
+msgid "Enable Credit Score Report"
+msgstr "فعال‌سازی گزارش امتیاز اعتباری"
+
+msgid "Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری)."
+msgstr "فعال‌سازی استعلام دلایل کاهش امتیاز اعتباری (دلایل کاهش امتیاز اعتباری)."
+
+msgid "Enable Collaterals Inquiry"
+msgstr "فعال‌سازی استعلام وثیقه‌ها"
+
+msgid "Enable contracts summary inquiry (وام‌ها/تسهیلات)."
+msgstr "فعال‌سازی استعلام خلاصه قراردادها (وام‌ها/تسهیلات)."
+
+msgid "Enable Cheque Color Inquiry"
+msgstr "فعال‌سازی استعلام وضعیت چک"
+
+msgid "Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی)."
+msgstr "فعال‌سازی استعلام وضعیت چک‌های صیادی (وضعیت چک‌های صیادی)."
+
+msgid "Banking Risk Assessment"
+msgstr "ارزیابی ریسک بانکی"
+
+msgid "Credit Risk Level:"
+msgstr "سطح ریسک اعتباری:"
+
+msgid "Risk Score:"
+msgstr "امتیاز ریسک:"
+
+msgid "Prohibited Transaction Status:"
+msgstr "وضعیت ممنوعیت تراکنش:"
+
+msgid "Financial Judgments:"
+msgstr "رای‌های مالی:"
+
+msgid "Rials"
+msgstr "ریال"
+
+msgid "Credit Score Decrease Reasons"
+msgstr "دلایل کاهش امتیاز اعتباری"
+
+msgid "Current Credit Score:"
+msgstr "امتیاز اعتباری فعلی:"
+
+msgid "Negative Factors:"
+msgstr "عوامل منفی:"
+
+msgid "Score History:"
+msgstr "تاریخچه امتیاز:"
+
+msgid "Previous Score"
+msgstr "امتیاز قبلی"
+
+msgid "New Score"
+msgstr "امتیاز جدید"
+
+msgid "Reason"
+msgstr "علت"
+
+msgid "Contracts Summary (Loans/Facilities)"
+msgstr "خلاصه قراردادها (وام‌ها/تسهیلات)"
+
+msgid "Total Contracts:"
+msgstr "مجموع قراردادها:"
+
+msgid "Total Loans:"
+msgstr "مجموع وام‌ها:"
+
+msgid "Total Facilities:"
+msgstr "مجموع تسهیلات:"
+
+msgid "Bank"
+msgstr "بانک"
+
+msgid "Contract Number"
+msgstr "شماره قرارداد"
+
+msgid "Sadad Cheque Status Inquiry"
+msgstr "استعلام وضعیت چک‌های صیادی"
+
+msgid "Cheque Status Details"
+msgstr "جزئیات وضعیت چک"
+
+msgid "Bounced Cheques:"
+msgstr "چک‌های برگشتی:"
+
+msgid "Cleared Cheques:"
+msgstr "چک‌های رفع سوءاثر شده:"
+
+msgid "Credit Information Available"
+msgstr "اطلاعات اعتباری موجود"
+
+msgid "Credit Risk Available"
+msgstr "ریسک اعتباری موجود"
+
+msgid "Credit Score Available"
+msgstr "امتیاز اعتباری موجود"
+
+msgid "Contracts Available"
+msgstr "قراردادها موجود"
+
+msgid "Cheque Status Available"
+msgstr "وضعیت چک موجود"
+
+msgid "Finnotech API Credentials"
+msgstr "اعتبارنامه‌های API فینوتک"
+
+msgid "These credentials are used for all Finnotech API services including Credit Risk, Credit Score, Collaterals, and Cheque Color inquiries."
+msgstr "این اعتبارنامه‌ها برای تمام سرویس‌های API فینوتک از جمله استعلام ریسک اعتباری، امتیاز اعتباری، وثیقه‌ها و وضعیت چک استفاده می‌شوند."
+
+msgid "Finnotech Client ID"
+msgstr "شناسه کلاینت فینوتک"
+
+msgid "Client ID provided by Finnotech. Stored securely encrypted."
+msgstr "شناسه کلاینت ارائه شده توسط فینوتک. به صورت امن رمزنگاری شده ذخیره می‌شود."
+
+msgid "Finnotech API Key"
+msgstr "کلید API فینوتک"
+
+msgid "API Key (Access Token) provided by Finnotech. Stored securely encrypted."
+msgstr "کلید API (Access Token) ارائه شده توسط فینوتک. به صورت امن رمزنگاری شده ذخیره می‌شود."
+
+msgid "Enable Legacy Finotex API"
+msgstr "فعال‌سازی API قدیمی فینوتک"
+
+msgid "Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead)."
+msgstr "فعال‌سازی API قدیمی استعلام وضعیت چک فینوتک (منسوخ شده، به جای آن از سرویس‌های API فینوتک استفاده کنید."
+
+
+msgid "Telegram Notifications"
+msgstr "تلگرام‌ها"
+
+msgid "Total SMS"
+msgstr "مجموع پیامک‌ها"
+
+msgid "Total Emails"
+msgstr "مجموع ایمیل‌ها"
+
+msgid "Total Telegram"
+msgstr "مجموع تلگرام‌ها"
+
+msgid "SMS Timeline"
+msgstr "روند پیامک‌ها"
+
+msgid "Email Timeline"
+msgstr "روند ایمیل‌ها"
+
+msgid "Telegram Timeline"
+msgstr "روند تلگرام‌ها"
+
+msgid "Notification Timeline"
+msgstr "روند اعلان‌ها"
+
+msgid "SMS Logs"
+msgstr "لاگ پیامک‌ها"
+
+msgid "Email Logs"
+msgstr "لاگ ایمیل‌ها"
+
+msgid "Telegram Logs"
+msgstr "لاگ تلگرام‌ها"
+
+msgid "No SMS notifications found."
+msgstr "پیامکی یافت نشد."
+
+msgid "No email notifications found."
+msgstr "ایمیلی یافت نشد."
+
+msgid "No Telegram notifications found."
+msgstr "تلگرامی یافت نشد."
+
+msgid "No in-app notifications found."
+msgstr "اعلان درون برنامه‌ای یافت نشد."
+
+msgid "Send Single SMS"
+msgstr "ارسال تک پیامک"
+
+msgid "Send Single Email"
+msgstr "ارسال تک ایمیل"
+
+msgid "Send Single Telegram"
+msgstr "ارسال تک تلگرام"
+
+msgid "Send Single Notification"
+msgstr "ارسال تک اعلان"
+
+msgid "Send Bulk SMS"
+msgstr "ارسال انبوه پیامک"
+
+msgid "Send Bulk Email"
+msgstr "ارسال انبوه ایمیل"
+
+msgid "Send Bulk Telegram"
+msgstr "ارسال انبوه تلگرام"
+
+msgid "Schedule SMS"
+msgstr "زمان‌بندی پیامک"
+
+msgid "Schedule Email"
+msgstr "زمان‌بندی ایمیل"
+
+msgid "Schedule Telegram"
+msgstr "زمان‌بندی تلگرام"
+
+msgid "Schedule Notification"
+msgstr "زمان‌بندی اعلان"
+
+msgid "Send Email"
+msgstr "ارسال ایمیل"
+
+msgid "Send Telegram"
+msgstr "ارسال تلگرام"
+
+msgid "Send Notification"
+msgstr "ارسال اعلان"
+
+msgid "Email sent successfully!"
+msgstr "ایمیل با موفقیت ارسال شد!"
+
+msgid "Telegram sent successfully!"
+msgstr "تلگرام با موفقیت ارسال شد!"
+
+msgid "Notification sent successfully!"
+msgstr "اعلان با موفقیت ارسال شد!"
+
+msgid "Bulk SMS sent successfully!"
+msgstr "پیامک‌های انبوه با موفقیت ارسال شدند!"
+
+msgid "Bulk Email sent successfully!"
+msgstr "ایمیل‌های انبوه با موفقیت ارسال شدند!"
+
+msgid "Bulk Telegram sent successfully!"
+msgstr "تلگرام‌های انبوه با موفقیت ارسال شدند!"
+
+msgid "Bulk Notification sent successfully!"
+msgstr "اعلان‌های انبوه با موفقیت ارسال شدند!"
+
+msgid "SMS scheduled successfully!"
+msgstr "پیامک با موفقیت زمان‌بندی شد!"
+
+msgid "Email scheduled successfully!"
+msgstr "ایمیل با موفقیت زمان‌بندی شد!"
+
+msgid "Telegram scheduled successfully!"
+msgstr "تلگرام با موفقیت زمان‌بندی شد!"
+
+msgid "Notification scheduled successfully!"
+msgstr "اعلان با موفقیت زمان‌بندی شد!"
+
+msgid "SMS retried successfully!"
+msgstr "پیامک با موفقیت مجدداً ارسال شد!"
+
+msgid "Email retried successfully!"
+msgstr "ایمیل با موفقیت مجدداً ارسال شد!"
+
+msgid "Telegram retried successfully!"
+msgstr "تلگرام با موفقیت مجدداً ارسال شد!"
+
+msgid "Retry sending this SMS?"
+msgstr "آیا می‌خواهید این پیامک را مجدداً ارسال کنید؟"
+
+msgid "Retry sending this email?"
+msgstr "آیا می‌خواهید این ایمیل را مجدداً ارسال کنید؟"
+
+msgid "Retry sending this Telegram?"
+msgstr "آیا می‌خواهید این تلگرام را مجدداً ارسال کنید؟"
+
+msgid "Phone number"
+msgstr "شماره تلفن"
+
+msgid "Email address"
+msgstr "آدرس ایمیل"
+
+msgid "Chat ID or User ID"
+msgstr "شناسه چت یا کاربر"
+
+msgid "User ID"
+msgstr "شناسه کاربر"
+
+msgid "Enter phone number or user ID"
+msgstr "شماره تلفن یا شناسه کاربر را وارد کنید"
+
+msgid "Enter email address or user ID"
+msgstr "آدرس ایمیل یا شناسه کاربر را وارد کنید"
+
+msgid "Enter Telegram Chat ID or user ID"
+msgstr "شناسه چت تلگرام یا شناسه کاربر را وارد کنید"
+
+msgid "Enter user ID"
+msgstr "شناسه کاربر را وارد کنید"
+
+msgid "Or enter custom phone numbers (one per line)"
+msgstr "یا شماره تلفن‌های سفارشی را وارد کنید (هر خط یک شماره)"
+
+msgid "Or enter custom email addresses (one per line)"
+msgstr "یا آدرس ایمیل‌های سفارشی را وارد کنید (هر خط یک آدرس)"
+
+msgid "Or enter custom Chat IDs (one per line)"
+msgstr "یا شناسه چت‌های سفارشی را وارد کنید (هر خط یک شناسه)"
+
+msgid "Or enter custom user IDs (one per line)"
+msgstr "یا شناسه کاربران سفارشی را وارد کنید (هر خط یک شناسه)"
+
+msgid "Select recipients type or enter custom phone numbers"
+msgstr "نوع گیرندگان را انتخاب کنید یا شماره تلفن‌های سفارشی وارد کنید"
+
+msgid "Select recipients type or enter custom email addresses"
+msgstr "نوع گیرندگان را انتخاب کنید یا آدرس ایمیل‌های سفارشی وارد کنید"
+
+msgid "Select recipients type or enter custom Chat IDs"
+msgstr "نوع گیرندگان را انتخاب کنید یا شناسه چت‌های سفارشی وارد کنید"
+
+msgid "Select recipients type or enter custom user IDs"
+msgstr "نوع گیرندگان را انتخاب کنید یا شناسه کاربران سفارشی وارد کنید"
+
+msgid "Email subject"
+msgstr "موضوع ایمیل"
+
+msgid "Email subject (optional)"
+msgstr "موضوع ایمیل (اختیاری)"
+
+msgid "Recipient, subject and message are required."
+msgstr "گیرنده، موضوع و پیام الزامی است."
+
+msgid "Subject and message are required."
+msgstr "موضوع و پیام الزامی است."
+
+msgid "Sent SMS"
+msgstr "پیامک‌های ارسال شده"
+
+msgid "Sent Emails"
+msgstr "ایمیل‌های ارسال شده"
+
+msgid "Sent Telegram"
+msgstr "تلگرام‌های ارسال شده"
+
+msgid "Sent Notifications"
+msgstr "اعلان‌های ارسال شده"
+
+msgid "Emails"
+msgstr "ایمیل‌ها"
+
+msgid "Messages"
+msgstr "پیام‌ها"
+
+msgid "Message Templates"
+msgstr "الگوهای پیام"
+
+msgid "Add Template"
+msgstr "افزودن الگو"
+
+msgid "Edit Template"
+msgstr "ویرایش الگو"
+
+msgid "Select Template (Optional)"
+msgstr "انتخاب الگو (اختیاری)"
+
+msgid "Template saved successfully!"
+msgstr "الگو با موفقیت ذخیره شد!"
+
+msgid "Template duplicated successfully!"
+msgstr "الگو با موفقیت کپی شد!"
+
+msgid "Template deleted successfully!"
+msgstr "الگو با موفقیت حذف شد!"
+
+msgid "Duplicate this template?"
+msgstr "آیا می‌خواهید این الگو را کپی کنید؟"
+
+msgid "Delete this template?"
+msgstr "آیا می‌خواهید این الگو را حذف کنید؟"
+
+msgid "Preview will appear here..."
+msgstr "پیش‌نمایش اینجا نمایش داده می‌شود..."
+
+msgid "Notification Details"
+msgstr "جزئیات اعلان"
+
+msgid "Meeting Reminder Patterns"
+msgstr "الگوهای یادآوری جلسات"
+
+msgid "Pattern codes for meeting reminder notifications. These will be used when sending reminders before meetings."
+msgstr "کدهای الگو برای یادآوری جلسات. این الگوها هنگام ارسال یادآوری قبل از جلسه استفاده می‌شوند."
+
+msgid "SMS Pattern: Meeting Reminder"
+msgstr "الگوی پیامک: یادآوری جلسه"
+
+msgid "Pattern code for SMS meeting reminders. Variables: 1. Customer Name 2. Meeting Date 3. Meeting Time 4. Car Name"
+msgstr "کد الگو برای یادآوری جلسه پیامکی. متغیرها: 1. نام مشتری 2. تاریخ جلسه 3. ساعت جلسه 4. نام خودرو"
+
+msgid "Telegram Pattern: Meeting Reminder"
+msgstr "الگوی تلگرام: یادآوری جلسه"
+
+msgid "Pattern code for Telegram meeting reminders. Variables: 1. Customer Name 2. Meeting Date 3. Meeting Time 4. Car Name"
+msgstr "کد الگو برای یادآوری جلسه تلگرامی. متغیرها: 1. نام مشتری 2. تاریخ جلسه 3. ساعت جلسه 4. نام خودرو"
+
+msgid "Email Pattern: Meeting Reminder"
+msgstr "الگوی ایمیل: یادآوری جلسه"
+
+msgid "Pattern code for Email meeting reminders. Variables: 1. Customer Name 2. Meeting Date 3. Meeting Time 4. Car Name"
+msgstr "کد الگو برای یادآوری جلسه ایمیل. متغیرها: 1. نام مشتری 2. تاریخ جلسه 3. ساعت جلسه 4. نام خودرو"
+
+msgid "Configure automatic reminders sent before scheduled meetings."
+msgstr "تنظیم یادآوری‌های خودکار که قبل از جلسات زمان‌بندی شده ارسال می‌شوند."
+
+msgid "Installment Inquiry Status Notifications"
+msgstr "اعلان‌های وضعیت استعلام اقساطی"
+
+msgid "Configure notification patterns for different installment inquiry statuses."
+msgstr "تنظیم الگوهای اعلان برای وضعیت‌های مختلف استعلام اقساطی."
+
+msgid "SMS Pattern: Pending Review"
+msgstr "الگوی پیامک: در انتظار بررسی"
+
+msgid "Pattern code for pending status. Variables: 1. Customer Name 2. Car Name"
+msgstr "کد الگو برای وضعیت در انتظار. متغیرها: 1. نام مشتری 2. نام خودرو"
+
+msgid "Telegram Pattern: Pending Review"
+msgstr "الگوی تلگرام: در انتظار بررسی"
+
+msgid "Email Pattern: Pending Review"
+msgstr "الگوی ایمیل: در انتظار بررسی"
+
+msgid "SMS Pattern: Approved"
+msgstr "الگوی پیامک: تایید شده"
+
+msgid "Pattern code for approved status. Variables: 1. Customer Name 2. Car Name"
+msgstr "کد الگو برای وضعیت تایید شده. متغیرها: 1. نام مشتری 2. نام خودرو"
+
+msgid "Telegram Pattern: Approved"
+msgstr "الگوی تلگرام: تایید شده"
+
+msgid "Email Pattern: Approved"
+msgstr "الگوی ایمیل: تایید شده"
+
+msgid "SMS Pattern: Rejected"
+msgstr "الگوی پیامک: رد شده"
+
+msgid "Pattern code for rejected status. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
+msgstr "کد الگو برای وضعیت رد شده. متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد"
+
+msgid "Telegram Pattern: Rejected"
+msgstr "الگوی تلگرام: رد شده"
+
+msgid "Email Pattern: Rejected"
+msgstr "الگوی ایمیل: رد شده"
+
+msgid "SMS Pattern: Referral to Expert"
+msgstr "الگوی پیامک: ارجاع به کارشناس"
+
+msgid "Pattern code for expert referral. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
+msgstr "کد الگو برای ارجاع به کارشناس. متغیرها: 1. نام کارشناس 2. نام مشتری 3. شماره موبایل مشتری 4. نام خودرو"
+
+msgid "Telegram Pattern: Referral to Expert"
+msgstr "الگوی تلگرام: ارجاع به کارشناس"
+
+msgid "Email Pattern: Referral to Expert"
+msgstr "الگوی ایمیل: ارجاع به کارشناس"
+
+msgid "Cash Inquiry Status Notifications"
+msgstr "اعلان‌های وضعیت استعلام نقدی"
+
+msgid "Configure notification patterns for different cash inquiry statuses."
+msgstr "تنظیم الگوهای اعلان برای وضعیت‌های مختلف استعلام نقدی."
+
+msgid "SMS Pattern: Cash Request Approved"
+msgstr "الگوی پیامک: درخواست نقدی تایید شده"
+
+msgid "Pattern code for approved cash request. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount"
+msgstr "کد الگو برای درخواست نقدی تایید شده. متغیرها: 1. نام مشتری 2. نام خودرو 3. مبلغ پیش‌پرداخت"
+
+msgid "Telegram Pattern: Cash Request Approved"
+msgstr "الگوی تلگرام: درخواست نقدی تایید شده"
+
+msgid "Email Pattern: Cash Request Approved"
+msgstr "الگوی ایمیل: درخواست نقدی تایید شده"
+
+msgid "SMS Pattern: Cash Request Rejected"
+msgstr "الگوی پیامک: درخواست نقدی رد شده"
+
+msgid "Pattern code for rejected cash request. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
+msgstr "کد الگو برای درخواست نقدی رد شده. متغیرها: 1. نام مشتری 2. نام خودرو 3. دلیل رد"
+
+msgid "Telegram Pattern: Cash Request Rejected"
+msgstr "الگوی تلگرام: درخواست نقدی رد شده"
+
+msgid "Email Pattern: Cash Request Rejected"
+msgstr "الگوی ایمیل: درخواست نقدی رد شده"
+
+msgid "SMS Pattern: Cash Request Referral to Expert"
+msgstr "الگوی پیامک: ارجاع درخواست نقدی به کارشناس"
+
+msgid "Telegram Pattern: Cash Request Referral to Expert"
+msgstr "الگوی تلگرام: ارجاع درخواست نقدی به کارشناس"
+
+msgid "Email Pattern: Cash Request Referral to Expert"
+msgstr "الگوی ایمیل: ارجاع درخواست نقدی به کارشناس"
+
+msgid "New Inquiry Notifications"
+msgstr "اعلان‌های استعلام جدید"
+
+msgid "Configure notifications sent to administrators when a new inquiry is submitted."
+msgstr "تنظیم اعلان‌هایی که هنگام ثبت استعلام جدید به مدیران ارسال می‌شوند."
+
+msgid "SMS Pattern: New Request for Admin"
+msgstr "الگوی پیامک: درخواست جدید برای مدیر"
+
+msgid "Pattern code for new inquiry notification to admin. Variables: 1. Customer Name 2. Car Name"
+msgstr "کد الگو برای اعلان استعلام جدید به مدیر. متغیرها: 1. نام مشتری 2. نام خودرو"
+
+msgid "Telegram Pattern: New Request for Admin"
+msgstr "الگوی تلگرام: درخواست جدید برای مدیر"
+
+msgid "Email Pattern: New Request for Admin"
+msgstr "الگوی ایمیل: درخواست جدید برای مدیر"
+
+msgid "Enable In-App Notification for New Inquiries"
+msgstr "فعال‌سازی اعلان درون‌برنامه‌ای برای استعلام‌های جدید"
+
+msgid "Send in-app notification to admins when a new inquiry is submitted."
+msgstr "ارسال اعلان درون‌برنامه‌ای به مدیران هنگام ثبت استعلام جدید."

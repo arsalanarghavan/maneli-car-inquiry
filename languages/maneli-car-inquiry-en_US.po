@@ -278,7 +278,7 @@ msgstr ""
 
 
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 
 msgid "Pending Review"
@@ -814,7 +814,7 @@ msgstr ""
 
 
 msgid "Date"
-msgstr ""
+msgstr "Date"
 
 
 msgid "Actions"
@@ -4249,7 +4249,7 @@ msgstr ""
 
 
 msgid "No"
-msgstr ""
+msgstr "No"
 
 
 msgid "No Car Selected"
@@ -4937,7 +4937,7 @@ msgstr ""
 
 
 msgid "Type"
-msgstr ""
+msgstr "Type"
 
 
 msgid "Type:"
@@ -5073,7 +5073,7 @@ msgstr ""
 
 
 msgid "Yes"
-msgstr ""
+msgstr "Yes"
 
 
 msgid "Yes, Delete"
@@ -5575,3 +5575,142 @@ msgstr "Follow-up Date (Earliest)"
 
 msgid "Follow-up Date (Latest)"
 msgstr "Follow-up Date (Latest)"
+
+
+msgid "Finnotech API Services"
+msgstr "Finnotech API Services"
+
+msgid "Enable or disable individual Finnotech API services. When disabled, the data will be hidden from reports but preserved in the database."
+msgstr "Enable or disable individual Finnotech API services. When disabled, the data will be hidden from reports but preserved in the database."
+
+msgid "Enable Credit Risk Inquiry"
+msgstr "Enable Credit Risk Inquiry"
+
+msgid "Enable banking risk inquiry for individuals (ریسک بانکی شخص)."
+msgstr "Enable banking risk inquiry for individuals (ریسک بانکی شخص)."
+
+msgid "Enable Credit Score Report"
+msgstr "Enable Credit Score Report"
+
+msgid "Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری)."
+msgstr "Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری)."
+
+msgid "Enable Collaterals Inquiry"
+msgstr "Enable Collaterals Inquiry"
+
+msgid "Enable contracts summary inquiry (وام‌ها/تسهیلات)."
+msgstr "Enable contracts summary inquiry (وام‌ها/تسهیلات)."
+
+msgid "Enable Cheque Color Inquiry"
+msgstr "Enable Cheque Color Inquiry"
+
+msgid "Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی)."
+msgstr "Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی)."
+
+msgid "Banking Risk Assessment"
+msgstr "Banking Risk Assessment"
+
+msgid "Credit Risk Level:"
+msgstr "Credit Risk Level:"
+
+msgid "Risk Score:"
+msgstr "Risk Score:"
+
+msgid "Prohibited Transaction Status:"
+msgstr "Prohibited Transaction Status:"
+
+msgid "Financial Judgments:"
+msgstr "Financial Judgments:"
+
+msgid "Rials"
+msgstr "Rials"
+
+msgid "Credit Score Decrease Reasons"
+msgstr "Credit Score Decrease Reasons"
+
+msgid "Current Credit Score:"
+msgstr "Current Credit Score:"
+
+msgid "Negative Factors:"
+msgstr "Negative Factors:"
+
+msgid "Score History:"
+msgstr "Score History:"
+
+msgid "Previous Score"
+msgstr "Previous Score"
+
+msgid "New Score"
+msgstr "New Score"
+
+msgid "Reason"
+msgstr "Reason"
+
+msgid "Contracts Summary (Loans/Facilities)"
+msgstr "Contracts Summary (Loans/Facilities)"
+
+msgid "Total Contracts:"
+msgstr "Total Contracts:"
+
+msgid "Total Loans:"
+msgstr "Total Loans:"
+
+msgid "Total Facilities:"
+msgstr "Total Facilities:"
+
+msgid "Bank"
+msgstr "Bank"
+
+msgid "Contract Number"
+msgstr "Contract Number"
+
+msgid "Sadad Cheque Status Inquiry"
+msgstr "Sadad Cheque Status Inquiry"
+
+msgid "Cheque Status Details"
+msgstr "Cheque Status Details"
+
+msgid "Bounced Cheques:"
+msgstr "Bounced Cheques:"
+
+msgid "Cleared Cheques:"
+msgstr "Cleared Cheques:"
+
+msgid "Credit Information Available"
+msgstr "Credit Information Available"
+
+msgid "Credit Risk Available"
+msgstr "Credit Risk Available"
+
+msgid "Credit Score Available"
+msgstr "Credit Score Available"
+
+msgid "Contracts Available"
+msgstr "Contracts Available"
+
+msgid "Cheque Status Available"
+msgstr "Cheque Status Available"
+
+msgid "Finnotech API Credentials"
+msgstr "Finnotech API Credentials"
+
+msgid "These credentials are used for all Finnotech API services including Credit Risk, Credit Score, Collaterals, and Cheque Color inquiries."
+msgstr "These credentials are used for all Finnotech API services including Credit Risk, Credit Score, Collaterals, and Cheque Color inquiries."
+
+msgid "Finnotech Client ID"
+msgstr "Finnotech Client ID"
+
+msgid "Client ID provided by Finnotech. Stored securely encrypted."
+msgstr "Client ID provided by Finnotech. Stored securely encrypted."
+
+msgid "Finnotech API Key"
+msgstr "Finnotech API Key"
+
+msgid "API Key (Access Token) provided by Finnotech. Stored securely encrypted."
+msgstr "API Key (Access Token) provided by Finnotech. Stored securely encrypted."
+
+msgid "Enable Legacy Finotex API"
+msgstr "Enable Legacy Finotex API"
+
+msgid "Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead)."
+msgstr "Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead)."

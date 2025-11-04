@@ -1549,7 +1549,33 @@ class Maneli_Dashboard_Handler {
                 'title' => esc_html__('Notification Center', 'maneli-car-inquiry'),
                 'url' => home_url('/dashboard/notifications-center'),
                 'icon' => 'ri-notification-3-line',
-                'capability' => 'manage_maneli_inquiries'
+                'capability' => 'manage_maneli_inquiries',
+                'children' => [
+                    [
+                        'title' => esc_html__('SMS Notifications', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard/notifications/sms'),
+                        'icon' => 'ri-message-2-line',
+                        'capability' => 'manage_maneli_inquiries'
+                    ],
+                    [
+                        'title' => esc_html__('Email Notifications', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard/notifications/email'),
+                        'icon' => 'ri-mail-line',
+                        'capability' => 'manage_maneli_inquiries'
+                    ],
+                    [
+                        'title' => esc_html__('Telegram Notifications', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard/notifications/telegram'),
+                        'icon' => 'ri-telegram-line',
+                        'capability' => 'manage_maneli_inquiries'
+                    ],
+                    [
+                        'title' => esc_html__('In-App Notifications', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard/notifications/app'),
+                        'icon' => 'ri-notification-line',
+                        'capability' => 'manage_maneli_inquiries'
+                    ]
+                ]
             ];
             
             // دسته: تنظیمات

@@ -377,6 +377,21 @@ if (!empty($view_payment)) {
                 include $page_template;
                 $page_content = ob_get_clean();
             }
+        } elseif ($page_slug === 'notifications' && !empty($subpage)) {
+            // Handle notification sub-pages: notifications/sms, notifications/email, etc.
+            $valid_subpages = ['sms', 'email', 'telegram', 'app'];
+            if (in_array($subpage, $valid_subpages)) {
+                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/notifications/' . $subpage . '-notifications.php';
+                if (file_exists($page_template)) {
+                    ob_start();
+                    include $page_template;
+                    $page_content = ob_get_clean();
+                }
+            } else {
+                // Invalid subpage, redirect to notifications center
+                wp_redirect(home_url('/dashboard/notifications-center'));
+                exit;
+            }
         } else {
             // Try to load page-specific content
             $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/' . $page_slug . '.php';

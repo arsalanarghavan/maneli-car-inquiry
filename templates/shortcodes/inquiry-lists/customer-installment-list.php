@@ -68,6 +68,23 @@ if (!defined('ABSPATH')) {
                                     $report_url = add_query_arg('inquiry_id', $inquiry_id, $current_url);
                                     $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
                                     
+                                    // Check Finnotech API data availability for customer view
+                                    $options = get_option('maneli_inquiry_all_options', []);
+                                    $credit_risk_data = get_post_meta($inquiry_id, '_finnotech_credit_risk_data', true);
+                                    $credit_score_data = get_post_meta($inquiry_id, '_finnotech_credit_score_data', true);
+                                    $collaterals_data = get_post_meta($inquiry_id, '_finnotech_collaterals_data', true);
+                                    $cheque_color_data = get_post_meta($inquiry_id, '_finnotech_cheque_color_data', true);
+                                    
+                                    $credit_risk_enabled = !empty($options['finnotech_credit_risk_enabled']) && $options['finnotech_credit_risk_enabled'] === '1';
+                                    $credit_score_enabled = !empty($options['finnotech_credit_score_enabled']) && $options['finnotech_credit_score_enabled'] === '1';
+                                    $collaterals_enabled = !empty($options['finnotech_collaterals_enabled']) && $options['finnotech_collaterals_enabled'] === '1';
+                                    $cheque_color_enabled = !empty($options['finnotech_cheque_color_enabled']) && $options['finnotech_cheque_color_enabled'] === '1';
+                                    
+                                    $has_finnotech_data = ($credit_risk_enabled && !empty($credit_risk_data)) || 
+                                                          ($credit_score_enabled && !empty($credit_score_data)) || 
+                                                          ($collaterals_enabled && !empty($collaterals_data)) || 
+                                                          ($cheque_color_enabled && !empty($cheque_color_data));
+                                    
                                     $status_data = [
                                         'pending' => ['label' => esc_html__('Pending Review', 'maneli-car-inquiry'), 'class' => 'warning'],
                                         'user_confirmed' => ['label' => esc_html__('Confirmed and Referred', 'maneli-car-inquiry'), 'class' => 'success'],
@@ -96,6 +113,9 @@ if (!defined('ABSPATH')) {
                                             <div class="d-flex align-items-center">
                                                 <i class="la la-car text-info me-2 fs-18"></i>
                                                 <span><?php echo esc_html(get_the_title($product_id)); ?></span>
+                                                <?php if ($has_finnotech_data): ?>
+                                                    <i class="la la-check-circle text-success ms-2" title="<?php esc_attr_e('Credit Information Available', 'maneli-car-inquiry'); ?>" style="font-size: 14px;"></i>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                         <td>

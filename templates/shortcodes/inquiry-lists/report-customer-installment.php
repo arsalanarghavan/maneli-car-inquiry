@@ -18,10 +18,23 @@ $post = get_post($inquiry_id);
 $post_meta = get_post_meta($inquiry_id);
 $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
 
+// Finnotech API data
+$credit_risk_data = get_post_meta($inquiry_id, '_finnotech_credit_risk_data', true);
+$credit_score_data = get_post_meta($inquiry_id, '_finnotech_credit_score_data', true);
+$collaterals_data = get_post_meta($inquiry_id, '_finnotech_collaterals_data', true);
+$cheque_color_data = get_post_meta($inquiry_id, '_finnotech_cheque_color_data', true);
+
+// Settings
+$options = get_option('maneli_inquiry_all_options', []);
+$credit_risk_enabled = !empty($options['finnotech_credit_risk_enabled']) && $options['finnotech_credit_risk_enabled'] === '1';
+$credit_score_enabled = !empty($options['finnotech_credit_score_enabled']) && $options['finnotech_credit_score_enabled'] === '1';
+$collaterals_enabled = !empty($options['finnotech_collaterals_enabled']) && $options['finnotech_collaterals_enabled'] === '1';
+$cheque_color_enabled = !empty($options['finnotech_cheque_color_enabled']) && $options['finnotech_cheque_color_enabled'] === '1';
+
 $inquiry_status = $post_meta['inquiry_status'][0] ?? 'pending';
 $product_id = $post_meta['product_id'][0] ?? 0;
 $car_name = get_the_title($product_id);
-$cheque_color_code = $finotex_data['result']['chequeColor'] ?? 0;
+$cheque_color_code = $finotex_data['result']['chequeColor'] ?? ($cheque_color_data['result']['chequeColor'] ?? 0);
 
 $back_link = home_url('/dashboard/installment-inquiries');
 
@@ -562,25 +575,214 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
 </div>
 <?php endif; ?>
 
-<!-- Credit Verification Card (Finotex) -->
+<!-- Credit Risk Card -->
+<?php if ($credit_risk_enabled && !empty($credit_risk_data)): ?>
+<div class="card custom-card mt-3">
+    <div class="card-header bg-danger-transparent">
+        <div class="card-title">
+            <i class="la la-exclamation-circle me-2"></i>
+            <?php esc_html_e('Banking Risk Assessment', 'maneli-car-inquiry'); ?>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php
+        $result = $credit_risk_data['result'] ?? [];
+        $credit_risk = $result['creditRisk'] ?? null;
+        $risk_score = $result['riskScore'] ?? null;
+        $prohibited = $result['prohibitedTransactionStatus'] ?? null;
+        $judgments = $result['financialJudgmentStatus'] ?? null;
+        ?>
+        <div class="row">
+            <?php if ($credit_risk !== null): ?>
+            <div class="col-md-6 mb-3">
+                <strong><?php esc_html_e('Credit Risk Level:', 'maneli-car-inquiry'); ?></strong>
+                <span class="badge bg-<?php echo esc_attr($credit_risk === 'low' ? 'success' : ($credit_risk === 'medium' ? 'warning' : 'danger')); ?>">
+                    <?php echo esc_html(ucfirst($credit_risk)); ?>
+                </span>
+            </div>
+            <?php endif; ?>
+            <?php if ($risk_score !== null): ?>
+            <div class="col-md-6 mb-3">
+                <strong><?php esc_html_e('Risk Score:', 'maneli-car-inquiry'); ?></strong>
+                <span><?php echo esc_html($risk_score); ?></span>
+            </div>
+            <?php endif; ?>
+            <?php if ($prohibited !== null): ?>
+            <div class="col-md-6 mb-3">
+                <strong><?php esc_html_e('Prohibited Transaction Status:', 'maneli-car-inquiry'); ?></strong>
+                <span class="badge bg-<?php echo esc_attr($prohibited === 'yes' ? 'danger' : 'success'); ?>">
+                    <?php echo esc_html($prohibited === 'yes' ? __('Yes', 'maneli-car-inquiry') : __('No', 'maneli-car-inquiry')); ?>
+                </span>
+            </div>
+            <?php endif; ?>
+            <?php if ($judgments !== null && is_array($judgments)): ?>
+            <div class="col-12 mb-3">
+                <strong><?php esc_html_e('Financial Judgments:', 'maneli-car-inquiry'); ?></strong>
+                <ul class="list-group mt-2">
+                    <?php foreach ($judgments as $judgment): ?>
+                    <li class="list-group-item">
+                        <?php echo esc_html($judgment['caseNumber'] ?? ''); ?> - 
+                        <?php echo esc_html(number_format($judgment['judgmentAmount'] ?? 0)); ?> 
+                        <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?>
+                    </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Credit Score Report Card -->
+<?php if ($credit_score_enabled && !empty($credit_score_data)): ?>
+<div class="card custom-card mt-3">
+    <div class="card-header bg-warning-transparent">
+        <div class="card-title">
+            <i class="la la-chart-line me-2"></i>
+            <?php esc_html_e('Credit Score Decrease Reasons', 'maneli-car-inquiry'); ?>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php
+        $result = $credit_score_data['result'] ?? [];
+        $negative_factors = $result['negativeFactors'] ?? [];
+        $score_history = $result['scoreHistory'] ?? [];
+        $credit_score = $result['creditScore'] ?? null;
+        ?>
+        <?php if ($credit_score !== null): ?>
+        <div class="mb-3">
+            <strong><?php esc_html_e('Current Credit Score:', 'maneli-car-inquiry'); ?></strong>
+            <span class="badge bg-primary fs-16 ms-2"><?php echo esc_html($credit_score); ?></span>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($negative_factors)): ?>
+        <div class="mb-3">
+            <strong><?php esc_html_e('Negative Factors:', 'maneli-car-inquiry'); ?></strong>
+            <ul class="list-group mt-2">
+                <?php foreach ($negative_factors as $factor): ?>
+                <li class="list-group-item">
+                    <strong><?php echo esc_html($factor['factorType'] ?? ''); ?></strong>
+                    <br>
+                    <small class="text-muted"><?php echo esc_html($factor['description'] ?? ''); ?></small>
+                    <?php if (isset($factor['impactOnScore'])): ?>
+                    <span class="badge bg-danger ms-2">-<?php echo esc_html($factor['impactOnScore']); ?></span>
+                    <?php endif; ?>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+        <?php endif; ?>
+        <?php if (!empty($score_history)): ?>
+        <div>
+            <strong><?php esc_html_e('Score History:', 'maneli-car-inquiry'); ?></strong>
+            <div class="table-responsive mt-2">
+                <table class="table table-bordered table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th class="bg-light"><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                            <th class="bg-light"><?php esc_html_e('Previous Score', 'maneli-car-inquiry'); ?></th>
+                            <th class="bg-light"><?php esc_html_e('New Score', 'maneli-car-inquiry'); ?></th>
+                            <th class="bg-light"><?php esc_html_e('Reason', 'maneli-car-inquiry'); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($score_history as $history): ?>
+                        <tr>
+                            <td><?php echo esc_html($history['date'] ?? ''); ?></td>
+                            <td><?php echo esc_html($history['previousScore'] ?? ''); ?></td>
+                            <td><?php echo esc_html($history['newScore'] ?? ''); ?></td>
+                            <td><?php echo esc_html($history['changeReason'] ?? ''); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Collaterals & Contracts Card -->
+<?php if ($collaterals_enabled && !empty($collaterals_data)): ?>
+<div class="card custom-card mt-3">
+    <div class="card-header bg-info-transparent">
+        <div class="card-title">
+            <i class="la la-file-contract me-2"></i>
+            <?php esc_html_e('Contracts Summary (Loans/Facilities)', 'maneli-car-inquiry'); ?>
+        </div>
+    </div>
+    <div class="card-body">
+        <?php
+        $result = $collaterals_data['result'] ?? [];
+        $total_contracts = $result['totalContracts'] ?? 0;
+        $total_loan_amount = $result['totalLoanAmount'] ?? 0;
+        $total_facility_amount = $result['totalFacilityAmount'] ?? 0;
+        $contracts = $result['contracts'] ?? [];
+        ?>
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <strong><?php esc_html_e('Total Contracts:', 'maneli-car-inquiry'); ?></strong>
+                <span class="badge bg-primary ms-2"><?php echo esc_html($total_contracts); ?></span>
+            </div>
+            <div class="col-md-4">
+                <strong><?php esc_html_e('Total Loans:', 'maneli-car-inquiry'); ?></strong>
+                <span><?php echo esc_html(number_format($total_loan_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
+            </div>
+            <div class="col-md-4">
+                <strong><?php esc_html_e('Total Facilities:', 'maneli-car-inquiry'); ?></strong>
+                <span><?php echo esc_html(number_format($total_facility_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
+            </div>
+        </div>
+        <?php if (!empty($contracts)): ?>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th class="bg-light"><?php esc_html_e('Bank', 'maneli-car-inquiry'); ?></th>
+                        <th class="bg-light"><?php esc_html_e('Contract Number', 'maneli-car-inquiry'); ?></th>
+                        <th class="bg-light"><?php esc_html_e('Type', 'maneli-car-inquiry'); ?></th>
+                        <th class="bg-light"><?php esc_html_e('Amount', 'maneli-car-inquiry'); ?></th>
+                        <th class="bg-light"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($contracts as $contract): ?>
+                    <tr>
+                        <td><?php echo esc_html($contract['bankName'] ?? ''); ?></td>
+                        <td><?php echo esc_html($contract['contractNumber'] ?? ''); ?></td>
+                        <td><?php echo esc_html($contract['contractType'] ?? ''); ?></td>
+                        <td><?php echo esc_html(number_format($contract['amount'] ?? 0)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></td>
+                        <td>
+                            <span class="badge bg-<?php echo esc_attr(($contract['contractStatus'] ?? '') === 'active' ? 'success' : 'secondary'); ?>">
+                                <?php echo esc_html($contract['contractStatus'] ?? ''); ?>
+                            </span>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Cheque Color Status Card -->
+<?php if ($cheque_color_enabled && (!empty($finotex_data) || !empty($cheque_color_data))): ?>
 <div class="card custom-card mt-3">
     <div class="card-header bg-primary-transparent">
         <div class="card-title">
             <i class="la la-shield-alt me-2"></i>
-            <?php esc_html_e('Credit Verification Result (Finotex)', 'maneli-car-inquiry'); ?>
+            <?php esc_html_e('Sadad Cheque Status Inquiry', 'maneli-car-inquiry'); ?>
         </div>
     </div>
     <div class="card-body">
-        <?php if (empty($finotex_data) || ($finotex_data['status'] ?? '') === 'SKIPPED'): ?>
-            <div class="alert alert-warning border-warning">
-                <i class="la la-exclamation-triangle me-2"></i>
-                <?php esc_html_e('Bank inquiry was not performed or failed to return data.', 'maneli-car-inquiry'); ?>
-            </div>
-        <?php else: ?>
-            <?php echo Maneli_Render_Helpers::render_cheque_status_info($cheque_color_code); ?>
-        <?php endif; ?>
+        <?php echo Maneli_Render_Helpers::render_cheque_status_info($cheque_color_code); ?>
     </div>
 </div>
+<?php endif; ?>
 
 <style>
 /* Status Roadmap Styles */

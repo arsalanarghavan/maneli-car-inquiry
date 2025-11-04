@@ -3516,3 +3516,143 @@ msgstr ""
 
 msgid "کل درخواست‌های نقدی"
 msgstr ""
+
+msgid "Finnotech API Services"
+msgstr ""
+
+msgid "Enable or disable individual Finnotech API services. When disabled, the data will be hidden from reports but preserved in the database."
+msgstr ""
+
+msgid "Enable Credit Risk Inquiry"
+msgstr ""
+
+msgid "Enable banking risk inquiry for individuals (ریسک بانکی شخص)."
+msgstr ""
+
+msgid "Enable Credit Score Report"
+msgstr ""
+
+msgid "Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری)."
+msgstr ""
+
+msgid "Enable Collaterals Inquiry"
+msgstr ""
+
+msgid "Enable contracts summary inquiry (وام‌ها/تسهیلات)."
+msgstr ""
+
+msgid "Enable Cheque Color Inquiry"
+msgstr ""
+
+msgid "Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی)."
+msgstr ""
+
+msgid "Banking Risk Assessment"
+msgstr ""
+
+msgid "Credit Risk Level:"
+msgstr ""
+
+msgid "Risk Score:"
+msgstr ""
+
+msgid "Prohibited Transaction Status:"
+msgstr ""
+
+msgid "No"
+msgstr ""
+
+msgid "Financial Judgments:"
+msgstr ""
+
+msgid "Rials"
+msgstr ""
+
+msgid "Credit Score Decrease Reasons"
+msgstr ""
+
+msgid "Current Credit Score:"
+msgstr ""
+
+msgid "Negative Factors:"
+msgstr ""
+
+msgid "Score History:"
+msgstr ""
+
+msgid "Previous Score"
+msgstr ""
+
+msgid "New Score"
+msgstr ""
+
+msgid "Reason"
+msgstr ""
+
+msgid "Contracts Summary (Loans/Facilities)"
+msgstr ""
+
+msgid "Total Contracts:"
+msgstr ""
+
+msgid "Total Loans:"
+msgstr ""
+
+msgid "Total Facilities:"
+msgstr ""
+
+msgid "Bank"
+msgstr ""
+
+msgid "Contract Number"
+msgstr ""
+
+msgid "Sadad Cheque Status Inquiry"
+msgstr ""
+
+msgid "Cheque Status Details"
+msgstr ""
+
+msgid "Bounced Cheques:"
+msgstr ""
+
+msgid "Cleared Cheques:"
+msgstr ""
+
+msgid "Credit Information Available"
+msgstr ""
+
+msgid "Credit Risk Available"
+msgstr ""
+
+msgid "Credit Score Available"
+msgstr ""
+
+msgid "Contracts Available"
+msgstr ""
+
+msgid "Cheque Status Available"
+msgstr ""
+msgid "Finnotech API Credentials"
+msgstr ""
+
+msgid "These credentials are used for all Finnotech API services including Credit Risk, Credit Score, Collaterals, and Cheque Color inquiries."
+msgstr ""
+
+msgid "Finnotech Client ID"
+msgstr ""
+
+msgid "Client ID provided by Finnotech. Stored securely encrypted."
+msgstr ""
+
+msgid "Finnotech API Key"
+msgstr ""
+
+msgid "API Key (Access Token) provided by Finnotech. Stored securely encrypted."
+msgstr ""
+
+msgid "Enable Legacy Finotex API"
+msgstr ""
+
+msgid "Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead)."
+msgstr ""
