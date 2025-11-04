@@ -6572,3 +6572,105 @@ msgstr "فعال‌سازی اعلان درون‌برنامه‌ای برای �
 
 msgid "Send in-app notification to admins when a new inquiry is submitted."
 msgstr "ارسال اعلان درون‌برنامه‌ای به مدیران هنگام ثبت استعلام جدید."
+
+msgid "Visitor Statistics"
+msgstr "آمار بازدیدکنندگان"
+
+msgid "Total Visits"
+msgstr "بازدید کل"
+
+msgid "Unique Visitors"
+msgstr "بازدیدکنندگان منحصر به فرد"
+
+msgid "Total Pages"
+msgstr "صفحات کل"
+
+msgid "Online Now"
+msgstr "آنلاین"
+
+msgid "Traffic Trend"
+msgstr "روند ترافیک"
+
+msgid "Daily Visits"
+msgstr "بازدید روزانه"
+
+msgid "Top Pages"
+msgstr "صفحات پربازدید"
+
+msgid "Browsers"
+msgstr "مرورگرها"
+
+msgid "Operating Systems"
+msgstr "سیستم‌عامل‌ها"
+
+msgid "Device Types"
+msgstr "نوع دستگاه"
+
+msgid "Most Viewed Cars"
+msgstr "پربازدیدترین خودروها"
+
+msgid "Search Engines"
+msgstr "موتورهای جستجو"
+
+msgid "Top Referrers"
+msgstr "ارجاع‌دهندگان برتر"
+
+msgid "Device Models"
+msgstr "مدل‌های دستگاه"
+
+msgid "Countries"
+msgstr "کشورها"
+
+msgid "Most Active Visitors"
+msgstr "فعال‌ترین بازدیدکنندگان"
+
+msgid "Recent Visitors"
+msgstr "بازدیدکنندگان اخیر"
+
+msgid "Online Visitors (Last 15 Minutes)"
+msgstr "بازدیدکنندگان آنلاین (۱۵ دقیقه گذشته)"
+
+msgid "Date Range Filter"
+msgstr "فیلتر بازه زمانی"
+
+msgid "Period:"
+msgstr "دوره:"
+
+msgid "From Date (Solar):"
+msgstr "از تاریخ (شمسی):"
+
+msgid "To Date (Solar):"
+msgstr "تا تاریخ (شمسی):"
+
+msgid "Unique"
+msgstr "منحصر به فرد"
+
+msgid "Page"
+msgstr "صفحه"
+
+msgid "Current Page"
+msgstr "صفحه فعلی"
+
+msgid "Last Activity"
+msgstr "آخرین فعالیت"
+
+msgid "Time"
+msgstr "زمان"
+
+msgid "Export Excel"
+msgstr "خروجی اکسل"
+
+msgid "Search Engine"
+msgstr "موتور جستجو"
+
+msgid "Referrer"
+msgstr "ارجاع‌دهنده"
+
+msgid "Device Model"
+msgstr "مدل دستگاه"
+
+msgid "ago"
+msgstr "پیش"
+
+msgid "Visits"
+msgstr "بازدیدها"
