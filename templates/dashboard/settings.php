@@ -40,7 +40,8 @@ $tab_persian_names = [
     'meetings' => esc_html__('Meetings & Calendar', 'maneli-car-inquiry'),
     'documents' => esc_html__('Documents', 'maneli-car-inquiry'),
     'availability' => esc_html__('Availability', 'maneli-car-inquiry'),
-    'notifications' => esc_html__('Notifications', 'maneli-car-inquiry')
+    'notifications' => esc_html__('Notifications', 'maneli-car-inquiry'),
+    'visitor_statistics' => esc_html__('Visitor Statistics', 'maneli-car-inquiry')
 ];
 ?>
 <div class="main-content app-content">
@@ -96,7 +97,8 @@ $tab_persian_names = [
                                 'meetings' => 'la-calendar',
                                 'documents' => 'la-file-alt',
                                 'availability' => 'la-box-open',
-                                'notifications' => 'la-bell'
+                                'notifications' => 'la-bell',
+                                'visitor_statistics' => 'la-chart-line'
                             ];
                             foreach ($all_settings as $tab_key => $tab_data) : 
                                 $icon = $tab_icons[$tab_key] ?? 'la-cog';
