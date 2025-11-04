@@ -672,19 +672,18 @@ class Maneli_Hooks {
             return;
         }
         
-        // Rate limiting - track once per session per page
-        if (!session_id()) {
-            session_start();
-        }
-        
+        // Rate limiting - use transients instead of session to avoid header issues
         $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $track_key = 'maneli_tracked_' . md5($current_url);
+        $ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+        $track_key = 'maneli_tracked_' . md5($current_url . $ip_address);
         
-        if (isset($_SESSION[$track_key])) {
-            return; // Already tracked this page in this session
+        // Check if already tracked in last 5 seconds (rate limiting)
+        if (get_transient($track_key)) {
+            return; // Already tracked this page recently
         }
         
-        $_SESSION[$track_key] = true;
+        // Set transient for 5 seconds to prevent duplicate tracking
+        set_transient($track_key, true, 5);
         
         $page_url = $current_url;
         $page_title = wp_get_document_title();
@@ -692,10 +691,14 @@ class Maneli_Hooks {
         
         // Extract product ID if on product page
         $product_id = null;
-        if (is_product()) {
-            global $product;
-            if ($product) {
-                $product_id = $product->get_id();
+        if (is_product() && function_exists('wc_get_product')) {
+            // Use get_queried_object_id() instead of global $product
+            $queried_object_id = get_queried_object_id();
+            if ($queried_object_id) {
+                $product_obj = wc_get_product($queried_object_id);
+                if ($product_obj && is_a($product_obj, 'WC_Product')) {
+                    $product_id = $product_obj->get_id();
+                }
             }
         }
         

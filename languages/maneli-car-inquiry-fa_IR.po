@@ -7983,3 +7983,722 @@ msgstr "فعال‌سازی ایمیل: استعلام جدید"
 msgid "Enable In-App Notification: New Inquiry"
 msgstr "فعال‌سازی اعلان درون‌برنامه‌ای: استعلام جدید"
 
+
+# Email Messages - Installment Inquiry (Customer)
+msgid "Subject: New (Installment - Customer)"
+msgstr "موضوع: جدید (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - New"
+msgstr "به‌روزرسانی استعلام اقساطی شما - جدید"
+
+msgid "Message: New (Installment - Customer)"
+msgstr "پیام: جدید (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: New."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: جدید است."
+
+msgid "Subject: Pending Review (Installment - Customer)"
+msgstr "موضوع: در انتظار بررسی (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Pending Review"
+msgstr "به‌روزرسانی استعلام اقساطی شما - در انتظار بررسی"
+
+msgid "Message: Pending Review (Installment - Customer)"
+msgstr "پیام: در انتظار بررسی (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Pending Review."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: در انتظار بررسی است."
+
+msgid "Subject: Approved and Referred (Installment - Customer)"
+msgstr "موضوع: تأیید شده و ارجاع داده شده (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Approved and Referred"
+msgstr "به‌روزرسانی استعلام اقساطی شما - تأیید شده و ارجاع داده شده"
+
+msgid "Message: Approved and Referred (Installment - Customer)"
+msgstr "پیام: تأیید شده و ارجاع داده شده (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Approved and Referred."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: تأیید شده و ارجاع داده شده است."
+
+msgid "Subject: More Documents Required (Installment - Customer)"
+msgstr "موضوع: نیاز به مدارک بیشتر (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - More Documents Required"
+msgstr "به‌روزرسانی استعلام اقساطی شما - نیاز به مدارک بیشتر"
+
+msgid "Message: More Documents Required (Installment - Customer)"
+msgstr "پیام: نیاز به مدارک بیشتر (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: More Documents Required."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: نیاز به مدارک بیشتر است."
+
+msgid "Subject: Rejected (Installment - Customer)"
+msgstr "موضوع: رد شده (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Rejected"
+msgstr "به‌روزرسانی استعلام اقساطی شما - رد شده"
+
+msgid "Message: Rejected (Installment - Customer)"
+msgstr "پیام: رد شده (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Rejected."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: رد شده است."
+
+msgid "Subject: Inquiry Failed (Installment - Customer)"
+msgstr "موضوع: استعلام ناموفق (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Inquiry Failed"
+msgstr "به‌روزرسانی استعلام اقساطی شما - استعلام ناموفق"
+
+msgid "Message: Inquiry Failed (Installment - Customer)"
+msgstr "پیام: استعلام ناموفق (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Inquiry Failed."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: استعلام ناموفق است."
+
+msgid "Subject: Referred to Expert (Installment - Customer)"
+msgstr "موضوع: ارجاع به کارشناس (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Referred to Expert"
+msgstr "به‌روزرسانی استعلام اقساطی شما - ارجاع به کارشناس"
+
+msgid "Message: Referred to Expert (Installment - Customer)"
+msgstr "پیام: ارجاع به کارشناس (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Referred to Expert."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: ارجاع به کارشناس است."
+
+msgid "Subject: In Progress (Installment - Customer)"
+msgstr "موضوع: در حال انجام (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - In Progress"
+msgstr "به‌روزرسانی استعلام اقساطی شما - در حال انجام"
+
+msgid "Message: In Progress (Installment - Customer)"
+msgstr "پیام: در حال انجام (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: In Progress."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: در حال انجام است."
+
+msgid "Subject: Follow Up Scheduled (Installment - Customer)"
+msgstr "موضوع: پیگیری برنامه‌ریزی شده (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Follow Up Scheduled"
+msgstr "به‌روزرسانی استعلام اقساطی شما - پیگیری برنامه‌ریزی شده"
+
+msgid "Message: Follow Up Scheduled (Installment - Customer)"
+msgstr "پیام: پیگیری برنامه‌ریزی شده (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Follow Up Scheduled."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: پیگیری برنامه‌ریزی شده است."
+
+msgid "Subject: Meeting Scheduled (Installment - Customer)"
+msgstr "موضوع: جلسه برنامه‌ریزی شده (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Meeting Scheduled"
+msgstr "به‌روزرسانی استعلام اقساطی شما - جلسه برنامه‌ریزی شده"
+
+msgid "Message: Meeting Scheduled (Installment - Customer)"
+msgstr "پیام: جلسه برنامه‌ریزی شده (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Meeting Scheduled."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: جلسه برنامه‌ریزی شده است."
+
+msgid "Subject: Awaiting Documents (Installment - Customer)"
+msgstr "موضوع: در انتظار مدارک (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Awaiting Documents"
+msgstr "به‌روزرسانی استعلام اقساطی شما - در انتظار مدارک"
+
+msgid "Message: Awaiting Documents (Installment - Customer)"
+msgstr "پیام: در انتظار مدارک (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Awaiting Documents."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: در انتظار مدارک است."
+
+msgid "Subject: Approved (Installment - Customer)"
+msgstr "موضوع: تأیید شده (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Approved"
+msgstr "به‌روزرسانی استعلام اقساطی شما - تأیید شده"
+
+msgid "Message: Approved (Installment - Customer)"
+msgstr "پیام: تأیید شده (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Approved."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: تأیید شده است."
+
+msgid "Subject: Completed (Installment - Customer)"
+msgstr "موضوع: تکمیل شده (اقساطی - مشتری)"
+
+msgid "Update on Your Installment Inquiry - Completed"
+msgstr "به‌روزرسانی استعلام اقساطی شما - تکمیل شده"
+
+msgid "Message: Completed (Installment - Customer)"
+msgstr "پیام: تکمیل شده (اقساطی - مشتری)"
+
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Completed."
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: تکمیل شده است."
+
+
+# Email Messages - Installment Inquiry (Expert)
+msgid "Subject: New (Installment - Expert)"
+msgstr "موضوع: جدید (اقساطی - کارشناس)"
+
+msgid "Message: New (Installment - Expert)"
+msgstr "پیام: جدید (اقساطی - کارشناس)"
+
+msgid "Subject: Pending Review (Installment - Expert)"
+msgstr "موضوع: در انتظار بررسی (اقساطی - کارشناس)"
+
+msgid "Message: Pending Review (Installment - Expert)"
+msgstr "پیام: در انتظار بررسی (اقساطی - کارشناس)"
+
+msgid "Subject: Approved and Referred (Installment - Expert)"
+msgstr "موضوع: تأیید شده و ارجاع داده شده (اقساطی - کارشناس)"
+
+msgid "Message: Approved and Referred (Installment - Expert)"
+msgstr "پیام: تأیید شده و ارجاع داده شده (اقساطی - کارشناس)"
+
+msgid "Subject: More Documents Required (Installment - Expert)"
+msgstr "موضوع: نیاز به مدارک بیشتر (اقساطی - کارشناس)"
+
+msgid "Message: More Documents Required (Installment - Expert)"
+msgstr "پیام: نیاز به مدارک بیشتر (اقساطی - کارشناس)"
+
+msgid "Subject: Rejected (Installment - Expert)"
+msgstr "موضوع: رد شده (اقساطی - کارشناس)"
+
+msgid "Message: Rejected (Installment - Expert)"
+msgstr "پیام: رد شده (اقساطی - کارشناس)"
+
+msgid "Subject: Inquiry Failed (Installment - Expert)"
+msgstr "موضوع: استعلام ناموفق (اقساطی - کارشناس)"
+
+msgid "Message: Inquiry Failed (Installment - Expert)"
+msgstr "پیام: استعلام ناموفق (اقساطی - کارشناس)"
+
+msgid "Subject: Referred to Expert (Installment - Expert)"
+msgstr "موضوع: ارجاع به کارشناس (اقساطی - کارشناس)"
+
+msgid "Message: Referred to Expert (Installment - Expert)"
+msgstr "پیام: ارجاع به کارشناس (اقساطی - کارشناس)"
+
+msgid "Subject: In Progress (Installment - Expert)"
+msgstr "موضوع: در حال انجام (اقساطی - کارشناس)"
+
+msgid "Message: In Progress (Installment - Expert)"
+msgstr "پیام: در حال انجام (اقساطی - کارشناس)"
+
+msgid "Subject: Follow Up Scheduled (Installment - Expert)"
+msgstr "موضوع: پیگیری برنامه‌ریزی شده (اقساطی - کارشناس)"
+
+msgid "Message: Follow Up Scheduled (Installment - Expert)"
+msgstr "پیام: پیگیری برنامه‌ریزی شده (اقساطی - کارشناس)"
+
+msgid "Subject: Meeting Scheduled (Installment - Expert)"
+msgstr "موضوع: جلسه برنامه‌ریزی شده (اقساطی - کارشناس)"
+
+msgid "Message: Meeting Scheduled (Installment - Expert)"
+msgstr "پیام: جلسه برنامه‌ریزی شده (اقساطی - کارشناس)"
+
+msgid "Subject: Awaiting Documents (Installment - Expert)"
+msgstr "موضوع: در انتظار مدارک (اقساطی - کارشناس)"
+
+msgid "Message: Awaiting Documents (Installment - Expert)"
+msgstr "پیام: در انتظار مدارک (اقساطی - کارشناس)"
+
+msgid "Subject: Approved (Installment - Expert)"
+msgstr "موضوع: تأیید شده (اقساطی - کارشناس)"
+
+msgid "Message: Approved (Installment - Expert)"
+msgstr "پیام: تأیید شده (اقساطی - کارشناس)"
+
+msgid "Subject: Completed (Installment - Expert)"
+msgstr "موضوع: تکمیل شده (اقساطی - کارشناس)"
+
+msgid "Message: Completed (Installment - Expert)"
+msgstr "پیام: تکمیل شده (اقساطی - کارشناس)"
+
+# Email Messages - Installment Inquiry (Admin)
+msgid "Subject: New (Installment - Admin)"
+msgstr "موضوع: جدید (اقساطی - مدیر)"
+
+msgid "Message: New (Installment - Admin)"
+msgstr "پیام: جدید (اقساطی - مدیر)"
+
+msgid "Subject: Pending Review (Installment - Admin)"
+msgstr "موضوع: در انتظار بررسی (اقساطی - مدیر)"
+
+msgid "Message: Pending Review (Installment - Admin)"
+msgstr "پیام: در انتظار بررسی (اقساطی - مدیر)"
+
+msgid "Subject: Approved and Referred (Installment - Admin)"
+msgstr "موضوع: تأیید شده و ارجاع داده شده (اقساطی - مدیر)"
+
+msgid "Message: Approved and Referred (Installment - Admin)"
+msgstr "پیام: تأیید شده و ارجاع داده شده (اقساطی - مدیر)"
+
+msgid "Subject: More Documents Required (Installment - Admin)"
+msgstr "موضوع: نیاز به مدارک بیشتر (اقساطی - مدیر)"
+
+msgid "Message: More Documents Required (Installment - Admin)"
+msgstr "پیام: نیاز به مدارک بیشتر (اقساطی - مدیر)"
+
+msgid "Subject: Rejected (Installment - Admin)"
+msgstr "موضوع: رد شده (اقساطی - مدیر)"
+
+msgid "Message: Rejected (Installment - Admin)"
+msgstr "پیام: رد شده (اقساطی - مدیر)"
+
+msgid "Subject: Inquiry Failed (Installment - Admin)"
+msgstr "موضوع: استعلام ناموفق (اقساطی - مدیر)"
+
+msgid "Message: Inquiry Failed (Installment - Admin)"
+msgstr "پیام: استعلام ناموفق (اقساطی - مدیر)"
+
+msgid "Subject: Referred to Expert (Installment - Admin)"
+msgstr "موضوع: ارجاع به کارشناس (اقساطی - مدیر)"
+
+msgid "Message: Referred to Expert (Installment - Admin)"
+msgstr "پیام: ارجاع به کارشناس (اقساطی - مدیر)"
+
+msgid "Subject: In Progress (Installment - Admin)"
+msgstr "موضوع: در حال انجام (اقساطی - مدیر)"
+
+msgid "Message: In Progress (Installment - Admin)"
+msgstr "پیام: در حال انجام (اقساطی - مدیر)"
+
+msgid "Subject: Follow Up Scheduled (Installment - Admin)"
+msgstr "موضوع: پیگیری برنامه‌ریزی شده (اقساطی - مدیر)"
+
+msgid "Message: Follow Up Scheduled (Installment - Admin)"
+msgstr "پیام: پیگیری برنامه‌ریزی شده (اقساطی - مدیر)"
+
+msgid "Subject: Meeting Scheduled (Installment - Admin)"
+msgstr "موضوع: جلسه برنامه‌ریزی شده (اقساطی - مدیر)"
+
+msgid "Message: Meeting Scheduled (Installment - Admin)"
+msgstr "پیام: جلسه برنامه‌ریزی شده (اقساطی - مدیر)"
+
+msgid "Subject: Awaiting Documents (Installment - Admin)"
+msgstr "موضوع: در انتظار مدارک (اقساطی - مدیر)"
+
+msgid "Message: Awaiting Documents (Installment - Admin)"
+msgstr "پیام: در انتظار مدارک (اقساطی - مدیر)"
+
+msgid "Subject: Approved (Installment - Admin)"
+msgstr "موضوع: تأیید شده (اقساطی - مدیر)"
+
+msgid "Message: Approved (Installment - Admin)"
+msgstr "پیام: تأیید شده (اقساطی - مدیر)"
+
+msgid "Subject: Completed (Installment - Admin)"
+msgstr "موضوع: تکمیل شده (اقساطی - مدیر)"
+
+msgid "Message: Completed (Installment - Admin)"
+msgstr "پیام: تکمیل شده (اقساطی - مدیر)"
+
+
+# Email Messages - Cash Inquiry (Customer)
+msgid "Subject: New (Cash - Customer)"
+msgstr "موضوع: جدید (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - New"
+msgstr "به‌روزرسانی استعلام نقدی شما - جدید"
+
+msgid "Message: New (Cash - Customer)"
+msgstr "پیام: جدید (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: New."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: جدید است."
+
+msgid "Subject: Referred to Expert (Cash - Customer)"
+msgstr "موضوع: ارجاع به کارشناس (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Referred to Expert"
+msgstr "به‌روزرسانی استعلام نقدی شما - ارجاع به کارشناس"
+
+msgid "Message: Referred to Expert (Cash - Customer)"
+msgstr "پیام: ارجاع به کارشناس (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Referred to Expert."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: ارجاع به کارشناس است."
+
+msgid "Subject: In Progress (Cash - Customer)"
+msgstr "موضوع: در حال انجام (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - In Progress"
+msgstr "به‌روزرسانی استعلام نقدی شما - در حال انجام"
+
+msgid "Message: In Progress (Cash - Customer)"
+msgstr "پیام: در حال انجام (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: In Progress."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: در حال انجام است."
+
+msgid "Subject: Follow Up Scheduled (Cash - Customer)"
+msgstr "موضوع: پیگیری برنامه‌ریزی شده (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Follow Up Scheduled"
+msgstr "به‌روزرسانی استعلام نقدی شما - پیگیری برنامه‌ریزی شده"
+
+msgid "Message: Follow Up Scheduled (Cash - Customer)"
+msgstr "پیام: پیگیری برنامه‌ریزی شده (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Follow Up Scheduled."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: پیگیری برنامه‌ریزی شده است."
+
+msgid "Subject: Meeting Scheduled (Cash - Customer)"
+msgstr "موضوع: جلسه برنامه‌ریزی شده (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Meeting Scheduled"
+msgstr "به‌روزرسانی استعلام نقدی شما - جلسه برنامه‌ریزی شده"
+
+msgid "Message: Meeting Scheduled (Cash - Customer)"
+msgstr "پیام: جلسه برنامه‌ریزی شده (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Meeting Scheduled."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: جلسه برنامه‌ریزی شده است."
+
+msgid "Subject: Awaiting Down Payment (Cash - Customer)"
+msgstr "موضوع: در انتظار پیش‌پرداخت (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Awaiting Down Payment"
+msgstr "به‌روزرسانی استعلام نقدی شما - در انتظار پیش‌پرداخت"
+
+msgid "Message: Awaiting Down Payment (Cash - Customer)"
+msgstr "پیام: در انتظار پیش‌پرداخت (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Awaiting Down Payment."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: در انتظار پیش‌پرداخت است."
+
+msgid "Subject: Down Payment Received (Cash - Customer)"
+msgstr "موضوع: پیش‌پرداخت دریافت شده (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Down Payment Received"
+msgstr "به‌روزرسانی استعلام نقدی شما - پیش‌پرداخت دریافت شده"
+
+msgid "Message: Down Payment Received (Cash - Customer)"
+msgstr "پیام: پیش‌پرداخت دریافت شده (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Down Payment Received."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: پیش‌پرداخت دریافت شده است."
+
+msgid "Subject: Awaiting Documents (Cash - Customer)"
+msgstr "موضوع: در انتظار مدارک (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Awaiting Documents"
+msgstr "به‌روزرسانی استعلام نقدی شما - در انتظار مدارک"
+
+msgid "Message: Awaiting Documents (Cash - Customer)"
+msgstr "پیام: در انتظار مدارک (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Awaiting Documents."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: در انتظار مدارک است."
+
+msgid "Subject: Approved (Cash - Customer)"
+msgstr "موضوع: تأیید شده (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Approved"
+msgstr "به‌روزرسانی استعلام نقدی شما - تأیید شده"
+
+msgid "Message: Approved (Cash - Customer)"
+msgstr "پیام: تأیید شده (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Approved."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: تأیید شده است."
+
+msgid "Subject: Rejected (Cash - Customer)"
+msgstr "موضوع: رد شده (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Rejected"
+msgstr "به‌روزرسانی استعلام نقدی شما - رد شده"
+
+msgid "Message: Rejected (Cash - Customer)"
+msgstr "پیام: رد شده (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Rejected."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: رد شده است."
+
+msgid "Subject: Completed (Cash - Customer)"
+msgstr "موضوع: تکمیل شده (نقدی - مشتری)"
+
+msgid "Update on Your Cash Inquiry - Completed"
+msgstr "به‌روزرسانی استعلام نقدی شما - تکمیل شده"
+
+msgid "Message: Completed (Cash - Customer)"
+msgstr "پیام: تکمیل شده (نقدی - مشتری)"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Completed."
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: تکمیل شده است."
+
+
+# Email Messages - Cash Inquiry (Expert)
+msgid "Subject: New (Cash - Expert)"
+msgstr "موضوع: جدید (نقدی - کارشناس)"
+
+msgid "Message: New (Cash - Expert)"
+msgstr "پیام: جدید (نقدی - کارشناس)"
+
+msgid "Subject: Referred to Expert (Cash - Expert)"
+msgstr "موضوع: ارجاع به کارشناس (نقدی - کارشناس)"
+
+msgid "Message: Referred to Expert (Cash - Expert)"
+msgstr "پیام: ارجاع به کارشناس (نقدی - کارشناس)"
+
+msgid "Subject: In Progress (Cash - Expert)"
+msgstr "موضوع: در حال انجام (نقدی - کارشناس)"
+
+msgid "Message: In Progress (Cash - Expert)"
+msgstr "پیام: در حال انجام (نقدی - کارشناس)"
+
+msgid "Subject: Follow Up Scheduled (Cash - Expert)"
+msgstr "موضوع: پیگیری برنامه‌ریزی شده (نقدی - کارشناس)"
+
+msgid "Message: Follow Up Scheduled (Cash - Expert)"
+msgstr "پیام: پیگیری برنامه‌ریزی شده (نقدی - کارشناس)"
+
+msgid "Subject: Meeting Scheduled (Cash - Expert)"
+msgstr "موضوع: جلسه برنامه‌ریزی شده (نقدی - کارشناس)"
+
+msgid "Message: Meeting Scheduled (Cash - Expert)"
+msgstr "پیام: جلسه برنامه‌ریزی شده (نقدی - کارشناس)"
+
+msgid "Subject: Awaiting Down Payment (Cash - Expert)"
+msgstr "موضوع: در انتظار پیش‌پرداخت (نقدی - کارشناس)"
+
+msgid "Message: Awaiting Down Payment (Cash - Expert)"
+msgstr "پیام: در انتظار پیش‌پرداخت (نقدی - کارشناس)"
+
+msgid "Subject: Down Payment Received (Cash - Expert)"
+msgstr "موضوع: پیش‌پرداخت دریافت شده (نقدی - کارشناس)"
+
+msgid "Message: Down Payment Received (Cash - Expert)"
+msgstr "پیام: پیش‌پرداخت دریافت شده (نقدی - کارشناس)"
+
+msgid "Subject: Awaiting Documents (Cash - Expert)"
+msgstr "موضوع: در انتظار مدارک (نقدی - کارشناس)"
+
+msgid "Message: Awaiting Documents (Cash - Expert)"
+msgstr "پیام: در انتظار مدارک (نقدی - کارشناس)"
+
+msgid "Subject: Approved (Cash - Expert)"
+msgstr "موضوع: تأیید شده (نقدی - کارشناس)"
+
+msgid "Message: Approved (Cash - Expert)"
+msgstr "پیام: تأیید شده (نقدی - کارشناس)"
+
+msgid "Subject: Rejected (Cash - Expert)"
+msgstr "موضوع: رد شده (نقدی - کارشناس)"
+
+msgid "Message: Rejected (Cash - Expert)"
+msgstr "پیام: رد شده (نقدی - کارشناس)"
+
+msgid "Subject: Completed (Cash - Expert)"
+msgstr "موضوع: تکمیل شده (نقدی - کارشناس)"
+
+msgid "Message: Completed (Cash - Expert)"
+msgstr "پیام: تکمیل شده (نقدی - کارشناس)"
+
+# Email Messages - Cash Inquiry (Admin)
+msgid "Subject: New (Cash - Admin)"
+msgstr "موضوع: جدید (نقدی - مدیر)"
+
+msgid "Message: New (Cash - Admin)"
+msgstr "پیام: جدید (نقدی - مدیر)"
+
+msgid "Subject: Referred to Expert (Cash - Admin)"
+msgstr "موضوع: ارجاع به کارشناس (نقدی - مدیر)"
+
+msgid "Message: Referred to Expert (Cash - Admin)"
+msgstr "پیام: ارجاع به کارشناس (نقدی - مدیر)"
+
+msgid "Subject: In Progress (Cash - Admin)"
+msgstr "موضوع: در حال انجام (نقدی - مدیر)"
+
+msgid "Message: In Progress (Cash - Admin)"
+msgstr "پیام: در حال انجام (نقدی - مدیر)"
+
+msgid "Subject: Follow Up Scheduled (Cash - Admin)"
+msgstr "موضوع: پیگیری برنامه‌ریزی شده (نقدی - مدیر)"
+
+msgid "Message: Follow Up Scheduled (Cash - Admin)"
+msgstr "پیام: پیگیری برنامه‌ریزی شده (نقدی - مدیر)"
+
+msgid "Subject: Meeting Scheduled (Cash - Admin)"
+msgstr "موضوع: جلسه برنامه‌ریزی شده (نقدی - مدیر)"
+
+msgid "Message: Meeting Scheduled (Cash - Admin)"
+msgstr "پیام: جلسه برنامه‌ریزی شده (نقدی - مدیر)"
+
+msgid "Subject: Awaiting Down Payment (Cash - Admin)"
+msgstr "موضوع: در انتظار پیش‌پرداخت (نقدی - مدیر)"
+
+msgid "Message: Awaiting Down Payment (Cash - Admin)"
+msgstr "پیام: در انتظار پیش‌پرداخت (نقدی - مدیر)"
+
+msgid "Subject: Down Payment Received (Cash - Admin)"
+msgstr "موضوع: پیش‌پرداخت دریافت شده (نقدی - مدیر)"
+
+msgid "Message: Down Payment Received (Cash - Admin)"
+msgstr "پیام: پیش‌پرداخت دریافت شده (نقدی - مدیر)"
+
+msgid "Subject: Awaiting Documents (Cash - Admin)"
+msgstr "موضوع: در انتظار مدارک (نقدی - مدیر)"
+
+msgid "Message: Awaiting Documents (Cash - Admin)"
+msgstr "پیام: در انتظار مدارک (نقدی - مدیر)"
+
+msgid "Subject: Approved (Cash - Admin)"
+msgstr "موضوع: تأیید شده (نقدی - مدیر)"
+
+msgid "Message: Approved (Cash - Admin)"
+msgstr "پیام: تأیید شده (نقدی - مدیر)"
+
+msgid "Subject: Rejected (Cash - Admin)"
+msgstr "موضوع: رد شده (نقدی - مدیر)"
+
+msgid "Message: Rejected (Cash - Admin)"
+msgstr "پیام: رد شده (نقدی - مدیر)"
+
+msgid "Subject: Completed (Cash - Admin)"
+msgstr "موضوع: تکمیل شده (نقدی - مدیر)"
+
+msgid "Message: Completed (Cash - Admin)"
+msgstr "پیام: تکمیل شده (نقدی - مدیر)"
+
+
+# Telegram Messages - Installment Inquiry (Customer)
+msgid "New installment inquiry has been created. Customer: {customer_name}, Car: {car_name}"
+msgstr "استعلام اقساطی جدید ایجاد شده است. مشتری: {customer_name}، خودرو: {car_name}"
+
+# Telegram Messages - Installment Inquiry (Expert)
+
+msgid "Dear {expert_name}, a new inquiry has been referred to you. Customer: {customer_name} ({customer_mobile}), Car: {car_name}"
+msgstr "عزیز {expert_name}، یک استعلام جدید به شما ارجاع داده شده است. مشتری: {customer_name} ({customer_mobile})، خودرو: {car_name}"
+
+msgid "Inquiry for {customer_name} ({car_name}) is now in progress."
+msgstr "استعلام برای {customer_name} ({car_name}) اکنون در حال انجام است."
+
+msgid "Follow-up scheduled for {customer_name} ({car_name})."
+msgstr "پیگیری برای {customer_name} ({car_name}) برنامه‌ریزی شده است."
+
+msgid "Meeting scheduled for {customer_name} ({car_name})."
+msgstr "جلسه برای {customer_name} ({car_name}) برنامه‌ریزی شده است."
+
+msgid "Awaiting documents from {customer_name} ({car_name})."
+msgstr "در انتظار مدارک از {customer_name} ({car_name})."
+
+msgid "Inquiry for {customer_name} ({car_name}) has been approved."
+msgstr "استعلام برای {customer_name} ({car_name}) تأیید شده است."
+
+msgid "Inquiry for {customer_name} ({car_name}) has been rejected."
+msgstr "استعلام برای {customer_name} ({car_name}) رد شده است."
+
+msgid "Inquiry for {customer_name} ({car_name}) has been completed."
+msgstr "استعلام برای {customer_name} ({car_name}) تکمیل شده است."
+
+# Telegram Messages - Installment Inquiry (Admin)
+msgid "New installment inquiry: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی جدید: {customer_name} ({car_name})"
+
+msgid "Installment inquiry pending review: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی در انتظار بررسی: {customer_name} ({car_name})"
+
+msgid "Installment inquiry approved and referred: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی تأیید شده و ارجاع داده شده: {customer_name} ({car_name})"
+
+msgid "Installment inquiry referred to expert: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی ارجاع داده شده به کارشناس: {customer_name} ({car_name})"
+
+msgid "Installment inquiry approved: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی تأیید شده: {customer_name} ({car_name})"
+
+msgid "Installment inquiry rejected: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی رد شده: {customer_name} ({car_name})"
+
+msgid "Installment inquiry failed: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی ناموفق: {customer_name} ({car_name})"
+
+msgid "Installment inquiry completed: {customer_name} ({car_name})"
+msgstr "استعلام اقساطی تکمیل شده: {customer_name} ({car_name})"
+
+
+# Telegram Messages - Cash Inquiry (Customer)
+msgid "New cash inquiry has been created. Customer: {customer_name}, Car: {car_name}"
+msgstr "استعلام نقدی جدید ایجاد شده است. مشتری: {customer_name}، خودرو: {car_name}"
+
+# Telegram Messages - Cash Inquiry (Expert)
+msgid "New cash inquiry: {customer_name} ({car_name})"
+msgstr "استعلام نقدی جدید: {customer_name} ({car_name})"
+
+msgid "Dear {expert_name}, a new cash inquiry has been referred to you. Customer: {customer_name} ({customer_mobile}), Car: {car_name}"
+msgstr "عزیز {expert_name}، یک استعلام نقدی جدید به شما ارجاع داده شده است. مشتری: {customer_name} ({customer_mobile})، خودرو: {car_name}"
+
+msgid "Cash inquiry for {customer_name} ({car_name}) is now in progress."
+msgstr "استعلام نقدی برای {customer_name} ({car_name}) اکنون در حال انجام است."
+
+msgid "Awaiting down payment from {customer_name} ({car_name})."
+msgstr "در انتظار پیش‌پرداخت از {customer_name} ({car_name})."
+
+msgid "Down payment received from {customer_name} ({car_name}): {amount} Toman"
+msgstr "پیش‌پرداخت دریافت شده از {customer_name} ({car_name}): {amount} تومان"
+
+msgid "Cash inquiry for {customer_name} ({car_name}) has been approved."
+msgstr "استعلام نقدی برای {customer_name} ({car_name}) تأیید شده است."
+
+msgid "Cash inquiry for {customer_name} ({car_name}) has been rejected."
+msgstr "استعلام نقدی برای {customer_name} ({car_name}) رد شده است."
+
+msgid "Cash inquiry for {customer_name} ({car_name}) has been completed."
+msgstr "استعلام نقدی برای {customer_name} ({car_name}) تکمیل شده است."
+
+# Telegram Messages - Cash Inquiry (Admin)
+
+msgid "Cash inquiry referred to expert: {customer_name} ({car_name})"
+msgstr "استعلام نقدی ارجاع داده شده به کارشناس: {customer_name} ({car_name})"
+
+msgid "Cash inquiry in progress: {customer_name} ({car_name})"
+msgstr "استعلام نقدی در حال انجام: {customer_name} ({car_name})"
+
+msgid "Follow-up scheduled: {customer_name} ({car_name})"
+msgstr "پیگیری برنامه‌ریزی شده: {customer_name} ({car_name})"
+
+msgid "Meeting scheduled: {customer_name} ({car_name})"
+msgstr "جلسه برنامه‌ریزی شده: {customer_name} ({car_name})"
+
+msgid "Awaiting down payment: {customer_name} ({car_name})"
+msgstr "در انتظار پیش‌پرداخت: {customer_name} ({car_name})"
+
+msgid "Down payment received: {customer_name} ({car_name}), Amount: {amount} Toman"
+msgstr "پیش‌پرداخت دریافت شده: {customer_name} ({car_name})، مبلغ: {amount} تومان"
+
+msgid "Awaiting documents: {customer_name} ({car_name})"
+msgstr "در انتظار مدارک: {customer_name} ({car_name})"
+
+msgid "Cash inquiry approved: {customer_name} ({car_name})"
+msgstr "استعلام نقدی تأیید شده: {customer_name} ({car_name})"
+
+msgid "Cash inquiry rejected: {customer_name} ({car_name})"
+msgstr "استعلام نقدی رد شده: {customer_name} ({car_name})"
+
+msgid "Cash inquiry completed: {customer_name} ({car_name})"
+msgstr "استعلام نقدی تکمیل شده: {customer_name} ({car_name})"
+
+
+# SMS Templates - Installment Inquiry (Customer) - Complete Messages
+msgid "Dear {customer_name}, your installment inquiry for {car_name} status is now: Rejected. Reason: {reason}"
+msgstr "عزیز {customer_name}، وضعیت استعلام اقساطی شما برای {car_name} اکنون: رد شده است. دلیل: {reason}"
+
+# SMS Templates - Cash Inquiry (Customer) - Complete Messages  
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Approved. Down payment: {amount} Toman"
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: تأیید شده است. پیش‌پرداخت: {amount} تومان"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Rejected. Reason: {reason}"
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: رد شده است. دلیل: {reason}"
+
+msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Down Payment Received. Amount: {amount} Toman"
+msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: پیش‌پرداخت دریافت شده است. مبلغ: {amount} تومان"
+

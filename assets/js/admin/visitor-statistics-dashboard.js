@@ -5,20 +5,29 @@
  * @package Maneli_Car_Inquiry
  */
 
-(function($) {
+(function() {
     'use strict';
     
-    // Check if ApexCharts is available
-    if (typeof ApexCharts === 'undefined') {
-        console.error('ApexCharts library is not loaded');
-        return;
-    }
-    
-    // Check if localization data exists
-    if (typeof maneliVisitorStats === 'undefined') {
-        console.error('maneliVisitorStats object is not defined');
-        return;
-    }
+    // Wait for jQuery to be available
+    function initVisitorStats() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initVisitorStats, 100);
+            return;
+        }
+        
+        var $ = jQuery;
+        
+        // Check if ApexCharts is available
+        if (typeof ApexCharts === 'undefined') {
+            console.error('ApexCharts library is not loaded');
+            return;
+        }
+        
+        // Check if localization data exists
+        if (typeof maneliVisitorStats === 'undefined') {
+            console.error('maneliVisitorStats object is not defined');
+            return;
+        }
     
     var charts = {};
     var dailyStatsData = maneliVisitorStats.dailyStats || [];
@@ -455,10 +464,17 @@
         alert('Export functionality will be implemented');
     };
     
-    // Initialize charts when DOM is ready
-    $(document).ready(function() {
-        initCharts();
-    });
+        // Initialize charts when DOM is ready
+        $(document).ready(function() {
+            initCharts();
+        });
+    }
     
-})(jQuery);
+    // Start initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initVisitorStats);
+    } else {
+        initVisitorStats();
+    }
+})();
 

@@ -691,30 +691,47 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
 </div>
 
 <script type="text/javascript">
-jQuery(document).ready(function($) {
-    // Initialize Persian Datepicker
-    if (typeof $.fn.persianDatepicker !== 'undefined') {
-        $('#start-date-picker').persianDatepicker({
-            formatDate: 'YYYY/MM/DD',
-            persianNumbers: true,
-            autoClose: true
-        });
-        $('#end-date-picker').persianDatepicker({
-            formatDate: 'YYYY/MM/DD',
-            persianNumbers: true,
-            autoClose: true
+(function() {
+    // Wait for jQuery to be available
+    function initDatePickers() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initDatePickers, 100);
+            return;
+        }
+        
+        jQuery(document).ready(function($) {
+            // Initialize Persian Datepicker
+            if (typeof $.fn.persianDatepicker !== 'undefined') {
+                $('#start-date-picker').persianDatepicker({
+                    formatDate: 'YYYY/MM/DD',
+                    persianNumbers: true,
+                    autoClose: true
+                });
+                $('#end-date-picker').persianDatepicker({
+                    formatDate: 'YYYY/MM/DD',
+                    persianNumbers: true,
+                    autoClose: true
+                });
+            }
+            
+            // Handle period filter change
+            $('#period-filter').on('change', function() {
+                var period = $(this).val();
+                if (period === 'custom') {
+                    $('#custom-start-date, #custom-end-date').removeClass('maneli-initially-hidden').show();
+                } else {
+                    $('#custom-start-date, #custom-end-date').addClass('maneli-initially-hidden').hide();
+                }
+            });
         });
     }
     
-    // Handle period filter change
-    $('#period-filter').on('change', function() {
-        var period = $(this).val();
-        if (period === 'custom') {
-            $('#custom-start-date, #custom-end-date').removeClass('maneli-initially-hidden').show();
-        } else {
-            $('#custom-start-date, #custom-end-date').addClass('maneli-initially-hidden').hide();
-        }
-    });
-});
+    // Start initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDatePickers);
+    } else {
+        initDatePickers();
+    }
+})();
 </script>
 
