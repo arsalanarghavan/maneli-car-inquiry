@@ -6674,6 +6674,16 @@ msgstr "پیش"
 
 msgid "Visits"
 msgstr "بازدیدها"
+
+msgid "Enable Visitor Statistics Tracking"
+msgstr "فعال‌سازی ردیابی آمار بازدیدکنندگان"
+
+msgid "If enabled, the plugin will track visitor statistics including visits, browsers, devices, countries, and more. This data will be displayed in the Visitor Statistics dashboard."
+msgstr "در صورت فعال بودن، پلاگین آمار بازدیدکنندگان شامل بازدیدها، مرورگرها، دستگاه‌ها، کشورها و موارد دیگر را ردیابی می‌کند. این داده‌ها در داشبورد آمار بازدیدکنندگان نمایش داده می‌شوند."
+
+msgid "Visitor Statistics Settings"
+msgstr "تنظیمات آمار بازدیدکنندگان"
+
 msgid "SMS Pattern Codes (Body ID)"
 msgstr "کدهای الگوی پیامک (Body ID)"
 
