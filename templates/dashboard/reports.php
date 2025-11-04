@@ -80,7 +80,7 @@ if (($is_admin || $is_manager) && !$expert_id) {
     
     // آمارهای جدید
     $growth_stats = Maneli_Reports_Dashboard::get_growth_statistics($start_date, $end_date);
-    $top_experts = Maneli_Reports_Dashboard::get_top_experts($start_date, $end_date, 5, 'profit');
+    $top_experts = Maneli_Reports_Dashboard::get_top_experts($start_date, $end_date, 5, 'completed');
     $vip_customers = Maneli_Reports_Dashboard::get_vip_customers($start_date, $end_date, 10);
     $status_distribution = Maneli_Reports_Dashboard::get_status_distribution($start_date, $end_date);
     $attention_required = Maneli_Reports_Dashboard::get_attention_required_inquiries();
@@ -297,42 +297,42 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                 <div class="card custom-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-primary1 svg-white">
-                                    <i class="la la-dollar-sign fs-24"></i>
+                            <div class="avatar avatar-lg bg-warning svg-white">
+                                <i class="la la-spinner fs-24"></i>
                             </div>
                             <div>
-                                <div class="flex-fill fs-13 text-muted">سود کل</div>
-                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($business_stats && isset($business_stats['total_profit']) ? $business_stats['total_profit'] : 0); ?></div>
-                                <?php if (isset($growth_stats['revenue_growth'])): ?>
-                                    <span class="badge <?php echo esc_attr($growth_stats['revenue_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> fs-10 mt-1">
-                                        <i class="la la-arrow-<?php echo esc_attr($growth_stats['revenue_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
-                                        <?php echo esc_html($growth_stats['revenue_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['revenue_growth'], 1)); ?>%
-                                </span>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('In Progress', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['in_progress']); ?></div>
+                                <?php if (isset($growth_stats['in_progress_growth'])): ?>
+                                    <span class="badge <?php echo esc_attr($growth_stats['in_progress_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> fs-10 mt-1">
+                                        <i class="la la-arrow-<?php echo esc_attr($growth_stats['in_progress_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
+                                        <?php echo esc_html($growth_stats['in_progress_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['in_progress_growth'], 1)); ?>%
+                                    </span>
                                 <?php endif; ?>
                             </div>
                             <div class="ms-auto">
-                                <span class="badge bg-success-transparent text-success fs-10">
-                                    <i class="la la-dollar-sign fs-11"></i>سود
+                                <span class="badge bg-warning-transparent text-warning fs-10">
+                                    <i class="la la-clock fs-11"></i><?php esc_html_e('Active', 'maneli-car-inquiry'); ?>
                                 </span>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-primary2 svg-white">
-                                <i class="la la-wallet fs-24"></i>
+                            <div class="avatar avatar-lg bg-info svg-white">
+                                <i class="la la-hourglass-half fs-24"></i>
                             </div>
                             <div>
-                                <div class="flex-fill fs-13 text-muted">مجموع درآمد</div>
-                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['revenue']); ?></div>
-                                </div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['new'] + $stats['referred']); ?></div>
+                            </div>
                             <div class="ms-auto">
-                                <span class="badge bg-success-transparent text-success fs-10">
-                                    <i class="la la-arrow-up fs-11"></i>درآمد
+                                <span class="badge bg-info-transparent text-info fs-10">
+                                    <i class="la la-pause fs-11"></i><?php esc_html_e('Waiting', 'maneli-car-inquiry'); ?>
                                 </span>
                             </div>
                         </div>
@@ -405,19 +405,19 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     </div>
                 </div>
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card border-primary2 border border-opacity-50 overflow-hidden main-content-card">
+                <div class="card custom-card border-warning border border-opacity-50 overflow-hidden main-content-card">
                     <div class="card-body">
                         <div class="d-flex align-items-start justify-content-between">
                             <div class="flex-grow-1">
                                 <span class="text-secondary fw-semibold me-1 d-inline-block badge bg-secondary-transparent">
-                                    <i class="la la-arrow-up"></i>+<?php echo maneli_number_format_persian($stats['total_inquiries'] > 0 ? ($stats['revenue'] / $stats['total_inquiries']) : 0, 0); ?>
+                                    <i class="la la-arrow-up"></i>+<?php echo maneli_number_format_persian($stats['followup_scheduled']); ?>
                                 </span>
-                                <h4 class="mt-2 mb-2 fw-medium"><?php echo maneli_number_format_persian($stats['revenue']); ?></h4>
-                                <p class="mb-0 fs-12 fw-medium"><?php esc_html_e('Total Revenue', 'maneli-car-inquiry'); ?></p>
+                                <h4 class="mt-2 mb-2 fw-medium"><?php echo maneli_number_format_persian($stats['followup_scheduled']); ?></h4>
+                                <p class="mb-0 fs-12 fw-medium"><?php esc_html_e('Follow-up Scheduled', 'maneli-car-inquiry'); ?></p>
             </div>
                             <div>
-                                <span class="avatar avatar-md bg-primary2 svg-white text-fixed-white">
-                                    <i class="la la-money-bill-wave fs-20"></i>
+                                <span class="avatar avatar-md bg-warning svg-white text-fixed-white">
+                                    <i class="la la-calendar-check fs-20"></i>
                                 </span>
                             </div>
                         </div>
@@ -679,7 +679,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-trophy me-2"></i>
-                            <?php esc_html_e('Top Experts (Based on Profit)', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Top Experts (Based on Activity)', 'maneli-car-inquiry'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -692,16 +692,24 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div class="d-flex align-items-center gap-3">
                                             <span class="badge <?php echo esc_attr($rank == 1 ? 'bg-warning' : ($rank == 2 ? 'bg-secondary' : ($rank == 3 ? 'bg-info' : 'bg-primary-transparent'))); ?> fs-16 maneli-rank-badge">
-                                                <?php echo esc_html($rank); ?>
+                                                <?php echo maneli_number_format_persian($rank); ?>
                                             </span>
                                             <div>
                                                 <h6 class="mb-0"><?php echo esc_html($expert['name']); ?></h6>
-                                                <small class="text-muted"><?php printf(esc_html__('%s inquiries', 'maneli-car-inquiry'), maneli_number_format_persian($expert['total_inquiries'])); ?></small>
+                                                <small class="text-muted">
+                                                    <?php printf(esc_html__('%s completed', 'maneli-car-inquiry'), maneli_number_format_persian($expert['completed'])); ?> • 
+                                                    <?php printf(esc_html__('%s total', 'maneli-car-inquiry'), maneli_number_format_persian($expert['total_inquiries'])); ?>
+                                                </small>
                                             </div>
                                         </div>
                                         <div class="text-end">
-                                            <strong class="text-success"><?php echo maneli_number_format_persian($expert['profit']); ?></strong>
-                                            <small class="d-block text-muted"><?php esc_html_e('Toman Profit', 'maneli-car-inquiry'); ?></small>
+                                            <strong class="text-success"><?php echo maneli_number_format_persian($expert['completed']); ?></strong>
+                                            <small class="d-block text-muted"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></small>
+                                            <?php if ($expert['total_inquiries'] > 0): ?>
+                                                <small class="d-block text-muted mt-1">
+                                                    <?php echo maneli_number_format_persian(round(($expert['completed'] / $expert['total_inquiries']) * 100, 1)); ?>% <?php esc_html_e('Success Rate', 'maneli-car-inquiry'); ?>
+                                                </small>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </li>
@@ -739,7 +747,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                     foreach ($vip_customers as $customer): 
                                     ?>
                                         <tr>
-                                            <td><span class="badge bg-primary"><?php echo $rank++; ?></span></td>
+                                            <td><span class="badge bg-primary"><?php echo maneli_number_format_persian($rank++); ?></span></td>
                                             <td><code><?php echo esc_html(substr($customer->national_id, 0, 3) . '***' . substr($customer->national_id, -2)); ?></code></td>
                                             <td><strong><?php echo maneli_number_format_persian($customer->inquiry_count); ?></strong></td>
                                             <td><span class="text-success"><?php echo maneli_number_format_persian($customer->total_amount); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
@@ -771,13 +779,13 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <div class="col-md-6">
                                 <h6 class="text-danger mb-3">
                                     <i class="la la-clock me-1"></i>
-                                    <?php printf(esc_html__('Overdue Inquiries (%d)', 'maneli-car-inquiry'), count($attention_required['overdue'])); ?>
+                                    <?php printf(esc_html__('Overdue Inquiries (%s)', 'maneli-car-inquiry'), maneli_number_format_persian(count($attention_required['overdue']))); ?>
                                 </h6>
                                 <div class="list-group">
                                     <?php foreach (array_slice($attention_required['overdue'], 0, 5) as $inq): ?>
                                         <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="list-group-item list-group-item-action">
                                             <div class="d-flex justify-content-between">
-                                                <span><?php printf(esc_html__('Inquiry #%d', 'maneli-car-inquiry'), $inq->ID); ?></span>
+                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), maneli_number_format_persian($inq->ID)); ?></span>
                                                 <span class="badge bg-danger"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
                                             </div>
                                         </a>
@@ -790,13 +798,13 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <div class="col-md-6">
                                 <h6 class="text-warning mb-3">
                                     <i class="la la-user-times me-1"></i>
-                                    <?php printf(esc_html__('Unassigned Inquiries (%d)', 'maneli-car-inquiry'), count($attention_required['unassigned'])); ?>
+                                    <?php printf(esc_html__('Unassigned Inquiries (%s)', 'maneli-car-inquiry'), maneli_number_format_persian(count($attention_required['unassigned']))); ?>
                                 </h6>
                                 <div class="list-group">
                                     <?php foreach (array_slice($attention_required['unassigned'], 0, 5) as $inq): ?>
                                         <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="list-group-item list-group-item-action">
                                             <div class="d-flex justify-content-between">
-                                                <span><?php printf(esc_html__('Inquiry #%d', 'maneli-car-inquiry'), $inq->ID); ?></span>
+                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), maneli_number_format_persian($inq->ID)); ?></span>
                                                 <span class="badge bg-warning"><?php esc_html_e('Not Assigned', 'maneli-car-inquiry'); ?></span>
                                             </div>
                                         </a>
@@ -840,7 +848,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                         $percentage = $stats['total_inquiries'] > 0 ? round(($product['count'] / $stats['total_inquiries']) * 100, 1) : 0;
                                     ?>
                                         <tr>
-                                            <td><span class="badge bg-primary"><?php echo $rank++; ?></span></td>
+                                            <td><span class="badge bg-primary"><?php echo maneli_number_format_persian($rank++); ?></span></td>
                                             <td><?php echo esc_html($product['name']); ?></td>
                                             <td><strong><?php echo maneli_number_format_persian($product['count']); ?></strong></td>
                                             <td>
@@ -938,6 +946,12 @@ function initCharts() {
         console.log('Initializing reports charts...');
         console.log('Chart.js available:', typeof Chart !== 'undefined');
         
+        // Helper function to convert numbers to Persian digits
+        const toPersianNumber = (num) => {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return num.toString().replace(/\d/g, d => persianDigits[d]);
+        };
+        
         // Translation object for charts
         const chartTexts = {
             totalInquiries: <?php echo wp_json_encode(esc_html__('Total Inquiries', 'maneli-car-inquiry')); ?>,
@@ -1027,13 +1041,28 @@ function initCharts() {
                             plugins: {
                                 legend: {
                                     position: 'top',
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            label += toPersianNumber(context.parsed.y);
+                                            return label;
+                                        }
+                                    }
                                 }
                             },
                             scales: {
                                 y: {
                                     beginAtZero: true,
                                     ticks: {
-                                        stepSize: 1
+                                        stepSize: 1,
+                                        callback: function(value) {
+                                            return toPersianNumber(value);
+                                        }
                                     }
                                 }
                             }
@@ -1087,7 +1116,7 @@ function initCharts() {
                                 position: 'right',
                             },
                             tooltip: {
-                                callbacks: {
+                                    callbacks: {
                                     label: function(context) {
                                         let label = context.label || '';
                                         if (label) {
@@ -1096,9 +1125,9 @@ function initCharts() {
                                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                         const percent = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
                                         // Convert to Persian digits
-                                        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                                        const percentStr = percent.toString().replace(/\d/g, d => persianDigits[d]);
-                                        label += context.parsed + ' (' + percentStr + '%)';
+                                        const parsedStr = toPersianNumber(context.parsed);
+                                        const percentStr = toPersianNumber(percent);
+                                        label += parsedStr + ' (' + percentStr + '%)';
                                         return label;
                                     }
                                 }
@@ -1154,7 +1183,24 @@ function initCharts() {
                             y: {
                                 beginAtZero: true,
                                 ticks: {
-                                    stepSize: 1
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return toPersianNumber(value);
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += toPersianNumber(context.parsed.y);
+                                        return label;
+                                    }
                                 }
                             }
                         }
@@ -1232,6 +1278,11 @@ function initCharts() {
                             y: {
                                 beginAtZero: true,
                                 position: 'left',
+                                ticks: {
+                                    callback: function(value) {
+                                        return toPersianNumber(value);
+                                    }
+                                }
                             },
                             y1: {
                                 type: 'linear',
@@ -1241,6 +1292,25 @@ function initCharts() {
                                 grid: {
                                     drawOnChartArea: false,
                                 },
+                                ticks: {
+                                    callback: function(value) {
+                                        return toPersianNumber(value);
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += toPersianNumber(context.parsed.y);
+                                        return label;
+                                    }
+                                }
                             }
                         }
                     }

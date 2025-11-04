@@ -595,8 +595,8 @@ class Maneli_Hooks {
      * This injects JavaScript code to track visits via AJAX
      */
     public function track_visitor_statistics() {
-        // Skip tracking on admin pages
-        if (is_admin()) {
+        // Skip tracking on admin pages (except dashboard)
+        if (is_admin() && !get_query_var('maneli_dashboard')) {
             return;
         }
         
@@ -718,7 +718,12 @@ class Maneli_Hooks {
             return;
         }
         
-        // Enqueue visitor tracking script
+        // Skip on dashboard pages (they use static HTML template, scripts will be injected manually)
+        if (get_query_var('maneli_dashboard')) {
+            return;
+        }
+        
+        // Enqueue visitor tracking script for frontend pages
         $script_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/visitor-tracking.js';
         if (file_exists($script_path)) {
             wp_enqueue_script(

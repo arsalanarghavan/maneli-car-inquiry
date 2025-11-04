@@ -108,82 +108,147 @@ $active_users_count = $active_users_query->get_total();
         <div class="row">
             <div class="col-xl-12">
                 <!-- Statistics Cards -->
-                <div class="row mb-3">
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card custom-card">
+                <style>
+                /* User Statistics Cards - Matching CRM style */
+                .card.custom-card.crm-card {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+                    position: relative !important;
+                    overflow: hidden !important;
+                    border-radius: 0.5rem !important;
+                    background: #fff !important;
+                }
+                [data-theme-mode=dark] .card.custom-card.crm-card {
+                    background: rgb(25, 25, 28) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+                    color: rgba(255, 255, 255, 0.9) !important;
+                }
+                .card.custom-card.crm-card::before {
+                    content: '' !important;
+                    position: absolute !important;
+                    top: 0 !important;
+                    right: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%) !important;
+                    pointer-events: none !important;
+                    transition: opacity 0.3s ease !important;
+                    opacity: 0 !important;
+                }
+                .card.custom-card.crm-card:hover {
+                    transform: translateY(-4px) !important;
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+                    border-color: rgba(0, 0, 0, 0.1) !important;
+                }
+                .card.custom-card.crm-card:hover::before {
+                    opacity: 1 !important;
+                }
+                .card.custom-card.crm-card .card-body {
+                    position: relative !important;
+                    z-index: 1 !important;
+                    padding: 1.5rem !important;
+                }
+                .card.custom-card.crm-card:hover .p-2 {
+                    transform: scale(1.1) !important;
+                }
+                .card.custom-card.crm-card:hover .avatar {
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+                }
+                .card.custom-card.crm-card h4 {
+                    font-weight: 700 !important;
+                    letter-spacing: -0.5px !important;
+                    font-size: 1.75rem !important;
+                    color: #1f2937 !important;
+                    transition: color 0.3s ease !important;
+                }
+                [data-theme-mode=dark] .card.custom-card.crm-card h4 {
+                    color: rgba(255, 255, 255, 0.9) !important;
+                }
+                .card.custom-card.crm-card:hover h4 {
+                    color: #5e72e4 !important;
+                }
+                [data-theme-mode=dark] .card.custom-card.crm-card:hover h4 {
+                    color: var(--primary-color) !important;
+                }
+                [data-theme-mode=dark] .card.custom-card.crm-card .text-muted,
+                [data-theme-mode=dark] .card.custom-card.crm-card p {
+                    color: rgba(255, 255, 255, 0.6) !important;
+                }
+                </style>
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="card custom-card crm-card overflow-hidden">
                             <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <span class="avatar avatar-md bg-primary-transparent">
-                                            <i class="la la-users fs-24"></i>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-pill">
+                                        <span class="avatar avatar-md avatar-rounded bg-primary svg-white">
+                                            <i class="la la-users fs-20"></i>
                                         </span>
                                     </div>
-                                    <div class="flex-fill">
-                                        <div class="mb-1">
-                                            <span class="text-muted fs-13"><?php esc_html_e('Total Users', 'maneli-car-inquiry'); ?></span>
-                                        </div>
-                                        <h4 class="fw-semibold mb-0"><?php echo persian_numbers(number_format_i18n($total_all_users)); ?></h4>
-                                    </div>
+                                </div>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Users', 'maneli-car-inquiry'); ?></p>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($total_all_users) : persian_numbers(number_format_i18n($total_all_users)); ?></h4>
+                                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Total Users', 'maneli-car-inquiry'); ?></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card custom-card">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="card custom-card crm-card overflow-hidden">
                             <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <span class="avatar avatar-md bg-success-transparent">
-                                            <i class="la la-user-shield fs-24"></i>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-pill">
+                                        <span class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                            <i class="la la-user-shield fs-20"></i>
                                         </span>
                                     </div>
-                                    <div class="flex-fill">
-                                        <div class="mb-1">
-                                            <span class="text-muted fs-13"><?php esc_html_e('Managers', 'maneli-car-inquiry'); ?></span>
-                                        </div>
-                                        <h4 class="fw-semibold mb-0 text-success"><?php echo persian_numbers(number_format_i18n($admin_count)); ?></h4>
-                                    </div>
+                                </div>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Managers', 'maneli-car-inquiry'); ?></p>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($admin_count) : persian_numbers(number_format_i18n($admin_count)); ?></h4>
+                                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Managers', 'maneli-car-inquiry'); ?></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card custom-card">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="card custom-card crm-card overflow-hidden">
                             <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <span class="avatar avatar-md bg-info-transparent">
-                                            <i class="la la-user-tie fs-24"></i>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-pill">
+                                        <span class="avatar avatar-md avatar-rounded bg-info svg-white">
+                                            <i class="la la-user-tie fs-20"></i>
                                         </span>
                                     </div>
-                                    <div class="flex-fill">
-                                        <div class="mb-1">
-                                            <span class="text-muted fs-13"><?php esc_html_e('Experts', 'maneli-car-inquiry'); ?></span>
-                                        </div>
-                                        <h4 class="fw-semibold mb-0 text-info"><?php echo persian_numbers(number_format_i18n($expert_count)); ?></h4>
-                                    </div>
+                                </div>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Experts', 'maneli-car-inquiry'); ?></p>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($expert_count) : persian_numbers(number_format_i18n($expert_count)); ?></h4>
+                                    <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Experts', 'maneli-car-inquiry'); ?></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card custom-card">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                        <div class="card custom-card crm-card overflow-hidden">
                             <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <span class="avatar avatar-md bg-warning-transparent">
-                                            <i class="la la-user fs-24"></i>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-pill">
+                                        <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
+                                            <i class="la la-user fs-20"></i>
                                         </span>
                                     </div>
-                                    <div class="flex-fill">
-                                        <div class="mb-1">
-                                            <span class="text-muted fs-13">مشتری‌ها</span>
-                                        </div>
-                                        <h4 class="fw-semibold mb-0 text-warning"><?php echo persian_numbers(number_format_i18n($customer_count)); ?></h4>
-                                    </div>
+                                </div>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Customers', 'maneli-car-inquiry'); ?></p>
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($customer_count) : persian_numbers(number_format_i18n($customer_count)); ?></h4>
+                                    <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Customers', 'maneli-car-inquiry'); ?></span>
                                 </div>
                             </div>
                         </div>

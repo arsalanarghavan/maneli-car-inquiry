@@ -1057,7 +1057,8 @@ class Maneli_Reports_Dashboard {
             'profit' => 'profit',
             'revenue' => 'revenue',
             'success_rate' => 'success_rate',
-            'total_inquiries' => 'total_inquiries'
+            'total_inquiries' => 'total_inquiries',
+            'completed' => 'completed'
         ];
         
         $key = $sort_keys[$sort_by] ?? 'profit';

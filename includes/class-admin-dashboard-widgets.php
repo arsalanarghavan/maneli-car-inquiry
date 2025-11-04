@@ -76,22 +76,24 @@ class Maneli_Admin_Dashboard_Widgets {
         global $wpdb;
         $counts = ['total' => 0];
 
-        $status_key = ($post_type === 'inquiry') ? 'inquiry_status' : 'cash_inquiry_status';
+        // For installment inquiries, use tracking_status instead of inquiry_status
+        $status_key = ($post_type === 'inquiry') ? 'tracking_status' : 'cash_inquiry_status';
 
         // Note: Using prepare for meta_key and post_type is generally not needed 
         // as they are known internal values, but is used here for completeness.
+        // Use LEFT JOIN to include inquiries without status (they will default to 'new')
         $results = $wpdb->get_results($wpdb->prepare("
-            SELECT pm.meta_value as status, COUNT(p.ID) as count
+            SELECT COALESCE(pm.meta_value, 'new') as status, COUNT(p.ID) as count
             FROM {$wpdb->posts} p
-            INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = %s
             WHERE p.post_type = %s
             AND p.post_status = 'publish'
-            AND pm.meta_key = %s
             GROUP BY status
-        ", $post_type, $status_key), ARRAY_A);
+        ", $status_key, $post_type), ARRAY_A);
 
         foreach ($results as $row) {
-            $counts[$row['status']] = (int)$row['count'];
+            $status = $row['status'] ?: 'new'; // Default to 'new' if empty
+            $counts[$status] = (int)$row['count'];
             $counts['total'] += (int)$row['count'];
         }
 
@@ -106,27 +108,81 @@ class Maneli_Admin_Dashboard_Widgets {
         if (!class_exists('Maneli_CPT_Handler')) return '';
 
         $counts = self::get_inquiry_counts('inquiry');
-        $statuses = Maneli_CPT_Handler::get_all_statuses();
+        $statuses = Maneli_CPT_Handler::get_tracking_statuses();
         
-        $stats = [
-            'total'          => ['label' => esc_html__('کل درخواست‌های اقساطی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
-            'pending'        => ['label' => $statuses['pending'] ?? esc_html__('در انتظار', 'maneli-car-inquiry'), 'count' => $counts['pending'] ?? 0, 'class' => 'pending'],
-            'user_confirmed' => ['label' => $statuses['user_confirmed'] ?? esc_html__('تایید شده', 'maneli-car-inquiry'), 'count' => $counts['user_confirmed'] ?? 0, 'class' => 'confirmed'],
-            'rejected'       => ['label' => $statuses['rejected'] ?? esc_html__('رد شد', 'maneli-car-inquiry'), 'count' => $counts['rejected'] ?? 0, 'class' => 'rejected'],
+        // مهم‌ترین وضعیت‌ها برای نمایش (حداکثر 10 کارت: 1 کل + 9 وضعیت)
+        $important_statuses = [
+            'new',
+            'referred',
+            'in_progress',
+            'awaiting_documents',
+            'follow_up_scheduled',
+            'meeting_scheduled',
+            'approved',
+            'completed',
+            'rejected'
         ];
+        
+        // Build stats array with important statuses only
+        $stats = [
+            'total' => ['label' => esc_html__('کل درخواست‌های اقساطی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+        ];
+        
+        // Add only important tracking statuses
+        foreach ($important_statuses as $status_key) {
+            if (isset($statuses[$status_key])) {
+                $stats[$status_key] = [
+                    'label' => $statuses[$status_key],
+                    'count' => $counts[$status_key] ?? 0,
+                    'class' => $status_key
+                ];
+            }
+        }
 
         // Define icon and color for each stat
         $stat_configs = [
             'total' => ['icon' => 'la-list-alt', 'color' => 'primary', 'bg' => 'bg-primary-transparent'],
-            'pending' => ['icon' => 'la-clock', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
-            'confirmed' => ['icon' => 'la-check-circle', 'color' => 'success', 'bg' => 'bg-success-transparent'],
+            'new' => ['icon' => 'la-folder-open', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'],
+            'referred' => ['icon' => 'la-share', 'color' => 'info', 'bg' => 'bg-info-transparent'],
+            'in_progress' => ['icon' => 'la-spinner', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
+            'follow_up_scheduled' => ['icon' => 'la-clock', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
+            'meeting_scheduled' => ['icon' => 'la-calendar-check', 'color' => 'cyan', 'bg' => 'bg-cyan-transparent'],
+            'awaiting_documents' => ['icon' => 'la-file-alt', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
+            'approved' => ['icon' => 'la-check-circle', 'color' => 'success', 'bg' => 'bg-success-transparent'],
             'rejected' => ['icon' => 'la-times-circle', 'color' => 'danger', 'bg' => 'bg-danger-transparent'],
+            'completed' => ['icon' => 'la-check-double', 'color' => 'success', 'bg' => 'bg-success-transparent'],
         ];
 
         ob_start();
         ?>
         <style>
         /* Inquiry Statistics Cards - Inline Styles for Immediate Effect */
+        .row.mb-4 {
+            display: flex !important;
+            flex-wrap: wrap !important;
+        }
+        .row.mb-4 > .col-xl-2 {
+            flex: 0 0 20% !important;
+            max-width: 20% !important;
+        }
+        @media (max-width: 1399.98px) {
+            .row.mb-4 > .col-xl-2 {
+                flex: 0 0 25% !important;
+                max-width: 25% !important;
+            }
+        }
+        @media (max-width: 991.98px) {
+            .row.mb-4 > .col-xl-2 {
+                flex: 0 0 33.333333% !important;
+                max-width: 33.333333% !important;
+            }
+        }
+        @media (max-width: 767.98px) {
+            .row.mb-4 > .col-xl-2 {
+                flex: 0 0 50% !important;
+                max-width: 50% !important;
+            }
+        }
         .card.custom-card.crm-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             border: 1px solid rgba(0, 0, 0, 0.06) !important;
@@ -200,9 +256,9 @@ class Maneli_Admin_Dashboard_Widgets {
         </style>
         <div class="row mb-4">
             <?php foreach ($stats as $key => $stat) : 
-                $config = $stat_configs[$stat['class']] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
+                $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
                     <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">
@@ -235,25 +291,81 @@ class Maneli_Admin_Dashboard_Widgets {
         $counts = self::get_inquiry_counts('cash_inquiry');
         $statuses = Maneli_CPT_Handler::get_all_cash_inquiry_statuses();
         
-        $stats = [
-            'total'            => ['label' => esc_html__('کل درخواست‌های نقدی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
-            'approved'         => ['label' => $statuses['approved'] ?? esc_html__('تایید شده', 'maneli-car-inquiry'), 'count' => $counts['approved'] ?? 0, 'class' => 'approved'],
-            'completed'        => ['label' => $statuses['completed'] ?? esc_html__('تکمیل شده', 'maneli-car-inquiry'), 'count' => $counts['completed'] ?? 0, 'class' => 'completed'],
-            'rejected'         => ['label' => $statuses['rejected'] ?? esc_html__('رد شد', 'maneli-car-inquiry'), 'count' => $counts['rejected'] ?? 0, 'class' => 'rejected'],
+        // مهم‌ترین وضعیت‌ها برای نمایش (حداکثر 10 کارت: 1 کل + 9 وضعیت)
+        $important_statuses = [
+            'new',
+            'referred',
+            'in_progress',
+            'awaiting_downpayment',
+            'downpayment_received',
+            'awaiting_documents',
+            'approved',
+            'completed',
+            'rejected'
         ];
+        
+        // Build stats array with important statuses only
+        $stats = [
+            'total' => ['label' => esc_html__('کل درخواست‌های نقدی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+        ];
+        
+        // Add only important cash inquiry statuses
+        foreach ($important_statuses as $status_key) {
+            if (isset($statuses[$status_key])) {
+                $stats[$status_key] = [
+                    'label' => $statuses[$status_key],
+                    'count' => $counts[$status_key] ?? 0,
+                    'class' => $status_key
+                ];
+            }
+        }
 
         // Define icon and color for each stat
         $stat_configs = [
             'total' => ['icon' => 'la-dollar-sign', 'color' => 'primary', 'bg' => 'bg-primary-transparent'],
+            'new' => ['icon' => 'la-folder-open', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'],
+            'referred' => ['icon' => 'la-share', 'color' => 'info', 'bg' => 'bg-info-transparent'],
+            'in_progress' => ['icon' => 'la-spinner', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
+            'follow_up_scheduled' => ['icon' => 'la-clock', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
+            'meeting_scheduled' => ['icon' => 'la-calendar-check', 'color' => 'cyan', 'bg' => 'bg-cyan-transparent'],
+            'awaiting_downpayment' => ['icon' => 'la-dollar-sign', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
+            'downpayment_received' => ['icon' => 'la-check-double', 'color' => 'success', 'bg' => 'bg-success-transparent'],
+            'awaiting_documents' => ['icon' => 'la-file-alt', 'color' => 'warning', 'bg' => 'bg-warning-transparent'],
             'approved' => ['icon' => 'la-check-circle', 'color' => 'success', 'bg' => 'bg-success-transparent'],
-            'completed' => ['icon' => 'la-check-double', 'color' => 'success', 'bg' => 'bg-success-transparent'],
             'rejected' => ['icon' => 'la-times-circle', 'color' => 'danger', 'bg' => 'bg-danger-transparent'],
+            'completed' => ['icon' => 'la-check-double', 'color' => 'success', 'bg' => 'bg-success-transparent'],
         ];
 
         ob_start();
         ?>
         <style>
         /* Cash Inquiry Statistics Cards - Inline Styles for Immediate Effect */
+        .row.mb-4 {
+            display: flex !important;
+            flex-wrap: wrap !important;
+        }
+        .row.mb-4 > .col-xl-2 {
+            flex: 0 0 20% !important;
+            max-width: 20% !important;
+        }
+        @media (max-width: 1399.98px) {
+            .row.mb-4 > .col-xl-2 {
+                flex: 0 0 25% !important;
+                max-width: 25% !important;
+            }
+        }
+        @media (max-width: 991.98px) {
+            .row.mb-4 > .col-xl-2 {
+                flex: 0 0 33.333333% !important;
+                max-width: 33.333333% !important;
+            }
+        }
+        @media (max-width: 767.98px) {
+            .row.mb-4 > .col-xl-2 {
+                flex: 0 0 50% !important;
+                max-width: 50% !important;
+            }
+        }
         .card.custom-card.crm-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             border: 1px solid rgba(0, 0, 0, 0.06) !important;
@@ -329,7 +441,7 @@ class Maneli_Admin_Dashboard_Widgets {
             <?php foreach ($stats as $key => $stat) :
                 $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
                     <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">

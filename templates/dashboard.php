@@ -513,15 +513,33 @@ if ($dashboard_page === 'home') {
 $dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/notifications.js"></script>';
 $dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/global-search.js"></script>';
 
-// Visitor Statistics Scripts - Direct Injection
-if ($page === 'visitor-statistics') {
+// Visitor Tracking Script - For all dashboard pages (to track dashboard visits)
+$options = get_option('maneli_inquiry_all_options', []);
+$tracking_enabled = isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] == '1';
+if ($tracking_enabled) {
+    $tracking_script_path = MANELI_PLUGIN_DIR . 'assets/js/frontend/visitor-tracking.js';
+    if (file_exists($tracking_script_path)) {
+        $dashboard_html .= '<script>
+var maneliVisitorTracking = {
+    ajaxUrl: "' . esc_js(admin_url('admin-ajax.php')) . '",
+    nonce: "' . esc_js(wp_create_nonce('maneli_visitor_stats_nonce')) . '",
+    enabled: true,
+    debug: ' . (defined('WP_DEBUG') && WP_DEBUG ? 'true' : 'false') . '
+};
+</script>' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/frontend/visitor-tracking.js?v=' . filemtime($tracking_script_path)) . '"></script>' . PHP_EOL;
+    }
+}
+
+// Visitor Statistics Scripts - Direct Injection (for visitor-statistics page only)
+if ($dashboard_page === 'visitor-statistics') {
     require_once MANELI_PLUGIN_DIR . 'includes/functions.php';
     
     // ApexCharts
     $apexcharts_path = MANELI_PLUGIN_DIR . 'assets/libs/apexcharts/apexcharts.min.js';
     if (file_exists($apexcharts_path)) {
-        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.css') . '">' . PHP_EOL;
-        $dashboard_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js') . '"></script>' . PHP_EOL;
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.css') . '">' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js') . '"></script>' . PHP_EOL;
     } else {
         // Fallback to CDN
         $dashboard_html .= '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.css">' . PHP_EOL;
@@ -529,15 +547,15 @@ if ($page === 'visitor-statistics') {
     }
     
     // Persian Datepicker
-    $datepicker_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/persianDatepicker-default.css';
-    $datepicker_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/persianDatepicker.min.js';
+    $datepicker_css = MANELI_PLUGIN_DIR . 'assets/css/persianDatepicker-default.css';
+    $datepicker_js = MANELI_PLUGIN_DIR . 'assets/js/persianDatepicker.min.js';
     if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
-        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
-        $dashboard_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
     }
     
     // Visitor Statistics Dashboard Script
-    $dashboard_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/admin/visitor-statistics-dashboard.js';
+    $dashboard_js_path = MANELI_PLUGIN_DIR . 'assets/js/admin/visitor-statistics-dashboard.js';
     if (file_exists($dashboard_js_path)) {
         // Get date range from query parameters
         $start_date_input = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : null;
@@ -549,20 +567,20 @@ if ($page === 'visitor-statistics') {
         
         if ($start_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $start_date_input, $matches)) {
             if (!function_exists('maneli_jalali_to_gregorian')) {
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+                require_once MANELI_PLUGIN_DIR . 'includes/functions.php';
             }
             $start_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
         }
         
         if ($end_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $end_date_input, $matches)) {
             if (!function_exists('maneli_jalali_to_gregorian')) {
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+                require_once MANELI_PLUGIN_DIR . 'includes/functions.php';
             }
             $end_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
         }
         
         // Get daily stats
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
+        require_once MANELI_PLUGIN_DIR . 'includes/class-visitor-statistics.php';
         $daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
         
         // Convert dates to Jalali format
@@ -578,7 +596,8 @@ if ($page === 'visitor-statistics') {
         
         // Localize script
         $dashboard_html .= '<script>
-var maneliVisitorStats = ' . json_encode([
+console.log("Visitor Statistics: Script block executed");
+var maneliVisitorStats = ' . wp_json_encode([
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
             'startDate' => $start_date,
@@ -593,16 +612,17 @@ var maneliVisitorStats = ' . json_encode([
                 'pages' => esc_html__('Pages', 'maneli-car-inquiry'),
                 'date' => esc_html__('Date', 'maneli-car-inquiry'),
             ]
-        ], JSON_UNESCAPED_UNICODE) . ';
+        ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';
+console.log("maneliVisitorStats object:", maneliVisitorStats);
 </script>' . PHP_EOL;
         
-        $dashboard_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/visitor-statistics-dashboard.js?v=' . filemtime($dashboard_js_path)) . '"></script>' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/admin/visitor-statistics-dashboard.js?v=' . filemtime($dashboard_js_path)) . '"></script>' . PHP_EOL;
     }
     
     // Visitor Statistics CSS
-    $dashboard_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/visitor-statistics.css';
+    $dashboard_css_path = MANELI_PLUGIN_DIR . 'assets/css/visitor-statistics.css';
     if (file_exists($dashboard_css_path)) {
-        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/visitor-statistics.css?v=' . filemtime($dashboard_css_path)) . '">' . PHP_EOL;
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/visitor-statistics.css?v=' . filemtime($dashboard_css_path)) . '">' . PHP_EOL;
     }
 }
 $dashboard_html .= '<script>

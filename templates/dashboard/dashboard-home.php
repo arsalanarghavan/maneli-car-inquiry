@@ -642,18 +642,20 @@ if ($is_customer) {
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
-                            <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-circle">
-                                <span class="avatar avatar-md avatar-rounded bg-success svg-white">
-                                    <i class="la la-money-bill-wave fs-20"></i>
+                            <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
+                                    <i class="la la-dollar-sign fs-20"></i>
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Revenue', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo persian_numbers_no_separator($stats['revenue'] ?? 0); ?></h4>
-                            <?php if ($revenue_growth != 0): ?>
-                            <span class="text-<?php echo $revenue_growth > 0 ? 'success' : 'danger'; ?> badge bg-<?php echo $revenue_growth > 0 ? 'success' : 'danger'; ?>-transparent rounded-pill d-flex align-items-center fs-11">
-                                <i class="la la-arrow-<?php echo $revenue_growth > 0 ? 'up' : 'down'; ?> fs-11"></i><?php echo persian_numbers_no_separator($revenue_growth); ?>%
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo persian_numbers_no_separator($stats['cash_inquiries'] ?? 0); ?></h4>
+                            <?php if (isset($stats['total_inquiries']) && $stats['total_inquiries'] > 0): 
+                                $cash_percentage = round(($stats['cash_inquiries'] / $stats['total_inquiries']) * 100, 1);
+                            ?>
+                            <span class="badge bg-warning-transparent text-warning rounded-pill d-flex align-items-center fs-11">
+                                <?php echo persian_numbers_no_separator($cash_percentage); ?>%
                             </span>
                             <?php endif; ?>
                         </div>
@@ -664,16 +666,22 @@ if ($is_customer) {
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
-                            <div class="p-2 border border-primary1 border-opacity-10 bg-primary1-transparent rounded-circle">
-                                <span class="avatar avatar-md avatar-rounded bg-primary1 svg-white">
-                                    <i class="la la-coins fs-20"></i>
+                            <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-info svg-white">
+                                    <i class="la la-credit-card fs-20"></i>
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Profit', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-primary"><?php echo persian_numbers_no_separator($total_profit); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo persian_numbers_no_separator($stats['installment_inquiries'] ?? 0); ?></h4>
+                            <?php if (isset($stats['total_inquiries']) && $stats['total_inquiries'] > 0): 
+                                $installment_percentage = round(($stats['installment_inquiries'] / $stats['total_inquiries']) * 100, 1);
+                            ?>
+                            <span class="badge bg-info-transparent text-info rounded-pill d-flex align-items-center fs-11">
+                                <?php echo persian_numbers_no_separator($installment_percentage); ?>%
+                            </span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -1762,7 +1770,25 @@ if ($is_customer) {
             
             // ایجاد نمودار ساده
             try {
-                const dailyDataRaw = <?php echo json_encode($daily_stats, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK); ?>;
+                <?php 
+                // تبدیل تاریخ‌ها به شمسی در PHP
+                $daily_stats_jalali = [];
+                if (!empty($daily_stats)) {
+                    foreach ($daily_stats as $stat) {
+                        $jalali_date = $stat['date'];
+                        if (function_exists('maneli_gregorian_to_jalali') && isset($stat['date']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $stat['date'], $matches)) {
+                            $jalali_date = maneli_gregorian_to_jalali($matches[1], $matches[2], $matches[3], 'Y/m/d');
+                        }
+                        $daily_stats_jalali[] = [
+                            'date' => $jalali_date,
+                            'total' => isset($stat['total']) ? absint($stat['total']) : 0,
+                            'cash' => isset($stat['cash']) ? absint($stat['cash']) : 0,
+                            'installment' => isset($stat['installment']) ? absint($stat['installment']) : 0,
+                        ];
+                    }
+                }
+                ?>
+                const dailyDataRaw = <?php echo wp_json_encode($daily_stats_jalali, JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK); ?>;
                 const dailyData = Array.isArray(dailyDataRaw) ? dailyDataRaw : [];
                 console.log('Daily stats data RAW:', dailyDataRaw);
                 console.log('Daily stats data ARRAY:', dailyData);
@@ -1771,16 +1797,13 @@ if ($is_customer) {
                 let labels, totalData, cashData, installmentData;
                 
                 if (dailyData && dailyData.length > 0) {
-                    // تبدیل تاریخ میلادی به شمسی
+                    // تاریخ‌ها قبلاً در PHP به شمسی تبدیل شده‌اند
                     labels = dailyData.map(item => {
                         if (!item || !item.date) {
                             console.warn('Invalid item in dailyData:', item);
                             return '" . esc_js(__('Unknown', 'maneli-car-inquiry')) . "';
                         }
-                        console.log('Converting date:', item.date);
-                        const jalaliDate = convertToJalali(item.date);
-                        console.log('Converted to:', jalaliDate);
-                        return jalaliDate;
+                        return String(item.date || '');
                     });
                     totalData = dailyData.map(item => {
                         const val = parseInt(item.total) || 0;

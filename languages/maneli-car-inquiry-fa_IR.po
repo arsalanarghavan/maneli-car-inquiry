@@ -320,6 +320,12 @@ msgstr "در انتظار پرداخت"
 msgid "Completed"
 msgstr "تکمیل شده"
 
+msgid "%s completed"
+msgstr "%s تکمیل شده"
+
+msgid "%s total"
+msgstr "%s کل"
+
 
 # Inquiry Types
 
@@ -3181,6 +3187,9 @@ msgid "Apply Filter"
 msgstr "اعمال فیلتر"
 
 
+msgid "Apply"
+msgstr "اعمال"
+
 msgid "Apply Filters"
 msgstr "اعمال فیلترها"
 
@@ -4583,6 +4592,9 @@ msgstr "پیگیری‌های امروز"
 msgid "Today Inquiries"
 msgstr "استعلام‌های امروز"
 
+msgid "Today's Inquiries"
+msgstr "استعلام‌های امروز"
+
 msgid "Today's Follow-ups"
 msgstr "پیگیری‌های امروز"
 
@@ -4600,6 +4612,9 @@ msgstr "امروز:"
 
 msgid "Toman Profit"
 msgstr "سود تومان"
+
+msgid "Top Experts (Based on Activity)"
+msgstr "بهترین کارشناسان (بر اساس فعالیت)"
 
 msgid "Top Experts (Based on Profit)"
 msgstr "بهترین کارشناسان (بر اساس سود)"
