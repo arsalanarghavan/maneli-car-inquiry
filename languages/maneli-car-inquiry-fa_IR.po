@@ -6036,3 +6036,6 @@ msgstr "تاریخ پیگیری (قدیمی‌ترین)"
 
 msgid "Follow-up Date (Latest)"
 msgstr "تاریخ پیگیری (جدیدترین)"
+
+msgid "Products Management"
+msgstr "مدیریت محصولات"

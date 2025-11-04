@@ -399,22 +399,31 @@ $product_categories = get_terms([
 }
 
 /* Product Stats Cards - 5 cards in one row */
-.product-stats-cards > [class*="col-"] {
-    flex: 0 0 20%;
-    max-width: 20%;
+@media (min-width: 1200px) {
+    .product-stats-cards > [class*="col-"] {
+        flex: 0 0 20% !important;
+        max-width: 20% !important;
+    }
 }
 
-@media (max-width: 1199.98px) {
+@media (min-width: 992px) and (max-width: 1199.98px) {
     .product-stats-cards > [class*="col-"] {
-        flex: 0 0 50%;
-        max-width: 50%;
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .product-stats-cards > [class*="col-"] {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
     }
 }
 
 @media (max-width: 767.98px) {
     .product-stats-cards > [class*="col-"] {
-        flex: 0 0 100%;
-        max-width: 100%;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
     }
 }
 

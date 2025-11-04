@@ -112,11 +112,30 @@ class Maneli_Activator {
             KEY user_id (user_id)
         ) $charset_collate;";
 
+        // Notification templates table
+        $table_notification_templates = $wpdb->prefix . 'maneli_notification_templates';
+        $sql_notification_templates = "CREATE TABLE IF NOT EXISTS $table_notification_templates (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            type varchar(50) NOT NULL COMMENT 'sms, telegram, email, notification',
+            name varchar(255) NOT NULL,
+            subject varchar(500) DEFAULT NULL COMMENT 'Subject line for email',
+            message text NOT NULL,
+            variables text DEFAULT NULL COMMENT 'JSON array of available variables',
+            is_active tinyint(1) DEFAULT 1,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY type (type),
+            KEY is_active (is_active),
+            KEY name (name(100))
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_inquiries);
         dbDelta($sql_followups);
         dbDelta($sql_notifications);
         dbDelta($sql_notification_logs);
+        dbDelta($sql_notification_templates);
         
         // Schedule cron jobs
         if (!wp_next_scheduled('maneli_send_meeting_reminders')) {
