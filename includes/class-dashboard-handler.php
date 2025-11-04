@@ -294,6 +294,66 @@ class Maneli_Dashboard_Handler {
                 }
             }
             
+            // Visitor Statistics page - ApexCharts and scripts
+            if ($page === 'visitor-statistics') {
+                // ApexCharts
+                $apexcharts_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/apexcharts/apexcharts.min.js';
+                if (file_exists($apexcharts_path)) {
+                    wp_enqueue_script('apexcharts', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js', ['jquery'], '3.44.0', true);
+                    $apexcharts_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/apexcharts/apexcharts.css';
+                    if (file_exists($apexcharts_css_path)) {
+                        wp_enqueue_style('apexcharts', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.css', [], '3.44.0');
+                    }
+                } else {
+                    // Fallback to CDN
+                    wp_enqueue_script('apexcharts', 'https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js', ['jquery'], '3.44.0', true);
+                    wp_enqueue_style('apexcharts', 'https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.css', [], '3.44.0');
+                }
+                
+                // Persian Datepicker
+                if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
+                    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
+                    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+                }
+                
+                // Visitor Statistics Dashboard Script
+                $dashboard_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/admin/visitor-statistics-dashboard.js';
+                if (file_exists($dashboard_js_path)) {
+                    wp_enqueue_script('maneli-visitor-statistics-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/visitor-statistics-dashboard.js', ['jquery', 'apexcharts'], filemtime($dashboard_js_path), true);
+                    
+                    // Localize script
+                    $start_date = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : date('Y-m-d', strtotime('-30 days'));
+                    $end_date = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : date('Y-m-d');
+                    
+                    // Get daily stats for chart
+                    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
+                    $daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
+                    
+                    wp_localize_script('maneli-visitor-statistics-dashboard', 'maneliVisitorStats', [
+                        'ajaxUrl' => admin_url('admin-ajax.php'),
+                        'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
+                        'startDate' => $start_date,
+                        'endDate' => $end_date,
+                        'dailyStats' => $daily_stats,
+                        'translations' => [
+                            'loading' => esc_html__('Loading...', 'maneli-car-inquiry'),
+                            'error' => esc_html__('Error loading data', 'maneli-car-inquiry'),
+                            'noData' => esc_html__('No data available', 'maneli-car-inquiry'),
+                            'visits' => esc_html__('Visits', 'maneli-car-inquiry'),
+                            'uniqueVisitors' => esc_html__('Unique Visitors', 'maneli-car-inquiry'),
+                            'pages' => esc_html__('Pages', 'maneli-car-inquiry'),
+                            'date' => esc_html__('Date', 'maneli-car-inquiry'),
+                        ]
+                    ]);
+                }
+                
+                // Visitor Statistics CSS
+                $dashboard_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/visitor-statistics.css';
+                if (file_exists($dashboard_css_path)) {
+                    wp_enqueue_style('maneli-visitor-statistics', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/visitor-statistics.css', [], filemtime($dashboard_css_path));
+                }
+            }
+            
             // Sales dashboard scripts (charts) - only for home page
             if ($page === 'home' || empty($page)) {
                 wp_enqueue_script('maneli-apexcharts', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js', ['jquery'], '1.0.0', true);
@@ -1510,12 +1570,6 @@ class Maneli_Dashboard_Handler {
             // دسته: مدیریت
             $menu_items[] = ['title' => esc_html__('Management', 'maneli-car-inquiry'), 'category' => true];
             $menu_items[] = [
-                'title' => esc_html__('Performance Reports', 'maneli-car-inquiry'),
-                'url' => home_url('/dashboard/reports'),
-                'icon' => 'ri-bar-chart-box-line',
-                'capability' => 'manage_maneli_inquiries'
-            ];
-            $menu_items[] = [
                 'title' => esc_html__('Edit Products', 'maneli-car-inquiry'),
                 'url' => home_url('/dashboard/products'),
                 'icon' => 'ri-store-line',
@@ -1543,8 +1597,20 @@ class Maneli_Dashboard_Handler {
                 'capability' => 'manage_maneli_inquiries'
             ];
             
-            // دسته: اطلاع‌رسانی
-            $menu_items[] = ['title' => esc_html__('Notifications', 'maneli-car-inquiry'), 'category' => true];
+            // دسته: گزارشات
+            $menu_items[] = ['title' => esc_html__('Reports', 'maneli-car-inquiry'), 'category' => true];
+            $menu_items[] = [
+                'title' => esc_html__('Performance Reports', 'maneli-car-inquiry'),
+                'url' => home_url('/dashboard/reports'),
+                'icon' => 'ri-bar-chart-box-line',
+                'capability' => 'manage_maneli_inquiries'
+            ];
+            $menu_items[] = [
+                'title' => esc_html__('Visitor Statistics', 'maneli-car-inquiry'),
+                'url' => home_url('/dashboard/visitor-statistics'),
+                'icon' => 'ri-line-chart-line',
+                'capability' => 'manage_maneli_inquiries'
+            ];
             $menu_items[] = [
                 'title' => esc_html__('Notification Center', 'maneli-car-inquiry'),
                 'url' => home_url('/dashboard/notifications-center'),

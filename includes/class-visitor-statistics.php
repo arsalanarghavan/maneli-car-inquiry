@@ -1,0 +1,1005 @@
+<?php
+/**
+ * Visitor Statistics Class
+ * مدیریت آمار بازدیدکنندگان و ردیابی بازدیدها
+ * 
+ * @package Maneli_Car_Inquiry
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Maneli_Visitor_Statistics {
+    
+    /**
+     * Get client IP address
+     */
+    private static function get_client_ip() {
+        $ip_keys = [
+            'HTTP_CF_CONNECTING_IP', // Cloudflare
+            'HTTP_X_REAL_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR'
+        ];
+        
+        foreach ($ip_keys as $key) {
+            if (array_key_exists($key, $_SERVER) === true) {
+                foreach (explode(',', $_SERVER[$key]) as $ip) {
+                    $ip = trim($ip);
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+                        return $ip;
+                    }
+                }
+            }
+        }
+        
+        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+    }
+    
+    /**
+     * Detect if user agent is a bot
+     */
+    private static function is_bot($user_agent) {
+        if (empty($user_agent)) {
+            return true;
+        }
+        
+        $bots = [
+            'googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider',
+            'yandexbot', 'sogou', 'exabot', 'facebot', 'ia_archiver',
+            'applebot', 'twitterbot', 'rogerbot', 'linkedinbot', 'embedly',
+            'quora', 'pinterest', 'slackbot', 'redditbot', 'applebot',
+            'flipboard', 'tumblr', 'bitlybot', 'skypeuripreview', 'nuzzel',
+            'qwantbot', 'pinterestbot', 'bitrix', 'xing-contenttabreceiver',
+            'chrome-lighthouse', 'semrushbot', 'dotbot', 'megaindex', 'ahrefsbot'
+        ];
+        
+        $user_agent_lower = strtolower($user_agent);
+        foreach ($bots as $bot) {
+            if (strpos($user_agent_lower, $bot) !== false) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Parse user agent to get browser, OS, and device info
+     */
+    private static function parse_user_agent($user_agent) {
+        $result = [
+            'browser' => 'Unknown',
+            'browser_version' => '',
+            'os' => 'Unknown',
+            'os_version' => '',
+            'device_type' => 'desktop',
+            'device_model' => ''
+        ];
+        
+        if (empty($user_agent)) {
+            return $result;
+        }
+        
+        // Detect OS
+        if (preg_match('/windows nt 10/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '10';
+        } elseif (preg_match('/windows nt 6\.3/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '8.1';
+        } elseif (preg_match('/windows nt 6\.2/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '8';
+        } elseif (preg_match('/windows nt 6\.1/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '7';
+        } elseif (preg_match('/macintosh|mac os x/i', $user_agent)) {
+            $result['os'] = 'macOS';
+            if (preg_match('/mac os x (\d+)[._](\d+)/i', $user_agent, $matches)) {
+                $result['os_version'] = $matches[1] . '.' . $matches[2];
+            }
+        } elseif (preg_match('/linux/i', $user_agent)) {
+            $result['os'] = 'Linux';
+        } elseif (preg_match('/android/i', $user_agent)) {
+            $result['os'] = 'Android';
+            $result['device_type'] = 'mobile';
+            if (preg_match('/android ([\d.]+)/i', $user_agent, $matches)) {
+                $result['os_version'] = $matches[1];
+            }
+            // Detect device model
+            if (preg_match('/(samsung|huawei|xiaomi|oneplus|oppo|vivo|realme|motorola|lg|sony|htc|nokia|asus|lenovo|zte|honor|google pixel|iphone)/i', $user_agent, $matches)) {
+                $result['device_model'] = ucfirst(strtolower($matches[1]));
+            }
+        } elseif (preg_match('/iphone|ipod/i', $user_agent)) {
+            $result['os'] = 'iOS';
+            $result['device_type'] = 'mobile';
+            $result['device_model'] = 'iPhone';
+            if (preg_match('/os ([\d_]+)/i', $user_agent, $matches)) {
+                $result['os_version'] = str_replace('_', '.', $matches[1]);
+            }
+        } elseif (preg_match('/ipad/i', $user_agent)) {
+            $result['os'] = 'iOS';
+            $result['device_type'] = 'tablet';
+            $result['device_model'] = 'iPad';
+            if (preg_match('/os ([\d_]+)/i', $user_agent, $matches)) {
+                $result['os_version'] = str_replace('_', '.', $matches[1]);
+            }
+        }
+        
+        // Detect Browser
+        if (preg_match('/edg\/([\d.]+)/i', $user_agent, $matches)) {
+            $result['browser'] = 'Edge';
+            $result['browser_version'] = $matches[1];
+        } elseif (preg_match('/chrome\/([\d.]+)/i', $user_agent, $matches)) {
+            $result['browser'] = 'Chrome';
+            $result['browser_version'] = $matches[1];
+        } elseif (preg_match('/safari\/([\d.]+)/i', $user_agent, $matches) && !preg_match('/chrome/i', $user_agent)) {
+            $result['browser'] = 'Safari';
+            $result['browser_version'] = $matches[1];
+        } elseif (preg_match('/firefox\/([\d.]+)/i', $user_agent, $matches)) {
+            $result['browser'] = 'Firefox';
+            $result['browser_version'] = $matches[1];
+        } elseif (preg_match('/msie|trident/i', $user_agent)) {
+            $result['browser'] = 'IE';
+            if (preg_match('/msie ([\d.]+)/i', $user_agent, $matches)) {
+                $result['browser_version'] = $matches[1];
+            }
+        } elseif (preg_match('/opera|opr\//i', $user_agent, $matches)) {
+            $result['browser'] = 'Opera';
+            if (preg_match('/(?:opera|opr)\/([\d.]+)/i', $user_agent, $matches)) {
+                $result['browser_version'] = $matches[1];
+            }
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Get country from IP (simple detection - can be enhanced with GeoIP service)
+     */
+    private static function get_country_from_ip($ip) {
+        // Simple detection based on IP ranges
+        // For production, use a GeoIP service like MaxMind or ipapi.co
+        $country = 'Unknown';
+        $country_code = '';
+        
+        // Check if IP is localhost or private
+        if ($ip === '127.0.0.1' || $ip === '::1' || strpos($ip, '192.168.') === 0 || strpos($ip, '10.') === 0) {
+            return ['country' => 'Local', 'country_code' => 'LOC'];
+        }
+        
+        // You can integrate with a GeoIP service here
+        // For now, return Unknown
+        return ['country' => $country, 'country_code' => $country_code];
+    }
+    
+    /**
+     * Extract search engine and keyword from referrer
+     */
+    private static function parse_search_engine($referrer) {
+        if (empty($referrer)) {
+            return ['engine' => null, 'keyword' => null];
+        }
+        
+        $parsed = parse_url($referrer);
+        if (!isset($parsed['host'])) {
+            return ['engine' => null, 'keyword' => null];
+        }
+        
+        $host = strtolower($parsed['host']);
+        $engine = null;
+        $keyword = null;
+        
+        // Google
+        if (strpos($host, 'google.') !== false) {
+            $engine = 'google';
+            if (isset($parsed['query'])) {
+                parse_str($parsed['query'], $query);
+                $keyword = isset($query['q']) ? $query['q'] : null;
+            }
+        }
+        // Bing
+        elseif (strpos($host, 'bing.') !== false) {
+            $engine = 'bing';
+            if (isset($parsed['query'])) {
+                parse_str($parsed['query'], $query);
+                $keyword = isset($query['q']) ? $query['q'] : null;
+            }
+        }
+        // Yahoo
+        elseif (strpos($host, 'yahoo.') !== false || strpos($host, 'search.yahoo') !== false) {
+            $engine = 'yahoo';
+            if (isset($parsed['query'])) {
+                parse_str($parsed['query'], $query);
+                $keyword = isset($query['p']) ? $query['p'] : (isset($query['q']) ? $query['q'] : null);
+            }
+        }
+        // DuckDuckGo
+        elseif (strpos($host, 'duckduckgo.') !== false) {
+            $engine = 'duckduckgo';
+            if (isset($parsed['query'])) {
+                parse_str($parsed['query'], $query);
+                $keyword = isset($query['q']) ? $query['q'] : null;
+            }
+        }
+        // Yandex
+        elseif (strpos($host, 'yandex.') !== false) {
+            $engine = 'yandex';
+            if (isset($parsed['query'])) {
+                parse_str($parsed['query'], $query);
+                $keyword = isset($query['text']) ? $query['text'] : null;
+            }
+        }
+        
+        return ['engine' => $engine, 'keyword' => $keyword];
+    }
+    
+    /**
+     * Track a visit
+     */
+    public static function track_visit($page_url = null, $page_title = null, $referrer = null, $product_id = null) {
+        global $wpdb;
+        
+        // Get visitor info
+        $ip = self::get_client_ip();
+        $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+        
+        // Check if bot
+        if (self::is_bot($user_agent)) {
+            return false;
+        }
+        
+        // Skip admin IPs (optional)
+        $admin_ips = apply_filters('maneli_skip_tracking_ips', ['127.0.0.1', '::1']);
+        if (in_array($ip, $admin_ips)) {
+            return false;
+        }
+        
+        // Get current page if not provided
+        if ($page_url === null) {
+            $page_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        }
+        
+        // Parse user agent
+        $ua_info = self::parse_user_agent($user_agent);
+        
+        // Get country
+        $country_info = self::get_country_from_ip($ip);
+        
+        // Parse search engine
+        $search_info = self::parse_search_engine($referrer);
+        
+        // Get or create visitor
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visitor = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $visitors_table WHERE ip_address = %s AND user_agent = %s LIMIT 1",
+            $ip,
+            $user_agent
+        ));
+        
+        if ($visitor) {
+            // Update visitor
+            $wpdb->update(
+                $visitors_table,
+                [
+                    'last_visit' => current_time('mysql'),
+                    'visit_count' => $visitor->visit_count + 1,
+                    'country' => $country_info['country'],
+                    'country_code' => $country_info['country_code'],
+                    'browser' => $ua_info['browser'],
+                    'browser_version' => $ua_info['browser_version'],
+                    'os' => $ua_info['os'],
+                    'os_version' => $ua_info['os_version'],
+                    'device_type' => $ua_info['device_type'],
+                    'device_model' => $ua_info['device_model']
+                ],
+                ['id' => $visitor->id],
+                ['%s', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'],
+                ['%d']
+            );
+            $visitor_id = $visitor->id;
+        } else {
+            // Create new visitor
+            $wpdb->insert(
+                $visitors_table,
+                [
+                    'ip_address' => $ip,
+                    'user_agent' => $user_agent,
+                    'country' => $country_info['country'],
+                    'country_code' => $country_info['country_code'],
+                    'browser' => $ua_info['browser'],
+                    'browser_version' => $ua_info['browser_version'],
+                    'os' => $ua_info['os'],
+                    'os_version' => $ua_info['os_version'],
+                    'device_type' => $ua_info['device_type'],
+                    'device_model' => $ua_info['device_model'],
+                    'first_visit' => current_time('mysql'),
+                    'last_visit' => current_time('mysql'),
+                    'visit_count' => 1,
+                    'is_bot' => 0
+                ],
+                ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d']
+            );
+            $visitor_id = $wpdb->insert_id;
+        }
+        
+        if (!$visitor_id) {
+            return false;
+        }
+        
+        // Generate session ID
+        $session_id = self::get_session_id();
+        
+        // Extract referrer domain
+        $referrer_domain = null;
+        if ($referrer) {
+            $parsed = parse_url($referrer);
+            $referrer_domain = isset($parsed['host']) ? $parsed['host'] : null;
+        }
+        
+        // Record visit
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $wpdb->insert(
+            $visits_table,
+            [
+                'visitor_id' => $visitor_id,
+                'page_url' => $page_url,
+                'page_title' => $page_title,
+                'referrer' => $referrer,
+                'referrer_domain' => $referrer_domain,
+                'search_engine' => $search_info['engine'],
+                'search_keyword' => $search_info['keyword'],
+                'visit_date' => current_time('mysql'),
+                'session_id' => $session_id,
+                'product_id' => $product_id
+            ],
+            ['%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d']
+        );
+        
+        // Update page statistics
+        self::update_page_stats($page_url, $page_title);
+        
+        // Update search engine statistics
+        if ($search_info['engine']) {
+            self::update_search_engine_stats($search_info['engine'], $search_info['keyword']);
+        }
+        
+        // Update referrer statistics
+        if ($referrer_domain) {
+            self::update_referrer_stats($referrer, $referrer_domain);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get session ID
+     */
+    private static function get_session_id() {
+        if (!session_id()) {
+            session_start();
+        }
+        if (!isset($_SESSION['maneli_session_id'])) {
+            $_SESSION['maneli_session_id'] = wp_generate_password(32, false);
+        }
+        return $_SESSION['maneli_session_id'];
+    }
+    
+    /**
+     * Update page statistics
+     */
+    private static function update_page_stats($page_url, $page_title) {
+        global $wpdb;
+        $pages_table = $wpdb->prefix . 'maneli_pages';
+        
+        $existing = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $pages_table WHERE page_url = %s LIMIT 1",
+            $page_url
+        ));
+        
+        if ($existing) {
+            $wpdb->update(
+                $pages_table,
+                [
+                    'visit_count' => $existing->visit_count + 1,
+                    'last_visit' => current_time('mysql'),
+                    'page_title' => $page_title ?: $existing->page_title
+                ],
+                ['id' => $existing->id],
+                ['%d', '%s', '%s'],
+                ['%d']
+            );
+        } else {
+            $wpdb->insert(
+                $pages_table,
+                [
+                    'page_url' => $page_url,
+                    'page_title' => $page_title,
+                    'visit_count' => 1,
+                    'unique_visitors' => 1,
+                    'last_visit' => current_time('mysql')
+                ],
+                ['%s', '%s', '%d', '%d', '%s']
+            );
+        }
+    }
+    
+    /**
+     * Update search engine statistics
+     */
+    private static function update_search_engine_stats($engine_name, $keyword) {
+        global $wpdb;
+        $search_table = $wpdb->prefix . 'maneli_search_engines';
+        
+        $existing = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $search_table WHERE engine_name = %s AND keyword = %s LIMIT 1",
+            $engine_name,
+            $keyword
+        ));
+        
+        if ($existing) {
+            $wpdb->update(
+                $search_table,
+                [
+                    'visit_count' => $existing->visit_count + 1,
+                    'last_visit' => current_time('mysql')
+                ],
+                ['id' => $existing->id],
+                ['%d', '%s'],
+                ['%d']
+            );
+        } else {
+            $wpdb->insert(
+                $search_table,
+                [
+                    'engine_name' => $engine_name,
+                    'keyword' => $keyword,
+                    'visit_count' => 1,
+                    'last_visit' => current_time('mysql')
+                ],
+                ['%s', '%s', '%d', '%s']
+            );
+        }
+    }
+    
+    /**
+     * Update referrer statistics
+     */
+    private static function update_referrer_stats($referrer_url, $referrer_domain) {
+        global $wpdb;
+        $referrers_table = $wpdb->prefix . 'maneli_referrers';
+        
+        $existing = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $referrers_table WHERE referrer_domain = %s LIMIT 1",
+            $referrer_domain
+        ));
+        
+        if ($existing) {
+            $wpdb->update(
+                $referrers_table,
+                [
+                    'visit_count' => $existing->visit_count + 1,
+                    'last_visit' => current_time('mysql'),
+                    'referrer_url' => $referrer_url
+                ],
+                ['id' => $existing->id],
+                ['%d', '%s', '%s'],
+                ['%d']
+            );
+        } else {
+            $wpdb->insert(
+                $referrers_table,
+                [
+                    'referrer_url' => $referrer_url,
+                    'referrer_domain' => $referrer_domain,
+                    'visit_count' => 1,
+                    'unique_visitors' => 1,
+                    'last_visit' => current_time('mysql')
+                ],
+                ['%s', '%s', '%d', '%d', '%s']
+            );
+        }
+    }
+    
+    /**
+     * Get overall statistics
+     */
+    public static function get_overall_stats($start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $stats = $wpdb->get_row($wpdb->prepare(
+            "SELECT 
+                COUNT(DISTINCT v.id) as total_visits,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors,
+                COUNT(DISTINCT v.page_url) as total_pages
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0",
+            $start_date,
+            $end_date
+        ));
+        
+        return [
+            'total_visits' => (int)($stats->total_visits ?? 0),
+            'unique_visitors' => (int)($stats->unique_visitors ?? 0),
+            'total_pages' => (int)($stats->total_pages ?? 0)
+        ];
+    }
+    
+    /**
+     * Get daily visits
+     */
+    public static function get_daily_visits($start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                DATE(v.visit_date) as date,
+                COUNT(DISTINCT v.id) as visits,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            GROUP BY DATE(v.visit_date)
+            ORDER BY date ASC",
+            $start_date,
+            $end_date
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get top pages
+     */
+    public static function get_top_pages($limit = 10, $start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                v.page_url,
+                v.page_title,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            GROUP BY v.page_url, v.page_title
+            ORDER BY visit_count DESC
+            LIMIT %d",
+            $start_date,
+            $end_date,
+            $limit
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get top products (cars)
+     */
+    public static function get_top_products($limit = 10, $start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                v.product_id,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors,
+                p.post_title as product_name
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            LEFT JOIN {$wpdb->posts} p ON v.product_id = p.ID
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND v.product_id IS NOT NULL
+            GROUP BY v.product_id
+            ORDER BY visit_count DESC
+            LIMIT %d",
+            $start_date,
+            $end_date,
+            $limit
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get browser statistics
+     */
+    public static function get_browser_stats($start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.browser,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND vis.browser IS NOT NULL
+            GROUP BY vis.browser
+            ORDER BY visit_count DESC",
+            $start_date,
+            $end_date
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get OS statistics
+     */
+    public static function get_os_stats($start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.os,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND vis.os IS NOT NULL
+            GROUP BY vis.os
+            ORDER BY visit_count DESC",
+            $start_date,
+            $end_date
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get device type statistics
+     */
+    public static function get_device_stats($start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.device_type,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND vis.device_type IS NOT NULL
+            GROUP BY vis.device_type
+            ORDER BY visit_count DESC",
+            $start_date,
+            $end_date
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get device model statistics
+     */
+    public static function get_device_model_stats($limit = 10, $start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.device_model,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND vis.device_model IS NOT NULL
+            AND vis.device_model != ''
+            GROUP BY vis.device_model
+            ORDER BY visit_count DESC
+            LIMIT %d",
+            $start_date,
+            $end_date,
+            $limit
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get country statistics
+     */
+    public static function get_country_stats($start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.country,
+                vis.country_code,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND vis.country IS NOT NULL
+            GROUP BY vis.country, vis.country_code
+            ORDER BY visit_count DESC",
+            $start_date,
+            $end_date
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get search engine statistics
+     */
+    public static function get_search_engine_stats($start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                v.search_engine,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND v.search_engine IS NOT NULL
+            GROUP BY v.search_engine
+            ORDER BY visit_count DESC",
+            $start_date,
+            $end_date
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get referrer statistics
+     */
+    public static function get_referrer_stats($limit = 10, $start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $referrers_table = $wpdb->prefix . 'maneli_referrers';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                referrer_domain,
+                referrer_url,
+                visit_count,
+                unique_visitors,
+                last_visit
+            FROM $referrers_table
+            WHERE DATE(last_visit) >= %s 
+            AND DATE(last_visit) <= %s
+            ORDER BY visit_count DESC
+            LIMIT %d",
+            $start_date,
+            $end_date,
+            $limit
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get recent visitors
+     */
+    public static function get_recent_visitors($limit = 50) {
+        global $wpdb;
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                v.*,
+                vis.ip_address,
+                vis.country,
+                vis.country_code,
+                vis.browser,
+                vis.os,
+                vis.device_type,
+                vis.device_model
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE vis.is_bot = 0
+            ORDER BY v.visit_date DESC
+            LIMIT %d",
+            $limit
+        ));
+        
+        return $results;
+    }
+    
+    /**
+     * Get online visitors (active in last 15 minutes)
+     */
+    public static function get_online_visitors() {
+        global $wpdb;
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results(
+            "SELECT 
+                vis.*,
+                v.page_url,
+                v.page_title,
+                v.visit_date
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE vis.is_bot = 0
+            AND v.visit_date >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+            GROUP BY vis.id
+            ORDER BY v.visit_date DESC"
+        );
+        
+        return $results;
+    }
+    
+    /**
+     * Get most active visitors
+     */
+    public static function get_most_active_visitors($limit = 10, $start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.*,
+                COUNT(DISTINCT v.id) as visit_count
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            GROUP BY vis.id
+            ORDER BY visit_count DESC
+            LIMIT %d",
+            $start_date,
+            $end_date,
+            $limit
+        ));
+        
+        return $results;
+    }
+}
+
+

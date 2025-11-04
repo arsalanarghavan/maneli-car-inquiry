@@ -109,6 +109,10 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-reports-page.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-reports-ajax-handler.php';
         
+        // Visitor Statistics
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-visitor-statistics-handler.php';
+        
         // Frontend Features
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
         

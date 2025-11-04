@@ -192,7 +192,39 @@ $tab_persian_names = [
                                                                         </div>
                                                                     <?php else: ?>
                                                                         <!-- Regular field - exactly like profile-settings.html -->
-                                                                        <div class="col-xl-<?php echo ($field['type'] === 'textarea') ? '12' : '6'; ?>">
+                                                                        <?php
+                                                                        // Check if this is a subject field followed by message field (for email)
+                                                                        $field_index = array_search($field, $section['fields'], true);
+                                                                        $is_subject = (strpos($field['name'], '_subject_') !== false);
+                                                                        $is_message = (strpos($field['name'], '_message_') !== false && $field['type'] === 'textarea');
+                                                                        $next_field = isset($section['fields'][$field_index + 1]) ? $section['fields'][$field_index + 1] : null;
+                                                                        $is_pair = false;
+                                                                        
+                                                                        if ($is_subject && $next_field && $next_field['type'] === 'textarea' && strpos($next_field['name'], '_message_') !== false) {
+                                                                            // Extract base name (remove _subject_ and _message_)
+                                                                            $current_base = preg_replace('/_subject_[^_]*$/', '', $field['name']);
+                                                                            $next_base = preg_replace('/_message_[^_]*$/', '', $next_field['name']);
+                                                                            if ($current_base === $next_base) {
+                                                                                $is_pair = true;
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        // Determine column size
+                                                                        if ($is_pair && $is_subject) {
+                                                                            // Subject in pair: use col-6
+                                                                            $col_size = '6';
+                                                                        } elseif ($is_pair && $is_message) {
+                                                                            // Message in pair: use col-6
+                                                                            $col_size = '6';
+                                                                        } elseif ($field['type'] === 'textarea' && !$is_message) {
+                                                                            // Standalone textarea: use col-12
+                                                                            $col_size = '12';
+                                                                        } else {
+                                                                            // Regular field: use col-6
+                                                                            $col_size = '6';
+                                                                        }
+                                                                        ?>
+                                                                        <div class="col-xl-<?php echo $col_size; ?>">
                                                                             <label for="<?php echo esc_attr($settings_page_handler->get_options_name() . '_' . $field['name']); ?>" class="form-label"><?php echo esc_html($field['label']); ?> :</label>
                                                                             <?php 
                                                                             // Render field using handler method (handles desc internally)

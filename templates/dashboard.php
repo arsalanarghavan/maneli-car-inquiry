@@ -511,6 +511,7 @@ if ($dashboard_page === 'home') {
 }
 
 $dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/notifications.js"></script>';
+$dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/global-search.js"></script>';
 $dashboard_html .= '<script>
 var maneli_current_user = ' . json_encode(array(
     'user_id' => $user_id,
@@ -521,6 +522,14 @@ var maneli_ajax = {
     nonce: "' . $ajax_nonce . '",
     plugin_url: "' . MANELI_PLUGIN_URL . '",
     notifications_nonce: "' . wp_create_nonce('maneli_notifications_nonce') . '"
+};
+var maneliGlobalSearch = {
+    texts: {
+        users: "' . esc_js(__('Users', 'maneli-car-inquiry')) . '",
+        cash_inquiries: "' . esc_js(__('Cash Inquiries', 'maneli-car-inquiry')) . '",
+        installment_inquiries: "' . esc_js(__('Installment Inquiries', 'maneli-car-inquiry')) . '",
+        no_results: "' . esc_js(__('No results found', 'maneli-car-inquiry')) . '"
+    }
 };
 
 // Initialize notifications
@@ -938,6 +947,109 @@ jQuery(document).ready(function($) {
     }
     $dashboard_html = str_replace('</body>', $scripts_html . '</body>', $dashboard_html);
 }
+
+// Add global search styles
+$global_search_styles = '<style id="maneli-global-search-styles">
+.global-search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 1050;
+    margin-top: 5px;
+}
+
+[data-theme-mode=dark] .global-search-dropdown {
+    background: rgb(25, 25, 28);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.search-section {
+    border-bottom: 1px solid #e9ecef;
+    padding: 8px 0;
+}
+
+.search-section:last-child {
+    border-bottom: none;
+}
+
+.search-section-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #6c757d;
+    padding: 8px 15px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+[data-theme-mode=dark] .search-section-title {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-section-items {
+    padding: 0;
+}
+
+.search-result-item {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+    text-decoration: none;
+    color: inherit;
+}
+
+[data-theme-mode=dark] .search-result-item {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme-mode=dark] .search-result-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-result-title {
+    font-weight: 500;
+    font-size: 14px;
+    color: #212529;
+}
+
+[data-theme-mode=dark] .search-result-title {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.search-result-meta {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+[data-theme-mode=dark] .search-result-meta {
+    color: rgba(255, 255, 255, 0.5);
+}
+</style>';
+
+$dashboard_html = str_replace('</head>', $global_search_styles . PHP_EOL . '</head>', $dashboard_html);
 
 // CRITICAL: Add inline CSS at the end to force dark mode text colors - Highest priority
 $dark_mode_text_fix = '<style id="maneli-dark-mode-text-force">

@@ -1132,7 +1132,7 @@ if ($is_customer) {
             <?php else: ?>
                 <!-- Task List for Admin -->
                 <?php
-                // Get pending assignments - Only inquiries with 'referred' status that need expert assignment
+                // Get pending assignments - Only inquiries with 'new' status that need expert assignment
                 $pending_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
@@ -1141,7 +1141,7 @@ if ($is_customer) {
                         'relation' => 'AND',
                         [
                             'key' => 'tracking_status',
-                            'value' => 'referred',
+                            'value' => 'new',
                             'compare' => '='
                         ],
                         [
@@ -1311,7 +1311,7 @@ if ($is_customer) {
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
                             <!-- Pending Installment Assignments -->
-                            <a href="<?php echo esc_url(add_query_arg(['status' => 'referred'], home_url('/dashboard/inquiries/installment'))); ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between <?php echo esc_attr(!empty($pending_installment) ? 'border-start border-danger border-3' : ''); ?>">
+                            <a href="<?php echo esc_url(add_query_arg(['status' => 'new'], home_url('/dashboard/inquiries/installment'))); ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between <?php echo esc_attr(!empty($pending_installment) ? 'border-start border-danger border-3' : ''); ?>">
                                 <div class="d-flex align-items-center">
                                     <span class="avatar avatar-sm bg-danger-transparent me-2">
                                         <i class="la la-credit-card"></i>

@@ -130,12 +130,114 @@ class Maneli_Activator {
             KEY name (name(100))
         ) $charset_collate;";
 
+        // Visitors table - برای ذخیره اطلاعات بازدیدکنندگان
+        $table_visitors = $wpdb->prefix . 'maneli_visitors';
+        $sql_visitors = "CREATE TABLE IF NOT EXISTS $table_visitors (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            ip_address varchar(45) NOT NULL COMMENT 'IPv4 or IPv6 address',
+            user_agent text,
+            country varchar(100) DEFAULT NULL,
+            country_code varchar(2) DEFAULT NULL,
+            browser varchar(100) DEFAULT NULL,
+            browser_version varchar(50) DEFAULT NULL,
+            os varchar(100) DEFAULT NULL,
+            os_version varchar(50) DEFAULT NULL,
+            device_type varchar(50) DEFAULT NULL COMMENT 'desktop, mobile, tablet',
+            device_model varchar(255) DEFAULT NULL,
+            first_visit datetime DEFAULT CURRENT_TIMESTAMP,
+            last_visit datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            visit_count int(11) DEFAULT 1,
+            is_bot tinyint(1) DEFAULT 0,
+            PRIMARY KEY (id),
+            KEY ip_address (ip_address(45)),
+            KEY country_code (country_code),
+            KEY browser (browser(50)),
+            KEY os (os(50)),
+            KEY device_type (device_type),
+            KEY first_visit (first_visit),
+            KEY last_visit (last_visit),
+            KEY is_bot (is_bot)
+        ) $charset_collate;";
+
+        // Visits table - برای ذخیره هر بازدید
+        $table_visits = $wpdb->prefix . 'maneli_visits';
+        $sql_visits = "CREATE TABLE IF NOT EXISTS $table_visits (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            visitor_id bigint(20) NOT NULL,
+            page_url varchar(500) NOT NULL,
+            page_title varchar(255) DEFAULT NULL,
+            referrer varchar(500) DEFAULT NULL,
+            referrer_domain varchar(255) DEFAULT NULL,
+            search_engine varchar(50) DEFAULT NULL COMMENT 'google, bing, yahoo, etc.',
+            search_keyword text DEFAULT NULL,
+            visit_date datetime DEFAULT CURRENT_TIMESTAMP,
+            session_id varchar(100) DEFAULT NULL,
+            product_id bigint(20) DEFAULT NULL COMMENT 'اگر صفحه مربوط به محصول باشد',
+            PRIMARY KEY (id),
+            KEY visitor_id (visitor_id),
+            KEY page_url (page_url(255)),
+            KEY visit_date (visit_date),
+            KEY session_id (session_id),
+            KEY product_id (product_id),
+            KEY referrer_domain (referrer_domain(100)),
+            KEY search_engine (search_engine)
+        ) $charset_collate;";
+
+        // Pages table - آمار صفحات
+        $table_pages = $wpdb->prefix . 'maneli_pages';
+        $sql_pages = "CREATE TABLE IF NOT EXISTS $table_pages (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            page_url varchar(500) NOT NULL,
+            page_title varchar(255) DEFAULT NULL,
+            visit_count int(11) DEFAULT 0,
+            unique_visitors int(11) DEFAULT 0,
+            last_visit datetime DEFAULT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY page_url (page_url(255)),
+            KEY visit_count (visit_count),
+            KEY last_visit (last_visit)
+        ) $charset_collate;";
+
+        // Search engines table - آمار موتورهای جستجو
+        $table_search_engines = $wpdb->prefix . 'maneli_search_engines';
+        $sql_search_engines = "CREATE TABLE IF NOT EXISTS $table_search_engines (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            engine_name varchar(50) NOT NULL,
+            keyword text,
+            visit_count int(11) DEFAULT 0,
+            last_visit datetime DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY engine_name (engine_name),
+            KEY visit_count (visit_count),
+            KEY last_visit (last_visit)
+        ) $charset_collate;";
+
+        // Referrers table - آمار ارجاع‌دهندگان
+        $table_referrers = $wpdb->prefix . 'maneli_referrers';
+        $sql_referrers = "CREATE TABLE IF NOT EXISTS $table_referrers (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            referrer_url varchar(500) NOT NULL,
+            referrer_domain varchar(255) NOT NULL,
+            visit_count int(11) DEFAULT 0,
+            unique_visitors int(11) DEFAULT 0,
+            last_visit datetime DEFAULT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY referrer_domain (referrer_domain(100)),
+            KEY visit_count (visit_count),
+            KEY last_visit (last_visit)
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_inquiries);
         dbDelta($sql_followups);
         dbDelta($sql_notifications);
         dbDelta($sql_notification_logs);
         dbDelta($sql_notification_templates);
+        dbDelta($sql_visitors);
+        dbDelta($sql_visits);
+        dbDelta($sql_pages);
+        dbDelta($sql_search_engines);
+        dbDelta($sql_referrers);
         
         // Schedule cron jobs
         if (!wp_next_scheduled('maneli_send_meeting_reminders')) {

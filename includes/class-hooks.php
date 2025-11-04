@@ -43,6 +43,11 @@ class Maneli_Hooks {
         add_action('maneli_send_meeting_reminders', [$this, 'send_meeting_reminders']);
         add_action('maneli_process_scheduled_notifications', [$this, 'process_scheduled_notifications']);
         
+        // Visitor statistics tracking
+        add_action('wp_footer', [$this, 'track_visitor_statistics'], 999);
+        add_action('template_redirect', [$this, 'track_visitor_statistics_server_side'], 1);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_visitor_tracking_scripts']);
+        
     }
 
     /**
@@ -582,6 +587,152 @@ class Maneli_Hooks {
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log(sprintf('Maneli Scheduled Notifications: %d notifications processed', $count));
+        }
+    }
+    
+    /**
+     * Track visitor statistics (client-side via JavaScript)
+     * This injects JavaScript code to track visits via AJAX
+     */
+    public function track_visitor_statistics() {
+        // Skip tracking on admin pages
+        if (is_admin()) {
+            return;
+        }
+        
+        // Check if visitor statistics is enabled
+        $options = get_option('maneli_inquiry_all_options', []);
+        if (isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] != '1') {
+            return;
+        }
+        
+        $page_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $page_title = wp_get_document_title();
+        $referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null;
+        
+        // Extract product ID if on product page
+        $product_id = null;
+        if (is_product()) {
+            global $product;
+            if ($product) {
+                $product_id = $product->get_id();
+            }
+        }
+        
+        // Get nonce
+        $nonce = wp_create_nonce('maneli_visitor_stats_nonce');
+        $ajax_url = admin_url('admin-ajax.php');
+        
+        ?>
+        <script type="text/javascript">
+        (function() {
+            if (typeof jQuery === 'undefined') return;
+            
+            jQuery(document).ready(function($) {
+                // Track visit via AJAX
+                $.ajax({
+                    url: '<?php echo esc_js($ajax_url); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_track_visit',
+                        nonce: '<?php echo esc_js($nonce); ?>',
+                        page_url: '<?php echo esc_js($page_url); ?>',
+                        page_title: <?php echo json_encode($page_title); ?>,
+                        referrer: <?php echo $referrer ? json_encode($referrer) : 'null'; ?>,
+                        product_id: <?php echo $product_id ? intval($product_id) : 'null'; ?>
+                    },
+                    timeout: 5000
+                }).fail(function() {
+                    // Silently fail - don't interrupt user experience
+                });
+            });
+        })();
+        </script>
+        <?php
+    }
+    
+    /**
+     * Track visitor statistics (server-side)
+     * This tracks visits directly via PHP (backup method)
+     */
+    public function track_visitor_statistics_server_side() {
+        // Skip tracking on admin pages (except dashboard)
+        if (is_admin() && !get_query_var('maneli_dashboard')) {
+            return;
+        }
+        
+        // Skip AJAX requests to avoid double tracking
+        if (wp_doing_ajax() || wp_doing_cron()) {
+            return;
+        }
+        
+        // Check if visitor statistics is enabled
+        $options = get_option('maneli_inquiry_all_options', []);
+        if (isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] != '1') {
+            return;
+        }
+        
+        // Rate limiting - track once per session per page
+        if (!session_id()) {
+            session_start();
+        }
+        
+        $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $track_key = 'maneli_tracked_' . md5($current_url);
+        
+        if (isset($_SESSION[$track_key])) {
+            return; // Already tracked this page in this session
+        }
+        
+        $_SESSION[$track_key] = true;
+        
+        $page_url = $current_url;
+        $page_title = wp_get_document_title();
+        $referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null;
+        
+        // Extract product ID if on product page
+        $product_id = null;
+        if (is_product()) {
+            global $product;
+            if ($product) {
+                $product_id = $product->get_id();
+            }
+        }
+        
+        // Track visit directly (lightweight operation)
+        if (class_exists('Maneli_Visitor_Statistics')) {
+            Maneli_Visitor_Statistics::track_visit($page_url, $page_title, $referrer, $product_id);
+        }
+    }
+    
+    /**
+     * Enqueue visitor tracking scripts
+     */
+    public function enqueue_visitor_tracking_scripts() {
+        // Check if visitor statistics is enabled
+        $options = get_option('maneli_inquiry_all_options', []);
+        if (isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] != '1') {
+            return;
+        }
+        
+        // Enqueue visitor tracking script
+        $script_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/visitor-tracking.js';
+        if (file_exists($script_path)) {
+            wp_enqueue_script(
+                'maneli-visitor-tracking',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/visitor-tracking.js',
+                ['jquery'],
+                filemtime($script_path),
+                true
+            );
+            
+            // Localize script
+            wp_localize_script('maneli-visitor-tracking', 'maneliVisitorTracking', [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
+                'enabled' => true,
+                'debug' => defined('WP_DEBUG') && WP_DEBUG
+            ]);
         }
     }
     

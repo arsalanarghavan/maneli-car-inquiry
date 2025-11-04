@@ -1,0 +1,253 @@
+/**
+ * Visitor Statistics Styles
+ * استایل‌های صفحه آمار بازدیدکنندگان
+ * 
+ * @package Maneli_Car_Inquiry
+ */
+
+/* Visitor Statistics Page */
+.visitor-statistics-page {
+    font-family: 'IRANSans', 'Peyda', Tahoma, sans-serif;
+}
+
+/* Statistics Cards */
+.visitor-statistics-page .card.custom-card {
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.visitor-statistics-page .card.custom-card .card-header {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.25rem;
+}
+
+.visitor-statistics-page .card.custom-card .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.visitor-statistics-page .card.custom-card .card-body {
+    padding: 1.25rem;
+}
+
+/* Avatar with SVG */
+.visitor-statistics-page .avatar svg-white {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.visitor-statistics-page .avatar.bg-primary svg-white {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.visitor-statistics-page .avatar.bg-primary1 svg-white {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.visitor-statistics-page .avatar.bg-primary2 svg-white {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.visitor-statistics-page .avatar.bg-primary3 svg-white {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+/* Statistics Numbers */
+.visitor-statistics-page .fs-21 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.visitor-statistics-page .fs-13 {
+    font-size: 0.875rem;
+    color: #718096;
+}
+
+/* Tables */
+.visitor-statistics-page .table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.visitor-statistics-page .table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.75rem;
+}
+
+.visitor-statistics-page .table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.visitor-statistics-page .table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Charts Container */
+.visitor-statistics-page #traffic-trend-chart,
+.visitor-statistics-page #browsers-chart,
+.visitor-statistics-page #os-chart,
+.visitor-statistics-page #device-types-chart {
+    direction: ltr;
+}
+
+/* Date Picker */
+.visitor-statistics-page .pdp-default {
+    font-family: 'IRANSans', 'Peyda', Tahoma, sans-serif;
+    direction: rtl;
+}
+
+/* Filter Form */
+.visitor-statistics-page .form-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.visitor-statistics-page .form-select,
+.visitor-statistics-page .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.visitor-statistics-page .form-select:focus,
+.visitor-statistics-page .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* Buttons */
+.visitor-statistics-page .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.visitor-statistics-page .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Loading States */
+.visitor-statistics-page .loading {
+    text-align: center;
+    padding: 2rem;
+    color: #718096;
+}
+
+.visitor-statistics-page .loading::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 0.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Empty States */
+.visitor-statistics-page .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #a0aec0;
+}
+
+.visitor-statistics-page .empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .visitor-statistics-page .card.custom-card {
+        margin-bottom: 1rem;
+    }
+    
+    .visitor-statistics-page .table-responsive {
+        font-size: 0.75rem;
+    }
+    
+    .visitor-statistics-page .fs-21 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Badge Styles */
+.visitor-statistics-page .badge {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 0.25rem;
+}
+
+/* Icon Styles */
+.visitor-statistics-page .ri-eye-line,
+.visitor-statistics-page .ri-user-line,
+.visitor-statistics-page .ri-file-line,
+.visitor-statistics-page .ri-user-star-line {
+    font-size: 2rem;
+}
+
+/* Chart Tooltips */
+.apexcharts-tooltip {
+    font-family: 'IRANSans', 'Peyda', Tahoma, sans-serif !important;
+}
+
+.apexcharts-legend {
+    font-family: 'IRANSans', 'Peyda', Tahoma, sans-serif !important;
+}
+
+/* Text Truncate */
+.visitor-statistics-page .text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Online Visitors Badge */
+.visitor-statistics-page .online-badge {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: #51d28c;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+

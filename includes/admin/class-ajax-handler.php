@@ -73,6 +73,173 @@ class Maneli_Ajax_Handler {
         ]);
     }
 
+    /**
+     * Global search for users and inquiries
+     */
+    public function ajax_global_search() {
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            return;
+        }
+
+        $search_query = isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '';
+        
+        if (empty($search_query) || strlen($search_query) < 2) {
+            wp_send_json_success([
+                'users' => [],
+                'cash_inquiries' => [],
+                'installment_inquiries' => []
+            ]);
+            return;
+        }
+
+        $results = [
+            'users' => [],
+            'cash_inquiries' => [],
+            'installment_inquiries' => []
+        ];
+
+        // Search Users
+        $user_query_args = [
+            'number' => 10,
+            'search' => '*' . $search_query . '*',
+            'search_columns' => ['user_login', 'user_email', 'display_name']
+        ];
+        
+        // Also search in user meta
+        $user_query_args['meta_query'] = [
+            'relation' => 'OR',
+            ['key' => 'first_name', 'value' => $search_query, 'compare' => 'LIKE'],
+            ['key' => 'last_name', 'value' => $search_query, 'compare' => 'LIKE'],
+            ['key' => 'mobile_number', 'value' => $search_query, 'compare' => 'LIKE'],
+            ['key' => 'national_code', 'value' => $search_query, 'compare' => 'LIKE']
+        ];
+
+        $user_query = new WP_User_Query($user_query_args);
+        $users = $user_query->get_results();
+        
+        foreach ($users as $user) {
+            $first_name = get_user_meta($user->ID, 'first_name', true);
+            $last_name = get_user_meta($user->ID, 'last_name', true);
+            $mobile = get_user_meta($user->ID, 'mobile_number', true);
+            $national_code = get_user_meta($user->ID, 'national_code', true);
+            
+            $results['users'][] = [
+                'id' => $user->ID,
+                'name' => trim(($first_name ?: '') . ' ' . ($last_name ?: '') ?: $user->display_name),
+                'mobile' => $mobile ?: '',
+                'national_code' => $national_code ?: '',
+                'url' => home_url('/dashboard/user-detail?user_id=' . $user->ID)
+            ];
+        }
+
+        // Search Cash Inquiries
+        $cash_query_args = [
+            'post_type' => 'cash_inquiry',
+            'posts_per_page' => 10,
+            'post_status' => 'publish',
+            'meta_query' => [
+                'relation' => 'OR',
+                ['key' => 'cash_first_name', 'value' => $search_query, 'compare' => 'LIKE'],
+                ['key' => 'cash_last_name', 'value' => $search_query, 'compare' => 'LIKE'],
+                ['key' => 'mobile_number', 'value' => $search_query, 'compare' => 'LIKE']
+            ]
+        ];
+        
+        // Also search by inquiry ID if query is numeric
+        if (is_numeric($search_query)) {
+            $cash_query_args['p'] = absint($search_query);
+            unset($cash_query_args['meta_query']);
+        }
+
+        $cash_query = new WP_Query($cash_query_args);
+        
+        if ($cash_query->have_posts()) {
+            while ($cash_query->have_posts()) {
+                $cash_query->the_post();
+                $inquiry_id = get_the_ID();
+                $first_name = get_post_meta($inquiry_id, 'cash_first_name', true);
+                $last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
+                $mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+                $product_id = get_post_meta($inquiry_id, 'product_id', true);
+                $car_name = $product_id ? get_the_title($product_id) : '';
+                
+                $results['cash_inquiries'][] = [
+                    'id' => $inquiry_id,
+                    'inquiry_number' => $inquiry_id,
+                    'customer_name' => trim(($first_name ?: '') . ' ' . ($last_name ?: '')),
+                    'mobile' => $mobile ?: '',
+                    'car_name' => $car_name,
+                    'url' => home_url('/dashboard/cash-inquiry-detail?cash_inquiry_id=' . $inquiry_id)
+                ];
+            }
+            wp_reset_postdata();
+        }
+
+        // Search Installment Inquiries
+        $installment_query_args = [
+            'post_type' => 'inquiry',
+            'posts_per_page' => 10,
+            'post_status' => 'publish',
+            'meta_query' => [
+                'relation' => 'OR',
+                ['key' => 'mobile_number', 'value' => $search_query, 'compare' => 'LIKE'],
+                ['key' => 'national_code', 'value' => $search_query, 'compare' => 'LIKE']
+            ]
+        ];
+        
+        // Also search by inquiry ID if query is numeric
+        if (is_numeric($search_query)) {
+            $installment_query_args['p'] = absint($search_query);
+            unset($installment_query_args['meta_query']);
+        }
+
+        $installment_query = new WP_Query($installment_query_args);
+        
+        if ($installment_query->have_posts()) {
+            while ($installment_query->have_posts()) {
+                $installment_query->the_post();
+                $inquiry_id = get_the_ID();
+                $author_id = get_post_field('post_author', $inquiry_id);
+                
+                if ($author_id) {
+                    $user = get_userdata($author_id);
+                    $first_name = get_user_meta($author_id, 'first_name', true);
+                    $last_name = get_user_meta($author_id, 'last_name', true);
+                    $mobile = get_user_meta($author_id, 'mobile_number', true);
+                    $national_code = get_user_meta($author_id, 'national_code', true);
+                    
+                    $product_id = get_post_meta($inquiry_id, 'maneli_selected_car_id', true);
+                    $car_name = $product_id ? get_the_title($product_id) : '';
+                    
+                    // Check if search matches user info
+                    $matches = false;
+                    if (stripos($mobile, $search_query) !== false || 
+                        stripos($national_code, $search_query) !== false ||
+                        stripos($first_name . ' ' . $last_name, $search_query) !== false ||
+                        $inquiry_id == $search_query) {
+                        $matches = true;
+                    }
+                    
+                    if ($matches) {
+                        $results['installment_inquiries'][] = [
+                            'id' => $inquiry_id,
+                            'inquiry_number' => $inquiry_id,
+                            'customer_name' => trim(($first_name ?: '') . ' ' . ($last_name ?: '') ?: $user->display_name),
+                            'mobile' => $mobile ?: '',
+                            'national_code' => $national_code ?: '',
+                            'car_name' => $car_name,
+                            'url' => home_url('/dashboard/inquiry-detail?inquiry_id=' . $inquiry_id)
+                        ];
+                    }
+                }
+            }
+            wp_reset_postdata();
+        }
+
+        wp_send_json_success($results);
+    }
+
     public function __construct() {
         // Load required helper classes
         if (!class_exists('Maneli_Permission_Helpers')) {
@@ -81,6 +248,9 @@ class Maneli_Ajax_Handler {
         
         // Meeting Settings
         add_action('wp_ajax_maneli_get_meeting_settings', [$this, 'ajax_get_meeting_settings']);
+        
+        // Global Search
+        add_action('wp_ajax_maneli_global_search', [$this, 'ajax_global_search']);
         
         // Inquiry Details, List Filtering & Actions (Installment)
         add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
