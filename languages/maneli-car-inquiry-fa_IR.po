@@ -4229,6 +4229,9 @@ msgstr "پیگیری‌های معوق"
 msgid "Overdue Inquiries (%d)"
 msgstr "استعلام‌های معوق (%d)"
 
+msgid "Overdue Inquiries (%s)"
+msgstr "استعلام‌های معوق (%s)"
+
 msgid "Password Verification"
 msgstr "تایید رمز عبور"
 
@@ -4662,6 +4665,12 @@ msgstr "معمولاً در عرض 24 ساعت."
 
 msgid "Unassigned Inquiries (%d)"
 msgstr "استعلام‌های اختصاص داده نشده (%d)"
+
+msgid "Unassigned Inquiries (%s)"
+msgstr "استعلام‌های تخصیص داده نشده (%s)"
+
+msgid "Unassigned"
+msgstr "تخصیص داده نشده"
 
 msgid "Under Review"
 msgstr "در حال بررسی"
