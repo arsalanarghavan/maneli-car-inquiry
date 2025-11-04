@@ -8702,3 +8702,43 @@ msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما ب�
 msgid "Dear {customer_name}, your cash inquiry for {car_name} status is now: Down Payment Received. Amount: {amount} Toman"
 msgstr "عزیز {customer_name}، وضعیت استعلام نقدی شما برای {car_name} اکنون: پیش‌پرداخت دریافت شده است. مبلغ: {amount} تومان"
 
+
+msgid "No Visitor Data Yet"
+msgstr "هنوز داده بازدیدکننده وجود ندارد"
+
+msgid "No visitor data has been collected yet for the selected date range. Statistics will appear here once visitors start browsing your site."
+msgstr "هنوز داده بازدیدکننده برای بازه زمانی انتخاب شده جمع‌آوری نشده است. آمار پس از شروع مرور بازدیدکنندگان در سایت شما، در اینجا نمایش داده خواهد شد."
+
+msgid "IP Address"
+msgstr "آدرس IP"
+
+msgid "Country"
+msgstr "کشور"
+
+msgid "Browser"
+msgstr "مرورگر"
+
+msgid "OS"
+msgstr "سیستم عامل"
+
+msgid "Device"
+msgstr "دستگاه"
+
+msgid "Status Distribution"
+msgstr "توزیع وضعیت"
+
+msgid "Template"
+msgstr "قالب"
+
+msgid "Message"
+msgstr "پیام"
+
+msgid "Available variables: {customer_name}, {car_name}, {date}"
+msgstr "متغیرهای موجود: {customer_name}، {car_name}، {date}"
+
+msgid "Preview"
+msgstr "پیش‌نمایش"
+
+msgid "No templates found."
+msgstr "هیچ قالبی یافت نشد."
+

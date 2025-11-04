@@ -512,6 +512,99 @@ if ($dashboard_page === 'home') {
 
 $dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/notifications.js"></script>';
 $dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/global-search.js"></script>';
+
+// Visitor Statistics Scripts - Direct Injection
+if ($page === 'visitor-statistics') {
+    require_once MANELI_PLUGIN_DIR . 'includes/functions.php';
+    
+    // ApexCharts
+    $apexcharts_path = MANELI_PLUGIN_DIR . 'assets/libs/apexcharts/apexcharts.min.js';
+    if (file_exists($apexcharts_path)) {
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.css') . '">' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js') . '"></script>' . PHP_EOL;
+    } else {
+        // Fallback to CDN
+        $dashboard_html .= '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.css">' . PHP_EOL;
+        $dashboard_html .= '<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.min.js"></script>' . PHP_EOL;
+    }
+    
+    // Persian Datepicker
+    $datepicker_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/persianDatepicker-default.css';
+    $datepicker_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/persianDatepicker.min.js';
+    if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+    }
+    
+    // Visitor Statistics Dashboard Script
+    $dashboard_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/admin/visitor-statistics-dashboard.js';
+    if (file_exists($dashboard_js_path)) {
+        // Get date range from query parameters
+        $start_date_input = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : null;
+        $end_date_input = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : null;
+        
+        // Convert Jalali to Gregorian if needed
+        $start_date = $start_date_input ?: date('Y-m-d', strtotime('-30 days'));
+        $end_date = $end_date_input ?: date('Y-m-d');
+        
+        if ($start_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $start_date_input, $matches)) {
+            if (!function_exists('maneli_jalali_to_gregorian')) {
+                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+            }
+            $start_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+        }
+        
+        if ($end_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $end_date_input, $matches)) {
+            if (!function_exists('maneli_jalali_to_gregorian')) {
+                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+            }
+            $end_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+        }
+        
+        // Get daily stats
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
+        $daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
+        
+        // Convert dates to Jalali format
+        if (function_exists('maneli_gregorian_to_jalali')) {
+            foreach ($daily_stats as &$stat) {
+                if (isset($stat->date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
+                    $date_parts = explode('-', $stat->date);
+                    $stat->date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
+                }
+            }
+            unset($stat);
+        }
+        
+        // Localize script
+        $dashboard_html .= '<script>
+var maneliVisitorStats = ' . json_encode([
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
+            'startDate' => $start_date,
+            'endDate' => $end_date,
+            'dailyStats' => $daily_stats,
+            'translations' => [
+                'loading' => esc_html__('Loading...', 'maneli-car-inquiry'),
+                'error' => esc_html__('Error loading data', 'maneli-car-inquiry'),
+                'noData' => esc_html__('No data available', 'maneli-car-inquiry'),
+                'visits' => esc_html__('Visits', 'maneli-car-inquiry'),
+                'uniqueVisitors' => esc_html__('Unique Visitors', 'maneli-car-inquiry'),
+                'pages' => esc_html__('Pages', 'maneli-car-inquiry'),
+                'date' => esc_html__('Date', 'maneli-car-inquiry'),
+            ]
+        ], JSON_UNESCAPED_UNICODE) . ';
+</script>' . PHP_EOL;
+        
+        $dashboard_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/visitor-statistics-dashboard.js?v=' . filemtime($dashboard_js_path)) . '"></script>' . PHP_EOL;
+    }
+    
+    // Visitor Statistics CSS
+    $dashboard_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/visitor-statistics.css';
+    if (file_exists($dashboard_css_path)) {
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/visitor-statistics.css?v=' . filemtime($dashboard_css_path)) . '">' . PHP_EOL;
+    }
+}
 $dashboard_html .= '<script>
 var maneli_current_user = ' . json_encode(array(
     'user_id' => $user_id,

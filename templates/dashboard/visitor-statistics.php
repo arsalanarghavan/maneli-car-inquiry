@@ -25,6 +25,10 @@ if (!$is_admin && !$is_manager) {
 // Load visitor statistics class
 require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
 
+// Check if visitor statistics tracking is enabled
+$options = get_option('maneli_inquiry_all_options', []);
+$tracking_enabled = isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] == '1';
+
 // Helper function to convert Jalali to Gregorian
 if (!function_exists('maneli_jalali_to_gregorian')) {
     function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
@@ -201,6 +205,40 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                 </div>
             </div>
         </div>
+
+        <?php if (!$tracking_enabled): ?>
+        <!-- Warning: Tracking Not Enabled -->
+        <div class="row mb-4">
+            <div class="col-xl-12">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="ri-alert-line me-2"></i>
+                    <strong><?php esc_html_e('Visitor Statistics Tracking is Disabled', 'maneli-car-inquiry'); ?></strong>
+                    <p class="mb-0 mt-2">
+                        <?php esc_html_e('Visitor statistics tracking is currently disabled. Please enable it in', 'maneli-car-inquiry'); ?>
+                        <a href="<?php echo esc_url(home_url('/dashboard/settings?tab=visitor_statistics')); ?>" class="alert-link">
+                            <?php esc_html_e('Settings > Visitor Statistics', 'maneli-car-inquiry'); ?>
+                        </a>
+                        <?php esc_html_e('to start collecting visitor data.', 'maneli-car-inquiry'); ?>
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <?php elseif ($overall_stats['total_visits'] == 0): ?>
+        <!-- Info: No Data Yet -->
+        <div class="row mb-4">
+            <div class="col-xl-12">
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="ri-information-line me-2"></i>
+                    <strong><?php esc_html_e('No Visitor Data Yet', 'maneli-car-inquiry'); ?></strong>
+                    <p class="mb-0 mt-2">
+                        <?php esc_html_e('No visitor data has been collected yet for the selected date range. Statistics will appear here once visitors start browsing your site.', 'maneli-car-inquiry'); ?>
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Overall Statistics Cards -->
         <div class="row">
