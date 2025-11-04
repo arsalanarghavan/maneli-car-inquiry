@@ -322,12 +322,69 @@ class Maneli_Dashboard_Handler {
                     wp_enqueue_script('maneli-visitor-statistics-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/admin/visitor-statistics-dashboard.js', ['jquery', 'apexcharts'], filemtime($dashboard_js_path), true);
                     
                     // Localize script
-                    $start_date = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : date('Y-m-d', strtotime('-30 days'));
-                    $end_date = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : date('Y-m-d');
+                    // Handle date conversion from Jalali to Gregorian for queries
+                    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+                    
+                    $start_date_input = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : null;
+                    $end_date_input = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : null;
+                    
+                    // Convert Jalali to Gregorian if needed
+                    if ($start_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $start_date_input, $matches)) {
+                        // Helper function from calendar.php
+                        if (!function_exists('maneli_jalali_to_gregorian')) {
+                            function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+                                $j_y = (int)$j_y; $j_m = (int)$j_m; $j_d = (int)$j_d;
+                                $jy = $j_y - 979; $jm = $j_m - 1; $jd = $j_d - 1;
+                                $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+                                $j_day_no = 365 * $jy + (int)($jy / 33) * 8 + (int)(($jy % 33 + 3) / 4);
+                                for ($i = 0; $i < $jm; ++$i) $j_day_no += $j_days_in_month[$i];
+                                $j_day_no += $jd; $g_day_no = $j_day_no + 79;
+                                $gy = 1600 + 400 * (int)($g_day_no / 146097);
+                                $g_day_no = $g_day_no % 146097;
+                                $leap = true;
+                                if ($g_day_no >= 36525) {
+                                    $g_day_no--; $gy += 100 * (int)($g_day_no / 36524);
+                                    $g_day_no = $g_day_no % 36524;
+                                    if ($g_day_no >= 365) $g_day_no++; else $leap = false;
+                                }
+                                $gy += 4 * (int)($g_day_no / 1461); $g_day_no = $g_day_no % 1461;
+                                if ($g_day_no >= 366) {
+                                    $leap = false; $g_day_no--; $gy += (int)($g_day_no / 365);
+                                    $g_day_no = $g_day_no % 365;
+                                }
+                                $g_days_in_month = [31, ($leap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                                $gm = 0;
+                                while ($gm < 12 && $g_day_no >= $g_days_in_month[$gm]) {
+                                    $g_day_no -= $g_days_in_month[$gm]; $gm++;
+                                }
+                                return sprintf('%04d-%02d-%02d', $gy, $gm + 1, $g_day_no + 1);
+                            }
+                        }
+                        $start_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+                    } else {
+                        $start_date = $start_date_input ?: date('Y-m-d', strtotime('-30 days'));
+                    }
+                    
+                    if ($end_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $end_date_input, $matches)) {
+                        $end_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+                    } else {
+                        $end_date = $end_date_input ?: date('Y-m-d');
+                    }
                     
                     // Get daily stats for chart
                     require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
                     $daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
+                    
+                    // Convert dates to Jalali format
+                    if (function_exists('maneli_gregorian_to_jalali')) {
+                        foreach ($daily_stats as &$stat) {
+                            if (isset($stat->date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
+                                $date_parts = explode('-', $stat->date);
+                                $stat->date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
+                            }
+                        }
+                        unset($stat);
+                    }
                     
                     wp_localize_script('maneli-visitor-statistics-dashboard', 'maneliVisitorStats', [
                         'ajaxUrl' => admin_url('admin-ajax.php'),

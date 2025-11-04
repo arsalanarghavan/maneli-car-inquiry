@@ -6674,3 +6674,1302 @@ msgstr "پیش"
 
 msgid "Visits"
 msgstr "بازدیدها"
+msgid "SMS Pattern Codes (Body ID)"
+msgstr "کدهای الگوی پیامک (Body ID)"
+
+msgid "فقط کد الگوی تایید شده (Body ID) از پنل پیامک خود را وارد کنید. ترتیب متغیرها باید با توضیحات مطابقت داشته باشد."
+msgstr "فقط کد الگوی تایید شده (Body ID) از پنل پیامک خود را وارد کنید. ترتیب متغیرها باید با توضیحات مطابقت داشته باشد."
+
+msgid "شماره موبایل مدیر"
+msgstr "شماره موبایل مدیر"
+
+msgid "شماره موبایل برای دریافت اعلان‌های درخواست جدید."
+msgstr "شماره موبایل برای دریافت اعلان‌های درخواست جدید."
+
+msgid "الگو: «درخواست جدید برای مدیر»"
+msgstr "الگو: «درخواست جدید برای مدیر»"
+
+msgid "Pattern: \"Meeting Reminder\""
+msgstr "الگو: \"Meeting Reminder\""
+
+msgid "کد الگو برای یادآوری جلسه پیامکی. متغیرها: 1. نام مشتری 2. تاریخ جلسه 3. ساعت جلسه 4. نام خودرو"
+msgstr "کد الگو برای یادآوری جلسه پیامکی. متغیرها: 1. نام مشتری 2. تاریخ جلسه 3. ساعت جلسه 4. نام خودرو"
+
+msgid "SMS Pattern Codes - Installment Inquiry (Customer)"
+msgstr "کدهای الگوی پیامک - استعلام اقساطی (مشتری)"
+
+msgid "Pattern: \"New\" (Installment - Customer)"
+msgstr "الگو: \"New\" (Installment - Customer)"
+
+msgid "Pattern: \"Pending Review\" (Installment - Customer)"
+msgstr "الگو: \"Pending Review\" (Installment - Customer)"
+
+msgid "Pattern: \"Approved and Referred\" (Installment - Customer)"
+msgstr "الگو: \"Approved and Referred\" (Installment - Customer)"
+
+msgid "Pattern: \"More Documents Required\" (Installment - Customer)"
+msgstr "الگو: \"More Documents Required\" (Installment - Customer)"
+
+msgid "Pattern: \"Rejected\" (Installment - Customer)"
+msgstr "الگو: \"Rejected\" (Installment - Customer)"
+
+msgid "Pattern: \"Inquiry Failed\" (Installment - Customer)"
+msgstr "الگو: \"Inquiry Failed\" (Installment - Customer)"
+
+msgid "Pattern: \"Referred to Expert\" (Installment - Customer)"
+msgstr "الگو: \"Referred to Expert\" (Installment - Customer)"
+
+msgid "Pattern: \"In Progress\" (Installment - Customer)"
+msgstr "الگو: \"In Progress\" (Installment - Customer)"
+
+msgid "Pattern: \"Follow Up Scheduled\" (Installment - Customer)"
+msgstr "الگو: \"Follow Up Scheduled\" (Installment - Customer)"
+
+msgid "Pattern: \"Meeting Scheduled\" (Installment - Customer)"
+msgstr "الگو: \"Meeting Scheduled\" (Installment - Customer)"
+
+msgid "Pattern: \"Awaiting Documents\" (Installment - Customer)"
+msgstr "الگو: \"Awaiting Documents\" (Installment - Customer)"
+
+msgid "Pattern: \"Awaiting Down Payment\" (Installment - Customer)"
+msgstr "الگو: \"Awaiting Down Payment\" (Installment - Customer)"
+
+msgid "Pattern: \"Down Payment Received\" (Installment - Customer)"
+msgstr "الگو: \"Down Payment Received\" (Installment - Customer)"
+
+msgid "Pattern: \"Approved\" (Installment - Customer)"
+msgstr "الگو: \"Approved\" (Installment - Customer)"
+
+msgid "Pattern: \"Completed\" (Installment - Customer)"
+msgstr "الگو: \"Completed\" (Installment - Customer)"
+
+msgid "SMS Pattern Codes - Installment Inquiry (Expert)"
+msgstr "کدهای الگوی پیامک - استعلام اقساطی (کارشناس)"
+
+msgid "Pattern: \"New\" (Installment - Expert)"
+msgstr "الگو: \"New\" (Installment - Expert)"
+
+msgid "Pattern: \"Rejected\" (Installment - Expert)"
+msgstr "الگو: \"Rejected\" (Installment - Expert)"
+
+msgid "Pattern: \"Referred to Expert\" (Installment - Expert)"
+msgstr "الگو: \"Referred to Expert\" (Installment - Expert)"
+
+msgid "Pattern: \"In Progress\" (Installment - Expert)"
+msgstr "الگو: \"In Progress\" (Installment - Expert)"
+
+msgid "Pattern: \"Follow Up Scheduled\" (Installment - Expert)"
+msgstr "الگو: \"Follow Up Scheduled\" (Installment - Expert)"
+
+msgid "Pattern: \"Meeting Scheduled\" (Installment - Expert)"
+msgstr "الگو: \"Meeting Scheduled\" (Installment - Expert)"
+
+msgid "Pattern: \"Awaiting Documents\" (Installment - Expert)"
+msgstr "الگو: \"Awaiting Documents\" (Installment - Expert)"
+
+msgid "Pattern: \"Approved\" (Installment - Expert)"
+msgstr "الگو: \"Approved\" (Installment - Expert)"
+
+msgid "Pattern: \"Completed\" (Installment - Expert)"
+msgstr "الگو: \"Completed\" (Installment - Expert)"
+
+msgid "SMS Pattern Codes - Installment Inquiry (Admin)"
+msgstr "کدهای الگوی پیامک - استعلام اقساطی (مدیر)"
+
+msgid "Pattern: \"New\" (Installment - Admin)"
+msgstr "الگو: \"New\" (Installment - Admin)"
+
+msgid "Pattern: \"Pending Review\" (Installment - Admin)"
+msgstr "الگو: \"Pending Review\" (Installment - Admin)"
+
+msgid "Pattern: \"Approved and Referred\" (Installment - Admin)"
+msgstr "الگو: \"Approved and Referred\" (Installment - Admin)"
+
+msgid "Pattern: \"Rejected\" (Installment - Admin)"
+msgstr "الگو: \"Rejected\" (Installment - Admin)"
+
+msgid "Pattern: \"Inquiry Failed\" (Installment - Admin)"
+msgstr "الگو: \"Inquiry Failed\" (Installment - Admin)"
+
+msgid "Pattern: \"Referred to Expert\" (Installment - Admin)"
+msgstr "الگو: \"Referred to Expert\" (Installment - Admin)"
+
+msgid "Pattern: \"Approved\" (Installment - Admin)"
+msgstr "الگو: \"Approved\" (Installment - Admin)"
+
+msgid "Pattern: \"Completed\" (Installment - Admin)"
+msgstr "الگو: \"Completed\" (Installment - Admin)"
+
+msgid "SMS Pattern Codes - Cash Inquiry (Customer)"
+msgstr "کدهای الگوی پیامک - استعلام نقدی (مشتری)"
+
+msgid "Pattern: \"New\" (Cash - Customer)"
+msgstr "الگو: \"New\" (Cash - Customer)"
+
+msgid "Pattern: \"Rejected\" (Cash - Customer)"
+msgstr "الگو: \"Rejected\" (Cash - Customer)"
+
+msgid "Pattern: \"Referred to Expert\" (Cash - Customer)"
+msgstr "الگو: \"Referred to Expert\" (Cash - Customer)"
+
+msgid "Pattern: \"In Progress\" (Cash - Customer)"
+msgstr "الگو: \"In Progress\" (Cash - Customer)"
+
+msgid "Pattern: \"Follow Up Scheduled\" (Cash - Customer)"
+msgstr "الگو: \"Follow Up Scheduled\" (Cash - Customer)"
+
+msgid "Pattern: \"Meeting Scheduled\" (Cash - Customer)"
+msgstr "الگو: \"Meeting Scheduled\" (Cash - Customer)"
+
+msgid "Pattern: \"Awaiting Documents\" (Cash - Customer)"
+msgstr "الگو: \"Awaiting Documents\" (Cash - Customer)"
+
+msgid "Pattern: \"Awaiting Down Payment\" (Cash - Customer)"
+msgstr "الگو: \"Awaiting Down Payment\" (Cash - Customer)"
+
+msgid "Pattern: \"Down Payment Received\" (Cash - Customer)"
+msgstr "الگو: \"Down Payment Received\" (Cash - Customer)"
+
+msgid "Pattern: \"Approved\" (Cash - Customer)"
+msgstr "الگو: \"Approved\" (Cash - Customer)"
+
+msgid "Pattern: \"Completed\" (Cash - Customer)"
+msgstr "الگو: \"Completed\" (Cash - Customer)"
+
+msgid "SMS Pattern Codes - Cash Inquiry (Expert)"
+msgstr "کدهای الگوی پیامک - استعلام نقدی (کارشناس)"
+
+msgid "Pattern: \"New\" (Cash - Expert)"
+msgstr "الگو: \"New\" (Cash - Expert)"
+
+msgid "Pattern: \"Rejected\" (Cash - Expert)"
+msgstr "الگو: \"Rejected\" (Cash - Expert)"
+
+msgid "Pattern: \"Referred to Expert\" (Cash - Expert)"
+msgstr "الگو: \"Referred to Expert\" (Cash - Expert)"
+
+msgid "Pattern: \"In Progress\" (Cash - Expert)"
+msgstr "الگو: \"In Progress\" (Cash - Expert)"
+
+msgid "Pattern: \"Follow Up Scheduled\" (Cash - Expert)"
+msgstr "الگو: \"Follow Up Scheduled\" (Cash - Expert)"
+
+msgid "Pattern: \"Meeting Scheduled\" (Cash - Expert)"
+msgstr "الگو: \"Meeting Scheduled\" (Cash - Expert)"
+
+msgid "Pattern: \"Awaiting Documents\" (Cash - Expert)"
+msgstr "الگو: \"Awaiting Documents\" (Cash - Expert)"
+
+msgid "Pattern: \"Awaiting Down Payment\" (Cash - Expert)"
+msgstr "الگو: \"Awaiting Down Payment\" (Cash - Expert)"
+
+msgid "Pattern: \"Down Payment Received\" (Cash - Expert)"
+msgstr "الگو: \"Down Payment Received\" (Cash - Expert)"
+
+msgid "Pattern: \"Approved\" (Cash - Expert)"
+msgstr "الگو: \"Approved\" (Cash - Expert)"
+
+msgid "Pattern: \"Completed\" (Cash - Expert)"
+msgstr "الگو: \"Completed\" (Cash - Expert)"
+
+msgid "SMS Pattern Codes - Cash Inquiry (Admin)"
+msgstr "کدهای الگوی پیامک - استعلام نقدی (مدیر)"
+
+msgid "Pattern: \"New\" (Cash - Admin)"
+msgstr "الگو: \"New\" (Cash - Admin)"
+
+msgid "Pattern: \"Rejected\" (Cash - Admin)"
+msgstr "الگو: \"Rejected\" (Cash - Admin)"
+
+msgid "Pattern: \"Referred to Expert\" (Cash - Admin)"
+msgstr "الگو: \"Referred to Expert\" (Cash - Admin)"
+
+msgid "Pattern: \"In Progress\" (Cash - Admin)"
+msgstr "الگو: \"In Progress\" (Cash - Admin)"
+
+msgid "Pattern: \"Follow Up Scheduled\" (Cash - Admin)"
+msgstr "الگو: \"Follow Up Scheduled\" (Cash - Admin)"
+
+msgid "Pattern: \"Meeting Scheduled\" (Cash - Admin)"
+msgstr "الگو: \"Meeting Scheduled\" (Cash - Admin)"
+
+msgid "Pattern: \"Awaiting Documents\" (Cash - Admin)"
+msgstr "الگو: \"Awaiting Documents\" (Cash - Admin)"
+
+msgid "Pattern: \"Awaiting Down Payment\" (Cash - Admin)"
+msgstr "الگو: \"Awaiting Down Payment\" (Cash - Admin)"
+
+msgid "Pattern: \"Down Payment Received\" (Cash - Admin)"
+msgstr "الگو: \"Down Payment Received\" (Cash - Admin)"
+
+msgid "Pattern: \"Approved\" (Cash - Admin)"
+msgstr "الگو: \"Approved\" (Cash - Admin)"
+
+msgid "Pattern: \"Completed\" (Cash - Admin)"
+msgstr "الگو: \"Completed\" (Cash - Admin)"
+
+msgid "Installment Inquiry Status Notifications - Customer"
+msgstr "اعلان‌های وضعیت استعلام اقساطی - Customer"
+
+msgid "Configure which notifications to send to customers for different installment inquiry statuses."
+msgstr "تنظیم اینکه چه اعلان‌هایی برای customers در وضعیت‌های مختلف اقساطی ارسال شود."
+
+msgid "Enable SMS: New (Installment - Customer)"
+msgstr "فعال‌سازی SMS: New (Installment - Customer)"
+
+msgid "Enable Telegram: New (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: New (Installment - Customer)"
+
+msgid "Enable Email: New (Installment - Customer)"
+msgstr "فعال‌سازی Email: New (Installment - Customer)"
+
+msgid "Enable In-App Notification: New (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: New (Installment - Customer)"
+
+msgid "Enable SMS: Pending Review (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Pending Review (Installment - Customer)"
+
+msgid "Enable Telegram: Pending Review (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Pending Review (Installment - Customer)"
+
+msgid "Enable Email: Pending Review (Installment - Customer)"
+msgstr "فعال‌سازی Email: Pending Review (Installment - Customer)"
+
+msgid "Enable In-App Notification: Pending Review (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Pending Review (Installment - Customer)"
+
+msgid "Enable SMS: Approved and Referred (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Approved and Referred (Installment - Customer)"
+
+msgid "Enable Telegram: Approved and Referred (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Approved and Referred (Installment - Customer)"
+
+msgid "Enable Email: Approved and Referred (Installment - Customer)"
+msgstr "فعال‌سازی Email: Approved and Referred (Installment - Customer)"
+
+msgid "Enable In-App Notification: Approved and Referred (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Approved and Referred (Installment - Customer)"
+
+msgid "Enable SMS: More Documents Required (Installment - Customer)"
+msgstr "فعال‌سازی SMS: More Documents Required (Installment - Customer)"
+
+msgid "Enable Telegram: More Documents Required (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: More Documents Required (Installment - Customer)"
+
+msgid "Enable Email: More Documents Required (Installment - Customer)"
+msgstr "فعال‌سازی Email: More Documents Required (Installment - Customer)"
+
+msgid "Enable In-App Notification: More Documents Required (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: More Documents Required (Installment - Customer)"
+
+msgid "Enable SMS: Rejected (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Rejected (Installment - Customer)"
+
+msgid "Enable Telegram: Rejected (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Rejected (Installment - Customer)"
+
+msgid "Enable Email: Rejected (Installment - Customer)"
+msgstr "فعال‌سازی Email: Rejected (Installment - Customer)"
+
+msgid "Enable In-App Notification: Rejected (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Rejected (Installment - Customer)"
+
+msgid "Enable SMS: Inquiry Failed (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Inquiry Failed (Installment - Customer)"
+
+msgid "Enable Telegram: Inquiry Failed (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Inquiry Failed (Installment - Customer)"
+
+msgid "Enable Email: Inquiry Failed (Installment - Customer)"
+msgstr "فعال‌سازی Email: Inquiry Failed (Installment - Customer)"
+
+msgid "Enable In-App Notification: Inquiry Failed (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Inquiry Failed (Installment - Customer)"
+
+msgid "Enable SMS: Referred to Expert (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Referred to Expert (Installment - Customer)"
+
+msgid "Enable Telegram: Referred to Expert (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Referred to Expert (Installment - Customer)"
+
+msgid "Enable Email: Referred to Expert (Installment - Customer)"
+msgstr "فعال‌سازی Email: Referred to Expert (Installment - Customer)"
+
+msgid "Enable In-App Notification: Referred to Expert (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Referred to Expert (Installment - Customer)"
+
+msgid "Enable SMS: In Progress (Installment - Customer)"
+msgstr "فعال‌سازی SMS: In Progress (Installment - Customer)"
+
+msgid "Enable Telegram: In Progress (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: In Progress (Installment - Customer)"
+
+msgid "Enable Email: In Progress (Installment - Customer)"
+msgstr "فعال‌سازی Email: In Progress (Installment - Customer)"
+
+msgid "Enable In-App Notification: In Progress (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: In Progress (Installment - Customer)"
+
+msgid "Enable SMS: Follow Up Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Follow Up Scheduled (Installment - Customer)"
+
+msgid "Enable Telegram: Follow Up Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Follow Up Scheduled (Installment - Customer)"
+
+msgid "Enable Email: Follow Up Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی Email: Follow Up Scheduled (Installment - Customer)"
+
+msgid "Enable In-App Notification: Follow Up Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Follow Up Scheduled (Installment - Customer)"
+
+msgid "Enable SMS: Meeting Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Meeting Scheduled (Installment - Customer)"
+
+msgid "Enable Telegram: Meeting Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Meeting Scheduled (Installment - Customer)"
+
+msgid "Enable Email: Meeting Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی Email: Meeting Scheduled (Installment - Customer)"
+
+msgid "Enable In-App Notification: Meeting Scheduled (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Meeting Scheduled (Installment - Customer)"
+
+msgid "Enable SMS: Awaiting Documents (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Awaiting Documents (Installment - Customer)"
+
+msgid "Enable Telegram: Awaiting Documents (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Awaiting Documents (Installment - Customer)"
+
+msgid "Enable Email: Awaiting Documents (Installment - Customer)"
+msgstr "فعال‌سازی Email: Awaiting Documents (Installment - Customer)"
+
+msgid "Enable In-App Notification: Awaiting Documents (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Documents (Installment - Customer)"
+
+msgid "Enable SMS: Awaiting Down Payment (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Awaiting Down Payment (Installment - Customer)"
+
+msgid "Enable Telegram: Awaiting Down Payment (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Awaiting Down Payment (Installment - Customer)"
+
+msgid "Enable Email: Awaiting Down Payment (Installment - Customer)"
+msgstr "فعال‌سازی Email: Awaiting Down Payment (Installment - Customer)"
+
+msgid "Enable In-App Notification: Awaiting Down Payment (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Down Payment (Installment - Customer)"
+
+msgid "Enable SMS: Down Payment Received (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Down Payment Received (Installment - Customer)"
+
+msgid "Enable Telegram: Down Payment Received (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Down Payment Received (Installment - Customer)"
+
+msgid "Enable Email: Down Payment Received (Installment - Customer)"
+msgstr "فعال‌سازی Email: Down Payment Received (Installment - Customer)"
+
+msgid "Enable In-App Notification: Down Payment Received (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Down Payment Received (Installment - Customer)"
+
+msgid "Enable SMS: Approved (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Approved (Installment - Customer)"
+
+msgid "Enable Telegram: Approved (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Approved (Installment - Customer)"
+
+msgid "Enable Email: Approved (Installment - Customer)"
+msgstr "فعال‌سازی Email: Approved (Installment - Customer)"
+
+msgid "Enable In-App Notification: Approved (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Approved (Installment - Customer)"
+
+msgid "Enable SMS: Completed (Installment - Customer)"
+msgstr "فعال‌سازی SMS: Completed (Installment - Customer)"
+
+msgid "Enable Telegram: Completed (Installment - Customer)"
+msgstr "فعال‌سازی Telegram: Completed (Installment - Customer)"
+
+msgid "Enable Email: Completed (Installment - Customer)"
+msgstr "فعال‌سازی Email: Completed (Installment - Customer)"
+
+msgid "Enable In-App Notification: Completed (Installment - Customer)"
+msgstr "فعال‌سازی In-App Notification: Completed (Installment - Customer)"
+
+msgid "Installment Inquiry Status Notifications - Expert"
+msgstr "اعلان‌های وضعیت استعلام اقساطی - Expert"
+
+msgid "Configure which notifications to send to experts for different installment inquiry statuses."
+msgstr "تنظیم اینکه چه اعلان‌هایی برای experts در وضعیت‌های مختلف اقساطی ارسال شود."
+
+msgid "Enable SMS: New (Installment - Expert)"
+msgstr "فعال‌سازی SMS: New (Installment - Expert)"
+
+msgid "Enable Telegram: New (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: New (Installment - Expert)"
+
+msgid "Enable Email: New (Installment - Expert)"
+msgstr "فعال‌سازی Email: New (Installment - Expert)"
+
+msgid "Enable In-App Notification: New (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: New (Installment - Expert)"
+
+msgid "Enable SMS: Referred to Expert (Installment - Expert)"
+msgstr "فعال‌سازی SMS: Referred to Expert (Installment - Expert)"
+
+msgid "Enable Telegram: Referred to Expert (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: Referred to Expert (Installment - Expert)"
+
+msgid "Enable Email: Referred to Expert (Installment - Expert)"
+msgstr "فعال‌سازی Email: Referred to Expert (Installment - Expert)"
+
+msgid "Enable In-App Notification: Referred to Expert (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: Referred to Expert (Installment - Expert)"
+
+msgid "Enable SMS: In Progress (Installment - Expert)"
+msgstr "فعال‌سازی SMS: In Progress (Installment - Expert)"
+
+msgid "Enable Telegram: In Progress (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: In Progress (Installment - Expert)"
+
+msgid "Enable Email: In Progress (Installment - Expert)"
+msgstr "فعال‌سازی Email: In Progress (Installment - Expert)"
+
+msgid "Enable In-App Notification: In Progress (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: In Progress (Installment - Expert)"
+
+msgid "Enable SMS: Follow Up Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی SMS: Follow Up Scheduled (Installment - Expert)"
+
+msgid "Enable Telegram: Follow Up Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: Follow Up Scheduled (Installment - Expert)"
+
+msgid "Enable Email: Follow Up Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی Email: Follow Up Scheduled (Installment - Expert)"
+
+msgid "Enable In-App Notification: Follow Up Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: Follow Up Scheduled (Installment - Expert)"
+
+msgid "Enable SMS: Meeting Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی SMS: Meeting Scheduled (Installment - Expert)"
+
+msgid "Enable Telegram: Meeting Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: Meeting Scheduled (Installment - Expert)"
+
+msgid "Enable Email: Meeting Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی Email: Meeting Scheduled (Installment - Expert)"
+
+msgid "Enable In-App Notification: Meeting Scheduled (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: Meeting Scheduled (Installment - Expert)"
+
+msgid "Enable SMS: Awaiting Documents (Installment - Expert)"
+msgstr "فعال‌سازی SMS: Awaiting Documents (Installment - Expert)"
+
+msgid "Enable Telegram: Awaiting Documents (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: Awaiting Documents (Installment - Expert)"
+
+msgid "Enable Email: Awaiting Documents (Installment - Expert)"
+msgstr "فعال‌سازی Email: Awaiting Documents (Installment - Expert)"
+
+msgid "Enable In-App Notification: Awaiting Documents (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Documents (Installment - Expert)"
+
+msgid "Enable SMS: Approved (Installment - Expert)"
+msgstr "فعال‌سازی SMS: Approved (Installment - Expert)"
+
+msgid "Enable Telegram: Approved (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: Approved (Installment - Expert)"
+
+msgid "Enable Email: Approved (Installment - Expert)"
+msgstr "فعال‌سازی Email: Approved (Installment - Expert)"
+
+msgid "Enable In-App Notification: Approved (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: Approved (Installment - Expert)"
+
+msgid "Enable SMS: Rejected (Installment - Expert)"
+msgstr "فعال‌سازی SMS: Rejected (Installment - Expert)"
+
+msgid "Enable Telegram: Rejected (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: Rejected (Installment - Expert)"
+
+msgid "Enable Email: Rejected (Installment - Expert)"
+msgstr "فعال‌سازی Email: Rejected (Installment - Expert)"
+
+msgid "Enable In-App Notification: Rejected (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: Rejected (Installment - Expert)"
+
+msgid "Enable SMS: Completed (Installment - Expert)"
+msgstr "فعال‌سازی SMS: Completed (Installment - Expert)"
+
+msgid "Enable Telegram: Completed (Installment - Expert)"
+msgstr "فعال‌سازی Telegram: Completed (Installment - Expert)"
+
+msgid "Enable Email: Completed (Installment - Expert)"
+msgstr "فعال‌سازی Email: Completed (Installment - Expert)"
+
+msgid "Enable In-App Notification: Completed (Installment - Expert)"
+msgstr "فعال‌سازی In-App Notification: Completed (Installment - Expert)"
+
+msgid "Installment Inquiry Status Notifications - Admin"
+msgstr "اعلان‌های وضعیت استعلام اقساطی - Admin"
+
+msgid "Configure which notifications to send to admins for different installment inquiry statuses."
+msgstr "تنظیم اینکه چه اعلان‌هایی برای admins در وضعیت‌های مختلف اقساطی ارسال شود."
+
+msgid "Enable SMS: New (Installment - Admin)"
+msgstr "فعال‌سازی SMS: New (Installment - Admin)"
+
+msgid "Enable Telegram: New (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: New (Installment - Admin)"
+
+msgid "Enable Email: New (Installment - Admin)"
+msgstr "فعال‌سازی Email: New (Installment - Admin)"
+
+msgid "Enable In-App Notification: New (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: New (Installment - Admin)"
+
+msgid "Enable SMS: Pending Review (Installment - Admin)"
+msgstr "فعال‌سازی SMS: Pending Review (Installment - Admin)"
+
+msgid "Enable Telegram: Pending Review (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: Pending Review (Installment - Admin)"
+
+msgid "Enable Email: Pending Review (Installment - Admin)"
+msgstr "فعال‌سازی Email: Pending Review (Installment - Admin)"
+
+msgid "Enable In-App Notification: Pending Review (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: Pending Review (Installment - Admin)"
+
+msgid "Enable SMS: Approved and Referred (Installment - Admin)"
+msgstr "فعال‌سازی SMS: Approved and Referred (Installment - Admin)"
+
+msgid "Enable Telegram: Approved and Referred (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: Approved and Referred (Installment - Admin)"
+
+msgid "Enable Email: Approved and Referred (Installment - Admin)"
+msgstr "فعال‌سازی Email: Approved and Referred (Installment - Admin)"
+
+msgid "Enable In-App Notification: Approved and Referred (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: Approved and Referred (Installment - Admin)"
+
+msgid "Enable SMS: Referred to Expert (Installment - Admin)"
+msgstr "فعال‌سازی SMS: Referred to Expert (Installment - Admin)"
+
+msgid "Enable Telegram: Referred to Expert (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: Referred to Expert (Installment - Admin)"
+
+msgid "Enable Email: Referred to Expert (Installment - Admin)"
+msgstr "فعال‌سازی Email: Referred to Expert (Installment - Admin)"
+
+msgid "Enable In-App Notification: Referred to Expert (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: Referred to Expert (Installment - Admin)"
+
+msgid "Enable SMS: Approved (Installment - Admin)"
+msgstr "فعال‌سازی SMS: Approved (Installment - Admin)"
+
+msgid "Enable Telegram: Approved (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: Approved (Installment - Admin)"
+
+msgid "Enable Email: Approved (Installment - Admin)"
+msgstr "فعال‌سازی Email: Approved (Installment - Admin)"
+
+msgid "Enable In-App Notification: Approved (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: Approved (Installment - Admin)"
+
+msgid "Enable SMS: Rejected (Installment - Admin)"
+msgstr "فعال‌سازی SMS: Rejected (Installment - Admin)"
+
+msgid "Enable Telegram: Rejected (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: Rejected (Installment - Admin)"
+
+msgid "Enable Email: Rejected (Installment - Admin)"
+msgstr "فعال‌سازی Email: Rejected (Installment - Admin)"
+
+msgid "Enable In-App Notification: Rejected (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: Rejected (Installment - Admin)"
+
+msgid "Enable SMS: Inquiry Failed (Installment - Admin)"
+msgstr "فعال‌سازی SMS: Inquiry Failed (Installment - Admin)"
+
+msgid "Enable Telegram: Inquiry Failed (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: Inquiry Failed (Installment - Admin)"
+
+msgid "Enable Email: Inquiry Failed (Installment - Admin)"
+msgstr "فعال‌سازی Email: Inquiry Failed (Installment - Admin)"
+
+msgid "Enable In-App Notification: Inquiry Failed (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: Inquiry Failed (Installment - Admin)"
+
+msgid "Enable SMS: Completed (Installment - Admin)"
+msgstr "فعال‌سازی SMS: Completed (Installment - Admin)"
+
+msgid "Enable Telegram: Completed (Installment - Admin)"
+msgstr "فعال‌سازی Telegram: Completed (Installment - Admin)"
+
+msgid "Enable Email: Completed (Installment - Admin)"
+msgstr "فعال‌سازی Email: Completed (Installment - Admin)"
+
+msgid "Enable In-App Notification: Completed (Installment - Admin)"
+msgstr "فعال‌سازی In-App Notification: Completed (Installment - Admin)"
+
+msgid "Cash Inquiry Status Notifications - Customer"
+msgstr "اعلان‌های وضعیت استعلام نقدی - Customer"
+
+msgid "Configure which notifications to send to customers for different cash inquiry statuses."
+msgstr "تنظیم اینکه چه اعلان‌هایی برای customers در وضعیت‌های مختلف نقدی ارسال شود."
+
+msgid "Enable SMS: New (Cash - Customer)"
+msgstr "فعال‌سازی SMS: New (Cash - Customer)"
+
+msgid "Enable Telegram: New (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: New (Cash - Customer)"
+
+msgid "Enable Email: New (Cash - Customer)"
+msgstr "فعال‌سازی Email: New (Cash - Customer)"
+
+msgid "Enable In-App Notification: New (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: New (Cash - Customer)"
+
+msgid "Enable SMS: Pending Review (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Pending Review (Cash - Customer)"
+
+msgid "Enable Telegram: Pending Review (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Pending Review (Cash - Customer)"
+
+msgid "Enable Email: Pending Review (Cash - Customer)"
+msgstr "فعال‌سازی Email: Pending Review (Cash - Customer)"
+
+msgid "Enable In-App Notification: Pending Review (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Pending Review (Cash - Customer)"
+
+msgid "Enable SMS: Approved and Referred (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Approved and Referred (Cash - Customer)"
+
+msgid "Enable Telegram: Approved and Referred (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Approved and Referred (Cash - Customer)"
+
+msgid "Enable Email: Approved and Referred (Cash - Customer)"
+msgstr "فعال‌سازی Email: Approved and Referred (Cash - Customer)"
+
+msgid "Enable In-App Notification: Approved and Referred (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Approved and Referred (Cash - Customer)"
+
+msgid "Enable SMS: More Documents Required (Cash - Customer)"
+msgstr "فعال‌سازی SMS: More Documents Required (Cash - Customer)"
+
+msgid "Enable Telegram: More Documents Required (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: More Documents Required (Cash - Customer)"
+
+msgid "Enable Email: More Documents Required (Cash - Customer)"
+msgstr "فعال‌سازی Email: More Documents Required (Cash - Customer)"
+
+msgid "Enable In-App Notification: More Documents Required (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: More Documents Required (Cash - Customer)"
+
+msgid "Enable SMS: Rejected (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Rejected (Cash - Customer)"
+
+msgid "Enable Telegram: Rejected (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Rejected (Cash - Customer)"
+
+msgid "Enable Email: Rejected (Cash - Customer)"
+msgstr "فعال‌سازی Email: Rejected (Cash - Customer)"
+
+msgid "Enable In-App Notification: Rejected (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Rejected (Cash - Customer)"
+
+msgid "Enable SMS: Inquiry Failed (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Inquiry Failed (Cash - Customer)"
+
+msgid "Enable Telegram: Inquiry Failed (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Inquiry Failed (Cash - Customer)"
+
+msgid "Enable Email: Inquiry Failed (Cash - Customer)"
+msgstr "فعال‌سازی Email: Inquiry Failed (Cash - Customer)"
+
+msgid "Enable In-App Notification: Inquiry Failed (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Inquiry Failed (Cash - Customer)"
+
+msgid "Enable SMS: Referred to Expert (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Referred to Expert (Cash - Customer)"
+
+msgid "Enable Telegram: Referred to Expert (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Referred to Expert (Cash - Customer)"
+
+msgid "Enable Email: Referred to Expert (Cash - Customer)"
+msgstr "فعال‌سازی Email: Referred to Expert (Cash - Customer)"
+
+msgid "Enable In-App Notification: Referred to Expert (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Referred to Expert (Cash - Customer)"
+
+msgid "Enable SMS: In Progress (Cash - Customer)"
+msgstr "فعال‌سازی SMS: In Progress (Cash - Customer)"
+
+msgid "Enable Telegram: In Progress (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: In Progress (Cash - Customer)"
+
+msgid "Enable Email: In Progress (Cash - Customer)"
+msgstr "فعال‌سازی Email: In Progress (Cash - Customer)"
+
+msgid "Enable In-App Notification: In Progress (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: In Progress (Cash - Customer)"
+
+msgid "Enable SMS: Follow Up Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Follow Up Scheduled (Cash - Customer)"
+
+msgid "Enable Telegram: Follow Up Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Follow Up Scheduled (Cash - Customer)"
+
+msgid "Enable Email: Follow Up Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی Email: Follow Up Scheduled (Cash - Customer)"
+
+msgid "Enable In-App Notification: Follow Up Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Follow Up Scheduled (Cash - Customer)"
+
+msgid "Enable SMS: Meeting Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Meeting Scheduled (Cash - Customer)"
+
+msgid "Enable Telegram: Meeting Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Meeting Scheduled (Cash - Customer)"
+
+msgid "Enable Email: Meeting Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی Email: Meeting Scheduled (Cash - Customer)"
+
+msgid "Enable In-App Notification: Meeting Scheduled (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Meeting Scheduled (Cash - Customer)"
+
+msgid "Enable SMS: Awaiting Documents (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Awaiting Documents (Cash - Customer)"
+
+msgid "Enable Telegram: Awaiting Documents (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Awaiting Documents (Cash - Customer)"
+
+msgid "Enable Email: Awaiting Documents (Cash - Customer)"
+msgstr "فعال‌سازی Email: Awaiting Documents (Cash - Customer)"
+
+msgid "Enable In-App Notification: Awaiting Documents (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Documents (Cash - Customer)"
+
+msgid "Enable SMS: Awaiting Down Payment (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Awaiting Down Payment (Cash - Customer)"
+
+msgid "Enable Telegram: Awaiting Down Payment (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Awaiting Down Payment (Cash - Customer)"
+
+msgid "Enable Email: Awaiting Down Payment (Cash - Customer)"
+msgstr "فعال‌سازی Email: Awaiting Down Payment (Cash - Customer)"
+
+msgid "Enable In-App Notification: Awaiting Down Payment (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Down Payment (Cash - Customer)"
+
+msgid "Enable SMS: Down Payment Received (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Down Payment Received (Cash - Customer)"
+
+msgid "Enable Telegram: Down Payment Received (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Down Payment Received (Cash - Customer)"
+
+msgid "Enable Email: Down Payment Received (Cash - Customer)"
+msgstr "فعال‌سازی Email: Down Payment Received (Cash - Customer)"
+
+msgid "Enable In-App Notification: Down Payment Received (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Down Payment Received (Cash - Customer)"
+
+msgid "Enable SMS: Approved (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Approved (Cash - Customer)"
+
+msgid "Enable Telegram: Approved (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Approved (Cash - Customer)"
+
+msgid "Enable Email: Approved (Cash - Customer)"
+msgstr "فعال‌سازی Email: Approved (Cash - Customer)"
+
+msgid "Enable In-App Notification: Approved (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Approved (Cash - Customer)"
+
+msgid "Enable SMS: Completed (Cash - Customer)"
+msgstr "فعال‌سازی SMS: Completed (Cash - Customer)"
+
+msgid "Enable Telegram: Completed (Cash - Customer)"
+msgstr "فعال‌سازی Telegram: Completed (Cash - Customer)"
+
+msgid "Enable Email: Completed (Cash - Customer)"
+msgstr "فعال‌سازی Email: Completed (Cash - Customer)"
+
+msgid "Enable In-App Notification: Completed (Cash - Customer)"
+msgstr "فعال‌سازی In-App Notification: Completed (Cash - Customer)"
+
+msgid "Cash Inquiry Status Notifications - Expert"
+msgstr "اعلان‌های وضعیت استعلام نقدی - Expert"
+
+msgid "Configure which notifications to send to experts for different cash inquiry statuses."
+msgstr "تنظیم اینکه چه اعلان‌هایی برای experts در وضعیت‌های مختلف نقدی ارسال شود."
+
+msgid "Enable SMS: New (Cash - Expert)"
+msgstr "فعال‌سازی SMS: New (Cash - Expert)"
+
+msgid "Enable Telegram: New (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: New (Cash - Expert)"
+
+msgid "Enable Email: New (Cash - Expert)"
+msgstr "فعال‌سازی Email: New (Cash - Expert)"
+
+msgid "Enable In-App Notification: New (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: New (Cash - Expert)"
+
+msgid "Enable SMS: Pending Review (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Pending Review (Cash - Expert)"
+
+msgid "Enable Telegram: Pending Review (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Pending Review (Cash - Expert)"
+
+msgid "Enable Email: Pending Review (Cash - Expert)"
+msgstr "فعال‌سازی Email: Pending Review (Cash - Expert)"
+
+msgid "Enable In-App Notification: Pending Review (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Pending Review (Cash - Expert)"
+
+msgid "Enable SMS: Approved and Referred (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Approved and Referred (Cash - Expert)"
+
+msgid "Enable Telegram: Approved and Referred (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Approved and Referred (Cash - Expert)"
+
+msgid "Enable Email: Approved and Referred (Cash - Expert)"
+msgstr "فعال‌سازی Email: Approved and Referred (Cash - Expert)"
+
+msgid "Enable In-App Notification: Approved and Referred (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Approved and Referred (Cash - Expert)"
+
+msgid "Enable SMS: More Documents Required (Cash - Expert)"
+msgstr "فعال‌سازی SMS: More Documents Required (Cash - Expert)"
+
+msgid "Enable Telegram: More Documents Required (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: More Documents Required (Cash - Expert)"
+
+msgid "Enable Email: More Documents Required (Cash - Expert)"
+msgstr "فعال‌سازی Email: More Documents Required (Cash - Expert)"
+
+msgid "Enable In-App Notification: More Documents Required (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: More Documents Required (Cash - Expert)"
+
+msgid "Enable SMS: Rejected (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Rejected (Cash - Expert)"
+
+msgid "Enable Telegram: Rejected (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Rejected (Cash - Expert)"
+
+msgid "Enable Email: Rejected (Cash - Expert)"
+msgstr "فعال‌سازی Email: Rejected (Cash - Expert)"
+
+msgid "Enable In-App Notification: Rejected (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Rejected (Cash - Expert)"
+
+msgid "Enable SMS: Inquiry Failed (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Inquiry Failed (Cash - Expert)"
+
+msgid "Enable Telegram: Inquiry Failed (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Inquiry Failed (Cash - Expert)"
+
+msgid "Enable Email: Inquiry Failed (Cash - Expert)"
+msgstr "فعال‌سازی Email: Inquiry Failed (Cash - Expert)"
+
+msgid "Enable In-App Notification: Inquiry Failed (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Inquiry Failed (Cash - Expert)"
+
+msgid "Enable SMS: Referred to Expert (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Referred to Expert (Cash - Expert)"
+
+msgid "Enable Telegram: Referred to Expert (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Referred to Expert (Cash - Expert)"
+
+msgid "Enable Email: Referred to Expert (Cash - Expert)"
+msgstr "فعال‌سازی Email: Referred to Expert (Cash - Expert)"
+
+msgid "Enable In-App Notification: Referred to Expert (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Referred to Expert (Cash - Expert)"
+
+msgid "Enable SMS: In Progress (Cash - Expert)"
+msgstr "فعال‌سازی SMS: In Progress (Cash - Expert)"
+
+msgid "Enable Telegram: In Progress (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: In Progress (Cash - Expert)"
+
+msgid "Enable Email: In Progress (Cash - Expert)"
+msgstr "فعال‌سازی Email: In Progress (Cash - Expert)"
+
+msgid "Enable In-App Notification: In Progress (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: In Progress (Cash - Expert)"
+
+msgid "Enable SMS: Follow Up Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Follow Up Scheduled (Cash - Expert)"
+
+msgid "Enable Telegram: Follow Up Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Follow Up Scheduled (Cash - Expert)"
+
+msgid "Enable Email: Follow Up Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی Email: Follow Up Scheduled (Cash - Expert)"
+
+msgid "Enable In-App Notification: Follow Up Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Follow Up Scheduled (Cash - Expert)"
+
+msgid "Enable SMS: Meeting Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Meeting Scheduled (Cash - Expert)"
+
+msgid "Enable Telegram: Meeting Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Meeting Scheduled (Cash - Expert)"
+
+msgid "Enable Email: Meeting Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی Email: Meeting Scheduled (Cash - Expert)"
+
+msgid "Enable In-App Notification: Meeting Scheduled (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Meeting Scheduled (Cash - Expert)"
+
+msgid "Enable SMS: Awaiting Documents (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Awaiting Documents (Cash - Expert)"
+
+msgid "Enable Telegram: Awaiting Documents (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Awaiting Documents (Cash - Expert)"
+
+msgid "Enable Email: Awaiting Documents (Cash - Expert)"
+msgstr "فعال‌سازی Email: Awaiting Documents (Cash - Expert)"
+
+msgid "Enable In-App Notification: Awaiting Documents (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Documents (Cash - Expert)"
+
+msgid "Enable SMS: Awaiting Down Payment (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Awaiting Down Payment (Cash - Expert)"
+
+msgid "Enable Telegram: Awaiting Down Payment (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Awaiting Down Payment (Cash - Expert)"
+
+msgid "Enable Email: Awaiting Down Payment (Cash - Expert)"
+msgstr "فعال‌سازی Email: Awaiting Down Payment (Cash - Expert)"
+
+msgid "Enable In-App Notification: Awaiting Down Payment (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Down Payment (Cash - Expert)"
+
+msgid "Enable SMS: Down Payment Received (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Down Payment Received (Cash - Expert)"
+
+msgid "Enable Telegram: Down Payment Received (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Down Payment Received (Cash - Expert)"
+
+msgid "Enable Email: Down Payment Received (Cash - Expert)"
+msgstr "فعال‌سازی Email: Down Payment Received (Cash - Expert)"
+
+msgid "Enable In-App Notification: Down Payment Received (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Down Payment Received (Cash - Expert)"
+
+msgid "Enable SMS: Approved (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Approved (Cash - Expert)"
+
+msgid "Enable Telegram: Approved (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Approved (Cash - Expert)"
+
+msgid "Enable Email: Approved (Cash - Expert)"
+msgstr "فعال‌سازی Email: Approved (Cash - Expert)"
+
+msgid "Enable In-App Notification: Approved (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Approved (Cash - Expert)"
+
+msgid "Enable SMS: Completed (Cash - Expert)"
+msgstr "فعال‌سازی SMS: Completed (Cash - Expert)"
+
+msgid "Enable Telegram: Completed (Cash - Expert)"
+msgstr "فعال‌سازی Telegram: Completed (Cash - Expert)"
+
+msgid "Enable Email: Completed (Cash - Expert)"
+msgstr "فعال‌سازی Email: Completed (Cash - Expert)"
+
+msgid "Enable In-App Notification: Completed (Cash - Expert)"
+msgstr "فعال‌سازی In-App Notification: Completed (Cash - Expert)"
+
+msgid "Cash Inquiry Status Notifications - Admin"
+msgstr "اعلان‌های وضعیت استعلام نقدی - Admin"
+
+msgid "Configure which notifications to send to admins for different cash inquiry statuses."
+msgstr "تنظیم اینکه چه اعلان‌هایی برای admins در وضعیت‌های مختلف نقدی ارسال شود."
+
+msgid "Enable SMS: New (Cash - Admin)"
+msgstr "فعال‌سازی SMS: New (Cash - Admin)"
+
+msgid "Enable Telegram: New (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: New (Cash - Admin)"
+
+msgid "Enable Email: New (Cash - Admin)"
+msgstr "فعال‌سازی Email: New (Cash - Admin)"
+
+msgid "Enable In-App Notification: New (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: New (Cash - Admin)"
+
+msgid "Enable SMS: Pending Review (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Pending Review (Cash - Admin)"
+
+msgid "Enable Telegram: Pending Review (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Pending Review (Cash - Admin)"
+
+msgid "Enable Email: Pending Review (Cash - Admin)"
+msgstr "فعال‌سازی Email: Pending Review (Cash - Admin)"
+
+msgid "Enable In-App Notification: Pending Review (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Pending Review (Cash - Admin)"
+
+msgid "Enable SMS: Approved and Referred (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Approved and Referred (Cash - Admin)"
+
+msgid "Enable Telegram: Approved and Referred (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Approved and Referred (Cash - Admin)"
+
+msgid "Enable Email: Approved and Referred (Cash - Admin)"
+msgstr "فعال‌سازی Email: Approved and Referred (Cash - Admin)"
+
+msgid "Enable In-App Notification: Approved and Referred (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Approved and Referred (Cash - Admin)"
+
+msgid "Enable SMS: More Documents Required (Cash - Admin)"
+msgstr "فعال‌سازی SMS: More Documents Required (Cash - Admin)"
+
+msgid "Enable Telegram: More Documents Required (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: More Documents Required (Cash - Admin)"
+
+msgid "Enable Email: More Documents Required (Cash - Admin)"
+msgstr "فعال‌سازی Email: More Documents Required (Cash - Admin)"
+
+msgid "Enable In-App Notification: More Documents Required (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: More Documents Required (Cash - Admin)"
+
+msgid "Enable SMS: Rejected (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Rejected (Cash - Admin)"
+
+msgid "Enable Telegram: Rejected (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Rejected (Cash - Admin)"
+
+msgid "Enable Email: Rejected (Cash - Admin)"
+msgstr "فعال‌سازی Email: Rejected (Cash - Admin)"
+
+msgid "Enable In-App Notification: Rejected (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Rejected (Cash - Admin)"
+
+msgid "Enable SMS: Inquiry Failed (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Inquiry Failed (Cash - Admin)"
+
+msgid "Enable Telegram: Inquiry Failed (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Inquiry Failed (Cash - Admin)"
+
+msgid "Enable Email: Inquiry Failed (Cash - Admin)"
+msgstr "فعال‌سازی Email: Inquiry Failed (Cash - Admin)"
+
+msgid "Enable In-App Notification: Inquiry Failed (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Inquiry Failed (Cash - Admin)"
+
+msgid "Enable SMS: Referred to Expert (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Referred to Expert (Cash - Admin)"
+
+msgid "Enable Telegram: Referred to Expert (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Referred to Expert (Cash - Admin)"
+
+msgid "Enable Email: Referred to Expert (Cash - Admin)"
+msgstr "فعال‌سازی Email: Referred to Expert (Cash - Admin)"
+
+msgid "Enable In-App Notification: Referred to Expert (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Referred to Expert (Cash - Admin)"
+
+msgid "Enable SMS: In Progress (Cash - Admin)"
+msgstr "فعال‌سازی SMS: In Progress (Cash - Admin)"
+
+msgid "Enable Telegram: In Progress (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: In Progress (Cash - Admin)"
+
+msgid "Enable Email: In Progress (Cash - Admin)"
+msgstr "فعال‌سازی Email: In Progress (Cash - Admin)"
+
+msgid "Enable In-App Notification: In Progress (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: In Progress (Cash - Admin)"
+
+msgid "Enable SMS: Follow Up Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Follow Up Scheduled (Cash - Admin)"
+
+msgid "Enable Telegram: Follow Up Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Follow Up Scheduled (Cash - Admin)"
+
+msgid "Enable Email: Follow Up Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی Email: Follow Up Scheduled (Cash - Admin)"
+
+msgid "Enable In-App Notification: Follow Up Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Follow Up Scheduled (Cash - Admin)"
+
+msgid "Enable SMS: Meeting Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Meeting Scheduled (Cash - Admin)"
+
+msgid "Enable Telegram: Meeting Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Meeting Scheduled (Cash - Admin)"
+
+msgid "Enable Email: Meeting Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی Email: Meeting Scheduled (Cash - Admin)"
+
+msgid "Enable In-App Notification: Meeting Scheduled (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Meeting Scheduled (Cash - Admin)"
+
+msgid "Enable SMS: Awaiting Documents (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Awaiting Documents (Cash - Admin)"
+
+msgid "Enable Telegram: Awaiting Documents (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Awaiting Documents (Cash - Admin)"
+
+msgid "Enable Email: Awaiting Documents (Cash - Admin)"
+msgstr "فعال‌سازی Email: Awaiting Documents (Cash - Admin)"
+
+msgid "Enable In-App Notification: Awaiting Documents (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Documents (Cash - Admin)"
+
+msgid "Enable SMS: Awaiting Down Payment (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Awaiting Down Payment (Cash - Admin)"
+
+msgid "Enable Telegram: Awaiting Down Payment (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Awaiting Down Payment (Cash - Admin)"
+
+msgid "Enable Email: Awaiting Down Payment (Cash - Admin)"
+msgstr "فعال‌سازی Email: Awaiting Down Payment (Cash - Admin)"
+
+msgid "Enable In-App Notification: Awaiting Down Payment (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Awaiting Down Payment (Cash - Admin)"
+
+msgid "Enable SMS: Down Payment Received (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Down Payment Received (Cash - Admin)"
+
+msgid "Enable Telegram: Down Payment Received (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Down Payment Received (Cash - Admin)"
+
+msgid "Enable Email: Down Payment Received (Cash - Admin)"
+msgstr "فعال‌سازی Email: Down Payment Received (Cash - Admin)"
+
+msgid "Enable In-App Notification: Down Payment Received (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Down Payment Received (Cash - Admin)"
+
+msgid "Enable SMS: Approved (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Approved (Cash - Admin)"
+
+msgid "Enable Telegram: Approved (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Approved (Cash - Admin)"
+
+msgid "Enable Email: Approved (Cash - Admin)"
+msgstr "فعال‌سازی Email: Approved (Cash - Admin)"
+
+msgid "Enable In-App Notification: Approved (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Approved (Cash - Admin)"
+
+msgid "Enable SMS: Completed (Cash - Admin)"
+msgstr "فعال‌سازی SMS: Completed (Cash - Admin)"
+
+msgid "Enable Telegram: Completed (Cash - Admin)"
+msgstr "فعال‌سازی Telegram: Completed (Cash - Admin)"
+
+msgid "Enable Email: Completed (Cash - Admin)"
+msgstr "فعال‌سازی Email: Completed (Cash - Admin)"
+
+msgid "Enable In-App Notification: Completed (Cash - Admin)"
+msgstr "فعال‌سازی In-App Notification: Completed (Cash - Admin)"
+
+msgid "Telegram Message Templates"
+msgstr "الگوهای پیام تلگرام"
+
+msgid "Configure message templates for Telegram notifications. Use variables: {customer_name}, {car_name}, {date}, {time}, {reason}, {expert_name}, {customer_mobile}, {amount}."
+msgstr "تنظیم الگوهای پیام برای اطلاع‌رسانی‌های تلگرام. از متغیرها استفاده کنید: {customer_name}, {car_name}, {date}, {time}, {reason}, {expert_name}, {customer_mobile}, {amount}."
+
+msgid "Message: New Inquiry for Admin"
+msgstr "پیام: استعلام جدید برای مدیر"
+
+msgid "New inquiry received from {customer_name} for {car_name}"
+msgstr "استعلام جدید از {customer_name} برای {car_name} دریافت شد"
+
+msgid "Message: Meeting Reminder"
+msgstr "پیام: یادآوری جلسه"
+
+msgid "Reminder: You have a meeting scheduled for {date} at {time}. Car: {car_name}"
+msgstr "یادآوری: شما یک جلسه برای {date} در ساعت {time} برنامه‌ریزی کرده‌اید. خودرو: {car_name}"
+
+msgid "Telegram Messages - Installment Inquiry (Customer)"
+msgstr "پیام‌های تلگرام - استعلام اقساطی (مشتری)"
+
+msgid "Telegram Messages - Installment Inquiry (Expert)"
+msgstr "پیام‌های تلگرام - استعلام اقساطی (کارشناس)"
+
+msgid "Telegram Messages - Installment Inquiry (Admin)"
+msgstr "پیام‌های تلگرام - استعلام اقساطی (مدیر)"
+
+msgid "Telegram Messages - Cash Inquiry (Customer)"
+msgstr "پیام‌های تلگرام - استعلام نقدی (مشتری)"
+
+msgid "Telegram Messages - Cash Inquiry (Expert)"
+msgstr "پیام‌های تلگرام - استعلام نقدی (کارشناس)"
+
+msgid "Telegram Messages - Cash Inquiry (Admin)"
+msgstr "پیام‌های تلگرام - استعلام نقدی (مدیر)"
+
+msgid "Email Message Templates"
+msgstr "الگوهای پیام ایمیل"
+
+msgid "Configure email message templates. Use variables: {customer_name}, {car_name}, {date}, {time}, {reason}, {expert_name}, {customer_mobile}, {amount}."
+msgstr "تنظیم الگوهای پیام ایمیل. از متغیرها استفاده کنید: {customer_name}, {car_name}, {date}, {time}, {reason}, {expert_name}, {customer_mobile}, {amount}."
+
+msgid "Subject: New Inquiry for Admin"
+msgstr "موضوع: استعلام جدید برای مدیر"
+
+msgid "New Inquiry Received"
+msgstr "استعلام جدید دریافت شد"
+
+msgid "A new inquiry has been received from {customer_name} for {car_name}."
+msgstr "استعلام جدیدی از {customer_name} برای {car_name} دریافت شده است."
+
+msgid "Subject: Meeting Reminder"
+msgstr "موضوع: یادآوری جلسه"
+
+msgid "یادآوری جلسه"
+msgstr "یادآوری جلسه"
+
+msgid "Dear {customer_name}, this is a reminder that you have a meeting scheduled for {date} at {time} regarding {car_name}."
+msgstr "عزیز {customer_name}، این یادآوری است که شما یک جلسه برای {date} در ساعت {time} در مورد {car_name} برنامه‌ریزی کرده‌اید."
+
+msgid "Global Channel Settings"
+msgstr "تنظیمات کانال‌های سراسری"
+
+msgid "Enable or disable notification channels globally. When disabled, the channel will be disabled for all notification types below."
+msgstr "فعال یا غیرفعال کردن کانال‌های اطلاع‌رسانی به صورت سراسری. هنگام غیرفعال بودن، کانال برای همه انواع اعلان‌های زیر غیرفعال می‌شود."
+
+msgid "Enable SMS Notifications (Global)"
+msgstr "فعال‌سازی اطلاع‌رسانی پیامک (سراسری)"
+
+msgid "When disabled, all SMS notifications will be turned off."
+msgstr "هنگام غیرفعال بودن، همه اعلان‌های پیامک غیرفعال می‌شوند."
+
+msgid "Enable Telegram Notifications (Global)"
+msgstr "فعال‌سازی اطلاع‌رسانی تلگرام (سراسری)"
+
+msgid "When disabled, all Telegram notifications will be turned off."
+msgstr "هنگام غیرفعال بودن، همه اعلان‌های تلگرام غیرفعال می‌شوند."
+
+msgid "Enable Email Notifications (Global)"
+msgstr "فعال‌سازی اطلاع‌رسانی ایمیل (سراسری)"
+
+msgid "When disabled, all Email notifications will be turned off."
+msgstr "هنگام غیرفعال بودن، همه اعلان‌های ایمیل غیرفعال می‌شوند."
+
+msgid "Enable In-App Notifications (Global)"
+msgstr "فعال‌سازی اعلان‌های درون‌برنامه‌ای (سراسری)"
+
+msgid "When disabled, all in-app notifications will be turned off."
+msgstr "هنگام غیرفعال بودن، همه اعلان‌های درون‌برنامه‌ای غیرفعال می‌شوند."
+
+msgid "Configure notifications sent when a new inquiry is submitted."
+msgstr "تنظیم اعلان‌های ارسالی هنگام ثبت استعلام جدید"
+
+msgid "Enable SMS: New Inquiry"
+msgstr "فعال‌سازی پیامک: استعلام جدید"
+
+msgid "Enable Telegram: New Inquiry"
+msgstr "فعال‌سازی تلگرام: استعلام جدید"
+
+msgid "Enable Email: New Inquiry"
+msgstr "فعال‌سازی ایمیل: استعلام جدید"
+
+msgid "Enable In-App Notification: New Inquiry"
+msgstr "فعال‌سازی اعلان درون‌برنامه‌ای: استعلام جدید"
+

@@ -24,6 +24,27 @@
     var dailyStatsData = maneliVisitorStats.dailyStats || [];
     
     /**
+     * Convert English digits to Persian digits
+     */
+    function toPersianDigits(str) {
+        if (!str) return '';
+        const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        let result = String(str);
+        for (let i = 0; i < 10; i++) {
+            result = result.split(english[i]).join(persian[i]);
+        }
+        return result;
+    }
+    
+    /**
+     * Format number with Persian digits
+     */
+    function formatPersianNumber(num) {
+        return toPersianDigits(num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+    }
+    
+    /**
      * Initialize all charts
      */
     function initCharts() {
@@ -32,6 +53,16 @@
         initOSChart();
         initDeviceTypesChart();
         loadOnlineVisitors();
+        
+        // Convert all numbers on page to Persian
+        $('.fs-21, .fs-16, td, .badge').each(function() {
+            var $el = $(this);
+            var text = $el.text();
+            // Only convert if it's a number (avoid converting already Persian numbers)
+            if (/^\d+([,\d]*)?$/.test(text.trim())) {
+                $el.text(toPersianDigits(text));
+            }
+        });
     }
     
     /**
@@ -43,7 +74,14 @@
         var uniqueVisitors = [];
         
         dailyStatsData.forEach(function(stat) {
-            dates.push(stat.date);
+            // Convert date to Jalali format if needed (assuming dates come in YYYY-MM-DD format)
+            var displayDate = stat.date;
+            if (stat.date && stat.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                // Date is in Gregorian format, but we'll display it as is for now
+                // The server should convert it to Jalali
+                displayDate = stat.date;
+            }
+            dates.push(displayDate);
             visits.push(parseInt(stat.visits) || 0);
             uniqueVisitors.push(parseInt(stat.unique_visitors) || 0);
         });
@@ -103,6 +141,9 @@
                         colors: '#8c9097',
                         fontSize: '11px',
                         fontFamily: 'IRANSans, Arial, sans-serif'
+                    },
+                    formatter: function(val) {
+                        return formatPersianNumber(Math.round(val));
                     }
                 }
             },
@@ -352,6 +393,8 @@
                     } else {
                         response.data.forEach(function(visitor) {
                             var timeAgo = getTimeAgo(visitor.visit_date);
+                            // Convert numbers in timeAgo to Persian
+                            timeAgo = toPersianDigits(timeAgo);
                             var row = '<tr>' +
                                 '<td>' + escapeHtml(visitor.ip_address) + '</td>' +
                                 '<td>' + escapeHtml(visitor.country || 'Unknown') + '</td>' +
@@ -366,8 +409,8 @@
                         });
                     }
                     
-                    // Update online count
-                    $('#online-visitors').text(response.data.length);
+                    // Update online count with Persian digits
+                    $('#online-visitors').text(toPersianDigits(response.data.length));
                 }
             }
         });

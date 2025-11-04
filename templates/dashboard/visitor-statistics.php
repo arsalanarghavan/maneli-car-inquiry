@@ -25,9 +25,92 @@ if (!$is_admin && !$is_manager) {
 // Load visitor statistics class
 require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
 
+// Helper function to convert Jalali to Gregorian
+if (!function_exists('maneli_jalali_to_gregorian')) {
+    function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+        $j_y = (int)$j_y;
+        $j_m = (int)$j_m;
+        $j_d = (int)$j_d;
+        
+        $jy = $j_y - 979;
+        $jm = $j_m - 1;
+        $jd = $j_d - 1;
+        
+        $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+        
+        $j_day_no = 365 * $jy + (int)($jy / 33) * 8 + (int)(($jy % 33 + 3) / 4);
+        for ($i = 0; $i < $jm; ++$i) {
+            $j_day_no += $j_days_in_month[$i];
+        }
+        $j_day_no += $jd;
+        
+        $g_day_no = $j_day_no + 79;
+        
+        $gy = 1600 + 400 * (int)($g_day_no / 146097);
+        $g_day_no = $g_day_no % 146097;
+        
+        $leap = true;
+        if ($g_day_no >= 36525) {
+            $g_day_no--;
+            $gy += 100 * (int)($g_day_no / 36524);
+            $g_day_no = $g_day_no % 36524;
+            
+            if ($g_day_no >= 365) {
+                $g_day_no++;
+            } else {
+                $leap = false;
+            }
+        }
+        
+        $gy += 4 * (int)($g_day_no / 1461);
+        $g_day_no = $g_day_no % 1461;
+        
+        if ($g_day_no >= 366) {
+            $leap = false;
+            $g_day_no--;
+            $gy += (int)($g_day_no / 365);
+            $g_day_no = $g_day_no % 365;
+        }
+        
+        $g_days_in_month = [31, ($leap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        $gm = 0;
+        while ($gm < 12 && $g_day_no >= $g_days_in_month[$gm]) {
+            $g_day_no -= $g_days_in_month[$gm];
+            $gm++;
+        }
+        
+        return sprintf('%04d-%02d-%02d', $gy, $gm + 1, $g_day_no + 1);
+    }
+}
+
+// Get current Jalali date for default values
+$today_jalali = maneli_gregorian_to_jalali(date('Y'), date('m'), date('d'), 'Y/m/d');
+$thirty_days_ago = date('Y-m-d', strtotime('-30 days'));
+$thirty_days_ago_jalali = maneli_gregorian_to_jalali(date('Y', strtotime('-30 days')), date('m', strtotime('-30 days')), date('d', strtotime('-30 days')), 'Y/m/d');
+
 // Get date range from query parameters (default: last 30 days)
-$start_date = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : date('Y-m-d', strtotime('-30 days'));
-$end_date = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : date('Y-m-d');
+// If dates are in Jalali format (YYYY/MM/DD), convert to Gregorian for database
+$start_date_input = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : $thirty_days_ago_jalali;
+$end_date_input = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : $today_jalali;
+
+// Convert Jalali to Gregorian for database queries
+if (preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $start_date_input, $matches)) {
+    $start_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+    $start_date_display = $start_date_input;
+} else {
+    // Assume it's already Gregorian
+    $start_date = $start_date_input;
+    $start_date_display = maneli_gregorian_to_jalali(date('Y', strtotime($start_date)), date('m', strtotime($start_date)), date('d', strtotime($start_date)), 'Y/m/d');
+}
+
+if (preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $end_date_input, $matches)) {
+    $end_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+    $end_date_display = $end_date_input;
+} else {
+    // Assume it's already Gregorian
+    $end_date = $end_date_input;
+    $end_date_display = maneli_gregorian_to_jalali(date('Y', strtotime($end_date)), date('m', strtotime($end_date)), date('d', strtotime($end_date)), 'Y/m/d');
+}
 
 // Get overall statistics
 $overall_stats = Maneli_Visitor_Statistics::get_overall_stats($start_date, $end_date);
@@ -102,11 +185,11 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                             </div>
                             <div class="col-md-3 maneli-initially-hidden" id="custom-start-date">
                                 <label class="form-label"><?php esc_html_e('From Date (Solar):', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="start_date" id="start-date-picker" class="form-control" value="<?php echo esc_attr($start_date); ?>" placeholder="YYYY/MM/DD">
+                                <input type="text" name="start_date" id="start-date-picker" class="form-control" value="<?php echo esc_attr($start_date_display); ?>" placeholder="YYYY/MM/DD">
                             </div>
                             <div class="col-md-3 maneli-initially-hidden" id="custom-end-date">
                                 <label class="form-label"><?php esc_html_e('To Date (Solar):', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="end_date" id="end-date-picker" class="form-control" value="<?php echo esc_attr($end_date); ?>" placeholder="YYYY/MM/DD">
+                                <input type="text" name="end_date" id="end-date-picker" class="form-control" value="<?php echo esc_attr($end_date_display); ?>" placeholder="YYYY/MM/DD">
                             </div>
                             <div class="col-md-3 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary btn-wave w-100">
@@ -130,7 +213,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                             </div>
                             <div>
                                 <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Total Visits', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="total-visits"><?php echo number_format($overall_stats['total_visits']); ?></div>
+                                <div class="fs-21 fw-medium" id="total-visits"><?php echo maneli_number_format_persian($overall_stats['total_visits']); ?></div>
                             </div>
                         </div>
                     </div>
@@ -145,7 +228,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                             </div>
                             <div>
                                 <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Unique Visitors', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="unique-visitors"><?php echo number_format($overall_stats['unique_visitors']); ?></div>
+                                <div class="fs-21 fw-medium" id="unique-visitors"><?php echo maneli_number_format_persian($overall_stats['unique_visitors']); ?></div>
                             </div>
                         </div>
                     </div>
@@ -160,7 +243,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                             </div>
                             <div>
                                 <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Total Pages', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="total-pages"><?php echo number_format($overall_stats['total_pages']); ?></div>
+                                <div class="fs-21 fw-medium" id="total-pages"><?php echo maneli_number_format_persian($overall_stats['total_pages']); ?></div>
                             </div>
                         </div>
                     </div>
@@ -175,7 +258,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                             </div>
                             <div>
                                 <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Online Now', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="online-visitors"><?php echo count($online_visitors); ?></div>
+                                <div class="fs-21 fw-medium" id="online-visitors"><?php echo maneli_number_format_persian(count($online_visitors)); ?></div>
                             </div>
                         </div>
                     </div>
@@ -219,11 +302,18 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     </tr>
                                 </thead>
                                 <tbody id="daily-visits-table">
-                                    <?php foreach (array_slice($daily_stats, -10) as $stat): ?>
+                                    <?php foreach (array_slice($daily_stats, -10) as $stat): 
+                                        // Convert date to Jalali if it's in Gregorian format
+                                        $display_date = $stat->date;
+                                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
+                                            $date_parts = explode('-', $stat->date);
+                                            $display_date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
+                                        }
+                                    ?>
                                     <tr>
-                                        <td><?php echo esc_html($stat->date); ?></td>
-                                        <td><?php echo number_format($stat->visits); ?></td>
-                                        <td><?php echo number_format($stat->unique_visitors); ?></td>
+                                        <td><?php echo esc_html($display_date); ?></td>
+                                        <td><?php echo maneli_number_format_persian($stat->visits); ?></td>
+                                        <td><?php echo maneli_number_format_persian($stat->unique_visitors); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -256,7 +346,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                                 <?php echo esc_html($page->page_title ?: $page->page_url); ?>
                                             </div>
                                         </td>
-                                        <td><?php echo number_format($page->visit_count); ?></td>
+                                        <td><?php echo maneli_number_format_persian($page->visit_count); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -330,8 +420,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <?php foreach ($top_products as $product): ?>
                                     <tr>
                                         <td><?php echo esc_html($product->product_name ?: 'Product #' . $product->product_id); ?></td>
-                                        <td><?php echo number_format($product->visit_count); ?></td>
-                                        <td><?php echo number_format($product->unique_visitors); ?></td>
+                                        <td><?php echo maneli_number_format_persian($product->visit_count); ?></td>
+                                        <td><?php echo maneli_number_format_persian($product->unique_visitors); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -365,8 +455,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <?php foreach ($search_engine_stats as $engine): ?>
                                     <tr>
                                         <td><?php echo esc_html(ucfirst($engine->search_engine)); ?></td>
-                                        <td><?php echo number_format($engine->visit_count); ?></td>
-                                        <td><?php echo number_format($engine->unique_visitors); ?></td>
+                                        <td><?php echo maneli_number_format_persian($engine->visit_count); ?></td>
+                                        <td><?php echo maneli_number_format_persian($engine->unique_visitors); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -399,7 +489,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                                 <?php echo esc_html($referrer->referrer_domain); ?>
                                             </div>
                                         </td>
-                                        <td><?php echo number_format($referrer->visit_count); ?></td>
+                                        <td><?php echo maneli_number_format_persian($referrer->visit_count); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -433,8 +523,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <?php foreach ($device_model_stats as $model): ?>
                                     <tr>
                                         <td><?php echo esc_html($model->device_model); ?></td>
-                                        <td><?php echo number_format($model->visit_count); ?></td>
-                                        <td><?php echo number_format($model->unique_visitors); ?></td>
+                                        <td><?php echo maneli_number_format_persian($model->visit_count); ?></td>
+                                        <td><?php echo maneli_number_format_persian($model->unique_visitors); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -464,8 +554,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <?php foreach (array_slice($country_stats, 0, 10) as $country): ?>
                                     <tr>
                                         <td><?php echo esc_html($country->country ?: 'Unknown'); ?></td>
-                                        <td><?php echo number_format($country->visit_count); ?></td>
-                                        <td><?php echo number_format($country->unique_visitors); ?></td>
+                                        <td><?php echo maneli_number_format_persian($country->visit_count); ?></td>
+                                        <td><?php echo maneli_number_format_persian($country->unique_visitors); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -500,7 +590,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <tr>
                                         <td><?php echo esc_html($visitor->ip_address); ?></td>
                                         <td><?php echo esc_html($visitor->country ?: 'Unknown'); ?></td>
-                                        <td><?php echo number_format($visitor->visit_count); ?></td>
+                                        <td><?php echo maneli_number_format_persian($visitor->visit_count); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -527,9 +617,13 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach (array_slice($recent_visitors, 0, 10) as $visit): ?>
+                                    <?php foreach (array_slice($recent_visitors, 0, 10) as $visit): 
+                                        $visit_timestamp = strtotime($visit->visit_date);
+                                        $visit_date_jalali = maneli_gregorian_to_jalali(date('Y', $visit_timestamp), date('m', $visit_timestamp), date('d', $visit_timestamp), 'Y/m/d');
+                                        $visit_time = date('H:i', $visit_timestamp);
+                                    ?>
                                     <tr>
-                                        <td><?php echo esc_html(date_i18n('Y-m-d H:i', strtotime($visit->visit_date))); ?></td>
+                                        <td><?php echo esc_html($visit_date_jalali . ' ' . $visit_time); ?></td>
                                         <td>
                                             <div class="text-truncate" style="max-width: 200px;" title="<?php echo esc_attr($visit->page_url); ?>">
                                                 <?php echo esc_html($visit->page_title ?: $visit->page_url); ?>

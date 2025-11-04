@@ -351,6 +351,18 @@ class Maneli_Settings_Page {
                                 'desc' => esc_html__('If enabled, all product prices will be hidden from customers on the website. Note: Unavailable products will still show "ناموجود" text.', 'maneli-car-inquiry')
                             ],
                         ]
+                    ],
+                    'maneli_visitor_statistics_section' => [
+                        'title' => esc_html__('Visitor Statistics', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'enable_visitor_statistics', 
+                                'label' => esc_html__('Enable Visitor Statistics Tracking', 'maneli-car-inquiry'), 
+                                'type' => 'switch', 
+                                'default' => '1',
+                                'desc' => esc_html__('If enabled, the plugin will track visitor statistics including visits, browsers, devices, countries, and more. This data will be displayed in the Visitor Statistics dashboard.', 'maneli-car-inquiry')
+                            ],
+                        ]
                     ]
                 ]
             ],
