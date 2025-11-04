@@ -289,6 +289,17 @@ if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
                         
                         <!-- Filter Controls - All in one line -->
                         <div class="row g-2 align-items-end mb-3">
+                            <!-- Status Filter -->
+                            <div class="col">
+                                <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
+                                <select id="cash-followup-status-filter" class="form-select form-select-sm">
+                                    <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
+                                    <?php foreach (Maneli_CPT_Handler::get_all_cash_inquiry_statuses() as $key => $label) : ?>
+                                        <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            
                             <?php if ($is_admin && !empty($experts)): ?>
                                 <!-- Expert Filter -->
                                 <div class="col">

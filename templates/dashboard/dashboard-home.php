@@ -64,7 +64,7 @@ if ($is_customer) {
         $tracking_status = get_post_meta($inq->ID, 'tracking_status', true) ?: 'new';
         if ($tracking_status === 'new' || $tracking_status === 'referred' || $tracking_status === 'in_progress') $pending_count++;
         elseif ($tracking_status === 'completed') $approved_count++;
-        elseif ($tracking_status === 'rejected' || $tracking_status === 'cancelled') $rejected_count++;
+        elseif ($tracking_status === 'rejected') $rejected_count++;
     }
     
     // Get recent inquiries (both types, last 5)
@@ -310,7 +310,6 @@ if ($is_customer) {
                                                 'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
                                             ];
                                         } else {
                                             $status_badge = [
@@ -320,7 +319,6 @@ if ($is_customer) {
                                                 'user_confirmed' => ['label' => esc_html__('Confirmed', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
                                                 'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
                                             ];
                                         }
@@ -956,7 +954,6 @@ if ($is_customer) {
                                                 'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
                                             ];
                                         } else {
                                             $status_badges = [
@@ -966,7 +963,6 @@ if ($is_customer) {
                                                 'user_confirmed' => ['label' => esc_html__('Confirmed', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
                                                 'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                                'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'class' => 'secondary'],
                                                 'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
                                             ];
                                         }
@@ -1248,7 +1244,7 @@ if ($is_customer) {
             <?php else: ?>
                 <!-- Task List for Admin -->
                 <?php
-                // Get pending assignments - Only 'referred' status without assigned expert
+                // Get pending assignments - Only 'new' status without assigned expert
                 $pending_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
@@ -1257,7 +1253,7 @@ if ($is_customer) {
                         'relation' => 'AND',
                         [
                             'key' => 'tracking_status',
-                            'value' => 'referred',
+                            'value' => 'new',
                             'compare' => '='
                         ],
                         [
@@ -1432,7 +1428,7 @@ if ($is_customer) {
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
                             <!-- Pending Installment Assignments -->
-                            <a href="<?php echo esc_url(add_query_arg(['status' => 'referred', 'assigned_expert' => '0'], home_url('/dashboard/inquiries/installment'))); ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between <?php echo !empty($pending_installment) ? 'border-start border-danger border-3' : ''; ?>">
+                            <a href="<?php echo esc_url(add_query_arg(['tracking_status' => 'new', 'assigned_expert' => '0'], home_url('/dashboard/inquiries/installment'))); ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between <?php echo !empty($pending_installment) ? 'border-start border-danger border-3' : ''; ?>">
                                 <div class="d-flex align-items-center">
                                     <span class="avatar avatar-sm bg-danger-transparent me-2">
                                         <i class="la la-credit-card"></i>

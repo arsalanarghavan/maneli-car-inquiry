@@ -60,11 +60,11 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
     </div>
     <div class="card-body">
         <!-- Status Alert -->
-        <div class="alert alert-<?php echo esc_attr($tracking_status === 'completed' ? 'success' : ($tracking_status === 'rejected' || $tracking_status === 'cancelled' ? 'danger' : ($tracking_status === 'meeting_scheduled' ? 'info' : ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled' ? 'primary' : ($tracking_status === 'referred' ? 'info' : 'warning'))))); ?>">
+        <div class="alert alert-<?php echo esc_attr($tracking_status === 'completed' ? 'success' : ($tracking_status === 'rejected' ? 'danger' : ($tracking_status === 'meeting_scheduled' ? 'info' : ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled' ? 'primary' : ($tracking_status === 'referred' ? 'info' : 'warning'))))); ?>">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <strong><?php esc_html_e('Current Status:', 'maneli-car-inquiry'); ?></strong> 
-                    <span class="badge bg-<?php echo esc_attr($tracking_status === 'completed' ? 'success' : ($tracking_status === 'rejected' || $tracking_status === 'cancelled' ? 'danger' : ($tracking_status === 'meeting_scheduled' ? 'info' : ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled' ? 'primary' : ($tracking_status === 'referred' ? 'info' : 'warning'))))); ?>-transparent fs-14 ms-2">
+                    <span class="badge bg-<?php echo esc_attr($tracking_status === 'completed' ? 'success' : ($tracking_status === 'rejected' ? 'danger' : ($tracking_status === 'meeting_scheduled' ? 'info' : ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled' ? 'primary' : ($tracking_status === 'referred' ? 'info' : 'warning'))))); ?>-transparent fs-14 ms-2">
                         <?php echo esc_html($tracking_status_label); ?>
                     </span>
                 </div>
@@ -96,20 +96,21 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                     'in_progress' => ['label' => esc_html__('در حال پیگیری', 'maneli-car-inquiry'), 'icon' => 'la-spinner', 'color' => 'primary'],
                     'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'icon' => 'la-clock', 'color' => 'warning'],
                     'meeting_scheduled' => ['label' => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), 'icon' => 'la-calendar-check', 'color' => 'cyan'],
+                    'awaiting_documents' => ['label' => esc_html__('Awaiting Documents', 'maneli-car-inquiry'), 'icon' => 'la-file-alt', 'color' => 'warning'],
+                    'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'icon' => 'la-check-circle', 'color' => 'success'],
                 ];
                 
                 // End statuses (completed or rejected)
                 $end_statuses = [
                     'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'icon' => 'la-check-circle', 'color' => 'success'],
                     'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'icon' => 'la-times-circle', 'color' => 'danger'],
-                    'cancelled' => ['label' => esc_html__('Cancelled', 'maneli-car-inquiry'), 'icon' => 'la-ban', 'color' => 'danger'],
                 ];
                 
                 $current_status = $tracking_status;
                 $status_reached = false;
                 
                 // Check if current status is an end status
-                $is_end_status = in_array($current_status, ['completed', 'rejected', 'cancelled']);
+                $is_end_status = in_array($current_status, ['completed', 'rejected']);
                 if ($is_end_status) {
                     $status_reached = true; // Mark all previous statuses as passed
                 }

@@ -219,10 +219,36 @@ $active_count = 0;      // car_status = special_sale (فروش ویژه/فعال
 $on_sale_count = 0;     // car_status = special_sale (فروش ویژه)
 $unavailable_count = 0; // car_status = unavailable (ناموجود)
 $disabled_count = 0;    // car_status = disabled (غیرفعال)
+$cash_unavailable_count = 0;    // محصولات با قیمت نقدی ناموجود
+$installment_unavailable_count = 0; // محصولات با قیمت اقساطی ناموجود
 
 foreach ($all_products as $product) {
     $product_id = $product->get_id();
     $car_status = get_post_meta($product_id, '_maneli_car_status', true);
+    
+    // Get prices
+    $cash_price = $product->get_regular_price();
+    $installment_price = get_post_meta($product_id, 'installment_price', true);
+    
+    // Check cash price availability (empty, null, 0, or '0')
+    if (is_string($cash_price)) {
+        $cash_price_clean = trim($cash_price);
+    } else {
+        $cash_price_clean = $cash_price;
+    }
+    if (empty($cash_price_clean) || $cash_price_clean == '0' || $cash_price_clean == 0 || (is_numeric($cash_price_clean) && floatval($cash_price_clean) <= 0)) {
+        $cash_unavailable_count++;
+    }
+    
+    // Check installment price availability (empty, null, 0, or '0')
+    if (is_string($installment_price)) {
+        $installment_price_clean = trim($installment_price);
+    } else {
+        $installment_price_clean = $installment_price;
+    }
+    if (empty($installment_price_clean) || $installment_price_clean == '0' || $installment_price_clean == 0 || (is_numeric($installment_price_clean) && floatval($installment_price_clean) <= 0)) {
+        $installment_unavailable_count++;
+    }
     
     // Count by car_status
     switch ($car_status) {
@@ -372,6 +398,26 @@ $product_categories = get_terms([
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
 }
 
+/* Product Stats Cards - 5 cards in one row */
+.product-stats-cards > [class*="col-"] {
+    flex: 0 0 20%;
+    max-width: 20%;
+}
+
+@media (max-width: 1199.98px) {
+    .product-stats-cards > [class*="col-"] {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .product-stats-cards > [class*="col-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
 /* Filter Form Styles */
 #product-filter-form .form-label {
     font-size: 0.875rem;
@@ -399,13 +445,26 @@ $product_categories = get_terms([
 
 <div class="main-content app-content">
     <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2">
+            <div>
+                <nav>
+                    <ol class="breadcrumb mb-1">
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Products Management', 'maneli-car-inquiry'); ?></li>
+                    </ol>
+                </nav>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Products Management', 'maneli-car-inquiry'); ?></h1>
+            </div>
+        </div>
+        <!-- Page Header Close -->
 
 <div class="row">
     <div class="col-xl-12">
         <!-- آمار محصولات -->
-        <div class="row mb-4">
+        <div class="row mb-4 product-stats-cards">
             <!-- کارت مجموع محصولات -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -425,7 +484,7 @@ $product_categories = get_terms([
             </div>
             
             <!-- کارت محصولات فعال برای فروش -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -444,28 +503,48 @@ $product_categories = get_terms([
                 </div>
             </div>
             
-            <!-- کارت محصولات ناموجود -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <!-- کارت نقدی ناموجود -->
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
                             <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-pill">
                                 <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
-                                    <i class="la la-exclamation-triangle fs-20"></i>
+                                    <i class="la la-money-bill-wave fs-20"></i>
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Unavailable', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Unavailable', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($unavailable_count)); ?></h4>
-                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Out of Stock', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($cash_unavailable_count)); ?></h4>
+                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Cash Price Missing', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- کارت اقساطی ناموجود -->
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-danger border-opacity-10 bg-danger-transparent rounded-pill">
+                                <span class="avatar avatar-md avatar-rounded bg-danger svg-white">
+                                    <i class="la la-credit-card fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Unavailable', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($installment_unavailable_count)); ?></h4>
+                            <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Installment Price Missing', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- کارت محصولات مخفی -->
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">

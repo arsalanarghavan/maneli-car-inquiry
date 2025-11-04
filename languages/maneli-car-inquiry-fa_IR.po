@@ -2184,6 +2184,10 @@ msgid "Approved"
 msgstr "تایید شده"
 
 
+msgid "Awaiting Documents"
+msgstr "منتظر مدارک"
+
+
 msgid "Confirm Car Alert"
 msgstr "هشدار تایید خودرو"
 
@@ -5722,6 +5726,12 @@ msgstr "اقساطی موجود"
 msgid "Installment Unavailable"
 msgstr "اقساطی ناموجود"
 
+msgid "Cash Price Missing"
+msgstr "قیمت نقدی ناموجود"
+
+msgid "Installment Price Missing"
+msgstr "قیمت اقساطی ناموجود"
+
 # Notification Center Translations
 msgid "Notification Center"
 msgstr "مرکز اطلاع‌رسانی"
@@ -6017,3 +6027,12 @@ msgstr "یادآوری: شما یک جلسه برای %s برنامه‌ریزی
 
 msgid "Reminder: You have a meeting scheduled for %s (%d days). Car: %s"
 msgstr "یادآوری: شما یک جلسه برای %s (%d روز) برنامه‌ریزی کرده‌اید. خودرو: %s"
+
+msgid "Search by customer name, car name..."
+msgstr "جستجو بر اساس نام مشتری، نام خودرو..."
+
+msgid "Follow-up Date (Earliest)"
+msgstr "تاریخ پیگیری (قدیمی‌ترین)"
+
+msgid "Follow-up Date (Latest)"
+msgstr "تاریخ پیگیری (جدیدترین)"

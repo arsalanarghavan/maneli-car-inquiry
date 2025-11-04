@@ -5557,3 +5557,18 @@ msgstr "Installment Available"
 
 msgid "Installment Unavailable"
 msgstr "Installment Unavailable"
+
+msgid "Cash Price Missing"
+msgstr "Cash Price Missing"
+
+msgid "Installment Price Missing"
+msgstr "Installment Price Missing"
+
+msgid "Search by customer name, car name..."
+msgstr "Search by customer name, car name..."
+
+msgid "Follow-up Date (Earliest)"
+msgstr "Follow-up Date (Earliest)"
+
+msgid "Follow-up Date (Latest)"
+msgstr "Follow-up Date (Latest)"

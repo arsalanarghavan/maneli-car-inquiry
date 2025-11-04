@@ -167,11 +167,14 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
                         <!-- Filter Controls - All in one line -->
                         <?php
                         // Get initial status from URL query parameter
-                        // For installment, 'referred' is a tracking_status, not inquiry_status
-                        $initial_status_param = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
-                        // Map tracking status values
-                        $tracking_statuses = ['new', 'referred', 'in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'cancelled', 'completed', 'rejected'];
-                        $is_tracking_status = in_array($initial_status_param, $tracking_statuses, true);
+                        // For installment, we use tracking_status, not inquiry_status
+                        $initial_status_param = '';
+                        if (isset($_GET['tracking_status'])) {
+                            $initial_status_param = sanitize_text_field($_GET['tracking_status']);
+                        } elseif (isset($_GET['status'])) {
+                            // Fallback for backward compatibility
+                            $initial_status_param = sanitize_text_field($_GET['status']);
+                        }
                         ?>
                         <div class="row g-2 align-items-end mb-3">
                             <!-- Status Filter -->
@@ -179,7 +182,7 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
                                 <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
                                 <select id="status-filter" class="form-select form-select-sm">
                                     <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                                    <?php foreach (Maneli_CPT_Handler::get_all_statuses() as $key => $label): ?>
+                                    <?php foreach (Maneli_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
                                         <option value="<?php echo esc_attr($key); ?>" <?php selected($initial_status_param, $key); ?>><?php echo esc_html($label); ?></option>
                                     <?php endforeach; ?>
                                 </select>

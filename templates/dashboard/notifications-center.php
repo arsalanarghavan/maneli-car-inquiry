@@ -16,6 +16,55 @@ if (!current_user_can('manage_maneli_inquiries')) {
 
 require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
 
+// Handle CSV Export
+if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    // Get all logs for export (no pagination)
+    $export_logs = Maneli_Database::get_notification_logs([
+        'type' => isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '',
+        'status' => isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '',
+        'date_from' => isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '',
+        'date_to' => isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '',
+        'search' => isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '',
+        'limit' => 10000,
+        'offset' => 0,
+    ]);
+    
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=notifications-' . date('Y-m-d') . '.csv');
+    
+    $output = fopen('php://output', 'w');
+    fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
+    
+    // Headers
+    fputcsv($output, [
+        esc_html__('ID', 'maneli-car-inquiry'),
+        esc_html__('Type', 'maneli-car-inquiry'),
+        esc_html__('Recipient', 'maneli-car-inquiry'),
+        esc_html__('Message', 'maneli-car-inquiry'),
+        esc_html__('Status', 'maneli-car-inquiry'),
+        esc_html__('Created At', 'maneli-car-inquiry'),
+        esc_html__('Sent At', 'maneli-car-inquiry'),
+        esc_html__('Error Message', 'maneli-car-inquiry'),
+    ]);
+    
+    // Data
+    foreach ($export_logs as $log) {
+        fputcsv($output, [
+            $log->id,
+            $log->type,
+            $log->recipient,
+            $log->message,
+            $log->status,
+            $log->created_at,
+            $log->sent_at ?: '-',
+            $log->error_message ?: '-',
+        ]);
+    }
+    
+    fclose($output);
+    exit;
+}
+
 // Get filters
 $type_filter = isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '';
 $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
@@ -60,6 +109,22 @@ if (!function_exists('persian_numbers')) {
         return str_replace($english, $persian, $str);
     }
 }
+
+// Enqueue Persian Datepicker
+if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
+    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
+    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+}
+
+// Enqueue Chart.js for charts
+if (!wp_script_is('chartjs', 'enqueued')) {
+    $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
+    if (file_exists($chartjs_path)) {
+        wp_enqueue_script('chartjs', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', ['jquery'], '4.4.0', false);
+    } else {
+        wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', ['jquery'], '4.4.0', false);
+    }
+}
 ?>
 
 <div class="main-content app-content">
@@ -81,69 +146,106 @@ if (!function_exists('persian_numbers')) {
         </div>
         <!-- End::page-header -->
         
-        <!-- Statistics Cards -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 mb-4">
-            <div class="col">
-                <div class="card custom-card">
+        <!-- Start::row-1 - Statistics Cards -->
+        <div class="row">
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-fill">
-                                <p class="text-muted mb-1"><?php esc_html_e('Total Sent', 'maneli-car-inquiry'); ?></p>
-                                <h4 class="mb-0"><?php echo persian_numbers(number_format($stats->sent ?? 0)); ?></h4>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-pill">
+                                <span class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                    <i class="la la-check-circle fs-20"></i>
+                                </span>
                             </div>
-                            <div class="avatar avatar-md avatar-rounded bg-success-transparent">
-                                <i class="ri-check-line fs-20"></i>
-                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Sent', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->sent ?? 0) : number_format($stats->sent ?? 0); ?></h4>
+                            <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
+                                <i class="la la-check-double fs-11"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card custom-card">
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-fill">
-                                <p class="text-muted mb-1"><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></p>
-                                <h4 class="mb-0 text-danger"><?php echo persian_numbers(number_format($stats->failed ?? 0)); ?></h4>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-danger border-opacity-10 bg-danger-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-danger svg-white">
+                                    <i class="la la-times-circle fs-20"></i>
+                                </span>
                             </div>
-                            <div class="avatar avatar-md avatar-rounded bg-danger-transparent">
-                                <i class="ri-close-line fs-20"></i>
-                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->failed ?? 0) : number_format($stats->failed ?? 0); ?></h4>
+                            <span class="text-danger badge bg-danger-transparent rounded-pill d-flex align-items-center fs-11">
+                                <i class="la la-ban fs-11"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card custom-card">
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-fill">
-                                <p class="text-muted mb-1"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></p>
-                                <h4 class="mb-0 text-warning"><?php echo persian_numbers(number_format($stats->pending ?? 0)); ?></h4>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
+                                    <i class="la la-clock fs-20"></i>
+                                </span>
                             </div>
-                            <div class="avatar avatar-md avatar-rounded bg-warning-transparent">
-                                <i class="ri-time-line fs-20"></i>
-                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->pending ?? 0) : number_format($stats->pending ?? 0); ?></h4>
+                            <span class="text-warning badge bg-warning-transparent rounded-pill d-flex align-items-center fs-11">
+                                <i class="la la-hourglass-half fs-11"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col">
-                <div class="card custom-card">
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-fill">
-                                <p class="text-muted mb-1"><?php esc_html_e('Total', 'maneli-car-inquiry'); ?></p>
-                                <h4 class="mb-0"><?php echo persian_numbers(number_format($stats->total ?? 0)); ?></h4>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-pill">
+                                <span class="avatar avatar-md avatar-rounded bg-primary svg-white">
+                                    <i class="la la-list-alt fs-20"></i>
+                                </span>
                             </div>
-                            <div class="avatar avatar-md avatar-rounded bg-info-transparent">
-                                <i class="ri-bar-chart-line fs-20"></i>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Notifications', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->total ?? 0) : number_format($stats->total ?? 0); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo $stats->total > 0 && function_exists('maneli_number_format_persian') ? maneli_number_format_persian(round((($stats->sent ?? 0) / $stats->total) * 100), 1) : '۰'; ?>% <?php esc_html_e('Success', 'maneli-car-inquiry'); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-circle">
+                                <span class="avatar avatar-md avatar-rounded bg-info svg-white">
+                                    <i class="la la-sms fs-20"></i>
+                                </span>
                             </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('SMS Sent', 'maneli-car-inquiry'); ?></p>
+                        <div class="d-flex align-items-center justify-content-between mt-1">
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->sms_sent ?? 0) : number_format($stats->sms_sent ?? 0); ?></h4>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $stats->total > 0 && function_exists('maneli_number_format_persian') ? maneli_number_format_persian(round((($stats->sms_sent ?? 0) / $stats->total) * 100), 1) : '۰'; ?>%</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- End::row-1 -->
         
         <!-- Filters and Actions -->
         <div class="card custom-card mb-4">
@@ -185,11 +287,11 @@ if (!function_exists('persian_numbers')) {
                     </div>
                     <div class="col-md-2">
                         <label class="form-label"><?php esc_html_e('Date From', 'maneli-car-inquiry'); ?></label>
-                        <input type="date" name="date_from" class="form-control" value="<?php echo esc_attr($date_from); ?>">
+                        <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label"><?php esc_html_e('Date To', 'maneli-car-inquiry'); ?></label>
-                        <input type="date" name="date_to" class="form-control" value="<?php echo esc_attr($date_to); ?>">
+                        <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
                     </div>
                     <div class="col-md-2">
                         <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
@@ -203,15 +305,47 @@ if (!function_exists('persian_numbers')) {
                         <a href="<?php echo esc_url(home_url('/dashboard/notifications-center')); ?>" class="btn btn-secondary btn-wave">
                             <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
                         </a>
+                        <button type="button" class="btn btn-success btn-wave" id="exportBtn">
+                            <i class="ri-download-line me-1"></i>
+                            <?php esc_html_e('Export', 'maneli-car-inquiry'); ?>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
         
+        <!-- Start::row-2 - Charts -->
+        <div class="row mb-4">
+            <div class="col-xl-6">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><?php esc_html_e('Notification Types Distribution', 'maneli-car-inquiry'); ?></h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="typesChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card custom-card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><?php esc_html_e('Status Distribution', 'maneli-car-inquiry'); ?></h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="statusChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End::row-2 -->
+        
         <!-- Logs Table -->
         <div class="card custom-card">
             <div class="card-header">
-                <h5 class="mb-0"><?php esc_html_e('Notification Logs', 'maneli-car-inquiry'); ?></h5>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0"><?php esc_html_e('Notification Logs', 'maneli-car-inquiry'); ?></h5>
+                    <span class="badge bg-primary-transparent"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($total_logs) : number_format($total_logs); ?> <?php esc_html_e('Total', 'maneli-car-inquiry'); ?></span>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -439,8 +573,12 @@ if (!function_exists('persian_numbers')) {
                         <textarea name="message" class="form-control" rows="5" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Scheduled Date & Time', 'maneli-car-inquiry'); ?></label>
-                        <input type="datetime-local" name="scheduled_at" class="form-control" required>
+                        <label class="form-label"><?php esc_html_e('Scheduled Date', 'maneli-car-inquiry'); ?></label>
+                        <input type="text" name="scheduled_date" id="schedule-date-picker" class="form-control maneli-datepicker mb-2" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><?php esc_html_e('Scheduled Time', 'maneli-car-inquiry'); ?></label>
+                        <input type="time" name="scheduled_time" class="form-control" required>
                     </div>
                 </form>
             </div>
@@ -454,6 +592,137 @@ if (!function_exists('persian_numbers')) {
 
 <script>
 jQuery(document).ready(function($) {
+    // Initialize Persian Datepicker
+    if (typeof persianDatepicker !== 'undefined') {
+        // Date From
+        $('#date-from-picker').persianDatepicker({
+            format: 'YYYY/MM/DD',
+            calendarType: 'persian',
+            observer: true,
+            altField: '#date-from-picker',
+            altFormat: 'YYYY/MM/DD',
+            timePicker: false
+        });
+        
+        // Date To
+        $('#date-to-picker').persianDatepicker({
+            format: 'YYYY/MM/DD',
+            calendarType: 'persian',
+            observer: true,
+            altField: '#date-to-picker',
+            altFormat: 'YYYY/MM/DD',
+            timePicker: false
+        });
+        
+        // Schedule Date
+        $('#schedule-date-picker').persianDatepicker({
+            format: 'YYYY/MM/DD',
+            calendarType: 'persian',
+            observer: true,
+            altField: '#schedule-date-picker',
+            altFormat: 'YYYY/MM/DD',
+            timePicker: false
+        });
+    }
+    
+    // Initialize Charts
+    if (typeof Chart !== 'undefined') {
+        // Types Chart
+        var typesCtx = document.getElementById('typesChart');
+        if (typesCtx) {
+            var typesChart = new Chart(typesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        '<?php echo esc_js(__('SMS', 'maneli-car-inquiry')); ?>',
+                        '<?php echo esc_js(__('Telegram', 'maneli-car-inquiry')); ?>',
+                        '<?php echo esc_js(__('Email', 'maneli-car-inquiry')); ?>',
+                        '<?php echo esc_js(__('Notification', 'maneli-car-inquiry')); ?>'
+                    ],
+                    datasets: [{
+                        data: [
+                            <?php echo intval($stats->sms_sent ?? 0); ?>,
+                            <?php echo intval($stats->telegram_sent ?? 0); ?>,
+                            <?php echo intval($stats->email_sent ?? 0); ?>,
+                            <?php echo intval($stats->notification_sent ?? 0); ?>
+                        ],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(0, 123, 255, 0.8)',
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(255, 206, 86, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(0, 123, 255, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Status Chart
+        var statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            var statusChart = new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: [
+                        '<?php echo esc_js(__('Sent', 'maneli-car-inquiry')); ?>',
+                        '<?php echo esc_js(__('Failed', 'maneli-car-inquiry')); ?>',
+                        '<?php echo esc_js(__('Pending', 'maneli-car-inquiry')); ?>'
+                    ],
+                    datasets: [{
+                        data: [
+                            <?php echo intval($stats->sent ?? 0); ?>,
+                            <?php echo intval($stats->failed ?? 0); ?>,
+                            <?php echo intval($stats->pending ?? 0); ?>
+                        ],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(220, 53, 69, 0.8)',
+                            'rgba(255, 193, 7, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(220, 53, 69, 1)',
+                            'rgba(255, 193, 7, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    // Export to CSV
+    $('#exportBtn').on('click', function() {
+        var params = new URLSearchParams(window.location.search);
+        params.set('export', 'csv');
+        window.location.href = '<?php echo esc_url(home_url('/dashboard/notifications-center')); ?>?' + params.toString();
+    });
+    
     // Send Bulk
     $('#sendBulkBtn').on('click', function() {
         var formData = $('#bulkNotificationForm').serialize();
@@ -487,7 +756,20 @@ jQuery(document).ready(function($) {
     
     // Schedule
     $('#scheduleBtn').on('click', function() {
-        var formData = $('#scheduleNotificationForm').serialize();
+        var formData = $('#scheduleNotificationForm').serializeArray();
+        var data = {};
+        $.each(formData, function(i, field) {
+            data[field.name] = field.value;
+        });
+        
+        // Combine date and time
+        if (data.scheduled_date && data.scheduled_time) {
+            // Convert Persian date to Gregorian for backend
+            data.scheduled_at = data.scheduled_date + ' ' + data.scheduled_time;
+            delete data.scheduled_date;
+            delete data.scheduled_time;
+        }
+        
         var btn = $(this);
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
         
@@ -497,7 +779,7 @@ jQuery(document).ready(function($) {
             data: {
                 action: 'maneli_schedule_notification',
                 nonce: maneli_ajax.nonce,
-                ...Object.fromEntries(new URLSearchParams(formData))
+                ...data
             },
             success: function(response) {
                 if (response.success) {

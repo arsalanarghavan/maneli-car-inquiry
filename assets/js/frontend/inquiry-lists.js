@@ -666,7 +666,7 @@ function toPersianNumber(num) {
             let trackingStatusParam = '';
             
             if (listType === 'installment') {
-                const trackingStatuses = ['new', 'referred', 'in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'cancelled', 'completed', 'rejected'];
+                const trackingStatuses = ['new', 'referred', 'in_progress', 'follow_up_scheduled', 'meeting_scheduled', 'awaiting_documents', 'approved', 'rejected', 'completed'];
                 if (statusParam && trackingStatuses.includes(statusParam)) {
                     trackingStatusParam = statusParam;
                     statusParam = ''; // Don't use inquiry_status for tracking statuses
@@ -1535,30 +1535,33 @@ function toPersianNumber(num) {
             nonce_present: ajaxNonce ? 'Yes (' + ajaxNonce.substring(0, 10) + '...)' : 'No'
         });
         
-        // Load initial list - Check for status and assigned_expert query parameters
+        // Load initial list - Check for tracking_status and assigned_expert query parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const initialStatus = urlParams.get('status') || '';
+        const initialTrackingStatus = urlParams.get('tracking_status') || '';
+        const initialStatus = urlParams.get('status') || ''; // Fallback for backward compatibility
         const initialAssignedExpert = urlParams.get('assigned_expert') || '';
         
-        // For installment inquiries, if status is 'referred', it's actually a tracking_status
-        // Map tracking_status values to appropriate handling
-        let statusParam = initialStatus;
-        let trackingStatusParam = '';
+        // For installment inquiries, we use tracking_status, not inquiry_status
+        // Priority: tracking_status > status (backward compatibility)
+        let statusParam = '';
+        let trackingStatusParam = initialTrackingStatus || '';
         
-        // Check if this is a tracking_status value
-        const trackingStatuses = ['new', 'referred', 'in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'cancelled', 'completed', 'rejected'];
-        if (initialStatus && trackingStatuses.includes(initialStatus)) {
-            trackingStatusParam = initialStatus;
-            statusParam = ''; // Don't use inquiry_status for tracking statuses
-            console.log('✓ Detected tracking_status from URL:', initialStatus);
-            // Note: We can't set a filter value for tracking_status as there's no dropdown for it in the template
-            // But we'll send it to the AJAX handler which will filter correctly
-        } else if (initialStatus) {
-            console.log('⚠ Status from URL is not a tracking_status:', initialStatus);
+        // If tracking_status is not in URL but status is, check if it's a tracking_status value
+        if (!trackingStatusParam && initialStatus) {
+            const trackingStatuses = ['new', 'referred', 'in_progress', 'follow_up_scheduled', 'meeting_scheduled', 'awaiting_documents', 'approved', 'rejected', 'completed'];
+            if (trackingStatuses.includes(initialStatus)) {
+                trackingStatusParam = initialStatus;
+                console.log('✓ Detected tracking_status from URL (backward compatibility):', initialStatus);
+            } else {
+                statusParam = initialStatus;
+            }
         }
         
-        // Set status filter if provided in URL (but tracking_status takes priority)
-        if (statusParam && $('#status-filter').length) {
+        // Set status filter if provided in URL (for tracking_status dropdown)
+        if (trackingStatusParam && $('#status-filter').length) {
+            $('#status-filter').val(trackingStatusParam);
+            console.log('✓ Set status filter from tracking_status:', trackingStatusParam);
+        } else if (statusParam && $('#status-filter').length) {
             $('#status-filter').val(statusParam);
         }
         
@@ -1822,34 +1825,38 @@ function toPersianNumber(num) {
             
             // Read URL parameters first (if any), then fall back to DOM values
             const urlParams = new URLSearchParams(window.location.search);
-            const urlStatus = urlParams.get('status') || '';
+            const urlTrackingStatus = urlParams.get('tracking_status') || '';
+            const urlStatus = urlParams.get('status') || ''; // Fallback for backward compatibility
             const urlExpert = urlParams.get('assigned_expert') || '';
             
             // Get current values from DOM (URL params take priority if set)
             const searchVal = $('#inquiry-search-input').val() || '';
-            let statusVal = urlStatus || $('#status-filter').val() || '';
+            const domStatusVal = $('#status-filter').val() || '';
+            let statusVal = urlTrackingStatus || urlStatus || domStatusVal || '';
             let expertVal = urlExpert || ($('#expert-filter').length ? $('#expert-filter').val() || '' : '');
             const sortVal = $('#inquiry-sort-filter').val() || 'default';
             
-            // For installment inquiries, check if status value is a tracking_status
-            // This must be done BEFORE updating DOM, so we can properly separate tracking_status from inquiry_status
-            let statusParam = statusVal;
+            // For installment inquiries, we use tracking_status, not inquiry_status
+            // Priority: tracking_status from URL > status from URL (backward compatibility) > DOM value
+            let statusParam = '';
             let trackingStatusParam = '';
             
-            const trackingStatuses = ['new', 'referred', 'in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'cancelled', 'completed', 'rejected'];
-            if (statusVal && trackingStatuses.includes(statusVal)) {
-                trackingStatusParam = statusVal;
-                statusParam = ''; // Don't use inquiry_status for tracking statuses
-                console.log('✓ Detected tracking_status from URL/DOM:', statusVal);
-                // Don't set this on the status filter dropdown (it's for inquiry_status, not tracking_status)
-            } else if (statusVal) {
-                // This is an inquiry_status, not a tracking_status
-                statusParam = statusVal;
-                trackingStatusParam = '';
-                // If URL params exist, update DOM to reflect them
-                if (urlStatus && $('#status-filter').length) {
-                    $('#status-filter').val(urlStatus);
+            if (urlTrackingStatus) {
+                // Direct tracking_status from URL
+                trackingStatusParam = urlTrackingStatus;
+                console.log('✓ Using tracking_status from URL:', urlTrackingStatus);
+            } else if (urlStatus) {
+                // Check if status from URL is a tracking_status value (backward compatibility)
+                const trackingStatuses = ['new', 'referred', 'in_progress', 'follow_up_scheduled', 'meeting_scheduled', 'awaiting_documents', 'approved', 'rejected', 'completed'];
+                if (trackingStatuses.includes(urlStatus)) {
+                    trackingStatusParam = urlStatus;
+                    console.log('✓ Detected tracking_status from URL (backward compatibility):', urlStatus);
+                } else {
+                    statusParam = urlStatus;
                 }
+            } else if (domStatusVal) {
+                // From DOM filter - it's already a tracking_status since dropdown uses get_tracking_statuses()
+                trackingStatusParam = domStatusVal;
             }
             
             if (urlExpert && $('#expert-filter').length) {

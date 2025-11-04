@@ -182,6 +182,10 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_retry_notification', [$this, 'ajax_retry_notification']);
         add_action('wp_ajax_maneli_send_single_sms', [$this, 'ajax_send_single_sms']);
         
+        // Status Migration Handlers
+        add_action('wp_ajax_maneli_get_migration_stats', [$this, 'ajax_get_migration_stats']);
+        add_action('wp_ajax_maneli_run_status_migration', [$this, 'ajax_run_status_migration']);
+        
     }
 
     //======================================================================
@@ -4966,6 +4970,48 @@ class Maneli_Ajax_Handler {
         } else {
             wp_send_json_error(['message' => esc_html__('Failed to send SMS: ', 'maneli-car-inquiry') . ($result['sms']['error'] ?? 'Unknown error')]);
         }
+    }
+    
+    //======================================================================
+    // Status Migration Handlers
+    //======================================================================
+    
+    /**
+     * Get migration statistics without running migration
+     */
+    public function ajax_get_migration_stats() {
+        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-status-migration.php';
+        
+        $stats = Maneli_Status_Migration::get_migration_stats();
+        wp_send_json_success($stats);
+    }
+    
+    /**
+     * Run status migration
+     */
+    public function ajax_run_status_migration() {
+        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-status-migration.php';
+        
+        $results = Maneli_Status_Migration::migrate_all_statuses();
+        
+        wp_send_json_success([
+            'message' => esc_html__('Migration completed successfully.', 'maneli-car-inquiry'),
+            'results' => $results
+        ]);
     }
     
 }

@@ -47,7 +47,7 @@ $experts = current_user_can('manage_maneli_inquiries') ? get_users(['role' => 'm
                             <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
                             <select id="status-filter" class="form-select">
                                 <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                                <?php foreach (Maneli_CPT_Handler::get_all_statuses() as $key => $label): ?>
+                                <?php foreach (Maneli_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
                                     <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
                                 <?php endforeach; ?>
                             </select>

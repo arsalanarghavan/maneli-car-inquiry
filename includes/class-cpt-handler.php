@@ -127,11 +127,12 @@ class Maneli_CPT_Handler {
             'new'                  => esc_html__('New', 'maneli-car-inquiry'), // جدید
             'referred'             => esc_html__('Referred to Expert', 'maneli-car-inquiry'), // ارجاع داده شده
             'in_progress'          => esc_html__('In Progress', 'maneli-car-inquiry'), // در حال پیگیری
-            'meeting_scheduled'    => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), // مراجعه حضوری
             'follow_up_scheduled'  => esc_html__('Follow Up Scheduled', 'maneli-car-inquiry'), // پیگیری بعدی
-            'cancelled'            => esc_html__('Cancelled', 'maneli-car-inquiry'), // لغو شده
-            'completed'            => esc_html__('Completed', 'maneli-car-inquiry'), // تکمیل شده
+            'meeting_scheduled'    => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), // مراجعه حضوری
+            'awaiting_documents'   => esc_html__('Awaiting Documents', 'maneli-car-inquiry'), // منتظر مدارک
+            'approved'             => esc_html__('Approved', 'maneli-car-inquiry'), // تایید شده
             'rejected'             => esc_html__('Rejected', 'maneli-car-inquiry'), // رد شده
+            'completed'            => esc_html__('Completed', 'maneli-car-inquiry'), // تکمیل شده
         ];
     }
     
@@ -165,9 +166,10 @@ class Maneli_CPT_Handler {
             'referred'               => esc_html__('Referred to Expert', 'maneli-car-inquiry'), // ارجاع داده شده
             'in_progress'            => esc_html__('In Progress', 'maneli-car-inquiry'), // در حال پیگیری
             'follow_up_scheduled'    => esc_html__('Follow Up Scheduled', 'maneli-car-inquiry'), // پیگیری بعدی
+            'meeting_scheduled'      => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), // مراجعه حضوری
             'awaiting_downpayment'   => esc_html__('Awaiting Down Payment', 'maneli-car-inquiry'), // در انتظار پیش پرداخت
             'downpayment_received'   => esc_html__('Down Payment Received', 'maneli-car-inquiry'), // پیش پرداخت دریافت شد
-            'meeting_scheduled'      => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), // مراجعه حضوری
+            'awaiting_documents'     => esc_html__('Awaiting Documents', 'maneli-car-inquiry'), // منتظر مدارک
             'approved'               => esc_html__('Approved', 'maneli-car-inquiry'), // تایید شده
             'rejected'               => esc_html__('Rejected', 'maneli-car-inquiry'), // رد شده
             'completed'              => esc_html__('Completed', 'maneli-car-inquiry'), // تکمیل شده
