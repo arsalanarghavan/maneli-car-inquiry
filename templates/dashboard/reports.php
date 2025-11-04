@@ -69,29 +69,38 @@ $vip_customers = [];
 $status_distribution = [];
 $attention_required = null;
 
+// Get statistics with all filters applied
+$stats = Maneli_Reports_Dashboard::get_overall_statistics_with_filters(
+    $start_date, 
+    $end_date, 
+    $expert_id, 
+    $filter_status, 
+    $filter_type, 
+    $filter_product
+);
+
 if (($is_admin || $is_manager) && !$expert_id) {
     // آمار کامل کسب و کار (فقط برای ادمین و مدیر مانلی)
-    $business_stats = Maneli_Reports_Dashboard::get_business_statistics($start_date, $end_date);
-    $stats = $business_stats['overall'];
-    $experts_detailed = $business_stats['experts'];
-    $popular_products = $business_stats['popular_products'];
-    $daily_stats = $business_stats['daily'];
-    $monthly_stats = $business_stats['monthly'];
+    // Note: For business stats, we use unfiltered stats to show overall system status
+    $business_stats_unfiltered = Maneli_Reports_Dashboard::get_business_statistics($start_date, $end_date);
+    $experts_detailed = $business_stats_unfiltered['experts'];
+    $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
+    $daily_stats = Maneli_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
+    $monthly_stats = $business_stats_unfiltered['monthly'];
     
-    // آمارهای جدید
-    $growth_stats = Maneli_Reports_Dashboard::get_growth_statistics($start_date, $end_date);
+    // آمارهای جدید (با فیلترها)
+    $growth_stats = Maneli_Reports_Dashboard::get_growth_statistics($start_date, $end_date, $expert_id);
     $top_experts = Maneli_Reports_Dashboard::get_top_experts($start_date, $end_date, 5, 'completed');
     $vip_customers = Maneli_Reports_Dashboard::get_vip_customers($start_date, $end_date, 10);
-    $status_distribution = Maneli_Reports_Dashboard::get_status_distribution($start_date, $end_date);
+    $status_distribution = Maneli_Reports_Dashboard::get_status_distribution($start_date, $end_date, $expert_id);
     $attention_required = Maneli_Reports_Dashboard::get_attention_required_inquiries();
 } else {
     // آمار یک کارشناس
     $expert_detailed = Maneli_Reports_Dashboard::get_expert_detailed_statistics($expert_id, $start_date, $end_date);
-    $stats = $expert_detailed['basic'];
     $profit = $expert_detailed['profit'];
     $success_rate = $expert_detailed['success_rate'];
-    $daily_stats = $expert_detailed['daily'];
-$popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
+    $daily_stats = Maneli_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
+    $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
     $growth_stats = Maneli_Reports_Dashboard::get_growth_statistics($start_date, $end_date, $expert_id);
     $status_distribution = Maneli_Reports_Dashboard::get_status_distribution($start_date, $end_date, $expert_id);
 }
@@ -272,10 +281,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-body">
                         <div class="d-flex gap-3 align-items-center">
                             <div class="avatar avatar-lg bg-primary svg-white">
-                                <i class="la la-shopping-cart fs-24"></i>
+                                <i class="la la-list-alt fs-24"></i>
                             </div>
                             <div>
-                                <div class="flex-fill fs-13 text-muted">مجموع فروش</div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></div>
                                 <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['total_inquiries']); ?></div>
                                 <?php if (isset($growth_stats['total_inquiries_growth'])): ?>
                                     <span class="badge <?php echo esc_attr($growth_stats['total_inquiries_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> fs-10 mt-1">
@@ -293,6 +302,47 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="avatar avatar-lg bg-secondary svg-white">
+                                <i class="la la-folder-open fs-24"></i>
+                            </div>
+                            <div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('New Inquiries', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['new']); ?></div>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-secondary-transparent text-secondary fs-10">
+                                    <i class="la la-clock fs-11"></i><?php esc_html_e('Awaiting Assignment', 'maneli-car-inquiry'); ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="avatar avatar-lg bg-info svg-white">
+                                <i class="la la-share fs-24"></i>
+                            </div>
+                            <div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Referred', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['referred']); ?></div>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-info-transparent text-info fs-10">
+                                    <i class="la la-user-tie fs-11"></i><?php esc_html_e('Assigned', 'maneli-car-inquiry'); ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card overflow-hidden">
                     <div class="card-body">
@@ -319,20 +369,31 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     </div>
                 </div>
             </div>
+        </div>
+        <!-- End:: row-1 -->
+
+        <!-- Start::row-2 -->
+        <div class="row mb-4">
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
                 <div class="card custom-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-info svg-white">
-                                <i class="la la-hourglass-half fs-24"></i>
+                            <div class="avatar avatar-lg bg-success svg-white">
+                                <i class="la la-check-circle fs-24"></i>
                             </div>
                             <div>
-                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['new'] + $stats['referred']); ?></div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['completed']); ?></div>
+                                <?php if (isset($growth_stats['completed_growth'])): ?>
+                                    <span class="badge <?php echo esc_attr($growth_stats['completed_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> fs-10 mt-1">
+                                        <i class="la la-arrow-<?php echo esc_attr($growth_stats['completed_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
+                                        <?php echo esc_html($growth_stats['completed_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['completed_growth'], 1)); ?>%
+                                    </span>
+                                <?php endif; ?>
                             </div>
                             <div class="ms-auto">
-                                <span class="badge bg-info-transparent text-info fs-10">
-                                    <i class="la la-pause fs-11"></i><?php esc_html_e('Waiting', 'maneli-car-inquiry'); ?>
+                                <span class="badge bg-success-transparent text-success fs-10">
+                                    <i class="la la-check-double fs-11"></i><?php esc_html_e('Finished', 'maneli-car-inquiry'); ?>
                                 </span>
                             </div>
                         </div>
@@ -343,16 +404,68 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                 <div class="card custom-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-primary3 svg-white">
-                                <i class="la la-users fs-24"></i>
+                            <div class="avatar avatar-lg bg-danger svg-white">
+                                <i class="la la-times-circle fs-24"></i>
                             </div>
                             <div>
-                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Total Customers', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium"><?php echo persian_numbers_no_separator($business_stats && isset($business_stats['total_customers']) ? $business_stats['total_customers'] : 0); ?></div>
-                                </div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['rejected']); ?></div>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-danger-transparent text-danger fs-10">
+                                    <i class="la la-ban fs-11"></i><?php esc_html_e('Cancelled', 'maneli-car-inquiry'); ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="avatar avatar-lg bg-primary1 svg-white">
+                                <i class="la la-money-bill-wave fs-24"></i>
+                            </div>
+                            <div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['cash_inquiries']); ?></div>
+                                <?php if (isset($growth_stats['cash_inquiries_growth'])): ?>
+                                    <span class="badge <?php echo esc_attr($growth_stats['cash_inquiries_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> fs-10 mt-1">
+                                        <i class="la la-arrow-<?php echo esc_attr($growth_stats['cash_inquiries_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
+                                        <?php echo esc_html($growth_stats['cash_inquiries_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['cash_inquiries_growth'], 1)); ?>%
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                             <div class="ms-auto">
                                 <span class="badge bg-primary-transparent text-primary fs-10">
-                                    <i class="la la-user fs-11"></i><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?>
+                                    <i class="la la-dollar-sign fs-11"></i><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card custom-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="avatar avatar-lg bg-primary2 svg-white">
+                                <i class="la la-credit-card fs-24"></i>
+                            </div>
+                            <div>
+                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></div>
+                                <div class="fs-21 fw-medium"><?php echo maneli_number_format_persian($stats['installment_inquiries']); ?></div>
+                                <?php if (isset($growth_stats['installment_inquiries_growth'])): ?>
+                                    <span class="badge <?php echo esc_attr($growth_stats['installment_inquiries_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> fs-10 mt-1">
+                                        <i class="la la-arrow-<?php echo esc_attr($growth_stats['installment_inquiries_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
+                                        <?php echo esc_html($growth_stats['installment_inquiries_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['installment_inquiries_growth'], 1)); ?>%
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="ms-auto">
+                                <span class="badge bg-primary-transparent text-primary fs-10">
+                                    <i class="la la-calendar-alt fs-11"></i><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?>
                                 </span>
                             </div>
                         </div>
@@ -360,91 +473,6 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                 </div>
             </div>
         </div>
-        <!-- End:: row-1 -->
-
-        <!-- Start::row-2 -->
-        <div class="row mb-4">
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card border-primary border border-opacity-50 overflow-hidden main-content-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="flex-grow-1">
-                                <span class="text-secondary fw-semibold me-1 d-inline-block badge bg-secondary-transparent">
-                                    <i class="la la-arrow-up"></i>+<?php echo maneli_number_format_persian($stats['total_inquiries'] > 0 ? ($stats['new_today'] / $stats['total_inquiries'] * 100) : 0, 1); ?>%
-                                </span>
-                                <h4 class="mt-2 mb-2 fw-medium"><?php echo maneli_number_format_persian($business_stats && isset($business_stats['total_experts']) ? $business_stats['total_experts'] : 0); ?></h4>
-                                <p class="mb-0 fs-12 fw-medium"><?php esc_html_e('Total Experts', 'maneli-car-inquiry'); ?></p>
-                            </div>
-                            <div>
-                                <span class="avatar avatar-md bg-primary svg-white text-fixed-white">
-                                    <i class="la la-user-tie fs-20"></i>
-                                </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card border-primary1 border border-opacity-50 overflow-hidden main-content-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="flex-grow-1">
-                                <span class="text-secondary fw-semibold me-1 d-inline-block badge bg-secondary-transparent">
-                                    <i class="la la-arrow-up"></i>+<?php echo maneli_number_format_persian($stats['total_inquiries'] > 0 ? ($stats['completed'] / $stats['total_inquiries'] * 100) : 0, 1); ?>%
-                                </span>
-                                <h4 class="mt-2 mb-2 fw-medium"><?php echo maneli_number_format_persian($stats['completed']); ?></h4>
-                                <p class="mb-0 fs-12 fw-medium"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></p>
-                            </div>
-                            <div>
-                                <span class="avatar avatar-md bg-primary1 svg-white text-fixed-white">
-                                    <i class="la la-check-circle fs-20"></i>
-                                </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card border-warning border border-opacity-50 overflow-hidden main-content-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="flex-grow-1">
-                                <span class="text-secondary fw-semibold me-1 d-inline-block badge bg-secondary-transparent">
-                                    <i class="la la-arrow-up"></i>+<?php echo maneli_number_format_persian($stats['followup_scheduled']); ?>
-                                </span>
-                                <h4 class="mt-2 mb-2 fw-medium"><?php echo maneli_number_format_persian($stats['followup_scheduled']); ?></h4>
-                                <p class="mb-0 fs-12 fw-medium"><?php esc_html_e('Follow-up Scheduled', 'maneli-car-inquiry'); ?></p>
-            </div>
-                            <div>
-                                <span class="avatar avatar-md bg-warning svg-white text-fixed-white">
-                                    <i class="la la-calendar-check fs-20"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
-                <div class="card custom-card border-primary3 border border-opacity-50 overflow-hidden main-content-card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start justify-content-between">
-                            <div class="flex-grow-1">
-                                <span class="text-secondary fw-semibold me-1 d-inline-block badge bg-secondary-transparent">
-                                    <i class="la la-arrow-up"></i>+<?php echo maneli_number_format_persian($stats['new_today']); ?>
-                                </span>
-                                <h4 class="mt-2 mb-2 fw-medium"><?php echo maneli_number_format_persian($stats['new_today']); ?></h4>
-                                <p class="mb-0 fs-12 fw-medium"><?php esc_html_e('Today\'s Inquiries', 'maneli-car-inquiry'); ?></p>
-                            </div>
-                            <div>
-                                <span class="avatar avatar-md bg-primary3 svg-white text-fixed-white">
-                                    <i class="la la-calendar-day fs-20"></i>
-                                </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         <!-- End::row-2 -->
             
         <!-- Experts Performance Table -->

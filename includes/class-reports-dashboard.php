@@ -1130,6 +1130,233 @@ class Maneli_Reports_Dashboard {
     }
     
     /**
+     * دریافت آمار کلی با اعمال فیلترهای پیشرفته
+     *
+     * @param string $start_date تاریخ شروع
+     * @param string $end_date تاریخ پایان
+     * @param int $expert_id شناسه کارشناس
+     * @param string $filter_status فیلتر وضعیت
+     * @param string $filter_type فیلتر نوع (all, cash, installment)
+     * @param int $filter_product فیلتر محصول
+     * @return array
+     */
+    public static function get_overall_statistics_with_filters($start_date = null, $end_date = null, $expert_id = null, $filter_status = '', $filter_type = 'all', $filter_product = null) {
+        global $wpdb;
+        
+        // تنظیم تاریخ پیش‌فرض
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        // ساخت WHERE clause
+        $where = ["p.post_status = 'publish'"];
+        
+        // بازه زمانی
+        $where[] = "p.post_date >= %s";
+        $where[] = "p.post_date <= %s";
+        
+        // فیلتر نوع استعلام
+        if ($filter_type === 'cash') {
+            $where[] = "p.post_type = 'cash_inquiry'";
+        } elseif ($filter_type === 'installment') {
+            $where[] = "p.post_type = 'inquiry'";
+        } else {
+            $where[] = "p.post_type IN ('cash_inquiry', 'inquiry')";
+        }
+        
+        // فیلتر کارشناس
+        $expert_join = '';
+        $expert_where = '';
+        if ($expert_id) {
+            $expert_join = "INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
+            $expert_where = "AND pm_expert.meta_value = %d";
+        }
+        
+        // فیلتر محصول
+        $product_join = '';
+        $product_where = '';
+        if ($filter_product) {
+            $product_join = "INNER JOIN {$wpdb->postmeta} pm_product ON p.ID = pm_product.post_id AND pm_product.meta_key = 'product_id'";
+            $product_where = "AND pm_product.meta_value = %d";
+        }
+        
+        $where_sql = implode(' AND ', $where);
+        
+        // ساخت JOIN برای status
+        $status_join_cash = "LEFT JOIN {$wpdb->postmeta} pm_status_cash ON p.ID = pm_status_cash.post_id AND pm_status_cash.meta_key = 'cash_inquiry_status'";
+        $status_join_installment = "LEFT JOIN {$wpdb->postmeta} pm_status_inst ON p.ID = pm_status_inst.post_id AND pm_status_inst.meta_key = 'tracking_status'";
+        
+        // فیلتر وضعیت
+        $status_where = '';
+        if ($filter_status) {
+            $status_where = "AND pm_status_cash.meta_value = %s";
+        }
+        
+        // آمار استعلام‌های نقدی
+        $cash_params = [$start_date . ' 00:00:00', $end_date . ' 23:59:59'];
+        if ($expert_id) {
+            $cash_params[] = $expert_id;
+        }
+        if ($filter_product) {
+            $cash_params[] = $filter_product;
+        }
+        if ($filter_status) {
+            $cash_params[] = $filter_status;
+        }
+        
+        $cash_query = "SELECT 
+            COALESCE(pm_status_cash.meta_value, 'new') as status,
+            COUNT(*) as count
+        FROM {$wpdb->posts} p
+        $status_join_cash
+        $expert_join
+        $product_join
+        WHERE $where_sql
+        AND p.post_type = 'cash_inquiry'
+        $expert_where
+        $product_where
+        $status_where
+        GROUP BY pm_status_cash.meta_value";
+        
+        $cash_stats = $wpdb->get_results($wpdb->prepare($cash_query, $cash_params));
+        
+        // آمار استعلام‌های اقساطی
+        $status_where_inst = '';
+        if ($filter_status) {
+            $status_where_inst = "AND pm_status_inst.meta_value = %s";
+        }
+        
+        $installment_params = [$start_date . ' 00:00:00', $end_date . ' 23:59:59'];
+        if ($expert_id) {
+            $installment_params[] = $expert_id;
+        }
+        if ($filter_product) {
+            $installment_params[] = $filter_product;
+        }
+        if ($filter_status) {
+            $installment_params[] = $filter_status;
+        }
+        
+        $installment_query = "SELECT 
+            COALESCE(pm_status_inst.meta_value, 'new') as status,
+            COUNT(*) as count
+        FROM {$wpdb->posts} p
+        $status_join_installment
+        $expert_join
+        $product_join
+        WHERE $where_sql
+        AND p.post_type = 'inquiry'
+        $expert_where
+        $product_where
+        $status_where_inst
+        GROUP BY pm_status_inst.meta_value";
+        
+        $installment_stats = $wpdb->get_results($wpdb->prepare($installment_query, $installment_params));
+        
+        // پردازش آمار
+        $statistics = [
+            'total_inquiries' => 0,
+            'cash_inquiries' => 0,
+            'installment_inquiries' => 0,
+            'new' => 0,
+            'referred' => 0,
+            'in_progress' => 0,
+            'completed' => 0,
+            'rejected' => 0,
+            'followup_scheduled' => 0,
+            'new_today' => 0,
+            'revenue' => 0,
+        ];
+        
+        foreach ($cash_stats as $stat) {
+            $statistics['cash_inquiries'] += intval($stat->count);
+            $statistics['total_inquiries'] += intval($stat->count);
+            
+            switch ($stat->status) {
+                case 'new':
+                    $statistics['new'] += intval($stat->count);
+                    break;
+                case 'referred':
+                    $statistics['referred'] += intval($stat->count);
+                    break;
+                case 'in_progress':
+                    $statistics['in_progress'] += intval($stat->count);
+                    break;
+                case 'follow_up_scheduled':
+                    $statistics['followup_scheduled'] += intval($stat->count);
+                    break;
+                case 'completed':
+                case 'approved':
+                    $statistics['completed'] += intval($stat->count);
+                    break;
+                case 'rejected':
+                    $statistics['rejected'] += intval($stat->count);
+                    break;
+            }
+        }
+        
+        foreach ($installment_stats as $stat) {
+            $statistics['installment_inquiries'] += intval($stat->count);
+            $statistics['total_inquiries'] += intval($stat->count);
+            
+            switch ($stat->status) {
+                case 'new':
+                    $statistics['new'] += intval($stat->count);
+                    break;
+                case 'referred':
+                    $statistics['referred'] += intval($stat->count);
+                    break;
+                case 'in_progress':
+                    $statistics['in_progress'] += intval($stat->count);
+                    break;
+                case 'follow_up_scheduled':
+                    $statistics['followup_scheduled'] += intval($stat->count);
+                    break;
+                case 'completed':
+                    $statistics['completed'] += intval($stat->count);
+                    break;
+                case 'rejected':
+                case 'cancelled':
+                    $statistics['rejected'] += intval($stat->count);
+                    break;
+            }
+        }
+        
+        // استعلام‌های امروز (با فیلترها)
+        $today_params = [date('Y-m-d') . ' 00:00:00', date('Y-m-d') . ' 23:59:59'];
+        if ($filter_type === 'cash') {
+            $today_where = "p.post_type = 'cash_inquiry'";
+        } elseif ($filter_type === 'installment') {
+            $today_where = "p.post_type = 'inquiry'";
+        } else {
+            $today_where = "p.post_type IN ('cash_inquiry', 'inquiry')";
+        }
+        
+        if ($expert_id) {
+            $today_params[] = $expert_id;
+        }
+        if ($filter_product) {
+            $today_params[] = $filter_product;
+        }
+        
+        $today_query = "SELECT COUNT(*) FROM {$wpdb->posts} p";
+        if ($expert_id) {
+            $today_query .= " INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id' AND pm_expert.meta_value = %d";
+        }
+        if ($filter_product) {
+            $today_query .= " INNER JOIN {$wpdb->postmeta} pm_product ON p.ID = pm_product.post_id AND pm_product.meta_key = 'product_id' AND pm_product.meta_value = %d";
+        }
+        $today_query .= " WHERE p.post_status = 'publish' AND $today_where AND p.post_date >= %s AND p.post_date <= %s";
+        
+        $statistics['new_today'] = intval($wpdb->get_var($wpdb->prepare($today_query, $today_params)));
+        
+        return $statistics;
+    }
+    
+    /**
      * دریافت استعلامات نیازمند توجه (عقب‌افتاده، بدون کارشناس)
      * @return array
      */
