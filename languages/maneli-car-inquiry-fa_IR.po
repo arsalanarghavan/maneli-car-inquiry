@@ -9040,3 +9040,24 @@ msgstr "تاریخ و زمان"
 msgid "Sent"
 msgstr "ارسال شده"
 
+msgid "Nonce is missing. Please refresh the page and try again."
+msgstr "توکن امنیتی وجود ندارد. لطفاً صفحه را رفرش کنید و دوباره تلاش کنید."
+
+msgid "Security token is missing. Please refresh the page."
+msgstr "توکن امنیتی وجود ندارد. لطفاً صفحه را رفرش کنید."
+
+msgid "Network error. Please check your connection."
+msgstr "خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کنید."
+
+msgid "Security verification failed. Please refresh the page and try again."
+msgstr "تأیید امنیتی ناموفق بود. لطفاً صفحه را رفرش کنید و دوباره تلاش کنید."
+
+msgid "Unable to find inquiry ID. Please refresh the page."
+msgstr "شناسه استعلام یافت نشد. لطفاً صفحه را رفرش کنید."
+
+msgid "Script initialization error. Please refresh the page."
+msgstr "خطا در مقداردهی اولیه اسکریپت. لطفاً صفحه را رفرش کنید."
+
+msgid "Server error. Please contact support if the problem persists."
+msgstr "خطای سرور. در صورت ادامه مشکل، با پشتیبانی تماس بگیرید."
+

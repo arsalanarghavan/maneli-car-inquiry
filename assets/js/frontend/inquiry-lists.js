@@ -2119,7 +2119,7 @@ function toPersianNumber(num) {
                     Swal.close();
                     Swal.fire({
                         title: getText('error', 'Error'),
-                        text: 'Nonce is missing. Please refresh the page and try again.',
+                        text: getText('nonce_missing', 'Nonce is missing. Please refresh the page and try again.'),
                         icon: 'error'
                     });
                     return;
@@ -2203,7 +2203,7 @@ function toPersianNumber(num) {
             console.error('❌ Nonce is missing for save note!');
             Swal.fire({
                 title: getText('error', 'Error') + '!',
-                text: 'Security token is missing. Please refresh the page.',
+                text: getText('security_token_missing', 'Security token is missing. Please refresh the page.'),
                 icon: 'error',
                 confirmButtonText: getText('ok_button', 'OK')
             });
@@ -2249,9 +2249,9 @@ function toPersianNumber(num) {
             if (xhr.responseJSON?.data?.message) {
                 errorMessage = xhr.responseJSON.data.message;
             } else if (xhr.status === 403) {
-                errorMessage = 'Security verification failed. Please refresh the page and try again.';
+                errorMessage = getText('security_verification_failed', 'Security verification failed. Please refresh the page and try again.');
             } else if (xhr.status === 0) {
-                errorMessage = 'Network error. Please check your connection.';
+                errorMessage = getText('network_error', 'Network error. Please check your connection.');
             }
             
             Swal.fire({
@@ -2346,7 +2346,7 @@ function toPersianNumber(num) {
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: getText('error', 'Error') + '!',
-                    text: 'Unable to find inquiry ID. Please refresh the page.',
+                    text: getText('unable_to_find_inquiry', 'Unable to find inquiry ID. Please refresh the page.'),
                     icon: 'error',
                     confirmButtonText: getText('ok_button', 'OK')
                 });
@@ -2366,7 +2366,7 @@ function toPersianNumber(num) {
                 console.error('❌ maneliInquiryLists is not defined for schedule_meeting!');
                 Swal.fire({
                     title: getText('error', 'Error') + '!',
-                    text: 'Script initialization error. Please refresh the page.',
+                    text: getText('script_init_error', 'Script initialization error. Please refresh the page.'),
                     icon: 'error',
                     confirmButtonText: getText('ok_button', 'OK')
                 });
@@ -2622,7 +2622,7 @@ function toPersianNumber(num) {
                     console.error('❌ maneliInquiryLists is not defined!');
                     Swal.fire({
                         title: getText('error', 'Error') + '!',
-                        text: 'Script initialization error. Please refresh the page.',
+                        text: getText('script_init_error', 'Script initialization error. Please refresh the page.'),
                         icon: 'error',
                         confirmButtonText: getText('ok_button', 'OK')
                     });
@@ -2640,7 +2640,7 @@ function toPersianNumber(num) {
                     });
                     Swal.fire({
                         title: getText('error', 'Error') + '!',
-                        text: 'Security token is missing. Please refresh the page.',
+                        text: getText('security_token_missing', 'Security token is missing. Please refresh the page.'),
                         icon: 'error',
                         confirmButtonText: getText('ok_button', 'OK')
                     });
@@ -2694,11 +2694,11 @@ function toPersianNumber(num) {
                     if (xhr.responseJSON?.data?.message) {
                         errorMessage = xhr.responseJSON.data.message;
                     } else if (xhr.status === 0) {
-                        errorMessage = 'Network error. Please check your connection.';
+                        errorMessage = getText('network_error', 'Network error. Please check your connection.');
                     } else if (xhr.status === 403) {
-                        errorMessage = 'Security verification failed. Please refresh the page and try again.';
+                        errorMessage = getText('security_verification_failed', 'Security verification failed. Please refresh the page and try again.');
                     } else if (xhr.status === 500) {
-                        errorMessage = 'Server error. Please contact support if the problem persists.';
+                        errorMessage = getText('server_error_contact_support', 'Server error. Please contact support if the problem persists.');
                     }
                     
                     Swal.fire({
@@ -2831,9 +2831,9 @@ function toPersianNumber(num) {
             if (xhr.responseJSON?.data?.message) {
                 errorMessage = xhr.responseJSON.data.message;
             } else if (xhr.status === 0) {
-                errorMessage = 'Network error. Please check your connection.';
+                errorMessage = getText('network_error', 'Network error. Please check your connection.');
             } else if (xhr.status === 403) {
-                errorMessage = 'Security verification failed. Please refresh the page and try again.';
+                errorMessage = getText('security_verification_failed', 'Security verification failed. Please refresh the page and try again.');
             } else if (xhr.status === 500) {
                 errorMessage = 'Server error. Please contact support if the problem persists.';
             }
@@ -3279,7 +3279,7 @@ function toPersianNumber(num) {
                     console.error('❌ maneliInquiryLists is not defined!');
                     Swal.fire({
                         title: getText('error', 'Error') + '!',
-                        text: 'Script initialization error. Please refresh the page.',
+                        text: getText('script_init_error', 'Script initialization error. Please refresh the page.'),
                         icon: 'error',
                         confirmButtonText: getText('ok_button', 'OK')
                     });
@@ -3298,7 +3298,7 @@ function toPersianNumber(num) {
                     });
                     Swal.fire({
                         title: getText('error', 'Error') + '!',
-                        text: 'Security token is missing. Please refresh the page.',
+                        text: getText('security_token_missing', 'Security token is missing. Please refresh the page.'),
                         icon: 'error',
                         confirmButtonText: getText('ok_button', 'OK')
                     });
@@ -3352,11 +3352,11 @@ function toPersianNumber(num) {
                     if (xhr.responseJSON?.data?.message) {
                         errorMessage = xhr.responseJSON.data.message;
                     } else if (xhr.status === 0) {
-                        errorMessage = 'Network error. Please check your connection.';
+                        errorMessage = getText('network_error', 'Network error. Please check your connection.');
                     } else if (xhr.status === 403) {
-                        errorMessage = 'Security verification failed. Please refresh the page and try again.';
+                        errorMessage = getText('security_verification_failed', 'Security verification failed. Please refresh the page and try again.');
                     } else if (xhr.status === 500) {
-                        errorMessage = 'Server error. Please contact support if the problem persists.';
+                        errorMessage = getText('server_error_contact_support', 'Server error. Please contact support if the problem persists.');
                     }
                     
                     Swal.fire({
@@ -3852,8 +3852,8 @@ function toPersianNumber(num) {
         }
         
         // Reset modal content
-        $('#sms-history-loading').removeClass('maneli-initially-hidden');
-        $('#sms-history-content').addClass('maneli-initially-hidden');
+        $('#sms-history-loading').removeClass('maneli-initially-hidden').show();
+        $('#sms-history-content').addClass('maneli-initially-hidden').hide();
         $('#sms-history-table-container').empty();
         
         // Get AJAX URL and nonce - try multiple sources (same as send SMS)
@@ -3891,12 +3891,12 @@ function toPersianNumber(num) {
         
         if (!ajaxNonce) {
             console.error('❌ Nonce is missing for SMS history!');
-            $('#sms-history-loading').addClass('maneli-initially-hidden');
-            $('#sms-history-content').removeClass('maneli-initially-hidden');
+            $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+            $('#sms-history-content').removeClass('maneli-initially-hidden').show();
             $('#sms-history-table-container').html(
                 '<div class="alert alert-danger">' +
                 '<i class="la la-exclamation-triangle me-2"></i>' +
-                'Nonce is missing. Please refresh the page and try again.' +
+                getText('nonce_missing', 'Nonce is missing. Please refresh the page and try again.') +
                 '</div>'
             );
             return;
@@ -3913,8 +3913,9 @@ function toPersianNumber(num) {
                 inquiry_type: inquiryType
             },
             success: function(response) {
-                $('#sms-history-loading').addClass('maneli-initially-hidden');
-                $('#sms-history-content').removeClass('maneli-initially-hidden');
+                // Hide loading and show content
+                $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                $('#sms-history-content').removeClass('maneli-initially-hidden').show();
                 
                 if (response.success && response.data && response.data.history) {
                     const history = response.data.history;
@@ -3981,8 +3982,8 @@ function toPersianNumber(num) {
                 }
             },
             error: function(xhr, status, error) {
-                $('#sms-history-loading').addClass('maneli-initially-hidden');
-                $('#sms-history-content').removeClass('maneli-initially-hidden');
+                $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                $('#sms-history-content').removeClass('maneli-initially-hidden').show();
                 
                 console.error('SMS History error:', {xhr: xhr, status: status, error: error, responseText: xhr.responseText});
                 
@@ -3992,7 +3993,7 @@ function toPersianNumber(num) {
                 } else if (xhr.status === 403) {
                     errorMsg = getText('unauthorized_access', 'Unauthorized access.');
                 } else if (xhr.status === 0) {
-                    errorMsg = 'Network error. Please check your connection.';
+                    errorMsg = getText('network_error', 'Network error. Please check your connection.');
                 }
                 
                 $('#sms-history-table-container').html(

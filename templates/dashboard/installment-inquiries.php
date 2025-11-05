@@ -412,7 +412,15 @@ if (typeof maneliInquiryLists === 'undefined') {
             send: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
             sending: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
             please_wait: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
-            missing_required_info: '<?php echo esc_js(__('Missing required information.', 'maneli-car-inquiry')); ?>'
+            missing_required_info: '<?php echo esc_js(__('Missing required information.', 'maneli-car-inquiry')); ?>',
+            nonce_missing: '<?php echo esc_js(__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry')); ?>',
+            security_token_missing: '<?php echo esc_js(__('Security token is missing. Please refresh the page.', 'maneli-car-inquiry')); ?>',
+            network_error: '<?php echo esc_js(__('Network error. Please check your connection.', 'maneli-car-inquiry')); ?>',
+            security_verification_failed: '<?php echo esc_js(__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry')); ?>',
+            unable_to_find_inquiry: '<?php echo esc_js(__('Unable to find inquiry ID. Please refresh the page.', 'maneli-car-inquiry')); ?>',
+            script_init_error: '<?php echo esc_js(__('Script initialization error. Please refresh the page.', 'maneli-car-inquiry')); ?>',
+            server_error_contact_support: '<?php echo esc_js(__('Server error. Please contact support if the problem persists.', 'maneli-car-inquiry')); ?>',
+            unauthorized_access: '<?php echo esc_js(__('Unauthorized access.', 'maneli-car-inquiry')); ?>'
         },
         installment_rejection_reasons: <?php 
             $options = get_option('maneli_inquiry_all_options', []);
