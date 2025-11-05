@@ -221,7 +221,6 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                     cash_filter: '<?php echo esc_js(wp_create_nonce("maneli_cash_inquiry_filter_nonce")); ?>',
                     cash_details: '<?php echo esc_js(wp_create_nonce("maneli_cash_inquiry_details_nonce")); ?>',
                     cash_update: '<?php echo esc_js(wp_create_nonce("maneli_cash_inquiry_update_nonce")); ?>',
-                    cash_delete: '<?php echo esc_js(wp_create_nonce("maneli_cash_inquiry_delete_nonce")); ?>',
                     cash_set_downpayment: '<?php echo esc_js(wp_create_nonce("maneli_cash_set_downpayment_nonce")); ?>',
                     cash_assign_expert: '<?php echo esc_js(wp_create_nonce("maneli_cash_inquiry_assign_expert_nonce")); ?>'
                 },

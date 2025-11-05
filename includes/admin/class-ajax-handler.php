@@ -5573,6 +5573,22 @@ class Maneli_Ajax_Handler {
                                 if (response && response.success && response.data) {
                                     var status = response.data.status;
                                     var statusText = response.data.message || 'Unknown';
+                                    
+                                    // Translate status text if it's a known error message
+                                    if (statusText === 'Rate limit exceeded or service temporarily unavailable') {
+                                        statusText = getTranslatedText('rate_limit_exceeded', statusText);
+                                    } else if (statusText === 'Delivered') {
+                                        statusText = getTranslatedText('delivered', '<?php echo esc_js(__('Delivered', 'maneli-car-inquiry')); ?>');
+                                    } else if (statusText === 'Failed') {
+                                        statusText = getTranslatedText('failed', '<?php echo esc_js(__('Failed', 'maneli-car-inquiry')); ?>');
+                                    } else if (statusText === 'Pending') {
+                                        statusText = getTranslatedText('pending', '<?php echo esc_js(__('Pending', 'maneli-car-inquiry')); ?>');
+                                    } else if (statusText === 'Blocked') {
+                                        statusText = getTranslatedText('blocked', '<?php echo esc_js(__('Blocked', 'maneli-car-inquiry')); ?>');
+                                    } else if (statusText === 'Rejected') {
+                                        statusText = getTranslatedText('rejected', '<?php echo esc_js(__('Rejected', 'maneli-car-inquiry')); ?>');
+                                    }
+                                    
                                     var badgeClass = 'badge-info';
                                     
                                     if (status === '1' || status === 'Delivered') {
@@ -5622,6 +5638,22 @@ class Maneli_Ajax_Handler {
                             if (response && response.success && response.data) {
                                 var status = response.data.status;
                                 var statusText = response.data.message || 'Unknown';
+                                
+                                // Translate status text if it's a known error message
+                                if (statusText === 'Rate limit exceeded or service temporarily unavailable') {
+                                    statusText = getTranslatedText('rate_limit_exceeded', statusText);
+                                } else if (statusText === 'Delivered') {
+                                    statusText = getTranslatedText('delivered', '<?php echo esc_js(__('Delivered', 'maneli-car-inquiry')); ?>');
+                                } else if (statusText === 'Failed') {
+                                    statusText = getTranslatedText('failed', '<?php echo esc_js(__('Failed', 'maneli-car-inquiry')); ?>');
+                                } else if (statusText === 'Pending') {
+                                    statusText = getTranslatedText('pending', '<?php echo esc_js(__('Pending', 'maneli-car-inquiry')); ?>');
+                                } else if (statusText === 'Blocked') {
+                                    statusText = getTranslatedText('blocked', '<?php echo esc_js(__('Blocked', 'maneli-car-inquiry')); ?>');
+                                } else if (statusText === 'Rejected') {
+                                    statusText = getTranslatedText('rejected', '<?php echo esc_js(__('Rejected', 'maneli-car-inquiry')); ?>');
+                                }
+                                
                                 var badgeClass = 'badge-info';
                                 
                                 if (status === '1' || status === 'Delivered') {

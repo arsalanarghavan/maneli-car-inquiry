@@ -680,11 +680,6 @@ class Maneli_Dashboard_Handler {
                         'assign_button' => esc_html__('Assign', 'maneli-car-inquiry'),
                         'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
                         'confirm_button' => esc_html__('Confirm', 'maneli-car-inquiry'),
-                        'delete_title' => esc_html__('Deleted', 'maneli-car-inquiry'),
-                        'delete_list_title' => esc_html__('Are you sure you want to delete this inquiry?', 'maneli-car-inquiry'),
-                        'delete_list_text' => esc_html__('This action cannot be undone.', 'maneli-car-inquiry'),
-                        'confirm_delete_title' => esc_html__('Are you sure?', 'maneli-car-inquiry'),
-                        'confirm_delete_text' => esc_html__('Do you want to delete this inquiry? This action cannot be undone.', 'maneli-car-inquiry'),
                         'edit_title' => esc_html__('Edit Inquiry', 'maneli-car-inquiry'),
                         'placeholder_name' => esc_html__('Name', 'maneli-car-inquiry'),
                         'placeholder_last_name' => esc_html__('Last Name', 'maneli-car-inquiry'),
@@ -735,6 +730,38 @@ class Maneli_Dashboard_Handler {
                         'sent' => esc_html__('Sent', 'maneli-car-inquiry'),
                         'failed' => esc_html__('Failed', 'maneli-car-inquiry'),
                         'missing_required_info' => esc_html__('Missing required information.', 'maneli-car-inquiry'),
+                        // SMS History and Resend
+                        'resend_sms' => esc_html__('Resend SMS?', 'maneli-car-inquiry'),
+                        'resend_confirm' => esc_html__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry'),
+                        'yes_resend' => esc_html__('Yes, Resend', 'maneli-car-inquiry'),
+                        'resend' => esc_html__('Resend', 'maneli-car-inquiry'),
+                        'sms_resent_successfully' => esc_html__('SMS resent successfully.', 'maneli-car-inquiry'),
+                        'failed_to_resend_sms' => esc_html__('Failed to resend SMS.', 'maneli-car-inquiry'),
+                        // SMS Status Check
+                        'check_status' => esc_html__('Check Status', 'maneli-car-inquiry'),
+                        'checking' => esc_html__('Checking...', 'maneli-car-inquiry'),
+                        'checking_status' => esc_html__('Checking status...', 'maneli-car-inquiry'),
+                        'failed_to_get_status' => esc_html__('Failed to get status.', 'maneli-car-inquiry'),
+                        'error_checking_status' => esc_html__('Error checking status.', 'maneli-car-inquiry'),
+                        'status_unavailable' => esc_html__('Status unavailable', 'maneli-car-inquiry'),
+                        'check_failed' => esc_html__('Check failed', 'maneli-car-inquiry'),
+                        // SMS Status Messages
+                        'delivered' => esc_html__('Delivered', 'maneli-car-inquiry'),
+                        'pending' => esc_html__('Pending', 'maneli-car-inquiry'),
+                        'blocked' => esc_html__('Blocked', 'maneli-car-inquiry'),
+                        'rejected' => esc_html__('Rejected', 'maneli-car-inquiry'),
+                        'unknown_status' => esc_html__('Unknown status', 'maneli-car-inquiry'),
+                        'rate_limit_exceeded' => esc_html__('Rate limit exceeded or service temporarily unavailable', 'maneli-car-inquiry'),
+                        // SMS History Table
+                        'sent_by' => esc_html__('Sent By', 'maneli-car-inquiry'),
+                        'recipient' => esc_html__('Recipient', 'maneli-car-inquiry'),
+                        'message' => esc_html__('Message', 'maneli-car-inquiry'),
+                        'status' => esc_html__('Status', 'maneli-car-inquiry'),
+                        'actions' => esc_html__('Actions', 'maneli-car-inquiry'),
+                        'customer' => esc_html__('Customer', 'maneli-car-inquiry'),
+                        'loading_sms_history' => esc_html__('Loading SMS history...', 'maneli-car-inquiry'),
+                        'no_sms_messages_sent_yet' => esc_html__('No SMS messages have been sent yet.', 'maneli-car-inquiry'),
+                        'please_refresh_page' => esc_html__('Please refresh the page to use this feature.', 'maneli-car-inquiry'),
                         'nonce_missing' => esc_html__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry'),
                         'security_token_missing' => esc_html__('Security token is missing. Please refresh the page.', 'maneli-car-inquiry'),
                         'network_error' => esc_html__('Network error. Please check your connection.', 'maneli-car-inquiry'),
@@ -778,7 +805,6 @@ class Maneli_Dashboard_Handler {
                         'cash_filter' => wp_create_nonce('maneli_cash_inquiry_filter_nonce'),
                         'cash_details' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
                         'cash_update' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
-                        'cash_delete' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
                         'cash_set_downpayment' => wp_create_nonce('maneli_cash_set_downpayment_nonce'),
                         'cash_assign_expert' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
                         'save_expert_note' => wp_create_nonce('maneli_save_expert_note'),
@@ -792,7 +818,6 @@ class Maneli_Dashboard_Handler {
                         'ajax' => wp_create_nonce('maneli-ajax-nonce'),
                         'inquiry_filter' => wp_create_nonce('maneli_inquiry_filter_nonce'),
                         'details' => wp_create_nonce('maneli_inquiry_details_nonce'),
-                        'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'),
                         'assign_expert' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
                         'tracking_status' => wp_create_nonce('maneli_tracking_status_nonce'),
                         'save_installment_note' => wp_create_nonce('maneli_installment_note'),
@@ -811,70 +836,127 @@ class Maneli_Dashboard_Handler {
                     $localize_data['text']['select_documents_label'] = esc_html__('Select Required Documents:', 'maneli-car-inquiry');
                 }
                 
-                // Ensure maneliInquiryLists is available immediately
-                // Add inline script BEFORE the main script to ensure it's available when needed
+                // CRITICAL: wp_localize_script outputs inline script AFTER the main script
+                // So we need to add the text data BEFORE inquiry-lists.js loads
+                // This ensures maneliInquiryLists.text is available when handler functions are defined
                 if ($load_inquiry_scripts) {
                     $cash_nonce = wp_create_nonce("maneli_cash_inquiry_filter_nonce");
                     $installment_nonce = wp_create_nonce("maneli_inquiry_filter_nonce");
                     $ajax_nonce = wp_create_nonce("maneli-ajax-nonce");
                     $ajax_url = admin_url("admin-ajax.php");
                     
-                    $fallback_script = "
+                    // Prepare text data as JSON for inline script
+                    $text_json = json_encode($localize_data['text'], JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT);
+                    
+                    // Build nonces object
+                    $nonces_obj = [
+                        'ajax' => $ajax_nonce,
+                        'cash_filter' => $cash_nonce,
+                        'cash_details' => wp_create_nonce("maneli_cash_inquiry_details_nonce"),
+                        'cash_update' => wp_create_nonce("maneli_cash_inquiry_update_nonce"),
+                        'cash_assign_expert' => wp_create_nonce("maneli_cash_inquiry_assign_expert_nonce"),
+                        'inquiry_filter' => $installment_nonce,
+                        'details' => wp_create_nonce("maneli_inquiry_details_nonce"),
+                        'assign_expert' => wp_create_nonce("maneli_inquiry_assign_expert_nonce"),
+                        'tracking_status' => wp_create_nonce("maneli_tracking_status_nonce"),
+                        'save_installment_note' => wp_create_nonce("maneli_installment_note"),
+                        'update_installment_status' => wp_create_nonce("maneli_installment_status"),
+                        'save_expert_note' => wp_create_nonce("maneli_save_expert_note"),
+                        'update_cash_status' => wp_create_nonce("maneli_update_cash_status")
+                    ];
+                    $nonces_json = json_encode($nonces_obj, JSON_UNESCAPED_UNICODE);
+                    $experts_json = json_encode($localize_data['experts'], JSON_UNESCAPED_UNICODE);
+                    
+                    // CRITICAL: Use wp_add_inline_script with 'before' position
+                    // This outputs the script BEFORE the main script tag, ensuring it runs first
+                    $preload_script = "
                     // Global AJAX variables for SMS sending - ensure they're available before inquiry-lists.js loads
                     if (typeof maneliAjaxUrl === 'undefined') {
-                        window.maneliAjaxUrl = '" . esc_js($ajax_url) . "';
+                        window.maneliAjaxUrl = " . json_encode($ajax_url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ";
                     }
                     if (typeof maneliAjaxNonce === 'undefined') {
-                        window.maneliAjaxNonce = '" . esc_js($ajax_nonce) . "';
+                        window.maneliAjaxNonce = " . json_encode($ajax_nonce, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ";
                     }
                     
-                    window.maneliInquiryLists = window.maneliInquiryLists || {
-                        ajax_url: '" . esc_js($ajax_url) . "',
-                        nonces: {
-                            ajax: '" . esc_js($ajax_nonce) . "',
-                            cash_filter: '" . esc_js($cash_nonce) . "',
-                            cash_details: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_details_nonce")) . "',
-                            cash_update: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_update_nonce")) . "',
-                            cash_delete: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_delete_nonce")) . "',
-                            cash_assign_expert: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_assign_expert_nonce")) . "',
-                            inquiry_filter: '" . esc_js($installment_nonce) . "',
-                            details: '" . esc_js(wp_create_nonce("maneli_inquiry_details_nonce")) . "',
-                            inquiry_delete: '" . esc_js(wp_create_nonce("maneli_inquiry_delete_nonce")) . "',
-                            assign_expert: '" . esc_js(wp_create_nonce("maneli_inquiry_assign_expert_nonce")) . "',
-                            tracking_status: '" . esc_js(wp_create_nonce("maneli_tracking_status_nonce")) . "',
-                            save_installment_note: '" . esc_js(wp_create_nonce("maneli_installment_note")) . "',
-                            update_installment_status: '" . esc_js(wp_create_nonce("maneli_installment_status")) . "',
-                            save_expert_note: '" . esc_js(wp_create_nonce("maneli_save_expert_note")) . "',
-                            update_cash_status: '" . esc_js(wp_create_nonce("maneli_update_cash_status")) . "'
-                        },
-                        experts: [],
-                        text: {
-                            error: '" . esc_js(__('Error', 'maneli-car-inquiry')) . "',
-                            success: '" . esc_js(__('Success', 'maneli-car-inquiry')) . "',
-                            server_error: '" . esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')) . "',
-                            unknown_error: '" . esc_js(__('Unknown error', 'maneli-car-inquiry')) . "',
-                            attention: '" . esc_js(__('Attention!', 'maneli-car-inquiry')) . "',
-                            please_enter_note: '" . esc_js(__('Please enter your note.', 'maneli-car-inquiry')) . "',
-                            note_saved_success: '" . esc_js(__('Note saved successfully.', 'maneli-car-inquiry')) . "',
-                            error_occurred: '" . esc_js(__('An error occurred.', 'maneli-car-inquiry')) . "',
-                            ok_button: '" . esc_js(__('OK', 'maneli-car-inquiry')) . "',
-                            complete_title: '" . esc_js(__('Complete Inquiry', 'maneli-car-inquiry')) . "',
-                            complete_confirm: '" . esc_js(__('Are you sure you want to complete this inquiry?', 'maneli-car-inquiry')) . "',
-                            followup_date_required: '" . esc_js(__('Please enter follow-up date', 'maneli-car-inquiry')) . "',
-                            cancel_inquiry_title: '" . esc_js(__('Cancel Inquiry', 'maneli-car-inquiry')) . "',
-                            rejection_reason_label: '" . esc_js(__('Rejection Reason', 'maneli-car-inquiry')) . "',
-                            cancel_reason_label: '" . esc_js(__('Cancellation Reason', 'maneli-car-inquiry')) . "',
-                            enter_reason: '" . esc_js(__('Please enter reason...', 'maneli-car-inquiry')) . "',
-                            reason_required: '" . esc_js(__('Please enter reason with at least 10 characters', 'maneli-car-inquiry')) . "'
+                    // CRITICAL: Initialize maneliInquiryLists with FULL text data BEFORE inquiry-lists.js loads
+                    // This ensures translations are available when handler functions use getText()
+                    if (typeof window.maneliInquiryLists === 'undefined') {
+                        window.maneliInquiryLists = {
+                            ajax_url: " . json_encode($ajax_url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ",
+                            nonces: " . $nonces_json . ",
+                            experts: " . $experts_json . ",
+                            text: " . $text_json . "
+                        };
+                        console.log('✅ maneliInquiryLists preloaded via wp_add_inline_script with ' + Object.keys(window.maneliInquiryLists.text).length + ' text keys');
+                    } else {
+                        // Merge text if object already exists
+                        if (!window.maneliInquiryLists.text) {
+                            window.maneliInquiryLists.text = {};
                         }
-                    };
-                    console.log('maneliInquiryLists fallback initialized for " . esc_js($page) . "', window.maneliInquiryLists);
+                        var preloadText = " . $text_json . ";
+                        Object.assign(window.maneliInquiryLists.text, preloadText);
+                        console.log('✅ maneliInquiryLists.text merged via wp_add_inline_script with ' + Object.keys(preloadText).length + ' keys');
+                    }
                     ";
-                    wp_add_inline_script('maneli-inquiry-lists-js', $fallback_script, 'before');
+                    wp_add_inline_script('maneli-inquiry-lists-js', $preload_script, 'before');
+                    
+                    // CRITICAL FIX: Also add script in wp_print_scripts hook as backup
+                    // This ensures it runs even if wp_add_inline_script fails for some reason
+                    add_action('wp_print_scripts', function() use ($ajax_url, $ajax_nonce, $text_json, $nonces_json, $experts_json) {
+                        if (wp_script_is('maneli-inquiry-lists-js', 'enqueued')) {
+                            ?>
+                            <script>
+                            // Global AJAX variables for SMS sending - ensure they're available before inquiry-lists.js loads
+                            if (typeof maneliAjaxUrl === 'undefined') {
+                                window.maneliAjaxUrl = <?php echo json_encode($ajax_url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+                            }
+                            if (typeof maneliAjaxNonce === 'undefined') {
+                                window.maneliAjaxNonce = <?php echo json_encode($ajax_nonce, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+                            }
+                            
+                            // CRITICAL: Initialize maneliInquiryLists with FULL text data BEFORE inquiry-lists.js loads
+                            // This ensures translations are available when handler functions use getText()
+                            if (typeof window.maneliInquiryLists === 'undefined') {
+                                window.maneliInquiryLists = {
+                                    ajax_url: <?php echo json_encode($ajax_url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>,
+                                    nonces: <?php echo $nonces_json; ?>,
+                                    experts: <?php echo $experts_json; ?>,
+                                    text: <?php echo $text_json; ?>
+                                };
+                                console.log('✅ maneliInquiryLists preloaded via wp_print_scripts with ' + Object.keys(window.maneliInquiryLists.text).length + ' text keys');
+                            } else {
+                                // Merge text if object already exists
+                                if (!window.maneliInquiryLists.text) {
+                                    window.maneliInquiryLists.text = {};
+                                }
+                                var preloadText = <?php echo $text_json; ?>;
+                                Object.assign(window.maneliInquiryLists.text, preloadText);
+                                console.log('✅ maneliInquiryLists.text merged via wp_print_scripts with ' + Object.keys(preloadText).length + ' keys');
+                            }
+                            </script>
+                            <?php
+                        }
+                    }, 5); // Priority 5 to run early
                 }
                 
-                // Now localize - this will override/merge with fallback if already set
+                // Now localize - this will override/merge with preloaded data if already set
                 wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', $localize_data);
+                
+                // CRITICAL: wp_localize_script outputs inline script AFTER the main script
+                // So we need to ensure that inquiry-lists.js can handle this timing issue
+                // The getText function will use fallback if text is not available yet
+                // This inline script logs when text is populated for debugging
+                $debug_text_script = "
+                (function() {
+                    // This runs after wp_localize_script output
+                    if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.text) {
+                        console.log('✅ maneliInquiryLists.text populated via wp_localize_script:', Object.keys(maneliInquiryLists.text).length + ' keys');
+                    } else {
+                        console.warn('⚠️ maneliInquiryLists.text not populated after wp_localize_script');
+                    }
+                })();
+                ";
+                wp_add_inline_script('maneli-inquiry-lists-js', $debug_text_script, 'after');
             }
             
             // EMERGENCY FIX: Only add emergency script if inquiry scripts are loaded
@@ -927,30 +1009,8 @@ class Maneli_Dashboard_Handler {
                                 });
                             });
                             
-                            // Direct handler for delete button
-                            $(document).off('click', '.delete-inquiry-report-btn.emergency').on('click', '.delete-inquiry-report-btn', function(e) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                console.log('🔘 Delete button clicked!');
-                                var btn = $(this);
-                                var inquiryId = btn.data('inquiry-id');
-                                var inquiryType = btn.data('inquiry-type');
-                                console.log('Delete Inquiry ID:', inquiryId, 'Type:', inquiryType);
-                                
-                                if (typeof Swal !== 'undefined') {
-                                    Swal.fire({
-                                        title: '" . esc_js(__('Delete Button Works!', 'maneli-car-inquiry')) . "',
-                                        text: 'Inquiry ID: ' + inquiryId,
-                                        icon: 'success'
-                                    });
-                                } else {
-                                    alert('" . esc_js(__('Delete button clicked! Inquiry ID:', 'maneli-car-inquiry')) . " ' + inquiryId);
-                                }
-                            });
-                            
                             console.log('✅ Emergency handlers attached');
                             console.log('Button count - .assign-expert-btn:', $('.assign-expert-btn').length);
-                            console.log('Button count - .delete-inquiry-report-btn:', $('.delete-inquiry-report-btn').length);
                         });
                     } else {
                         console.error('❌ jQuery not available for emergency handlers!');

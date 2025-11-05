@@ -209,7 +209,6 @@ $current_url = home_url('/dashboard/my-installment-inquiries');
                 nonces: {
                     inquiry_filter: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_filter_nonce")); ?>',
                     details: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_details_nonce")); ?>',
-                    inquiry_delete: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_delete_nonce")); ?>',
                     assign_expert: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_assign_expert_nonce")); ?>',
                     tracking_status: '<?php echo esc_js(wp_create_nonce("maneli_tracking_status_nonce")); ?>'
                 },

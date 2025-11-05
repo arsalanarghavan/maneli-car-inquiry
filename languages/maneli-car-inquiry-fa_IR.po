@@ -9145,3 +9145,9 @@ msgstr "الگو یا کد الگو نامعتبر"
 msgid "Invalid recipient number"
 msgstr "شماره گیرنده نامعتبر"
 
+msgid "Resend"
+msgstr "ارسال مجدد"
+
+msgid "Rate limit exceeded or service temporarily unavailable"
+msgstr "محدودیت ارسال پیامک رد شده یا سرویس موقتاً در دسترس نیست"
+

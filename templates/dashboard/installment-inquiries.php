@@ -340,7 +340,6 @@ if (typeof maneliInquiryLists === 'undefined') {
         nonces: {
             inquiry_filter: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_filter_nonce")); ?>',
             details: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_details_nonce")); ?>',
-            inquiry_delete: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_delete_nonce")); ?>',
             assign_expert: '<?php echo esc_js(wp_create_nonce("maneli_inquiry_assign_expert_nonce")); ?>',
             tracking_status: '<?php echo esc_js(wp_create_nonce("maneli_tracking_status_nonce")); ?>',
             update_installment_status: '<?php echo esc_js(wp_create_nonce("maneli_installment_status")); ?>',
@@ -506,8 +505,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 2000);
 });
+</script>
 
-// Global AJAX variables for SMS sending (same as users.php)
+<script>
+// Global AJAX variables for SMS sending (fallback for timing - main localization is in class-dashboard-handler.php)
 var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
 </script>

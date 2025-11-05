@@ -196,45 +196,5 @@ jQuery(document).ready(function($) {
         });
     });
 
-    /**
-     * Handles 'Delete' button click from list
-     */
-    $(document.body).on('click', '.delete-installment-list-btn', function() {
-        const button = $(this);
-        const inquiryId = button.data('inquiry-id');
-        const originalText = button.text();
-
-        Swal.fire({
-            title: getText('delete_list_title'), 
-            text: getText('delete_list_text'),
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: getText('confirm_button'),
-            cancelButtonText: getText('cancel_button')
-        }).then((result) => {
-            if (result.isConfirmed) {
-                button.prop('disabled', true).text('...');
-                $.post(maneliFollowupList.ajax_url, {
-                    action: 'maneli_delete_inquiry',
-                    nonce: maneliFollowupList.nonces.inquiry_delete,
-                    inquiry_id: inquiryId
-                }, function(response) {
-                    if (response.success) {
-                        button.closest('tr').fadeOut(400, function() {
-                            $(this).remove();
-                        });
-                        Swal.fire(getText('delete_title'), response.data.message || 'Request deleted.', 'success');
-                    } else {
-                        Swal.fire(getText('error'), response.data.message, 'error');
-                        button.prop('disabled', false).text(originalText);
-                    }
-                }).fail(function() {
-                    Swal.fire(getText('error'), getText('server_error'), 'error');
-                    button.prop('disabled', false).text(originalText);
-                });
-            }
-        });
-    });
 });
 

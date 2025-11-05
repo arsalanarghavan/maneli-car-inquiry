@@ -45,16 +45,45 @@ function toPersianNumber(num) {
         console.log('=== Inquiry Lists Script INITIALIZED ===');
         console.log('jQuery available:', typeof $ !== 'undefined');
         console.log('Document ready state:', document.readyState);
+        console.log('maneliInquiryLists:', typeof maneliInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
+        if (typeof maneliInquiryLists !== 'undefined') {
+            console.log('maneliInquiryLists.text:', maneliInquiryLists.text ? (Object.keys(maneliInquiryLists.text).length + ' keys') : 'UNDEFINED');
+            console.log('maneliInquiryLists.ajax_url:', maneliInquiryLists.ajax_url || 'MISSING');
+            if (maneliInquiryLists.text) {
+                console.log('Sample text keys:', Object.keys(maneliInquiryLists.text).slice(0, 5));
+            }
+        }
+        console.log('Send SMS buttons found:', $('.send-sms-report-btn').length);
+        console.log('SMS History buttons found:', $('.view-sms-history-btn').length);
+        console.log('SMS History modal found:', $('#sms-history-modal').length);
         
     //======================================================================
     //  HELPER FUNCTION: LOCALIZATION & STRING ACCESS
     //======================================================================
     
     // Helper to get localized text, falling back to English/a default if missing (for robustness)
+    // wp_localize_script outputs inline script AFTER inquiry-lists.js, so we need to handle timing
     const getText = (key, fallback = '...') => {
+        // Check if maneliInquiryLists exists and has text
         if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.text && maneliInquiryLists.text[key]) {
             return maneliInquiryLists.text[key];
         }
+        
+        // If text is not available yet, wait a bit and try again (for first few calls)
+        // This handles the case where wp_localize_script output comes after this script
+        if (typeof maneliInquiryLists !== 'undefined' && (!maneliInquiryLists.text || Object.keys(maneliInquiryLists.text).length === 0)) {
+            // Check again after a short delay (only for first call)
+            if (!getText._checked) {
+                getText._checked = true;
+                setTimeout(function() {
+                    if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.text && maneliInquiryLists.text[key]) {
+                        console.log('✅ getText: Found key after delay:', key);
+                    }
+                }, 100);
+            }
+        }
+        
+        // Return fallback - this ensures the page still works even if localization isn't ready yet
         return fallback;
     };
     
@@ -323,105 +352,6 @@ function toPersianNumber(num) {
                 }, function(response) {
                     if (response.success) {
                         Swal.fire(getText('success'), response.data.message, 'success').then(() => location.reload());
-                    } else {
-                        Swal.fire(getText('error'), response.data.message, 'error');
-                        button.prop('disabled', false).text(originalText);
-                    }
-                }).fail(function() {
-                    Swal.fire(getText('error'), getText('server_error'), 'error');
-                    button.prop('disabled', false).text(originalText);
-                });
-            }
-        });
-    });
-    
-    // ----------------------------------------------------------------------
-    // UNIVERSAL DELETION LOGIC (LISTS AND REPORTS)
-    // ----------------------------------------------------------------------
-
-    /**
-     * Handles the 'Delete' button click for both cash and installment inquiries from the LIST PAGE.
-     * Selectors: .delete-cash-list-btn, .delete-installment-list-btn
-     */
-    $(document.body).on('click', '.delete-cash-list-btn, .delete-installment-list-btn', function() {
-        const button = $(this);
-        const inquiryId = button.data('inquiry-id');
-        // Determine type based on which class was clicked
-        const inquiryType = button.hasClass('delete-installment-list-btn') ? 'installment' : 'cash'; 
-        
-        const ajaxAction = (inquiryType === 'cash') ? 'maneli_delete_cash_inquiry' : 'maneli_delete_inquiry';
-        const nonce = (inquiryType === 'cash') ? maneliInquiryLists.nonces.cash_delete : maneliInquiryLists.nonces.inquiry_delete;
-        const originalText = button.text();
-
-        Swal.fire({
-            title: getText('delete_list_title'), 
-            text: getText('delete_list_text'),
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: getText('confirm_button'),
-            cancelButtonText: getText('cancel_button')
-        }).then((result) => {
-            if (result.isConfirmed) {
-                button.prop('disabled', true).text('...');
-                $.post(maneliInquiryLists.ajax_url, {
-                    action: ajaxAction,
-                    nonce: nonce,
-                    inquiry_id: inquiryId
-                }, function(response) {
-                    if (response.success) {
-                        // Remove the row from the table
-                        button.closest('tr').fadeOut(400, function() {
-                            $(this).remove();
-                        });
-                        Swal.fire(getText('delete_title'), response.data.message || 'Request deleted.', 'success');
-                    } else {
-                        Swal.fire(getText('error'), response.data.message, 'error');
-                        button.prop('disabled', false).text(originalText);
-                    }
-                }).fail(function() {
-                    Swal.fire(getText('error'), getText('server_error'), 'error');
-                    button.prop('disabled', false).text(originalText);
-                });
-            }
-        });
-    });
-
-    /**
-     * Handles the 'Delete Request' button click for both cash and installment inquiries from the REPORT PAGE.
-     * Selector: .delete-inquiry-report-btn
-     * This handler is more generic and ensures redirection to the list page after deletion.
-     */
-    $(document.body).on('click', '.delete-inquiry-report-btn', function() {
-        const button = $(this);
-        const inquiryId = button.data('inquiry-id');
-        const inquiryType = button.data('inquiry-type');
-        const backUrl = $('.report-back-button-wrapper a').attr('href'); 
-        
-        const ajaxAction = (inquiryType === 'cash') ? 'maneli_delete_cash_inquiry' : 'maneli_delete_inquiry';
-        const nonce = (inquiryType === 'cash') ? maneliInquiryLists.nonces.cash_delete : maneliInquiryLists.nonces.inquiry_delete;
-        const originalText = button.text();
-
-        Swal.fire({
-            title: getText('confirm_delete_title'), // Using the general report confirmation title
-            text: getText('confirm_delete_text'),
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: getText('confirm_button'),
-            cancelButtonText: getText('cancel_button')
-        }).then((result) => {
-            if (result.isConfirmed) {
-                button.prop('disabled', true).text('...');
-                $.post(maneliInquiryLists.ajax_url, {
-                    action: ajaxAction,
-                    nonce: nonce,
-                    inquiry_id: inquiryId
-                }, function(response) {
-                    if (response.success) {
-                        Swal.fire(getText('delete_title'), response.data.message || 'Request deleted.', 'success').then(() => {
-                            if (backUrl) window.location.href = backUrl; // Redirect to list on successful deletion
-                        });
                     } else {
                         Swal.fire(getText('error'), response.data.message, 'error');
                         button.prop('disabled', false).text(originalText);
@@ -2021,6 +1951,9 @@ function toPersianNumber(num) {
         var inquiryId = $btn.data('inquiry-id');
         
         console.log('🔘 Send SMS button clicked:', {phone: phone, customerName: customerName, inquiryId: inquiryId});
+        console.log('🔘 maneliInquiryLists:', typeof maneliInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
+        console.log('🔘 maneliInquiryLists.text:', typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.text ? (Object.keys(maneliInquiryLists.text).length + ' keys') : 'UNDEFINED');
+        console.log('🔘 Swal:', typeof Swal !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
         
         if (!phone || !inquiryId) {
             console.error('Missing required data for SMS:', {phone: phone, inquiryId: inquiryId});
@@ -3818,6 +3751,10 @@ function toPersianNumber(num) {
         const inquiryId = button.data('inquiry-id');
         const inquiryType = button.data('inquiry-type') || 'cash';
         
+        console.log('🔘 SMS History button clicked:', {inquiryId: inquiryId, inquiryType: inquiryType});
+        console.log('🔘 maneliInquiryLists:', typeof maneliInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
+        console.log('🔘 maneliInquiryLists.text:', typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.text ? (Object.keys(maneliInquiryLists.text).length + ' keys') : 'UNDEFINED');
+        
         if (!inquiryId) {
             Swal.fire({
                 title: getText('error', 'Error'),
@@ -4014,19 +3951,414 @@ function toPersianNumber(num) {
         });
     });
     
-    /**
-     * Helper function to escape HTML
-     */
-    function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
-    }
-    
-    }); // End of document.ready callback
-})(); // End of waitForJQuery function
+                /**
+                 * Helper function to escape HTML
+                 */
+                function escapeHtml(text) {
+                    const map = {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    };
+                    return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+                }
+
+                //======================================================================
+                //  RESEND SMS BUTTON HANDLER (for static history tables and modal)
+                //======================================================================
+
+                /**
+                 * Handle Resend SMS button click - works for both static tables and modal
+                 */
+                $(document.body).on('click', '.btn-resend-sms', function() {
+                    var $btn = $(this);
+                    var phone = $btn.data('phone');
+                    var message = $btn.data('message');
+                    var relatedId = $btn.data('related-id');
+                    
+                    if (!phone || !message || !relatedId) {
+                        console.error('Missing required data for resend SMS:', {phone: phone, message: message, relatedId: relatedId});
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: getText('missing_required_info', 'Missing required information.'),
+                                icon: 'error'
+                            });
+                        }
+                        return;
+                    }
+                    
+                    if (typeof Swal === 'undefined') {
+                        var resendConfirmFallback = getText('resend_confirm', 'Are you sure you want to resend this SMS?');
+                        if (confirm(resendConfirmFallback)) {
+                            alert(getText('please_refresh_page', 'Please refresh the page to use this feature.'));
+                        }
+                        return;
+                    }
+                    
+                    var resendTitle = getText('resend_sms', 'Resend SMS?');
+                    var resendConfirm = getText('resend_confirm', 'Are you sure you want to resend this SMS?');
+                    var yesResend = getText('yes_resend', 'Yes, Resend');
+                    var cancelText = getText('cancel_button', 'Cancel');
+                    var sendingText = getText('sending', 'Sending...');
+                    
+                    Swal.fire({
+                        title: resendTitle,
+                        text: resendConfirm,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: yesResend,
+                        cancelButtonText: cancelText
+                    }).then(function(result) {
+                        if (result.isConfirmed) {
+                            $btn.prop('disabled', true).html('<i class="la la-spinner la-spin me-1"></i>' + sendingText);
+                            
+                            // Get AJAX URL and nonce - try multiple sources
+                            var ajaxUrl = '';
+                            var ajaxNonce = '';
+                            
+                            if (typeof maneliAjaxUrl !== 'undefined' && maneliAjaxUrl) {
+                                ajaxUrl = maneliAjaxUrl;
+                            } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                                ajaxUrl = maneliInquiryLists.ajax_url || '';
+                            }
+                            
+                            if (typeof maneliAjaxNonce !== 'undefined' && maneliAjaxNonce) {
+                                ajaxNonce = maneliAjaxNonce;
+                            } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                                ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
+                            }
+                            
+                            if (!ajaxUrl) {
+                                ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
+                                if (!ajaxUrl && typeof ajaxurl !== 'undefined') {
+                                    ajaxUrl = ajaxurl;
+                                }
+                            }
+                            
+                            if (!ajaxNonce) {
+                                ajaxNonce = typeof adminAjax !== 'undefined' ? adminAjax.nonce : '';
+                                if (!ajaxNonce && typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces) {
+                                    ajaxNonce = maneliInquiryLists.nonces.ajax || '';
+                                }
+                            }
+                            
+                            if (!ajaxNonce) {
+                                console.error('❌ Nonce is missing for resend SMS!');
+                                var resendText = getText('resend', 'Resend');
+                                $btn.prop('disabled', false).html('<i class="la la-redo me-1"></i>' + resendText);
+                                Swal.fire({
+                                    title: getText('error', 'Error'),
+                                    text: getText('nonce_missing', 'Nonce is missing. Please refresh the page and try again.'),
+                                    icon: 'error'
+                                });
+                                return;
+                            }
+                            
+                            $.ajax({
+                                url: ajaxUrl,
+                                type: 'POST',
+                                data: {
+                                    action: 'maneli_resend_sms',
+                                    nonce: ajaxNonce,
+                                    phone: phone,
+                                    message: message,
+                                    related_id: relatedId
+                                },
+                                success: function(response) {
+                                    var resendText = getText('resend', 'Resend');
+                                    var successText = getText('success', 'Success');
+                                    var resentSuccessText = getText('sms_resent_successfully', 'SMS resent successfully.');
+                                    var errorText = getText('error', 'Error');
+                                    var resentFailedText = getText('failed_to_resend_sms', 'Failed to resend SMS.');
+                                    
+                                    $btn.prop('disabled', false).html('<i class="la la-redo me-1"></i>' + resendText);
+                                    
+                                    if (response && response.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: successText,
+                                            text: response.data?.message || resentSuccessText
+                                        }).then(function() {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: errorText,
+                                            text: response.data?.message || resentFailedText
+                                        });
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    var resendText = getText('resend', 'Resend');
+                                    var errorText = getText('error', 'Error');
+                                    var serverErrorText = getText('server_error', 'Server error. Please try again.');
+                                    
+                                    $btn.prop('disabled', false).html('<i class="la la-redo me-1"></i>' + resendText);
+                                    
+                                    var errorMsg = serverErrorText;
+                                    if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                                        errorMsg = xhr.responseJSON.data.message;
+                                    } else if (xhr.status === 403) {
+                                        errorMsg = getText('security_verification_failed', 'Security verification failed. Please refresh the page and try again.');
+                                    } else if (xhr.status === 0) {
+                                        errorMsg = getText('network_error', 'Network error. Please check your connection.');
+                                    }
+                                    
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: errorText,
+                                        text: errorMsg
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+
+                //======================================================================
+                //  CHECK STATUS BUTTON HANDLER (for static history tables and modal)
+                //======================================================================
+
+                /**
+                 * Handle Check Status button click - works for both static tables and modal
+                 */
+                $(document.body).on('click', '.btn-check-status', function() {
+                    var $btn = $(this);
+                    var messageId = $btn.data('message-id');
+                    var $row = $btn.closest('tr');
+                    var $statusEl = $row.find('.delivery-status');
+                    
+                    if (!messageId) {
+                        console.error('Missing message_id for status check');
+                        return;
+                    }
+                    
+                    var checkingText = getText('checking', 'Checking...');
+                    var checkStatusText = getText('check_status', 'Check Status');
+                    $btn.prop('disabled', true).html('<i class="la la-spinner la-spin me-1"></i>' + checkingText);
+                    
+                    // Get AJAX URL and nonce - try multiple sources
+                    var ajaxUrl = '';
+                    var ajaxNonce = '';
+                    
+                    if (typeof maneliAjaxUrl !== 'undefined' && maneliAjaxUrl) {
+                        ajaxUrl = maneliAjaxUrl;
+                    } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                        ajaxUrl = maneliInquiryLists.ajax_url || '';
+                    }
+                    
+                    if (typeof maneliAjaxNonce !== 'undefined' && maneliAjaxNonce) {
+                        ajaxNonce = maneliAjaxNonce;
+                    } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                        ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
+                    }
+                    
+                    if (!ajaxUrl) {
+                        ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
+                        if (!ajaxUrl && typeof ajaxurl !== 'undefined') {
+                            ajaxUrl = ajaxurl;
+                        }
+                    }
+                    
+                    if (!ajaxNonce) {
+                        ajaxNonce = typeof adminAjax !== 'undefined' ? adminAjax.nonce : '';
+                        if (!ajaxNonce && typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces) {
+                            ajaxNonce = maneliInquiryLists.nonces.ajax || '';
+                        }
+                    }
+                    
+                    if (!ajaxNonce) {
+                        console.error('❌ Nonce is missing for status check!');
+                        $btn.prop('disabled', false).html('<i class="la la-sync me-1"></i>' + checkStatusText);
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: getText('nonce_missing', 'Nonce is missing. Please refresh the page and try again.'),
+                                icon: 'error'
+                            });
+                        }
+                        return;
+                    }
+                    
+                    $.ajax({
+                        url: ajaxUrl,
+                        type: 'POST',
+                        data: {
+                            action: 'maneli_get_sms_status',
+                            nonce: ajaxNonce,
+                            message_id: messageId
+                        },
+                        success: function(response) {
+                            $btn.prop('disabled', false).html('<i class="la la-sync me-1"></i>' + checkStatusText);
+                            
+                            if (response && response.success && response.data) {
+                                var status = response.data.status;
+                                var statusText = response.data.message || 'Unknown';
+                                
+                                // Translate status text if it's a known error message
+                                if (statusText === 'Rate limit exceeded or service temporarily unavailable') {
+                                    statusText = getText('rate_limit_exceeded', statusText);
+                                } else if (statusText === 'Delivered') {
+                                    statusText = getText('delivered', 'Delivered');
+                                } else if (statusText === 'Failed') {
+                                    statusText = getText('failed', 'Failed');
+                                } else if (statusText === 'Pending') {
+                                    statusText = getText('pending', 'Pending');
+                                } else if (statusText === 'Blocked') {
+                                    statusText = getText('blocked', 'Blocked');
+                                } else if (statusText === 'Rejected') {
+                                    statusText = getText('rejected', 'Rejected');
+                                }
+                                
+                                var badgeClass = 'badge-info';
+                                
+                                if (status === '1' || status === 'Delivered') {
+                                    badgeClass = 'badge-success';
+                                } else if (status === '2' || status === 'Failed') {
+                                    badgeClass = 'badge-danger';
+                                } else if (status === '3' || status === 'Pending') {
+                                    badgeClass = 'badge-warning';
+                                }
+                                
+                                if ($statusEl.length) {
+                                    $statusEl.find('.status-text').html('<span class="badge ' + badgeClass + '">' + statusText + '</span>');
+                                } else {
+                                    // Fallback: append to row
+                                    $row.find('td:eq(4)').append('<br><small class="text-muted"><span class="badge ' + badgeClass + '">' + statusText + '</span></small>');
+                                }
+                            } else {
+                                var failedStatusText = getText('failed_to_get_status', 'Failed to get status.');
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: getText('error', 'Error'),
+                                        text: failedStatusText
+                                    });
+                                } else {
+                                    alert(failedStatusText);
+                                }
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            var checkStatusText = getText('check_status', 'Check Status');
+                            var errorStatusText = getText('error_checking_status', 'Error checking status.');
+                            $btn.prop('disabled', false).html('<i class="la la-sync me-1"></i>' + checkStatusText);
+                            
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: getText('error', 'Error'),
+                                    text: errorStatusText
+                                });
+                            } else {
+                                alert(errorStatusText);
+                            }
+                        }
+                    });
+                });
+
+                //======================================================================
+                //  AUTO-CHECK STATUS FOR MESSAGES WITH message_id (on page load)
+                //======================================================================
+
+                /**
+                 * Auto-check status for messages with message_id in static tables
+                 */
+                $('.delivery-status[data-message-id]').each(function() {
+                    var $statusEl = $(this);
+                    var messageId = $statusEl.data('message-id');
+                    
+                    if (messageId) {
+                        // Get AJAX URL and nonce - try multiple sources
+                        var ajaxUrl = '';
+                        var ajaxNonce = '';
+                        
+                        if (typeof maneliAjaxUrl !== 'undefined' && maneliAjaxUrl) {
+                            ajaxUrl = maneliAjaxUrl;
+                        } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                            ajaxUrl = maneliInquiryLists.ajax_url || '';
+                        }
+                        
+                        if (typeof maneliAjaxNonce !== 'undefined' && maneliAjaxNonce) {
+                            ajaxNonce = maneliAjaxNonce;
+                        } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                            ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
+                        }
+                        
+                        if (!ajaxUrl) {
+                            ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
+                            if (!ajaxUrl && typeof ajaxurl !== 'undefined') {
+                                ajaxUrl = ajaxurl;
+                            }
+                        }
+                        
+                        if (!ajaxNonce) {
+                            ajaxNonce = typeof adminAjax !== 'undefined' ? adminAjax.nonce : '';
+                            if (!ajaxNonce && typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces) {
+                                ajaxNonce = maneliInquiryLists.nonces.ajax || '';
+                            }
+                        }
+                        
+                        if (!ajaxNonce) {
+                            console.warn('⚠️ Nonce is missing for auto status check, skipping');
+                            return;
+                        }
+                        
+                        $.ajax({
+                            url: ajaxUrl,
+                            type: 'POST',
+                            data: {
+                                action: 'maneli_get_sms_status',
+                                nonce: ajaxNonce,
+                                message_id: messageId
+                            },
+                            success: function(response) {
+                                if (response && response.success && response.data) {
+                                    var status = response.data.status;
+                                    var statusText = response.data.message || 'Unknown';
+                                    
+                                    // Translate status text
+                                    if (statusText === 'Rate limit exceeded or service temporarily unavailable') {
+                                        statusText = getText('rate_limit_exceeded', statusText);
+                                    } else if (statusText === 'Delivered') {
+                                        statusText = getText('delivered', 'Delivered');
+                                    } else if (statusText === 'Failed') {
+                                        statusText = getText('failed', 'Failed');
+                                    } else if (statusText === 'Pending') {
+                                        statusText = getText('pending', 'Pending');
+                                    } else if (statusText === 'Blocked') {
+                                        statusText = getText('blocked', 'Blocked');
+                                    } else if (statusText === 'Rejected') {
+                                        statusText = getText('rejected', 'Rejected');
+                                    }
+                                    
+                                    var badgeClass = 'badge-info';
+                                    
+                                    if (status === '1' || status === 'Delivered') {
+                                        badgeClass = 'badge-success';
+                                    } else if (status === '2' || status === 'Failed') {
+                                        badgeClass = 'badge-danger';
+                                    } else if (status === '3' || status === 'Pending') {
+                                        badgeClass = 'badge-warning';
+                                    }
+                                    
+                                    $statusEl.find('.status-text').html('<span class="badge ' + badgeClass + '">' + statusText + '</span>');
+                                } else {
+                                    var statusUnavailableText = getText('status_unavailable', 'Status unavailable');
+                                    $statusEl.find('.status-text').html('<span class="badge badge-secondary">' + statusUnavailableText + '</span>');
+                                }
+                            },
+                            error: function() {
+                                var checkFailedText = getText('check_failed', 'Check failed');
+                                $statusEl.find('.status-text').html('<span class="badge badge-secondary">' + checkFailedText + '</span>');
+                            }
+                        });
+                    }
+                });
+
+            }); // End of document.ready callback
+        })(); // End of waitForJQuery function

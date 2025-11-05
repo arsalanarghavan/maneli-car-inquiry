@@ -803,6 +803,8 @@ $cash_inquiry_id = isset($_GET['cash_inquiry_id']) ? intval($_GET['cash_inquiry_
 $need_inquiry_scripts = (
     $page === 'cash-inquiries' || 
     $page === 'installment-inquiries' ||
+    $page === 'cash-followups' ||
+    $page === 'installment-followups' ||
     ($page === 'inquiries' && ($subpage === 'cash' || $subpage === 'installment')) ||
     $page === 'new-inquiry' ||
     $page === 'new-cash-inquiry' ||
@@ -899,9 +901,7 @@ if ($need_inquiry_scripts) {
         'experts' => $experts_list,
         'nonces' => [
             'assign_expert' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
-            'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'),
             'cash_assign_expert' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
-            'cash_delete' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
             'installment_status' => wp_create_nonce('maneli_installment_status'),
             'cash_filter' => wp_create_nonce('maneli_cash_inquiry_filter_nonce'),
             'inquiry_filter' => wp_create_nonce('maneli_inquiry_filter_nonce'),
@@ -924,18 +924,8 @@ if ($need_inquiry_scripts) {
             'assign_text' => esc_html__('Select an expert for this inquiry:', 'maneli-car-inquiry'),
             'assign_success' => esc_html__('Expert assigned successfully.', 'maneli-car-inquiry'),
             'assign_failed' => esc_html__('Error assigning expert.', 'maneli-car-inquiry'),
-            'delete_title' => esc_html__('Deleted', 'maneli-car-inquiry'),
-            'delete_text' => esc_html__('Are you sure you want to delete this request? This action cannot be undone.', 'maneli-car-inquiry'),
-            'delete_list_title' => esc_html__('Delete this inquiry?', 'maneli-car-inquiry'),
-            'delete_list_text' => esc_html__('This action cannot be undone.', 'maneli-car-inquiry'),
-            'confirm_delete_title' => esc_html__('Are you sure?', 'maneli-car-inquiry'),
-            'confirm_delete_text' => esc_html__('Do you want to delete this inquiry? This action cannot be undone.', 'maneli-car-inquiry'),
             'confirm_button' => esc_html__('Yes', 'maneli-car-inquiry'),
             'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
-            'deleting' => esc_html__('Deleting...', 'maneli-car-inquiry'),
-            'confirm_delete' => esc_html__('Confirm Delete', 'maneli-car-inquiry'),
-            'delete' => esc_html__('Delete', 'maneli-car-inquiry'),
-            'error_deleting' => esc_html__('Error deleting', 'maneli-car-inquiry'),
             'edit_title' => esc_html__('Edit Inquiry', 'maneli-car-inquiry'),
             'placeholder_name' => esc_html__('First Name', 'maneli-car-inquiry'),
             'placeholder_last_name' => esc_html__('Last Name', 'maneli-car-inquiry'),
@@ -979,11 +969,75 @@ if ($need_inquiry_scripts) {
             'ok_button' => esc_html__('OK', 'maneli-car-inquiry'),
             'status_updated' => esc_html__('Status updated successfully', 'maneli-car-inquiry'),
             'status_update_error' => esc_html__('Error updating status', 'maneli-car-inquiry'),
+            // SMS Related Translations
+            'send_sms' => esc_html__('Send SMS', 'maneli-car-inquiry'),
+            'recipient' => esc_html__('Recipient:', 'maneli-car-inquiry'),
+            'message' => esc_html__('Message:', 'maneli-car-inquiry'),
+            'enter_message' => esc_html__('Enter your message...', 'maneli-car-inquiry'),
+            'please_enter_message' => esc_html__('Please enter a message', 'maneli-car-inquiry'),
+            'sending' => esc_html__('Sending...', 'maneli-car-inquiry'),
+            'please_wait' => esc_html__('Please wait', 'maneli-car-inquiry'),
+            'sms_sent_successfully' => esc_html__('SMS sent successfully!', 'maneli-car-inquiry'),
+            'failed_to_send_sms' => esc_html__('Failed to send SMS', 'maneli-car-inquiry'),
+            'invalid_inquiry_id' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry'),
+            'sms_history_modal_not_found' => esc_html__('SMS history modal not found.', 'maneli-car-inquiry'),
+            'no_sms_history' => esc_html__('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry'),
+            'error_loading_history' => esc_html__('Error loading SMS history.', 'maneli-car-inquiry'),
+            'missing_required_info' => esc_html__('Missing required information.', 'maneli-car-inquiry'),
+            'resend_sms' => esc_html__('Resend SMS?', 'maneli-car-inquiry'),
+            'resend_confirm' => esc_html__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry'),
+            'yes_resend' => esc_html__('Yes, Resend', 'maneli-car-inquiry'),
+            'resend' => esc_html__('Resend', 'maneli-car-inquiry'),
+            'sms_resent_successfully' => esc_html__('SMS resent successfully.', 'maneli-car-inquiry'),
+            'failed_to_resend_sms' => esc_html__('Failed to resend SMS.', 'maneli-car-inquiry'),
+            'check_status' => esc_html__('Check Status', 'maneli-car-inquiry'),
+            'checking' => esc_html__('Checking...', 'maneli-car-inquiry'),
+            'checking_status' => esc_html__('Checking status...', 'maneli-car-inquiry'),
+            'failed_to_get_status' => esc_html__('Failed to get status.', 'maneli-car-inquiry'),
+            'error_checking_status' => esc_html__('Error checking status.', 'maneli-car-inquiry'),
+            'status_unavailable' => esc_html__('Status unavailable', 'maneli-car-inquiry'),
+            'check_failed' => esc_html__('Check failed', 'maneli-car-inquiry'),
+            'rate_limit_exceeded' => esc_html__('Rate limit exceeded or service temporarily unavailable', 'maneli-car-inquiry'),
+            'delivered' => esc_html__('Delivered', 'maneli-car-inquiry'),
+            'failed' => esc_html__('Failed', 'maneli-car-inquiry'),
+            'pending' => esc_html__('Pending', 'maneli-car-inquiry'),
+            'blocked' => esc_html__('Blocked', 'maneli-car-inquiry'),
+            'rejected' => esc_html__('Rejected', 'maneli-car-inquiry'),
+            'unknown_status' => esc_html__('Unknown status', 'maneli-car-inquiry'),
+            'sent_by' => esc_html__('Sent By', 'maneli-car-inquiry'),
+            'loading_sms_history' => esc_html__('Loading SMS history...', 'maneli-car-inquiry'),
+            'no_sms_messages_sent_yet' => esc_html__('No SMS messages have been sent yet.', 'maneli-car-inquiry'),
+            'date_time' => esc_html__('Date & Time', 'maneli-car-inquiry'),
+            'sent' => esc_html__('Sent', 'maneli-car-inquiry'),
+            'security_verification_failed' => esc_html__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry'),
+            'unauthorized_access' => esc_html__('Unauthorized access.', 'maneli-car-inquiry'),
         ]
     ];
     
+    // Add AJAX nonce for SMS
+    $localize_data['nonces']['ajax'] = wp_create_nonce('maneli-ajax-nonce');
+    
+    // Update nonces based on page type (cash vs installment, including followups)
+    if ($page === 'cash-inquiries' || $page === 'cash-followups' || ($page === 'inquiries' && $subpage === 'cash')) {
+        // Cash inquiries and followups
+        $localize_data['nonces']['cash_filter'] = wp_create_nonce('maneli_cash_inquiry_filter_nonce');
+        $localize_data['nonces']['cash_details'] = wp_create_nonce('maneli_cash_inquiry_details_nonce');
+        $localize_data['nonces']['cash_update'] = wp_create_nonce('maneli_cash_inquiry_update_nonce');
+        $localize_data['nonces']['cash_assign_expert'] = wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce');
+        $localize_data['nonces']['save_expert_note'] = wp_create_nonce('maneli_save_expert_note');
+        $localize_data['nonces']['update_cash_status'] = wp_create_nonce('maneli_update_cash_status');
+    } else if ($page === 'installment-inquiries' || $page === 'installment-followups' || ($page === 'inquiries' && $subpage === 'installment')) {
+        // Installment inquiries and followups
+        $localize_data['nonces']['inquiry_filter'] = wp_create_nonce('maneli_inquiry_filter_nonce');
+        $localize_data['nonces']['details'] = wp_create_nonce('maneli_inquiry_details_nonce');
+        $localize_data['nonces']['assign_expert'] = wp_create_nonce('maneli_inquiry_assign_expert_nonce');
+        $localize_data['nonces']['tracking_status'] = wp_create_nonce('maneli_tracking_status_nonce');
+        $localize_data['nonces']['save_installment_note'] = wp_create_nonce('maneli_installment_note');
+        $localize_data['nonces']['update_installment_status'] = wp_create_nonce('maneli_installment_status');
+    }
+    
     // Add cash rejection reasons if we're on cash inquiries page
-    if ($page === 'cash-inquiries' || ($page === 'inquiries' && $subpage === 'cash')) {
+    if ($page === 'cash-inquiries' || $page === 'cash-followups' || ($page === 'inquiries' && $subpage === 'cash')) {
         $cash_rejection_reasons = array_filter(array_map('trim', explode("\n", $options['cash_inquiry_rejection_reasons'] ?? '')));
         $localize_data['cash_rejection_reasons'] = $cash_rejection_reasons;
     }

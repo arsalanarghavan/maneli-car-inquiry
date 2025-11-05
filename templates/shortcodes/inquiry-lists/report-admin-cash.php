@@ -885,13 +885,6 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
                             <?php esc_html_e('Send SMS', 'maneli-car-inquiry'); ?>
                         </button>
                         <?php endif; ?>
-                        
-                        <button type="button" class="btn btn-danger btn-wave delete-inquiry-report-btn" 
-                                data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
-                                data-inquiry-type="cash">
-                            <i class="la la-trash me-1"></i>
-                            <?php esc_html_e('Delete Request', 'maneli-car-inquiry'); ?>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -1159,6 +1152,10 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 
 <script type="text/javascript">
+// Global AJAX variables for SMS sending (fallback for timing - main localization is in class-dashboard-handler.php)
+var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+
 // Note: Send SMS handler is now handled by inquiry-lists.js (same as other pages)
 // This ensures consistent behavior and translations across all pages
 if (typeof jQuery !== 'undefined') {
@@ -1269,188 +1266,13 @@ if (typeof jQuery !== 'undefined') {
             });
         });
         
-        // Add handlers for Resend and Check Status buttons in static SMS history table
-        // Auto-check status for messages with message_id
-        $('.delivery-status[data-message-id]').each(function() {
-            var $statusEl = $(this);
-            var messageId = $statusEl.data('message-id');
-            
-            if (messageId) {
-                $.ajax({
-                    url: typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : '<?php echo admin_url('admin-ajax.php'); ?>',
-                    type: 'POST',
-                    data: {
-                        action: 'maneli_get_sms_status',
-                        nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
-                        message_id: messageId
-                    },
-                    success: function(response) {
-                        if (response && response.success && response.data) {
-                            var status = response.data.status;
-                            var statusText = response.data.message || 'Unknown';
-                            var badgeClass = 'badge-info';
-                            
-                            if (status === '1' || status === 'Delivered') {
-                                badgeClass = 'badge-success';
-                            } else if (status === '2' || status === 'Failed') {
-                                badgeClass = 'badge-danger';
-                            } else if (status === '3' || status === 'Pending') {
-                                badgeClass = 'badge-warning';
-                            }
-                            
-                            $statusEl.find('.status-text').html('<span class="badge ' + badgeClass + '">' + statusText + '</span>');
-                        } else {
-                            $statusEl.find('.status-text').html('<span class="badge badge-secondary"><?php echo esc_js(__('Status unavailable', 'maneli-car-inquiry')); ?></span>');
-                        }
-                    },
-                    error: function() {
-                        $statusEl.find('.status-text').html('<span class="badge badge-secondary"><?php echo esc_js(__('Check failed', 'maneli-car-inquiry')); ?></span>');
-                    }
-                });
-            }
-        });
-        
-        // Manual status check button
-        $(document).on('click', '.btn-check-status', function() {
-            var $btn = $(this);
-            var messageId = $btn.data('message-id');
-            var $row = $btn.closest('tr');
-            var $statusEl = $row.find('.delivery-status');
-            
-            $btn.prop('disabled', true).html('<i class="la la-spinner la-spin me-1"></i><?php echo esc_js(__('Checking...', 'maneli-car-inquiry')); ?>');
-            
-            $.ajax({
-                url: typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : '<?php echo admin_url('admin-ajax.php'); ?>',
-                type: 'POST',
-                data: {
-                    action: 'maneli_get_sms_status',
-                    nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
-                    message_id: messageId
-                },
-                success: function(response) {
-                    $btn.prop('disabled', false).html('<i class="la la-sync me-1"></i><?php echo esc_js(__('Check Status', 'maneli-car-inquiry')); ?>');
-                    
-                    if (response && response.success && response.data) {
-                        var status = response.data.status;
-                        var statusText = response.data.message || 'Unknown';
-                        var badgeClass = 'badge-info';
-                        
-                        if (status === '1' || status === 'Delivered') {
-                            badgeClass = 'badge-success';
-                        } else if (status === '2' || status === 'Failed') {
-                            badgeClass = 'badge-danger';
-                        } else if (status === '3' || status === 'Pending') {
-                            badgeClass = 'badge-warning';
-                        }
-                        
-                        if ($statusEl.length) {
-                            $statusEl.find('.status-text').html('<span class="badge ' + badgeClass + '">' + statusText + '</span>');
-                        }
-                    } else {
-                        alert('<?php echo esc_js(__('Failed to get status.', 'maneli-car-inquiry')); ?>');
-                    }
-                },
-                error: function() {
-                    $btn.prop('disabled', false).html('<i class="la la-sync me-1"></i><?php echo esc_js(__('Check Status', 'maneli-car-inquiry')); ?>');
-                    alert('<?php echo esc_js(__('Error checking status.', 'maneli-car-inquiry')); ?>');
-                }
-            });
-        });
-        
-        // Resend SMS button
-        $(document).on('click', '.btn-resend-sms', function() {
-            var $btn = $(this);
-            var phone = $btn.data('phone');
-            var message = $btn.data('message');
-            var relatedId = $btn.data('related-id');
-            
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: '<?php echo esc_js(__('Resend SMS?', 'maneli-car-inquiry')); ?>',
-                    text: '<?php echo esc_js(__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry')); ?>',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: '<?php echo esc_js(__('Yes, Resend', 'maneli-car-inquiry')); ?>',
-                    cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>'
-                }).then(function(result) {
-                    if (result.isConfirmed) {
-                        $btn.prop('disabled', true).html('<i class="la la-spinner la-spin me-1"></i><?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>');
-                        
-                        $.ajax({
-                            url: typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : '<?php echo admin_url('admin-ajax.php'); ?>',
-                            type: 'POST',
-                            data: {
-                                action: 'maneli_resend_sms',
-                                nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
-                                phone: phone,
-                                message: message,
-                                related_id: relatedId
-                            },
-                            success: function(response) {
-                                $btn.prop('disabled', false).html('<i class="la la-redo me-1"></i><?php echo esc_js(__('Resend', 'maneli-car-inquiry')); ?>');
-                                
-                                if (response && response.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: '<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>',
-                                        text: response.data?.message || '<?php echo esc_js(__('SMS resent successfully.', 'maneli-car-inquiry')); ?>'
-                                    }).then(function() {
-                                        location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
-                                        text: response.data?.message || '<?php echo esc_js(__('Failed to resend SMS.', 'maneli-car-inquiry')); ?>'
-                                    });
-                                }
-                            },
-                            error: function() {
-                                $btn.prop('disabled', false).html('<i class="la la-redo me-1"></i><?php echo esc_js(__('Resend', 'maneli-car-inquiry')); ?>');
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
-                                    text: '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>'
-                                });
-                            }
-                        });
-                    }
-                });
-            } else {
-                if (confirm('<?php echo esc_js(__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry')); ?>')) {
-                    alert('<?php echo esc_js(__('Please refresh the page to use this feature.', 'maneli-car-inquiry')); ?>');
-                }
-            }
-        });
+        // Note: Resend SMS, Check Status, and Auto-check handlers are now handled by inquiry-lists.js
+        // This ensures consistent behavior and translations across all pages
     });
 }
 </script>
 
-<!-- SMS History Modal -->
-<div class="modal fade" id="sms-history-modal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="la la-sms me-2"></i>
-                    <?php esc_html_e('SMS History', 'maneli-car-inquiry'); ?>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="sms-history-loading" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
-                    </div>
-                    <p class="mt-2 text-muted"><?php esc_html_e('Loading SMS history...', 'maneli-car-inquiry'); ?></p>
-                </div>
-                <div id="sms-history-content" class="maneli-initially-hidden">
-                    <div id="sms-history-table-container"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Close', 'maneli-car-inquiry'); ?></button>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+// Include SMS History Modal (shared template)
+maneli_get_template_part('partials/sms-history-modal');
+?>

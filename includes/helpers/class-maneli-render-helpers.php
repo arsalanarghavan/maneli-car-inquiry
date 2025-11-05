@@ -522,11 +522,6 @@ class Maneli_Render_Helpers {
                             <i class="la la-history"></i>
                         </button>
                     <?php endif; ?>
-                    <?php if ($is_admin) : ?>
-                        <button class="btn btn-sm btn-danger-light btn-icon delete-installment-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
-                            <i class="la la-trash"></i>
-                        </button>
-                    <?php endif; ?>
                 </div>
             </td>
         </tr>
@@ -670,11 +665,6 @@ class Maneli_Render_Helpers {
                                 data-inquiry-type="cash" 
                                 title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
                             <i class="la la-history"></i>
-                        </button>
-                    <?php endif; ?>
-                    <?php if ($is_admin) : ?>
-                        <button class="btn btn-sm btn-danger-light btn-icon delete-cash-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
-                            <i class="la la-trash"></i>
                         </button>
                     <?php endif; ?>
                 </div>

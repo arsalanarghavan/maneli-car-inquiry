@@ -217,13 +217,13 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
 </div>
 <!-- End::main-content -->
 
+<script>
+// Global AJAX variables for SMS sending (fallback for timing - main localization is in class-dashboard-handler.php)
+var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+</script>
+
 <?php
 // Include shared SMS History Modal template
 maneli_get_template_part('partials/sms-history-modal');
 ?>
-
-<script>
-// Global AJAX variables for SMS sending (same as users.php)
-var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
-</script>
