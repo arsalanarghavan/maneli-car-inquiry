@@ -5244,16 +5244,35 @@ class Maneli_Ajax_Handler {
     public function ajax_send_single_sms() {
         check_ajax_referer('maneli-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $current_user_id = get_current_user_id();
+        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+        
+        if (!$is_admin && !$is_expert) {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
             return;
         }
         
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
         
         $recipient = isset($_POST['recipient']) ? sanitize_text_field($_POST['recipient']) : '';
         $message = isset($_POST['message']) ? sanitize_textarea_field($_POST['message']) : '';
         $related_id = isset($_POST['related_id']) ? (int)$_POST['related_id'] : 0;
+        
+        // If expert, check if they are assigned to this inquiry
+        if ($is_expert && !$is_admin && $related_id > 0) {
+            $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($related_id, $current_user_id);
+            if (!$is_assigned) {
+                wp_send_json_error(['message' => esc_html__('You do not have permission to send SMS for this inquiry.', 'maneli-car-inquiry')]);
+                return;
+            }
+        }
         
         if (empty($recipient) || empty($message)) {
             wp_send_json_error(['message' => esc_html__('Recipient and message are required.', 'maneli-car-inquiry')]);

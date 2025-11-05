@@ -759,6 +759,7 @@ class Maneli_Dashboard_Handler {
                 // Check for cash inquiries (both old and new routes)
                 if ($page === 'cash-inquiries' || ($page === 'inquiries' && $subpage === 'cash')) {
                     $localize_data['nonces'] = [
+                        'ajax' => wp_create_nonce('maneli-ajax-nonce'),
                         'cash_filter' => wp_create_nonce('maneli_cash_inquiry_filter_nonce'),
                         'cash_details' => wp_create_nonce('maneli_cash_inquiry_details_nonce'),
                         'cash_update' => wp_create_nonce('maneli_cash_inquiry_update_nonce'),
@@ -772,6 +773,7 @@ class Maneli_Dashboard_Handler {
                     $localize_data['cash_rejection_reasons'] = $cash_rejection_reasons;
                 } else {
                     $localize_data['nonces'] = [
+                        'ajax' => wp_create_nonce('maneli-ajax-nonce'),
                         'inquiry_filter' => wp_create_nonce('maneli_inquiry_filter_nonce'),
                         'details' => wp_create_nonce('maneli_inquiry_details_nonce'),
                         'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'),
@@ -802,6 +804,7 @@ class Maneli_Dashboard_Handler {
                     window.maneliInquiryLists = window.maneliInquiryLists || {
                         ajax_url: '" . esc_js(admin_url("admin-ajax.php")) . "',
                         nonces: {
+                            ajax: '" . esc_js(wp_create_nonce("maneli-ajax-nonce")) . "',
                             cash_filter: '" . esc_js($cash_nonce) . "',
                             cash_details: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_details_nonce")) . "',
                             cash_update: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_update_nonce")) . "',

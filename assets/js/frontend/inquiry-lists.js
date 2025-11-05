@@ -2096,6 +2096,26 @@ function toPersianNumber(num) {
                     }
                 });
                 
+                // Debug: Log nonce and AJAX URL
+                console.log('🔵 SMS Send Debug:', {
+                    ajaxUrl: ajaxUrl,
+                    ajaxNonce: ajaxNonce ? (ajaxNonce.substring(0, 10) + '...') : 'MISSING',
+                    action: 'maneli_send_single_sms',
+                    recipient: phone,
+                    inquiryId: inquiryId
+                });
+                
+                if (!ajaxNonce) {
+                    console.error('❌ Nonce is missing!');
+                    Swal.close();
+                    Swal.fire({
+                        title: getText('error', 'Error'),
+                        text: 'Nonce is missing. Please refresh the page and try again.',
+                        icon: 'error'
+                    });
+                    return;
+                }
+                
                 $.ajax({
                     url: ajaxUrl,
                     type: 'POST',
