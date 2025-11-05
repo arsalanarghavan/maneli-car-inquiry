@@ -408,6 +408,12 @@ $active_users_count = $active_users_query->get_total();
                                                             <i class="la la-sms"></i>
                                                         </button>
                                                         <?php endif; ?>
+                                                        <button class="btn btn-sm btn-info-light view-sms-history-btn" 
+                                                                data-user-id="<?php echo esc_attr($user->ID); ?>" 
+                                                                data-phone="<?php echo esc_attr($mobile_number); ?>"
+                                                                title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                                                            <i class="la la-history"></i>
+                                                        </button>
                                                         <button class="btn btn-sm btn-danger-light" onclick="deleteUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
                                                             <i class="la la-trash"></i>
                                                         </button>
@@ -838,7 +844,146 @@ function deleteUser(userId) {
         initSMSHandler();
     }
 })();
+
+// SMS History handler - Wait for jQuery to load
+(function() {
+    function initSMSHistoryHandler() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initSMSHistoryHandler, 100);
+            return;
+        }
+        
+        var $ = jQuery;
+        
+        $(document).ready(function() {
+            $(document).on('click', '.view-sms-history-btn', function() {
+                var userId = $(this).data('user-id');
+                var phone = $(this).data('phone');
+                
+                if (!userId) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                            text: '<?php echo esc_js(__('Invalid user ID.', 'maneli-car-inquiry')); ?>',
+                            icon: 'error'
+                        });
+                    }
+                    return;
+                }
+                
+                const modalElement = document.getElementById('sms-history-modal');
+                if (!modalElement) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                            text: '<?php echo esc_js(__('SMS history modal not found.', 'maneli-car-inquiry')); ?>',
+                            icon: 'error'
+                        });
+                    }
+                    return;
+                }
+                
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                } else if (typeof jQuery !== 'undefined' && jQuery(modalElement).modal) {
+                    jQuery(modalElement).modal('show');
+                } else {
+                    jQuery(modalElement).addClass('show').css('display', 'block');
+                    jQuery('.modal-backdrop').remove();
+                    jQuery('body').append('<div class="modal-backdrop fade show"></div>');
+                }
+                
+                $('#sms-history-loading').removeClass('maneli-initially-hidden').show();
+                $('#sms-history-content').addClass('maneli-initially-hidden').hide();
+                $('#sms-history-table-container').empty();
+                
+                if (!maneliAjaxNonce) {
+                    $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                    $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                    $('#sms-history-table-container').html(
+                        '<div class="alert alert-danger">' +
+                        '<i class="la la-exclamation-triangle me-2"></i>' +
+                        '<?php echo esc_js(__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry')); ?>' +
+                        '</div>'
+                    );
+                    return;
+                }
+                
+                $.ajax({
+                    url: maneliAjaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_get_sms_history',
+                        nonce: maneliAjaxNonce,
+                        user_id: userId
+                    },
+                    success: function(response) {
+                        $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                        $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                        
+                        if (response && response.success && response.data && response.data.html) {
+                            $('#sms-history-table-container').html(response.data.html);
+                        } else {
+                            $('#sms-history-table-container').html(
+                                '<div class="alert alert-info">' +
+                                '<i class="la la-info-circle me-2"></i>' +
+                                '<?php echo esc_js(__('No SMS messages have been sent to this user yet.', 'maneli-car-inquiry')); ?>' +
+                                '</div>'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                        $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                        $('#sms-history-table-container').html(
+                            '<div class="alert alert-danger">' +
+                            '<i class="la la-exclamation-triangle me-2"></i>' +
+                            '<?php echo esc_js(__('Error loading SMS history.', 'maneli-car-inquiry')); ?>' +
+                            '</div>'
+                        );
+                    }
+                });
+            });
+        });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSMSHistoryHandler);
+    } else {
+        initSMSHistoryHandler();
+    }
+})();
 </script>
+
+<!-- SMS History Modal -->
+<div class="modal fade" id="sms-history-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="la la-sms me-2"></i>
+                    <?php esc_html_e('SMS History', 'maneli-car-inquiry'); ?>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="sms-history-loading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
+                    </div>
+                    <p class="mt-2 text-muted"><?php esc_html_e('Loading SMS history...', 'maneli-car-inquiry'); ?></p>
+                </div>
+                <div id="sms-history-content" class="maneli-initially-hidden">
+                    <div id="sms-history-table-container"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Close', 'maneli-car-inquiry'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
 .table-hover tbody tr:hover {

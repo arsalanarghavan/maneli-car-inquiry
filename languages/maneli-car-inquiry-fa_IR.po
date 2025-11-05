@@ -9064,3 +9064,84 @@ msgstr "خطا در مقداردهی اولیه اسکریپت. لطفاً صف�
 msgid "Server error. Please contact support if the problem persists."
 msgstr "خطای سرور. در صورت ادامه مشکل، با پشتیبانی تماس بگیرید."
 
+
+# SMS Related Translations - New strings only
+
+msgid "Resend SMS?"
+msgstr "ارسال مجدد پیامک؟"
+
+msgid "Check Status"
+msgstr "بررسی وضعیت"
+
+msgid "SMS resent successfully."
+msgstr "پیامک مجدداً با موفقیت ارسال شد."
+
+msgid "Failed to resend SMS."
+msgstr "ارسال مجدد پیامک ناموفق بود."
+
+msgid "No SMS messages have been sent yet."
+msgstr "هنوز هیچ پیامکی ارسال نشده است."
+
+msgid "Sent By"
+msgstr "ارسال شده توسط"
+
+msgid "Checking status..."
+msgstr "در حال بررسی وضعیت..."
+
+msgid "Checking..."
+msgstr "در حال بررسی..."
+
+msgid "Status unavailable"
+msgstr "وضعیت در دسترس نیست"
+
+msgid "Check failed"
+msgstr "بررسی ناموفق بود"
+
+msgid "Failed to get status."
+msgstr "دریافت وضعیت ناموفق بود."
+
+msgid "Error checking status."
+msgstr "خطا در بررسی وضعیت."
+
+msgid "Are you sure you want to resend this SMS?"
+msgstr "آیا مطمئن هستید که می‌خواهید این پیامک را مجدداً ارسال کنید؟"
+
+msgid "Yes, Resend"
+msgstr "بله، ارسال مجدد"
+
+msgid "You do not have permission to send SMS for this inquiry."
+msgstr "شما مجوز ارسال پیامک برای این استعلام را ندارید."
+
+msgid "Invalid inquiry ID or user ID."
+msgstr "شناسه استعلام یا کاربر نامعتبر است."
+
+msgid "Invalid message ID."
+msgstr "شناسه پیام نامعتبر است."
+
+msgid "Delivered"
+msgstr "تحویل داده شد"
+
+msgid "Blocked"
+msgstr "مسدود شده"
+
+msgid "Unknown status"
+msgstr "وضعیت نامشخص"
+
+msgid "SMS sending failed"
+msgstr "ارسال پیامک ناموفق بود"
+
+msgid "Invalid username/password"
+msgstr "نام کاربری یا رمز عبور نامعتبر"
+
+msgid "User is restricted/limited"
+msgstr "کاربر محدود شده است"
+
+msgid "Credit insufficient"
+msgstr "اعتبار ناکافی"
+
+msgid "Invalid pattern/bodyId"
+msgstr "الگو یا کد الگو نامعتبر"
+
+msgid "Invalid recipient number"
+msgstr "شماره گیرنده نامعتبر"
+

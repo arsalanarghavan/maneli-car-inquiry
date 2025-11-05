@@ -56,21 +56,30 @@ if ($is_customer) {
 // Check if viewing a single inquiry report
 $inquiry_id = isset($_GET['inquiry_id']) ? intval($_GET['inquiry_id']) : 0;
 if ($inquiry_id > 0) {
-    // CRITICAL: Ensure nonces are set BEFORE loading report template
-    // Add inline script to ensure maneliInquiryLists has update_installment_status nonce
+    // Add AJAX variables for SMS sending in report pages
     ?>
     <script>
+    // Global AJAX variables for SMS sending (same as installment-inquiries.php list page)
+    var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+    var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+    
+    // CRITICAL: Ensure nonces are set BEFORE loading report template
     // Ensure maneliInquiryLists has update_installment_status nonce for single report view
     (function() {
         if (typeof maneliInquiryLists === 'undefined') {
             window.maneliInquiryLists = {
                 ajax_url: '<?php echo esc_js(admin_url("admin-ajax.php")); ?>',
-                nonces: {},
+                nonces: {
+                    ajax: '<?php echo esc_js(wp_create_nonce("maneli-ajax-nonce")); ?>'
+                },
                 text: {}
             };
         }
         if (!maneliInquiryLists.nonces) {
             maneliInquiryLists.nonces = {};
+        }
+        if (!maneliInquiryLists.nonces.ajax) {
+            maneliInquiryLists.nonces.ajax = '<?php echo esc_js(wp_create_nonce("maneli-ajax-nonce")); ?>';
         }
         if (!maneliInquiryLists.nonces.update_installment_status) {
             maneliInquiryLists.nonces.update_installment_status = '<?php echo esc_js(wp_create_nonce("maneli_installment_status")); ?>';
@@ -503,31 +512,7 @@ var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
 </script>
 
-<!-- SMS History Modal -->
-<div class="modal fade" id="sms-history-modal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="la la-sms me-2"></i>
-                    <?php esc_html_e('SMS History', 'maneli-car-inquiry'); ?>
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="sms-history-loading" class="text-center py-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
-                    </div>
-                    <p class="mt-2 text-muted"><?php esc_html_e('Loading SMS history...', 'maneli-car-inquiry'); ?></p>
-                </div>
-                <div id="sms-history-content" class="maneli-initially-hidden">
-                    <div id="sms-history-table-container"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Close', 'maneli-car-inquiry'); ?></button>
-            </div>
-        </div>
-    </div>
-</div>
+<?php
+// Include shared SMS History Modal template
+maneli_get_template_part('partials/sms-history-modal');
+?>

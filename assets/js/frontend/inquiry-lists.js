@@ -3917,6 +3917,14 @@ function toPersianNumber(num) {
                 $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
                 $('#sms-history-content').removeClass('maneli-initially-hidden').show();
                 
+                // Use HTML if available (includes buttons and JavaScript), otherwise build table from history
+                if (response.success && response.data && response.data.html) {
+                    // Use the complete HTML from server (includes Resend and Check Status buttons)
+                    $('#sms-history-table-container').html(response.data.html);
+                    return;
+                }
+                
+                // Fallback: Build table from history array (for backward compatibility)
                 if (response.success && response.data && response.data.history) {
                     const history = response.data.history;
                     

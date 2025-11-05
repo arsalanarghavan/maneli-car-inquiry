@@ -29,7 +29,7 @@ class Maneli_SMS_Handler {
      * @param int    $bodyId       The pattern ID (Body ID) from the SMS panel.
      * @param string $recipient    The recipient's mobile number.
      * @param array  $parameters   An array of variables for the pattern.
-     * @return bool True on success, false on failure.
+     * @return array|bool Returns array with 'success' and 'message_id' on success, false on failure.
      */
     public function send_pattern($bodyId, $recipient, $parameters) {
         $username = $this->options['sms_username'] ?? '';
@@ -151,7 +151,10 @@ class Maneli_SMS_Handler {
                     return false;
                 } elseif ($result_len > 10) {
                     // Long numeric MessageID - likely success
-                    return true;
+                    return [
+                        'success' => true,
+                        'message_id' => (string)$send_Result_code
+                    ];
                 } elseif ($code_num == 0 && $result_len <= 3) {
                     // Code 0 with short length - might be error, but could also be empty MessageID
                     // This is ambiguous - log it but treat as error for safety
@@ -165,7 +168,10 @@ class Maneli_SMS_Handler {
             // Check if it's a string MessageID (success)
             if (is_string($send_Result_code) && $result_len > 10) {
                 // Success - MessageID returned as string
-                return true;
+                return [
+                    'success' => true,
+                    'message_id' => (string)$send_Result_code
+                ];
             }
             
             // Unknown format - log for debugging but treat as error
@@ -175,7 +181,14 @@ class Maneli_SMS_Handler {
             
             // Conservative approach: if length > 3, might be MessageID (success)
             // If length <= 3, likely error code
-            return $result_len > 3;
+            if ($result_len > 3) {
+                return [
+                    'success' => true,
+                    'message_id' => (string)$send_Result_code
+                ];
+            }
+            
+            return false;
 
         } catch (SoapFault $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -216,7 +229,7 @@ class Maneli_SMS_Handler {
      *
      * @param string $recipient The recipient's mobile number.
      * @param string $message   The message to send.
-     * @return bool True on success, false on failure.
+     * @return array|bool Returns array with 'success' and 'message_id' on success, false on failure.
      */
     public function send_sms($recipient, $message) {
         $username = $this->options['sms_username'] ?? '';
@@ -310,7 +323,10 @@ class Maneli_SMS_Handler {
                     return false;
                 } elseif ($result_len > 10) {
                     // Long numeric MessageID - likely success
-                    return true;
+                    return [
+                        'success' => true,
+                        'message_id' => (string)$send_Result_code
+                    ];
                 } elseif ($code_num == 0 && $result_len <= 3) {
                     // Code 0 with short length - might be error
                     if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -323,7 +339,10 @@ class Maneli_SMS_Handler {
             // Check if it's a string MessageID (success)
             if (is_string($send_Result_code) && $result_len > 10) {
                 // Success - MessageID returned as string
-                return true;
+                return [
+                    'success' => true,
+                    'message_id' => (string)$send_Result_code
+                ];
             }
             
             // Unknown format - log for debugging but treat as error
@@ -333,7 +352,14 @@ class Maneli_SMS_Handler {
             
             // Conservative approach: if length > 3, might be MessageID (success)
             // If length <= 3, likely error code
-            return $result_len > 3;
+            if ($result_len > 3) {
+                return [
+                    'success' => true,
+                    'message_id' => (string)$send_Result_code
+                ];
+            }
+            
+            return false;
 
         } catch (SoapFault $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -346,6 +372,122 @@ class Maneli_SMS_Handler {
             }
             return false;
         }
+    }
+
+    /**
+     * Get SMS delivery status from MeliPayamak API
+     *
+     * @param string $message_id Message ID returned from send_sms or send_pattern
+     * @param string $from Phone number that sent the SMS (optional)
+     * @return array|false Returns array with status info on success, false on failure
+     */
+    public function get_message_status($message_id, $from = '') {
+        $username = $this->options['sms_username'] ?? '';
+        $password = $this->options['sms_password'] ?? '';
+
+        if (empty($username) || empty($password) || empty($message_id)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS Error: Missing required parameters for getting message status.');
+            }
+            return false;
+        }
+
+        if (!class_exists('SoapClient')) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS Error: SoapClient class not found.');
+            }
+            return false;
+        }
+
+        if (!defined('MANELI_SMS_API_WSDL')) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS Error: MANELI_SMS_API_WSDL constant is not defined.');
+            }
+            return false;
+        }
+
+        try {
+            ini_set("soap.wsdl_cache_enabled", "0");
+            $sms_client = new SoapClient(MANELI_SMS_API_WSDL, ['encoding' => 'UTF-8']);
+
+            // GetMessagesReceptions method from MeliPayamak API
+            // Parameters: username, password, msgId, fromRows
+            $data = [
+                "username" => (string)$username,
+                "password" => (string)$password,
+                "msgId" => (string)$message_id,
+                "fromRows" => "0", // Start from row 0
+            ];
+
+            $result = $sms_client->GetMessagesReceptions($data);
+            $receptions = $result->GetMessagesReceptionsResult ?? null;
+
+            if (empty($receptions)) {
+                return [
+                    'status' => 'unknown',
+                    'message' => 'No delivery information available'
+                ];
+            }
+
+            // Parse reception data (format depends on API response)
+            // Typically returns array of objects with fields like: Mobile, Date, Status
+            if (is_array($receptions) && !empty($receptions)) {
+                $reception = $receptions[0];
+                $status = $reception->Status ?? 'unknown';
+                
+                return [
+                    'status' => (string)$status,
+                    'mobile' => $reception->Mobile ?? '',
+                    'date' => $reception->Date ?? '',
+                    'message' => $this->parse_delivery_status($status)
+                ];
+            } elseif (is_object($receptions)) {
+                // Single reception object
+                $status = $receptions->Status ?? 'unknown';
+                
+                return [
+                    'status' => (string)$status,
+                    'mobile' => $receptions->Mobile ?? '',
+                    'date' => $receptions->Date ?? '',
+                    'message' => $this->parse_delivery_status($status)
+                ];
+            }
+
+            return [
+                'status' => 'unknown',
+                'message' => 'Unable to parse delivery status'
+            ];
+
+        } catch (SoapFault $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS SOAP Fault (get_message_status): ' . $e->getMessage());
+            }
+            return false;
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS General Exception (get_message_status): ' . $e->getMessage());
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Parse delivery status code to human-readable message
+     *
+     * @param string|int $status Status code from API
+     * @return string Human-readable status message
+     */
+    private function parse_delivery_status($status) {
+        $status = (string)$status;
+        $status_messages = [
+            '1' => esc_html__('Delivered', 'maneli-car-inquiry'),
+            '2' => esc_html__('Failed', 'maneli-car-inquiry'),
+            '3' => esc_html__('Pending', 'maneli-car-inquiry'),
+            '4' => esc_html__('Blocked', 'maneli-car-inquiry'),
+            '5' => esc_html__('Rejected', 'maneli-car-inquiry'),
+        ];
+        
+        return $status_messages[$status] ?? esc_html__('Unknown status', 'maneli-car-inquiry');
     }
 
     /**

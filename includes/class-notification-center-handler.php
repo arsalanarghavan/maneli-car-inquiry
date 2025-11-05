@@ -100,11 +100,23 @@ class Maneli_Notification_Center_Handler {
             $result = $sms_handler->send_sms($recipient, $message);
         }
 
+        // Handle result - can be array with success/message_id or false
+        $success = false;
+        $message_id = null;
+        
+        if (is_array($result) && isset($result['success'])) {
+            $success = $result['success'];
+            $message_id = $result['message_id'] ?? null;
+        } elseif ($result === true || $result === false) {
+            // Backward compatibility for old code that might return bool
+            $success = $result;
+        }
+
         // Get error code if available
         $error_code = $sms_handler->get_last_error_code();
         $error_message = 'SMS sending failed';
         
-        if ($error_code !== null) {
+        if (!$success && $error_code !== null) {
             $error_messages = [
                 1 => esc_html__('Invalid username/password', 'maneli-car-inquiry'),
                 2 => esc_html__('User is restricted/limited', 'maneli-car-inquiry'),
@@ -117,8 +129,9 @@ class Maneli_Notification_Center_Handler {
         }
 
         return [
-            'success' => $result,
-            'error' => $result ? null : $error_message
+            'success' => $success,
+            'message_id' => $message_id,
+            'error' => $success ? null : $error_message
         ];
     }
 

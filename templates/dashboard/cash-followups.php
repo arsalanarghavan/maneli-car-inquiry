@@ -735,7 +735,41 @@ if (typeof maneliInquiryLists === 'undefined') {
         nonces: {
             ajax: '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>'
         },
-        text: {}
+        text: {
+            'error': '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+            'success': '<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>',
+            'send_sms': '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+            'recipient': '<?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?>',
+            'message': '<?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?>',
+            'enter_message': '<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>',
+            'please_enter_message': '<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>',
+            'send': '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
+            'cancel_button': '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
+            'sending': '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
+            'please_wait': '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+            'sms_sent_successfully': '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>',
+            'failed_to_send_sms': '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>',
+            'server_error': '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>',
+            'invalid_inquiry_id': '<?php echo esc_js(__('Invalid inquiry ID.', 'maneli-car-inquiry')); ?>',
+            'sms_history_modal_not_found': '<?php echo esc_js(__('SMS history modal not found.', 'maneli-car-inquiry')); ?>',
+            'nonce_missing': '<?php echo esc_js(__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry')); ?>',
+            'no_sms_history': '<?php echo esc_js(__('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry')); ?>',
+            'error_loading_history': '<?php echo esc_js(__('Error loading SMS history.', 'maneli-car-inquiry')); ?>',
+            'missing_required_info': '<?php echo esc_js(__('Missing required information.', 'maneli-car-inquiry')); ?>',
+            'ok_button': '<?php echo esc_js(__('OK', 'maneli-car-inquiry')); ?>',
+            'resend_sms': '<?php echo esc_js(__('Resend SMS?', 'maneli-car-inquiry')); ?>',
+            'resend_confirm': '<?php echo esc_js(__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry')); ?>',
+            'yes_resend': '<?php echo esc_js(__('Yes, Resend', 'maneli-car-inquiry')); ?>',
+            'resend': '<?php echo esc_js(__('Resend', 'maneli-car-inquiry')); ?>',
+            'sms_resent_successfully': '<?php echo esc_js(__('SMS resent successfully.', 'maneli-car-inquiry')); ?>',
+            'failed_to_resend_sms': '<?php echo esc_js(__('Failed to resend SMS.', 'maneli-car-inquiry')); ?>',
+            'check_status': '<?php echo esc_js(__('Check Status', 'maneli-car-inquiry')); ?>',
+            'checking': '<?php echo esc_js(__('Checking...', 'maneli-car-inquiry')); ?>',
+            'failed_to_get_status': '<?php echo esc_js(__('Failed to get status.', 'maneli-car-inquiry')); ?>',
+            'error_checking_status': '<?php echo esc_js(__('Error checking status.', 'maneli-car-inquiry')); ?>',
+            'status_unavailable': '<?php echo esc_js(__('Status unavailable', 'maneli-car-inquiry')); ?>',
+            'check_failed': '<?php echo esc_js(__('Check failed', 'maneli-car-inquiry')); ?>'
+        }
     };
 }
 
@@ -986,7 +1020,7 @@ if (typeof maneliInquiryLists === 'undefined') {
                                     getText('error_loading_history', 'Error loading SMS history.') +
                                     '</div>'
                                 );
-                            }
+                        }
                         });
                     });
                     
