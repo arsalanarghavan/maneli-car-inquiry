@@ -2043,11 +2043,20 @@ function toPersianNumber(num) {
         var ajaxUrl = '';
         var ajaxNonce = '';
         
-        if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
+        // Try global variables first (same as users.php)
+        if (typeof maneliAjaxUrl !== 'undefined' && maneliAjaxUrl) {
+            ajaxUrl = maneliAjaxUrl;
+        } else if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
             ajaxUrl = maneli_ajax.ajax_url || maneli_ajax.url || '';
-            ajaxNonce = maneli_ajax.nonce || '';
         } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
             ajaxUrl = maneliInquiryLists.ajax_url || '';
+        }
+        
+        if (typeof maneliAjaxNonce !== 'undefined' && maneliAjaxNonce) {
+            ajaxNonce = maneliAjaxNonce;
+        } else if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
+            ajaxNonce = maneli_ajax.nonce || '';
+        } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
             ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
         }
         
@@ -3823,7 +3832,7 @@ function toPersianNumber(num) {
         if (!modalElement) {
             Swal.fire({
                 title: getText('error', 'Error'),
-                text: 'SMS history modal not found.',
+                text: getText('sms_history_modal_not_found', 'SMS history modal not found.'),
                 icon: 'error'
             });
             return;
@@ -3847,13 +3856,59 @@ function toPersianNumber(num) {
         $('#sms-history-content').addClass('maneli-initially-hidden');
         $('#sms-history-table-container').empty();
         
+        // Get AJAX URL and nonce - try multiple sources (same as send SMS)
+        var ajaxUrl = '';
+        var ajaxNonce = '';
+        
+        // Try global variables first (same as users.php)
+        if (typeof maneliAjaxUrl !== 'undefined' && maneliAjaxUrl) {
+            ajaxUrl = maneliAjaxUrl;
+        } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+            ajaxUrl = maneliInquiryLists.ajax_url || '';
+        }
+        
+        if (typeof maneliAjaxNonce !== 'undefined' && maneliAjaxNonce) {
+            ajaxNonce = maneliAjaxNonce;
+        } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+            ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
+        }
+        
+        if (!ajaxUrl) {
+            ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
+            if (!ajaxUrl && typeof ajaxurl !== 'undefined') {
+                ajaxUrl = ajaxurl;
+            }
+        }
+        
+        // Debug: Log nonce and AJAX URL
+        console.log('🔵 SMS History Debug:', {
+            ajaxUrl: ajaxUrl,
+            ajaxNonce: ajaxNonce ? (ajaxNonce.substring(0, 10) + '...') : 'MISSING',
+            action: 'maneli_get_sms_history',
+            inquiryId: inquiryId,
+            inquiryType: inquiryType
+        });
+        
+        if (!ajaxNonce) {
+            console.error('❌ Nonce is missing for SMS history!');
+            $('#sms-history-loading').addClass('maneli-initially-hidden');
+            $('#sms-history-content').removeClass('maneli-initially-hidden');
+            $('#sms-history-table-container').html(
+                '<div class="alert alert-danger">' +
+                '<i class="la la-exclamation-triangle me-2"></i>' +
+                'Nonce is missing. Please refresh the page and try again.' +
+                '</div>'
+            );
+            return;
+        }
+        
         // Load SMS history
         $.ajax({
-            url: maneliInquiryLists.ajax_url,
+            url: ajaxUrl,
             type: 'POST',
             data: {
                 action: 'maneli_get_sms_history',
-                nonce: maneliInquiryLists.nonces.ajax || maneliInquiryLists.nonce,
+                nonce: ajaxNonce,
                 inquiry_id: inquiryId,
                 inquiry_type: inquiryType
             },
@@ -3925,13 +3980,25 @@ function toPersianNumber(num) {
                     );
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
                 $('#sms-history-loading').addClass('maneli-initially-hidden');
                 $('#sms-history-content').removeClass('maneli-initially-hidden');
+                
+                console.error('SMS History error:', {xhr: xhr, status: status, error: error, responseText: xhr.responseText});
+                
+                var errorMsg = getText('server_error', 'Server error. Please try again.');
+                if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                    errorMsg = xhr.responseJSON.data.message;
+                } else if (xhr.status === 403) {
+                    errorMsg = getText('unauthorized_access', 'Unauthorized access.');
+                } else if (xhr.status === 0) {
+                    errorMsg = 'Network error. Please check your connection.';
+                }
+                
                 $('#sms-history-table-container').html(
                     '<div class="alert alert-danger">' +
                     '<i class="la la-exclamation-triangle me-2"></i>' +
-                    getText('server_error', 'Server error. Please try again.') +
+                    errorMsg +
                     '</div>'
                 );
             }

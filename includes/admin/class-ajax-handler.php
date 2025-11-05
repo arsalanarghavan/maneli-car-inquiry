@@ -5372,18 +5372,33 @@ class Maneli_Ajax_Handler {
         $formatted_history = [];
         
         foreach ($sms_history as $sms) {
-            $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($sms['sent_at'], 'Y/m/d H:i');
-            if (function_exists('persian_numbers_no_separator')) {
-                $jalali_date = persian_numbers_no_separator($jalali_date);
-                $recipient = persian_numbers_no_separator($sms['recipient']);
+            // Safely format date - handle both string and array formats
+            $sent_at = $sms['sent_at'] ?? '';
+            $jalali_date = '';
+            
+            if (!empty($sent_at)) {
+                try {
+                    $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($sent_at, 'Y/m/d H:i');
+                    if (function_exists('persian_numbers_no_separator')) {
+                        $jalali_date = persian_numbers_no_separator($jalali_date);
+                    }
+                } catch (Exception $e) {
+                    // Fallback to original date if conversion fails
+                    $jalali_date = $sent_at;
+                }
             } else {
-                $recipient = $sms['recipient'];
+                $jalali_date = __('N/A', 'maneli-car-inquiry');
+            }
+            
+            $recipient = $sms['recipient'] ?? '';
+            if (function_exists('persian_numbers_no_separator')) {
+                $recipient = persian_numbers_no_separator($recipient);
             }
             
             $formatted_history[] = [
-                'user_name' => $sms['user_name'],
+                'user_name' => $sms['user_name'] ?? __('Unknown', 'maneli-car-inquiry'),
                 'recipient' => $recipient,
-                'message' => $sms['message'],
+                'message' => $sms['message'] ?? '',
                 'sent_at' => $jalali_date,
                 'success' => $sms['success'] ?? false,
                 'error' => $sms['error'] ?? null,

@@ -832,3 +832,9 @@ wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
         </div>
     </div>
 </div>
+
+<script>
+// Global AJAX variables for SMS sending (same as users.php)
+var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+</script>

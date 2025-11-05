@@ -727,6 +727,7 @@ class Maneli_Dashboard_Handler {
                         'send' => esc_html__('Send', 'maneli-car-inquiry'),
                         'sending' => esc_html__('Sending...', 'maneli-car-inquiry'),
                         'please_wait' => esc_html__('Please wait', 'maneli-car-inquiry'),
+                        'sms_history_modal_not_found' => esc_html__('SMS history modal not found.', 'maneli-car-inquiry'),
                         'missing_required_info' => esc_html__('Missing required information.', 'maneli-car-inquiry'),
                         'schedule_followup_button' => esc_html__('Schedule Follow-up', 'maneli-car-inquiry'),
                         'set_downpayment_title' => esc_html__('Set Down Payment Amount', 'maneli-car-inquiry'),

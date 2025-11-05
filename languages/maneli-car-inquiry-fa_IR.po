@@ -5854,6 +5854,9 @@ msgstr "گیرنده:"
 msgid "Message:"
 msgstr "پیام:"
 
+msgid "SMS history modal not found."
+msgstr "مودال تاریخچه پیامک یافت نشد."
+
 # Settings Translations
 msgid "Meeting Reminders"
 msgstr "یادآوری جلسات"
