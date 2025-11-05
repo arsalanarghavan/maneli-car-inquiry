@@ -77,6 +77,53 @@ if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
     wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
     wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
 }
+
+// Enqueue SweetAlert2
+$sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+if (file_exists($sweetalert2_path)) {
+    wp_enqueue_style('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+    wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+} else {
+    wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+}
+
+// Enqueue inquiry-lists.js for SMS handlers
+wp_enqueue_script('maneli-inquiry-lists-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js', ['jquery', 'sweetalert2', 'select2'], '1.0.2', true);
+
+// Localize script
+$experts_query = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
+$experts_list = [];
+foreach ($experts_query as $expert) {
+    $experts_list[] = ['id' => $expert->ID, 'name' => $expert->display_name ?: $expert->user_login];
+}
+
+wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
+    'ajax_url' => admin_url('admin-ajax.php'),
+    'experts' => $experts_list,
+    'nonces' => [
+        'ajax' => wp_create_nonce('maneli-ajax-nonce'),
+        'cash_delete' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
+        'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'),
+    ],
+    'text' => [
+        'error' => esc_html__('Error', 'maneli-car-inquiry'),
+        'success' => esc_html__('Success', 'maneli-car-inquiry'),
+        'send_sms' => esc_html__('Send SMS', 'maneli-car-inquiry'),
+        'recipient' => esc_html__('Recipient:', 'maneli-car-inquiry'),
+        'message' => esc_html__('Message:', 'maneli-car-inquiry'),
+        'enter_message' => esc_html__('Enter your message...', 'maneli-car-inquiry'),
+        'please_enter_message' => esc_html__('Please enter a message', 'maneli-car-inquiry'),
+        'sms_sent_successfully' => esc_html__('SMS sent successfully!', 'maneli-car-inquiry'),
+        'failed_to_send_sms' => esc_html__('Failed to send SMS', 'maneli-car-inquiry'),
+        'send' => esc_html__('Send', 'maneli-car-inquiry'),
+        'sending' => esc_html__('Sending...', 'maneli-car-inquiry'),
+        'please_wait' => esc_html__('Please wait', 'maneli-car-inquiry'),
+        'missing_required_info' => esc_html__('Missing required information.', 'maneli-car-inquiry'),
+        'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
+        'ok_button' => esc_html__('OK', 'maneli-car-inquiry'),
+        'server_error' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry'),
+    ]
+]);
 ?>
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -692,4 +739,33 @@ if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
 <!-- End::row -->
 
 </div>
+</div>
+
+<!-- SMS History Modal -->
+<div class="modal fade" id="sms-history-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="la la-sms me-2"></i>
+                    <?php esc_html_e('SMS History', 'maneli-car-inquiry'); ?>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="sms-history-loading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
+                    </div>
+                    <p class="mt-2 text-muted"><?php esc_html_e('Loading SMS history...', 'maneli-car-inquiry'); ?></p>
+                </div>
+                <div id="sms-history-content" class="maneli-initially-hidden">
+                    <div id="sms-history-table-container"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Close', 'maneli-car-inquiry'); ?></button>
+            </div>
+        </div>
+    </div>
 </div>

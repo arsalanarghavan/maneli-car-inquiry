@@ -401,7 +401,18 @@ if (typeof maneliInquiryLists === 'undefined') {
             status_will_change_to_in_progress: '<?php echo esc_js(__('Status will change to "In Progress"', 'maneli-car-inquiry')); ?>',
             downpayment_amount_required: '<?php echo esc_js(__('Please enter down payment amount', 'maneli-car-inquiry')); ?>',
             cancel_inquiry_title: '<?php echo esc_js(__('Cancel Inquiry', 'maneli-car-inquiry')); ?>',
-            cancel_reason_label: '<?php echo esc_js(__('Cancellation Reason', 'maneli-car-inquiry')); ?>'
+            cancel_reason_label: '<?php echo esc_js(__('Cancellation Reason', 'maneli-car-inquiry')); ?>',
+            send_sms: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+            recipient: '<?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?>',
+            message: '<?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?>',
+            enter_message: '<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>',
+            please_enter_message: '<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>',
+            sms_sent_successfully: '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>',
+            failed_to_send_sms: '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>',
+            send: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
+            sending: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
+            please_wait: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+            missing_required_info: '<?php echo esc_js(__('Missing required information.', 'maneli-car-inquiry')); ?>'
         },
         installment_rejection_reasons: <?php 
             $options = get_option('maneli_inquiry_all_options', []);
