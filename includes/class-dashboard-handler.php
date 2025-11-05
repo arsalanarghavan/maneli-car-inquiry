@@ -577,8 +577,8 @@ class Maneli_Dashboard_Handler {
             // Load scripts for ALL inquiry pages unconditionally
             $load_inquiry_scripts = false;
             
-            // Check if we're on any inquiry-related page
-            if ($page === 'cash-inquiries' || $page === 'installment-inquiries' || ($page === 'inquiries' && ($subpage === 'cash' || $subpage === 'installment'))) {
+            // Check if we're on any inquiry-related page (including followups)
+            if ($page === 'cash-inquiries' || $page === 'installment-inquiries' || ($page === 'inquiries' && ($subpage === 'cash' || $subpage === 'installment')) || $page === 'cash-followups' || $page === 'installment-followups') {
                 $load_inquiry_scripts = true;
             }
             
@@ -587,9 +587,8 @@ class Maneli_Dashboard_Handler {
                 $load_inquiry_scripts = true;
             }
             
-            // CRITICAL: Remove ALL conditions - ALWAYS load for dashboard pages
-            // Force load regardless of any condition
-            {
+            // Load scripts for inquiry pages (including followups)
+            if ($load_inquiry_scripts) {
                 // Enqueue dependencies first - Use local SweetAlert2
                 $sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
                 if (file_exists($sweetalert2_path)) {
@@ -597,7 +596,7 @@ class Maneli_Dashboard_Handler {
                     wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
                 } else {
                     // Fallback to CDN
-                wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+                    wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
                 }
                 // Note: Select2 is not available locally, keep CDN
                 wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
@@ -654,8 +653,8 @@ class Maneli_Dashboard_Handler {
                 }
             }
             
-            // Inquiry Lists localization - ALWAYS localize
-            {
+            // Inquiry Lists localization - only for inquiry pages (including followups)
+            if ($load_inquiry_scripts) {
                 // Localize script with data for cash or installment
                 $options = get_option('maneli_inquiry_all_options', []);
                 $experts_query = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
@@ -728,6 +727,13 @@ class Maneli_Dashboard_Handler {
                         'sending' => esc_html__('Sending...', 'maneli-car-inquiry'),
                         'please_wait' => esc_html__('Please wait', 'maneli-car-inquiry'),
                         'sms_history_modal_not_found' => esc_html__('SMS history modal not found.', 'maneli-car-inquiry'),
+                        'invalid_inquiry_id' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry'),
+                        'no_sms_history' => esc_html__('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry'),
+                        'error_loading_history' => esc_html__('Error loading SMS history.', 'maneli-car-inquiry'),
+                        'user' => esc_html__('User', 'maneli-car-inquiry'),
+                        'date_time' => esc_html__('Date & Time', 'maneli-car-inquiry'),
+                        'sent' => esc_html__('Sent', 'maneli-car-inquiry'),
+                        'failed' => esc_html__('Failed', 'maneli-car-inquiry'),
                         'missing_required_info' => esc_html__('Missing required information.', 'maneli-car-inquiry'),
                         'nonce_missing' => esc_html__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry'),
                         'security_token_missing' => esc_html__('Security token is missing. Please refresh the page.', 'maneli-car-inquiry'),
@@ -765,8 +771,8 @@ class Maneli_Dashboard_Handler {
                     ]
                 ];
                 
-                // Check for cash inquiries (both old and new routes)
-                if ($page === 'cash-inquiries' || ($page === 'inquiries' && $subpage === 'cash')) {
+                // Check for cash inquiries (both old and new routes) and cash followups
+                if ($page === 'cash-inquiries' || ($page === 'inquiries' && $subpage === 'cash') || $page === 'cash-followups') {
                     $localize_data['nonces'] = [
                         'ajax' => wp_create_nonce('maneli-ajax-nonce'),
                         'cash_filter' => wp_create_nonce('maneli_cash_inquiry_filter_nonce'),
@@ -781,6 +787,7 @@ class Maneli_Dashboard_Handler {
                     $cash_rejection_reasons = array_filter(array_map('trim', explode("\n", $options['cash_inquiry_rejection_reasons'] ?? '')));
                     $localize_data['cash_rejection_reasons'] = $cash_rejection_reasons;
                 } else {
+                    // Installment inquiries and installment followups
                     $localize_data['nonces'] = [
                         'ajax' => wp_create_nonce('maneli-ajax-nonce'),
                         'inquiry_filter' => wp_create_nonce('maneli_inquiry_filter_nonce'),
@@ -806,7 +813,7 @@ class Maneli_Dashboard_Handler {
                 
                 // Ensure maneliInquiryLists is available immediately
                 // Add inline script BEFORE the main script to ensure it's available when needed
-                if ($load_inquiry_scripts || true) {
+                if ($load_inquiry_scripts) {
                     $cash_nonce = wp_create_nonce("maneli_cash_inquiry_filter_nonce");
                     $installment_nonce = wp_create_nonce("maneli_inquiry_filter_nonce");
                     $fallback_script = "
@@ -857,7 +864,10 @@ class Maneli_Dashboard_Handler {
                 
                 // Now localize - this will override/merge with fallback if already set
                 wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', $localize_data);
-                
+            }
+            
+            // EMERGENCY FIX: Only add emergency script if inquiry scripts are loaded
+            if ($load_inquiry_scripts) {
                 // EMERGENCY FIX: Add inline script DIRECTLY in template output
                 // Since wp_footer might not be called, output directly after scripts
                 // Store for output in template

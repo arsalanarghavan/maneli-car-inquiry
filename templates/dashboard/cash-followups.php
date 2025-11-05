@@ -67,79 +67,8 @@ foreach ($followups as $inquiry) {
     }
 }
 
-// Enqueue assets for modals
-if (!wp_script_is('select2', 'enqueued')) {
-    wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-    wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-}
-
-if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
-    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
-    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
-}
-
-// Enqueue SweetAlert2
-$sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
-if (file_exists($sweetalert2_path)) {
-    wp_enqueue_style('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
-    wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
-} else {
-    wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
-}
-
-// Enqueue inquiry-lists.js for SMS handlers
-wp_enqueue_script('maneli-inquiry-lists-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js', ['jquery', 'sweetalert2', 'select2'], '1.0.2', true);
-
-// Localize script
-$experts_query = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
-$experts_list = [];
-foreach ($experts_query as $expert) {
-    $experts_list[] = ['id' => $expert->ID, 'name' => $expert->display_name ?: $expert->user_login];
-}
-
-wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
-    'ajax_url' => admin_url('admin-ajax.php'),
-    'experts' => $experts_list,
-    'nonces' => [
-        'ajax' => wp_create_nonce('maneli-ajax-nonce'),
-        'cash_delete' => wp_create_nonce('maneli_cash_inquiry_delete_nonce'),
-        'inquiry_delete' => wp_create_nonce('maneli_inquiry_delete_nonce'),
-    ],
-    'text' => [
-        'error' => esc_html__('Error', 'maneli-car-inquiry'),
-        'success' => esc_html__('Success', 'maneli-car-inquiry'),
-        'send_sms' => esc_html__('Send SMS', 'maneli-car-inquiry'),
-        'recipient' => esc_html__('Recipient:', 'maneli-car-inquiry'),
-        'message' => esc_html__('Message:', 'maneli-car-inquiry'),
-        'enter_message' => esc_html__('Enter your message...', 'maneli-car-inquiry'),
-        'please_enter_message' => esc_html__('Please enter a message', 'maneli-car-inquiry'),
-        'sms_sent_successfully' => esc_html__('SMS sent successfully!', 'maneli-car-inquiry'),
-        'failed_to_send_sms' => esc_html__('Failed to send SMS', 'maneli-car-inquiry'),
-        'send' => esc_html__('Send', 'maneli-car-inquiry'),
-        'sending' => esc_html__('Sending...', 'maneli-car-inquiry'),
-        'please_wait' => esc_html__('Please wait', 'maneli-car-inquiry'),
-        'missing_required_info' => esc_html__('Missing required information.', 'maneli-car-inquiry'),
-        'nonce_missing' => esc_html__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry'),
-        'security_token_missing' => esc_html__('Security token is missing. Please refresh the page.', 'maneli-car-inquiry'),
-        'network_error' => esc_html__('Network error. Please check your connection.', 'maneli-car-inquiry'),
-        'security_verification_failed' => esc_html__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry'),
-        'unable_to_find_inquiry' => esc_html__('Unable to find inquiry ID. Please refresh the page.', 'maneli-car-inquiry'),
-        'script_init_error' => esc_html__('Script initialization error. Please refresh the page.', 'maneli-car-inquiry'),
-        'server_error_contact_support' => esc_html__('Server error. Please contact support if the problem persists.', 'maneli-car-inquiry'),
-        'unauthorized_access' => esc_html__('Unauthorized access.', 'maneli-car-inquiry'),
-        'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
-        'ok_button' => esc_html__('OK', 'maneli-car-inquiry'),
-        'server_error' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry'),
-        'invalid_inquiry_id' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry'),
-        'no_sms_history' => esc_html__('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry'),
-        'error_loading_history' => esc_html__('Error loading SMS history.', 'maneli-car-inquiry'),
-        'user' => esc_html__('User', 'maneli-car-inquiry'),
-        'date_time' => esc_html__('Date & Time', 'maneli-car-inquiry'),
-        'status' => esc_html__('Status', 'maneli-car-inquiry'),
-        'sent' => esc_html__('Sent', 'maneli-car-inquiry'),
-        'failed' => esc_html__('Failed', 'maneli-car-inquiry'),
-    ]
-]);
+// Scripts and localization are handled by class-dashboard-handler.php
+// Similar to cash-inquiries.php and installment-inquiries.php - no need to enqueue here
 ?>
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -798,4 +727,45 @@ wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
 // Global AJAX variables for SMS sending (same as users.php)
 var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+
+// Debug and verify inquiry-lists.js is loaded
+(function() {
+    function waitForjQuery() {
+        if (typeof jQuery !== 'undefined' || typeof window.jQuery !== 'undefined') {
+            var $ = jQuery || window.jQuery;
+            $(document).ready(function() {
+                console.log('🔵 Cash Followups: Initializing...');
+                console.log('🔵 jQuery:', typeof $ !== 'undefined');
+                console.log('🔵 Swal:', typeof Swal !== 'undefined');
+                console.log('🔵 maneliInquiryLists:', typeof maneliInquiryLists !== 'undefined', maneliInquiryLists);
+                console.log('🔵 maneliAjaxUrl:', typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : 'MISSING');
+                console.log('🔵 maneliAjaxNonce:', typeof maneliAjaxNonce !== 'undefined' ? (maneliAjaxNonce.substring(0, 10) + '...') : 'MISSING');
+                console.log('🔵 Send SMS buttons:', $('.send-sms-report-btn').length);
+                console.log('🔵 SMS History buttons:', $('.view-sms-history-btn').length);
+                
+                // Check if inquiry-lists.js handlers are attached
+                setTimeout(function() {
+                    console.log('🔵 Checking if inquiry-lists.js loaded...');
+                    console.log('🔵 Check console for "inquiry-lists.js FILE LOADED" message');
+                    
+                    if ($('.send-sms-report-btn').length > 0 && typeof Swal !== 'undefined') {
+                        console.log('🔵 Buttons found, attempting to verify handlers...');
+                        var testBtn = $('.send-sms-report-btn').first();
+                        if (testBtn.length) {
+                            console.log('✅ Send SMS button found in DOM');
+                            console.log('🔵 Button data:', {
+                                phone: testBtn.data('phone'),
+                                inquiryId: testBtn.data('inquiry-id'),
+                                customerName: testBtn.data('customer-name')
+                            });
+                        }
+                    }
+                }, 2000);
+            });
+        } else {
+            setTimeout(waitForjQuery, 50);
+        }
+    }
+    waitForjQuery();
+})();
 </script>
