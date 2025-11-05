@@ -9028,3 +9028,12 @@ msgstr "همه محصولات"
 msgid "Missing required information."
 msgstr "اطلاعات موردنیاز وجود ندارد."
 
+msgid "Error loading SMS history."
+msgstr "خطا در بارگذاری تاریخچه پیامک."
+
+msgid "Date & Time"
+msgstr "تاریخ و زمان"
+
+msgid "Sent"
+msgstr "ارسال شده"
+

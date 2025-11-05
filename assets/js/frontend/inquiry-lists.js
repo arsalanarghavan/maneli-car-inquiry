@@ -3798,9 +3798,29 @@ function toPersianNumber(num) {
             return;
         }
         
-        // Show modal
-        const modal = new bootstrap.Modal(document.getElementById('sms-history-modal'));
-        modal.show();
+        // Show modal - support both Bootstrap 5 and jQuery
+        const modalElement = document.getElementById('sms-history-modal');
+        if (!modalElement) {
+            Swal.fire({
+                title: getText('error', 'Error'),
+                text: 'SMS history modal not found.',
+                icon: 'error'
+            });
+            return;
+        }
+        
+        // Try Bootstrap 5 first, fallback to jQuery
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        } else if (typeof jQuery !== 'undefined' && jQuery(modalElement).modal) {
+            jQuery(modalElement).modal('show');
+        } else {
+            // Fallback: show using jQuery show/hide
+            jQuery(modalElement).addClass('show').css('display', 'block');
+            jQuery('.modal-backdrop').remove();
+            jQuery('body').append('<div class="modal-backdrop fade show"></div>');
+        }
         
         // Reset modal content
         $('#sms-history-loading').removeClass('maneli-initially-hidden');

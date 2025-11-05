@@ -122,6 +122,14 @@ wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
         'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
         'ok_button' => esc_html__('OK', 'maneli-car-inquiry'),
         'server_error' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry'),
+        'invalid_inquiry_id' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry'),
+        'no_sms_history' => esc_html__('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry'),
+        'error_loading_history' => esc_html__('Error loading SMS history.', 'maneli-car-inquiry'),
+        'user' => esc_html__('User', 'maneli-car-inquiry'),
+        'date_time' => esc_html__('Date & Time', 'maneli-car-inquiry'),
+        'status' => esc_html__('Status', 'maneli-car-inquiry'),
+        'sent' => esc_html__('Sent', 'maneli-car-inquiry'),
+        'failed' => esc_html__('Failed', 'maneli-car-inquiry'),
     ]
 ]);
 ?>
@@ -714,14 +722,22 @@ wp_localize_script('maneli-inquiry-lists-js', 'maneliInquiryLists', [
                                                    class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
                                                     <i class="la la-eye"></i>
                                                 </a>
-                                                <?php if (($is_admin || $is_assigned_expert) && !empty($customer_mobile)): ?>
-                                                    <button class="btn btn-sm btn-success-light btn-icon send-sms-report-btn" 
+                                                <?php if ($is_admin || $is_assigned_expert): ?>
+                                                    <?php if (!empty($customer_mobile)): ?>
+                                                        <button class="btn btn-sm btn-success-light btn-icon send-sms-report-btn" 
+                                                                data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                                                data-phone="<?php echo esc_attr($customer_mobile); ?>"
+                                                                data-customer-name="<?php echo esc_attr($customer_name); ?>"
+                                                                data-inquiry-type="cash"
+                                                                title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                                            <i class="la la-sms"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                    <button class="btn btn-sm btn-info-light btn-icon view-sms-history-btn" 
                                                             data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
-                                                            data-phone="<?php echo esc_attr($customer_mobile); ?>"
-                                                            data-customer-name="<?php echo esc_attr($customer_name); ?>"
-                                                            data-inquiry-type="cash"
-                                                            title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
-                                                        <i class="la la-sms"></i>
+                                                            data-inquiry-type="cash" 
+                                                            title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                                                        <i class="la la-history"></i>
                                                     </button>
                                                 <?php endif; ?>
                                             </div>
