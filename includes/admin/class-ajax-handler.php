@@ -15,6 +15,18 @@ if (!defined('ABSPATH')) {
 class Maneli_Ajax_Handler {
 
     /**
+     * Log user action for AJAX calls
+     * Helper method to log user actions
+     */
+    private function log_user_action($action_type, $description, $target_type = null, $target_id = null, $metadata = array()) {
+        if (!class_exists('Maneli_Logger')) {
+            return;
+        }
+        $logger = Maneli_Logger::instance();
+        $logger->log_user_action($action_type, $description, $target_type, $target_id, $metadata);
+    }
+
+    /**
      * Convert Jalali date to Gregorian date
      * 
      * @param string $date_str Date string in Jalali format (Y/m/d) or Gregorian format (Y-m-d)
@@ -340,6 +352,7 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_approve_customer_document', [$this, 'ajax_approve_customer_document']);
         add_action('wp_ajax_maneli_reject_customer_document', [$this, 'ajax_reject_customer_document']);
         add_action('wp_ajax_maneli_request_customer_document', [$this, 'ajax_request_customer_document']);
+        add_action('wp_ajax_maneli_request_customer_documents_bulk', [$this, 'ajax_request_customer_documents_bulk']);
         
         // SMS Credit
         add_action('wp_ajax_maneli_get_sms_credit', [$this, 'ajax_get_sms_credit']);
@@ -351,10 +364,19 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_get_notification_stats', [$this, 'ajax_get_notification_stats']);
         add_action('wp_ajax_maneli_retry_notification', [$this, 'ajax_retry_notification']);
         add_action('wp_ajax_maneli_send_single_sms', [$this, 'ajax_send_single_sms']);
+        add_action('wp_ajax_maneli_get_sms_history', [$this, 'ajax_get_sms_history']);
         
         // Status Migration Handlers
         add_action('wp_ajax_maneli_get_migration_stats', [$this, 'ajax_get_migration_stats']);
         add_action('wp_ajax_maneli_run_status_migration', [$this, 'ajax_run_status_migration']);
+        
+        // Log Handlers
+        add_action('wp_ajax_maneli_get_system_log_details', [$this, 'ajax_get_system_log_details']);
+        add_action('wp_ajax_maneli_get_user_log_details', [$this, 'ajax_get_user_log_details']);
+        add_action('wp_ajax_maneli_get_system_logs', [$this, 'ajax_get_system_logs']);
+        add_action('wp_ajax_maneli_get_user_logs', [$this, 'ajax_get_user_logs']);
+        add_action('wp_ajax_maneli_log_console', [$this, 'ajax_log_console']);
+        add_action('wp_ajax_maneli_log_user_action', [$this, 'ajax_log_user_action']);
         
     }
 
@@ -3839,6 +3861,114 @@ class Maneli_Ajax_Handler {
         
         wp_send_json_success(['message' => esc_html__('Document request sent to customer successfully.', 'maneli-car-inquiry')]);
     }
+
+    /**
+     * Request multiple customer documents at once - sends ONE SMS for all selected documents
+     */
+    public function ajax_request_customer_documents_bulk() {
+        check_ajax_referer('maneli_ajax_nonce', 'security');
+        
+        // Check if user is admin or assigned expert
+        $user_id_param = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
+        $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : 'installment';
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            // Check if user is assigned expert
+            if ($inquiry_id > 0) {
+                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+                if (!Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
+                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                    return;
+                }
+            } else {
+                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                return;
+            }
+        }
+        
+        $user_id = $user_id_param;
+        $documents = isset($_POST['documents']) ? $_POST['documents'] : [];
+        
+        // Sanitize documents array
+        if (!is_array($documents)) {
+            $documents = [];
+        }
+        $documents = array_map('sanitize_text_field', $documents);
+        $documents = array_filter($documents); // Remove empty values
+        
+        if (!$user_id || empty($documents)) {
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $user = get_userdata($user_id);
+        if (!$user) {
+            wp_send_json_error(['message' => esc_html__('Invalid user.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $mobile = get_user_meta($user_id, 'mobile_number', true);
+        if (!$mobile) {
+            wp_send_json_error(['message' => esc_html__('Customer mobile number not found.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        // Determine inquiry link
+        $link = home_url('/dashboard/profile-settings');
+        if ($inquiry_id) {
+            $post_type = get_post_type($inquiry_id);
+            if ($post_type === 'cash_inquiry') {
+                $link = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
+            } else {
+                $link = add_query_arg('view_inquiry', $inquiry_id, home_url('/dashboard/installment-inquiries'));
+            }
+        }
+        
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        
+        // Create in-app notifications for each document (individual notifications)
+        foreach ($documents as $document_name) {
+            Maneli_Notification_Handler::create_notification($user_id, [
+                'type' => 'document_requested',
+                'title' => esc_html__('Document requested', 'maneli-car-inquiry'),
+                'message' => sprintf(
+                    esc_html__('Please upload the document "%s".', 'maneli-car-inquiry'),
+                    $document_name
+                ),
+                'link' => $link,
+                'related_id' => $inquiry_id ? $inquiry_id : 0,
+            ]);
+        }
+        
+        // Send ONE SMS for all selected documents
+        $documents_list = implode('، ', $documents); // Persian comma separator
+        $message = sprintf(
+            esc_html__('لطفاً مدارک زیر را در پروفایل خود آپلود کنید: %s', 'maneli-car-inquiry'),
+            $documents_list
+        );
+        
+        Maneli_Notification_Handler::send_sms_notification($mobile, $message);
+        
+        // Update requested documents meta for inquiry (if inquiry_id exists)
+        if ($inquiry_id) {
+            $current_requested = get_post_meta($inquiry_id, 'requested_documents', true) ?: [];
+            if (!is_array($current_requested)) {
+                $current_requested = [];
+            }
+            // Merge with new documents (avoid duplicates)
+            $all_requested = array_unique(array_merge($current_requested, $documents));
+            update_post_meta($inquiry_id, 'requested_documents', $all_requested);
+        }
+        
+        $count = count($documents);
+        $success_message = sprintf(
+            esc_html__('درخواست %d مدرک با موفقیت ارسال شد. یک پیامک برای همه مدارک ارسال شد.', 'maneli-car-inquiry'),
+            $count
+        );
+        
+        wp_send_json_success(['message' => $success_message]);
+    }
     
     /**
      * Get expert details for viewing
@@ -5148,11 +5278,103 @@ class Maneli_Ajax_Handler {
             ]
         );
         
+        // Store SMS history if related_id is an inquiry
+        if ($related_id > 0) {
+            $current_user = wp_get_current_user();
+            $user_name = $current_user->display_name ?: $current_user->user_login;
+            
+            // Check if it's a cash_inquiry or inquiry post type
+            $post_type = get_post_type($related_id);
+            if (in_array($post_type, ['cash_inquiry', 'inquiry'])) {
+                $sms_history = get_post_meta($related_id, 'sms_history', true) ?: [];
+                
+                $sms_entry = [
+                    'user_id' => get_current_user_id(),
+                    'user_name' => $user_name,
+                    'recipient' => $phone,
+                    'message' => $message,
+                    'sent_at' => current_time('mysql'),
+                    'success' => $result['sms']['success'] ?? false,
+                    'error' => $result['sms']['error'] ?? null,
+                ];
+                
+                // Add to beginning of array (newest first)
+                array_unshift($sms_history, $sms_entry);
+                
+                // Keep only last 100 entries
+                if (count($sms_history) > 100) {
+                    $sms_history = array_slice($sms_history, 0, 100);
+                }
+                
+                update_post_meta($related_id, 'sms_history', $sms_history);
+            }
+        }
+        
         if ($result['sms']['success'] ?? false) {
             wp_send_json_success(['message' => esc_html__('SMS sent successfully.', 'maneli-car-inquiry')]);
         } else {
             wp_send_json_error(['message' => esc_html__('Failed to send SMS: ', 'maneli-car-inquiry') . ($result['sms']['error'] ?? 'Unknown error')]);
         }
+    }
+    
+    /**
+     * Get SMS history for an inquiry
+     */
+    public function ajax_get_sms_history() {
+        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        
+        $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
+        $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : '';
+        
+        if (!$inquiry_id) {
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        // Check permissions
+        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_assigned_expert = false;
+        
+        if (!$is_admin && $inquiry_id > 0) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+            $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        }
+        
+        if (!$is_admin && !$is_assigned_expert) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        // Get SMS history
+        $sms_history = get_post_meta($inquiry_id, 'sms_history', true) ?: [];
+        
+        // Format dates and prepare data
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        $formatted_history = [];
+        
+        foreach ($sms_history as $sms) {
+            $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($sms['sent_at'], 'Y/m/d H:i');
+            if (function_exists('persian_numbers_no_separator')) {
+                $jalali_date = persian_numbers_no_separator($jalali_date);
+                $recipient = persian_numbers_no_separator($sms['recipient']);
+            } else {
+                $recipient = $sms['recipient'];
+            }
+            
+            $formatted_history[] = [
+                'user_name' => $sms['user_name'],
+                'recipient' => $recipient,
+                'message' => $sms['message'],
+                'sent_at' => $jalali_date,
+                'success' => $sms['success'] ?? false,
+                'error' => $sms['error'] ?? null,
+            ];
+        }
+        
+        wp_send_json_success([
+            'history' => $formatted_history,
+            'count' => count($formatted_history)
+        ]);
     }
     
     //======================================================================
@@ -5195,6 +5417,312 @@ class Maneli_Ajax_Handler {
             'message' => esc_html__('Migration completed successfully.', 'maneli-car-inquiry'),
             'results' => $results
         ]);
+    }
+
+    /**
+     * Get system log details
+     */
+    public function ajax_get_system_log_details() {
+        check_ajax_referer('maneli_log_details_nonce', 'security');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $log_id = isset($_POST['log_id']) ? intval($_POST['log_id']) : 0;
+        if (!$log_id) {
+            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_system_logs';
+        $log = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $log_id));
+        
+        if (!$log) {
+            wp_send_json_error(['message' => esc_html__('Log not found.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $user = $log->user_id ? get_user_by('ID', $log->user_id) : null;
+        $context = $log->context ? json_decode($log->context, true) : null;
+        
+        ob_start();
+        ?>
+        <div class="log-details">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="30%"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                    <td><?php echo esc_html($log->id); ?></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Type', 'maneli-car-inquiry'); ?></th>
+                    <td><span class="badge bg-primary"><?php echo esc_html(ucfirst($log->log_type)); ?></span></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Severity', 'maneli-car-inquiry'); ?></th>
+                    <td><span class="badge bg-danger"><?php echo esc_html(ucfirst($log->severity)); ?></span></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
+                    <td><?php echo esc_html($log->message); ?></td>
+                </tr>
+                <?php if ($log->file): ?>
+                <tr>
+                    <th><?php esc_html_e('File', 'maneli-car-inquiry'); ?></th>
+                    <td><code><?php echo esc_html($log->file); ?><?php echo $log->line ? ':' . esc_html($log->line) : ''; ?></code></td>
+                </tr>
+                <?php endif; ?>
+                <?php if ($user): ?>
+                <tr>
+                    <th><?php esc_html_e('User', 'maneli-car-inquiry'); ?></th>
+                    <td><?php echo esc_html($user->display_name); ?> (ID: <?php echo esc_html($log->user_id); ?>)</td>
+                </tr>
+                <?php endif; ?>
+                <tr>
+                    <th><?php esc_html_e('IP Address', 'maneli-car-inquiry'); ?></th>
+                    <td><?php echo esc_html($log->ip_address); ?></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('User Agent', 'maneli-car-inquiry'); ?></th>
+                    <td><small><?php echo esc_html($log->user_agent); ?></small></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                    <td>
+                        <?php
+                        $date_time = strtotime($log->created_at);
+                        $greg_date = date('Y-m-d H:i:s', $date_time);
+                        $date_parts = explode(' ', $greg_date);
+                        $date_part = explode('-', $date_parts[0]);
+                        $time_part = $date_parts[1] ?? '00:00:00';
+                        if (function_exists('maneli_gregorian_to_jalali')) {
+                            $jalali_date = maneli_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
+                            echo esc_html($jalali_date . ' ' . $time_part);
+                        } else {
+                            echo esc_html(date_i18n('Y/m/d H:i:s', $date_time));
+                        }
+                        ?>
+                    </td>
+                </tr>
+                <?php if ($context): ?>
+                <tr>
+                    <th><?php esc_html_e('Context', 'maneli-car-inquiry'); ?></th>
+                    <td><pre><?php echo esc_html(json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre></td>
+                </tr>
+                <?php endif; ?>
+            </table>
+        </div>
+        <?php
+        $html = ob_get_clean();
+        
+        wp_send_json_success(['html' => $html]);
+    }
+
+    /**
+     * Get user log details
+     */
+    public function ajax_get_user_log_details() {
+        check_ajax_referer('maneli_log_details_nonce', 'security');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $log_id = isset($_POST['log_id']) ? intval($_POST['log_id']) : 0;
+        if (!$log_id) {
+            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_user_logs';
+        $log = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $log_id));
+        
+        if (!$log) {
+            wp_send_json_error(['message' => esc_html__('Log not found.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $user = get_user_by('ID', $log->user_id);
+        $metadata = $log->metadata ? json_decode($log->metadata, true) : null;
+        
+        ob_start();
+        ?>
+        <div class="log-details">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="30%"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                    <td><?php echo esc_html($log->id); ?></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('User', 'maneli-car-inquiry'); ?></th>
+                    <td>
+                        <?php if ($user): ?>
+                            <?php echo esc_html($user->display_name); ?> (ID: <?php echo esc_html($log->user_id); ?>)
+                        <?php else: ?>
+                            <?php echo esc_html($log->user_id); ?>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Action Type', 'maneli-car-inquiry'); ?></th>
+                    <td><span class="badge bg-primary"><?php echo esc_html(str_replace('_', ' ', ucwords($log->action_type, '_'))); ?></span></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Description', 'maneli-car-inquiry'); ?></th>
+                    <td><?php echo esc_html($log->action_description); ?></td>
+                </tr>
+                <?php if ($log->target_type && $log->target_id): ?>
+                <tr>
+                    <th><?php esc_html_e('Target', 'maneli-car-inquiry'); ?></th>
+                    <td><span class="badge bg-info"><?php echo esc_html(ucfirst($log->target_type)); ?> #<?php echo esc_html($log->target_id); ?></span></td>
+                </tr>
+                <?php endif; ?>
+                <tr>
+                    <th><?php esc_html_e('IP Address', 'maneli-car-inquiry'); ?></th>
+                    <td><?php echo esc_html($log->ip_address); ?></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('User Agent', 'maneli-car-inquiry'); ?></th>
+                    <td><small><?php echo esc_html($log->user_agent); ?></small></td>
+                </tr>
+                <tr>
+                    <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                    <td>
+                        <?php
+                        $date_time = strtotime($log->created_at);
+                        $greg_date = date('Y-m-d H:i:s', $date_time);
+                        $date_parts = explode(' ', $greg_date);
+                        $date_part = explode('-', $date_parts[0]);
+                        $time_part = $date_parts[1] ?? '00:00:00';
+                        if (function_exists('maneli_gregorian_to_jalali')) {
+                            $jalali_date = maneli_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
+                            echo esc_html($jalali_date . ' ' . $time_part);
+                        } else {
+                            echo esc_html(date_i18n('Y/m/d H:i:s', $date_time));
+                        }
+                        ?>
+                    </td>
+                </tr>
+                <?php if ($metadata): ?>
+                <tr>
+                    <th><?php esc_html_e('Metadata', 'maneli-car-inquiry'); ?></th>
+                    <td><pre><?php echo esc_html(json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre></td>
+                </tr>
+                <?php endif; ?>
+            </table>
+        </div>
+        <?php
+        $html = ob_get_clean();
+        
+        wp_send_json_success(['html' => $html]);
+    }
+
+    /**
+     * Get system logs (AJAX)
+     */
+    public function ajax_get_system_logs() {
+        check_ajax_referer('maneli_ajax_nonce', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $logger = Maneli_Logger::instance();
+        $args = array(
+            'log_type' => isset($_POST['log_type']) ? sanitize_text_field($_POST['log_type']) : '',
+            'severity' => isset($_POST['severity']) ? sanitize_text_field($_POST['severity']) : '',
+            'date_from' => isset($_POST['date_from']) ? sanitize_text_field($_POST['date_from']) : '',
+            'date_to' => isset($_POST['date_to']) ? sanitize_text_field($_POST['date_to']) : '',
+            'search' => isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '',
+            'limit' => isset($_POST['limit']) ? intval($_POST['limit']) : 50,
+            'offset' => isset($_POST['offset']) ? intval($_POST['offset']) : 0,
+        );
+        
+        $logs = $logger->get_system_logs($args);
+        $total = $logger->get_system_logs_count($args);
+        
+        wp_send_json_success([
+            'logs' => $logs,
+            'total' => $total
+        ]);
+    }
+
+    /**
+     * Get user logs (AJAX)
+     */
+    public function ajax_get_user_logs() {
+        check_ajax_referer('maneli_ajax_nonce', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        $logger = Maneli_Logger::instance();
+        $args = array(
+            'user_id' => isset($_POST['user_id']) ? intval($_POST['user_id']) : '',
+            'action_type' => isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : '',
+            'target_type' => isset($_POST['target_type']) ? sanitize_text_field($_POST['target_type']) : '',
+            'date_from' => isset($_POST['date_from']) ? sanitize_text_field($_POST['date_from']) : '',
+            'date_to' => isset($_POST['date_to']) ? sanitize_text_field($_POST['date_to']) : '',
+            'search' => isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '',
+            'limit' => isset($_POST['limit']) ? intval($_POST['limit']) : 50,
+            'offset' => isset($_POST['offset']) ? intval($_POST['offset']) : 0,
+        );
+        
+        $logs = $logger->get_user_logs($args);
+        $total = $logger->get_user_logs_count($args);
+        
+        wp_send_json_success([
+            'logs' => $logs,
+            'total' => $total
+        ]);
+    }
+
+    /**
+     * Log console message (from JavaScript)
+     */
+    public function ajax_log_console() {
+        // Light nonce check - this is called from frontend
+        if (!is_user_logged_in()) {
+            return;
+        }
+
+        $logger = Maneli_Logger::instance();
+        $log_type = isset($_POST['log_type']) ? sanitize_text_field($_POST['log_type']) : 'console';
+        $severity = isset($_POST['severity']) ? sanitize_text_field($_POST['severity']) : 'info';
+        $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
+        $context = isset($_POST['context']) ? json_decode(stripslashes($_POST['context']), true) : null;
+
+        $logger->log_console($message, $log_type, $severity, $context);
+        
+        wp_send_json_success();
+    }
+
+    /**
+     * Log user action (from JavaScript)
+     */
+    public function ajax_log_user_action() {
+        // Light nonce check - this is called from frontend
+        if (!is_user_logged_in()) {
+            return;
+        }
+
+        $logger = Maneli_Logger::instance();
+        $action_type = isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : 'unknown';
+        $action_description = isset($_POST['action_description']) ? sanitize_text_field($_POST['action_description']) : '';
+        $target_type = isset($_POST['target_type']) ? sanitize_text_field($_POST['target_type']) : null;
+        $target_id = isset($_POST['target_id']) ? intval($_POST['target_id']) : null;
+        $metadata = isset($_POST['metadata']) ? json_decode(stripslashes($_POST['metadata']), true) : null;
+
+        $logger->log_user_action($action_type, $action_description, $target_type, $target_id, $metadata);
+        
+        wp_send_json_success();
     }
     
 }

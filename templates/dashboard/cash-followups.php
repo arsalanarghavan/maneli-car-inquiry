@@ -600,6 +600,10 @@ if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
                                     $cash_status_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($cash_status);
                                     $expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
                                     $expert = $expert_id ? get_userdata($expert_id) : null;
+                                    $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
+                                    
+                                    // Check if current user is assigned expert
+                                    $is_assigned_expert = !$is_admin && $expert_id == $current_user_id;
                                     
                                     // Get followup history
                                     $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
@@ -663,6 +667,16 @@ if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
                                                    class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
                                                     <i class="la la-eye"></i>
                                                 </a>
+                                                <?php if (($is_admin || $is_assigned_expert) && !empty($customer_mobile)): ?>
+                                                    <button class="btn btn-sm btn-success-light btn-icon send-sms-report-btn" 
+                                                            data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                                            data-phone="<?php echo esc_attr($customer_mobile); ?>"
+                                                            data-customer-name="<?php echo esc_attr($customer_name); ?>"
+                                                            data-inquiry-type="cash"
+                                                            title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                                        <i class="la la-sms"></i>
+                                                    </button>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>

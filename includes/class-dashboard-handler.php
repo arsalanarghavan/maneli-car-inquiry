@@ -62,7 +62,9 @@ class Maneli_Dashboard_Handler {
         add_action('wp_ajax_maneli_password_login', [$this, 'handle_password_login']);
         add_action('wp_ajax_nopriv_maneli_password_login', [$this, 'handle_password_login']);
         
-        // مخفی کردن Admin Bar در داشبورد
+        // مخفی کردن Admin Bar برای همه نقش‌های افزونه در همه صفحات
+        add_action('init', [$this, 'hide_admin_bar_for_plugin_roles'], 999);
+        add_filter('show_admin_bar', [$this, 'disable_admin_bar_for_plugin_roles'], 999);
         add_action('template_redirect', [$this, 'hide_admin_bar_in_dashboard']);
         
         // Show notice if rewrite rules need flushing
@@ -165,6 +167,83 @@ class Maneli_Dashboard_Handler {
             $this->render_dashboard();
             exit;
         }
+    }
+    
+    /**
+     * مخفی کردن Admin Bar برای همه نقش‌های افزونه در همه صفحات
+     */
+    public function hide_admin_bar_for_plugin_roles() {
+        // بررسی آیا کاربر وارد شده است
+        if (!is_user_logged_in()) {
+            return;
+        }
+        
+        // دریافت نقش‌های کاربر
+        $current_user = wp_get_current_user();
+        $user_roles = (array) $current_user->roles;
+        
+        // نقش‌های افزونه
+        $plugin_roles = ['maneli_admin', 'maneli_expert', 'customer'];
+        
+        // بررسی آیا کاربر یکی از نقش‌های افزونه را دارد
+        $has_plugin_role = false;
+        foreach ($plugin_roles as $role) {
+            if (in_array($role, $user_roles, true)) {
+                $has_plugin_role = true;
+                break;
+            }
+        }
+        
+        // اگر کاربر یکی از نقش‌های افزونه را دارد، Admin Bar را مخفی کن
+        if ($has_plugin_role) {
+            // غیرفعال کردن کامل Admin Bar
+            show_admin_bar(false);
+            
+            // حذف Admin Bar از DOM
+            remove_action('wp_head', '_admin_bar_bump_cb');
+            remove_action('admin_head', '_admin_bar_bump_cb');
+            
+            // غیرفعال کردن اسکریپت‌های Admin Bar
+            add_action('wp_enqueue_scripts', function() {
+                wp_dequeue_style('admin-bar');
+                wp_deregister_style('admin-bar');
+                wp_dequeue_script('admin-bar');
+                wp_deregister_script('admin-bar');
+            }, 999);
+            
+            add_action('admin_enqueue_scripts', function() {
+                wp_dequeue_style('admin-bar');
+                wp_deregister_style('admin-bar');
+                wp_dequeue_script('admin-bar');
+                wp_deregister_script('admin-bar');
+            }, 999);
+        }
+    }
+    
+    /**
+     * فیلتر برای غیرفعال کردن Admin Bar برای نقش‌های افزونه
+     */
+    public function disable_admin_bar_for_plugin_roles($show) {
+        // بررسی آیا کاربر وارد شده است
+        if (!is_user_logged_in()) {
+            return $show;
+        }
+        
+        // دریافت نقش‌های کاربر
+        $current_user = wp_get_current_user();
+        $user_roles = (array) $current_user->roles;
+        
+        // نقش‌های افزونه
+        $plugin_roles = ['maneli_admin', 'maneli_expert', 'customer'];
+        
+        // بررسی آیا کاربر یکی از نقش‌های افزونه را دارد
+        foreach ($plugin_roles as $role) {
+            if (in_array($role, $user_roles, true)) {
+                return false; // غیرفعال کردن Admin Bar
+            }
+        }
+        
+        return $show;
     }
     
     /**
@@ -275,6 +354,24 @@ class Maneli_Dashboard_Handler {
                 'url' => admin_url('admin-ajax.php'),
                 'notifications_nonce' => wp_create_nonce('maneli_notifications_nonce'),
                 'ajax_url' => admin_url('admin-ajax.php'), // Also add for compatibility
+                'nonce' => wp_create_nonce('maneli_ajax_nonce'), // Add nonce for logging
+            ));
+            
+            // Logging tracker - intercept console logs and track user actions
+            $options = get_option('maneli_inquiry_all_options', []);
+            wp_enqueue_script('maneli-logging-tracker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/logging-tracker.js', ['jquery'], '1.0.0', true);
+            wp_localize_script('maneli-logging-tracker', 'maneliAjax', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('maneli_ajax_nonce'),
+            ));
+            wp_localize_script('maneli-logging-tracker', 'maneliLoggingSettings', array(
+                'enable_logging_system' => !empty($options['enable_logging_system']) && $options['enable_logging_system'] == '1',
+                'log_console_messages' => !empty($options['log_console_messages']) && $options['log_console_messages'] == '1',
+                'enable_user_logging' => !empty($options['enable_user_logging']) && $options['enable_user_logging'] == '1',
+                'log_button_clicks' => !empty($options['log_button_clicks']) && $options['log_button_clicks'] == '1',
+                'log_form_submissions' => !empty($options['log_form_submissions']) && $options['log_form_submissions'] == '1',
+                'log_ajax_calls' => !empty($options['log_ajax_calls']) && $options['log_ajax_calls'] == '1',
+                'log_page_views' => !empty($options['log_page_views']) && $options['log_page_views'] == '1',
             ));
             // wp_enqueue_script('maneli-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/dashboard.js', ['jquery'], '1.0.0', true);
             // Dashboard.js file does not exist - commented out
@@ -1667,6 +1764,25 @@ class Maneli_Dashboard_Handler {
                 'url' => home_url('/dashboard/visitor-statistics'),
                 'icon' => 'ri-line-chart-line',
                 'capability' => 'manage_maneli_inquiries'
+            ];
+            $menu_items[] = [
+                'title' => esc_html__('System Logs', 'maneli-car-inquiry'),
+                'icon' => 'ri-file-list-3-line',
+                'capability' => 'manage_maneli_inquiries',
+                'children' => [
+                    [
+                        'title' => esc_html__('System Logs', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard/logs/system'),
+                        'icon' => 'ri-bug-line',
+                        'capability' => 'manage_maneli_inquiries'
+                    ],
+                    [
+                        'title' => esc_html__('User Logs', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard/logs/user'),
+                        'icon' => 'ri-user-line',
+                        'capability' => 'manage_maneli_inquiries'
+                    ]
+                ]
             ];
             $menu_items[] = [
                 'title' => esc_html__('Notification Center', 'maneli-car-inquiry'),

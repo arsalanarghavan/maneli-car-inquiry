@@ -14,5703 +14,3300 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-
+"Plural-Forms: nplurals=2; plural=(n != 1)"
 msgid "Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue."
-msgstr ""
-
-
+msgstr "Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue."
+"Maneli Car Inquiry plugin requires WooCommerce to be installed and"
+"activated. Please activate WooCommerce to continue."
+"Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue"
 msgid "You do not have sufficient permissions to access this page."
-msgstr ""
-
-
+msgstr "You do not have sufficient permissions to access this page."
 msgid "Unauthorized access."
-msgstr ""
-
-
+msgstr "Unauthorized access."
 msgid "Invalid request or insufficient permissions."
-msgstr ""
-
-
+msgstr "Invalid request or insufficient permissions."
 msgid "Security check failed!"
-msgstr ""
-
-
+msgstr "Security check failed!"
 msgid "Login Required"
-msgstr ""
-
-
+msgstr "Login Required"
 msgid "Please log in to start your inquiry."
-msgstr ""
-
-
+msgstr "Please log in to start your inquiry."
 msgid "Log In"
-msgstr ""
-
-
+msgstr "Log In"
 # User Roles
 
-
 msgid "Customer"
-msgstr ""
-
-
+msgstr "Customer"
 msgid "Maneli Expert"
-msgstr ""
-
-
+msgstr "Maneli Expert"
 msgid "Maneli Manager"
-msgstr ""
-
-
+msgstr "Maneli Manager"
 msgid "General Manager"
-msgstr ""
-
-
+msgstr "General Manager"
 # Form Fields
 
-
 msgid "First Name"
-msgstr ""
-
-
+msgstr "First Name"
 msgid "Last Name"
-msgstr ""
-
-
+msgstr "Last Name"
 msgid "Father's Name"
-msgstr ""
-
-
+msgstr "Father's Name"
 msgid "National Code"
-msgstr ""
-
-
+msgstr "National Code"
 msgid "Date of Birth"
-msgstr ""
-
-
+msgstr "Date of Birth"
 msgid "Mobile Number"
-msgstr ""
-
-
+msgstr "Mobile Number"
 msgid "Phone Number"
-msgstr ""
-
-
+msgstr "Phone Number"
 msgid "Email"
-msgstr ""
-
-
+msgstr "Email"
 msgid "Address"
-msgstr ""
-
-
+msgstr "Address"
 msgid "Occupation"
-msgstr ""
-
-
+msgstr "Occupation"
 msgid "Job Type"
-msgstr ""
-
-
+msgstr "Job Type"
 msgid "Job Title:"
-msgstr ""
-
-
+msgstr "Job Title:"
 msgid "Issuer Job Title:"
-msgstr ""
-
-
+msgstr "Issuer Job Title:"
 msgid "Income Level"
-msgstr ""
-
-
+msgstr "Income Level"
 msgid "Residency Status"
-msgstr ""
-
-
+msgstr "Residency Status"
 msgid "Workplace Status"
-msgstr ""
-
-
+msgstr "Workplace Status"
 msgid "Bank Name"
-msgstr ""
-
-
+msgstr "Bank Name"
 msgid "Account Number"
-msgstr ""
-
-
+msgstr "Account Number"
 msgid "Branch Code"
-msgstr ""
-
-
+msgstr "Branch Code"
 msgid "Branch Name"
-msgstr ""
-
-
+msgstr "Branch Name"
 # Job Type Options
 
-
 msgid "Freelance"
-msgstr ""
-
-
+msgstr "Freelance"
 msgid "Employee"
-msgstr ""
-
-
+msgstr "Employee"
 # Residency Status Options
 
-
 msgid "Owner"
-msgstr ""
-
-
+msgstr "Owner"
 msgid "Tenant"
-msgstr ""
-
-
+msgstr "Tenant"
 # Workplace Status Options
 
-
 msgid "Permanent"
-msgstr ""
-
-
+msgstr "Permanent"
 msgid "Contract"
-msgstr ""
-
-
+msgstr "Contract"
 # Car and Product
 
-
 msgid "Car"
-msgstr ""
-
-
+msgstr "Car"
 msgid "Car Name"
-msgstr ""
-
-
+msgstr "Car Name"
 msgid "Car Model"
-msgstr ""
-
-
+msgstr "Car Model"
 msgid "Total Price"
-msgstr ""
-
-
+msgstr "Total Price"
 msgid "Cash Price (Toman)"
-msgstr ""
-
-
+msgstr "Cash Price (Toman)"
 msgid "Installment Price (Toman)"
-msgstr ""
-
-
+msgstr "Installment Price (Toman)"
 msgid "Down Payment"
-msgstr ""
-
-
+msgstr "Down Payment"
 msgid "Min. Down Payment (Toman)"
-msgstr ""
-
-
+msgstr "Min. Down Payment (Toman)"
 msgid "Loan Amount"
-msgstr ""
-
-
+msgstr "Loan Amount"
 msgid "Installment Term"
-msgstr ""
-
-
+msgstr "Installment Term"
 msgid "Monthly Installment"
-msgstr ""
-
-
+msgstr "Monthly Installment"
 msgid "Approximate Installment Amount"
-msgstr ""
-
-
+msgstr "Approximate Installment Amount"
 msgid "Approximate Installment Amount:"
-msgstr ""
-
-
+msgstr "Approximate Installment Amount:"
 msgid "Available Colors"
-msgstr ""
-
-
+msgstr "Available Colors"
 msgid "Sales Status"
-msgstr ""
-
-
+msgstr "Sales Status"
 msgid "Toman"
-msgstr ""
-
-
+msgstr "Toman"
 msgid "Months"
-msgstr ""
-
-
+msgstr "Months"
 # Time Periods
 
-
 msgid "12 Months"
-msgstr ""
-
-
+msgstr "12 Months"
 msgid "18 Months"
-msgstr ""
-
-
+msgstr "18 Months"
 msgid "24 Months"
-msgstr ""
-
-
+msgstr "24 Months"
 msgid "36 Months"
-msgstr ""
-
-
+msgstr "36 Months"
 # Status Messages
-
 
 msgid "Status"
 msgstr "Status"
-
-
 msgid "Pending Review"
-msgstr ""
-
-
+msgstr "Pending Review"
 msgid "Approved and Referred"
-msgstr ""
-
-
+msgstr "Approved and Referred"
 msgid "More Documents Required"
-msgstr ""
-
-
+msgstr "More Documents Required"
 msgid "Rejected"
-msgstr ""
-
-
+msgstr "Rejected"
 msgid "Inquiry Failed"
-msgstr ""
-
-
+msgstr "Inquiry Failed"
 msgid "Unknown"
-msgstr ""
-
-
+msgstr "Unknown"
 msgid "Follow-up in Progress"
-msgstr ""
-
-
+msgstr "Follow-up in Progress"
 msgid "Referred"
-msgstr ""
-
-
+msgstr "Referred"
 msgid "Awaiting Payment"
-msgstr ""
-
-
+msgstr "Awaiting Payment"
 msgid "Completed"
-msgstr ""
-
-
+msgstr "Completed"
 # Inquiry Types
 
-
 msgid "Installment Inquiries"
-msgstr ""
-
-
+msgstr "Installment Inquiries"
 msgid "Installment Inquiry"
-msgstr ""
-
-
+msgstr "Installment Inquiry"
 msgid "Bank Inquiries"
-msgstr ""
-
-
+msgstr "Bank Inquiries"
 msgid "All Inquiries"
-msgstr ""
-
-
+msgstr "All Inquiries"
 msgid "Cash Requests"
-msgstr ""
-
-
+msgstr "Cash Requests"
 msgid "Cash Request"
-msgstr ""
-
-
+msgstr "Cash Request"
 msgid "All Cash Requests"
-msgstr ""
-
-
+msgstr "All Cash Requests"
 # Cheque Information
 
-
 msgid "Cheque Issuer Information"
-msgstr ""
-
-
+msgstr "Cheque Issuer Information"
 msgid "Cheque Holder Information"
-msgstr ""
-
-
+msgstr "Cheque Holder Information"
 msgid "I am both the buyer and the cheque issuer."
-msgstr ""
-
-
+msgstr "I am both the buyer and the cheque issuer."
 msgid "The cheque issuer is another person."
-msgstr ""
-
-
+msgstr "The cheque issuer is another person."
 msgid "Issuer First Name:"
-msgstr ""
-
-
+msgstr "Issuer First Name:"
 msgid "Issuer Last Name:"
-msgstr ""
-
-
+msgstr "Issuer Last Name:"
 msgid "Issuer Father's Name:"
-msgstr ""
-
-
+msgstr "Issuer Father's Name:"
 msgid "Issuer Date of Birth:"
-msgstr ""
-
-
+msgstr "Issuer Date of Birth:"
 msgid "Issuer Mobile Number:"
-msgstr ""
-
-
+msgstr "Issuer Mobile Number:"
 msgid "Issuer National Code:"
-msgstr ""
-
-
+msgstr "Issuer National Code:"
 msgid "Issuer Occupation:"
-msgstr ""
-
-
+msgstr "Issuer Occupation:"
 msgid "Issuer Phone Number:"
-msgstr ""
-
-
+msgstr "Issuer Phone Number:"
 msgid "Issuer Address:"
-msgstr ""
-
-
+msgstr "Issuer Address:"
 msgid "Issuer Bank Name:"
-msgstr ""
-
-
+msgstr "Issuer Bank Name:"
 msgid "Issuer Account Number:"
-msgstr ""
-
-
+msgstr "Issuer Account Number:"
 msgid "Issuer Branch Code:"
-msgstr ""
-
-
+msgstr "Issuer Branch Code:"
 msgid "Issuer Branch Name:"
-msgstr ""
-
-
+msgstr "Issuer Branch Name:"
 msgid "Issuer Residency Status"
-msgstr ""
-
-
+msgstr "Issuer Residency Status"
 # Form Steps
 
-
 msgid "Step 1: Select a Car"
-msgstr ""
-
-
+msgstr "Step 1: Select a Car"
 msgid "Step 2: Complete Information"
-msgstr ""
-
-
+msgstr "Step 2: Complete Information"
 msgid "Step 3: Confirm Car"
-msgstr ""
-
-
+msgstr "Step 3: Confirm Car"
 msgid "Step 4: Payment"
-msgstr ""
-
-
+msgstr "Step 4: Payment"
 msgid "Step 5: Pending Review"
-msgstr ""
-
-
+msgstr "Step 5: Pending Review"
 msgid "Step 6: Final Result"
-msgstr ""
-
-
+msgstr "Step 6: Final Result"
 msgid "Select Car"
-msgstr ""
-
-
+msgstr "Select Car"
 msgid "Complete Information"
-msgstr ""
-
-
+msgstr "Complete Information"
 msgid "Confirm Car"
-msgstr ""
-
-
+msgstr "Confirm Car"
 msgid "Payment"
-msgstr ""
-
-
+msgstr "Payment"
 msgid "Final Result"
-msgstr ""
-
-
+msgstr "Final Result"
 # Progress Tracker
 
-
 msgid "Step %s"
-msgstr ""
-
-
+msgstr "Step %s"
 # Car Selection
 
-
 msgid "Your Request Summary"
-msgstr ""
-
-
+msgstr "Your Request Summary"
 msgid "Selected Car:"
-msgstr ""
-
-
+msgstr "Selected Car:"
 msgid "Car Model:"
-msgstr ""
-
-
+msgstr "Car Model:"
 msgid "Total Price:"
-msgstr ""
-
-
+msgstr "Total Price:"
 msgid "Down Payment:"
-msgstr ""
-
-
+msgstr "Down Payment:"
 msgid "Loan Amount:"
-msgstr ""
-
-
+msgstr "Loan Amount:"
 msgid "Installment Term:"
-msgstr ""
-
-
+msgstr "Installment Term:"
 msgid "Approx. Installment:"
-msgstr ""
-
-
+msgstr "Approx. Installment:"
 # Price Disclaimer
 
-
 msgid "Due to severe market fluctuations, car prices are approximate and may change until final approval."
-msgstr ""
-
-
+msgstr "Due to severe market fluctuations, car prices are approximate and may change until final approval."
+"Due to severe market fluctuations, car prices are approximate and may"
+"change until final approval."
+"Due to severe market fluctuations, car prices are approximate and may change until final approval"
 # Confirm Car Step
 
-
 msgid "The inquiry will be performed for the car below and cannot be changed."
-msgstr ""
-
-
+msgstr "The inquiry will be performed for the car below and cannot be changed."
 msgid "Your Selected Car"
-msgstr ""
-
-
+msgstr "Your Selected Car"
 msgid "Search…"
-msgstr ""
-
-
+msgstr "Search…"
 msgid "All Brands"
-msgstr ""
-
-
+msgstr "All Brands"
 msgid "All Categories"
-msgstr ""
-
-
+msgstr "All Categories"
 msgid "Filter"
-msgstr ""
-
-
+msgstr "Filter"
 msgid "View Full Cars List"
-msgstr ""
-
-
+msgstr "View Full Cars List"
 msgid "I agree and confirm this car."
-msgstr ""
-
-
+msgstr "I agree and confirm this car."
 msgid "Previous Step"
-msgstr ""
-
-
+msgstr "Previous Step"
 msgid "Continue"
-msgstr ""
-
-
+msgstr "Continue"
 # Payment
 
-
 msgid "Step 3: Payment of Inquiry Fee"
-msgstr ""
-
-
+msgstr "Step 3: Payment of Inquiry Fee"
 msgid "To finalize your request and send it to our experts, please pay the inquiry fee of %s Toman."
-msgstr ""
-
-
+msgstr "To finalize your request and send it to our experts, please pay the inquiry fee of %s Toman."
+"To finalize your request and send it to our experts, please pay the"
+"inquiry fee of %s Toman."
+"To finalize your request and send it to our experts, please pay the inquiry fee of %s Toman"
 msgid "Have a discount code?"
-msgstr ""
-
-
+msgstr "Have a discount code?"
 msgid "Enter discount code:"
-msgstr ""
-
-
+msgstr "Enter discount code:"
 msgid "Discount Code"
-msgstr ""
-
-
+msgstr "Discount Code"
 msgid "Pay and Finalize Request"
-msgstr ""
-
-
+msgstr "Pay and Finalize Request"
 msgid "Finalize Request"
-msgstr ""
-
-
+msgstr "Finalize Request"
 # Wait Message
 
-
 msgid "Our experts require additional documents to complete the process. Please wait for our team to contact you."
-msgstr ""
-
-
+msgstr "Our experts require additional documents to complete the process. Please wait for our team to contact you."
+"Our experts require additional documents to complete the process."
+"Please wait for our team to contact you."
+"Our experts require additional documents to complete the process. Please wait for our team to contact you"
 msgid "Your inquiry request has been successfully submitted. You will be notified of the result after it has been reviewed by our experts (usually within 24 business hours)."
-msgstr ""
-
-
+msgstr "Your inquiry request has been successfully submitted. You will be notified of the result after it has been reviewed by our experts (usually within 24 business hours)."
+"Your inquiry request has been successfully submitted. You will be"
+"notified of the result after it has been reviewed by our experts"
+"(usually within 24 business hours)."
+"Your inquiry request has been successfully submitted. You will be notified of the result after it has been reviewed by our experts (usually within 24 business hours)"
 msgid "Step 4: Pending Review"
-msgstr ""
-
-
+msgstr "Step 4: Pending Review"
 msgid "Thank you for your patience."
-msgstr ""
-
-
+msgstr "Thank you for your patience."
 # Final Report
 
-
 msgid "Step 5: Final Result"
-msgstr ""
-
-
+msgstr "Step 5: Final Result"
 msgid "Final Result: Your request has been approved."
-msgstr ""
-
-
+msgstr "Final Result: Your request has been approved."
 msgid "Your request has been approved by our experts and referred to the sales unit. One of our colleagues will contact you soon for final coordination."
-msgstr ""
-
-
+msgstr "Your request has been approved by our experts and referred to the sales unit. One of our colleagues will contact you soon for final coordination."
+"Your request has been approved by our experts and referred to the"
+"sales unit. One of our colleagues will contact you soon for final"
+"coordination."
+"Your request has been approved by our experts and referred to the sales unit. One of our colleagues will contact you soon for final coordination"
 msgid "Final Result: Your request has been rejected."
-msgstr ""
-
-
+msgstr "Final Result: Your request has been rejected."
 msgid "Reason:"
-msgstr ""
-
-
+msgstr "Reason:"
 msgid "Request Summary"
-msgstr ""
-
-
+msgstr "Request Summary"
 msgid "Credit Verification Result"
-msgstr ""
-
-
+msgstr "Credit Verification Result"
 msgid "Sayad Cheque Status:"
-msgstr ""
-
-
+msgstr "Sayad Cheque Status:"
 msgid "Status Explanation:"
-msgstr ""
-
-
+msgstr "Status Explanation:"
 msgid "Bank inquiry was not performed."
-msgstr ""
-
-
+msgstr "Bank inquiry was not performed."
 # Failed Inquiry
 
-
 msgid "Inquiry Unsuccessful"
-msgstr ""
-
-
+msgstr "Inquiry Unsuccessful"
 msgid "Unfortunately, an error occurred while attempting to retrieve your inquiry from the banking system. This issue could be due to incorrect identity information or temporary system problems."
-msgstr ""
-
-
+msgstr "Unfortunately, an error occurred while attempting to retrieve your inquiry from the banking system. This issue could be due to incorrect identity information or temporary system problems."
+"Unfortunately, an error occurred while attempting to retrieve your"
+"inquiry from the banking system. This issue could be due to incorrect"
+"identity information or temporary system problems."
+"Unfortunately, an error occurred while attempting to retrieve your inquiry from the banking system. This issue could be due to incorrect identity information or temporary system problems"
 msgid "You can edit your information and try again."
-msgstr ""
-
-
+msgstr "You can edit your information and try again."
 msgid "Retry and Correct Information"
-msgstr ""
-
-
+msgstr "Retry and Correct Information"
 # Expert Panel
 
-
 msgid "New inquiry has been successfully created for the customer."
-msgstr ""
-
-
+msgstr "New inquiry has been successfully created for the customer."
 msgid "1. Select Car and Conditions"
-msgstr ""
-
-
+msgstr "1. Select Car and Conditions"
 msgid "Search for a Car"
-msgstr ""
-
-
+msgstr "Search for a Car"
 msgid "Start typing to search for a car..."
-msgstr ""
-
-
+msgstr "Start typing to search for a car..."
 msgid "Assign Responsible Expert"
-msgstr ""
-
-
+msgstr "Assign Responsible Expert"
 msgid "-- Automatic Assignment (Round-robin) --"
-msgstr ""
-
-
+msgstr "-- Automatic Assignment (Round-robin) --"
 msgid "If not selected, the system will automatically assign an expert."
-msgstr ""
-
-
+msgstr "If not selected, the system will automatically assign an expert."
 msgid "2. Identity Information"
-msgstr ""
-
-
+msgstr "2. Identity Information"
 msgid "Buyer and cheque issuer are the same person."
-msgstr ""
-
-
+msgstr "Buyer and cheque issuer are the same person."
 msgid "Buyer Information Form"
-msgstr ""
-
-
+msgstr "Buyer Information Form"
 msgid "Cheque Issuer Information Form"
-msgstr ""
-
-
+msgstr "Cheque Issuer Information Form"
 msgid "Submit Inquiry and Create User"
-msgstr ""
-
-
+msgstr "Submit Inquiry and Create User"
 # Payment Status
 
-
 msgid "Your payment was successful. Your request has been submitted to our experts."
-msgstr ""
-
-
+msgstr "Your payment was successful. Your request has been submitted to our experts."
+"Your payment was successful. Your request has been submitted to our"
+"experts."
+"Your payment was successful. Your request has been submitted to our experts"
 msgid "Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours."
-msgstr ""
-
-
+msgstr "Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours."
+"Unfortunately, your transaction was unsuccessful. If any amount was"
+"deducted, it will be returned to your account within 72 hours."
+"Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours"
 msgid "You have cancelled the payment. Your request has not been finalized yet."
-msgstr ""
-
-
+msgstr "You have cancelled the payment. Your request has not been finalized yet."
+"You have cancelled the payment. Your request has not been finalized"
+"yet."
+"You have cancelled the payment. Your request has not been finalized yet"
 # Lists and Reports
 
-
 msgid "Complete List of Inquiries"
-msgstr ""
-
-
+msgstr "Complete List of Inquiries"
 msgid "Your Installment Inquiries List"
-msgstr ""
-
-
+msgstr "Your Installment Inquiries List"
 msgid "Your Cash Purchase Requests"
-msgstr ""
-
-
+msgstr "Your Cash Purchase Requests"
 msgid "Cash Purchase Requests List"
-msgstr ""
-
-
+msgstr "Cash Purchase Requests List"
 msgid "Installment Request Report #%d - %s"
-msgstr ""
-
-
+msgstr "Installment Request Report #%d - %s"
 msgid "Cash Purchase Request Details"
-msgstr ""
-
-
+msgstr "Cash Purchase Request Details"
 # Search and Filters
 
-
 msgid "Search by customer name, car name, national ID or mobile..."
-msgstr ""
-
-
+msgstr "Search by customer name, car name, national ID or mobile..."
 msgid "Search by customer name, car name, or mobile..."
-msgstr ""
-
-
+msgstr "Search by customer name, car name, or mobile..."
 msgid "Search by name, email, mobile, or national ID..."
-msgstr ""
-
-
+msgstr "Search by name, email, mobile, or national ID..."
 msgid "All Statuses"
-msgstr ""
-
-
+msgstr "All Statuses"
 msgid "All Experts"
-msgstr ""
-
-
+msgstr "All Experts"
 msgid "All Roles"
-msgstr ""
-
-
+msgstr "All Roles"
 # Table Headers
 
-
 msgid "ID"
-msgstr ""
-
-
+msgstr "ID"
 msgid "Mobile"
-msgstr ""
-
-
+msgstr "Mobile"
 msgid "Assigned"
-msgstr ""
-
-
+msgstr "Assigned"
 msgid "Date"
 msgstr "Date"
-
-
 msgid "Actions"
-msgstr ""
-
+msgstr "Actions"
 
 msgid "Display Name"
-msgstr ""
-
-
+msgstr "Display Name"
 msgid "Username"
-msgstr ""
-
-
+msgstr "Username"
 msgid "Role"
-msgstr ""
-
-
+msgstr "Role"
 msgid "Registration Date"
-msgstr ""
-
-
+msgstr "Registration Date"
 # Current Status
 
-
 msgid "Current Status:"
-msgstr ""
-
-
+msgstr "Current Status:"
 msgid "Assigned Expert:"
-msgstr ""
-
-
+msgstr "Assigned Expert:"
 msgid "Reason for Rejection:"
-msgstr ""
-
-
+msgstr "Reason for Rejection:"
 # Actions
 
-
 msgid "View Details"
-msgstr ""
-
-
+msgstr "View Details"
 msgid "Edit Information"
-msgstr ""
-
-
+msgstr "Edit Information"
 msgid "Delete Request"
-msgstr ""
-
-
+msgstr "Delete Request"
 msgid "Assign"
-msgstr ""
-
-
+msgstr "Assign"
 msgid "Assign to Expert"
-msgstr ""
-
-
+msgstr "Assign to Expert"
 msgid "Set Down Payment"
-msgstr ""
-
-
+msgstr "Set Down Payment"
 msgid "Reject Request"
-msgstr ""
-
-
+msgstr "Reject Request"
 msgid "View Customer Payment Link"
-msgstr ""
-
-
+msgstr "View Customer Payment Link"
 msgid "Back to List"
-msgstr ""
-
-
+msgstr "Back to List"
 msgid "Back to Inquiry List"
-msgstr ""
-
-
+msgstr "Back to Inquiry List"
 msgid "Back to Requests List"
-msgstr ""
-
-
+msgstr "Back to Requests List"
 # Request Information
 
-
 msgid "Request Information"
-msgstr ""
-
-
+msgstr "Request Information"
 msgid "Customer Name"
-msgstr ""
-
-
+msgstr "Customer Name"
 msgid "National ID"
-msgstr ""
-
-
+msgstr "National ID"
 msgid "Assigned Expert"
-msgstr ""
-
-
+msgstr "Assigned Expert"
 msgid "Requested Color"
-msgstr ""
-
-
+msgstr "Requested Color"
 msgid "Down Payment Amount"
-msgstr ""
-
-
+msgstr "Down Payment Amount"
 msgid "Rejection Reason"
-msgstr ""
-
-
+msgstr "Rejection Reason"
 msgid "Notes"
-msgstr ""
-
-
+msgstr "Notes"
 # Loan and Car Details
 
-
 msgid "Loan and Car Details"
-msgstr ""
-
-
+msgstr "Loan and Car Details"
 msgid "Selected Car"
-msgstr ""
-
-
+msgstr "Selected Car"
 msgid "Date Submitted"
-msgstr ""
-
-
+msgstr "Date Submitted"
 # Applicant and Expert Details
 
-
 msgid "Applicant and Expert Details"
-msgstr ""
-
-
+msgstr "Applicant and Expert Details"
 msgid "Cheque Issuer: Another Person"
-msgstr ""
-
-
+msgstr "Cheque Issuer: Another Person"
 msgid "Issuer National ID"
-msgstr ""
-
-
+msgstr "Issuer National ID"
 msgid "Cheque Issuer"
-msgstr ""
-
-
+msgstr "Cheque Issuer"
 msgid "Same as Applicant"
-msgstr ""
-
-
+msgstr "Same as Applicant"
 # Credit Verification
 
-
 msgid "Credit Verification Result (Finotex)"
-msgstr ""
-
-
+msgstr "Credit Verification Result (Finotex)"
 msgid "Bank inquiry was not performed or failed to return data."
-msgstr ""
-
-
+msgstr "Bank inquiry was not performed or failed to return data."
 # Rejection Reasons
 
-
 msgid "Please specify the reason for rejecting this request. This reason will be shown to the user."
-msgstr ""
-
-
+msgstr "Please specify the reason for rejecting this request. This reason will be shown to the user."
+"Please specify the reason for rejecting this request. This reason"
+"will be shown to the user."
+"Please specify the reason for rejecting this request. This reason will be shown to the user"
 msgid "Please specify the reason for rejecting this request. This reason will be sent to the user via SMS."
-msgstr ""
-
-
+msgstr "Please specify the reason for rejecting this request. This reason will be sent to the user via SMS."
+"Please specify the reason for rejecting this request. This reason"
+"will be sent to the user via SMS."
+"Please specify the reason for rejecting this request. This reason will be sent to the user via SMS"
 msgid "Select a reason:"
-msgstr ""
-
-
+msgstr "Select a reason:"
 msgid "-- Select a reason --"
-msgstr ""
-
-
+msgstr "-- Select a reason --"
 msgid "Other reason (write in the box below)"
-msgstr ""
-
-
+msgstr "Other reason (write in the box below)"
 msgid "Custom Text:"
-msgstr ""
-
-
+msgstr "Custom Text:"
 msgid "Submit Reason and Reject Request"
-msgstr ""
-
-
+msgstr "Submit Reason and Reject Request"
 # Final Actions
 
-
 msgid "Final Approval & Refer to Sales"
-msgstr ""
-
-
+msgstr "Final Approval & Refer to Sales"
 msgid "Assign Expert"
-msgstr ""
-
-
+msgstr "Assign Expert"
 msgid "Retry Finotex Inquiry"
-msgstr ""
-
-
+msgstr "Retry Finotex Inquiry"
 msgid "Request More Documents"
-msgstr ""
-
-
+msgstr "Request More Documents"
 # Action Required
 
-
 msgid "Action Required"
-msgstr ""
-
-
+msgstr "Action Required"
 msgid "Please note: Prices are approximate and the final price of the car will be determined by the daily rate at the time the down payment is made."
-msgstr ""
-
-
+msgstr "Please note: Prices are approximate and the final price of the car will be determined by the daily rate at the time the down payment is made."
+"Please note: Prices are approximate and the final price of the car"
+"will be determined by the daily rate at the time the down payment is"
+"made."
+"Please note: Prices are approximate and the final price of the car will be determined by the daily rate at the time the down payment is made"
 msgid "Your down payment has been set. To finalize your purchase, please proceed to the payment gateway via the button below."
-msgstr ""
-
-
+msgstr "Your down payment has been set. To finalize your purchase, please proceed to the payment gateway via the button below."
+"Your down payment has been set. To finalize your purchase, please"
+"proceed to the payment gateway via the button below."
+"Your down payment has been set. To finalize your purchase, please proceed to the payment gateway via the button below"
 msgid "Proceed to Payment Gateway"
-msgstr ""
-
-
+msgstr "Proceed to Payment Gateway"
 # Messages
 
-
 msgid "You have not submitted any installment inquiries yet."
-msgstr ""
-
-
+msgstr "You have not submitted any installment inquiries yet."
 msgid "You have not submitted any cash purchase requests yet."
-msgstr ""
-
-
+msgstr "You have not submitted any cash purchase requests yet."
 msgid "Please note: Quoted prices are approximate. The final price will be determined based on the market rate at the time of the down payment."
-msgstr ""
-
-
+msgstr "Please note: Quoted prices are approximate. The final price will be determined based on the market rate at the time of the down payment."
+"Please note: Quoted prices are approximate. The final price will be"
+"determined based on the market rate at the time of the down payment."
+"Please note: Quoted prices are approximate. The final price will be determined based on the market rate at the time of the down payment"
 # System Messages
 
-
 msgid "No inquiries found."
-msgstr ""
-
-
+msgstr "No inquiries found."
 msgid "No users found."
-msgstr ""
-
-
+msgstr "No users found."
 msgid "No products found."
-msgstr ""
-
-
+msgstr "No products found."
 msgid "N/A"
-msgstr ""
-
-
+msgstr "N/A"
 msgid "Not set"
-msgstr ""
-
-
+msgstr "Not set"
 msgid "No experts are currently registered."
-msgstr ""
-
-
+msgstr "No experts are currently registered."
 # Success Messages
 
-
 msgid "Inquiry deleted successfully."
-msgstr ""
-
-
+msgstr "Inquiry deleted successfully."
 msgid "Request updated successfully."
-msgstr ""
-
-
+msgstr "Request updated successfully."
 msgid "Request deleted successfully."
-msgstr ""
-
-
+msgstr "Request deleted successfully."
 msgid "Status changed successfully."
-msgstr ""
-
-
+msgstr "Status changed successfully."
 msgid "Inquiry successfully assigned to %s."
-msgstr ""
-
-
+msgstr "Inquiry successfully assigned to %s."
 msgid "Request successfully assigned to %s."
-msgstr ""
-
-
+msgstr "Request successfully assigned to %s."
 msgid "User information updated successfully."
-msgstr ""
-
-
+msgstr "User information updated successfully."
 msgid "New user created successfully."
-msgstr ""
-
-
+msgstr "New user created successfully."
 msgid "User deleted successfully."
-msgstr ""
-
-
+msgstr "User deleted successfully."
 msgid "Settings saved successfully."
-msgstr ""
-
-
+msgstr "Settings saved successfully."
 # Error Messages
 
-
 msgid "Error deleting inquiry."
-msgstr ""
-
-
+msgstr "Error deleting inquiry."
 msgid "Error deleting request."
-msgstr ""
-
-
+msgstr "Error deleting request."
 msgid "Error deleting user."
-msgstr ""
-
-
+msgstr "Error deleting user."
 msgid "An error occurred while deleting the user."
-msgstr ""
-
-
+msgstr "An error occurred while deleting the user."
 msgid "Invalid inquiry ID."
-msgstr ""
-
-
+msgstr "Invalid inquiry ID."
 msgid "Invalid request ID."
-msgstr ""
-
-
+msgstr "Invalid request ID."
 msgid "Invalid data sent."
-msgstr ""
-
-
+msgstr "Invalid data sent."
 msgid "Invalid data submitted."
-msgstr ""
-
-
+msgstr "Invalid data submitted."
 msgid "Invalid status provided."
-msgstr ""
-
-
+msgstr "Invalid status provided."
 msgid "Invalid inquiry type."
-msgstr ""
-
-
+msgstr "Invalid inquiry type."
 msgid "Invalid field type."
-msgstr ""
-
-
+msgstr "Invalid field type."
 msgid "Invalid amount."
-msgstr ""
-
-
+msgstr "Invalid amount."
 msgid "Please enter a valid amount."
-msgstr ""
-
-
+msgstr "Please enter a valid amount."
 msgid "A reason for rejection is required."
-msgstr ""
-
-
+msgstr "A reason for rejection is required."
 msgid "You do not have permission to perform this action."
-msgstr ""
-
-
+msgstr "You do not have permission to perform this action."
 msgid "You do not have permission to view this report."
-msgstr ""
-
-
+msgstr "You do not have permission to view this report."
 msgid "Please select a car."
-msgstr ""
-
-
+msgstr "Please select a car."
 msgid "Error: The field \"%s\" for the buyer is required."
-msgstr "خطا: فیلد «%s» برای خریدار الزامی است."
-
-
+msgstr "Error: The field \"%s\" for the buyer is required."
 msgid "Error creating new user: "
-msgstr ""
-
-
+msgstr "Error creating new user: "
 msgid "Error creating inquiry post."
-msgstr ""
-
-
+msgstr "Error creating inquiry post."
 msgid "User ID not specified."
-msgstr ""
-
-
+msgstr "User ID not specified."
 msgid "You cannot change your own administrative role to a lower-level role."
-msgstr ""
-
-
+msgstr "You cannot change your own administrative role to a lower-level role."
 msgid "Mobile number and password are required."
-msgstr ""
-
-
+msgstr "Mobile number and password are required."
 msgid "A user with this mobile number already exists."
-msgstr ""
-
-
+msgstr "A user with this mobile number already exists."
 msgid "An email associated with this mobile number already exists."
-msgstr ""
-
-
+msgstr "An email associated with this mobile number already exists."
 msgid "No experts found for automatic assignment."
-msgstr ""
-
-
+msgstr "No experts found for automatic assignment."
 msgid "The selected expert is not valid."
-msgstr ""
-
-
+msgstr "The selected expert is not valid."
 msgid "No inquiries found matching your criteria."
-msgstr ""
-
-
+msgstr "No inquiries found matching your criteria."
 msgid "No requests found."
-msgstr ""
-
-
+msgstr "No requests found."
 msgid "No users found matching your criteria."
-msgstr ""
-
-
+msgstr "No users found matching your criteria."
 msgid "No products found matching your criteria."
-msgstr ""
-
-
+msgstr "No products found matching your criteria."
 msgid "You cannot delete your own account."
-msgstr ""
-
-
+msgstr "You cannot delete your own account."
 msgid "Product not found."
-msgstr ""
-
-
+msgstr "Product not found."
 msgid "Inquiry not found or you do not have permission to view it."
-msgstr ""
-
-
+msgstr "Inquiry not found or you do not have permission to view it."
 msgid "The requested user was not found."
-msgstr ""
-
-
+msgstr "The requested user was not found."
 # Pagination
 
-
 msgid "&laquo; Previous"
-msgstr ""
-
-
+msgstr "&laquo; Previous"
 msgid "Next &raquo;"
-msgstr ""
-
-
+msgstr "Next &raquo;"
 # Updated
 
-
 msgid "Updated."
-msgstr ""
-
-
+msgstr "Updated."
 # Select Options
 
-
 msgid "-- Select --"
-msgstr ""
-
-
+msgstr "-- Select --"
 msgid "-- Select a color --"
-msgstr ""
-
-
+msgstr "-- Select a color --"
 # Examples
 
-
 msgid "e.g., 1365/04/15"
-msgstr ""
-
-
+msgstr "e.g., 1365/04/15"
 msgid "e.g., 09123456789"
-msgstr ""
-
-
+msgstr "e.g., 09123456789"
 msgid "e.g., 09129876543"
-msgstr ""
-
-
+msgstr "e.g., 09129876543"
 msgid "e.g., White, Black, Silver"
-msgstr ""
-
-
+msgstr "e.g., White, Black, Silver"
 msgid "10-digit national ID"
-msgstr ""
-
-
+msgstr "10-digit national ID"
 # Calculator
 
-
 msgid "Installment Sale"
-msgstr ""
-
-
+msgstr "Installment Sale"
 msgid "Cash Sale"
-msgstr ""
-
-
+msgstr "Cash Sale"
 msgid "Cash Purchase Request"
-msgstr ""
-
-
+msgstr "Cash Purchase Request"
 msgid "First Name:"
-msgstr ""
-
-
+msgstr "First Name:"
 msgid "Last Name:"
-msgstr ""
-
-
+msgstr "Last Name:"
 msgid "Mobile Number:"
-msgstr ""
-
-
+msgstr "Mobile Number:"
 msgid "Car Color:"
-msgstr ""
-
-
+msgstr "Car Color:"
 msgid "Enter your desired color"
-msgstr ""
-
-
+msgstr "Enter your desired color"
 msgid "The listed price is approximate. Due to market fluctuations, the final price will be determined upon down payment."
-msgstr ""
-
-
+msgstr "The listed price is approximate. Due to market fluctuations, the final price will be determined upon down payment."
+"The listed price is approximate. Due to market fluctuations, the"
+"final price will be determined upon down payment."
+"The listed price is approximate. Due to market fluctuations, the final price will be determined upon down payment"
 msgid "Approximate Price:"
-msgstr ""
-
-
+msgstr "Approximate Price:"
 msgid "Submit Price Inquiry Request"
-msgstr ""
-
-
+msgstr "Submit Price Inquiry Request"
 msgid "To submit a cash purchase request, please log in to your account first."
-msgstr ""
-
-
+msgstr "To submit a cash purchase request, please log in to your account first."
+"To submit a cash purchase request, please log in to your account"
+"first."
+"To submit a cash purchase request, please log in to your account first"
 msgid "Login and Submit Request"
-msgstr ""
-
-
+msgstr "Login and Submit Request"
 msgid "Budgeting and Installment Calculation"
-msgstr ""
-
-
+msgstr "Budgeting and Installment Calculation"
 msgid "Down Payment Amount:"
-msgstr ""
-
-
+msgstr "Down Payment Amount:"
 msgid "Minimum Down Payment:"
-msgstr ""
-
-
+msgstr "Minimum Down Payment:"
 msgid "Required Conditions"
-msgstr ""
-
-
+msgstr "Required Conditions"
 msgid "1. ID Card - National ID Card"
-msgstr ""
-
-
+msgstr "1. ID Card - National ID Card"
 msgid "2. Chequebook"
-msgstr ""
-
-
+msgstr "2. Chequebook"
 msgid "3. Last 3-month bank statement (cheque owner)"
-msgstr ""
-
-
+msgstr "3. Last 3-month bank statement (cheque owner)"
 msgid "4. Payslip or business license (applicant and cheque owner)"
-msgstr ""
-
-
+msgstr "4. Payslip or business license (applicant and cheque owner)"
 msgid "Repayment Period:"
-msgstr ""
-
-
+msgstr "Repayment Period:"
 msgid "Bank Credit Check for Car Purchase"
-msgstr ""
-
-
+msgstr "Bank Credit Check for Car Purchase"
 msgid "Log in to Start Inquiry"
-msgstr ""
-
-
+msgstr "Log in to Start Inquiry"
 msgid "This car is currently unavailable for purchase."
-msgstr ""
-
-
+msgstr "This car is currently unavailable for purchase."
 # Product Editor
 
-
 msgid "Car Price & Status"
-msgstr ""
-
-
+msgstr "Car Price & Status"
 msgid "On this page, you can quickly change the price and sales status of products. Changes are saved automatically."
-msgstr ""
-
-
+msgstr "On this page, you can quickly change the price and sales status of products. Changes are saved automatically."
+"On this page, you can quickly change the price and sales status of"
+"products. Changes are saved automatically."
+"On this page, you can quickly change the price and sales status of products. Changes are saved automatically"
 msgid "Available Colors (comma-separated)"
-msgstr ""
-
-
+msgstr "Available Colors (comma-separated)"
 msgid "Error:"
-msgstr ""
-
-
+msgstr "Error:"
 msgid "To use this plugin, please install and activate WooCommerce first."
-msgstr ""
-
-
+msgstr "To use this plugin, please install and activate WooCommerce first."
 msgid "Car Price & Status List"
-msgstr ""
-
-
+msgstr "Car Price & Status List"
 msgid "Search car name..."
-msgstr ""
-
-
+msgstr "Search car name..."
 # Sales Status Options
 
-
 msgid "Special Sale (Active)"
-msgstr ""
-
-
+msgstr "Special Sale (Active)"
 msgid "Unavailable (Show in site)"
-msgstr ""
-
-
+msgstr "Unavailable (Show in site)"
 msgid "Disabled (Hide from site)"
-msgstr ""
-
-
+msgstr "Disabled (Hide from site)"
 # System Report
 
-
 msgid "General System Reports"
-msgstr ""
-
-
+msgstr "General System Reports"
 msgid "Latest Registered Inquiries"
-msgstr ""
-
-
+msgstr "Latest Registered Inquiries"
 msgid "Latest Registered Users"
-msgstr ""
-
-
+msgstr "Latest Registered Users"
 # User Management
 
-
 msgid "Complete User List"
-msgstr ""
-
-
+msgstr "Complete User List"
 msgid "Add New User"
-msgstr ""
-
-
+msgstr "Add New User"
 msgid "User Role:"
-msgstr ""
-
-
+msgstr "User Role:"
 msgid "Order By:"
-msgstr ""
-
-
+msgstr "Order By:"
 msgid "Order:"
-msgstr ""
-
-
+msgstr "Order:"
 msgid "Ascending"
-msgstr ""
-
-
+msgstr "Ascending"
 msgid "Descending"
-msgstr ""
-
-
+msgstr "Descending"
 msgid "Editing User: %s"
-msgstr ""
-
-
+msgstr "Editing User: %s"
 msgid "The new user will be created with the default \"Customer\" role. The username and email will be automatically generated based on the mobile number."
-msgstr "کاربر جدید با نقش پیش‌فرض «مشتری» ایجاد می‌شود. نام کاربری و ایمیل به صورت خودکار بر اساس شماره موبایل ساخته خواهد شد."
-
-
+msgstr "The new user will be created with the default \"Customer\" role. The username and email will be automatically generated based on the mobile number."
 msgid "Mobile Number (Required):"
-msgstr ""
-
-
+msgstr "Mobile Number (Required):"
 msgid "Password (Required):"
-msgstr ""
-
-
+msgstr "Password (Required):"
 msgid "Supplementary Information"
-msgstr ""
-
-
+msgstr "Supplementary Information"
 msgid "Create User"
-msgstr ""
-
-
+msgstr "Create User"
 msgid "Cancel"
-msgstr ""
-
-
+msgstr "Cancel"
 msgid "Save Changes"
-msgstr ""
-
-
+msgstr "Save Changes"
 # Settings
 
-
 msgid "Expert Name"
-msgstr ""
-
-
+msgstr "Expert Name"
 msgid "Name"
-msgstr ""
-
-
+msgstr "Name"
 # Dashboard Widgets
 
-
 msgid "Installment Inquiry Statistics"
-msgstr ""
-
-
+msgstr "Installment Inquiry Statistics"
 msgid "Cash Inquiry Statistics"
-msgstr ""
-
-
+msgstr "Cash Inquiry Statistics"
 msgid "User Statistics"
-msgstr ""
-
-
+msgstr "User Statistics"
 msgid "Product Statistics"
-msgstr ""
-
-
+msgstr "Product Statistics"
 msgid "Total Inquiries"
-msgstr ""
-
-
+msgstr "Total Inquiries"
 msgid "Docs Req."
-msgstr ""
-
-
+msgstr "Docs Req."
 msgid "Total Cash Requests"
-msgstr ""
-
-
+msgstr "Total Cash Requests"
 msgid "Total Users"
-msgstr ""
-
-
+msgstr "Total Users"
 msgid "Maneli Experts"
-msgstr ""
-
-
+msgstr "Maneli Experts"
 msgid "Managers"
-msgstr ""
-
-
+msgstr "Managers"
 msgid "Total Products"
-msgstr ""
-
-
+msgstr "Total Products"
 msgid "Active for Sale"
-msgstr ""
-
-
+msgstr "Active for Sale"
 msgid "Unavailable"
-msgstr ""
-
-
+msgstr "Unavailable"
 msgid "Hidden Products"
-msgstr ""
-
-
+msgstr "Hidden Products"
 # Credit Report
 
-
 msgid "Full Credit Report"
-msgstr ""
-
-
+msgstr "Full Credit Report"
 msgid "for Inquiry #%d"
-msgstr ""
-
-
+msgstr "for Inquiry #%d"
 msgid "Requested Car"
-msgstr ""
-
-
+msgstr "Requested Car"
 msgid "No image has been set for this product."
-msgstr ""
-
-
+msgstr "No image has been set for this product."
 msgid "Installment Amount"
-msgstr ""
-
-
+msgstr "Installment Amount"
 msgid "Personal Information"
-msgstr ""
-
-
+msgstr "Personal Information"
 msgid "Buyer Name"
-msgstr ""
-
-
+msgstr "Buyer Name"
 msgid "Buyer Last Name"
-msgstr ""
-
-
+msgstr "Buyer Last Name"
 msgid "Buyer National Code"
-msgstr ""
-
-
+msgstr "Buyer National Code"
 msgid "Buyer Father's Name"
-msgstr ""
-
-
+msgstr "Buyer Father's Name"
 msgid "Buyer Date of Birth"
-msgstr ""
-
-
+msgstr "Buyer Date of Birth"
 msgid "Buyer Mobile Number"
-msgstr ""
-
-
+msgstr "Buyer Mobile Number"
 msgid "Cheque Status Inquiry Result (Sayadi)"
-msgstr ""
-
-
+msgstr "Cheque Status Inquiry Result (Sayadi)"
 msgid "White"
-msgstr ""
-
-
+msgstr "White"
 msgid "Yellow"
-msgstr ""
-
-
+msgstr "Yellow"
 msgid "Orange"
-msgstr ""
-
-
+msgstr "Orange"
 msgid "Brown"
-msgstr ""
-
-
+msgstr "Brown"
 msgid "Red"
-msgstr ""
-
-
+msgstr "Red"
 msgid "Credit Status"
-msgstr ""
-
-
+msgstr "Credit Status"
 msgid "Description"
-msgstr ""
-
-
+msgstr "Description"
 msgid "No history of bounced cheques."
-msgstr ""
-
-
+msgstr "No history of bounced cheques."
 msgid "One bounced cheque or a maximum of 50 million Rials in returned commitments."
-msgstr ""
-
-
+msgstr "One bounced cheque or a maximum of 50 million Rials in returned commitments."
+"One bounced cheque or a maximum of 50 million Rials in returned"
+"commitments."
+"One bounced cheque or a maximum of 50 million Rials in returned commitments"
 msgid "Two to four bounced cheques or a maximum of 200 million Rials in returned commitments."
-msgstr ""
-
-
+msgstr "Two to four bounced cheques or a maximum of 200 million Rials in returned commitments."
+"Two to four bounced cheques or a maximum of 200 million Rials in"
+"returned commitments."
+"Two to four bounced cheques or a maximum of 200 million Rials in returned commitments"
 msgid "Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments."
-msgstr ""
-
-
+msgstr "Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments."
+"Five to ten bounced cheques or a maximum of 500 million Rials in"
+"returned commitments."
+"Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments"
 msgid "More than ten bounced cheques or more than 500 million Rials in returned commitments."
-msgstr ""
-
-
+msgstr "More than ten bounced cheques or more than 500 million Rials in returned commitments."
+"More than ten bounced cheques or more than 500 million Rials in"
+"returned commitments."
+"More than ten bounced cheques or more than 500 million Rials in returned commitments"
 msgid "Undetermined"
-msgstr ""
-
-
+msgstr "Undetermined"
 msgid "Information was not received from Finotex or the inquiry was unsuccessful."
-msgstr ""
-
-
+msgstr "Information was not received from Finotex or the inquiry was unsuccessful."
+"Information was not received from Finotex or the inquiry was"
+"unsuccessful."
+"Information was not received from Finotex or the inquiry was unsuccessful"
 msgid "Raw Service Response:"
-msgstr ""
-
-
+msgstr "Raw Service Response:"
 msgid "Final Decision"
-msgstr ""
-
-
+msgstr "Final Decision"
 msgid "After reviewing the information above, specify the final status of this request."
-msgstr ""
-
-
+msgstr "After reviewing the information above, specify the final status of this request."
+"After reviewing the information above, specify the final status of"
+"this request."
+"After reviewing the information above, specify the final status of this request"
 msgid "Approve and Assign to Expert"
-msgstr ""
-
-
+msgstr "Approve and Assign to Expert"
 msgid "Final Rejection of Request"
-msgstr ""
-
-
+msgstr "Final Rejection of Request"
 msgid "Reason for Rejection"
-msgstr ""
-
-
+msgstr "Reason for Rejection"
 msgid "Applicant Information"
-msgstr ""
-
-
+msgstr "Applicant Information"
 msgid "Issuer Name"
-msgstr ""
-
-
+msgstr "Issuer Name"
 msgid "Issuer National Code"
-msgstr ""
-
-
+msgstr "Issuer National Code"
 msgid "Car and Installment Details"
-msgstr ""
-
-
+msgstr "Car and Installment Details"
 msgid "Your request has been successfully submitted. We will contact you soon."
-msgstr ""
-
-
+msgstr "Your request has been successfully submitted. We will contact you soon."
+"Your request has been successfully submitted. We will contact you"
+"soon."
+"Your request has been successfully submitted. We will contact you soon"
 # Grouped Attributes
 
-
 msgid "Specifications"
-msgstr ""
-
-
+msgstr "Specifications"
 # Settings Messages
 
-
 msgid "car_inquiry_form"
-msgstr ""
-
-
+msgstr "car_inquiry_form"
 # Expert Panel Messages
 
-
 msgid "Search for a car name..."
-msgstr ""
-
-
+msgstr "Search for a car name..."
 msgid "Down Payment Amount (Toman)"
-msgstr ""
-
-
+msgstr "Down Payment Amount (Toman)"
 msgid "Minimum recommended down payment:"
-msgstr ""
-
-
+msgstr "Minimum recommended down payment:"
 msgid "Repayment Period (Months)"
-msgstr ""
-
-
+msgstr "Repayment Period (Months)"
 msgid "Total Loan Amount"
-msgstr ""
-
-
+msgstr "Total Loan Amount"
 msgid "Total Repayment Amount"
-msgstr ""
-
-
+msgstr "Total Repayment Amount"
 msgid "Server error:"
-msgstr ""
-
-
+msgstr "Server error:"
 msgid "Unknown error"
-msgstr ""
-
-
+msgstr "Unknown error"
 msgid "Finance & Calculator"
-msgstr ""
-
-
+msgstr "Finance & Calculator"
 msgid "Installment Loan Settings"
-msgstr ""
-
-
+msgstr "Installment Loan Settings"
 msgid "Monthly Interest Rate (Decimal)"
-msgstr ""
-
-
+msgstr "Monthly Interest Rate (Decimal)"
 msgid "Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in all installment calculations."
-msgstr ""
-
-
+msgstr "Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in all installment calculations."
+"Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%)."
+"Used in all installment calculations."
+"Enter the monthly interest rate as a decimal (e.g., 0.035 for 3.5%). Used in all installment calculations"
 msgid "Payment Gateway"
-msgstr ""
-
-
+msgstr "Payment Gateway"
 msgid "General Payment Settings"
-msgstr ""
-
-
+msgstr "General Payment Settings"
 msgid "Enable Payment Gateway"
-msgstr ""
-
-
+msgstr "Enable Payment Gateway"
 msgid "If enabled, the inquiry fee payment step will be shown to users."
-msgstr ""
-
-
+msgstr "If enabled, the inquiry fee payment step will be shown to users."
 msgid "Inquiry Fee (Toman)"
-msgstr ""
-
-
+msgstr "Inquiry Fee (Toman)"
 msgid "Enter 0 for free inquiries."
-msgstr ""
-
-
+msgstr "Enter 0 for free inquiries."
 msgid "Message for Free Inquiry"
-msgstr ""
-
-
+msgstr "Message for Free Inquiry"
 msgid "The inquiry fee is waived for you. Please click the button below to continue."
-msgstr ""
-
-
+msgstr "The inquiry fee is waived for you. Please click the button below to continue."
+"The inquiry fee is waived for you. Please click the button below to"
+"continue."
+"The inquiry fee is waived for you. Please click the button below to continue"
 msgid "Discount Code Settings"
-msgstr ""
-
-
+msgstr "Discount Code Settings"
 msgid "Enter a code for 100% off the inquiry fee."
-msgstr ""
-
-
+msgstr "Enter a code for 100% off the inquiry fee."
 msgid "Discount Code Success Message"
-msgstr ""
-
-
+msgstr "Discount Code Success Message"
 msgid "100% discount applied successfully."
-msgstr ""
-
-
+msgstr "100% discount applied successfully."
 msgid "Sadad (Melli Bank) Settings"
-msgstr ""
-
-
+msgstr "Sadad (Melli Bank) Settings"
 msgid "Enable Sadad"
-msgstr ""
-
-
+msgstr "Enable Sadad"
 msgid "Terminal ID"
-msgstr ""
-
-
+msgstr "Terminal ID"
 msgid "Merchant ID"
-msgstr ""
-
-
+msgstr "Merchant ID"
 msgid "Sadad Encryption Key"
-msgstr ""
-
-
+msgstr "Sadad Encryption Key"
 msgid "The encryption key (TDes key) provided by Sadad. Stored securely encrypted."
-msgstr ""
-
-
+msgstr "The encryption key (TDes key) provided by Sadad. Stored securely encrypted."
+"The encryption key (TDes key) provided by Sadad. Stored securely"
+"encrypted."
+"The encryption key (TDes key) provided by Sadad. Stored securely encrypted"
 msgid "Zarinpal Settings"
-msgstr ""
-
-
+msgstr "Zarinpal Settings"
 msgid "Enable Zarinpal"
-msgstr ""
-
-
+msgstr "Enable Zarinpal"
 msgid "SMS"
-msgstr ""
-
-
+msgstr "SMS"
 msgid "MeliPayamak Panel Information"
-msgstr ""
-
-
+msgstr "MeliPayamak Panel Information"
 msgid "Password"
-msgstr ""
-
-
+msgstr "Password"
 msgid "SMS Pattern Codes (Body ID) - General & Installment"
-msgstr ""
-
-
+msgstr "SMS Pattern Codes (Body ID) - General & Installment"
 msgid "Enter only the approved Pattern Code (Body ID) from your SMS panel. Variable order must match the descriptions."
-msgstr ""
-
-
+msgstr "Enter only the approved Pattern Code (Body ID) from your SMS panel. Variable order must match the descriptions."
+"Enter only the approved Pattern Code (Body ID) from your SMS panel."
+"Variable order must match the descriptions."
+"Enter only the approved Pattern Code (Body ID) from your SMS panel. Variable order must match the descriptions"
 msgid "Admin Mobile Number"
-msgstr ""
-
-
+msgstr "Admin Mobile Number"
 msgid "Mobile number to receive new request notifications."
-msgstr ""
-
-
+msgstr "Mobile number to receive new request notifications."
 msgid "Pattern: \"New Request for Admin\""
-msgstr "الگو: «درخواست جدید برای مدیر»"
-
-
+msgstr "Pattern: \"New Request for Admin\""
 msgid "Variables: 1. Customer Name 2. Car Name"
-msgstr ""
-
-
+msgstr "Variables: 1. Customer Name 2. Car Name"
 msgid "Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
-msgstr ""
-
-
+msgstr "Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
 msgid "Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
-msgstr ""
-
-
+msgstr "Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
+"Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car"
+"Name"
+"Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Nam"
 msgid "SMS Pattern Codes - Cash Request"
-msgstr ""
-
-
+msgstr "SMS Pattern Codes - Cash Request"
 msgid "Sent to customer after down payment is set. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount"
-msgstr ""
-
-
+msgstr "Sent to customer after down payment is set. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amount"
+"Sent to customer after down payment is set. Variables: 1. Customer"
+"Name 2. Car Name 3. Down Payment Amount"
+"Sent to customer after down payment is set. Variables: 1. Customer Name 2. Car Name 3. Down Payment Amoun"
 msgid "Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
-msgstr ""
-
-
+msgstr "Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reason"
+"Sent to customer after rejection. Variables: 1. Customer Name 2. Car"
+"Name 3. Rejection Reason"
+"Sent to customer after rejection. Variables: 1. Customer Name 2. Car Name 3. Rejection Reaso"
 msgid "Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
-msgstr ""
-
-
+msgstr "Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Name"
+"Sent to expert. Variables: 1. Expert Name 2. Customer Name 3."
+"Customer Mobile 4. Car Name"
+"Sent to expert. Variables: 1. Expert Name 2. Customer Name 3. Customer Mobile 4. Car Nam"
 msgid "Cash Request Process Settings"
-msgstr ""
-
-
+msgstr "Cash Request Process Settings"
 msgid "Predefined Rejection Reasons"
-msgstr ""
-
-
+msgstr "Predefined Rejection Reasons"
 msgid "Enter one reason per line. These will be shown as a list to the admin when rejecting a request."
-msgstr ""
-
-
+msgstr "Enter one reason per line. These will be shown as a list to the admin when rejecting a request."
+"Enter one reason per line. These will be shown as a list to the admin"
+"when rejecting a request."
+"Enter one reason per line. These will be shown as a list to the admin when rejecting a request"
 msgid "Installment Request"
-msgstr ""
-
-
+msgstr "Installment Request"
 msgid "Installment Rejection Reasons"
-msgstr ""
-
-
+msgstr "Installment Rejection Reasons"
 msgid "Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request."
-msgstr ""
-
-
+msgstr "Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request."
+"Enter one reason per line. These will be shown as a list to the admin"
+"when rejecting an installment request."
+"Enter one reason per line. These will be shown as a list to the admin when rejecting an installment request"
 msgid "Experts"
-msgstr ""
-
-
+msgstr "Experts"
 msgid "Expert Management"
-msgstr ""
-
-
+msgstr "Expert Management"
 msgid "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
-msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس مانلی\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس مانلی» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
-
-
+msgstr "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
 msgid "Finotex"
-msgstr ""
-
-
+msgstr "Finotex"
 msgid "Cheque Color Inquiry Service"
-msgstr ""
-
-
+msgstr "Cheque Color Inquiry Service"
 msgid "Enable Finotex Inquiry"
-msgstr ""
-
-
+msgstr "Enable Finotex Inquiry"
 msgid "Enable the cheque color inquiry via the Finotex service."
-msgstr ""
-
-
+msgstr "Enable the cheque color inquiry via the Finotex service."
 msgid "Finotex Client ID"
-msgstr ""
-
-
+msgstr "Finotex Client ID"
 msgid "Client ID provided by Finotex. Stored securely encrypted."
-msgstr ""
-
-
+msgstr "Client ID provided by Finotex. Stored securely encrypted."
 msgid "Finotex API Key"
-msgstr ""
-
-
+msgstr "Finotex API Key"
 msgid "API Key (Access Token) provided by Finotex. Stored securely encrypted."
-msgstr ""
-
-
+msgstr "API Key (Access Token) provided by Finotex. Stored securely encrypted."
 # Frontend Messages
 
-
 msgid "Frontend Messages"
-msgstr ""
-
-
+msgstr "Frontend Messages"
 msgid "Price Disclaimer"
-msgstr ""
-
-
+msgstr "Price Disclaimer"
 msgid "Waiting Review Message"
-msgstr ""
-
-
+msgstr "Waiting Review Message"
 msgid "Post Approval Message"
-msgstr ""
-
-
+msgstr "Post Approval Message"
 # Expert Decision Settings
 
-
 msgid "Expert Decision Settings"
-msgstr ""
-
-
+msgstr "Expert Decision Settings"
 msgid "Expert Statuses"
-msgstr ""
-
-
+msgstr "Expert Statuses"
 msgid "Default Expert Status"
-msgstr ""
-
-
+msgstr "Default Expert Status"
 # Meeting Settings
 
-
 msgid "Meetings & Calendar"
-msgstr ""
-
-
+msgstr "Meetings & Calendar"
 msgid "Enable Meeting Scheduling"
-msgstr ""
-
-
+msgstr "Enable Meeting Scheduling"
 msgid "Working Hours Start"
-msgstr ""
-
-
+msgstr "Working Hours Start"
 msgid "Working Hours End"
-msgstr ""
-
-
+msgstr "Working Hours End"
 msgid "Slot Duration (Minutes)"
-msgstr ""
-
-
+msgstr "Slot Duration (Minutes)"
 # Meeting Calendar
 
-
 msgid "Meeting Calendar"
-msgstr ""
-
-
+msgstr "Meeting Calendar"
 msgid "Schedule Meeting"
-msgstr ""
-
-
+msgstr "Schedule Meeting"
 msgid "Select Date"
-msgstr ""
-
-
+msgstr "Select Date"
 msgid "Available Slots"
-msgstr ""
-
-
+msgstr "Available Slots"
 msgid "Book Meeting"
-msgstr ""
-
-
+msgstr "Book Meeting"
 msgid "Meeting Scheduled Successfully"
-msgstr ""
-
-
+msgstr "Meeting Scheduled Successfully"
 msgid "No available slots for selected date"
-msgstr ""
-
-
+msgstr "No available slots for selected date"
 msgid "Meeting Details"
-msgstr ""
-
-
+msgstr "Meeting Details"
 msgid "Meeting Time"
-msgstr ""
-
-
+msgstr "Meeting Time"
 msgid "Meeting Date"
-msgstr ""
-
-
+msgstr "Meeting Date"
 # Expert Status Badge
 
-
 msgid "Expert Status"
-msgstr ""
-
-
+msgstr "Expert Status"
 msgid "In Progress"
-msgstr ""
-
-
+msgstr "In Progress"
 msgid "Approved"
-msgstr ""
-
-
+msgstr "Approved"
 msgid "Confirm Car Alert"
-msgstr ""
-
-
+msgstr "Confirm Car Alert"
 msgid "I agree, I choose this car."
-msgstr ""
-
-
+msgstr "I agree, I choose this car."
 msgid "Previous"
-msgstr ""
-
-
+msgstr "Previous"
 msgid "Next"
-msgstr ""
-
-
+msgstr "Next"
 msgid "View Full Car List"
-msgstr ""
-
-
+msgstr "View Full Car List"
 msgid "Search"
-msgstr ""
-
-
+msgstr "Search"
 msgid "Loading..."
-msgstr ""
-
-
+msgstr "Loading..."
 msgid "Error loading products."
-msgstr ""
-
-
+msgstr "Error loading products."
 msgid "Select a time slot"
-msgstr ""
-
-
+msgstr "Select a time slot"
 msgid "Time slot is already booked"
-msgstr ""
-
-
+msgstr "Time slot is already booked"
 msgid "Time slot is available"
-msgstr ""
-
-
+msgstr "Time slot is available"
 msgid "Book this slot"
-msgstr ""
-
-
+msgstr "Book this slot"
 msgid "Meeting booked successfully!"
-msgstr ""
-
-
+msgstr "Meeting booked successfully!"
 msgid "Error booking meeting. Please try again."
-msgstr ""
-
-
+msgstr "Error booking meeting. Please try again."
 msgid "No available slots for this date"
-msgstr ""
-
-
+msgstr "No available slots for this date"
 msgid "Loading available slots..."
-msgstr ""
-
-
+msgstr "Loading available slots..."
 msgid "Expert Decision"
-msgstr ""
-
-
+msgstr "Expert Decision"
 msgid "Update Decision"
-msgstr ""
-
-
+msgstr "Update Decision"
 msgid "Decision updated successfully!"
-msgstr ""
-
-
+msgstr "Decision updated successfully!"
 msgid "Error updating decision. Please try again."
-msgstr ""
-
-
+msgstr "Error updating decision. Please try again."
 msgid "Please select a status"
-msgstr ""
-
-
+msgstr "Please select a status"
 msgid "Please enter notes"
-msgstr ""
-
-
+msgstr "Please enter notes"
 msgid "Expert Status Badge"
-msgstr ""
-
-
+msgstr "Expert Status Badge"
 msgid "Display expert status badge in inquiry lists"
-msgstr ""
-
-
+msgstr "Display expert status badge in inquiry lists"
 msgid "Expert status badge color"
-msgstr ""
-
-
+msgstr "Expert status badge color"
 msgid "Expert status badge text color"
-msgstr ""
-
-
+msgstr "Expert status badge text color"
 msgid "Expert status badge border color"
-msgstr ""
-
-
+msgstr "Expert status badge border color"
 msgid "Expert status badge hover color"
-msgstr ""
-
-
+msgstr "Expert status badge hover color"
 msgid "Expert status badge shadow color"
-msgstr ""
-
-
+msgstr "Expert status badge shadow color"
 msgid "Expert status badge font size"
-msgstr ""
-
-
+msgstr "Expert status badge font size"
 msgid "Expert status badge padding"
-msgstr ""
-
-
+msgstr "Expert status badge padding"
 msgid "Expert status badge border radius"
-msgstr ""
-
-
+msgstr "Expert status badge border radius"
 msgid "Expert status badge font weight"
-msgstr ""
-
-
+msgstr "Expert status badge font weight"
 msgid "Expert status badge text transform"
-msgstr ""
-
-
+msgstr "Expert status badge text transform"
 msgid "Expert status badge letter spacing"
-msgstr ""
-
-
+msgstr "Expert status badge letter spacing"
 msgid "Expert status badge line height"
-msgstr ""
-
-
+msgstr "Expert status badge line height"
 msgid "Expert status badge margin"
-msgstr ""
-
-
+msgstr "Expert status badge margin"
 msgid "Expert status badge display"
-msgstr ""
-
-
+msgstr "Expert status badge display"
 msgid "Expert status badge position"
-msgstr ""
-
-
+msgstr "Expert status badge position"
 msgid "Expert status badge z-index"
-msgstr ""
-
-
+msgstr "Expert status badge z-index"
 msgid "Expert status badge transition"
-msgstr ""
-
-
+msgstr "Expert status badge transition"
 msgid "Expert status badge animation"
-msgstr ""
-
-
+msgstr "Expert status badge animation"
 msgid "Expert status badge transform"
-msgstr ""
-
-
+msgstr "Expert status badge transform"
 msgid "Expert status badge filter"
-msgstr ""
-
-
+msgstr "Expert status badge filter"
 msgid "Expert status badge backdrop-filter"
-msgstr ""
-
-
+msgstr "Expert status badge backdrop-filter"
 msgid "Expert status badge mix-blend-mode"
-msgstr ""
-
-
+msgstr "Expert status badge mix-blend-mode"
 msgid "Expert status badge isolation"
-msgstr ""
-
-
+msgstr "Expert status badge isolation"
 # JavaScript Hardcoded Persian Strings (calculator.js)
 
-
 msgid "Sending information..."
-msgstr ""
-
-
+msgstr "Sending information..."
 msgid "Error sending information: "
-msgstr ""
-
-
+msgstr "Error sending information: "
 msgid "An unknown error occurred while communicating with the server."
-msgstr ""
-
-
+msgstr "An unknown error occurred while communicating with the server."
 # JavaScript Hardcoded Persian Strings (expert-panel.js)
 
-
 msgid "Start typing to search for a car... (minimum 2 characters)"
-msgstr ""
-
-
+msgstr "Start typing to search for a car... (minimum 2 characters)"
 msgid "Please enter at least 2 characters..."
-msgstr ""
-
-
+msgstr "Please enter at least 2 characters..."
 msgid "Searching..."
-msgstr ""
-
-
+msgstr "Searching..."
 msgid "No car found"
-msgstr ""
-
-
+msgstr "No car found"
 msgid "Loading more..."
-msgstr ""
-
-
+msgstr "Loading more..."
 # JavaScript Hardcoded Persian Strings (inquiry-form.js)
 
-
 msgid "Error retrieving information"
-msgstr ""
-
-
+msgstr "Error retrieving information"
 msgid "Error communicating with server"
-msgstr ""
-
-
+msgstr "Error communicating with server"
 msgid "Booking..."
-msgstr ""
-
-
+msgstr "Booking..."
 msgid "Meeting booked successfully"
-msgstr ""
-
-
+msgstr "Meeting booked successfully"
 msgid "Booking error"
-msgstr ""
-
-
+msgstr "Booking error"
 msgid "Please select a time"
-msgstr ""
-
-
+msgstr "Please select a time"
 # JavaScript Hardcoded Persian Strings (reports-dashboard.js)
 
-
 msgid "View"
-msgstr ""
-
-
+msgstr "View"
 msgid "Meetings"
-msgstr ""
-
-
+msgstr "Meetings"
 msgid "Meeting"
-msgstr ""
-
-
+msgstr "Meeting"
 msgid "New"
-msgstr ""
-
-
+msgstr "New"
 msgid "Follow Up"
-msgstr ""
-
-
+msgstr "Follow Up"
 msgid "Inquiry for"
-msgstr ""
-
-
+msgstr "Inquiry for"
 msgid "Cash"
-msgstr ""
-
-
+msgstr "Cash"
 msgid "Invalid request."
-msgstr ""
-
-
+msgstr "Invalid request."
 msgid "Access denied."
-msgstr ""
-
-
+msgstr "Access denied."
 msgid "Please fill out all required fields."
-msgstr ""
-
-
+msgstr "Please fill out all required fields."
 msgid "You must be logged in to submit a request."
-msgstr ""
-
-
+msgstr "You must be logged in to submit a request."
 msgid "An error occurred while creating your request. Please try again."
-msgstr ""
-
-
+msgstr "An error occurred while creating your request. Please try again."
 msgid "Invalid schedule range."
-msgstr ""
-
-
+msgstr "Invalid schedule range."
 msgid "Selected slot is no longer available."
-msgstr ""
-
-
+msgstr "Selected slot is no longer available."
 msgid "Meeting - %s"
-msgstr ""
-
-
+msgstr "Meeting - %s"
 msgid "Invalid tracking status."
-msgstr ""
-
-
+msgstr "Invalid tracking status."
 msgid "Tracking status updated to: %s"
-msgstr ""
-
-
+msgstr "Tracking status updated to: %s"
 msgid "No follow-up inquiries found."
-msgstr ""
-
-
+msgstr "No follow-up inquiries found."
 msgid "Cash Price"
-msgstr ""
-
-
+msgstr "Cash Price"
 msgid "Installment Price"
-msgstr ""
-
-
+msgstr "Installment Price"
 msgid "Edit"
-msgstr ""
-
-
+msgstr "Edit"
 msgid "Your request has been submitted. The result will be announced within the next 24 hours."
-msgstr ""
-
-
+msgstr "Your request has been submitted. The result will be announced within the next 24 hours."
+"Your request has been submitted. The result will be announced within"
+"the next 24 hours."
+"Your request has been submitted. The result will be announced within the next 24 hours"
 msgid "Your documents have been approved. Our team will contact you shortly for next steps."
-msgstr ""
-
-
+msgstr "Your documents have been approved. Our team will contact you shortly for next steps."
+"Your documents have been approved. Our team will contact you shortly"
+"for next steps."
+"Your documents have been approved. Our team will contact you shortly for next steps"
 msgid "Statuses (one per line: key|label|#color)"
-msgstr ""
-
-
+msgstr "Statuses (one per line: key|label|#color)"
 msgid "Example: unknown|Unknown|#999999"
-msgstr ""
-
-
+msgstr "Example: unknown|Unknown|#999999"
 msgid "Default Expert Status Key"
-msgstr ""
-
-
+msgstr "Default Expert Status Key"
 msgid "General Settings"
-msgstr ""
-
-
+msgstr "General Settings"
 msgid "Enable Meetings"
-msgstr ""
-
-
+msgstr "Enable Meetings"
 msgid "Workday Start (HH:MM)"
-msgstr ""
-
-
+msgstr "Workday Start (HH:MM)"
 msgid "Workday End (HH:MM)"
-msgstr ""
-
-
+msgstr "Workday End (HH:MM)"
 msgid "Slot Duration (minutes)"
-msgstr ""
-
-
+msgstr "Slot Duration (minutes)"
 msgid "Excluded Days"
-msgstr ""
-
-
+msgstr "Excluded Days"
 msgid "Select days when meetings cannot be scheduled"
-msgstr ""
-
-
+msgstr "Select days when meetings cannot be scheduled"
 msgid "This day is excluded from meeting schedules."
-msgstr ""
-
-
+msgstr "This day is excluded from meeting schedules."
 msgid "⚠️ Overdue Follow-up"
-msgstr ""
-
-
+msgstr "⚠️ Overdue Follow-up"
 msgid "🔥 Follow-up Due Today"
-msgstr ""
-
-
+msgstr "🔥 Follow-up Due Today"
 msgid "⚠️ Follow-up Tomorrow"
-msgstr ""
-
-
+msgstr "⚠️ Follow-up Tomorrow"
 msgid "⚠️ Follow-up in 2 Days"
-msgstr ""
-
-
+msgstr "⚠️ Follow-up in 2 Days"
 msgid "ℹ️ Follow-up in 3 Days"
-msgstr ""
-
-
+msgstr "ℹ️ Follow-up in 3 Days"
 msgid "Follow-up Reminder"
-msgstr ""
-
-
+msgstr "Follow-up Reminder"
 msgid "Follow-up for %s inquiry is due in %d day(s)"
-msgstr ""
-
-
+msgstr "Follow-up for %s inquiry is due in %d day(s)"
 msgid "Invalid request. Please log in and try again."
-msgstr ""
-
-
+msgstr "Invalid request. Please log in and try again."
 msgid "Car selected. Redirecting..."
-msgstr ""
-
-
+msgstr "Car selected. Redirecting..."
 msgid "Please confirm your selected car to continue."
-msgstr ""
-
-
+msgstr "Please confirm your selected car to continue."
 msgid "Start typing the car name to search (at least 2 characters)"
-msgstr ""
-
-
+msgstr "Start typing the car name to search (at least 2 characters)"
 msgid "Referral Request #%d"
-msgstr ""
-
-
+msgstr "Referral Request #%d"
 msgid "Select an expert for this request:"
-msgstr ""
-
-
+msgstr "Select an expert for this request:"
 msgid "Refer"
-msgstr ""
-
-
+msgstr "Refer"
 msgid "Are you sure you want to permanently delete this request?"
-msgstr ""
-
-
+msgstr "Are you sure you want to permanently delete this request?"
 msgid "Yes, delete it!"
-msgstr ""
-
-
+msgstr "Yes, delete it!"
 msgid "Plugin Settings"
-msgstr ""
-
-
+msgstr "Plugin Settings"
 msgid "Configure all aspects of the Maneli Car Inquiry plugin from this centralized settings panel."
-msgstr ""
-
-
+msgstr "Configure all aspects of the Maneli Car Inquiry plugin from this centralized settings panel."
+"Configure all aspects of the Maneli Car Inquiry plugin from this"
+"centralized settings panel."
+"Configure all aspects of the Maneli Car Inquiry plugin from this centralized settings panel"
 msgid "Post-Approval Message"
-msgstr ""
-
-
+msgstr "Post-Approval Message"
 msgid "Schedule In-Person Meeting"
-msgstr ""
-
-
+msgstr "Schedule In-Person Meeting"
 msgid "Note (optional):"
-msgstr ""
-
-
+msgstr "Note (optional):"
 msgid "No meetings scheduled."
-msgstr ""
-
-
+msgstr "No meetings scheduled."
 msgid "Follow-up List"
-msgstr ""
-
-
+msgstr "Follow-up List"
 msgid "Inquiries that require follow-up contact on the specified dates."
-msgstr ""
-
-
+msgstr "Inquiries that require follow-up contact on the specified dates."
 msgid "Follow-up Date"
-msgstr ""
-
-
+msgstr "Follow-up Date"
 msgid "Date Created"
-msgstr ""
-
-
+msgstr "Date Created"
 msgid "Unknown error."
-msgstr ""
-
-
+msgstr "Unknown error."
 # Additional Missing Frontend Labels
 msgid "Tracking Status:"
-msgstr ""
-
-
+msgstr "Tracking Status:"
 msgid "Set Status"
-msgstr ""
-
-
+msgstr "Set Status"
 msgid "Save Decision"
-msgstr ""
-
-
+msgstr "Save Decision"
 msgid "Referral Request"
-msgstr ""
-
-
+msgstr "Referral Request"
 msgid "Not Assigned"
-msgstr ""
-
-
+msgstr "Not Assigned"
 msgid "Note (optional)"
-msgstr ""
-
-
+msgstr "Note (optional)"
 msgid "Buyer Information"
-msgstr ""
-
-
+msgstr "Buyer Information"
 msgid "Bank Information"
-msgstr ""
-
-
+msgstr "Bank Information"
 msgid "Bank Information (Cheque Holder)"
-msgstr ""
-
-
+msgstr "Bank Information (Cheque Holder)"
 msgid "Issuer Last Name"
-msgstr ""
-
-
+msgstr "Issuer Last Name"
 msgid "Issuer Date of Birth"
-msgstr ""
-
-
+msgstr "Issuer Date of Birth"
 msgid "Set Tracking Status"
-msgstr ""
-
-
+msgstr "Set Tracking Status"
 msgid "Select Status:"
-msgstr ""
-
-
+msgstr "Select Status:"
 msgid "Select Date:"
-msgstr ""
-
-
+msgstr "Select Date:"
 msgid "Confirm Status"
-msgstr ""
-
-
+msgstr "Confirm Status"
 msgid "Invalid SMS panel username or password. Please check your credentials in Settings."
 msgstr "Invalid SMS panel username or password. Please check your credentials in Settings."
-
-
 msgid "Your SMS panel account is restricted or limited. Please contact your SMS panel support or check your account status."
 msgstr "Your SMS panel account is restricted or limited. Please contact your SMS panel support or check your account status."
-
-
 msgid "Insufficient credit in your SMS panel. Please recharge your account."
 msgstr "Insufficient credit in your SMS panel. Please recharge your account."
-
-
 msgid "Invalid pattern code. Please check the pattern code (Body ID) in Settings."
 msgstr "Invalid pattern code. Please check the pattern code (Body ID) in Settings."
-
-
 msgid "Invalid phone number format. Please check the recipient number."
 msgstr "Invalid phone number format. Please check the recipient number."
-
-
 msgid "Error sending SMS. API returned error code: "
 msgstr "Error sending SMS. API returned error code: "
-
-
 msgid "Approve Inquiry"
 msgstr "Approve Inquiry"
-
-
 msgid "Approve"
 msgstr "Approve"
-
-
 msgid "Are you sure you want to approve this inquiry?"
 msgstr "Are you sure you want to approve this inquiry?"
-
-
 msgid "Cancel Meeting"
 msgstr "Cancel Meeting"
-
-
 msgid "Are you sure you want to cancel this meeting?"
 msgstr "Are you sure you want to cancel this meeting?"
-
-
 msgid "Meeting cancelled successfully"
 msgstr "Meeting cancelled successfully"
-
-
 msgid "Error cancelling meeting"
 msgstr "Error cancelling meeting"
-
-
 msgid "Can only approve from In Progress status."
 msgstr "Can only approve from In Progress status."
-
-
 msgid "Can only reject from In Progress or Meeting Scheduled status."
 msgstr "Can only reject from In Progress or Meeting Scheduled status."
-
-
 msgid "Can only schedule follow-up from In Progress or Meeting Scheduled status."
 msgstr "Can only schedule follow-up from In Progress or Meeting Scheduled status."
-
-
 msgid "Inquiry approved successfully."
 msgstr "Inquiry approved successfully."
-
-
 msgid "Follow-up scheduled for inquiry #%d on %s"
 msgstr "Follow-up scheduled for inquiry #%d on %s"
-
-
 msgid "Follow-up scheduled for cash inquiry #%d on %s"
 msgstr "Follow-up scheduled for cash inquiry #%d on %s"
-
-
 msgid "Meeting is not scheduled."
 msgstr "Meeting is not scheduled."
-
-
 msgid "You do not have permission to cancel this meeting."
 msgstr "You do not have permission to cancel this meeting."
-
-
 msgid "Pages"
 msgstr "Pages"
-
-
 msgid "Expert"
 msgstr "Expert"
-
-
 msgid "Edit Expert"
 msgstr "Edit Expert"
-
-
 msgid "Expert Details"
 msgstr "Expert Details"
-
-
 msgid "Account"
 msgstr "Account"
-
-
 msgid "Registered Inquiries"
 msgstr "Registered Inquiries"
-
-
 msgid "Permissions"
 msgstr "Permissions"
-
-
 msgid "Assigned Inquiries:"
 msgstr "Assigned Inquiries:"
-
-
 msgid "Payment Management"
 msgstr "Payment Management"
-
-
 msgid "Search payments..."
 msgstr "Search payments..."
-
-
 msgid "All"
 msgstr "All"
-
-
 msgid "Inquiry Fee Payment"
 msgstr "Inquiry Fee Payment"
-
-
 msgid "Cash Car Down Payment"
 msgstr "Cash Car Down Payment"
-
-
 msgid "Inquiry ID"
 msgstr "Inquiry ID"
-
-
 msgid "Payment Date"
 msgstr "Payment Date"
-
-
 msgid "Payment Type"
 msgstr "Payment Type"
-
-
 msgid "Payment Method"
 msgstr "Payment Method"
-
-
 msgid "Amount"
 msgstr "Amount"
-
-
 msgid "Payment Details"
 msgstr "Payment Details"
-
-
 msgid "Back"
 msgstr "Back"
-
-
 msgid "Payment Number"
 msgstr "Payment Number"
-
-
 msgid "Payment Type:"
 msgstr "Payment Type:"
-
-
 msgid "Payment Method:"
 msgstr "Payment Method:"
-
-
 msgid "Payment Amount:"
 msgstr "Payment Amount:"
-
-
 msgid "Payment Date:"
 msgstr "Payment Date:"
-
-
 msgid "Transaction Information"
 msgstr "Transaction Information"
-
-
 msgid "Inquiry Information"
 msgstr "Inquiry Information"
-
-
 msgid "Permission Management:"
 msgstr "Permission Management:"
-
-
 msgid "Access to Cash Inquiries"
 msgstr "Access to Cash Inquiries"
-
-
 msgid "Expert can view and manage cash inquiries."
 msgstr "Expert can view and manage cash inquiries."
-
-
 msgid "Access to Installment Inquiries"
 msgstr "Access to Installment Inquiries"
-
-
 msgid "Expert can view and manage installment inquiries."
 msgstr "Expert can view and manage installment inquiries."
-
-
 msgid "No inquiries have been assigned to this expert."
 msgstr "No inquiries have been assigned to this expert."
-
-
 msgid "User Management"
 msgstr "User Management"
-
-
 msgid "Total Experts"
 msgstr "Total Experts"
-
-
 msgid "System Settings"
 msgstr "System Settings"
-
-
 msgid "Maneli Car System Settings"
 msgstr "Maneli Car System Settings"
-
-
 msgid "Success!"
 msgstr "Success!"
-
-
 msgid "Add New Expert"
 msgstr "Add New Expert"
-
-
 msgid "Search name, mobile..."
 msgstr "Search name, mobile..."
-
-
 msgid "Clear"
 msgstr "Clear"
-
-
 msgid "Deactivate"
 msgstr "Deactivate"
-
-
 msgid "Activate"
 msgstr "Activate"
-
-
 msgid "Permission Level"
 msgstr "Permission Level"
-
-
 msgid "Notifications and Alerts"
 msgstr "Notifications and Alerts"
-
-
 msgid "Mark All as Read"
 msgstr "Mark All as Read"
-
-
 msgid "Delete Read"
 msgstr "Delete Read"
-
-
 msgid "Cash Follow-ups"
 msgstr "Cash Follow-ups"
-
-
 msgid "Print"
 msgstr "Print"
-
-
 msgid "Export PDF"
 msgstr "Export PDF"
-
-
 msgid "Advanced Filters"
 msgstr "Advanced Filters"
-
-
 msgid "Reset Filters"
 msgstr "Reset Filters"
-
-
 msgid "Time Period:"
 msgstr "Time Period:"
-
-
 msgid "Today"
 msgstr "Today"
-
-
 msgid "Yesterday"
 msgstr "Yesterday"
-
-
 msgid "Last Week"
 msgstr "Last Week"
-
-
 msgid "%d days ago"
-msgstr ""
+msgstr "%d days ago"
 
 
 msgid "%d images uploaded successfully%s."
-msgstr ""
-
-
+msgstr "%d images uploaded successfully%s."
 msgid "%d previous follow-ups"
-msgstr ""
-
-
+msgstr "%d previous follow-ups"
 msgid "%s inquiries"
-msgstr ""
-
-
+msgstr "%s inquiries"
 msgid "%s items"
-msgstr ""
-
-
+msgstr "%s items"
 msgid "-"
-msgstr ""
-
-
+msgstr "-"
 msgid "-- Please Select --"
-msgstr ""
-
-
+msgstr "-- Please Select --"
 msgid "02112345678"
-msgstr ""
-
-
+msgstr "02112345678"
 msgid "09123456789"
-msgstr ""
-
-
+msgstr "09123456789"
 msgid "10 digits"
-msgstr ""
-
-
+msgstr "10 digits"
 msgid "1370/01/01"
-msgstr ""
-
-
+msgstr "1370/01/01"
 msgid "Aban"
-msgstr ""
-
-
+msgstr "Aban"
 msgid "Access Restricted!"
-msgstr ""
-
-
+msgstr "Access Restricted!"
 msgid "Access to Meeting Calendar"
-msgstr ""
-
-
+msgstr "Access to Meeting Calendar"
 msgid "Account Information"
-msgstr ""
-
-
+msgstr "Account Information"
 msgid "Account Number:"
-msgstr ""
-
-
+msgstr "Account Number:"
 msgid "Account Settings:"
-msgstr ""
-
-
+msgstr "Account Settings:"
 msgid "Activate Expert?"
-msgstr ""
-
-
+msgstr "Activate Expert?"
 msgid "Active"
-msgstr ""
-
-
+msgstr "Active"
 msgid "Activity Timeline"
-msgstr ""
-
-
+msgstr "Activity Timeline"
 msgid "Add Color"
-msgstr ""
-
-
+msgstr "Add Color"
 msgid "Add Feature"
-msgstr ""
-
-
+msgstr "Add Feature"
 msgid "Add Image to Gallery"
-msgstr ""
-
-
+msgstr "Add Image to Gallery"
 msgid "Add New Product"
-msgstr ""
-
-
+msgstr "Add New Product"
 msgid "Add a note..."
-msgstr ""
-
-
+msgstr "Add a note..."
 msgid "Address:"
-msgstr ""
-
-
+msgstr "Address:"
 msgid "Admin Actions"
-msgstr ""
-
-
+msgstr "Admin Actions"
 msgid "Administrator"
-msgstr ""
-
-
+msgstr "Administrator"
 msgid "After submitting your inquiry, our expert will contact you and guide you through the required documents."
-msgstr ""
-
-
+msgstr "After submitting your inquiry, our expert will contact you and guide you through the required documents."
+"After submitting your inquiry, our expert will contact you and guide"
+"you through the required documents."
+"After submitting your inquiry, our expert will contact you and guide you through the required documents"
 msgid "Apply Filter"
-msgstr ""
-
-
+msgstr "Apply Filter"
 msgid "Apply Filters"
-msgstr ""
-
-
+msgstr "Apply Filters"
 msgid "Approximate Monthly Installment"
-msgstr ""
-
-
+msgstr "Approximate Monthly Installment"
 msgid "Are you sure?"
-msgstr ""
-
-
+msgstr "Are you sure?"
 msgid "Assigned to Expert:"
-msgstr ""
-
-
+msgstr "Assigned to Expert:"
 msgid "Assigned to Me"
-msgstr ""
-
-
+msgstr "Assigned to Me"
 msgid "Assigned to:"
-msgstr ""
-
-
+msgstr "Assigned to:"
 msgid "Attention Required"
-msgstr ""
-
-
+msgstr "Attention Required"
 msgid "Authentication"
-msgstr ""
-
-
+msgstr "Authentication"
 msgid "Awaiting Down Payment"
-msgstr ""
-
-
+msgstr "Awaiting Down Payment"
 msgid "Azar"
-msgstr ""
-
-
+msgstr "Azar"
 msgid "Back to Dashboard"
-msgstr ""
-
-
+msgstr "Back to Dashboard"
 msgid "Back to Inquiries List"
-msgstr ""
-
-
+msgstr "Back to Inquiries List"
 msgid "Back to Previous Step"
-msgstr ""
-
-
+msgstr "Back to Previous Step"
 msgid "Bahman"
-msgstr ""
-
-
+msgstr "Bahman"
 msgid "Bank Name:"
-msgstr ""
-
-
+msgstr "Bank Name:"
 msgid "Bank inquiry has not been performed."
-msgstr ""
-
-
+msgstr "Bank inquiry has not been performed."
 msgid "Birth Date"
-msgstr ""
-
-
+msgstr "Birth Date"
 msgid "Birth Date:"
-msgstr ""
-
-
+msgstr "Birth Date:"
 msgid "Branch Code:"
-msgstr ""
-
-
+msgstr "Branch Code:"
 msgid "Branch Name:"
-msgstr ""
-
-
+msgstr "Branch Name:"
 msgid "Brand"
-msgstr ""
-
-
+msgstr "Brand"
 msgid "Browse Other Cars"
-msgstr ""
-
-
+msgstr "Browse Other Cars"
 msgid "Business Management Dashboard"
-msgstr ""
-
-
+msgstr "Business Management Dashboard"
 msgid "Buy your dream car with easy installments"
-msgstr ""
-
-
+msgstr "Buy your dream car with easy installments"
 msgid "By Status"
-msgstr ""
-
-
+msgstr "By Status"
 msgid "Cancellation Reason:"
-msgstr ""
-
-
+msgstr "Cancellation Reason:"
 msgid "Cancelled"
-msgstr ""
-
-
+msgstr "Cancelled"
 msgid "Car Features"
-msgstr ""
-
-
+msgstr "Car Features"
 msgid "Car Selection"
-msgstr ""
-
-
+msgstr "Car Selection"
 msgid "Cash Car Purchase"
-msgstr ""
-
-
+msgstr "Cash Car Purchase"
 msgid "Cash Inquiries"
-msgstr ""
-
-
+msgstr "Cash Inquiries"
 msgid "Cash Inquiries List"
-msgstr ""
-
-
+msgstr "Cash Inquiries List"
 msgid "Cash Inquiries:"
-msgstr ""
-
-
+msgstr "Cash Inquiries:"
 msgid "Cash Inquiry"
-msgstr ""
-
-
+msgstr "Cash Inquiry"
 msgid "Cash Inquiry Follow-ups List"
-msgstr ""
-
-
+msgstr "Cash Inquiry Follow-ups List"
 msgid "Cash Inquiry List"
-msgstr ""
-
-
+msgstr "Cash Inquiry List"
 msgid "Cash inquiries"
-msgstr ""
-
-
+msgstr "Cash inquiries"
 msgid "Cash vs Installment Comparison"
-msgstr ""
-
-
+msgstr "Cash vs Installment Comparison"
 msgid "Cash:"
-msgstr ""
-
-
+msgstr "Cash:"
 msgid "Category"
-msgstr ""
-
-
+msgstr "Category"
 msgid "Change Expert"
-msgstr ""
-
-
+msgstr "Change Expert"
 msgid "Change Image"
-msgstr ""
-
-
+msgstr "Change Image"
 msgid "Check Issuer Information"
-msgstr ""
-
-
+msgstr "Check Issuer Information"
 msgid "Cheque Status:"
-msgstr ""
-
-
+msgstr "Cheque Status:"
 msgid "Clear Filters"
-msgstr ""
-
-
+msgstr "Clear Filters"
 msgid "Color"
-msgstr ""
-
-
+msgstr "Color"
 msgid "Colors"
-msgstr ""
-
-
+msgstr "Colors"
 msgid "Complete"
-msgstr ""
-
-
+msgstr "Complete"
 msgid "Complete System Reports"
-msgstr ""
-
-
+msgstr "Complete System Reports"
 msgid "Completed / Rejected"
-msgstr ""
-
-
+msgstr "Completed / Rejected"
 msgid "Configure Notifications"
-msgstr ""
-
-
+msgstr "Configure Notifications"
 msgid "Confirm and Continue"
-msgstr ""
-
-
+msgstr "Confirm and Continue"
 msgid "Confirmed"
-msgstr ""
-
-
+msgstr "Confirmed"
 msgid "Confirmed and Referred"
-msgstr ""
-
-
+msgstr "Confirmed and Referred"
 msgid "Congratulations! Your request has been approved"
-msgstr ""
-
-
+msgstr "Congratulations! Your request has been approved"
 msgid "Contact Information"
-msgstr ""
-
-
+msgstr "Contact Information"
 msgid "Contact Number"
-msgstr ""
-
-
+msgstr "Contact Number"
 msgid "Continue to Next Step"
-msgstr ""
-
-
+msgstr "Continue to Next Step"
 msgid "Continue to Payment"
-msgstr ""
-
-
+msgstr "Continue to Payment"
 msgid "Control how profile information is verified for security purposes."
-msgstr ""
-
-
+msgstr "Control how profile information is verified for security purposes."
 msgid "Cover Image"
-msgstr ""
-
-
+msgstr "Cover Image"
 msgid "Create First Inquiry"
-msgstr ""
-
-
+msgstr "Create First Inquiry"
 msgid "Create New Cash Request"
-msgstr ""
-
-
+msgstr "Create New Cash Request"
 msgid "Create New Inquiry"
-msgstr ""
-
-
+msgstr "Create New Inquiry"
 msgid "Create New Inquiry (Expert Mode)"
-msgstr ""
-
-
+msgstr "Create New Inquiry (Expert Mode)"
 msgid "Create New Installment Request"
-msgstr ""
-
-
+msgstr "Create New Installment Request"
 msgid "Created"
-msgstr ""
-
-
+msgstr "Created"
 msgid "Current Status"
-msgstr ""
-
-
+msgstr "Current Status"
 msgid "Custom"
-msgstr ""
-
-
+msgstr "Custom"
 msgid "Custom Range"
-msgstr ""
-
-
+msgstr "Custom Range"
 msgid "Customer name, car name, mobile..."
-msgstr ""
-
-
+msgstr "Customer name, car name, mobile..."
 msgid "Customers"
-msgstr ""
-
-
+msgstr "Customers"
 msgid "Daily"
-msgstr ""
-
-
+msgstr "Daily"
 msgid "Daily Inquiries Trend (Last 7 Days)"
-msgstr ""
-
-
+msgstr "Daily Inquiries Trend (Last 7 Days)"
 msgid "Daily Inquiry Trend"
-msgstr ""
-
-
+msgstr "Daily Inquiry Trend"
 msgid "Daily Inquiry Trend (Last 7 Days)"
-msgstr ""
-
-
+msgstr "Daily Inquiry Trend (Last 7 Days)"
 msgid "Dashboard"
-msgstr ""
-
-
+msgstr "Dashboard"
 msgid "Date of Birth:"
-msgstr ""
-
-
+msgstr "Date of Birth:"
 msgid "Deactivate Expert?"
-msgstr ""
-
-
+msgstr "Deactivate Expert?"
 msgid "Default (Newest First)"
-msgstr ""
-
-
+msgstr "Default (Newest First)"
 msgid "Delete"
-msgstr ""
-
-
+msgstr "Delete"
 msgid "Delete Expert?"
-msgstr ""
-
-
+msgstr "Delete Expert?"
 msgid "Delete Inquiry"
-msgstr ""
-
-
+msgstr "Delete Inquiry"
 msgid "Delete works!"
-msgstr ""
-
-
+msgstr "Delete works!"
 msgid "Deleted"
-msgstr ""
-
-
+msgstr "Deleted"
 msgid "Deleted!"
-msgstr ""
-
-
+msgstr "Deleted!"
 msgid "Deleting..."
-msgstr ""
-
-
+msgstr "Deleting..."
 msgid "Description should not exceed 500 characters."
-msgstr ""
-
-
+msgstr "Description should not exceed 500 characters."
 msgid "Designation:"
-msgstr ""
-
-
+msgstr "Designation:"
 msgid "Dey"
-msgstr ""
-
-
+msgstr "Dey"
 msgid "Disabled"
-msgstr ""
-
-
+msgstr "Disabled"
 msgid "Do you have a discount code?"
-msgstr ""
-
-
+msgstr "Do you have a discount code?"
 msgid "Documents Required"
-msgstr ""
-
-
+msgstr "Documents Required"
 msgid "Down Payment Amount (Toman):"
-msgstr ""
-
-
+msgstr "Down Payment Amount (Toman):"
 msgid "Down Payment Received"
-msgstr ""
-
-
+msgstr "Down Payment Received"
 msgid "Down Payment Requested:"
-msgstr ""
-
-
+msgstr "Down Payment Requested:"
 msgid "Due to severe market fluctuations, car prices are approximate and may change until final confirmation."
-msgstr ""
-
-
+msgstr "Due to severe market fluctuations, car prices are approximate and may change until final confirmation."
+"Due to severe market fluctuations, car prices are approximate and may"
+"change until final confirmation."
+"Due to severe market fluctuations, car prices are approximate and may change until final confirmation"
 msgid "Edit Account"
-msgstr ""
-
-
+msgstr "Edit Account"
 msgid "Edit Permissions"
-msgstr ""
-
-
+msgstr "Edit Permissions"
 msgid "Edit Product"
-msgstr ""
-
-
+msgstr "Edit Product"
 msgid "Edit User"
-msgstr ""
-
-
+msgstr "Edit User"
 msgid "Edit User Account"
-msgstr ""
-
-
+msgstr "Edit User Account"
 msgid "Email Notifications"
-msgstr ""
-
-
+msgstr "Email Notifications"
 msgid "Email:"
-msgstr ""
-
-
+msgstr "Email:"
 msgid "Enter account number"
-msgstr ""
-
-
+msgstr "Enter account number"
 msgid "Enter address"
-msgstr ""
-
-
+msgstr "Enter address"
 msgid "Enter bank name"
-msgstr ""
-
-
+msgstr "Enter bank name"
 msgid "Enter branch code"
-msgstr ""
-
-
+msgstr "Enter branch code"
 msgid "Enter branch name"
-msgstr ""
-
-
+msgstr "Enter branch name"
 msgid "Enter designation"
-msgstr ""
-
-
+msgstr "Enter designation"
 msgid "Enter email"
-msgstr ""
-
-
+msgstr "Enter email"
 msgid "Enter father\\"
-msgstr ""
-
-
+msgstr "Enter father\\"
 msgid "Enter mobile number"
-msgstr ""
-
-
+msgstr "Enter mobile number"
 msgid "Enter name"
-msgstr ""
-
-
+msgstr "Enter name"
 msgid "Enter occupation or job title"
-msgstr ""
-
-
+msgstr "Enter occupation or job title"
 msgid "Enter the 4-digit code sent to mobile number %s."
-msgstr ""
-
-
+msgstr "Enter the 4-digit code sent to mobile number %s."
 msgid "Enter your father\\"
-msgstr ""
-
-
+msgstr "Enter your father\\"
 msgid "Enter your first name"
-msgstr ""
-
-
+msgstr "Enter your first name"
 msgid "Enter your last name"
-msgstr ""
-
-
+msgstr "Enter your last name"
 msgid "Enter your mobile number"
-msgstr ""
-
-
+msgstr "Enter your mobile number"
 msgid "Enter your note..."
-msgstr ""
-
+msgstr "Enter your note..."
 msgid "Error"
-msgstr ""
-
-
+msgstr "Error"
 msgid "Error adding expert"
-msgstr ""
-
-
+msgstr "Error adding expert"
 msgid "Error loading data"
-msgstr ""
-
-
+msgstr "Error loading data"
 msgid "Error loading permissions"
-msgstr ""
-
-
+msgstr "Error loading permissions"
 msgid "Error saving product. Please try again."
-msgstr ""
-
-
+msgstr "Error saving product. Please try again."
 msgid "Error sending request. Please try again."
-msgstr ""
-
-
+msgstr "Error sending request. Please try again."
 msgid "Error updating"
-msgstr ""
-
-
+msgstr "Error updating"
 msgid "Error uploading image. Please try again."
-msgstr ""
-
-
+msgstr "Error uploading image. Please try again."
 msgid "Error!"
-msgstr ""
-
-
+msgstr "Error!"
 msgid "Esfand"
-msgstr ""
-
-
+msgstr "Esfand"
 msgid "Example: 50000000"
-msgstr ""
-
-
+msgstr "Example: 50000000"
 msgid "Example: Central"
-msgstr ""
-
-
+msgstr "Example: Central"
 msgid "Example: Engineer"
-msgstr ""
-
-
+msgstr "Example: Engineer"
 msgid "Example: Melli"
-msgstr ""
-
-
+msgstr "Example: Melli"
 msgid "Expert Dashboard"
-msgstr ""
-
-
+msgstr "Expert Dashboard"
 msgid "Expert Notes"
-msgstr ""
-
-
+msgstr "Expert Notes"
 msgid "Expert Performance"
-msgstr ""
-
-
+msgstr "Expert Performance"
 msgid "Expert Performance Comparison"
-msgstr ""
-
-
+msgstr "Expert Performance Comparison"
 msgid "Expert Performance Report"
-msgstr ""
-
-
+msgstr "Expert Performance Report"
 msgid "Expert Status Control"
-msgstr ""
-
-
+msgstr "Expert Status Control"
 msgid "Expert Status:"
-msgstr ""
-
-
+msgstr "Expert Status:"
 msgid "Expert added successfully."
-msgstr ""
-
-
+msgstr "Expert added successfully."
 msgid "Expert can view and manage meetings."
-msgstr ""
-
-
+msgstr "Expert can view and manage meetings."
 msgid "Expert deleted successfully."
-msgstr ""
-
-
+msgstr "Expert deleted successfully."
 msgid "Expert information updated successfully."
-msgstr ""
-
-
+msgstr "Expert information updated successfully."
 msgid "Expert not found."
-msgstr ""
-
-
+msgstr "Expert not found."
 msgid "Expert not specified."
-msgstr ""
-
-
+msgstr "Expert not specified."
 msgid "Expert updated successfully."
-msgstr ""
-
-
+msgstr "Expert updated successfully."
 msgid "Expert will be activated"
-msgstr ""
-
-
+msgstr "Expert will be activated"
 msgid "Expert will be deactivated"
-msgstr ""
-
-
+msgstr "Expert will be deactivated"
 msgid "Expert:"
-msgstr ""
-
-
+msgstr "Expert:"
 msgid "Expert: %s"
-msgstr ""
-
-
+msgstr "Expert: %s"
 msgid "Export CSV"
-msgstr ""
-
-
+msgstr "Export CSV"
 msgid "Failed to upload images."
-msgstr ""
-
-
+msgstr "Failed to upload images."
 msgid "Failed!"
-msgstr ""
-
-
+msgstr "Failed!"
 msgid "Farvardin"
-msgstr ""
-
-
+msgstr "Farvardin"
 msgid "Father\\"
-msgstr ""
-
-
+msgstr "Father\\"
 msgid "Feature"
-msgstr ""
-
-
+msgstr "Feature"
 msgid "File %s is larger than 5MB and will be ignored."
-msgstr ""
-
-
+msgstr "File %s is larger than 5MB and will be ignored."
 msgid "File size exceeds 2 MB limit."
-msgstr ""
-
-
+msgstr "File size exceeds 2 MB limit."
 msgid "File size should not exceed 5MB."
-msgstr ""
-
-
+msgstr "File size should not exceed 5MB."
 msgid "Filter by Expert"
-msgstr ""
-
-
+msgstr "Filter by Expert"
 msgid "Final Admin Approval"
-msgstr ""
-
-
+msgstr "Final Admin Approval"
 msgid "Final Approval"
-msgstr ""
-
-
+msgstr "Final Approval"
 msgid "Final Approval and Completed"
-msgstr ""
-
-
+msgstr "Final Approval and Completed"
 msgid "Final Approved"
-msgstr ""
-
-
+msgstr "Final Approved"
 msgid "Final Installment Inquiry Result"
-msgstr ""
-
-
+msgstr "Final Installment Inquiry Result"
 msgid "Finish"
-msgstr ""
-
-
+msgstr "Finish"
 msgid "First"
-msgstr ""
-
-
+msgstr "First"
 msgid "Follow-up Completed (Date:"
-msgstr ""
-
-
+msgstr "Follow-up Completed (Date:"
 msgid "Follow-up Date:"
-msgstr ""
-
-
+msgstr "Follow-up Date:"
 msgid "Follow-up Inquiries List"
-msgstr ""
-
-
+msgstr "Follow-up Inquiries List"
 msgid "Follow-up Scheduled"
-msgstr ""
-
-
+msgstr "Follow-up Scheduled"
 msgid "Follow-up Started by Expert"
-msgstr ""
-
-
+msgstr "Follow-up Started by Expert"
 msgid "Follow-ups"
-msgstr ""
-
-
+msgstr "Follow-ups"
 msgid "Free"
-msgstr ""
-
-
+msgstr "Free"
 msgid "Friday"
-msgstr ""
-
-
+msgstr "Friday"
 msgid "From Date:"
-msgstr ""
-
-
+msgstr "From Date:"
 msgid "Full Address"
-msgstr ""
-
-
+msgstr "Full Address"
 msgid "Full address"
-msgstr ""
-
-
+msgstr "Full address"
 msgid "Future Followup"
-msgstr ""
-
-
+msgstr "Future Followup"
 msgid "Future meetings will be displayed here."
-msgstr ""
-
-
+msgstr "Future meetings will be displayed here."
 msgid "Go to Cars List"
-msgstr ""
-
-
+msgstr "Go to Cars List"
 msgid "Go to Payment Gateway"
-msgstr ""
-
-
+msgstr "Go to Payment Gateway"
 msgid "Government"
-msgstr ""
-
-
+msgstr "Government"
 msgid "Guide:"
-msgstr ""
-
-
+msgstr "Guide:"
 msgid "Home"
-msgstr ""
-
-
+msgstr "Home"
 msgid "Identity Information"
-msgstr ""
-
-
+msgstr "Identity Information"
 msgid "Identity Information:"
-msgstr ""
-
-
+msgstr "Identity Information:"
 msgid "Image Gallery"
-msgstr ""
-
-
+msgstr "Image Gallery"
 msgid "Image uploaded successfully."
-msgstr ""
-
-
+msgstr "Image uploaded successfully."
 msgid "In-App Notifications"
-msgstr ""
-
-
+msgstr "In-App Notifications"
 msgid "In-person appointments"
-msgstr ""
-
-
+msgstr "In-person appointments"
 msgid "Inactive"
-msgstr ""
-
-
+msgstr "Inactive"
 msgid "Income Level (Toman)"
-msgstr ""
-
-
+msgstr "Income Level (Toman)"
 msgid "Income Level (Toman):"
-msgstr ""
-
-
+msgstr "Income Level (Toman):"
 msgid "Inquiries that require follow-up contact on the specified dates are displayed here."
-msgstr ""
-
-
+msgstr "Inquiries that require follow-up contact on the specified dates are displayed here."
+"Inquiries that require follow-up contact on the specified dates are"
+"displayed here."
+"Inquiries that require follow-up contact on the specified dates are displayed here"
 msgid "Inquiry"
-msgstr ""
-
-
+msgstr "Inquiry"
 msgid "Inquiry #%d"
-msgstr ""
-
-
+msgstr "Inquiry #%d"
 msgid "Inquiry Count"
-msgstr ""
-
-
+msgstr "Inquiry Count"
 msgid "Inquiry Status Distribution"
-msgstr ""
-
-
+msgstr "Inquiry Status Distribution"
 msgid "Inquiry not found or you do not have access."
-msgstr ""
-
-
+msgstr "Inquiry not found or you do not have access."
 msgid "Installment"
-msgstr ""
-
-
+msgstr "Installment"
 msgid "Installment Car Purchase"
-msgstr ""
-
-
+msgstr "Installment Car Purchase"
 msgid "Installment Follow-ups"
-msgstr ""
-
-
+msgstr "Installment Follow-ups"
 msgid "Installment Inquiries:"
-msgstr ""
-
-
+msgstr "Installment Inquiries:"
 msgid "Installment Inquiry Follow-ups List"
-msgstr ""
-
-
+msgstr "Installment Inquiry Follow-ups List"
 msgid "Installment Period"
-msgstr ""
-
-
+msgstr "Installment Period"
 msgid "Installment Request Details"
-msgstr ""
-
-
+msgstr "Installment Request Details"
 msgid "Installment:"
-msgstr ""
-
-
+msgstr "Installment:"
 msgid "Invalid file type. Only JPEG, PNG and GIF are allowed."
-msgstr ""
-
-
+msgstr "Invalid file type. Only JPEG, PNG and GIF are allowed."
 msgid "Issuer Account Number"
-msgstr ""
-
-
+msgstr "Issuer Account Number"
 msgid "Issuer Address"
-msgstr ""
-
-
+msgstr "Issuer Address"
 msgid "Issuer Bank Name"
-msgstr ""
-
-
+msgstr "Issuer Bank Name"
 msgid "Issuer Birth Date"
-msgstr ""
-
-
+msgstr "Issuer Birth Date"
 msgid "Issuer Branch Code"
-msgstr ""
-
-
+msgstr "Issuer Branch Code"
 msgid "Issuer Branch Name"
-msgstr ""
-
-
+msgstr "Issuer Branch Name"
 msgid "Issuer Father\\"
-msgstr ""
-
-
+msgstr "Issuer Father\\"
 msgid "Issuer First Name"
-msgstr ""
-
-
+msgstr "Issuer First Name"
 msgid "Issuer Income Level (Toman)"
-msgstr ""
-
-
+msgstr "Issuer Income Level (Toman)"
 msgid "Issuer Income Level (Toman):"
-msgstr ""
-
-
+msgstr "Issuer Income Level (Toman):"
 msgid "Issuer Job Title"
-msgstr ""
-
-
+msgstr "Issuer Job Title"
 msgid "Issuer Job Type"
-msgstr ""
-
-
+msgstr "Issuer Job Type"
 msgid "Issuer Landline Phone"
-msgstr ""
-
-
+msgstr "Issuer Landline Phone"
 msgid "Issuer Mobile Number"
-msgstr ""
-
-
+msgstr "Issuer Mobile Number"
 msgid "Items"
-msgstr ""
-
-
+msgstr "Items"
 msgid "Job Information"
-msgstr ""
-
-
+msgstr "Job Information"
 msgid "Job Title"
-msgstr ""
-
-
+msgstr "Job Title"
 msgid "Job Type:"
-msgstr ""
-
-
+msgstr "Job Type:"
 msgid "Khordad"
-msgstr ""
-
-
+msgstr "Khordad"
 msgid "Landline Phone"
-msgstr ""
-
-
+msgstr "Landline Phone"
 msgid "Last 3 Months"
-msgstr ""
-
-
+msgstr "Last 3 Months"
 msgid "Last 6 Months"
-msgstr ""
-
-
+msgstr "Last 6 Months"
 msgid "Last 7 Days Summary:"
-msgstr ""
-
-
+msgstr "Last 7 Days Summary:"
 msgid "Last Month"
-msgstr ""
-
-
+msgstr "Last Month"
 msgid "Last Year"
-msgstr ""
-
-
+msgstr "Last Year"
 msgid "Loading follow-ups..."
-msgstr ""
-
-
+msgstr "Loading follow-ups..."
 msgid "Loading inquiries..."
-msgstr ""
-
-
+msgstr "Loading inquiries..."
 msgid "Loan Calculator"
-msgstr ""
-
-
+msgstr "Loan Calculator"
 msgid "Login Verification"
-msgstr ""
-
-
+msgstr "Login Verification"
 msgid "Maneli Admin"
-msgstr ""
-
-
+msgstr "Maneli Admin"
 msgid "Manufacturing Year"
-msgstr ""
-
-
+msgstr "Manufacturing Year"
 msgid "Meeting Scheduled"
-msgstr ""
-
-
+msgstr "Meeting Scheduled"
 msgid "Meeting Scheduled:"
-msgstr ""
-
-
+msgstr "Meeting Scheduled:"
 msgid "Mehr"
-msgstr ""
-
-
+msgstr "Mehr"
 msgid "Messages sent to user email address."
-msgstr ""
-
-
+msgstr "Messages sent to user email address."
 msgid "Minimum Down Payment"
-msgstr ""
-
-
+msgstr "Minimum Down Payment"
 msgid "Mobile Number (Username):"
-msgstr ""
-
-
+msgstr "Mobile Number (Username):"
 msgid "Monday"
-msgstr ""
-
-
+msgstr "Monday"
 msgid "Monthly"
-msgstr ""
-
-
+msgstr "Monthly"
 msgid "Monthly Revenue (Last 6 Months)"
-msgstr ""
-
-
+msgstr "Monthly Revenue (Last 6 Months)"
 msgid "Mordad"
-msgstr ""
-
-
+msgstr "Mordad"
 msgid "My Account"
-msgstr ""
-
-
+msgstr "My Account"
 msgid "My Assigned Inquiries Needing Action"
-msgstr ""
-
-
+msgstr "My Assigned Inquiries Needing Action"
 msgid "My Cash Inquiries"
-msgstr ""
-
-
+msgstr "My Cash Inquiries"
 msgid "My Cash Purchase Inquiries"
-msgstr ""
-
-
+msgstr "My Cash Purchase Inquiries"
 msgid "My Customers"
-msgstr ""
-
-
+msgstr "My Customers"
 msgid "My Installment Inquiries"
-msgstr ""
-
-
+msgstr "My Installment Inquiries"
 msgid "My Installment Purchase Inquiries"
-msgstr ""
-
-
+msgstr "My Installment Purchase Inquiries"
 msgid "My Performance Report"
-msgstr ""
-
-
+msgstr "My Performance Report"
 msgid "My Profit"
-msgstr ""
-
-
+msgstr "My Profit"
 msgid "My Total Inquiries"
-msgstr ""
-
-
+msgstr "My Total Inquiries"
 msgid "My Upcoming Follow-ups"
-msgstr ""
-
-
+msgstr "My Upcoming Follow-ups"
 msgid "National Code:"
-msgstr ""
-
-
+msgstr "National Code:"
 msgid "Need More Documents"
-msgstr ""
-
-
+msgstr "Need More Documents"
 msgid "Need expert assignment"
-msgstr ""
-
-
+msgstr "Need expert assignment"
 msgid "New Inquiry"
-msgstr ""
-
-
+msgstr "New Inquiry"
 msgid "New Installment Inquiry"
-msgstr ""
-
-
+msgstr "New Installment Inquiry"
 msgid "Newest"
-msgstr ""
-
-
+msgstr "Newest"
 msgid "Next Follow-up Scheduled for:"
-msgstr ""
-
-
+msgstr "Next Follow-up Scheduled for:"
 msgid "Next Step"
-msgstr ""
-
-
+msgstr "Next Step"
 msgid "No"
 msgstr "No"
-
-
 msgid "No Car Selected"
-msgstr ""
-
+msgstr "No Car Selected"
 
 msgid "No Cash Inquiries Yet"
-msgstr ""
-
-
+msgstr "No Cash Inquiries Yet"
 msgid "No Image"
-msgstr ""
-
-
+msgstr "No Image"
 msgid "No Inquiries Found"
-msgstr ""
-
-
+msgstr "No Inquiries Found"
 msgid "No Inquiries Yet"
-msgstr ""
-
-
+msgstr "No Inquiries Yet"
 msgid "No Installment Inquiries Yet"
-msgstr ""
-
-
+msgstr "No Installment Inquiries Yet"
 msgid "No Role"
-msgstr ""
-
-
+msgstr "No Role"
 msgid "No data available"
-msgstr ""
-
-
+msgstr "No data available"
 msgid "No experts found."
-msgstr ""
-
-
+msgstr "No experts found."
 msgid "No follow-ups found."
-msgstr ""
-
-
+msgstr "No follow-ups found."
 msgid "No inquiries have been registered in the system yet"
-msgstr ""
-
-
+msgstr "No inquiries have been registered in the system yet"
 msgid "No inquiries registered in the last 7 days."
-msgstr ""
-
-
+msgstr "No inquiries registered in the last 7 days."
 msgid "No meetings scheduled"
-msgstr ""
-
-
+msgstr "No meetings scheduled"
 msgid "No notes have been recorded yet."
-msgstr ""
-
-
+msgstr "No notes have been recorded yet."
 msgid "No valid files selected."
-msgstr ""
-
-
+msgstr "No valid files selected."
 msgid "Not Specified"
-msgstr ""
-
-
+msgstr "Not Specified"
 msgid "Note:"
-msgstr ""
-
-
+msgstr "Note:"
 msgid "Notification Settings:"
-msgstr ""
-
-
+msgstr "Notification Settings:"
 msgid "Notifications"
-msgstr ""
-
-
+msgstr "Notifications"
 msgid "Notifications sent to user mobile or desktop devices."
-msgstr ""
-
-
+msgstr "Notifications sent to user mobile or desktop devices."
 msgid "Notifications that appear within the application interface."
-msgstr ""
-
-
+msgstr "Notifications that appear within the application interface."
 msgid "OK"
-msgstr ""
-
-
+msgstr "OK"
 msgid "Occupation / Position:"
-msgstr ""
-
-
+msgstr "Occupation / Position:"
 msgid "Occupation or Position"
-msgstr ""
-
-
+msgstr "Occupation or Position"
 msgid "Occupation/Job Title:"
-msgstr ""
-
-
+msgstr "Occupation/Job Title:"
 msgid "Oldest"
-msgstr ""
-
-
+msgstr "Oldest"
 msgid "Ordibehesht"
-msgstr ""
-
-
+msgstr "Ordibehesht"
 msgid "Our colleagues will contact you soon for final coordination."
-msgstr ""
-
-
+msgstr "Our colleagues will contact you soon for final coordination."
 msgid "Our experts need more documents to complete the process. Please wait for our team to contact you."
-msgstr ""
-
-
+msgstr "Our experts need more documents to complete the process. Please wait for our team to contact you."
+"Our experts need more documents to complete the process. Please wait"
+"for our team to contact you."
+"Our experts need more documents to complete the process. Please wait for our team to contact you"
 msgid "Overdue"
-msgstr ""
-
-
+msgstr "Overdue"
 msgid "Overdue Follow-ups"
-msgstr ""
-
-
+msgstr "Overdue Follow-ups"
 msgid "Overdue Followups"
-msgstr ""
-
-
+msgstr "Overdue Followups"
 msgid "Overdue Inquiries (%d)"
-msgstr ""
-
-
+msgstr "Overdue Inquiries (%d)"
 msgid "Password Verification"
-msgstr ""
-
-
+msgstr "Password Verification"
 msgid "Password will be automatically generated. The expert can set their password through the forgot password option."
-msgstr ""
-
-
+msgstr "Password will be automatically generated. The expert can set their password through the forgot password option."
+"Password will be automatically generated. The expert can set their"
+"password through the forgot password option."
+"Password will be automatically generated. The expert can set their password through the forgot password option"
 msgid "Payment Amount"
-msgstr ""
-
-
+msgstr "Payment Amount"
 msgid "Payment completed successfully."
-msgstr ""
-
-
+msgstr "Payment completed successfully."
 msgid "Payment was not completed."
-msgstr ""
-
-
+msgstr "Payment was not completed."
 msgid "Pending"
-msgstr ""
-
-
+msgstr "Pending"
 msgid "Pending Cash Assignments"
-msgstr ""
-
-
+msgstr "Pending Cash Assignments"
 msgid "Pending Cash Inquiries"
-msgstr ""
-
-
+msgstr "Pending Cash Inquiries"
 msgid "Pending Installment Assignments"
-msgstr ""
-
-
+msgstr "Pending Installment Assignments"
 msgid "Pending Installment Inquiries"
-msgstr ""
-
-
+msgstr "Pending Installment Inquiries"
 msgid "Percentage"
-msgstr ""
-
-
+msgstr "Percentage"
 msgid "Permissions updated successfully."
-msgstr ""
-
-
+msgstr "Permissions updated successfully."
 msgid "Permissions:"
-msgstr ""
-
-
+msgstr "Permissions:"
 msgid "Phone"
-msgstr ""
-
-
+msgstr "Phone"
 msgid "Phone Number:"
-msgstr ""
-
-
+msgstr "Phone Number:"
 msgid "Please enter car name."
-msgstr ""
-
-
+msgstr "Please enter car name."
 msgid "Please fill all required fields."
-msgstr ""
-
-
+msgstr "Please fill all required fields."
 msgid "Please select a car first."
-msgstr ""
-
-
+msgstr "Please select a car first."
 msgid "Please send the additional documents requested."
-msgstr ""
-
-
+msgstr "Please send the additional documents requested."
 msgid "Popular Products"
-msgstr ""
-
-
+msgstr "Popular Products"
 msgid "Price"
-msgstr ""
-
-
+msgstr "Price"
 msgid "Private"
-msgstr ""
-
-
+msgstr "Private"
 msgid "Proceed to Payment"
-msgstr ""
-
-
+msgstr "Proceed to Payment"
 msgid "Product Description"
-msgstr ""
-
-
+msgstr "Product Description"
 msgid "Product Images"
-msgstr ""
-
-
+msgstr "Product Images"
 msgid "Product Name"
-msgstr ""
-
-
+msgstr "Product Name"
 msgid "Product name should not exceed 30 characters."
-msgstr ""
-
-
+msgstr "Product name should not exceed 30 characters."
 msgid "Product saved successfully."
-msgstr ""
-
-
+msgstr "Product saved successfully."
 msgid "Products"
-msgstr ""
-
-
+msgstr "Products"
 msgid "Profile Picture"
-msgstr ""
-
-
+msgstr "Profile Picture"
 msgid "Profile Settings"
-msgstr ""
-
-
+msgstr "Profile Settings"
 msgid "Profit (Toman)"
-msgstr ""
-
-
+msgstr "Profit (Toman)"
 msgid "Push Notifications"
-msgstr ""
-
-
+msgstr "Push Notifications"
 msgid "Rank"
-msgstr ""
-
-
+msgstr "Rank"
 msgid "Recent Inquiries"
-msgstr ""
-
-
+msgstr "Recent Inquiries"
 msgid "Refresh"
-msgstr ""
-
-
+msgstr "Refresh"
 msgid "Registered Inquiries:"
-msgstr ""
-
-
+msgstr "Registered Inquiries:"
 msgid "Reject"
-msgstr ""
-
-
+msgstr "Reject"
 msgid "Rejection Reason:"
-msgstr ""
-
-
+msgstr "Rejection Reason:"
 msgid "Reports"
-msgstr ""
-
-
+msgstr "Reports"
 msgid "Request Created"
-msgstr ""
-
-
+msgstr "Request Created"
 msgid "Request Down Payment"
-msgstr ""
-
-
+msgstr "Request Down Payment"
 msgid "Request Journey"
-msgstr ""
-
-
+msgstr "Request Journey"
 msgid "Request Status Management"
-msgstr ""
-
-
+msgstr "Request Status Management"
 msgid "Require Personal Details"
-msgstr ""
-
-
+msgstr "Require Personal Details"
 msgid "Requires urgent action"
-msgstr ""
-
-
+msgstr "Requires urgent action"
 msgid "Reserved"
-msgstr ""
-
-
+msgstr "Reserved"
 msgid "Reset Changes"
-msgstr ""
-
-
+msgstr "Reset Changes"
 msgid "Residency Status:"
-msgstr ""
-
-
+msgstr "Residency Status:"
 msgid "Revenue"
-msgstr ""
-
-
+msgstr "Revenue"
 msgid "Revenue (Toman)"
-msgstr ""
-
-
+msgstr "Revenue (Toman)"
 msgid "Revenue Comparison:"
-msgstr ""
-
-
+msgstr "Revenue Comparison:"
 msgid "Role:"
-msgstr ""
-
-
+msgstr "Role:"
 msgid "SMS Notifications"
-msgstr ""
-
-
+msgstr "SMS Notifications"
 msgid "SMS messages sent to user mobile phone."
-msgstr ""
-
-
+msgstr "SMS messages sent to user mobile phone."
 msgid "Saturday"
-msgstr ""
-
-
+msgstr "Saturday"
 msgid "Save"
-msgstr ""
-
-
+msgstr "Save"
 msgid "Save Expert"
-msgstr ""
-
-
+msgstr "Save Expert"
 msgid "Save Meeting Time and Update Status"
-msgstr ""
-
-
+msgstr "Save Meeting Time and Update Status"
 msgid "Save Note"
-msgstr ""
-
-
+msgstr "Save Note"
 msgid "Save Product"
-msgstr ""
-
-
+msgstr "Save Product"
 msgid "Saving..."
-msgstr ""
-
-
+msgstr "Saving..."
 msgid "Schedule Follow-up"
-msgstr ""
-
-
+msgstr "Schedule Follow-up"
 msgid "Search by car name..."
-msgstr ""
-
-
+msgstr "Search by car name..."
 msgid "Search by customer name, car name or mobile number..."
-msgstr ""
-
-
+msgstr "Search by customer name, car name or mobile number..."
 msgid "Search..."
-msgstr ""
-
-
+msgstr "Search..."
 msgid "Security"
-msgstr ""
-
-
+msgstr "Security"
 msgid "Security Settings:"
-msgstr ""
-
-
+msgstr "Security Settings:"
 msgid "Select"
-msgstr ""
-
-
+msgstr "Select"
 msgid "Select Car and Conditions"
-msgstr ""
-
-
+msgstr "Select Car and Conditions"
 msgid "Select Cover Image"
-msgstr ""
-
-
+msgstr "Select Cover Image"
 msgid "Select Time:"
-msgstr ""
-
-
+msgstr "Select Time:"
 msgid "Select birth date"
-msgstr ""
-
-
+msgstr "Select birth date"
 msgid "Select category"
-msgstr ""
-
-
+msgstr "Select category"
 msgid "Self Employed"
-msgstr ""
-
-
+msgstr "Self Employed"
 msgid "Self-Employed"
-msgstr ""
-
-
+msgstr "Self-Employed"
 msgid "Self-employed"
-msgstr ""
-
-
+msgstr "Self-employed"
 msgid "Send Down Payment Request to Customer"
-msgstr ""
-
-
+msgstr "Send Down Payment Request to Customer"
 msgid "Server configuration not available. Please refresh the page."
-msgstr ""
-
-
+msgstr "Server configuration not available. Please refresh the page."
 msgid "Server connection error"
-msgstr ""
-
-
+msgstr "Server connection error"
 msgid "Server connection error. Please try again."
-msgstr ""
-
-
+msgstr "Server connection error. Please try again."
 msgid "Set Down Payment Amount"
-msgstr ""
-
-
+msgstr "Set Down Payment Amount"
 msgid "Setup Verification"
-msgstr ""
-
-
+msgstr "Setup Verification"
 msgid "Shahrivar"
-msgstr ""
-
-
+msgstr "Shahrivar"
 msgid "Showing %s items"
-msgstr ""
-
-
+msgstr "Showing %s items"
 msgid "Sort:"
-msgstr ""
-
-
+msgstr "Sort:"
 msgid "Special Sale"
-msgstr ""
-
-
+msgstr "Special Sale"
 msgid "Staff"
-msgstr ""
-
-
+msgstr "Staff"
 msgid "Start Progress"
-msgstr ""
-
-
+msgstr "Start Progress"
 msgid "Status:"
-msgstr ""
-
-
+msgstr "Status:"
 msgid "Submit Installment Inquiry"
-msgstr ""
-
-
+msgstr "Submit Installment Inquiry"
 msgid "Subscriber"
-msgstr ""
-
-
+msgstr "Subscriber"
 msgid "Success"
-msgstr ""
-
-
+msgstr "Success"
 msgid "Success Rate"
-msgstr ""
-
-
+msgstr "Success Rate"
 msgid "Sunday"
-msgstr ""
-
-
+msgstr "Sunday"
 msgid "System Reports"
-msgstr ""
-
-
+msgstr "System Reports"
 msgid "Thank You for Your Patience"
-msgstr ""
-
-
+msgstr "Thank You for Your Patience"
 msgid "The announced prices are approximate. The final price of the car will be determined based on the daily market rate at the time of down payment."
-msgstr ""
-
-
+msgstr "The announced prices are approximate. The final price of the car will be determined based on the daily market rate at the time of down payment."
+"The announced prices are approximate. The final price of the car will"
+"be determined based on the daily market rate at the time of down"
+"payment."
+"The announced prices are approximate. The final price of the car will be determined based on the daily market rate at the time of down payment"
 msgid "The announced prices are approximate. The final price will be determined based on the daily market rate at the time of down payment."
-msgstr ""
-
-
+msgstr "The announced prices are approximate. The final price will be determined based on the daily market rate at the time of down payment."
+"The announced prices are approximate. The final price will be"
+"determined based on the daily market rate at the time of down"
+"payment."
+"The announced prices are approximate. The final price will be determined based on the daily market rate at the time of down payment"
 msgid "The buyer and check issuer are the same person."
-msgstr ""
-
-
+msgstr "The buyer and check issuer are the same person."
 msgid "The check issuer is another person."
-msgstr ""
-
-
+msgstr "The check issuer is another person."
 msgid "The fastest way to buy a car with cash"
-msgstr ""
-
-
+msgstr "The fastest way to buy a car with cash"
 msgid "The inquiry fee is free for you. Please click the button below to continue."
-msgstr ""
-
-
+msgstr "The inquiry fee is free for you. Please click the button below to continue."
+"The inquiry fee is free for you. Please click the button below to"
+"continue."
+"The inquiry fee is free for you. Please click the button below to continue"
 msgid "The inquiry will be made for the car below and cannot be changed."
-msgstr ""
-
-
+msgstr "The inquiry will be made for the car below and cannot be changed."
 msgid "This Week"
-msgstr ""
-
-
+msgstr "This Week"
 msgid "This action cannot be undone!"
-msgstr ""
-
-
+msgstr "This action cannot be undone!"
 msgid "This extra step helps ensure the person trying to change account details is the real owner."
-msgstr ""
-
-
+msgstr "This extra step helps ensure the person trying to change account details is the real owner."
+"This extra step helps ensure the person trying to change account"
+"details is the real owner."
+"This extra step helps ensure the person trying to change account details is the real owner"
 msgid "This helps protect account from unauthorized access, even if password is compromised."
-msgstr ""
-
-
+msgstr "This helps protect account from unauthorized access, even if password is compromised."
+"This helps protect account from unauthorized access, even if password"
+"is compromised."
+"This helps protect account from unauthorized access, even if password is compromised"
 msgid "Thursday"
-msgstr ""
-
-
+msgstr "Thursday"
 msgid "Time Period: %s days ago"
-msgstr ""
-
-
+msgstr "Time Period: %s days ago"
 msgid "Tir"
-msgstr ""
-
-
+msgstr "Tir"
 msgid "To Date:"
-msgstr ""
-
-
+msgstr "To Date:"
 msgid "To begin the inquiry process, please first select your desired car from one of the product pages and click the \"Bank Credit Check\" button."
-msgstr ""
-
-
+msgstr "To begin the inquiry process, please first select your desired car from one of the product pages and click the \"Bank Credit Check\" button."
+"To begin the inquiry process, please first select your desired car"
+"from one of the product pages and click the \"Bank Credit Check\""
+"button."
+"To begin the inquiry process, please first select your desired car from one of the product pages and click the \"Bank Credit Check\" button"
 msgid "To finalize your purchase, please go to the payment gateway using the button below."
-msgstr ""
-
-
+msgstr "To finalize your purchase, please go to the payment gateway using the button below."
+"To finalize your purchase, please go to the payment gateway using the"
+"button below."
+"To finalize your purchase, please go to the payment gateway using the button below"
 msgid "To purchase a car with cash, create your first inquiry."
-msgstr ""
-
-
+msgstr "To purchase a car with cash, create your first inquiry."
 msgid "To purchase a car with installments, use the loan calculator."
-msgstr ""
-
-
+msgstr "To purchase a car with installments, use the loan calculator."
 msgid "To start the inquiry process, please first select your desired car from the products page and click on the \"Bank Credit Inquiry\" button."
-msgstr ""
-
-
+msgstr "To start the inquiry process, please first select your desired car from the products page and click on the \"Bank Credit Inquiry\" button."
+"To start the inquiry process, please first select your desired car"
+"from the products page and click on the \"Bank Credit Inquiry\""
+"button."
+"To start the inquiry process, please first select your desired car from the products page and click on the \"Bank Credit Inquiry\" button"
 msgid "To submit a cash inquiry, please use the"
-msgstr ""
-
-
+msgstr "To submit a cash inquiry, please use the"
 msgid "To submit an installment inquiry, please use the"
-msgstr ""
-
-
+msgstr "To submit an installment inquiry, please use the"
 msgid "Today Follow-ups"
-msgstr ""
-
-
+msgstr "Today Follow-ups"
 msgid "Today Inquiries"
-msgstr ""
-
-
+msgstr "Today Inquiries"
 msgid "Today's Follow-ups"
-msgstr ""
-
-
+msgstr "Today's Follow-ups"
 msgid "Today's Followups"
-msgstr ""
-
-
+msgstr "Today's Followups"
 msgid "Today's Meetings"
-msgstr ""
-
-
+msgstr "Today's Meetings"
 msgid "Today's Task List"
-msgstr ""
-
-
+msgstr "Today's Task List"
 msgid "Today:"
-msgstr ""
-
-
+msgstr "Today:"
 msgid "Today\\"
-msgstr ""
-
-
+msgstr "Today\\"
 msgid "Toman Profit"
-msgstr ""
-
-
+msgstr "Toman Profit"
 msgid "Top Experts (Based on Profit)"
-msgstr ""
-
-
+msgstr "Top Experts (Based on Profit)"
 msgid "Total"
-msgstr ""
-
-
+msgstr "Total"
 msgid "Total Amount"
-msgstr ""
-
-
+msgstr "Total Amount"
 msgid "Total Customers"
-msgstr ""
-
-
+msgstr "Total Customers"
 msgid "Total Meetings"
-msgstr ""
-
-
+msgstr "Total Meetings"
 msgid "Total Profit"
-msgstr ""
-
-
+msgstr "Total Profit"
 msgid "Total Referrals"
-msgstr ""
-
-
+msgstr "Total Referrals"
 msgid "Total Revenue"
-msgstr ""
-
-
+msgstr "Total Revenue"
 msgid "Total:"
-msgstr ""
-
-
+msgstr "Total:"
 msgid "Tuesday"
-msgstr ""
-
-
+msgstr "Tuesday"
 msgid "Type"
 msgstr "Type"
-
-
 msgid "Type:"
-msgstr ""
-
+msgstr "Type:"
 
 msgid "Typically within 24 hours."
-msgstr ""
-
-
+msgstr "Typically within 24 hours."
 msgid "Unassigned Inquiries (%d)"
-msgstr ""
-
-
+msgstr "Unassigned Inquiries (%d)"
 msgid "Under Review"
-msgstr ""
-
-
+msgstr "Under Review"
 msgid "Unfortunately, your request has been rejected."
-msgstr ""
-
-
+msgstr "Unfortunately, your request has been rejected."
 msgid "Updating..."
-msgstr ""
-
-
+msgstr "Updating..."
 msgid "Upload failed. Please try again."
-msgstr ""
-
-
+msgstr "Upload failed. Please try again."
 msgid "Uploading %d images..."
-msgstr ""
-
-
+msgstr "Uploading %d images..."
 msgid "Uploading..."
-msgstr ""
-
-
+msgstr "Uploading..."
 msgid "Use JPEG, PNG or GIF formats. Best size: 200x200 pixels. File size less than 2 MB"
-msgstr ""
-
-
+msgstr "Use JPEG, PNG or GIF formats. Best size: 200x200 pixels. File size less than 2 MB"
+"Use JPEG, PNG or GIF formats. Best size: 200x200 pixels. File size"
+"less than 2 MB"
+"Use JPEG, PNG or GIF formats. Best size: 200x200 pixels. File size less than 2 M"
 msgid "User"
-msgstr ""
-
-
+msgstr "User"
 msgid "User Account"
-msgstr ""
-
-
+msgstr "User Account"
 msgid "User Account Information"
-msgstr ""
-
-
+msgstr "User Account Information"
 msgid "User Details"
-msgstr ""
-
-
+msgstr "User Details"
 msgid "User not found."
-msgstr ""
-
-
+msgstr "User not found."
 msgid "User not specified."
-msgstr ""
-
-
+msgstr "User not specified."
 msgid "Username:"
-msgstr ""
-
-
+msgstr "Username:"
 msgid "Users can configure their experience to receive notifications about important events."
-msgstr ""
-
-
+msgstr "Users can configure their experience to receive notifications about important events."
+"Users can configure their experience to receive notifications about"
+"important events."
+"Users can configure their experience to receive notifications about important events"
 msgid "Usually within 24 hours."
-msgstr ""
-
-
+msgstr "Usually within 24 hours."
 msgid "VIP Customers"
-msgstr ""
-
-
+msgstr "VIP Customers"
 msgid "View & Action"
-msgstr ""
-
-
+msgstr "View & Action"
 msgid "View All"
-msgstr ""
-
-
+msgstr "View All"
 msgid "View All Followups"
-msgstr ""
-
-
+msgstr "View All Followups"
 msgid "View All My Inquiries"
-msgstr ""
-
-
+msgstr "View All My Inquiries"
 msgid "View Cash Inquiries"
-msgstr ""
-
-
+msgstr "View Cash Inquiries"
 msgid "View Inquiries List"
-msgstr ""
-
-
+msgstr "View Inquiries List"
 msgid "View Installment Inquiries"
-msgstr ""
-
-
+msgstr "View Installment Inquiries"
 msgid "View Reports"
-msgstr ""
-
-
+msgstr "View Reports"
 msgid "Warning"
-msgstr ""
-
-
+msgstr "Warning"
 msgid "Wednesday"
-msgstr ""
-
-
+msgstr "Wednesday"
 msgid "Weekly"
-msgstr ""
-
-
+msgstr "Weekly"
 msgid "Welcome, %s"
-msgstr ""
-
-
+msgstr "Welcome, %s"
 msgid "Workplace Status:"
-msgstr ""
-
-
+msgstr "Workplace Status:"
 msgid "Yes"
 msgstr "Yes"
-
-
 msgid "Yes, Delete"
-msgstr ""
-
+msgstr "Yes, Delete"
 
 msgid "You can create your first inquiry"
-msgstr ""
-
-
+msgstr "You can create your first inquiry"
 msgid "You do not have access to this page."
-msgstr ""
-
-
+msgstr "You do not have access to this page."
 msgid "You want to delete your profile image?"
-msgstr ""
-
-
+msgstr "You want to delete your profile image?"
 msgid "Your Recent Inquiries"
-msgstr ""
-
-
+msgstr "Your Recent Inquiries"
 msgid "Your down payment amount has been determined."
-msgstr ""
-
-
+msgstr "Your down payment amount has been determined."
 msgid "Your request has been approved by our experts and referred to the sales department. One of our colleagues will contact you soon for final coordination."
-msgstr ""
-
-
+msgstr "Your request has been approved by our experts and referred to the sales department. One of our colleagues will contact you soon for final coordination."
+"Your request has been approved by our experts and referred to the"
+"sales department. One of our colleagues will contact you soon for"
+"final coordination."
+"Your request has been approved by our experts and referred to the sales department. One of our colleagues will contact you soon for final coordination"
 msgid "Your request has been completed successfully"
-msgstr ""
-
-
+msgstr "Your request has been completed successfully"
 msgid "Your request has been registered. The result will be announced within the next 24 hours."
-msgstr ""
-
-
+msgstr "Your request has been registered. The result will be announced within the next 24 hours."
+"Your request has been registered. The result will be announced within"
+"the next 24 hours."
+"Your request has been registered. The result will be announced within the next 24 hours"
 msgid "Your request is under review. Please wait."
-msgstr ""
-
-
+msgstr "Your request is under review. Please wait."
 msgid "days"
-msgstr ""
-
-
+msgstr "days"
 msgid "failed"
-msgstr ""
-
-
+msgstr "failed"
 msgid "inquiries"
-msgstr ""
-
-
+msgstr "inquiries"
 msgid "items"
-msgstr ""
-
-
+msgstr "items"
 msgid "page."
-msgstr ""
-
-
+msgstr "page."
 msgid "previous follow-ups"
-msgstr ""
-
-
+msgstr "previous follow-ups"
 msgid "to"
-msgstr ""
-
-
+msgstr "to"
 msgid "محصولی یافت نشد."
-msgstr ""
-
-
+msgstr "No products found."
 msgid "ناموجود"
-msgstr ""
-
-
+msgstr "Unavailable"
 msgid "No notifications"
-msgstr ""
-
-
+msgstr "No notifications"
 msgid "When you receive new notifications, they will appear here."
-msgstr ""
-
-
+msgstr "When you receive new notifications, they will appear here."
 msgid "Mark as Read"
-msgstr ""
-
-
+msgstr "Mark as Read"
 msgid "Processing..."
-msgstr ""
-
-
+msgstr "Processing..."
 msgid "Error loading notifications"
-msgstr ""
-
-
+msgstr "Error loading notifications"
 msgid "Operation failed"
-msgstr ""
-
-
+msgstr "Operation failed"
 msgid "Are you sure you want to delete all read notifications?"
-msgstr ""
-
-
+msgstr "Are you sure you want to delete all read notifications?"
 msgid "Are you sure you want to delete this notification?"
-msgstr ""
-
-
+msgstr "Are you sure you want to delete this notification?"
 msgid "User added successfully."
-msgstr ""
-
-
+msgstr "User added successfully."
 msgid "Error adding user"
-msgstr ""
-
-
+msgstr "Error adding user"
 msgid "Delete User?"
-msgstr ""
-
-
+msgstr "Delete User?"
 msgid "Error deleting user"
-msgstr ""
-
-
+msgstr "Error deleting user"
 msgid "Button works!"
-msgstr ""
-
-
+msgstr "Button works!"
 msgid "Are you sure you want to revert changes?"
-msgstr ""
-
-
+msgstr "Are you sure you want to revert changes?"
 msgid "seconds"
-msgstr ""
-
-
+msgstr "seconds"
 msgid "wait"
-msgstr ""
-
-
+msgstr "wait"
 msgid "Server error. Please try again."
-msgstr ""
-
-
+msgstr "Server error. Please try again."
 msgid "Income Amount (Toman)"
-msgstr ""
-
-
+msgstr "Income Amount (Toman)"
 msgid "Example: National"
-msgstr ""
-
-
+msgstr "Example: National"
 msgid "View Payment Details"
-msgstr ""
-
-
+msgstr "View Payment Details"
 msgid "Showing %1$s to %2$s of %3$s items"
-msgstr ""
-
-
+msgstr "Showing %1$s to %2$s of %3$s items"
 msgid "Charts"
-msgstr ""
-
-
+msgstr "Charts"
 msgid "Page %1$s of %2$s"
-msgstr ""
-
-
+msgstr "Page %1$s of %2$s"
 msgid "Product"
-msgstr ""
-
-
+msgstr "Product"
 msgid "Sale Status"
-msgstr ""
-
-
+msgstr "Sale Status"
 msgid "Free!"
-msgstr ""
-
-
+msgstr "Free!"
 msgid "Alerts"
-msgstr ""
-
-
+msgstr "Alerts"
 msgid "unread"
-msgstr ""
-
-
+msgstr "unread"
 msgid "Overview"
-msgstr ""
-
-
+msgstr "Overview"
 msgid "Expert Reports"
-msgstr ""
-
-
+msgstr "Expert Reports"
 msgid "Inquiry Details"
-msgstr ""
-
-
+msgstr "Inquiry Details"
 msgid "All Types"
-msgstr ""
-
-
+msgstr "All Types"
 msgid "Download CSV"
-msgstr ""
-
-
+msgstr "Download CSV"
 msgid "%s inquiry has been assigned to you"
-msgstr ""
-
-
+msgstr "%s inquiry has been assigned to you"
 msgid "A %s inquiry has been assigned to you. Please review it."
-msgstr ""
-
-
+msgstr "A %s inquiry has been assigned to you. Please review it."
 msgid "Your request status has changed"
-msgstr ""
-
-
+msgstr "Your request status has changed"
 msgid "Your request status has changed from \"%s\" to \"%s\"."
-msgstr ""
-
-
+msgstr "Your request status has changed from \"%s\" to \"%s\"."
 msgid "A new installment inquiry from %s for %s has been registered"
-msgstr ""
-
-
+msgstr "A new installment inquiry from %s for %s has been registered"
 msgid "Follow-up"
-msgstr ""
-
-
+msgstr "Follow-up"
 msgid "Attention"
-msgstr ""
-
-
+msgstr "Attention"
 msgid "Please select a car"
-msgstr ""
-
-
+msgstr "Please select a car"
 msgid "Got it"
-msgstr ""
-
-
+msgstr "Got it"
 msgid "Zarinpal Gateway"
-msgstr ""
-
-
+msgstr "Zarinpal Gateway"
 msgid "Sadad Gateway"
-msgstr ""
-
-
+msgstr "Sadad Gateway"
 msgid "Bank Gateway"
-msgstr ""
-
-
+msgstr "Bank Gateway"
 msgid "Inquiry Payment Fee"
-msgstr ""
-
-
+msgstr "Inquiry Payment Fee"
 msgid "No experts available."
-msgstr ""
-
-
+msgstr "No experts available."
 msgid "Please select an expert."
-msgstr ""
-
-
+msgstr "Please select an expert."
 msgid "Select Expert"
-msgstr ""
-
-
+msgstr "Select Expert"
 msgid "-- Auto Assign (Round Robin) --"
-msgstr ""
-
-
+msgstr "-- Auto Assign (Round Robin) --"
 msgid "Select Expert:"
-msgstr ""
-
-
+msgstr "Select Expert:"
 msgid "Select an expert for this inquiry:"
-msgstr ""
-
-
+msgstr "Select an expert for this inquiry:"
 msgid "Expert assigned successfully."
-msgstr ""
-
-
+msgstr "Expert assigned successfully."
 msgid "Error assigning expert."
-msgstr ""
-
-
+msgstr "Error assigning expert."
 msgid "Are you sure you want to delete this request? This action cannot be undone."
-msgstr ""
-
-
+msgstr "Are you sure you want to delete this request? This action cannot be undone."
+"Are you sure you want to delete this request? This action cannot be"
+"undone."
+"Are you sure you want to delete this request? This action cannot be undone"
 msgid "Delete this inquiry?"
-msgstr ""
-
-
+msgstr "Delete this inquiry?"
 msgid "This action cannot be undone."
-msgstr ""
-
-
+msgstr "This action cannot be undone."
 msgid "Do you want to delete this inquiry? This action cannot be undone."
-msgstr ""
-
-
+msgstr "Do you want to delete this inquiry? This action cannot be undone."
 msgid "Confirm Delete"
-msgstr ""
-
-
+msgstr "Confirm Delete"
 msgid "Error deleting"
-msgstr ""
-
-
+msgstr "Error deleting"
 msgid "Edit Inquiry"
-msgstr ""
-
-
+msgstr "Edit Inquiry"
 msgid "Submit Down Payment"
-msgstr ""
-
-
+msgstr "Submit Down Payment"
 msgid "Reject Inquiry"
-msgstr ""
-
-
+msgstr "Reject Inquiry"
 msgid "Enter custom reason..."
-msgstr ""
-
-
+msgstr "Enter custom reason..."
 msgid "-- Select Reason --"
-msgstr ""
-
-
+msgstr "-- Select Reason --"
 msgid "-- Custom Reason --"
-msgstr ""
-
-
+msgstr "-- Custom Reason --"
 msgid "Please select or enter a rejection reason."
-msgstr ""
-
-
+msgstr "Please select or enter a rejection reason."
 msgid "Payment Gateways"
-msgstr ""
-
-
+msgstr "Payment Gateways"
 msgid "Example: White"
-msgstr ""
-
-
+msgstr "Example: White"
 msgid "Write your description or special request..."
-msgstr ""
-
-
+msgstr "Write your description or special request..."
 msgid "Help:"
-msgstr ""
-
-
+msgstr "Help:"
 msgid "Inquiries that need follow-up on specific dates are shown here."
-msgstr ""
-
-
+msgstr "Inquiries that need follow-up on specific dates are shown here."
 msgid "Previous Follow-up"
-msgstr ""
-
-
+msgstr "Previous Follow-up"
 msgid "Access Denied!"
-msgstr ""
-
-
+msgstr "Access Denied!"
 msgid "You do not have permission to access this page. Please contact the system administrator."
-msgstr ""
-
-
+msgstr "You do not have permission to access this page. Please contact the system administrator."
+"You do not have permission to access this page. Please contact the"
+"system administrator."
+"You do not have permission to access this page. Please contact the system administrator"
 msgid "Return to Main Page"
-msgstr ""
-
-
+msgstr "Return to Main Page"
 msgid "Oops, the page you're looking for doesn't exist?"
-msgstr ""
-
-
+msgstr "Oops, the page you're looking for doesn't exist?"
 msgid "The requested page is not available. It may have been moved, deleted, or never existed."
-msgstr ""
-
-
+msgstr "The requested page is not available. It may have been moved, deleted, or never existed."
+"The requested page is not available. It may have been moved, deleted,"
+"or never existed."
+"The requested page is not available. It may have been moved, deleted, or never existed"
 msgid "Internal Server Error!"
-msgstr ""
-
-
+msgstr "Internal Server Error!"
 msgid "Unfortunately, a problem occurred on the server. Please try again or contact support."
-msgstr ""
-
-
+msgstr "Unfortunately, a problem occurred on the server. Please try again or contact support."
+"Unfortunately, a problem occurred on the server. Please try again or"
+"contact support."
+"Unfortunately, a problem occurred on the server. Please try again or contact support"
 msgid "No inquiries have been registered in the system yet."
-msgstr ""
-
-
+msgstr "No inquiries have been registered in the system yet."
 msgid "Requested Product Price (at time of request)"
 msgstr "Requested Product Price (at time of request)"
-
-
 msgid "Not Available"
 msgstr "Not Available"
-
-
 msgid "Customer Documents:"
 msgstr "Customer Documents:"
-
-
 msgid "Required Documents"
 msgstr "Required Documents"
-
-
 msgid "Document Rejection Reasons"
 msgstr "Document Rejection Reasons"
-
 msgid "Enter one reason per line. These will be shown as a dropdown list when rejecting a document."
 msgstr "Enter one reason per line. These will be shown as a dropdown list when rejecting a document."
-
 msgid "Request Document"
 msgstr "Request Document"
-
 msgid "No documents have been configured in settings."
 msgstr "No documents have been configured in settings."
-
 msgid "Select a reason..."
 msgstr "Select a reason..."
-
 msgid "Or enter custom reason:"
 msgstr "Or enter custom reason:"
-
 msgid "Please enter or select a rejection reason with at least 3 characters"
 msgstr "Please enter or select a rejection reason with at least 3 characters"
-
 msgid "Request Document?"
 msgstr "Request Document?"
-
 msgid "Send a request to the customer to upload this document?"
 msgstr "Send a request to the customer to upload this document?"
-
 msgid "Yes, Request"
 msgstr "Yes, Request"
-
 msgid "Document request sent to customer successfully."
 msgstr "Document request sent to customer successfully."
-
 msgid "Error approving document."
 msgstr "Error approving document."
-
 msgid "Error rejecting document."
 msgstr "Error rejecting document."
-
 msgid "Error sending document request."
 msgstr "Error sending document request."
-
 msgid "Please upload the document \"%s\" in your profile."
 msgstr "Please upload the document \"%s\" in your profile."
-
 msgid "Document requested"
 msgstr "Document requested"
-
 msgid "Please upload the document \"%s\"."
 msgstr "Please upload the document \"%s\"."
-
 msgid "Price Availability"
 msgstr "Price Availability"
-
 msgid "Cash Available"
 msgstr "Cash Available"
-
 msgid "Cash Unavailable"
 msgstr "Cash Unavailable"
-
 msgid "Installment Available"
 msgstr "Installment Available"
-
 msgid "Installment Unavailable"
 msgstr "Installment Unavailable"
-
 msgid "Cash Price Missing"
 msgstr "Cash Price Missing"
-
 msgid "Installment Price Missing"
 msgstr "Installment Price Missing"
-
 msgid "Search by customer name, car name..."
 msgstr "Search by customer name, car name..."
-
 msgid "Products Management"
 msgstr "Products Management"
-
 msgid "Follow-up Date (Earliest)"
 msgstr "Follow-up Date (Earliest)"
-
 msgid "Follow-up Date (Latest)"
 msgstr "Follow-up Date (Latest)"
-
-
 msgid "Finnotech API Services"
 msgstr "Finnotech API Services"
-
 msgid "Enable or disable individual Finnotech API services. When disabled, the data will be hidden from reports but preserved in the database."
 msgstr "Enable or disable individual Finnotech API services. When disabled, the data will be hidden from reports but preserved in the database."
-
 msgid "Enable Credit Risk Inquiry"
 msgstr "Enable Credit Risk Inquiry"
-
 msgid "Enable banking risk inquiry for individuals (ریسک بانکی شخص)."
 msgstr "Enable banking risk inquiry for individuals (ریسک بانکی شخص)."
-
 msgid "Enable Credit Score Report"
 msgstr "Enable Credit Score Report"
-
 msgid "Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری)."
 msgstr "Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری)."
-
 msgid "Enable Collaterals Inquiry"
 msgstr "Enable Collaterals Inquiry"
-
 msgid "Enable contracts summary inquiry (وام‌ها/تسهیلات)."
 msgstr "Enable contracts summary inquiry (وام‌ها/تسهیلات)."
-
 msgid "Enable Cheque Color Inquiry"
 msgstr "Enable Cheque Color Inquiry"
-
 msgid "Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی)."
 msgstr "Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی)."
-
 msgid "Banking Risk Assessment"
 msgstr "Banking Risk Assessment"
-
 msgid "Credit Risk Level:"
 msgstr "Credit Risk Level:"
-
 msgid "Risk Score:"
 msgstr "Risk Score:"
-
 msgid "Prohibited Transaction Status:"
 msgstr "Prohibited Transaction Status:"
-
 msgid "Financial Judgments:"
 msgstr "Financial Judgments:"
-
 msgid "Rials"
 msgstr "Rials"
-
 msgid "Credit Score Decrease Reasons"
 msgstr "Credit Score Decrease Reasons"
-
 msgid "Current Credit Score:"
 msgstr "Current Credit Score:"
-
 msgid "Negative Factors:"
 msgstr "Negative Factors:"
-
 msgid "Score History:"
 msgstr "Score History:"
-
 msgid "Previous Score"
 msgstr "Previous Score"
-
 msgid "New Score"
 msgstr "New Score"
-
 msgid "Reason"
 msgstr "Reason"
-
 msgid "Contracts Summary (Loans/Facilities)"
 msgstr "Contracts Summary (Loans/Facilities)"
-
 msgid "Total Contracts:"
 msgstr "Total Contracts:"
-
 msgid "Total Loans:"
 msgstr "Total Loans:"
-
 msgid "Total Facilities:"
 msgstr "Total Facilities:"
-
 msgid "Bank"
 msgstr "Bank"
-
 msgid "Contract Number"
 msgstr "Contract Number"
-
 msgid "Sadad Cheque Status Inquiry"
 msgstr "Sadad Cheque Status Inquiry"
-
 msgid "Cheque Status Details"
 msgstr "Cheque Status Details"
-
 msgid "Bounced Cheques:"
 msgstr "Bounced Cheques:"
-
 msgid "Cleared Cheques:"
 msgstr "Cleared Cheques:"
-
 msgid "Credit Information Available"
 msgstr "Credit Information Available"
-
 msgid "Credit Risk Available"
 msgstr "Credit Risk Available"
-
 msgid "Credit Score Available"
 msgstr "Credit Score Available"
-
 msgid "Contracts Available"
 msgstr "Contracts Available"
-
 msgid "Cheque Status Available"
 msgstr "Cheque Status Available"
-
 msgid "Finnotech API Credentials"
 msgstr "Finnotech API Credentials"
-
 msgid "These credentials are used for all Finnotech API services including Credit Risk, Credit Score, Collaterals, and Cheque Color inquiries."
 msgstr "These credentials are used for all Finnotech API services including Credit Risk, Credit Score, Collaterals, and Cheque Color inquiries."
-
 msgid "Finnotech Client ID"
 msgstr "Finnotech Client ID"
-
 msgid "Client ID provided by Finnotech. Stored securely encrypted."
 msgstr "Client ID provided by Finnotech. Stored securely encrypted."
-
 msgid "Finnotech API Key"
 msgstr "Finnotech API Key"
-
 msgid "API Key (Access Token) provided by Finnotech. Stored securely encrypted."
 msgstr "API Key (Access Token) provided by Finnotech. Stored securely encrypted."
-
 msgid "Enable Legacy Finotex API"
 msgstr "Enable Legacy Finotex API"
-
 msgid "Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead)."
 msgstr "Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead)."
+# Logs System - Settings Tab
+msgid "Logs"
+msgstr "Logs"
+"Requested Product Price (at time of request)\"\n"
+"# Logs System - Settings Ta"
+msgid "General Log Settings"
+msgstr "General Log Settings"
+msgid "Enable System Logging"
+msgstr "Enable System Logging"
+msgid "Enable logging system to track errors, debug messages, and system events."
+msgstr "Enable logging system to track errors, debug messages, and system events."
+"Enable logging system to track errors, debug messages, and system"
+"events."
+"Enable logging system to track errors, debug messages, and system events"
+msgid "Enable User Activity Logging"
+msgstr "Enable User Activity Logging"
+msgid "Enable logging of user actions including button clicks, form submissions, and AJAX calls."
+msgstr "Enable logging of user actions including button clicks, form submissions, and AJAX calls."
+"Enable logging of user actions including button clicks, form"
+"submissions, and AJAX calls."
+"Enable logging of user actions including button clicks, form submissions, and AJAX calls"
+msgid "System Log Types"
+msgstr "System Log Types"
+msgid "Control which types of system logs are recorded."
+msgstr "Control which types of system logs are recorded."
+msgid "Log Errors"
+msgstr "Log Errors"
+msgid "Log PHP errors and exceptions."
+msgstr "Log PHP errors and exceptions."
+msgid "Log Debug Messages"
+msgstr "Log Debug Messages"
+msgid "Log debug messages (only when WP_DEBUG is enabled)."
+msgstr "Log debug messages (only when WP_DEBUG is enabled)."
+msgid "Log Console Messages"
+msgstr "Log Console Messages"
+msgid "Log JavaScript console.log, console.error, and console.warn messages."
+msgstr "Log JavaScript console.log, console.error, and console.warn messages."
+msgid "Log Button Errors"
+msgstr "Log Button Errors"
+msgid "Log errors related to button clicks and interactions."
+msgstr "Log errors related to button clicks and interactions."
+msgid "User Activity Log Types"
+msgstr "User Activity Log Types"
+msgid "Control which types of user activities are logged."
+msgstr "Control which types of user activities are logged."
+msgid "Log Button Clicks"
+msgstr "Log Button Clicks"
+msgid "Log all button clicks by staff and managers."
+msgstr "Log all button clicks by staff and managers."
+msgid "Log Form Submissions"
+msgstr "Log Form Submissions"
+msgid "Log form submissions."
+msgstr "Log form submissions."
+msgid "Log AJAX Calls"
+msgstr "Log AJAX Calls"
+msgid "Log AJAX requests made by staff and managers."
+msgstr "Log AJAX requests made by staff and managers."
+msgid "Log Page Views"
+msgstr "Log Page Views"
+msgid "Log page views in dashboard (may generate many logs)."
+msgstr "Log page views in dashboard (may generate many logs)."
+msgid "Log Retention & Cleanup"
+msgstr "Log Retention & Cleanup"
+msgid "Configure automatic deletion of old logs to manage database size."
+msgstr "Configure automatic deletion of old logs to manage database size."
+msgid "Enable Automatic Log Cleanup"
+msgstr "Enable Automatic Log Cleanup"
+msgid "Automatically delete logs older than the retention period."
+msgstr "Automatically delete logs older than the retention period."
+msgid "Log Retention Period (Days)"
+msgstr "Log Retention Period (Days)"
+msgid "Logs older than this number of days will be automatically deleted. Minimum: 7 days, Recommended: 30-90 days."
+msgstr "Logs older than this number of days will be automatically deleted. Minimum: 7 days, Recommended: 30-90 days."
+"Logs older than this number of days will be automatically deleted."
+"Minimum: 7 days, Recommended: 30-90 days."
+"Logs older than this number of days will be automatically deleted. Minimum: 7 days, Recommended: 30-90 days"
+msgid "Cleanup Frequency"
+msgstr "Cleanup Frequency"
+msgid "Log Limits & Performance"
+msgstr "Log Limits & Performance"
+msgid "Maximum Logs Per Page"
+msgstr "Maximum Logs Per Page"
+msgid "Maximum number of logs to display per page in the logs dashboard. Recommended: 50-100."
+msgstr "Maximum number of logs to display per page in the logs dashboard. Recommended: 50-100."
+"Maximum number of logs to display per page in the logs dashboard."
+"Recommended: 50-100."
+"Maximum number of logs to display per page in the logs dashboard. Recommended: 50-100"
+msgid "Maximum Log Message Size (Characters)"
+msgstr "Maximum Log Message Size (Characters)"
+msgid "Maximum length of log messages. Longer messages will be truncated. Set to 0 for unlimited."
+msgstr "Maximum length of log messages. Longer messages will be truncated. Set to 0 for unlimited."
+"Maximum length of log messages. Longer messages will be truncated."
+"Set to 0 for unlimited."
+"Maximum length of log messages. Longer messages will be truncated. Set to 0 for unlimited"
+# Logs System - Dashboard Menu
+msgid "System Logs"
+msgstr "System Logs"
+msgid "User Logs"
+msgstr "User Logs"
+# Logs System - System Logs Page
+msgid "Filter System Logs"
+msgstr "Filter System Logs"
+msgid "Log Type"
+msgstr "Log Type"
+msgid "Debug"
+msgstr "Debug"
+msgid "Console"
+msgstr "Console"
+msgid "Button Error"
+msgstr "Button Error"
+msgid "Severity"
+msgstr "Severity"
+msgid "All Severities"
+msgstr "All Severities"
+msgid "Info"
+msgstr "Info"
+msgid "Critical"
+msgstr "Critical"
+msgid "Date From"
+msgstr "Date From"
+msgid "Date To"
+msgstr "Date To"
+msgid "Search message..."
+msgstr "Search message..."
+msgid "System Log Entries"
+msgstr "System Log Entries"
+msgid "No system logs found."
+msgstr "No system logs found."
+msgid "Log Details"
+msgstr "Log Details"
+msgid "Could not fetch log details."
+msgstr "Could not fetch log details."
+# Logs System - User Logs Page
+msgid "Filter User Logs"
+msgstr "Filter User Logs"
+msgid "Enter User ID"
+msgstr "Enter User ID"
+msgid "Button Click"
+msgstr "Button Click"
+msgid "Form Submit"
+msgstr "Form Submit"
+msgid "AJAX Call"
+msgstr "AJAX Call"
+msgid "Page View"
+msgstr "Page View"
+msgid "Update Profile"
+msgstr "Update Profile"
+msgid "Inquiry Status Change"
+msgstr "Inquiry Status Change"
+msgid "Expert Assignment"
+msgstr "Expert Assignment"
+msgid "Target Type"
+msgstr "Target Type"
+msgid "All Targets"
+msgstr "All Targets"
+msgid "Search description..."
+msgstr "Search description..."
+msgid "User Log Entries"
+msgstr "User Log Entries"
+msgid "No user logs found."
+msgstr "No user logs found."
+msgid "User Log Details"
+msgstr "User Log Details"
+msgid "New Inquiries"
+msgstr "New Inquiries"
+msgid "Monthly Performance (Last 6 Months)"
+msgstr "Monthly Performance (Last 6 Months)"
+msgid "From Date"
+msgstr "From Date"
+msgid "To Date"
+msgstr "To Date"
+msgid "No logs found."
+msgstr "No logs found."
+msgid "Action Type"
+msgstr "Action Type"
+msgid "All Actions"
+msgstr "All Actions"
+msgid "User Activity Logs"
+msgstr "User Activity Logs"
+msgid "Request Documents"
+msgstr "Request Documents"
+msgid "SMS History"
+msgstr "SMS History"
+msgid "No SMS messages have been sent for this inquiry yet."
+msgstr "No SMS messages have been sent for this inquiry yet."
+msgid "All Products"
+msgstr "All Products"

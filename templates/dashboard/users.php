@@ -333,8 +333,9 @@ $active_users_count = $active_users_query->get_total();
                                 <tbody>
                                     <?php if (!empty($users)): ?>
                                         <?php foreach ($users as $user): 
-                                            $user_roles = $user->roles;
-                                            $role_display = !empty($user_roles) ? ucfirst($user_roles[0]) : esc_html__('No Role', 'maneli-car-inquiry');
+                                            $user_roles = is_array($user->roles) ? $user->roles : [];
+                                            $primary_role = !empty($user_roles) && isset($user_roles[0]) ? $user_roles[0] : '';
+                                            $role_display = !empty($primary_role) ? ucfirst($primary_role) : esc_html__('No Role', 'maneli-car-inquiry');
                                             
                                             // Role names
                                             $role_labels = [
@@ -344,7 +345,7 @@ $active_users_count = $active_users_query->get_total();
                                                 'customer' => esc_html__('Customer', 'maneli-car-inquiry'),
                                                 'subscriber' => esc_html__('Subscriber', 'maneli-car-inquiry')
                                             ];
-                                            $role_display = isset($role_labels[$user_roles[0]]) ? $role_labels[$user_roles[0]] : $role_display;
+                                            $role_display = !empty($primary_role) && isset($role_labels[$primary_role]) ? $role_labels[$primary_role] : $role_display;
                                             
                                             // Role badge color
                                             $role_colors = [
@@ -354,14 +355,14 @@ $active_users_count = $active_users_query->get_total();
                                                 'customer' => 'warning',
                                                 'subscriber' => 'secondary'
                                             ];
-                                            $badge_color = isset($role_colors[$user_roles[0]]) ? $role_colors[$user_roles[0]] : 'secondary';
+                                            $badge_color = !empty($primary_role) && isset($role_colors[$primary_role]) ? $role_colors[$primary_role] : 'secondary';
                                             
                                             $mobile_number = get_user_meta($user->ID, 'mobile_number', true);
                                             if (empty($mobile_number)) {
                                                 $mobile_number = $user->user_login; // Use username as fallback
                                             }
                                         ?>
-                                            <tr data-role="<?php echo esc_attr($user_roles[0]); ?>">
+                                            <tr data-role="<?php echo esc_attr($primary_role); ?>">
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <div class="avatar avatar-sm avatar-rounded me-2">
@@ -529,6 +530,7 @@ $active_users_count = $active_users_query->get_total();
 
 <script>
 var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
 
 // Localized strings
 const userTranslations = {
@@ -577,17 +579,27 @@ function editUser(userId) {
 }
 
 function saveUser() {
-    const firstName = jQuery('#new-first-name').val();
-    const lastName = jQuery('#new-last-name').val();
-    const mobile = jQuery('#new-mobile').val();
-    const role = jQuery('#new-role').val();
+    if (typeof jQuery === 'undefined') {
+        alert('<?php echo esc_js(__('Please wait for the page to fully load.', 'maneli-car-inquiry')); ?>');
+        return;
+    }
+    
+    const $ = jQuery;
+    const firstName = $('#new-first-name').val();
+    const lastName = $('#new-last-name').val();
+    const mobile = $('#new-mobile').val();
+    const role = $('#new-role').val();
     
     if (!firstName || !lastName || !mobile) {
-        Swal.fire({
-            icon: 'error',
-            title: userTranslations.error,
-            text: userTranslations.fillRequiredFields
-        });
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: userTranslations.error,
+                text: userTranslations.fillRequiredFields
+            });
+        } else {
+            alert(userTranslations.fillRequiredFields);
+        }
         return;
     }
     
@@ -595,16 +607,18 @@ function saveUser() {
     const email = generateEmailFromMobile(mobile);
     const password = generateRandomPassword();
     
-    Swal.fire({
-        title: userTranslations.saving,
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: userTranslations.saving,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    }
     
-    jQuery.ajax({
+    $.ajax({
         url: maneliAjaxUrl,
         type: 'POST',
         data: {
@@ -619,24 +633,69 @@ function saveUser() {
             nonce: '<?php echo wp_create_nonce('maneli_add_user_nonce'); ?>'
         },
         success: function(response) {
-            Swal.close();
-            if (response.success) {
-                Swal.fire(userTranslations.success, userTranslations.userAdded, 'success').then(() => {
-                    location.reload();
-                });
+            if (typeof Swal !== 'undefined') {
+                Swal.close();
+                if (response.success) {
+                    Swal.fire(userTranslations.success, userTranslations.userAdded, 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(userTranslations.error, response.data?.message || userTranslations.addUserError, 'error');
+                }
             } else {
-                Swal.fire(userTranslations.error, response.data?.message || userTranslations.addUserError, 'error');
+                if (response.success) {
+                    alert(userTranslations.userAdded);
+                    location.reload();
+                } else {
+                    alert(response.data?.message || userTranslations.addUserError);
+                }
             }
         },
         error: function(xhr, status, error) {
-            Swal.close();
+            if (typeof Swal !== 'undefined') {
+                Swal.close();
+                Swal.fire(userTranslations.error, userTranslations.serverError, 'error');
+            } else {
+                alert(userTranslations.serverError);
+            }
             console.error('AJAX Error:', error, xhr.responseText);
-            Swal.fire(userTranslations.error, userTranslations.serverError, 'error');
         }
     });
 }
 
 function deleteUser(userId) {
+    if (typeof jQuery === 'undefined' || typeof Swal === 'undefined') {
+        if (confirm(userTranslations.deleteUser + '\n' + userTranslations.deleteIrreversible)) {
+            // Fallback without jQuery/Swal
+            if (typeof jQuery !== 'undefined') {
+                const $ = jQuery;
+                $.ajax({
+                    url: maneliAjaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_delete_user',
+                        user_id: userId,
+                        nonce: '<?php echo wp_create_nonce('maneli_delete_user_nonce'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(userTranslations.userDeleted);
+                            location.reload();
+                        } else {
+                            alert(response.data?.message || userTranslations.deleteUserError);
+                        }
+                    },
+                    error: function() {
+                        alert(userTranslations.serverError);
+                    }
+                });
+            } else {
+                alert('<?php echo esc_js(__('Please wait for the page to fully load.', 'maneli-car-inquiry')); ?>');
+            }
+        }
+        return;
+    }
+    
     Swal.fire({
         title: userTranslations.deleteUser,
         text: userTranslations.deleteIrreversible,
@@ -684,75 +743,101 @@ function deleteUser(userId) {
     });
 }
 
-// Send SMS handler
-jQuery(document).ready(function($) {
-    $('.send-sms-btn').on('click', function() {
-        var phone = $(this).data('phone');
-        var userName = $(this).data('user-name');
-        var userId = $(this).data('user-id');
+// Send SMS handler - Wait for jQuery to load
+(function() {
+    function initSMSHandler() {
+        if (typeof jQuery === 'undefined') {
+            // Wait for jQuery to load
+            setTimeout(initSMSHandler, 100);
+            return;
+        }
         
-        Swal.fire({
-            title: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
-            html: `
-                <div class="text-start">
-                    <p><strong><?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?></strong> ${userName} (${phone})</p>
-                    <div class="mb-3">
-                        <label class="form-label"><?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?></label>
-                        <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>"></textarea>
-                    </div>
-                </div>
-            `,
-            showCancelButton: true,
-            confirmButtonText: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
-            cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
-            preConfirm: function() {
-                var message = $('#sms-message').val();
-                if (!message.trim()) {
-                    Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>');
-                    return false;
-                }
-                return { message: message };
-            }
-        }).then(function(result) {
-            if (result.isConfirmed && result.value) {
-                Swal.fire({
-                    title: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
-                    text: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: function() {
-                        Swal.showLoading();
-                    }
-                });
+        var $ = jQuery;
+        
+        // Wait for DOM to be ready
+        $(document).ready(function() {
+            $(document).on('click', '.send-sms-btn', function() {
+                var phone = $(this).data('phone');
+                var userName = $(this).data('user-name');
+                var userId = $(this).data('user-id');
                 
-                $.ajax({
-                    url: maneli_ajax.url,
-                    type: 'POST',
-                    data: {
-                        action: 'maneli_send_single_sms',
-                        nonce: maneli_ajax.nonce,
-                        recipient: phone,
-                        message: result.value.message,
-                        related_id: userId
-                    },
-                    success: function(response) {
-                        Swal.close();
-                        if (response.success) {
-                            Swal.fire('<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>', 'success');
-                        } else {
-                            Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', response.data?.message || '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>', 'error');
+                if (typeof Swal === 'undefined') {
+                    console.error('SweetAlert2 is not loaded');
+                    alert('<?php echo esc_js(__('Please refresh the page and try again.', 'maneli-car-inquiry')); ?>');
+                    return;
+                }
+                
+                Swal.fire({
+                    title: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+                    html: `
+                        <div class="text-start">
+                            <p><strong><?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?></strong> ${userName} (${phone})</p>
+                            <div class="mb-3">
+                                <label class="form-label"><?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?></label>
+                                <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>"></textarea>
+                            </div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
+                    cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
+                    preConfirm: function() {
+                        var message = $('#sms-message').val();
+                        if (!message.trim()) {
+                            Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>');
+                            return false;
                         }
-                    },
-                    error: function() {
-                        Swal.close();
-                        Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>', 'error');
+                        return { message: message };
+                    }
+                }).then(function(result) {
+                    if (result.isConfirmed && result.value) {
+                        Swal.fire({
+                            title: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
+                            text: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: function() {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        $.ajax({
+                            url: maneliAjaxUrl,
+                            type: 'POST',
+                            data: {
+                                action: 'maneli_send_single_sms',
+                                nonce: maneliAjaxNonce,
+                                recipient: phone,
+                                message: result.value.message,
+                                related_id: userId
+                            },
+                            success: function(response) {
+                                Swal.close();
+                                if (response.success) {
+                                    Swal.fire('<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>', 'success');
+                                } else {
+                                    Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', response.data?.message || '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>', 'error');
+                                }
+                            },
+                            error: function() {
+                                Swal.close();
+                                Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>', 'error');
+                            }
+                        });
                     }
                 });
-            }
+            });
         });
-    });
-});
+    }
+    
+    // Start initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSMSHandler);
+    } else {
+        initSMSHandler();
+    }
+})();
 </script>
 
 <style>

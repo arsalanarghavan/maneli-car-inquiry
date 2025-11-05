@@ -392,6 +392,21 @@ if (!empty($view_payment)) {
                 wp_redirect(home_url('/dashboard/notifications-center'));
                 exit;
             }
+        } elseif ($page_slug === 'logs' && !empty($subpage)) {
+            // Handle logs sub-pages: logs/system and logs/user
+            $valid_subpages = ['system', 'user'];
+            if (in_array($subpage, $valid_subpages)) {
+                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/' . $subpage . '-logs.php';
+                if (file_exists($page_template)) {
+                    ob_start();
+                    include $page_template;
+                    $page_content = ob_get_clean();
+                }
+            } else {
+                // Invalid subpage, redirect to dashboard
+                wp_redirect(home_url('/dashboard'));
+                exit;
+            }
         } else {
             // Try to load page-specific content
             $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/' . $page_slug . '.php';

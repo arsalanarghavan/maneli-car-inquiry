@@ -48,6 +48,10 @@ class Maneli_Hooks {
         add_action('template_redirect', [$this, 'track_visitor_statistics_server_side'], 1);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_visitor_tracking_scripts']);
         
+        // Log cleanup cron job
+        add_action('maneli_cleanup_old_logs', [$this, 'cleanup_old_logs']);
+        add_action('init', [$this, 'schedule_log_cleanup_cron']);
+        
     }
 
     /**
@@ -741,6 +745,55 @@ class Maneli_Hooks {
                 'enabled' => true,
                 'debug' => defined('WP_DEBUG') && WP_DEBUG
             ]);
+        }
+    }
+
+    /**
+     * Schedule log cleanup cron job
+     */
+    public function schedule_log_cleanup_cron() {
+        $options = get_option('maneli_inquiry_all_options', []);
+        
+        // Check if auto cleanup is enabled
+        if (empty($options['enable_auto_log_cleanup']) || $options['enable_auto_log_cleanup'] != '1') {
+            // Unschedule if disabled
+            $timestamp = wp_next_scheduled('maneli_cleanup_old_logs');
+            if ($timestamp) {
+                wp_unschedule_event($timestamp, 'maneli_cleanup_old_logs');
+            }
+            return;
+        }
+        
+        // Get cleanup frequency
+        $frequency = isset($options['log_cleanup_frequency']) ? $options['log_cleanup_frequency'] : 'daily';
+        
+        // Map frequency to WordPress schedule
+        $schedule_map = [
+            'hourly' => 'hourly',
+            'daily' => 'daily',
+            'weekly' => 'weekly',
+        ];
+        $schedule = $schedule_map[$frequency] ?? 'daily';
+        
+        // Schedule if not already scheduled or schedule changed
+        if (!wp_next_scheduled('maneli_cleanup_old_logs')) {
+            wp_schedule_event(time(), $schedule, 'maneli_cleanup_old_logs');
+        }
+    }
+
+    /**
+     * Cleanup old logs (called by cron)
+     */
+    public function cleanup_old_logs() {
+        if (!class_exists('Maneli_Logger')) {
+            return;
+        }
+        
+        $logger = Maneli_Logger::instance();
+        $deleted_count = $logger->cleanup_old_logs();
+        
+        if (defined('WP_DEBUG') && WP_DEBUG && $deleted_count > 0) {
+            error_log(sprintf('Maneli Log Cleanup: Deleted %d old log entries', $deleted_count));
         }
     }
     

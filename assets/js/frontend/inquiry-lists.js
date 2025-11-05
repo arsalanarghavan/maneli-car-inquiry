@@ -2009,6 +2009,139 @@ function toPersianNumber(num) {
     //======================================================================
 
     /**
+     * Send SMS handler - works for both list and report pages
+     */
+    $(document.body).on('click', '.send-sms-report-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var $btn = $(this);
+        var phone = $btn.data('phone');
+        var customerName = $btn.data('customer-name');
+        var inquiryId = $btn.data('inquiry-id');
+        
+        console.log('🔘 Send SMS button clicked:', {phone: phone, customerName: customerName, inquiryId: inquiryId});
+        
+        if (!phone || !inquiryId) {
+            console.error('Missing required data for SMS:', {phone: phone, inquiryId: inquiryId});
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: getText('error', 'Error'),
+                    text: getText('missing_required_info', 'Missing required information.'),
+                    icon: 'error'
+                });
+            }
+            return;
+        }
+        
+        if (typeof Swal === 'undefined') {
+            alert('SweetAlert is not loaded');
+            return;
+        }
+        
+        // Get AJAX URL and nonce - try multiple sources
+        var ajaxUrl = '';
+        var ajaxNonce = '';
+        
+        if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
+            ajaxUrl = maneli_ajax.ajax_url || maneli_ajax.url || '';
+            ajaxNonce = maneli_ajax.nonce || '';
+        } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+            ajaxUrl = maneliInquiryLists.ajax_url || '';
+            ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
+        }
+        
+        if (!ajaxUrl) {
+            ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
+            if (!ajaxUrl && typeof ajaxurl !== 'undefined') {
+                ajaxUrl = ajaxurl;
+            }
+        }
+        if (!ajaxNonce && typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces) {
+            ajaxNonce = maneliInquiryLists.nonces.ajax || '';
+        }
+        
+        Swal.fire({
+            title: getText('send_sms', 'Send SMS'),
+            html: `
+                <div class="text-start">
+                    <p><strong>${getText('recipient', 'Recipient:')}</strong> ${customerName || ''} (${phone})</p>
+                    <div class="mb-3">
+                        <label class="form-label">${getText('message', 'Message:')}</label>
+                        <textarea id="sms-message" class="form-control" rows="5" placeholder="${getText('enter_message', 'Enter your message...')}"></textarea>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: getText('send', 'Send'),
+            cancelButtonText: getText('cancel_button', 'Cancel'),
+            preConfirm: function() {
+                var message = $('#sms-message').val();
+                if (!message || !message.trim()) {
+                    Swal.showValidationMessage(getText('please_enter_message', 'Please enter a message'));
+                    return false;
+                }
+                return { message: message };
+            }
+        }).then(function(result) {
+            if (result.isConfirmed && result.value) {
+                Swal.fire({
+                    title: getText('sending', 'Sending...'),
+                    text: getText('please_wait', 'Please wait'),
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: function() {
+                        Swal.showLoading();
+                    }
+                });
+                
+                $.ajax({
+                    url: ajaxUrl,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_send_single_sms',
+                        nonce: ajaxNonce,
+                        recipient: phone,
+                        message: result.value.message,
+                        related_id: inquiryId
+                    },
+                    success: function(response) {
+                        Swal.close();
+                        if (response && response.success) {
+                            Swal.fire({
+                                title: getText('success', 'Success'),
+                                text: getText('sms_sent_successfully', 'SMS sent successfully!'),
+                                icon: 'success',
+                                confirmButtonText: getText('ok_button', 'OK')
+                            }).then(function() {
+                                // Reload page to show updated SMS history
+                                location.reload();
+                            });
+                        } else {
+                            var errorMsg = (response && response.data && response.data.message) ? response.data.message : getText('failed_to_send_sms', 'Failed to send SMS');
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: errorMsg,
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.close();
+                        console.error('SMS send error:', {xhr: xhr, status: status, error: error});
+                        Swal.fire({
+                            title: getText('error', 'Error'),
+                            text: getText('server_error', 'Server error. Please try again.'),
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+    /**
      * Save expert note for installment inquiry
      */
     $(document.body).on('submit', '#installment-expert-note-form', function(e) {
@@ -3482,6 +3615,302 @@ function toPersianNumber(num) {
             }
         });
     });
+
+    /**
+     * Handle bulk document request button - shows modal with switches for document selection
+     */
+    $(document.body).on('click', '.request-documents-bulk-btn', function() {
+        const $btn = $(this);
+        const userId = $btn.data('user-id');
+        const inquiryId = $btn.data('inquiry-id') || 0;
+        const inquiryType = $btn.data('inquiry-type') || 'installment';
+        let requiredDocs = [];
+        
+        try {
+            const docsData = $btn.data('required-docs');
+            requiredDocs = Array.isArray(docsData) ? docsData : (docsData ? JSON.parse(docsData) : []);
+        } catch (e) {
+            console.error('Error parsing required documents:', e);
+            requiredDocs = [];
+        }
+
+        if (requiredDocs.length === 0) {
+            Swal.fire({
+                title: getText('error', 'Error'),
+                text: getText('no_documents_available', 'No documents available to request.'),
+                icon: 'error'
+            });
+            return;
+        }
+
+        // Build HTML with toggle switches for each document (like settings page)
+        let docsHtml = '<div style="text-align: right; direction: rtl; font-family: inherit; max-height: 400px; overflow-y: auto; padding: 10px;">';
+        docsHtml += '<label style="display: block; margin-bottom: 20px; font-weight: bold; font-size: 15px; color: #495057;">' + 
+                    getText('select_documents_label', 'کدام مدارک نیاز است؟') + '</label>';
+        
+        requiredDocs.forEach(function(doc, index) {
+            const docId = 'bulk-doc-' + index;
+            docsHtml += '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background: #ffffff; transition: all 0.2s ease;">';
+            docsHtml += '<label style="flex: 1; margin: 0; cursor: pointer; font-size: 14px; font-weight: 500; color: #495057; padding-left: 10px;" for="' + docId + '">' + doc + '</label>';
+            docsHtml += '<div class="toggle toggle-success mb-0" id="' + docId + '-toggle" style="cursor: pointer; flex-shrink: 0;">';
+            docsHtml += '<span></span>';
+            docsHtml += '</div>';
+            docsHtml += '<input type="checkbox" class="bulk-doc-checkbox" id="' + docId + '" value="' + index + '" data-doc-name="' + doc.replace(/"/g, '&quot;') + '" style="display: none;">';
+            docsHtml += '</div>';
+        });
+        
+        docsHtml += '</div>';
+
+        Swal.fire({
+            title: getText('request_documents_title', 'درخواست مدارک'),
+            html: docsHtml,
+            width: '650px',
+            showCancelButton: true,
+            confirmButtonText: getText('send_request', 'ارسال درخواست'),
+            cancelButtonText: getText('cancel', 'لغو'),
+            customClass: {
+                popup: 'swal-documents-modal',
+                htmlContainer: 'swal-documents-container'
+            },
+            didOpen: function() {
+                // Add custom styles for toggle switches in modal
+                if (!$('#swal-toggle-styles').length) {
+                    $('head').append('<style id="swal-toggle-styles">' +
+                        '.swal-documents-modal .toggle { width: 3.75rem; height: 1.563rem; background-color: #e9ecef; padding: 0.125rem; border-radius: 0.188rem; position: relative; overflow: hidden; transition: all 0.2s ease; cursor: pointer; }' +
+                        '.swal-documents-modal .toggle span { position: absolute; top: 0.188rem; bottom: 0.25rem; left: 0.2rem; display: block; width: 1.25rem; border-radius: 0.125rem; background-color: #fff; box-shadow: 0 0.125rem 0.125rem 0 rgba(0, 0, 0, 0.25); cursor: pointer; transition: all 0.2s ease; }' +
+                        '.swal-documents-modal .toggle.on { background-color: rgba(16, 185, 129, 0.3); }' +
+                        '.swal-documents-modal .toggle.on span { background-color: #10b981; left: calc(100% - 1.45rem); }' +
+                        '.swal-documents-modal div[style*="display: flex"]:hover { background-color: #f8f9fa; border-color: #10b981; }' +
+                        '</style>');
+                }
+                
+                // Initialize toggle switches
+                $('.toggle').each(function() {
+                    const $toggle = $(this);
+                    const checkboxId = $toggle.attr('id').replace('-toggle', '');
+                    const $checkbox = $('#' + checkboxId);
+                    const $parent = $toggle.closest('div[style*="display: flex"]');
+                    
+                    // Make entire row clickable
+                    $parent.off('click').on('click', function(e) {
+                        if ($(e.target).closest('.toggle').length === 0 && $(e.target).closest('label').length === 0) {
+                            e.preventDefault();
+                            $toggle.toggleClass('on');
+                            $checkbox.prop('checked', $toggle.hasClass('on'));
+                        }
+                    });
+                    
+                    // Toggle click handler
+                    $toggle.off('click').on('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        $toggle.toggleClass('on');
+                        $checkbox.prop('checked', $toggle.hasClass('on'));
+                    });
+                    
+                    // Label click handler
+                    $('label[for="' + checkboxId + '"]').off('click').on('click', function(e) {
+                        e.preventDefault();
+                        $toggle.toggleClass('on');
+                        $checkbox.prop('checked', $toggle.hasClass('on'));
+                    });
+                });
+            },
+            preConfirm: () => {
+                const selectedDocs = [];
+                $('.bulk-doc-checkbox:checked').each(function() {
+                    selectedDocs.push($(this).data('doc-name'));
+                });
+                
+                if (selectedDocs.length === 0) {
+                    Swal.showValidationMessage(getText('select_at_least_one', 'لطفاً حداقل یک مدرک را انتخاب کنید.'));
+                    return false;
+                }
+                
+                return selectedDocs;
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                $btn.prop('disabled', true).html('<i class="la la-spinner la-spin me-2"></i>' + getText('sending', 'در حال ارسال...'));
+                
+                // Submit via AJAX
+                $.ajax({
+                    url: maneliInquiryLists.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'maneli_request_customer_documents_bulk',
+                        security: maneliInquiryLists.nonces.ajax || '',
+                        user_id: userId,
+                        documents: result.value,
+                        inquiry_id: inquiryId,
+                        inquiry_type: inquiryType
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                title: getText('success', 'موفقیت'),
+                                text: response.data.message || getText('document_request_sent', 'درخواست مدارک با موفقیت ارسال شد.'),
+                                icon: 'success'
+                            }).then(() => {
+                                // Reload page to show updated status
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: getText('error', 'خطا'),
+                                text: response.data?.message || getText('request_error', 'خطا در ارسال درخواست.'),
+                                icon: 'error'
+                            });
+                            $btn.prop('disabled', false).html('<i class="la la-paper-plane me-2"></i>' + getText('request_documents', 'درخواست مدارک'));
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: getText('error', 'خطا'),
+                            text: getText('server_error', 'خطای سرور. لطفاً دوباره تلاش کنید.'),
+                            icon: 'error'
+                        });
+                        $btn.prop('disabled', false).html('<i class="la la-paper-plane me-2"></i>' + getText('request_documents', 'درخواست مدارک'));
+                    }
+                });
+            }
+        });
+    });
+
+    //======================================================================
+    // SMS HISTORY MODAL HANDLER
+    //======================================================================
+    
+    /**
+     * Handle SMS history button click - opens modal and loads history
+     */
+    $(document.body).on('click', '.view-sms-history-btn', function() {
+        const button = $(this);
+        const inquiryId = button.data('inquiry-id');
+        const inquiryType = button.data('inquiry-type') || 'cash';
+        
+        if (!inquiryId) {
+            Swal.fire({
+                title: getText('error', 'Error'),
+                text: getText('invalid_inquiry_id', 'Invalid inquiry ID.'),
+                icon: 'error'
+            });
+            return;
+        }
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('sms-history-modal'));
+        modal.show();
+        
+        // Reset modal content
+        $('#sms-history-loading').removeClass('maneli-initially-hidden');
+        $('#sms-history-content').addClass('maneli-initially-hidden');
+        $('#sms-history-table-container').empty();
+        
+        // Load SMS history
+        $.ajax({
+            url: maneliInquiryLists.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'maneli_get_sms_history',
+                nonce: maneliInquiryLists.nonces.ajax || maneliInquiryLists.nonce,
+                inquiry_id: inquiryId,
+                inquiry_type: inquiryType
+            },
+            success: function(response) {
+                $('#sms-history-loading').addClass('maneli-initially-hidden');
+                $('#sms-history-content').removeClass('maneli-initially-hidden');
+                
+                if (response.success && response.data && response.data.history) {
+                    const history = response.data.history;
+                    
+                    if (history.length === 0) {
+                        $('#sms-history-table-container').html(
+                            '<div class="alert alert-info">' +
+                            '<i class="la la-info-circle me-2"></i>' +
+                            getText('no_sms_history', 'No SMS messages have been sent for this inquiry yet.') +
+                            '</div>'
+                        );
+                        return;
+                    }
+                    
+                    // Build table
+                    let tableHTML = '<div class="table-responsive">';
+                    tableHTML += '<table class="table table-hover table-bordered">';
+                    tableHTML += '<thead class="table-light">';
+                    tableHTML += '<tr>';
+                    tableHTML += '<th>' + getText('user', 'User') + '</th>';
+                    tableHTML += '<th>' + getText('recipient', 'Recipient') + '</th>';
+                    tableHTML += '<th>' + getText('message', 'Message') + '</th>';
+                    tableHTML += '<th>' + getText('date_time', 'Date & Time') + '</th>';
+                    tableHTML += '<th>' + getText('status', 'Status') + '</th>';
+                    tableHTML += '</tr>';
+                    tableHTML += '</thead>';
+                    tableHTML += '<tbody>';
+                    
+                    history.forEach(function(sms) {
+                        tableHTML += '<tr>';
+                        tableHTML += '<td>';
+                        tableHTML += '<div class="d-flex align-items-center">';
+                        tableHTML += '<span class="avatar avatar-sm bg-primary-transparent me-2">';
+                        tableHTML += '<i class="la la-user"></i>';
+                        tableHTML += '</span>';
+                        tableHTML += '<span class="fw-semibold">' + escapeHtml(sms.user_name) + '</span>';
+                        tableHTML += '</div>';
+                        tableHTML += '</td>';
+                        tableHTML += '<td><span class="text-muted">' + escapeHtml(sms.recipient) + '</span></td>';
+                        tableHTML += '<td><div class="text-wrap" style="max-width: 300px;"><small>' + escapeHtml(sms.message) + '</small></div></td>';
+                        tableHTML += '<td><small class="text-muted">' + escapeHtml(sms.sent_at) + '</small></td>';
+                        
+                        if (sms.success) {
+                            tableHTML += '<td><span class="badge bg-success-transparent"><i class="la la-check-circle me-1"></i>' + getText('sent', 'Sent') + '</span></td>';
+                        } else {
+                            tableHTML += '<td><span class="badge bg-danger-transparent" title="' + escapeHtml(sms.error || '') + '"><i class="la la-times-circle me-1"></i>' + getText('failed', 'Failed') + '</span></td>';
+                        }
+                        
+                        tableHTML += '</tr>';
+                    });
+                    
+                    tableHTML += '</tbody>';
+                    tableHTML += '</table>';
+                    tableHTML += '</div>';
+                    
+                    $('#sms-history-table-container').html(tableHTML);
+                } else {
+                    $('#sms-history-table-container').html(
+                        '<div class="alert alert-danger">' +
+                        '<i class="la la-exclamation-triangle me-2"></i>' +
+                        (response.data?.message || getText('error_loading_history', 'Error loading SMS history.')) +
+                        '</div>'
+                    );
+                }
+            },
+            error: function() {
+                $('#sms-history-loading').addClass('maneli-initially-hidden');
+                $('#sms-history-content').removeClass('maneli-initially-hidden');
+                $('#sms-history-table-container').html(
+                    '<div class="alert alert-danger">' +
+                    '<i class="la la-exclamation-triangle me-2"></i>' +
+                    getText('server_error', 'Server error. Please try again.') +
+                    '</div>'
+                );
+            }
+        });
+    });
+    
+    /**
+     * Helper function to escape HTML
+     */
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
     
     }); // End of document.ready callback
 })(); // End of waitForJQuery function

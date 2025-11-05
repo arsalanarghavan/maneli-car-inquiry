@@ -3478,8 +3478,6 @@ msgid "Customers"
 msgstr "مشتریان"
 
 
-msgid "Daily"
-msgstr "روزانه"
 
 
 msgid "Daily Inquiries Trend (Last 7 Days)"
@@ -4753,8 +4751,6 @@ msgstr "هشدار"
 msgid "Wednesday"
 msgstr "چهارشنبه"
 
-msgid "Weekly"
-msgstr "هفتگی"
 
 msgid "Welcome, %s"
 msgstr "خوش آمدید، %s"
@@ -5766,11 +5762,7 @@ msgstr "ارسال شده"
 msgid "Failed"
 msgstr "ناموفق"
 
-msgid "Date From"
-msgstr "از تاریخ"
 
-msgid "Date To"
-msgstr "تا تاریخ"
 
 msgid "Filters"
 msgstr "فیلترها"
@@ -8765,4 +8757,271 @@ msgstr "پیش‌نمایش"
 
 msgid "No templates found."
 msgstr "هیچ قالبی یافت نشد."
+
+
+# Logs System - Settings Tab
+msgid "Logs"
+msgstr "لاگ‌ها"
+
+msgid "General Log Settings"
+msgstr "تنظیمات عمومی لاگ"
+
+msgid "Enable System Logging"
+msgstr "فعال‌سازی لاگ سیستم"
+
+msgid "Enable logging system to track errors, debug messages, and system events."
+msgstr "فعال‌سازی سیستم لاگ برای ردیابی خطاها، پیام‌های دیباگ و رویدادهای سیستم."
+
+msgid "Enable User Activity Logging"
+msgstr "فعال‌سازی لاگ فعالیت کاربران"
+
+msgid "Enable logging of user actions including button clicks, form submissions, and AJAX calls."
+msgstr "فعال‌سازی لاگ فعالیت‌های کاربران شامل کلیک روی دکمه‌ها، ارسال فرم‌ها و فراخوانی‌های AJAX."
+
+msgid "System Log Types"
+msgstr "انواع لاگ سیستم"
+
+msgid "Control which types of system logs are recorded."
+msgstr "کنترل اینکه کدام انواع لاگ سیستم ثبت شوند."
+
+msgid "Log Errors"
+msgstr "ثبت خطاها"
+
+msgid "Log PHP errors and exceptions."
+msgstr "ثبت خطاها و استثناهای PHP."
+
+msgid "Log Debug Messages"
+msgstr "ثبت پیام‌های دیباگ"
+
+msgid "Log debug messages (only when WP_DEBUG is enabled)."
+msgstr "ثبت پیام‌های دیباگ (فقط زمانی که WP_DEBUG فعال باشد)."
+
+msgid "Log Console Messages"
+msgstr "ثبت پیام‌های کنسول"
+
+msgid "Log JavaScript console.log, console.error, and console.warn messages."
+msgstr "ثبت پیام‌های console.log، console.error و console.warn در JavaScript."
+
+msgid "Log Button Errors"
+msgstr "ثبت خطاهای دکمه"
+
+msgid "Log errors related to button clicks and interactions."
+msgstr "ثبت خطاهای مربوط به کلیک‌ها و تعاملات دکمه‌ها."
+
+msgid "User Activity Log Types"
+msgstr "انواع لاگ فعالیت کاربران"
+
+msgid "Control which types of user activities are logged."
+msgstr "کنترل اینکه کدام انواع فعالیت‌های کاربران ثبت شوند."
+
+msgid "Log Button Clicks"
+msgstr "ثبت کلیک‌های دکمه"
+
+msgid "Log all button clicks by staff and managers."
+msgstr "ثبت تمام کلیک‌های دکمه توسط کارکنان و مدیران."
+
+msgid "Log Form Submissions"
+msgstr "ثبت ارسال فرم‌ها"
+
+msgid "Log form submissions."
+msgstr "ثبت ارسال فرم‌ها."
+
+msgid "Log AJAX Calls"
+msgstr "ثبت فراخوانی‌های AJAX"
+
+msgid "Log AJAX requests made by staff and managers."
+msgstr "ثبت درخواست‌های AJAX انجام شده توسط کارکنان و مدیران."
+
+msgid "Log Page Views"
+msgstr "ثبت مشاهده صفحات"
+
+msgid "Log page views in dashboard (may generate many logs)."
+msgstr "ثبت مشاهده صفحات در داشبورد (ممکن است لاگ‌های زیادی تولید کند)."
+
+msgid "Log Retention & Cleanup"
+msgstr "نگهداری و پاکسازی لاگ"
+
+msgid "Configure automatic deletion of old logs to manage database size."
+msgstr "پیکربندی حذف خودکار لاگ‌های قدیمی برای مدیریت حجم دیتابیس."
+
+msgid "Enable Automatic Log Cleanup"
+msgstr "فعال‌سازی پاکسازی خودکار لاگ"
+
+msgid "Automatically delete logs older than the retention period."
+msgstr "حذف خودکار لاگ‌های قدیمی‌تر از دوره نگهداری."
+
+msgid "Log Retention Period (Days)"
+msgstr "دوره نگهداری لاگ (روز)"
+
+msgid "Logs older than this number of days will be automatically deleted. Minimum: 7 days, Recommended: 30-90 days."
+msgstr "لاگ‌های قدیمی‌تر از این تعداد روز به صورت خودکار حذف می‌شوند. حداقل: 7 روز، توصیه شده: 30-90 روز."
+
+msgid "Cleanup Frequency"
+msgstr "فرکانس پاکسازی"
+
+
+
+
+msgid "How often to run the automatic cleanup process."
+msgstr "چند وقت یکبار فرآیند پاکسازی خودکار اجرا شود."
+
+msgid "Log Limits & Performance"
+msgstr "محدودیت‌ها و عملکرد لاگ"
+
+msgid "Maximum Logs Per Page"
+msgstr "حداکثر لاگ در هر صفحه"
+
+msgid "Maximum number of logs to display per page in the logs dashboard. Recommended: 50-100."
+msgstr "حداکثر تعداد لاگ برای نمایش در هر صفحه در داشبورد لاگ. توصیه شده: 50-100."
+
+msgid "Maximum Log Message Size (Characters)"
+msgstr "حداکثر اندازه پیام لاگ (کاراکتر)"
+
+msgid "Maximum length of log messages. Longer messages will be truncated. Set to 0 for unlimited."
+msgstr "حداکثر طول پیام‌های لاگ. پیام‌های طولانی‌تر کوتاه می‌شوند. برای نامحدود، 0 تنظیم کنید."
+
+# Logs System - Dashboard Menu
+msgid "System Logs"
+msgstr "لاگ‌های سیستم"
+
+msgid "User Logs"
+msgstr "لاگ‌های کاربر"
+
+# Logs System - System Logs Page
+msgid "Filter System Logs"
+msgstr "فیلتر لاگ‌های سیستم"
+
+msgid "Log Type"
+msgstr "دیباگ"
+
+msgid "Console"
+msgstr "کنسول"
+
+msgid "Button Error"
+msgstr "خطای دکمه"
+
+msgid "Severity"
+msgstr "شدت"
+
+msgid "All Severities"
+msgstr "همه شدت‌ها"
+
+msgid "Info"
+msgstr "اطلاعات"
+
+msgid "Critical"
+msgstr "بحرانی"
+
+msgid "Search message..."
+msgstr "جستجوی پیام..."
+
+msgid "System Log Entries"
+msgstr "ورودی‌های لاگ سیستم"
+
+msgid "Log Details"
+msgstr "جزئیات لاگ"
+
+msgid "Could not fetch log details."
+msgstr "امکان دریافت جزئیات لاگ وجود ندارد."
+
+# Logs System - User Logs Page
+msgid "Filter User Logs"
+msgstr "فیلتر لاگ‌های کاربر"
+
+msgid "Enter User ID"
+msgstr "وارد کردن شناسه کاربر"
+
+msgid "Button Click"
+msgstr "کلیک دکمه"
+
+msgid "Form Submit"
+msgstr "ارسال فرم"
+
+msgid "AJAX Call"
+msgstr "فراخوانی AJAX"
+
+msgid "Page View"
+msgstr "مشاهده صفحه"
+
+msgid "Update Profile"
+msgstr "به‌روزرسانی پروفایل"
+
+msgid "Inquiry Status Change"
+msgstr "تغییر وضعیت استعلام"
+
+msgid "Expert Assignment"
+msgstr "اختصاص کارشناس"
+
+msgid "Target Type"
+msgstr "نوع هدف"
+
+msgid "All Targets"
+msgstr "همه اهداف"
+
+msgid "Search description..."
+msgstr "جستجوی توضیحات..."
+
+msgid "User Log Entries"
+msgstr "ورودی‌های لاگ کاربر"
+
+msgid "No user logs found."
+msgstr "هیچ لاگ کاربری یافت نشد."
+
+msgid "User Log Details"
+msgstr "جزئیات لاگ کاربر"
+
+
+msgid "Hourly"
+msgstr "ساعتی"
+
+msgid "Daily"
+msgstr "روزانه"
+
+msgid "Weekly"
+msgstr "هفتگی"
+
+msgid "Date From"
+msgstr "از تاریخ"
+
+msgid "Date To"
+msgstr "تا تاریخ"
+
+msgid "New Inquiries"
+msgstr "استعلام‌های جدید"
+
+msgid "Monthly Performance (Last 6 Months)"
+msgstr "عملکرد ماهانه (۶ ماه گذشته)"
+
+msgid "From Date"
+msgstr "از تاریخ"
+
+msgid "To Date"
+msgstr "تا تاریخ"
+
+msgid "No logs found."
+msgstr "هیچ لاگی یافت نشد."
+
+msgid "Debug"
+msgstr "اشکال‌زدایی"
+
+msgid "Action Type"
+msgstr "نوع عمل"
+
+msgid "All Actions"
+msgstr "همه اعمال"
+
+msgid "User Activity Logs"
+msgstr "لاگ‌های فعالیت کاربر"
+
+msgid "Request Documents"
+msgstr "درخواست اسناد"
+
+msgid "SMS History"
+msgstr "تاریخچه پیامک"
+
+msgid "No SMS messages have been sent for this inquiry yet."
+msgstr "هنوز هیچ پیامکی برای این استعلام ارسال نشده است."
+
+msgid "All Products"
+msgstr "همه محصولات"
 

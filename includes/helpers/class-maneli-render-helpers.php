@@ -372,6 +372,13 @@ class Maneli_Render_Helpers {
         $status_label      = Maneli_CPT_Handler::get_status_label($inquiry_status); 
         $is_admin          = current_user_can( 'manage_maneli_inquiries' );
         
+        // Check if current user is assigned expert
+        $is_assigned_expert = false;
+        if (!$is_admin) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+            $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        }
+        
         // Get expert status info and tracking status
         $expert_status_info = self::get_expert_status_info($expert_status);
         $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
@@ -490,6 +497,31 @@ class Maneli_Render_Helpers {
                     <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'maneli-car-inquiry'); ?>">
                         <i class="la la-eye"></i>
                     </a>
+                    <?php if ($is_admin || $is_assigned_expert) : 
+                        $customer_mobile = get_user_meta($customer->ID, 'billing_phone', true);
+                        if (empty($customer_mobile)) {
+                            $customer_mobile = get_user_meta($customer->ID, 'mobile_number', true);
+                        }
+                        if (empty($customer_mobile)) {
+                            $customer_mobile = $customer->user_login;
+                        }
+                        if (!empty($customer_mobile)): ?>
+                            <button class="btn btn-sm btn-success-light btn-icon send-sms-report-btn" 
+                                    data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                    data-phone="<?php echo esc_attr($customer_mobile); ?>"
+                                    data-customer-name="<?php echo esc_attr($customer->display_name ?? ''); ?>"
+                                    data-inquiry-type="installment"
+                                    title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                <i class="la la-sms"></i>
+                            </button>
+                        <?php endif; ?>
+                        <button class="btn btn-sm btn-info-light btn-icon view-sms-history-btn" 
+                                data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                data-inquiry-type="installment" 
+                                title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                            <i class="la la-history"></i>
+                        </button>
+                    <?php endif; ?>
                     <?php if ($is_admin) : ?>
                         <button class="btn btn-sm btn-danger-light btn-icon delete-installment-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
                             <i class="la la-trash"></i>
@@ -533,6 +565,13 @@ class Maneli_Render_Helpers {
         // از کلاس CPT Handler برای گرفتن لیبل وضعیت استفاده می‌کنیم.
         $status_label   = Maneli_CPT_Handler::get_cash_inquiry_status_label($inquiry_status); 
         $is_admin       = current_user_can( 'manage_maneli_inquiries' );
+        
+        // Check if current user is assigned expert
+        $is_assigned_expert = false;
+        if (!$is_admin) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+            $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        }
 
         // Get expert status info
         $expert_status_info = self::get_expert_status_info($expert_status);
@@ -615,6 +654,24 @@ class Maneli_Render_Helpers {
                     <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'maneli-car-inquiry'); ?>">
                         <i class="la la-eye"></i>
                     </a>
+                    <?php if ($is_admin || $is_assigned_expert) : 
+                        if (!empty($customer_mobile)): ?>
+                            <button class="btn btn-sm btn-success-light btn-icon send-sms-report-btn" 
+                                    data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                    data-phone="<?php echo esc_attr($customer_mobile); ?>"
+                                    data-customer-name="<?php echo esc_attr($customer_name); ?>"
+                                    data-inquiry-type="cash"
+                                    title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                <i class="la la-sms"></i>
+                            </button>
+                        <?php endif; ?>
+                        <button class="btn btn-sm btn-info-light btn-icon view-sms-history-btn" 
+                                data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                data-inquiry-type="cash" 
+                                title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                            <i class="la la-history"></i>
+                        </button>
+                    <?php endif; ?>
                     <?php if ($is_admin) : ?>
                         <button class="btn btn-sm btn-danger-light btn-icon delete-cash-list-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
                             <i class="la la-trash"></i>

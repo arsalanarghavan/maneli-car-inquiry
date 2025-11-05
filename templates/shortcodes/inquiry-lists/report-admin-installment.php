@@ -782,6 +782,90 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 </div>
             </div>
         <?php endif; ?>
+
+        <!-- SMS History - Visible for Admin and Expert -->
+        <?php if ($is_admin_or_expert): ?>
+            <?php
+            $sms_history = get_post_meta($inquiry_id, 'sms_history', true) ?: [];
+            ?>
+            <div class="card border-info mt-4">
+                <div class="card-header bg-info-transparent">
+                    <h6 class="card-title mb-0">
+                        <i class="la la-sms text-info me-2"></i>
+                        <?php esc_html_e('SMS History', 'maneli-car-inquiry'); ?>
+                        <?php if (!empty($sms_history)): ?>
+                            <span class="badge bg-info ms-2"><?php echo count($sms_history); ?></span>
+                        <?php endif; ?>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <?php if (!empty($sms_history)): ?>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><?php esc_html_e('User', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Recipient', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Date & Time', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($sms_history as $sms): 
+                                        $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($sms['sent_at'], 'Y/m/d H:i');
+                                        $jalali_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($jalali_date) : $jalali_date;
+                                        $recipient_formatted = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($sms['recipient']) : $sms['recipient'];
+                                    ?>
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="avatar avatar-sm bg-primary-transparent me-2">
+                                                        <i class="la la-user"></i>
+                                                    </span>
+                                                    <span class="fw-semibold"><?php echo esc_html($sms['user_name']); ?></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted"><?php echo esc_html($recipient_formatted); ?></span>
+                                            </td>
+                                            <td>
+                                                <div class="text-wrap" style="max-width: 300px;">
+                                                    <small><?php echo esc_html(wp_trim_words($sms['message'], 20)); ?></small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted"><?php echo esc_html($jalali_date); ?></small>
+                                            </td>
+                                            <td>
+                                                <?php if ($sms['success']): ?>
+                                                    <span class="badge bg-success-transparent">
+                                                        <i class="la la-check-circle me-1"></i>
+                                                        <?php esc_html_e('Sent', 'maneli-car-inquiry'); ?>
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-danger-transparent" title="<?php echo esc_attr($sms['error'] ?? esc_html__('Unknown error', 'maneli-car-inquiry')); ?>">
+                                                        <i class="la la-times-circle me-1"></i>
+                                                        <?php esc_html_e('Failed', 'maneli-car-inquiry'); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-info-transparent border-info">
+                            <div class="d-flex align-items-center">
+                                <i class="la la-info-circle me-2 fs-18"></i>
+                                <span><?php esc_html_e('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry'); ?></span>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
             </div>
         </div>
 
@@ -1054,21 +1138,24 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                                                     <i class="la la-exclamation-triangle me-2"></i>
                                                     <?php esc_html_e('Not Uploaded', 'maneli-car-inquiry'); ?>
                                                 </div>
-                                                <?php if ($is_admin_or_expert): ?>
-                                                    <button class="btn btn-sm btn-warning mt-2 w-100 request-doc-btn" 
-                                                            data-user-id="<?php echo esc_attr($customer_id); ?>" 
-                                                            data-doc-name="<?php echo esc_attr($doc_name); ?>"
-                                                            data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
-                                                            data-inquiry-type="installment">
-                                                        <i class="la la-paper-plane"></i> <?php esc_html_e('Request Document', 'maneli-car-inquiry'); ?>
-                                                    </button>
-                                                <?php endif; ?>
                                             <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
+                    <?php if ($is_admin_or_expert): ?>
+                        <div class="mt-3 pt-3 border-top">
+                            <button class="btn btn-primary w-100 request-documents-bulk-btn" 
+                                    data-user-id="<?php echo esc_attr($customer_id); ?>" 
+                                    data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
+                                    data-inquiry-type="installment"
+                                    data-required-docs='<?php echo wp_json_encode(array_values($required_docs)); ?>'>
+                                <i class="la la-paper-plane me-2"></i>
+                                <?php esc_html_e('Request Documents', 'maneli-car-inquiry'); ?>
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 <?php else: ?>
                     <div class="alert alert-info">
                         <i class="la la-info-circle me-2"></i>
@@ -1721,12 +1808,18 @@ if (typeof jQuery !== 'undefined') {
         console.log('✅ Template emergency handlers attached');
         console.log('Button count - .assign-expert-btn:', $('.assign-expert-btn').length);
         console.log('Button count - .delete-inquiry-report-btn:', $('.delete-inquiry-report-btn').length);
+        console.log('Button count - .send-sms-report-btn:', $('.send-sms-report-btn').length);
         
-        // Send SMS handler
-        $('.send-sms-report-btn').on('click', function() {
-            var phone = $(this).data('phone');
-            var customerName = $(this).data('customer-name');
-            var inquiryId = $(this).data('inquiry-id');
+        // Send SMS handler - using event delegation for dynamically loaded content
+        $(document).off('click.emergency', '.send-sms-report-btn').on('click.emergency', '.send-sms-report-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🔘 TEMPLATE: Send SMS button clicked!');
+            var btn = $(this);
+            var phone = btn.data('phone');
+            var customerName = btn.data('customer-name');
+            var inquiryId = btn.data('inquiry-id');
+            console.log('SMS - Inquiry ID:', inquiryId, 'Phone:', phone);
             
             if (typeof Swal === 'undefined') {
                 alert('<?php echo esc_js(__('SweetAlert is not loaded', 'maneli-car-inquiry')); ?>');
@@ -1768,27 +1861,59 @@ if (typeof jQuery !== 'undefined') {
                         }
                     });
                     
+                    // Get AJAX URL and nonce - try multiple sources
+                    var ajaxUrl = '';
+                    var ajaxNonce = '';
+                    
+                    if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
+                        ajaxUrl = maneli_ajax.ajax_url || maneli_ajax.url || '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+                        ajaxNonce = maneli_ajax.nonce || '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>';
+                    } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                        ajaxUrl = maneliInquiryLists.ajax_url || '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+                        ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>';
+                    } else {
+                        ajaxUrl = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+                        ajaxNonce = '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>';
+                    }
+                    
                     $.ajax({
-                        url: maneli_ajax.url,
+                        url: ajaxUrl,
                         type: 'POST',
                         data: {
                             action: 'maneli_send_single_sms',
-                            nonce: maneli_ajax.nonce,
+                            nonce: ajaxNonce,
                             recipient: phone,
                             message: result.value.message,
                             related_id: inquiryId
                         },
                         success: function(response) {
                             Swal.close();
-                            if (response.success) {
-                                Swal.fire('<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>', 'success');
+                            if (response && response.success) {
+                                Swal.fire({
+                                    title: '<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>',
+                                    text: '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>',
+                                    icon: 'success',
+                                    confirmButtonText: '<?php echo esc_js(__('OK', 'maneli-car-inquiry')); ?>'
+                                }).then(function() {
+                                    // Reload page to show updated SMS history
+                                    location.reload();
+                                });
                             } else {
-                                Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', response.data?.message || '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>', 'error');
+                                var errorMsg = (response && response.data && response.data.message) ? response.data.message : '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>';
+                                Swal.fire({
+                                    title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                                    text: errorMsg,
+                                    icon: 'error'
+                                });
                             }
                         },
                         error: function() {
                             Swal.close();
-                            Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>', 'error');
+                            Swal.fire({
+                                title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                                text: '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>',
+                                icon: 'error'
+                            });
                         }
                     });
                 }
@@ -1802,5 +1927,131 @@ if (typeof jQuery !== 'undefined') {
 <?php
 }
 ?>
+
+<script type="text/javascript">
+// Send SMS handler for installment inquiry report - always loaded
+if (typeof jQuery !== 'undefined') {
+    jQuery(document).ready(function($) {
+        // Send SMS handler - use event delegation to handle dynamically added buttons
+        $(document.body).on('click', '.send-sms-report-btn', function() {
+            var $btn = $(this);
+            var phone = $btn.data('phone');
+            var customerName = $btn.data('customer-name');
+            var inquiryId = $btn.data('inquiry-id');
+            
+            if (!phone || !inquiryId) {
+                console.error('Missing required data for SMS:', {phone: phone, inquiryId: inquiryId});
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                        text: '<?php echo esc_js(__('Missing required information.', 'maneli-car-inquiry')); ?>',
+                        icon: 'error'
+                    });
+                }
+                return;
+            }
+            
+            if (typeof Swal === 'undefined') {
+                alert('<?php echo esc_js(__('SweetAlert is not loaded', 'maneli-car-inquiry')); ?>');
+                return;
+            }
+            
+            // Get AJAX URL and nonce - try multiple sources
+            var ajaxUrl = '';
+            var ajaxNonce = '';
+            
+            if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
+                ajaxUrl = maneli_ajax.ajax_url || maneli_ajax.url || adminAjax.url || '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+                ajaxNonce = maneli_ajax.nonce || '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>';
+            } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                ajaxUrl = maneliInquiryLists.ajax_url || '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+                ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>';
+            } else {
+                ajaxUrl = '<?php echo esc_js(admin_url('admin-ajax.php')); ?>';
+                ajaxNonce = '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>';
+            }
+            
+            Swal.fire({
+                title: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+                html: `
+                    <div class="text-start">
+                        <p><strong><?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?></strong> ${customerName || ''} (${phone})</p>
+                        <div class="mb-3">
+                            <label class="form-label"><?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?></label>
+                            <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>"></textarea>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
+                cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
+                preConfirm: function() {
+                    var message = $('#sms-message').val();
+                    if (!message || !message.trim()) {
+                        Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>');
+                        return false;
+                    }
+                    return { message: message };
+                }
+            }).then(function(result) {
+                if (result.isConfirmed && result.value) {
+                    Swal.fire({
+                        title: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
+                        text: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: function() {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    $.ajax({
+                        url: ajaxUrl,
+                        type: 'POST',
+                        data: {
+                            action: 'maneli_send_single_sms',
+                            nonce: ajaxNonce,
+                            recipient: phone,
+                            message: result.value.message,
+                            related_id: inquiryId
+                        },
+                        success: function(response) {
+                            Swal.close();
+                            if (response && response.success) {
+                                Swal.fire({
+                                    title: '<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>',
+                                    text: '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>',
+                                    icon: 'success',
+                                    confirmButtonText: '<?php echo esc_js(__('OK', 'maneli-car-inquiry')); ?>'
+                                }).then(function() {
+                                    // Reload page to show updated SMS history
+                                    location.reload();
+                                });
+                            } else {
+                                var errorMsg = (response && response.data && response.data.message) ? response.data.message : '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>';
+                                Swal.fire({
+                                    title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                                    text: errorMsg,
+                                    icon: 'error'
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.close();
+                            console.error('SMS send error:', {xhr: xhr, status: status, error: error});
+                            Swal.fire({
+                                title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                                text: '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    });
+}
+</script>
 
 <?php } // End of permission check ?>

@@ -124,6 +124,14 @@ class Maneli_Settings_Page {
                 echo "<input type='checkbox' name='" . esc_attr($field_name) . "' value='1' " . checked('1', $value, false) . '>';
                 echo '<span class="maneli-slider round"></span></label>';
                 break;
+            case 'select':
+                $options = $args['options'] ?? [];
+                echo '<select name="' . esc_attr($field_name) . '" id="' . esc_attr($this->options_name . '_' . $name) . '" class="form-select">';
+                foreach ($options as $opt_val => $opt_label) {
+                    echo '<option value="' . esc_attr($opt_val) . '" ' . selected($value, $opt_val, false) . '>' . esc_html($opt_label) . '</option>';
+                }
+                echo '</select>';
+                break;
             case 'multiselect':
                 // Handle multi-select field for excluded days
                 if ($name === 'meetings_excluded_days') {
@@ -238,6 +246,14 @@ class Maneli_Settings_Page {
                                     $value = 0;
                                 }
                             }
+                        } elseif ($field['type'] === 'select') {
+                            // Handle select field - validate against allowed options
+                            $allowed_options = isset($field['options']) ? array_keys($field['options']) : [];
+                            if (!empty($allowed_options) && !in_array($value, $allowed_options)) {
+                                // Use default if invalid
+                                $value = isset($field['default']) ? $field['default'] : '';
+                            }
+                            $value = sanitize_text_field($value);
                         } elseif ($field['type'] === 'multiselect') {
                             // Handle multiselect field - validate array values
                             if (is_array($value)) {
@@ -371,6 +387,151 @@ class Maneli_Settings_Page {
                             ],
                         ]
                     ]
+                ]
+            ],
+            // Logs Tab
+            'logs' => [
+                'title' => esc_html__('Logs', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-file-alt',
+                'sections' => [
+                    'maneli_logs_general_section' => [
+                        'title' => esc_html__('General Log Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'enable_logging_system',
+                                'label' => esc_html__('Enable System Logging', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Enable logging system to track errors, debug messages, and system events.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'enable_user_logging',
+                                'label' => esc_html__('Enable User Activity Logging', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Enable logging of user actions including button clicks, form submissions, and AJAX calls.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_logs_system_section' => [
+                        'title' => esc_html__('System Log Types', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Control which types of system logs are recorded.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'log_system_errors',
+                                'label' => esc_html__('Log Errors', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Log PHP errors and exceptions.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_system_debug',
+                                'label' => esc_html__('Log Debug Messages', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '0',
+                                'desc' => esc_html__('Log debug messages (only when WP_DEBUG is enabled).', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_console_messages',
+                                'label' => esc_html__('Log Console Messages', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Log JavaScript console.log, console.error, and console.warn messages.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_button_errors',
+                                'label' => esc_html__('Log Button Errors', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Log errors related to button clicks and interactions.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_logs_user_section' => [
+                        'title' => esc_html__('User Activity Log Types', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Control which types of user activities are logged.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'log_button_clicks',
+                                'label' => esc_html__('Log Button Clicks', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Log all button clicks by staff and managers.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_form_submissions',
+                                'label' => esc_html__('Log Form Submissions', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Log form submissions.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_ajax_calls',
+                                'label' => esc_html__('Log AJAX Calls', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Log AJAX requests made by staff and managers.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_page_views',
+                                'label' => esc_html__('Log Page Views', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '0',
+                                'desc' => esc_html__('Log page views in dashboard (may generate many logs).', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_logs_retention_section' => [
+                        'title' => esc_html__('Log Retention & Cleanup', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Configure automatic deletion of old logs to manage database size.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'enable_auto_log_cleanup',
+                                'label' => esc_html__('Enable Automatic Log Cleanup', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '1',
+                                'desc' => esc_html__('Automatically delete logs older than the retention period.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_retention_days',
+                                'label' => esc_html__('Log Retention Period (Days)', 'maneli-car-inquiry'),
+                                'type' => 'number',
+                                'default' => '90',
+                                'desc' => esc_html__('Logs older than this number of days will be automatically deleted. Minimum: 7 days, Recommended: 30-90 days.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_cleanup_frequency',
+                                'label' => esc_html__('Cleanup Frequency', 'maneli-car-inquiry'),
+                                'type' => 'select',
+                                'default' => 'daily',
+                                'options' => [
+                                    'hourly' => esc_html__('Hourly', 'maneli-car-inquiry'),
+                                    'daily' => esc_html__('Daily', 'maneli-car-inquiry'),
+                                    'weekly' => esc_html__('Weekly', 'maneli-car-inquiry'),
+                                ],
+                                'desc' => esc_html__('How often to run the automatic cleanup process.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_logs_limits_section' => [
+                        'title' => esc_html__('Log Limits & Performance', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'max_logs_per_page',
+                                'label' => esc_html__('Maximum Logs Per Page', 'maneli-car-inquiry'),
+                                'type' => 'number',
+                                'default' => '50',
+                                'desc' => esc_html__('Maximum number of logs to display per page in the logs dashboard. Recommended: 50-100.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'log_max_file_size',
+                                'label' => esc_html__('Maximum Log Message Size (Characters)', 'maneli-car-inquiry'),
+                                'type' => 'number',
+                                'default' => '5000',
+                                'desc' => esc_html__('Maximum length of log messages. Longer messages will be truncated. Set to 0 for unlimited.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
                 ]
             ],
             // EXISTING TABS

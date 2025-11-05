@@ -706,6 +706,25 @@ if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
                                                    class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
                                                     <i class="la la-eye"></i>
                                                 </a>
+                                                <?php if (($is_admin || ($expert_id == $current_user_id)) && $customer): 
+                                                    $customer_mobile = get_user_meta($customer->ID, 'billing_phone', true);
+                                                    if (empty($customer_mobile)) {
+                                                        $customer_mobile = get_user_meta($customer->ID, 'mobile_number', true);
+                                                    }
+                                                    if (empty($customer_mobile)) {
+                                                        $customer_mobile = $customer->user_login;
+                                                    }
+                                                    if (!empty($customer_mobile)): ?>
+                                                        <button class="btn btn-sm btn-success-light btn-icon send-sms-report-btn" 
+                                                                data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
+                                                                data-phone="<?php echo esc_attr($customer_mobile); ?>"
+                                                                data-customer-name="<?php echo esc_attr($customer->display_name ?? ''); ?>"
+                                                                data-inquiry-type="installment"
+                                                                title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                                            <i class="la la-sms"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>

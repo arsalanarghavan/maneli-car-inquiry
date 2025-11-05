@@ -83,6 +83,7 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-roles-caps.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-hooks.php';
         
@@ -112,6 +113,9 @@ final class Maneli_Car_Inquiry_Plugin {
         // Visitor Statistics
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-visitor-statistics-handler.php';
+        
+        // Logger
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-logger.php';
         
         // Frontend Features
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
@@ -144,6 +148,9 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Initialize Frontend Theme Handler FIRST (needed by dashboard templates)
         Maneli_Frontend_Theme_Handler::instance();
+        
+        // Initialize Logger
+        Maneli_Logger::instance();
         
         // Initialize Dashboard Handler
         Maneli_Dashboard_Handler::instance();

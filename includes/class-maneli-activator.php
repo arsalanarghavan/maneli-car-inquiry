@@ -227,6 +227,50 @@ class Maneli_Activator {
             KEY last_visit (last_visit)
         ) $charset_collate;";
 
+        // System logs table - لاگ سیستم
+        $table_system_logs = $wpdb->prefix . 'maneli_system_logs';
+        $sql_system_logs = "CREATE TABLE IF NOT EXISTS $table_system_logs (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            log_type varchar(50) NOT NULL COMMENT 'error, debug, console, button_error',
+            severity varchar(20) DEFAULT 'info' COMMENT 'info, warning, error, critical',
+            message text NOT NULL,
+            context longtext DEFAULT NULL COMMENT 'JSON data',
+            file varchar(500) DEFAULT NULL,
+            line int(11) DEFAULT NULL,
+            user_id bigint(20) DEFAULT NULL,
+            ip_address varchar(45) DEFAULT NULL,
+            user_agent text DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY log_type (log_type),
+            KEY severity (severity),
+            KEY user_id (user_id),
+            KEY created_at (created_at),
+            KEY ip_address (ip_address(45))
+        ) $charset_collate;";
+
+        // User logs table - لاگ کاربر
+        $table_user_logs = $wpdb->prefix . 'maneli_user_logs';
+        $sql_user_logs = "CREATE TABLE IF NOT EXISTS $table_user_logs (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            user_id bigint(20) NOT NULL,
+            action_type varchar(100) NOT NULL COMMENT 'button_click, form_submit, ajax_call, etc.',
+            action_description varchar(500) NOT NULL,
+            target_type varchar(100) DEFAULT NULL COMMENT 'inquiry, user, product, etc.',
+            target_id bigint(20) DEFAULT NULL,
+            metadata longtext DEFAULT NULL COMMENT 'JSON data',
+            ip_address varchar(45) DEFAULT NULL,
+            user_agent text DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY action_type (action_type),
+            KEY target_type (target_type),
+            KEY target_id (target_id),
+            KEY created_at (created_at),
+            KEY ip_address (ip_address(45))
+        ) $charset_collate;";
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_inquiries);
         dbDelta($sql_followups);
@@ -238,6 +282,8 @@ class Maneli_Activator {
         dbDelta($sql_pages);
         dbDelta($sql_search_engines);
         dbDelta($sql_referrers);
+        dbDelta($sql_system_logs);
+        dbDelta($sql_user_logs);
         
         // Schedule cron jobs
         if (!wp_next_scheduled('maneli_send_meeting_reminders')) {
