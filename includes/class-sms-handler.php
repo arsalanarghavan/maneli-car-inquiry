@@ -136,6 +136,7 @@ class Maneli_SMS_Handler {
                             3 => 'Credit insufficient',
                             4 => 'Invalid pattern/bodyId',
                             5 => 'Invalid recipient number',
+                            11 => 'Rate limit exceeded or service temporarily unavailable',
                         ];
                         $error_msg = $error_messages[$code_num] ?? 'Unknown error';
                         error_log('Maneli SMS API Error: Failed to send SMS via Pattern. API returned error code: ' . $code_num . ' (' . $error_msg . ')');
@@ -292,7 +293,9 @@ class Maneli_SMS_Handler {
                             1 => 'Invalid username/password',
                             2 => 'User is restricted/limited',
                             3 => 'Credit insufficient',
+                            4 => 'Invalid pattern/bodyId',
                             5 => 'Invalid recipient number',
+                            11 => 'Rate limit exceeded or service temporarily unavailable',
                         ];
                         $error_msg = $error_messages[$code_num] ?? 'Unknown error';
                         error_log('Maneli SMS API Error: Failed to send SMS. API returned error code: ' . $code_num . ' (' . $error_msg . ')');

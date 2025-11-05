@@ -89,6 +89,9 @@ class Maneli_Notification_Center_Handler {
             $recipient = $recipient[0]; // Use first recipient for SMS
         }
 
+        // Reset error code before sending
+        $sms_handler->reset_error_code();
+
         // If pattern ID is provided, use pattern SMS
         if (!empty($pattern_id) && !empty($parameters)) {
             $result = $sms_handler->send_pattern((int)$pattern_id, $recipient, $parameters);
@@ -97,9 +100,25 @@ class Maneli_Notification_Center_Handler {
             $result = $sms_handler->send_sms($recipient, $message);
         }
 
+        // Get error code if available
+        $error_code = $sms_handler->get_last_error_code();
+        $error_message = 'SMS sending failed';
+        
+        if ($error_code !== null) {
+            $error_messages = [
+                1 => esc_html__('Invalid username/password', 'maneli-car-inquiry'),
+                2 => esc_html__('User is restricted/limited', 'maneli-car-inquiry'),
+                3 => esc_html__('Credit insufficient', 'maneli-car-inquiry'),
+                4 => esc_html__('Invalid pattern/bodyId', 'maneli-car-inquiry'),
+                5 => esc_html__('Invalid recipient number', 'maneli-car-inquiry'),
+                11 => esc_html__('Rate limit exceeded or service temporarily unavailable', 'maneli-car-inquiry'),
+            ];
+            $error_message = $error_messages[$error_code] ?? esc_html__('SMS sending failed', 'maneli-car-inquiry') . ' (Error code: ' . $error_code . ')';
+        }
+
         return [
             'success' => $result,
-            'error' => $result ? null : 'SMS sending failed'
+            'error' => $result ? null : $error_message
         ];
     }
 

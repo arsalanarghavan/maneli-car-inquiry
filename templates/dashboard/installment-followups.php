@@ -771,43 +771,278 @@ foreach ($followups as $inquiry) {
 </div>
 
 <script>
-// Global AJAX variables for SMS sending (same as users.php)
+// Global AJAX variables for SMS sending (same as users.php and installment-inquiries.php)
 var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
 
-// Debug and verify inquiry-lists.js is loaded
+// Initialize maneliInquiryLists fallback if not already defined (before inquiry-lists.js loads)
+if (typeof maneliInquiryLists === 'undefined') {
+    window.maneliInquiryLists = {
+        ajax_url: '<?php echo esc_js(admin_url('admin-ajax.php')); ?>',
+        nonces: {
+            ajax: '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>'
+        },
+        text: {}
+    };
+}
+
+// Debug: Verify script loading (wait for jQuery)
 (function() {
     function waitForjQuery() {
         if (typeof jQuery !== 'undefined' || typeof window.jQuery !== 'undefined') {
             var $ = jQuery || window.jQuery;
             $(document).ready(function() {
-                console.log('🟢 Installment Followups: Initializing...');
-                console.log('🟢 jQuery:', typeof $ !== 'undefined');
-                console.log('🟢 Swal:', typeof Swal !== 'undefined');
-                console.log('🟢 maneliInquiryLists:', typeof maneliInquiryLists !== 'undefined', maneliInquiryLists);
+                console.log('🟢 Installment Followups: Script loaded');
                 console.log('🟢 maneliAjaxUrl:', typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : 'MISSING');
                 console.log('🟢 maneliAjaxNonce:', typeof maneliAjaxNonce !== 'undefined' ? (maneliAjaxNonce.substring(0, 10) + '...') : 'MISSING');
+                console.log('🟢 maneliInquiryLists:', typeof maneliInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
                 console.log('🟢 Send SMS buttons:', $('.send-sms-report-btn').length);
                 console.log('🟢 SMS History buttons:', $('.view-sms-history-btn').length);
                 
-                // Check if inquiry-lists.js handlers are attached
+                // Check if inquiry-lists.js is loaded
                 setTimeout(function() {
-                    console.log('🟢 Checking if inquiry-lists.js loaded...');
-                    console.log('🟢 Check console for "inquiry-lists.js FILE LOADED" message');
+                    console.log('🟢 Checking inquiry-lists.js...');
+                    console.log('🟢 Swal available:', typeof Swal !== 'undefined');
                     
-                    if ($('.send-sms-report-btn').length > 0 && typeof Swal !== 'undefined') {
-                        console.log('🟢 Buttons found, attempting to verify handlers...');
-                        var testBtn = $('.send-sms-report-btn').first();
-                        if (testBtn.length) {
-                            console.log('✅ Send SMS button found in DOM');
-                            console.log('🟢 Button data:', {
-                                phone: testBtn.data('phone'),
-                                inquiryId: testBtn.data('inquiry-id'),
-                                customerName: testBtn.data('customer-name')
-                            });
+                    // Helper function for getting localized text
+                    function getText(key, fallback) {
+                        if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.text && maneliInquiryLists.text[key]) {
+                            return maneliInquiryLists.text[key];
                         }
+                        return fallback || key;
                     }
-                }, 2000);
+                    
+                    // Main SMS send handler (from inquiry-lists.js)
+                    $(document.body).off('click', '.send-sms-report-btn.followup').on('click', '.send-sms-report-btn.followup', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        var $btn = $(this);
+                        var phone = $btn.data('phone');
+                        var customerName = $btn.data('customer-name');
+                        var inquiryId = $btn.data('inquiry-id');
+                        
+                        console.log('🟢 Send SMS button clicked:', {phone: phone, customerName: customerName, inquiryId: inquiryId});
+                        
+                        if (!phone || !inquiryId) {
+                            console.error('Missing required data for SMS:', {phone: phone, inquiryId: inquiryId});
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    title: getText('error', 'Error'),
+                                    text: getText('missing_required_info', 'Missing required information.'),
+                                    icon: 'error'
+                                });
+                            }
+                            return;
+                        }
+                        
+                        if (typeof Swal === 'undefined') {
+                            alert('SweetAlert is not loaded');
+                            return;
+                        }
+                        
+                        // Get AJAX URL and nonce
+                        var ajaxUrl = typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : 
+                                     (typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists.ajax_url : '');
+                        var ajaxNonce = typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce :
+                                       (typeof maneliInquiryLists !== 'undefined' ? (maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '') : '');
+                        
+                        if (!ajaxUrl) {
+                            ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
+                            if (!ajaxUrl && typeof ajaxurl !== 'undefined') {
+                                ajaxUrl = ajaxurl;
+                            }
+                        }
+                        
+                        Swal.fire({
+                            title: getText('send_sms', 'Send SMS'),
+                            html: '<div class="text-start"><p><strong>' + getText('recipient', 'Recipient:') + '</strong> ' + (customerName || '') + ' (' + phone + ')</p><div class="mb-3"><label class="form-label">' + getText('message', 'Message:') + '</label><textarea id="sms-message" class="form-control" rows="5" placeholder="' + getText('enter_message', 'Enter your message...') + '"></textarea></div></div>',
+                            showCancelButton: true,
+                            confirmButtonText: getText('send', 'Send'),
+                            cancelButtonText: getText('cancel_button', 'Cancel'),
+                            preConfirm: function() {
+                                var message = $('#sms-message').val();
+                                if (!message || !message.trim()) {
+                                    Swal.showValidationMessage(getText('please_enter_message', 'Please enter a message'));
+                                    return false;
+                                }
+                                return { message: message };
+                            }
+                        }).then(function(result) {
+                            if (result.isConfirmed && result.value) {
+                                Swal.fire({
+                                    title: getText('sending', 'Sending...'),
+                                    text: getText('please_wait', 'Please wait'),
+                                    allowOutsideClick: false,
+                                    allowEscapeKey: false,
+                                    showConfirmButton: false,
+                                    didOpen: function() {
+                                        Swal.showLoading();
+                                    }
+                                });
+                                
+                                if (!ajaxNonce) {
+                                    console.error('❌ Nonce is missing!');
+                                    Swal.close();
+                                    Swal.fire({
+                                        title: getText('error', 'Error'),
+                                        text: getText('nonce_missing', 'Nonce is missing. Please refresh the page and try again.'),
+                                        icon: 'error'
+                                    });
+                                    return;
+                                }
+                                
+                                $.ajax({
+                                    url: ajaxUrl,
+                                    type: 'POST',
+                                    data: {
+                                        action: 'maneli_send_single_sms',
+                                        nonce: ajaxNonce,
+                                        recipient: phone,
+                                        message: result.value.message,
+                                        related_id: inquiryId
+                                    },
+                                    success: function(response) {
+                                        Swal.close();
+                                        if (response && response.success) {
+                                            Swal.fire({
+                                                title: getText('success', 'Success'),
+                                                text: getText('sms_sent_successfully', 'SMS sent successfully!'),
+                                                icon: 'success',
+                                                confirmButtonText: getText('ok_button', 'OK')
+                                            }).then(function() {
+                                                location.reload();
+                                            });
+                                        } else {
+                                            var errorMsg = (response && response.data && response.data.message) ? response.data.message : getText('failed_to_send_sms', 'Failed to send SMS');
+                                            Swal.fire({
+                                                title: getText('error', 'Error'),
+                                                text: errorMsg,
+                                                icon: 'error'
+                                            });
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        Swal.close();
+                                        console.error('SMS send error:', {xhr: xhr, status: status, error: error});
+                                        Swal.fire({
+                                            title: getText('error', 'Error'),
+                                            text: getText('server_error', 'Server error. Please try again.'),
+                                            icon: 'error'
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    
+                    // SMS History handler (from inquiry-lists.js)
+                    $(document.body).off('click', '.view-sms-history-btn.followup').on('click', '.view-sms-history-btn.followup', function() {
+                        const button = $(this);
+                        const inquiryId = button.data('inquiry-id');
+                        const inquiryType = button.data('inquiry-type') || 'installment';
+                        
+                        if (!inquiryId) {
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: getText('invalid_inquiry_id', 'Invalid inquiry ID.'),
+                                icon: 'error'
+                            });
+                            return;
+                        }
+                        
+                        const modalElement = document.getElementById('sms-history-modal');
+                        if (!modalElement) {
+                            Swal.fire({
+                                title: getText('error', 'Error'),
+                                text: getText('sms_history_modal_not_found', 'SMS history modal not found.'),
+                                icon: 'error'
+                            });
+                            return;
+                        }
+                        
+                        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                            const modal = new bootstrap.Modal(modalElement);
+                            modal.show();
+                        } else if (typeof jQuery !== 'undefined' && jQuery(modalElement).modal) {
+                            jQuery(modalElement).modal('show');
+                        } else {
+                            jQuery(modalElement).addClass('show').css('display', 'block');
+                            jQuery('.modal-backdrop').remove();
+                            jQuery('body').append('<div class="modal-backdrop fade show"></div>');
+                        }
+                        
+                        $('#sms-history-loading').removeClass('maneli-initially-hidden').show();
+                        $('#sms-history-content').addClass('maneli-initially-hidden').hide();
+                        $('#sms-history-table-container').empty();
+                        
+                        var ajaxUrl = typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : 
+                                     (typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists.ajax_url : '');
+                        var ajaxNonce = typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce :
+                                       (typeof maneliInquiryLists !== 'undefined' ? (maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '') : '');
+                        
+                        if (!ajaxUrl) {
+                            ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
+                            if (!ajaxUrl && typeof ajaxurl !== 'undefined') {
+                                ajaxUrl = ajaxurl;
+                            }
+                        }
+                        
+                        if (!ajaxNonce) {
+                            $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                            $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                            $('#sms-history-table-container').html(
+                                '<div class="alert alert-danger">' +
+                                '<i class="la la-exclamation-triangle me-2"></i>' +
+                                getText('nonce_missing', 'Nonce is missing. Please refresh the page and try again.') +
+                                '</div>'
+                            );
+                            return;
+                        }
+                        
+                        $.ajax({
+                            url: ajaxUrl,
+                            type: 'POST',
+                            data: {
+                                action: 'maneli_get_sms_history',
+                                nonce: ajaxNonce,
+                                inquiry_id: inquiryId,
+                                inquiry_type: inquiryType
+                            },
+                            success: function(response) {
+                                $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                                $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                                
+                                if (response && response.success && response.data && response.data.html) {
+                                    $('#sms-history-table-container').html(response.data.html);
+                                } else {
+                                    $('#sms-history-table-container').html(
+                                        '<div class="alert alert-info">' +
+                                        '<i class="la la-info-circle me-2"></i>' +
+                                        getText('no_sms_history', 'No SMS messages have been sent for this inquiry yet.') +
+                                        '</div>'
+                                    );
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
+                                $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                                $('#sms-history-table-container').html(
+                                    '<div class="alert alert-danger">' +
+                                    '<i class="la la-exclamation-triangle me-2"></i>' +
+                                    getText('error_loading_history', 'Error loading SMS history.') +
+                                    '</div>'
+                                );
+                            }
+                        });
+                    });
+                    
+                    // Add class to buttons so our handlers work
+                    $('.send-sms-report-btn').addClass('followup');
+                    $('.view-sms-history-btn').addClass('followup');
+                    
+                    console.log('🟢 SMS handlers attached to', $('.send-sms-report-btn.followup').length, 'send button(s) and', $('.view-sms-history-btn.followup').length, 'history button(s)');
+                }, 1000);
             });
         } else {
             setTimeout(waitForjQuery, 50);

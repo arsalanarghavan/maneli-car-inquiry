@@ -5286,53 +5286,61 @@ class Maneli_Ajax_Handler {
             return;
         }
         
-        // Send SMS (without pattern)
-        $result = Maneli_Notification_Center_Handler::send(
-            'sms',
-            $phone,
-            $message,
-            [
-                'related_id' => $related_id,
-                'user_id' => get_current_user_id(),
-            ]
-        );
-        
-        // Store SMS history if related_id is an inquiry
-        if ($related_id > 0) {
-            $current_user = wp_get_current_user();
-            $user_name = $current_user->display_name ?: $current_user->user_login;
-            
-            // Check if it's a cash_inquiry or inquiry post type
-            $post_type = get_post_type($related_id);
-            if (in_array($post_type, ['cash_inquiry', 'inquiry'])) {
-                $sms_history = get_post_meta($related_id, 'sms_history', true) ?: [];
-                
-                $sms_entry = [
+        try {
+            // Send SMS (without pattern)
+            $result = Maneli_Notification_Center_Handler::send(
+                'sms',
+                $phone,
+                $message,
+                [
+                    'related_id' => $related_id,
                     'user_id' => get_current_user_id(),
-                    'user_name' => $user_name,
-                    'recipient' => $phone,
-                    'message' => $message,
-                    'sent_at' => current_time('mysql'),
-                    'success' => $result['sms']['success'] ?? false,
-                    'error' => $result['sms']['error'] ?? null,
-                ];
+                ]
+            );
+            
+            // Store SMS history if related_id is an inquiry
+            if ($related_id > 0) {
+                $current_user = wp_get_current_user();
+                $user_name = $current_user->display_name ?: $current_user->user_login;
                 
-                // Add to beginning of array (newest first)
-                array_unshift($sms_history, $sms_entry);
-                
-                // Keep only last 100 entries
-                if (count($sms_history) > 100) {
-                    $sms_history = array_slice($sms_history, 0, 100);
+                // Check if it's a cash_inquiry or inquiry post type
+                $post_type = get_post_type($related_id);
+                if (in_array($post_type, ['cash_inquiry', 'inquiry'])) {
+                    $sms_history = get_post_meta($related_id, 'sms_history', true) ?: [];
+                    
+                    $sms_entry = [
+                        'user_id' => get_current_user_id(),
+                        'user_name' => $user_name,
+                        'recipient' => $phone,
+                        'message' => $message,
+                        'sent_at' => current_time('mysql'),
+                        'success' => $result['sms']['success'] ?? false,
+                        'error' => $result['sms']['error'] ?? null,
+                    ];
+                    
+                    // Add to beginning of array (newest first)
+                    array_unshift($sms_history, $sms_entry);
+                    
+                    // Keep only last 100 entries
+                    if (count($sms_history) > 100) {
+                        $sms_history = array_slice($sms_history, 0, 100);
+                    }
+                    
+                    update_post_meta($related_id, 'sms_history', $sms_history);
                 }
-                
-                update_post_meta($related_id, 'sms_history', $sms_history);
             }
-        }
-        
-        if ($result['sms']['success'] ?? false) {
-            wp_send_json_success(['message' => esc_html__('SMS sent successfully.', 'maneli-car-inquiry')]);
-        } else {
-            wp_send_json_error(['message' => esc_html__('Failed to send SMS: ', 'maneli-car-inquiry') . ($result['sms']['error'] ?? 'Unknown error')]);
+            
+            if ($result['sms']['success'] ?? false) {
+                wp_send_json_success(['message' => esc_html__('SMS sent successfully.', 'maneli-car-inquiry')]);
+            } else {
+                $error_message = $result['sms']['error'] ?? esc_html__('Unknown error', 'maneli-car-inquiry');
+                wp_send_json_error(['message' => esc_html__('Failed to send SMS: ', 'maneli-car-inquiry') . $error_message]);
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli SMS Send Error: ' . $e->getMessage());
+            }
+            wp_send_json_error(['message' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry')]);
         }
     }
     

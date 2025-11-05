@@ -9025,6 +9025,9 @@ msgstr "تاریخچه پیامک"
 msgid "No SMS messages have been sent for this inquiry yet."
 msgstr "هنوز هیچ پیامکی برای این استعلام ارسال نشده است."
 
+msgid "Loading SMS history..."
+msgstr "در حال بارگذاری تاریخچه پیامک..."
+
 msgid "All Products"
 msgstr "همه محصولات"
 

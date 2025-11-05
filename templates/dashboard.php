@@ -1026,46 +1026,56 @@ if ($need_inquiry_scripts) {
     if ($page === 'new-inquiry') {
         $scripts_html .= '
 <script>
-jQuery(document).ready(function($) {
-    var currentStep = 0;
-    var $wizard = $("#inquiry-wizard");
-    var $steps = $(".wizard-step", $wizard);
-    var totalSteps = $steps.length;
-    
-    // Find active step
-    $steps.each(function(index) {
-        if ($(this).hasClass("active")) currentStep = index;
-    });
-    
-    function showStep(step) {
-        $steps.removeClass("active").hide();
-        $steps.eq(step).addClass("active").show();
-        
-        var $prev = $(".wizard-btn.prev");
-        var $next = $(".wizard-btn.next");
-        var $finish = $(".wizard-btn.finish");
-        
-        $prev.prop("disabled", step === 0);
-        $next.toggle(step < totalSteps - 1);
-        $finish.toggle(step === totalSteps - 1).css("display", step === totalSteps - 1 ? "inline-block" : "none");
+(function() {
+    function waitForjQuery() {
+        if (typeof jQuery !== "undefined" || typeof window.jQuery !== "undefined") {
+            var $ = jQuery || window.jQuery;
+            $(document).ready(function() {
+                var currentStep = 0;
+                var $wizard = $("#inquiry-wizard");
+                var $steps = $(".wizard-step", $wizard);
+                var totalSteps = $steps.length;
+                
+                // Find active step
+                $steps.each(function(index) {
+                    if ($(this).hasClass("active")) currentStep = index;
+                });
+                
+                function showStep(step) {
+                    $steps.removeClass("active").hide();
+                    $steps.eq(step).addClass("active").show();
+                    
+                    var $prev = $(".wizard-btn.prev");
+                    var $next = $(".wizard-btn.next");
+                    var $finish = $(".wizard-btn.finish");
+                    
+                    $prev.prop("disabled", step === 0);
+                    $next.toggle(step < totalSteps - 1);
+                    $finish.toggle(step === totalSteps - 1).css("display", step === totalSteps - 1 ? "inline-block" : "none");
+                }
+                
+                showStep(currentStep);
+                
+                $(".wizard-btn.next").on("click", function() {
+                    if (currentStep < totalSteps - 1) {
+                        currentStep++;
+                        showStep(currentStep);
+                    }
+                });
+                
+                $(".wizard-btn.prev").on("click", function() {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        showStep(currentStep);
+                    }
+                });
+            });
+        } else {
+            setTimeout(waitForjQuery, 50);
+        }
     }
-    
-    showStep(currentStep);
-    
-    $(".wizard-btn.next").on("click", function() {
-        if (currentStep < totalSteps - 1) {
-            currentStep++;
-            showStep(currentStep);
-        }
-    });
-    
-    $(".wizard-btn.prev").on("click", function() {
-        if (currentStep > 0) {
-            currentStep--;
-            showStep(currentStep);
-        }
-    });
-});
+    waitForjQuery();
+})();
 </script>
 <style>
 .wizard-container .wizard-step { display: none; }

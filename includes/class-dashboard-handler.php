@@ -816,11 +816,22 @@ class Maneli_Dashboard_Handler {
                 if ($load_inquiry_scripts) {
                     $cash_nonce = wp_create_nonce("maneli_cash_inquiry_filter_nonce");
                     $installment_nonce = wp_create_nonce("maneli_inquiry_filter_nonce");
+                    $ajax_nonce = wp_create_nonce("maneli-ajax-nonce");
+                    $ajax_url = admin_url("admin-ajax.php");
+                    
                     $fallback_script = "
+                    // Global AJAX variables for SMS sending - ensure they're available before inquiry-lists.js loads
+                    if (typeof maneliAjaxUrl === 'undefined') {
+                        window.maneliAjaxUrl = '" . esc_js($ajax_url) . "';
+                    }
+                    if (typeof maneliAjaxNonce === 'undefined') {
+                        window.maneliAjaxNonce = '" . esc_js($ajax_nonce) . "';
+                    }
+                    
                     window.maneliInquiryLists = window.maneliInquiryLists || {
-                        ajax_url: '" . esc_js(admin_url("admin-ajax.php")) . "',
+                        ajax_url: '" . esc_js($ajax_url) . "',
                         nonces: {
-                            ajax: '" . esc_js(wp_create_nonce("maneli-ajax-nonce")) . "',
+                            ajax: '" . esc_js($ajax_nonce) . "',
                             cash_filter: '" . esc_js($cash_nonce) . "',
                             cash_details: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_details_nonce")) . "',
                             cash_update: '" . esc_js(wp_create_nonce("maneli_cash_inquiry_update_nonce")) . "',
