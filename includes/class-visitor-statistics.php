@@ -78,6 +78,7 @@ class Maneli_Visitor_Statistics {
             'device_type' => 'desktop',
             'device_model' => ''
         ];
+        $result['normalized_device_model'] = '';
         
         if (empty($user_agent)) {
             return $result;
@@ -87,22 +88,28 @@ class Maneli_Visitor_Statistics {
         if (preg_match('/windows nt 10/i', $user_agent)) {
             $result['os'] = 'Windows';
             $result['os_version'] = '10';
+            $result['normalized_device_model'] = 'Desktop';
         } elseif (preg_match('/windows nt 6\.3/i', $user_agent)) {
             $result['os'] = 'Windows';
             $result['os_version'] = '8.1';
+            $result['normalized_device_model'] = 'Desktop';
         } elseif (preg_match('/windows nt 6\.2/i', $user_agent)) {
             $result['os'] = 'Windows';
             $result['os_version'] = '8';
+            $result['normalized_device_model'] = 'Desktop';
         } elseif (preg_match('/windows nt 6\.1/i', $user_agent)) {
             $result['os'] = 'Windows';
             $result['os_version'] = '7';
+            $result['normalized_device_model'] = 'Desktop';
         } elseif (preg_match('/macintosh|mac os x/i', $user_agent)) {
             $result['os'] = 'macOS';
             if (preg_match('/mac os x (\d+)[._](\d+)/i', $user_agent, $matches)) {
                 $result['os_version'] = $matches[1] . '.' . $matches[2];
             }
+            $result['normalized_device_model'] = 'Desktop';
         } elseif (preg_match('/linux/i', $user_agent)) {
             $result['os'] = 'Linux';
+            $result['normalized_device_model'] = 'Desktop';
         } elseif (preg_match('/android/i', $user_agent)) {
             $result['os'] = 'Android';
             $result['device_type'] = 'mobile';
@@ -112,11 +119,15 @@ class Maneli_Visitor_Statistics {
             // Detect device model
             if (preg_match('/(samsung|huawei|xiaomi|oneplus|oppo|vivo|realme|motorola|lg|sony|htc|nokia|asus|lenovo|zte|honor|google pixel|iphone)/i', $user_agent, $matches)) {
                 $result['device_model'] = ucfirst(strtolower($matches[1]));
+                $result['normalized_device_model'] = $result['device_model'];
+            } else {
+                $result['normalized_device_model'] = 'Android Device';
             }
         } elseif (preg_match('/iphone|ipod/i', $user_agent)) {
             $result['os'] = 'iOS';
             $result['device_type'] = 'mobile';
             $result['device_model'] = 'iPhone';
+            $result['normalized_device_model'] = 'iPhone';
             if (preg_match('/os ([\d_]+)/i', $user_agent, $matches)) {
                 $result['os_version'] = str_replace('_', '.', $matches[1]);
             }
@@ -124,6 +135,7 @@ class Maneli_Visitor_Statistics {
             $result['os'] = 'iOS';
             $result['device_type'] = 'tablet';
             $result['device_model'] = 'iPad';
+            $result['normalized_device_model'] = 'iPad';
             if (preg_match('/os ([\d_]+)/i', $user_agent, $matches)) {
                 $result['os_version'] = str_replace('_', '.', $matches[1]);
             }
@@ -158,19 +170,25 @@ class Maneli_Visitor_Statistics {
         if ($result['os'] === 'Unknown') {
             if (stripos($user_agent, 'windows') !== false) {
                 $result['os'] = 'Windows';
+                $result['normalized_device_model'] = 'Desktop';
             } elseif (stripos($user_agent, 'macintosh') !== false || stripos($user_agent, 'mac os') !== false) {
                 $result['os'] = 'macOS';
+                $result['normalized_device_model'] = 'Desktop';
             } elseif (stripos($user_agent, 'linux') !== false || stripos($user_agent, 'x11') !== false) {
                 $result['os'] = 'Linux';
+                $result['normalized_device_model'] = 'Desktop';
             } elseif (stripos($user_agent, 'android') !== false) {
                 $result['os'] = 'Android';
                 $result['device_type'] = 'mobile';
+                $result['normalized_device_model'] = 'Android Device';
             } elseif (stripos($user_agent, 'iphone') !== false || stripos($user_agent, 'ipod') !== false) {
                 $result['os'] = 'iOS';
                 $result['device_type'] = 'mobile';
+                $result['normalized_device_model'] = 'iPhone';
             } elseif (stripos($user_agent, 'ipad') !== false) {
                 $result['os'] = 'iPadOS';
                 $result['device_type'] = 'tablet';
+                $result['normalized_device_model'] = 'iPad';
             }
         }
 
@@ -202,6 +220,22 @@ class Maneli_Visitor_Statistics {
                 $result['device_type'] = 'tablet';
             }
         }
+
+        if (empty($result['device_model'])) {
+            if (!empty($result['normalized_device_model'])) {
+                $result['device_model'] = $result['normalized_device_model'];
+            } else {
+                if ($result['device_type'] === 'desktop') {
+                    $result['device_model'] = 'Desktop';
+                } elseif ($result['device_type'] === 'mobile') {
+                    $result['device_model'] = ($result['os'] === 'Android') ? 'Android Device' : 'Mobile Device';
+                } elseif ($result['device_type'] === 'tablet') {
+                    $result['device_model'] = 'Tablet Device';
+                }
+            }
+        }
+
+        unset($result['normalized_device_model']);
 
         return $result;
     }
@@ -1093,6 +1127,19 @@ class Maneli_Visitor_Statistics {
             ORDER BY v.visit_date DESC"
         );
         
+        if (!empty($results)) {
+            $now = current_time('timestamp');
+            foreach ($results as &$visitor) {
+                $visitor->country = self::translate_country_name($visitor->country_code, $visitor->country);
+                $visitor->browser = self::translate_browser_name($visitor->browser);
+                $visitor->os      = self::translate_os_name($visitor->os);
+                $visitor->device_type_label = self::translate_device_type($visitor->device_type);
+                $visitor->time_ago = self::format_time_ago($visitor->visit_date, $now);
+                $visitor->country_flag = self::get_country_flag_class($visitor->country_code);
+            }
+            unset($visitor);
+        }
+        
         return $results;
     }
     
@@ -1130,6 +1177,233 @@ class Maneli_Visitor_Statistics {
         ));
         
         return $results;
+    }
+    
+    /**
+     * Translate device type to localized label
+     */
+    public static function translate_device_type($device_type) {
+        $device_type = strtolower((string) $device_type);
+        $map = self::get_device_type_translation_map();
+        return $map[$device_type] ?? $map['unknown'];
+    }
+    
+    /**
+     * Get device type translation map
+     */
+    public static function get_device_type_translation_map() {
+        return [
+            'desktop' => esc_html__('Desktop', 'maneli-car-inquiry'),
+            'mobile' => esc_html__('Mobile', 'maneli-car-inquiry'),
+            'tablet' => esc_html__('Tablet', 'maneli-car-inquiry'),
+            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+        ];
+    }
+    
+    /**
+     * Translate browser name
+     */
+    public static function translate_browser_name($browser) {
+        $browser = trim((string) $browser);
+        if ($browser === '') {
+            return esc_html__('Unknown', 'maneli-car-inquiry');
+        }
+        $lookup = strtolower($browser);
+        $map = self::get_browser_translation_map();
+        return $map[$lookup] ?? $browser;
+    }
+    
+    /**
+     * Browser translation map
+     */
+    public static function get_browser_translation_map() {
+        return [
+            'chrome' => esc_html__('Chrome', 'maneli-car-inquiry'),
+            'firefox' => esc_html__('Firefox', 'maneli-car-inquiry'),
+            'safari' => esc_html__('Safari', 'maneli-car-inquiry'),
+            'edge' => esc_html__('Edge', 'maneli-car-inquiry'),
+            'ie' => esc_html__('Internet Explorer', 'maneli-car-inquiry'),
+            'opera' => esc_html__('Opera', 'maneli-car-inquiry'),
+            'chromium' => esc_html__('Chromium', 'maneli-car-inquiry'),
+            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+        ];
+    }
+    
+    /**
+     * Translate OS name
+     */
+    public static function translate_os_name($os) {
+        $os = trim((string) $os);
+        if ($os === '') {
+            return esc_html__('Unknown', 'maneli-car-inquiry');
+        }
+        $lookup = strtolower($os);
+        $map = self::get_os_translation_map();
+        return $map[$lookup] ?? $os;
+    }
+    
+    /**
+     * OS translation map
+     */
+    public static function get_os_translation_map() {
+        return [
+            'windows' => esc_html__('Windows', 'maneli-car-inquiry'),
+            'macos' => esc_html__('macOS', 'maneli-car-inquiry'),
+            'linux' => esc_html__('Linux', 'maneli-car-inquiry'),
+            'android' => esc_html__('Android', 'maneli-car-inquiry'),
+            'ios' => esc_html__('iOS', 'maneli-car-inquiry'),
+            'ipados' => esc_html__('iPadOS', 'maneli-car-inquiry'),
+            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+        ];
+    }
+    
+    /**
+     * Translate country name using WooCommerce or fallback list
+     */
+    public static function translate_country_name($country_code, $fallback = '') {
+        $country_code = strtoupper((string) $country_code);
+        $countries = self::get_country_translation_map();
+        if ($country_code && isset($countries[$country_code])) {
+            return $countries[$country_code];
+        }
+        
+        $fallback = trim((string) $fallback);
+        if ($fallback !== '') {
+            $fallback_key = strtolower($fallback);
+            $fallback_map = self::get_country_name_fallback_map();
+            if (isset($fallback_map[$fallback_key])) {
+                return $fallback_map[$fallback_key];
+            }
+        }
+        
+        return esc_html__('Unknown', 'maneli-car-inquiry');
+    }
+    
+    /**
+     * Get map of ISO country code => translated country name
+     */
+    public static function get_country_translation_map() {
+        static $map = null;
+        if ($map !== null) {
+            return $map;
+        }
+        
+        $map = [];
+        if (function_exists('WC') && WC()->countries) {
+            $countries = WC()->countries->get_countries();
+            if (!empty($countries)) {
+                foreach ($countries as $code => $name) {
+                    $map[strtoupper($code)] = $name;
+                }
+            }
+        }
+        
+        if (empty($map)) {
+            $fallback = self::get_country_name_fallback_map();
+            foreach ($fallback as $code => $label) {
+                if (strlen($code) === 2) {
+                    $map[strtoupper($code)] = $label;
+                }
+            }
+        }
+        
+        return $map;
+    }
+    
+    /**
+     * Country fallback names keyed by ISO or lowercase name
+     */
+    private static function get_country_name_fallback_map() {
+        static $map = null;
+        if ($map !== null) {
+            return $map;
+        }
+        
+        $map = [
+            'IR' => esc_html__('Iran', 'maneli-car-inquiry'),
+            'US' => esc_html__('United States', 'maneli-car-inquiry'),
+            'GB' => esc_html__('United Kingdom', 'maneli-car-inquiry'),
+            'DE' => esc_html__('Germany', 'maneli-car-inquiry'),
+            'FR' => esc_html__('France', 'maneli-car-inquiry'),
+            'IT' => esc_html__('Italy', 'maneli-car-inquiry'),
+            'ES' => esc_html__('Spain', 'maneli-car-inquiry'),
+            'CA' => esc_html__('Canada', 'maneli-car-inquiry'),
+            'RU' => esc_html__('Russia', 'maneli-car-inquiry'),
+            'TR' => esc_html__('Turkey', 'maneli-car-inquiry'),
+            'CN' => esc_html__('China', 'maneli-car-inquiry'),
+            'JP' => esc_html__('Japan', 'maneli-car-inquiry'),
+            'IN' => esc_html__('India', 'maneli-car-inquiry'),
+            'BR' => esc_html__('Brazil', 'maneli-car-inquiry'),
+            'AU' => esc_html__('Australia', 'maneli-car-inquiry'),
+            'AE' => esc_html__('United Arab Emirates', 'maneli-car-inquiry'),
+            'SA' => esc_html__('Saudi Arabia', 'maneli-car-inquiry'),
+            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+        ];
+        
+        foreach ($map as $code => $label) {
+            if (strlen($code) === 2) {
+                $map[strtolower($label)] = $label;
+            }
+        }
+        
+        return $map;
+    }
+    
+    /**
+     * Return CSS class for country flag
+     */
+    public static function get_country_flag_class($country_code) {
+        $country_code = strtolower((string) $country_code);
+        if (empty($country_code) || $country_code === 'loc') {
+            return 'flag-icon flag-icon-un';
+        }
+        return 'flag-icon flag-icon-' . esc_attr($country_code);
+    }
+    
+    /**
+     * Format time difference into localized "ago" string
+     */
+    private static function format_time_ago($datetime, $current_timestamp) {
+        if (empty($datetime)) {
+            return '';
+        }
+        
+        $timestamp = strtotime($datetime);
+        if ($timestamp === false) {
+            return '';
+        }
+        
+        $diff_text = human_time_diff($timestamp, $current_timestamp);
+        
+        $replacements = [
+            ' mins'   => ' دقیقه',
+            ' min'    => ' دقیقه',
+            ' minutes' => ' دقیقه',
+            ' minute'  => ' دقیقه',
+            ' hours'  => ' ساعت',
+            ' hour'   => ' ساعت',
+            ' days'   => ' روز',
+            ' day'    => ' روز',
+            ' weeks'  => ' هفته',
+            ' week'   => ' هفته',
+            ' months' => ' ماه',
+            ' month'  => ' ماه',
+            ' years'  => ' سال',
+            ' year'   => ' سال',
+            ' secs'   => ' ثانیه',
+            ' sec'    => ' ثانیه',
+            ' seconds'=> ' ثانیه',
+            ' second' => ' ثانیه',
+        ];
+        
+        $translated = strtr(' ' . $diff_text, $replacements);
+        $translated = trim($translated);
+        
+        if (function_exists('persian_numbers')) {
+            $translated = persian_numbers($translated);
+        }
+        
+        return trim($translated . ' ' . esc_html__('ago', 'maneli-car-inquiry'));
     }
 }
 

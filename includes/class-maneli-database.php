@@ -844,4 +844,25 @@ class Maneli_Database {
 
         return null;
     }
+
+    /**
+     * Delete all system logs
+     */
+    public static function delete_system_logs() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_system_logs';
+
+        $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+        if ($total === 0) {
+            return 0;
+        }
+
+        $deleted = $wpdb->query("DELETE FROM {$table}");
+
+        if ($deleted === false) {
+            return false;
+        }
+
+        return $deleted;
+    }
 }

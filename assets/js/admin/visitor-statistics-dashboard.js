@@ -39,6 +39,14 @@
         console.log('maneliVisitorStats object:', maneliVisitorStats);
         
         var charts = {};
+        var translations = maneliVisitorStats.translations || {};
+        var unknownLabel = translations.unknown || 'Unknown';
+        var deviceLabels = {
+            desktop: translations.deviceDesktop || 'Desktop',
+            mobile: translations.deviceMobile || 'Mobile',
+            tablet: translations.deviceTablet || 'Tablet',
+            unknown: unknownLabel
+        };
         var dailyStatsData = maneliVisitorStats.dailyStats || [];
         
         /**
@@ -106,7 +114,9 @@
                     // The server should convert it to Jalali
                     displayDate = stat.date;
                 }
-                dates.push(displayDate);
+                // Replace hyphen with slash for better readability and convert digits
+                displayDate = displayDate.replace(/-/g, '/');
+                dates.push(toPersianDigits(displayDate));
                 visits.push(parseInt(stat.visits) || 0);
                 uniqueVisitors.push(parseInt(stat.unique_visitors) || 0);
             });
@@ -218,7 +228,11 @@
                         var series = [];
                         
                         response.data.forEach(function(item) {
-                            labels.push(item.browser || 'Unknown');
+                            var browserLabel = item.browser || unknownLabel;
+                            if (browserLabel === 'Unknown') {
+                                browserLabel = unknownLabel;
+                            }
+                            labels.push(browserLabel);
                             series.push(parseInt(item.visit_count) || 0);
                         });
                         
@@ -284,7 +298,11 @@
                         var series = [];
                         
                         response.data.forEach(function(item) {
-                            labels.push(item.os || 'Unknown');
+                            var osLabel = item.os || unknownLabel;
+                            if (osLabel === 'Unknown') {
+                                osLabel = unknownLabel;
+                            }
+                            labels.push(osLabel);
                             series.push(parseInt(item.visit_count) || 0);
                         });
                         
@@ -350,12 +368,11 @@
                         var series = [];
                         
                         response.data.forEach(function(item) {
-                            var deviceType = item.device_type || 'Unknown';
-                            // Translate device types
-                            if (deviceType === 'desktop') deviceType = 'دسکتاپ';
-                            else if (deviceType === 'mobile') deviceType = 'موبایل';
-                            else if (deviceType === 'tablet') deviceType = 'تبلت';
-                            labels.push(deviceType);
+                            var deviceType = (item.device_type || 'unknown').toLowerCase();
+                            if (!deviceLabels.hasOwnProperty(deviceType)) {
+                                deviceType = 'unknown';
+                            }
+                            labels.push(deviceLabels[deviceType]);
                             series.push(parseInt(item.visit_count) || 0);
                         });
                         
@@ -442,15 +459,21 @@
                             tbody.html('<tr><td colspan="7" class="text-center text-muted">' + maneliVisitorStats.translations.noData + '</td></tr>');
                         } else {
                             response.data.forEach(function(visitor) {
-                                var timeAgo = getTimeAgo(visitor.visit_date);
-                                // Convert numbers in timeAgo to Persian
+                                var country = visitor.country || unknownLabel;
+                                var browser = visitor.browser || unknownLabel;
+                                var os = visitor.os || unknownLabel;
+                                var deviceType = visitor.device_type_label || deviceLabels[(visitor.device_type || '').toLowerCase()] || deviceLabels.unknown;
+                                var timeAgo = visitor.time_ago || getTimeAgo(visitor.visit_date);
+                                if (!timeAgo) {
+                                    timeAgo = translations.momentsAgo || ('0 ' + (translations.unitSecond || 'second') + ' ' + (translations.ago || 'ago'));
+                                }
                                 timeAgo = toPersianDigits(timeAgo);
                                 var row = '<tr>' +
                                     '<td>' + escapeHtml(visitor.ip_address) + '</td>' +
-                                    '<td>' + escapeHtml(visitor.country || 'Unknown') + '</td>' +
-                                    '<td>' + escapeHtml(visitor.browser || 'Unknown') + '</td>' +
-                                    '<td>' + escapeHtml(visitor.os || 'Unknown') + '</td>' +
-                                    '<td>' + escapeHtml(visitor.device_type || 'Unknown') + '</td>' +
+                                    '<td>' + escapeHtml(country === 'Unknown' ? unknownLabel : country) + '</td>' +
+                                    '<td>' + escapeHtml(browser === 'Unknown' ? unknownLabel : browser) + '</td>' +
+                                    '<td>' + escapeHtml(os === 'Unknown' ? unknownLabel : os) + '</td>' +
+                                    '<td>' + escapeHtml(deviceType) + '</td>' +
                                     '<td><div class="text-truncate" style="max-width: 200px;" title="' + escapeHtml(visitor.page_url || '') + '">' + 
                                         escapeHtml(visitor.page_title || visitor.page_url || '') + '</div></td>' +
                                     '<td>' + timeAgo + '</td>' +
@@ -484,10 +507,27 @@
             var date = new Date(dateString);
             var diff = Math.floor((now - date) / 1000);
             
-            if (diff < 60) return diff + ' ' + (diff === 1 ? 'second' : 'seconds') + ' ago';
-            if (diff < 3600) return Math.floor(diff / 60) + ' ' + (Math.floor(diff / 60) === 1 ? 'minute' : 'minutes') + ' ago';
-            if (diff < 86400) return Math.floor(diff / 3600) + ' ' + (Math.floor(diff / 3600) === 1 ? 'hour' : 'hours') + ' ago';
-            return Math.floor(diff / 86400) + ' ' + (Math.floor(diff / 86400) === 1 ? 'day' : 'days') + ' ago';
+            var suffix = translations.ago || 'ago';
+            var labels = {
+                second: translations.unitSecond || 'second',
+                minute: translations.unitMinute || 'minute',
+                hour: translations.unitHour || 'hour',
+                day: translations.unitDay || 'day'
+            };
+            
+            if (diff < 60) {
+                return diff + ' ' + labels.second + ' ' + suffix;
+            }
+            if (diff < 3600) {
+                var minutes = Math.floor(diff / 60);
+                return minutes + ' ' + labels.minute + ' ' + suffix;
+            }
+            if (diff < 86400) {
+                var hours = Math.floor(diff / 3600);
+                return hours + ' ' + labels.hour + ' ' + suffix;
+            }
+            var days = Math.floor(diff / 86400);
+            return days + ' ' + labels.day + ' ' + suffix;
         }
         
         /**

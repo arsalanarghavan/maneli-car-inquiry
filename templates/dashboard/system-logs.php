@@ -291,9 +291,15 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
         <div class="row">
             <div class="col-12">
                 <div class="card custom-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <h5 class="card-title mb-0"><?php esc_html_e('System Logs', 'maneli-car-inquiry'); ?></h5>
-                        <span class="badge bg-primary"><?php echo esc_html($total_logs_label); ?> <?php esc_html_e('Logs', 'maneli-car-inquiry'); ?></span>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary"><?php echo esc_html($total_logs_label); ?> <?php esc_html_e('Logs', 'maneli-car-inquiry'); ?></span>
+                            <button id="delete-system-logs-btn" type="button" class="btn btn-outline-danger btn-sm">
+                                <i class="ri-delete-bin-6-line me-1"></i>
+                                <?php esc_html_e('Delete Logs', 'maneli-car-inquiry'); ?>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($logs)): ?>
@@ -466,37 +472,125 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
 </div>
 
 <script>
-jQuery(document).ready(function($) {
-    $('.file-path').each(function() {
-        var $el = $(this);
-        if (!$el.attr('title')) {
-            $el.attr('title', $el.text());
+(function() {
+    function initSystemLogsDatepickers() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initSystemLogsDatepickers, 100);
+            return;
         }
-    });
-});
 
-jQuery(document).ready(function($) {
-    // Initialize Persian Datepicker
-    if (typeof persianDatepicker !== 'undefined') {
-        $('#date-from-picker').persianDatepicker({
-            format: 'YYYY/MM/DD',
-            calendarType: 'persian',
-            observer: true,
-            altField: '#date-from-picker',
-            altFormat: 'YYYY/MM/DD',
-            timePicker: false
-        });
-        
-        $('#date-to-picker').persianDatepicker({
-            format: 'YYYY/MM/DD',
-            calendarType: 'persian',
-            observer: true,
-            altField: '#date-to-picker',
-            altFormat: 'YYYY/MM/DD',
-            timePicker: false
+        jQuery(function($) {
+            $('.file-path').each(function() {
+                var $el = $(this);
+                if (!$el.attr('title')) {
+                    $el.attr('title', $el.text());
+                }
+            });
+
+            var deleteLogsNonce = '<?php echo esc_js(wp_create_nonce('maneli_log_actions_nonce')); ?>';
+            var deleteLogsConfirm = '<?php echo esc_js(__('Are you sure you want to delete all system logs? This action cannot be undone.', 'maneli-car-inquiry')); ?>';
+            var deleteLogsSuccess = '<?php echo esc_js(__('System logs deleted successfully.', 'maneli-car-inquiry')); ?>';
+            var deleteLogsFailure = '<?php echo esc_js(__('Failed to delete system logs.', 'maneli-car-inquiry')); ?>';
+
+            $('#delete-system-logs-btn').on('click', function() {
+                var $btn = $(this);
+                if ($btn.prop('disabled')) {
+                    return;
+                }
+
+                if (!confirm(deleteLogsConfirm)) {
+                    return;
+                }
+
+                $btn.prop('disabled', true).addClass('disabled');
+
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'maneli_delete_system_logs',
+                        nonce: deleteLogsNonce
+                    }
+                }).done(function(response) {
+                    if (response && response.success) {
+                        alert(deleteLogsSuccess);
+                        window.location.reload();
+                    } else {
+                        var message = (response && response.data && response.data.message) ? response.data.message : deleteLogsFailure;
+                        alert(message);
+                    }
+                }).fail(function() {
+                    alert(deleteLogsFailure);
+                }).always(function() {
+                    $btn.prop('disabled', false).removeClass('disabled');
+                });
+            });
+
+            var selectors = ['#date-from-picker', '#date-to-picker'];
+            var retryCount = 0;
+            var maxRetries = 20;
+
+            function ensureDatepickerPlugin(callback) {
+                if (typeof $.fn.persianDatepicker === 'undefined') {
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        setTimeout(function() {
+                            ensureDatepickerPlugin(callback);
+                        }, 150);
+                    } else {
+                        console.warn('persianDatepicker plugin was not loaded in time on system-logs page.');
+                    }
+                    return;
+                }
+                callback();
+            }
+
+            function initializePicker($field) {
+                if (!$field.length || $field.data('pdp-init') === 'true') {
+                    return;
+                }
+
+                var hasInitialValue = $field.val() && $field.val().trim() !== '';
+
+                $field.persianDatepicker({
+                    formatDate: 'YYYY/MM/DD',
+                    persianNumbers: true,
+                    autoClose: true,
+                    observer: false,
+                    initialValue: hasInitialValue,
+                    timePicker: false
+                });
+
+                $field.attr('data-pdp-init', 'true');
+            }
+
+            ensureDatepickerPlugin(function() {
+                selectors.forEach(function(selector) {
+                    initializePicker($(selector));
+                });
+            });
+
+            $(document).on('focus', selectors.join(', '), function() {
+                var $field = $(this);
+                if (!$field.data('pdp-init') || $field.data('pdp-init') !== 'true') {
+                    ensureDatepickerPlugin(function() {
+                        initializePicker($field);
+                        if (typeof $field.data('persianDatepicker') === 'object' && typeof $field.data('persianDatepicker').show === 'function') {
+                            $field.data('persianDatepicker').show();
+                        }
+                    });
+                }
+            });
         });
     }
-});
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSystemLogsDatepickers);
+    } else {
+        initSystemLogsDatepickers();
+    }
+})();
 
 function showLogDetails(logId) {
     jQuery.ajax({

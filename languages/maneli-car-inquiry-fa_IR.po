@@ -4909,6 +4909,27 @@ msgstr "محصول"
 msgid "Product #%s"
 msgstr "محصول شمارهٔ %s"
 
+msgid "Desktop"
+msgstr "دسکتاپ"
+
+msgid "Tablet"
+msgstr "تبلت"
+
+msgid "Moments ago"
+msgstr "لحظاتی پیش"
+
+msgid "second"
+msgstr "ثانیه"
+
+msgid "minute"
+msgstr "دقیقه"
+
+msgid "hour"
+msgstr "ساعت"
+
+msgid "day"
+msgstr "روز"
+
 msgid "Sale Status"
 msgstr "وضعیت فروش"
 
@@ -8942,6 +8963,27 @@ msgstr "ورودی‌های لاگ سیستم"
 
 msgid "Log Details"
 msgstr "جزئیات لاگ"
+
+msgid "Context"
+msgstr "زمینه"
+
+msgid "Line %s"
+msgstr "خط %s"
+
+msgid "User ID: %d"
+msgstr "شناسه کاربر: %d"
+
+msgid "Delete Logs"
+msgstr "حذف لاگ‌ها"
+
+msgid "Are you sure you want to delete all system logs? This action cannot be undone."
+msgstr "آیا از حذف تمام لاگ‌های سیستم اطمینان دارید؟ این اقدام قابل بازگشت نیست."
+
+msgid "System logs deleted successfully."
+msgstr "لاگ‌های سیستم با موفقیت حذف شد."
+
+msgid "Failed to delete system logs."
+msgstr "حذف لاگ‌های سیستم انجام نشد."
 
 msgid "Could not fetch log details."
 msgstr "امکان دریافت جزئیات لاگ وجود ندارد."

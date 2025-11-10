@@ -125,43 +125,103 @@ class Maneli_Render_Helpers {
      * @return string خروجی HTML.
      */
     public static function render_cheque_status_info($cheque_color_code) {
-        $colors = [
-            1 => ['name' => esc_html__('White', 'maneli-car-inquiry'), 'class' => 'white'], 
+        static $styles_printed = false;
+
+        $palette = [
+            1 => ['name' => esc_html__('White', 'maneli-car-inquiry'), 'class' => 'white'],
             2 => ['name' => esc_html__('Yellow', 'maneli-car-inquiry'), 'class' => 'yellow'],
-            3 => ['name' => esc_html__('Orange', 'maneli-car-inquiry'), 'class' => 'orange'], 
+            3 => ['name' => esc_html__('Orange', 'maneli-car-inquiry'), 'class' => 'orange'],
             4 => ['name' => esc_html__('Brown', 'maneli-car-inquiry'), 'class' => 'brown'],
-            5 => ['name' => esc_html__('Red', 'maneli-car-inquiry'), 'class' => 'red']
+            5 => ['name' => esc_html__('Red', 'maneli-car-inquiry'), 'class' => 'red'],
+            0 => ['name' => esc_html__('Undetermined', 'maneli-car-inquiry'), 'class' => 'undetermined'],
         ];
-        
+
         $cheque_color_map = [
             '1' => ['text' => esc_html__('White', 'maneli-car-inquiry'), 'desc' => esc_html__('No history of bounced cheques.', 'maneli-car-inquiry')],
             '2' => ['text' => esc_html__('Yellow', 'maneli-car-inquiry'), 'desc' => esc_html__('One bounced cheque or a maximum of 50 million Rials in returned commitments.', 'maneli-car-inquiry')],
             '3' => ['text' => esc_html__('Orange', 'maneli-car-inquiry'), 'desc' => esc_html__('Two to four bounced cheques or a maximum of 200 million Rials in returned commitments.', 'maneli-car-inquiry')],
             '4' => ['text' => esc_html__('Brown', 'maneli-car-inquiry'), 'desc' => esc_html__('Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
             '5' => ['text' => esc_html__('Red', 'maneli-car-inquiry'), 'desc' => esc_html__('More than ten bounced cheques or more than 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
-             0  => ['text' => esc_html__('Undetermined', 'maneli-car-inquiry'), 'desc' => esc_html__('Information was not received from Finotex or the inquiry was unsuccessful.', 'maneli-car-inquiry')]
+            '0' => ['text' => esc_html__('Undetermined', 'maneli-car-inquiry'), 'desc' => esc_html__('Information was not received from Finotex or the inquiry was unsuccessful.', 'maneli-car-inquiry')],
         ];
 
-        $output = '<div class="maneli-status-bar">';
-        foreach ($colors as $code => $color) {
-            $active_class = ((string)$code === (string)$cheque_color_code) ? 'active' : '';
-            $output .= "<div class='bar-segment segment-{$color['class']} {$active_class}'><span>" . esc_html($color['name']) . "</span></div>";
+        $cheque_color_code = (string) ($cheque_color_code ?? '0');
+        if (!isset($cheque_color_map[$cheque_color_code])) {
+            $cheque_color_code = '0';
         }
-        $output .= '</div>';
-        
-        $color_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map[0];
 
-        $output .= '<table class="summary-table maneli-summary-table">
-                        <tr>
-                            <td><strong>' . esc_html__('Sayad Cheque Status:', 'maneli-car-inquiry') . '</strong></td>
-                            <td><strong class="cheque-color-' . esc_attr($cheque_color_code) . '">' . esc_html($color_info['text']) . '</strong></td>
-                        </tr>
-                        <tr>
-                            <td><strong>' . esc_html__('Status Explanation:', 'maneli-car-inquiry') . '</strong></td>
-                            <td>' . esc_html($color_info['desc']) . '</td>
-                        </tr>
-                    </table>';
-        
+        $is_fa_locale = function_exists('get_locale') ? (get_locale() === 'fa_IR') : false;
+        if ($is_fa_locale) {
+            if (function_exists('persian_numbers')) {
+                foreach ($cheque_color_map as &$info) {
+                    $info['text'] = persian_numbers($info['text']);
+                    $info['desc'] = persian_numbers($info['desc']);
+                }
+                unset($info);
+            } elseif (function_exists('persian_numbers_no_separator')) {
+                foreach ($cheque_color_map as &$info) {
+                    $info['text'] = persian_numbers_no_separator($info['text']);
+                    $info['desc'] = persian_numbers_no_separator($info['desc']);
+                }
+                unset($info);
+            }
+        }
+
+        $active_info = $cheque_color_map[$cheque_color_code] ?? $cheque_color_map['0'];
+        $active_palette = $palette[(int) $cheque_color_code] ?? $palette[0];
+        $status_class = 'status-color-' . $active_palette['class'];
+
+        $output = '';
+        if (!$styles_printed) {
+            $styles_printed = true;
+            $output .= '<style>
+                .maneli-cheque-status-card {border:1px solid rgba(15,23,42,0.08);border-radius:18px;padding:22px;background:var(--bs-card-bg,#fff);}
+                .maneli-cheque-status-main {display:flex;align-items:center;gap:1.25rem;padding:20px;border-radius:16px;position:relative;overflow:hidden;color:#0f172a;}
+                .maneli-cheque-status-main .status-icon {width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,0.35);box-shadow:0 10px 25px rgba(15,23,42,0.08);}
+                .maneli-cheque-status-main .status-body {flex:1;min-width:0;}
+                .maneli-cheque-status-main .status-title {margin-bottom:.4rem;font-size:1rem;font-weight:600;}
+                .maneli-cheque-status-main .status-chip {display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:999px;font-weight:600;background:rgba(255,255,255,0.35);backdrop-filter:blur(4px);box-shadow:0 5px 18px rgba(15,23,42,0.12);}
+                .maneli-cheque-status-main .status-desc {margin-top:.75rem;color:rgba(15,23,42,0.75);font-size:.9rem;line-height:1.65;}
+                .maneli-cheque-status-legend {display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.5rem;}
+                .maneli-cheque-chip {display:inline-flex;align-items:center;gap:.45rem;padding:.42rem .95rem;border-radius:999px;font-size:.85rem;font-weight:500;border:1px solid transparent;transition:all .2s ease;}
+                .maneli-cheque-chip .chip-dot {width:10px;height:10px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(15,23,42,0.06);}
+                .maneli-cheque-chip.active {transform:translateY(-2px);box-shadow:0 10px 22px rgba(15,23,42,0.14);border-color:currentColor;background:#fff;}
+                .maneli-cheque-chip.chip-white {color:#475569;background:linear-gradient(135deg,#f8fafc,#fefefe);}
+                .maneli-cheque-chip.chip-yellow {color:#b7791f;background:linear-gradient(135deg,#fff7d6,#fde68a);}
+                .maneli-cheque-chip.chip-orange {color:#c2410c;background:linear-gradient(135deg,#ffe0c2,#fed7aa);}
+                .maneli-cheque-chip.chip-brown {color:#92400e;background:linear-gradient(135deg,#f5d7b8,#f3c98b);}
+                .maneli-cheque-chip.chip-red {color:#b91c1c;background:linear-gradient(135deg,#fecaca,#f87171);}
+                .maneli-cheque-chip.chip-undetermined {color:#475569;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);}
+                .maneli-cheque-status-main.status-color-white {background:linear-gradient(135deg,#f8fafc,#ffffff);color:#1f2937;}
+                .maneli-cheque-status-main.status-color-yellow {background:linear-gradient(135deg,#fffbeb,#fef08a);color:#854d0e;}
+                .maneli-cheque-status-main.status-color-orange {background:linear-gradient(135deg,#fff7ed,#fed7aa);color:#9a3412;}
+                .maneli-cheque-status-main.status-color-brown {background:linear-gradient(135deg,#f9eadf,#f3c999);color:#78350f;}
+                .maneli-cheque-status-main.status-color-red {background:linear-gradient(135deg,#fee2e2,#fca5a5);color:#7f1d1d;}
+                .maneli-cheque-status-main.status-color-undetermined {background:linear-gradient(135deg,#eef2f7,#cbd5f5);color:#1f2937;}
+                @media (max-width: 576px){.maneli-cheque-status-main{flex-direction:column;text-align:center;}.maneli-cheque-status-main .status-icon{margin-bottom:.75rem;}}
+            </style>';
+        }
+
+        $output .= '<div class="maneli-cheque-status-card">';
+        $output .= '<div class="maneli-cheque-status-main ' . esc_attr($status_class) . '">';
+        $output .= '<div class="status-icon"><i class="la la-shield-alt"></i></div>';
+        $output .= '<div class="status-body">';
+        $output .= '<div class="status-title">' . esc_html__('Sadad Cheque Status Inquiry', 'maneli-car-inquiry') . '</div>';
+        $output .= '<div class="status-chip"><span class="chip-dot"></span><span>' . esc_html($active_info['text']) . '</span></div>';
+        $output .= '<p class="status-desc">' . esc_html($active_info['desc']) . '</p>';
+        $output .= '</div>';
+        $output .= '</div>';
+
+        $output .= '<div class="maneli-cheque-status-legend">';
+        foreach ([1, 2, 3, 4, 5] as $code) {
+            $info = $palette[$code];
+            $output .= '<div class="maneli-cheque-chip chip-' . esc_attr($info['class']) . ' ' . ($cheque_color_code === (string)$code ? 'active' : '') . '"><span class="chip-dot"></span><span>' . esc_html($info['name']) . '</span></div>';
+        }
+        $output .= '<div class="maneli-cheque-chip chip-undetermined ' . ($cheque_color_code === '0' ? 'active' : '') . '"><span class="chip-dot"></span><span>' . esc_html($palette[0]['name']) . '</span></div>';
+        $output .= '</div>';
+
+        $output .= '</div>';
+
         return $output;
     }
 

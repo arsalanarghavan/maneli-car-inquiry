@@ -398,6 +398,7 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_get_user_logs', [$this, 'ajax_get_user_logs']);
         add_action('wp_ajax_maneli_log_console', [$this, 'ajax_log_console']);
         add_action('wp_ajax_maneli_log_user_action', [$this, 'ajax_log_user_action']);
+        add_action('wp_ajax_maneli_delete_system_logs', [$this, 'ajax_delete_system_logs']);
         
     }
 
@@ -6287,6 +6288,33 @@ class Maneli_Ajax_Handler {
         $logger->log_user_action($action_type, $action_description, $target_type, $target_id, $metadata);
         
         wp_send_json_success();
+    }
+
+    /**
+     * Delete all system logs
+     */
+    public function ajax_delete_system_logs() {
+        check_ajax_referer('maneli_log_actions_nonce', 'nonce');
+
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error([
+                'message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')
+            ], 403);
+        }
+
+        $logger = Maneli_Logger::instance();
+        $deleted = $logger->delete_all_system_logs();
+
+        if ($deleted === false) {
+            wp_send_json_error([
+                'message' => esc_html__('Failed to delete system logs.', 'maneli-car-inquiry')
+            ]);
+        }
+
+        wp_send_json_success([
+            'deleted' => (int) $deleted,
+            'message' => esc_html__('System logs deleted successfully.', 'maneli-car-inquiry')
+        ]);
     }
     
 }

@@ -19,6 +19,13 @@ class Maneli_Dashboard_Handler {
      * Instance of this class
      */
     private static $instance = null;
+
+    /**
+     * Whether the session cookie parameters have been configured.
+     *
+     * @var bool
+     */
+    private static $session_cookie_configured = false;
     
     /**
      * Get instance
@@ -41,6 +48,7 @@ class Maneli_Dashboard_Handler {
      * Initialize hooks
      */
     private function init_hooks() {
+        add_action('init', [$this, 'configure_session_cookie'], 0);
         add_action('init', [$this, 'add_rewrite_rules']);
         add_filter('query_vars', [$this, 'add_query_vars']);
         add_action('template_redirect', [$this, 'handle_dashboard_requests']);
@@ -422,50 +430,88 @@ class Maneli_Dashboard_Handler {
                     // Handle date conversion from Jalali to Gregorian for queries
                     require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
                     
-                    $start_date_input = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : null;
-                    $end_date_input = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : null;
-                    
-                    // Convert Jalali to Gregorian if needed
-                    if ($start_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $start_date_input, $matches)) {
-                        // Helper function from calendar.php
-                        if (!function_exists('maneli_jalali_to_gregorian')) {
-                            function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
-                                $j_y = (int)$j_y; $j_m = (int)$j_m; $j_d = (int)$j_d;
-                                $jy = $j_y - 979; $jm = $j_m - 1; $jd = $j_d - 1;
-                                $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-                                $j_day_no = 365 * $jy + (int)($jy / 33) * 8 + (int)(($jy % 33 + 3) / 4);
-                                for ($i = 0; $i < $jm; ++$i) $j_day_no += $j_days_in_month[$i];
-                                $j_day_no += $jd; $g_day_no = $j_day_no + 79;
-                                $gy = 1600 + 400 * (int)($g_day_no / 146097);
-                                $g_day_no = $g_day_no % 146097;
-                                $leap = true;
-                                if ($g_day_no >= 36525) {
-                                    $g_day_no--; $gy += 100 * (int)($g_day_no / 36524);
-                                    $g_day_no = $g_day_no % 36524;
-                                    if ($g_day_no >= 365) $g_day_no++; else $leap = false;
-                                }
-                                $gy += 4 * (int)($g_day_no / 1461); $g_day_no = $g_day_no % 1461;
-                                if ($g_day_no >= 366) {
-                                    $leap = false; $g_day_no--; $gy += (int)($g_day_no / 365);
-                                    $g_day_no = $g_day_no % 365;
-                                }
-                                $g_days_in_month = [31, ($leap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-                                $gm = 0;
-                                while ($gm < 12 && $g_day_no >= $g_days_in_month[$gm]) {
-                                    $g_day_no -= $g_days_in_month[$gm]; $gm++;
-                                }
-                                return sprintf('%04d-%02d-%02d', $gy, $gm + 1, $g_day_no + 1);
+                    if (!function_exists('maneli_jalali_to_gregorian')) {
+                        function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+                            $j_y = (int)$j_y; $j_m = (int)$j_m; $j_d = (int)$j_d;
+                            $jy = $j_y - 979; $jm = $j_m - 1; $jd = $j_d - 1;
+                            $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+                            $j_day_no = 365 * $jy + (int)($jy / 33) * 8 + (int)(($jy % 33 + 3) / 4);
+                            for ($i = 0; $i < $jm; ++$i) {
+                                $j_day_no += $j_days_in_month[$i];
                             }
+                            $j_day_no += $jd;
+                            $g_day_no = $j_day_no + 79;
+                            $gy = 1600 + 400 * (int)($g_day_no / 146097);
+                            $g_day_no = $g_day_no % 146097;
+                            $leap = true;
+                            if ($g_day_no >= 36525) {
+                                $g_day_no--;
+                                $gy += 100 * (int)($g_day_no / 36524);
+                                $g_day_no = $g_day_no % 36524;
+                                if ($g_day_no >= 365) {
+                                    $g_day_no++;
+                                } else {
+                                    $leap = false;
+                                }
+                            }
+                            $gy += 4 * (int)($g_day_no / 1461);
+                            $g_day_no = $g_day_no % 1461;
+                            if ($g_day_no >= 366) {
+                                $leap = false;
+                                $g_day_no--;
+                                $gy += (int)($g_day_no / 365);
+                                $g_day_no = $g_day_no % 365;
+                            }
+                            $g_days_in_month = [31, ($leap ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                            $gm = 0;
+                            while ($gm < 12 && $g_day_no >= $g_days_in_month[$gm]) {
+                                $g_day_no -= $g_days_in_month[$gm];
+                                $gm++;
+                            }
+                            return sprintf('%04d-%02d-%02d', $gy, $gm + 1, $g_day_no + 1);
                         }
-                        $start_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
-                    } else {
-                        $start_date = $start_date_input ?: date('Y-m-d', strtotime('-30 days'));
                     }
                     
-                    if ($end_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $end_date_input, $matches)) {
-                        $end_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
-                    } else {
-                        $end_date = $end_date_input ?: date('Y-m-d');
+                    $start_date_input = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : '';
+                    $end_date_input   = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : '';
+                    
+                    $start_date = date('Y-m-d', strtotime('-30 days'));
+                    $end_date   = date('Y-m-d');
+                    
+                    if ($start_date_input !== '') {
+                        $normalized_start = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($start_date_input) : null;
+                        if ($normalized_start) {
+                            $parts = explode('/', $normalized_start);
+                            $start_date = maneli_jalali_to_gregorian($parts[0], $parts[1], $parts[2]);
+                        } else {
+                            $english_start = function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($start_date_input) : $start_date_input;
+                            $english_start = str_replace('/', '-', $english_start);
+                            $start_timestamp = strtotime($english_start);
+                            if ($start_timestamp !== false) {
+                                $start_date = date('Y-m-d', $start_timestamp);
+                            }
+                        }
+                    }
+                    
+                    if ($end_date_input !== '') {
+                        $normalized_end = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($end_date_input) : null;
+                        if ($normalized_end) {
+                            $parts = explode('/', $normalized_end);
+                            $end_date = maneli_jalali_to_gregorian($parts[0], $parts[1], $parts[2]);
+                        } else {
+                            $english_end = function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($end_date_input) : $end_date_input;
+                            $english_end = str_replace('/', '-', $english_end);
+                            $end_timestamp = strtotime($english_end);
+                            if ($end_timestamp !== false) {
+                                $end_date = date('Y-m-d', $end_timestamp);
+                            }
+                        }
+                    }
+                    
+                    if (strtotime($start_date) > strtotime($end_date)) {
+                        $tmp = $start_date;
+                        $start_date = $end_date;
+                        $end_date = $tmp;
                     }
                     
                     // Get daily stats for chart
@@ -497,6 +543,16 @@ class Maneli_Dashboard_Handler {
                             'uniqueVisitors' => esc_html__('Unique Visitors', 'maneli-car-inquiry'),
                             'pages' => esc_html__('Pages', 'maneli-car-inquiry'),
                             'date' => esc_html__('Date', 'maneli-car-inquiry'),
+                            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+                            'deviceDesktop' => esc_html__('Desktop', 'maneli-car-inquiry'),
+                            'deviceMobile' => esc_html__('Mobile', 'maneli-car-inquiry'),
+                            'deviceTablet' => esc_html__('Tablet', 'maneli-car-inquiry'),
+                            'ago' => esc_html__('ago', 'maneli-car-inquiry'),
+                            'momentsAgo' => esc_html__('Moments ago', 'maneli-car-inquiry'),
+                            'unitSecond' => esc_html__('second', 'maneli-car-inquiry'),
+                            'unitMinute' => esc_html__('minute', 'maneli-car-inquiry'),
+                            'unitHour' => esc_html__('hour', 'maneli-car-inquiry'),
+                            'unitDay' => esc_html__('day', 'maneli-car-inquiry'),
                         ]
                     ]);
                 }
@@ -1184,21 +1240,39 @@ class Maneli_Dashboard_Handler {
     }
     
     /**
+     * Ensure session cookie parameters are set early in the request before any output.
+     */
+    public function configure_session_cookie() {
+        if (self::$session_cookie_configured) {
+            return;
+        }
+
+        if (headers_sent() || session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        $params = array(
+            'lifetime' => 0,
+            'path'     => '/',
+            'domain'   => '',
+            'secure'   => is_ssl(),
+            'httponly' => true,
+            'samesite' => 'Lax',
+        );
+
+        // Configure session cookie parameters for security and persistence
+        session_set_cookie_params($params);
+        self::$session_cookie_configured = true;
+    }
+
+    /**
      * Start session if not already started
-     * CRITICAL: Configure session cookie parameters for proper persistence
      */
     private function maybe_start_session() {
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
-            // Configure session cookie parameters for security and persistence
-            // SameSite=Lax allows session to work across redirects
-            session_set_cookie_params([
-                'lifetime' => 0, // Session cookie (expires when browser closes)
-                'path' => '/',
-                'domain' => '',
-                'secure' => is_ssl(), // Use secure cookies on HTTPS
-                'httponly' => true, // Prevent JavaScript access
-                'samesite' => 'Lax' // Allow cookies in redirects
-            ]);
+            if (!self::$session_cookie_configured) {
+                $this->configure_session_cookie();
+            }
             session_start();
         }
     }

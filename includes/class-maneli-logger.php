@@ -382,5 +382,12 @@ class Maneli_Logger {
         
         return $deleted_count;
     }
+
+    /**
+     * Delete all system logs
+     */
+    public function delete_all_system_logs() {
+        return Maneli_Database::delete_system_logs();
+    }
 }
 

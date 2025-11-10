@@ -34,6 +34,36 @@ $show_finnotech_structures = array_key_exists('finnotech_show_inquiry_structures
     ? $options['finnotech_show_inquiry_structures'] === '1'
     : true;
 
+$is_fa_locale = function_exists('get_locale') ? (get_locale() === 'fa_IR') : false;
+$maneli_digits = function ($value) use ($is_fa_locale) {
+    if ($value === null || $value === '') {
+        return '';
+    }
+    $string = (string) $value;
+    if ($is_fa_locale) {
+        if (function_exists('persian_numbers')) {
+            return persian_numbers($string);
+        }
+        if (function_exists('persian_numbers_no_separator')) {
+            return persian_numbers_no_separator($string);
+        }
+    }
+    return $string;
+};
+$maneli_number = function ($value, $precision = null) use ($maneli_digits) {
+    if ($value === null || $value === '') {
+        return '';
+    }
+    if (is_numeric($value)) {
+        if ($precision !== null) {
+            $value = number_format((float) $value, $precision, '.', ',');
+        } else {
+            $value = number_format((float) $value, 0, '.', ',');
+        }
+    }
+    return $maneli_digits($value);
+};
+
 $inquiry_status = $post_meta['inquiry_status'][0] ?? 'pending';
 $product_id = $post_meta['product_id'][0] ?? 0;
 $car_name = get_the_title($product_id);
@@ -614,9 +644,9 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
             </div>
             <div class="col-md-6 mb-3">
                 <strong><?php esc_html_e('Risk Score:', 'maneli-car-inquiry'); ?></strong>
-                <span><?php echo ($risk_score !== null) ? esc_html($risk_score) : esc_html__('Not available', 'maneli-car-inquiry'); ?></span>
+                <span><?php echo ($risk_score !== null) ? esc_html($maneli_digits($risk_score)) : esc_html__('Not available', 'maneli-car-inquiry'); ?></span>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-6.mb-3">
                 <strong><?php esc_html_e('Prohibited Transaction Status:', 'maneli-car-inquiry'); ?></strong>
                 <?php if ($prohibited !== null): ?>
                     <span class="badge bg-<?php echo esc_attr($prohibited === 'yes' ? 'danger' : 'success'); ?>">
@@ -633,8 +663,8 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                 <?php if (!empty($judgments)): ?>
                     <?php foreach ($judgments as $judgment): ?>
                         <li class="list-group-item">
-                            <?php echo esc_html($judgment['caseNumber'] ?? ''); ?> -
-                            <?php echo esc_html(number_format($judgment['judgmentAmount'] ?? 0)); ?>
+                            <?php echo esc_html($judgment['caseNumber'] ? $maneli_digits($judgment['caseNumber']) : __('Not available', 'maneli-car-inquiry')); ?> -
+                            <?php echo esc_html($judgment['judgmentAmount'] !== null ? $maneli_number($judgment['judgmentAmount']) : __('Not available', 'maneli-car-inquiry')); ?>
                             <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?>
                         </li>
                     <?php endforeach; ?>
@@ -680,7 +710,7 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
         <div class="mb-3">
             <strong><?php esc_html_e('Current Credit Score:', 'maneli-car-inquiry'); ?></strong>
             <span class="badge <?php echo ($credit_score !== null) ? 'bg-primary fs-16 ms-2' : 'bg-light text-muted'; ?>">
-                <?php echo ($credit_score !== null) ? esc_html($credit_score) : esc_html__('Not available', 'maneli-car-inquiry'); ?>
+                <?php echo ($credit_score !== null) ? esc_html($maneli_digits($credit_score)) : esc_html__('Not available', 'maneli-car-inquiry'); ?>
             </span>
         </div>
         <div class="mb-3">
@@ -693,7 +723,7 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                             <br>
                             <small class="text-muted"><?php echo esc_html($factor['description'] ?? ''); ?></small>
                             <?php if (isset($factor['impactOnScore'])): ?>
-                                <span class="badge bg-danger ms-2">-<?php echo esc_html($factor['impactOnScore']); ?></span>
+                                <span class="badge bg-danger ms-2">-<?php echo esc_html($maneli_digits($factor['impactOnScore'])); ?></span>
                             <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
@@ -720,10 +750,10 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                         <?php if (!empty($score_history)): ?>
                             <?php foreach ($score_history as $history): ?>
                                 <tr>
-                                    <td><?php echo esc_html($history['date'] ?? ''); ?></td>
-                                    <td><?php echo esc_html($history['previousScore'] ?? ''); ?></td>
-                                    <td><?php echo esc_html($history['newScore'] ?? ''); ?></td>
-                                    <td><?php echo esc_html($history['changeReason'] ?? ''); ?></td>
+                                    <td><?php echo esc_html(!empty($history['date']) ? $maneli_digits($history['date']) : '—'); ?></td>
+                                    <td><?php echo esc_html(isset($history['previousScore']) ? $maneli_digits($history['previousScore']) : '—'); ?></td>
+                                    <td><?php echo esc_html(isset($history['newScore']) ? $maneli_digits($history['newScore']) : '—'); ?></td>
+                                    <td><?php echo esc_html($history['changeReason'] ?? '—'); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -773,15 +803,15 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
         <div class="row mb-3">
             <div class="col-md-4">
                 <strong><?php esc_html_e('Total Contracts:', 'maneli-car-inquiry'); ?></strong>
-                <span class="badge bg-primary ms-2"><?php echo esc_html($total_contracts); ?></span>
+                <span class="badge bg-primary ms-2"><?php echo esc_html($maneli_digits($total_contracts)); ?></span>
             </div>
             <div class="col-md-4">
                 <strong><?php esc_html_e('Total Loans:', 'maneli-car-inquiry'); ?></strong>
-                <span><?php echo esc_html(number_format($total_loan_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
+                <span><?php echo esc_html($maneli_number($total_loan_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
             </div>
             <div class="col-md-4">
                 <strong><?php esc_html_e('Total Facilities:', 'maneli-car-inquiry'); ?></strong>
-                <span><?php echo esc_html(number_format($total_facility_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
+                <span><?php echo esc_html($maneli_number($total_facility_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
             </div>
         </div>
         <div class="table-responsive">
@@ -800,9 +830,9 @@ $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
                         <?php foreach ($contracts as $contract): ?>
                             <tr>
                                 <td><?php echo esc_html($contract['bankName'] ?? ''); ?></td>
-                                <td><?php echo esc_html($contract['contractNumber'] ?? ''); ?></td>
+                                <td><?php echo esc_html(isset($contract['contractNumber']) ? $maneli_digits($contract['contractNumber']) : '—'); ?></td>
                                 <td><?php echo esc_html($contract['contractType'] ?? ''); ?></td>
-                                <td><?php echo esc_html(number_format($contract['amount'] ?? 0)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></td>
+                                <td><?php echo esc_html(isset($contract['amount']) ? $maneli_number($contract['amount']) : '—'); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></td>
                                 <td>
                                     <span class="badge bg-<?php echo esc_attr(($contract['contractStatus'] ?? '') === 'active' ? 'success' : 'secondary'); ?>">
                                         <?php echo esc_html($contract['contractStatus'] ?? ''); ?>

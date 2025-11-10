@@ -378,50 +378,78 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
 </div>
 
 <script>
-jQuery(function($) {
-    var datepickerRetries = 0;
-    var maxRetries = 15;
-    var retryDelay = 200;
-
-    function initDatepicker(selector) {
-        var $field = $(selector);
-
-        if (!$field.length) {
+(function() {
+    function initUserLogsDatepickers() {
+        if (typeof jQuery === 'undefined') {
+            setTimeout(initUserLogsDatepickers, 100);
             return;
         }
 
-        // Avoid re-initializing if it's already connected
-        if ($field.data('persianDatepicker')) {
-            return;
-        }
+        jQuery(function($) {
+            var selectors = ['#date-from-picker', '#date-to-picker'];
+            var retryCount = 0;
+            var maxRetries = 20;
 
-        $field.persianDatepicker({
-            format: 'YYYY/MM/DD',
-            calendarType: 'persian',
-            observer: true,
-            altField: selector,
-            altFormat: 'YYYY/MM/DD',
-            timePicker: false
+            function ensureDatepickerPlugin(callback) {
+                if (typeof $.fn.persianDatepicker === 'undefined') {
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        setTimeout(function() {
+                            ensureDatepickerPlugin(callback);
+                        }, 150);
+                    } else {
+                        console.warn('persianDatepicker plugin was not loaded in time on user-logs page.');
+                    }
+                    return;
+                }
+                callback();
+            }
+
+            function initializePicker($field) {
+                if (!$field.length || $field.data('pdp-init') === 'true') {
+                    return;
+                }
+
+                var hasInitialValue = $field.val() && $field.val().trim() !== '';
+
+                $field.persianDatepicker({
+                    formatDate: 'YYYY/MM/DD',
+                    persianNumbers: true,
+                    autoClose: true,
+                    observer: false,
+                    initialValue: hasInitialValue,
+                    timePicker: false
+                });
+
+                $field.attr('data-pdp-init', 'true');
+            }
+
+            ensureDatepickerPlugin(function() {
+                selectors.forEach(function(selector) {
+                    initializePicker($(selector));
+                });
+            });
+
+            $(document).on('focus', selectors.join(', '), function() {
+                var $field = $(this);
+                if (!$field.data('pdp-init') || $field.data('pdp-init') !== 'true') {
+                    ensureDatepickerPlugin(function() {
+                        initializePicker($field);
+                        if (typeof $field.data('persianDatepicker') === 'object' && typeof $field.data('persianDatepicker').show === 'function') {
+                            $field.data('persianDatepicker').show();
+                        }
+                    });
+                }
+            });
         });
     }
 
-    function setupDatepickers() {
-        if (typeof $.fn === 'undefined' || typeof $.fn.persianDatepicker === 'undefined') {
-            if (datepickerRetries < maxRetries) {
-                datepickerRetries++;
-                setTimeout(setupDatepickers, retryDelay);
-            } else {
-                console.warn('persianDatepicker plugin was not loaded in time.');
-            }
-            return;
-        }
-
-        initDatepicker('#date-from-picker');
-        initDatepicker('#date-to-picker');
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initUserLogsDatepickers);
+    } else {
+        initUserLogsDatepickers();
     }
-
-    setupDatepickers();
-});
+})();
 
 function showLogDetails(logId) {
     jQuery.ajax({

@@ -68,6 +68,60 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
     }
 }
 
+if (!function_exists('maneli_convert_to_english_digits')) {
+    /**
+     * Convert Persian/Arabic digits within a string to English digits.
+     *
+     * @param string $value Input string.
+     * @return string
+     */
+    function maneli_convert_to_english_digits($value) {
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $arabic  = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $value = str_replace($persian, $english, (string) $value);
+        $value = str_replace($arabic, $english, $value);
+        return $value;
+    }
+}
+
+if (!function_exists('maneli_normalize_jalali_date')) {
+    /**
+     * Normalize a Jalali date string (convert digits to English and ensure 4/2/2 format).
+     *
+     * @param string $value Jalali date string (possibly with Persian digits).
+     * @return string|null Normalized date in Y/m/d format or null if invalid.
+     */
+    function maneli_normalize_jalali_date($value) {
+        if (!is_string($value) || $value === '') {
+            return null;
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        $value = str_replace(['-', '.'], '/', $value);
+        $value = maneli_convert_to_english_digits($value);
+
+        if (!preg_match('/^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/', $value, $matches)) {
+            return null;
+        }
+
+        $year  = str_pad($matches[1], 4, '0', STR_PAD_LEFT);
+        $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+        $day   = str_pad($matches[3], 2, '0', STR_PAD_LEFT);
+
+        // Basic validation
+        if ((int) $month < 1 || (int) $month > 12 || (int) $day < 1 || (int) $day > 31) {
+            return null;
+        }
+
+        return $year . '/' . $month . '/' . $day;
+    }
+}
+
 if (!function_exists('maneli_get_current_url')) {
     /**
      * Gets the current page URL while preserving specific query parameters.

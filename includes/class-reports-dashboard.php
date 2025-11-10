@@ -861,6 +861,9 @@ class Maneli_Reports_Dashboard {
             'orderby' => 'display_name',
             'order' => 'ASC',
         ]);
+        $expert_role_users = array_filter($experts, static function ($user) {
+            return in_array('maneli_expert', (array) $user->roles, true);
+        });
         
         $experts_detailed = [];
         foreach ($experts as $expert) {
