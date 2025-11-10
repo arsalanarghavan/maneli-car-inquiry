@@ -4906,6 +4906,9 @@ msgstr "صفحه %1$s از %2$s"
 msgid "Product"
 msgstr "محصول"
 
+msgid "Product #%s"
+msgstr "محصول شمارهٔ %s"
+
 msgid "Sale Status"
 msgstr "وضعیت فروش"
 

@@ -672,9 +672,14 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                         $visit_timestamp = strtotime($visit->visit_date);
                                         $visit_date_jalali = maneli_gregorian_to_jalali(date('Y', $visit_timestamp), date('m', $visit_timestamp), date('d', $visit_timestamp), 'Y/m/d');
                                         $visit_time = date('H:i', $visit_timestamp);
+                                        if (function_exists('persian_numbers_no_separator')) {
+                                            $visit_date_jalali = persian_numbers_no_separator($visit_date_jalali);
+                                            $visit_time = persian_numbers_no_separator($visit_time);
+                                        }
+                                        $visit_datetime_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(trim($visit_date_jalali . ' ' . $visit_time)) : trim($visit_date_jalali . ' ' . $visit_time);
                                     ?>
                                     <tr>
-                                        <td><?php echo esc_html($visit_date_jalali . ' ' . $visit_time); ?></td>
+                                        <td><?php echo esc_html($visit_datetime_display); ?></td>
                                         <td>
                                             <div class="text-truncate" style="max-width: 200px;" title="<?php echo esc_attr($visit->page_url); ?>">
                                                 <?php echo esc_html($visit->page_title ?: $visit->page_url); ?>
@@ -727,7 +732,11 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                                 <?php echo esc_html($visitor->page_title ?: $visitor->page_url); ?>
                                             </div>
                                         </td>
-                                        <td><?php echo esc_html(human_time_diff(strtotime($visitor->visit_date), current_time('timestamp'))); ?> <?php esc_html_e('ago', 'maneli-car-inquiry'); ?></td>
+                                        <?php
+                                        $time_diff = human_time_diff(strtotime($visitor->visit_date), current_time('timestamp'));
+                                        $time_diff = function_exists('persian_numbers') ? persian_numbers($time_diff) : $time_diff;
+                                        ?>
+                                        <td><?php echo esc_html($time_diff); ?> <?php esc_html_e('ago', 'maneli-car-inquiry'); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>

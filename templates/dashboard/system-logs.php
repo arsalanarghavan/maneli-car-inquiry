@@ -128,8 +128,8 @@ if (!function_exists('maneli_format_relative_path')) {
 
 if (!function_exists('maneli_to_persian_digits')) {
     function maneli_to_persian_digits($value) {
-        $digits = array('0','1','2','3','4','5','6','7','8','9');
-        $persian = array('۰','۱','۲','۳','۴','۵','۶','۷','۸','۹');
+        $digits = array('0','1','2','3','4','5','6','7','8','9',',');
+        $persian = array('۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','،');
         return str_replace($digits, $persian, (string) $value);
     }
 }
@@ -340,6 +340,12 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
                                             } elseif (!empty($log->user_agent)) {
                                                 $user_display = mb_strimwidth($log->user_agent, 0, 35, '…', 'UTF-8');
                                                 $user_title = $log->user_agent;
+                                            }
+                                            if (!empty($user_display)) {
+                                                $user_display = maneli_to_persian_digits($user_display);
+                                            }
+                                            if (!empty($user_title)) {
+                                                $user_title = maneli_to_persian_digits($user_title);
                                             }
                                             ?>
                                             <tr>
