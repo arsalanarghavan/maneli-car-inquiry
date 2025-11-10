@@ -86,7 +86,7 @@
             loadOnlineVisitors();
             
             // Convert all numbers on page to Persian
-            $('.fs-21, .fs-16, td, .badge').each(function() {
+            $('.maneli-stat-value, .fs-21, .fs-16, td, .badge').each(function() {
                 var $el = $(this);
                 var text = $el.text();
                 // Only convert if it's a number (avoid converting already Persian numbers)

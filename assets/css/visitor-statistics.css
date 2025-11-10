@@ -71,6 +71,19 @@
     color: #718096;
 }
 
+.visitor-statistics-page .maneli-stat-card .card-body {
+    padding: 1.5rem;
+}
+
+.visitor-statistics-page .maneli-stat-card .maneli-stat-value {
+    font-size: 1.75rem;
+    color: #1a202c;
+}
+
+.visitor-statistics-page .maneli-stat-card .text-muted {
+    font-size: 0.9rem;
+}
+
 /* Tables */
 .visitor-statistics-page .table-responsive {
     max-height: 400px;

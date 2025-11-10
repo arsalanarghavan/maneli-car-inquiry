@@ -269,60 +269,76 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
         <!-- Overall Statistics Cards -->
         <div class="row">
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card custom-card overflow-hidden">
+                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-primary svg-white">
-                                <i class="ri-eye-line fs-32"></i>
-                            </div>
-                            <div>
-                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Total Visits', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="total-visits"><?php echo maneli_number_format_persian($overall_stats['total_visits']); ?></div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="p-2 border border-primary border-opacity-10 bg-primary-transparent rounded-circle">
+                                    <span class="avatar avatar-md avatar-rounded bg-primary svg-white">
+                                        <i class="ri-eye-line fs-20"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Visits', 'maneli-car-inquiry'); ?></p>
+                                    <h4 class="fw-semibold mb-0 maneli-stat-value" id="total-visits"><?php echo maneli_number_format_persian($overall_stats['total_visits']); ?></h4>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card custom-card overflow-hidden">
+                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-primary1 svg-white">
-                                <i class="ri-user-line fs-32"></i>
-                            </div>
-                            <div>
-                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Unique Visitors', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="unique-visitors"><?php echo maneli_number_format_persian($overall_stats['unique_visitors']); ?></div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="p-2 border border-success border-opacity-10 bg-success-transparent rounded-circle">
+                                    <span class="avatar avatar-md avatar-rounded bg-success svg-white">
+                                        <i class="ri-user-line fs-20"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Unique Visitors', 'maneli-car-inquiry'); ?></p>
+                                    <h4 class="fw-semibold mb-0 text-success maneli-stat-value" id="unique-visitors"><?php echo maneli_number_format_persian($overall_stats['unique_visitors']); ?></h4>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card custom-card overflow-hidden">
+                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-primary2 svg-white">
-                                <i class="ri-file-line fs-32"></i>
-                            </div>
-                            <div>
-                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Total Pages', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="total-pages"><?php echo maneli_number_format_persian($overall_stats['total_pages']); ?></div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-circle">
+                                    <span class="avatar avatar-md avatar-rounded bg-info svg-white">
+                                        <i class="ri-file-line fs-20"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Pages', 'maneli-car-inquiry'); ?></p>
+                                    <h4 class="fw-semibold mb-0 text-info maneli-stat-value" id="total-pages"><?php echo maneli_number_format_persian($overall_stats['total_pages']); ?></h4>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card custom-card overflow-hidden">
+                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
-                        <div class="d-flex gap-3 align-items-center">
-                            <div class="avatar avatar-lg bg-primary3 svg-white">
-                                <i class="ri-user-star-line fs-32"></i>
-                            </div>
-                            <div>
-                                <div class="flex-fill fs-13 text-muted"><?php esc_html_e('Online Now', 'maneli-car-inquiry'); ?></div>
-                                <div class="fs-21 fw-medium" id="online-visitors"><?php echo maneli_number_format_persian(count($online_visitors)); ?></div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="p-2 border border-warning border-opacity-10 bg-warning-transparent rounded-circle">
+                                    <span class="avatar avatar-md avatar-rounded bg-warning svg-white">
+                                        <i class="ri-user-star-line fs-20"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Online Now', 'maneli-car-inquiry'); ?></p>
+                                    <h4 class="fw-semibold mb-0 text-warning maneli-stat-value" id="online-visitors"><?php echo maneli_number_format_persian(count($online_visitors)); ?></h4>
+                                </div>
                             </div>
                         </div>
                     </div>

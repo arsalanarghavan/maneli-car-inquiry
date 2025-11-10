@@ -24,7 +24,13 @@ if (!current_user_can('manage_maneli_inquiries')) {
 $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
 $filter_status = isset($_GET['filter_status']) ? sanitize_text_field($_GET['filter_status']) : '';
-$filter_brand = isset($_GET['filter_brand']) ? sanitize_text_field($_GET['filter_brand']) : '';
+$filter_brand_raw = isset($_GET['filter_brand']) ? wp_unslash($_GET['filter_brand']) : '';
+$filter_brand = is_string($filter_brand_raw) ? trim($filter_brand_raw) : '';
+$filter_brand_label = '';
+if ($filter_brand !== '') {
+    $decoded_label = rawurldecode($filter_brand);
+    $filter_brand_label = sanitize_text_field($decoded_label);
+}
 $filter_category = isset($_GET['filter_category']) ? absint($_GET['filter_category']) : 0;
 $filter_price = isset($_GET['filter_price']) ? sanitize_text_field($_GET['filter_price']) : '';
 
@@ -64,66 +70,87 @@ if (!empty($filter_status)) {
 
 // Brand filter
 if (!empty($filter_brand)) {
-    $brand_product_ids = [];
-    $brand_meta_candidates = [$filter_brand];
-
+    $brand_tax_queries = [];
     $brand_taxonomies = ['product_brand', 'pa_brand'];
+
+    $brand_slug_candidates = [$filter_brand];
+    $decoded_candidate = rawurldecode($filter_brand);
+    if ($decoded_candidate !== $filter_brand) {
+        $brand_slug_candidates[] = $decoded_candidate;
+    }
+    if (!empty($filter_brand_label)) {
+        $brand_slug_candidates[] = $filter_brand_label;
+        $brand_slug_candidates[] = sanitize_title($filter_brand_label);
+    }
+    $brand_slug_candidates = array_values(array_unique(array_filter(array_map('trim', $brand_slug_candidates))));
+
     foreach ($brand_taxonomies as $brand_taxonomy) {
-        $brand_term = get_term_by('slug', $filter_brand, $brand_taxonomy);
-        if ($brand_term && !is_wp_error($brand_term)) {
-            $term_products = get_posts([
-                'post_type' => 'product',
-                'posts_per_page' => -1,
-                'fields' => 'ids',
-                'tax_query' => [
-                    [
-                        'taxonomy' => $brand_taxonomy,
-                        'field' => 'term_id',
-                        'terms' => [$brand_term->term_id],
-                        'include_children' => false,
-                    ]
-                ],
-                'post_status' => ['publish', 'draft', 'private', 'pending', 'future'],
-                'suppress_filters' => true,
-            ]);
-            if (!empty($term_products)) {
-                $brand_product_ids = array_merge($brand_product_ids, array_map('intval', $term_products));
+        foreach ($brand_slug_candidates as $candidate) {
+            if ($candidate === '') {
+                continue;
             }
-            $brand_meta_candidates[] = $brand_term->name;
-            $brand_meta_candidates[] = $brand_term->slug;
+
+            $term = get_term_by('slug', $candidate, $brand_taxonomy);
+            if (!$term && !empty($filter_brand_label)) {
+                $term = get_term_by('name', $filter_brand_label, $brand_taxonomy);
+            }
+
+            if ($term && !is_wp_error($term)) {
+                $brand_tax_queries[] = [
+                    'taxonomy' => $brand_taxonomy,
+                    'field' => 'term_id',
+                    'terms' => [$term->term_id],
+                    'include_children' => false,
+                ];
+                break;
+            }
         }
     }
 
+    if (!empty($brand_tax_queries)) {
+        if (!isset($query_args['tax_query'])) {
+            $query_args['tax_query'] = [];
+        }
+        if (count($brand_tax_queries) > 1) {
+            $query_args['tax_query'][] = array_merge(['relation' => 'OR'], $brand_tax_queries);
+        } else {
+            $query_args['tax_query'][] = $brand_tax_queries[0];
+        }
+    }
+
+    $brand_meta_candidates = [];
+    if (!empty($filter_brand_label)) {
+        $brand_meta_candidates[] = $filter_brand_label;
+    }
+    if (!empty($decoded_candidate)) {
+        $brand_meta_candidates[] = $decoded_candidate;
+    }
+    if (!empty($filter_brand)) {
+        $brand_meta_candidates[] = $filter_brand;
+    }
     $brand_meta_candidates = array_values(array_unique(array_filter(array_map('trim', $brand_meta_candidates))));
+
     if (!empty($brand_meta_candidates)) {
-        $meta_products = get_posts([
-            'post_type' => 'product',
-            'posts_per_page' => -1,
-            'fields' => 'ids',
-            'meta_query' => [
-                [
-                    'key' => '_maneli_car_brand',
-                    'value' => $brand_meta_candidates,
-                    'compare' => 'IN'
-                ]
-            ],
-            'post_status' => ['publish', 'draft', 'private', 'pending', 'future'],
-            'suppress_filters' => true,
-        ]);
-        if (!empty($meta_products)) {
-            $brand_product_ids = array_merge($brand_product_ids, array_map('intval', $meta_products));
+        if (!isset($query_args['meta_query'])) {
+            $query_args['meta_query'] = [];
         }
-    }
 
-    $brand_product_ids = array_values(array_unique(array_filter($brand_product_ids)));
-
-    if (!empty($brand_product_ids)) {
-        if (!empty($query_args['post__in'] ?? [])) {
-            $brand_product_ids = array_values(array_intersect($query_args['post__in'], $brand_product_ids));
+        $brand_meta_clauses = [];
+        foreach ($brand_meta_candidates as $brand_candidate) {
+            $brand_meta_clauses[] = [
+                'key' => '_maneli_car_brand',
+                'value' => $brand_candidate,
+                'compare' => 'LIKE'
+            ];
         }
-        $query_args['post__in'] = !empty($brand_product_ids) ? $brand_product_ids : [0];
-    } else {
-        $query_args['post__in'] = [0];
+
+        if (!empty($brand_meta_clauses)) {
+            if (count($brand_meta_clauses) > 1) {
+                $query_args['meta_query'][] = array_merge(['relation' => 'OR'], $brand_meta_clauses);
+            } else {
+                $query_args['meta_query'][] = $brand_meta_clauses[0];
+            }
+        }
     }
 }
 
