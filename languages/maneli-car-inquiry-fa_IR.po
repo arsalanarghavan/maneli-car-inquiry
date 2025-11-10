@@ -305,6 +305,10 @@ msgid "Unknown"
 msgstr "نامشخص"
 
 
+msgid "Local"
+msgstr "محلی"
+
+
 msgid "Follow-up in Progress"
 msgstr "پیگیری در حال انجام"
 

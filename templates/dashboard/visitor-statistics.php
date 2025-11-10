@@ -628,11 +628,11 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 <tbody>
                                     <?php foreach (array_slice($country_stats, 0, 10) as $country): 
                                         $country_name = Maneli_Visitor_Statistics::translate_country_name($country->country_code, $country->country);
-                                        $flag_class = Maneli_Visitor_Statistics::get_country_flag_class($country->country_code);
+                                        $flag_icon = Maneli_Visitor_Statistics::get_country_flag_icon($country->country_code, $country->country);
                                     ?>
                                     <tr>
                                         <td>
-                                            <span class="<?php echo esc_attr($flag_class); ?> me-2"></span>
+                                            <span class="maneli-emoji-flag me-2"><?php echo esc_html($flag_icon); ?></span>
                                             <?php echo esc_html($country_name); ?>
                                         </td>
                                         <td><?php echo maneli_number_format_persian($country->visit_count); ?></td>
@@ -669,12 +669,12 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 <tbody>
                                     <?php foreach ($most_active_visitors as $visitor):
                                         $active_country = Maneli_Visitor_Statistics::translate_country_name($visitor->country_code ?? '', $visitor->country ?? '');
-                                        $active_flag = Maneli_Visitor_Statistics::get_country_flag_class($visitor->country_code ?? '');
+                                        $active_flag = Maneli_Visitor_Statistics::get_country_flag_icon($visitor->country_code ?? '', $visitor->country ?? '');
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($visitor->ip_address); ?></td>
                                         <td>
-                                            <span class="<?php echo esc_attr($active_flag); ?> me-2"></span>
+                                            <span class="maneli-emoji-flag me-2"><?php echo esc_html($active_flag); ?></span>
                                             <?php echo esc_html($active_country); ?>
                                         </td>
                                         <td><?php echo maneli_number_format_persian($visitor->visit_count); ?></td>
@@ -723,10 +723,10 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                         </td>
                                     <?php
                                         $recent_country = Maneli_Visitor_Statistics::translate_country_name($visit->country_code ?? '', $visit->country ?? '');
-                                        $recent_flag = Maneli_Visitor_Statistics::get_country_flag_class($visit->country_code ?? '');
+                                        $recent_flag = Maneli_Visitor_Statistics::get_country_flag_icon($visit->country_code ?? '', $visit->country ?? '');
                                     ?>
                                     <td>
-                                        <span class="<?php echo esc_attr($recent_flag); ?> me-2"></span>
+                                        <span class="maneli-emoji-flag me-2"><?php echo esc_html($recent_flag); ?></span>
                                         <?php echo esc_html($recent_country); ?>
                                     </td>
                                     </tr>
@@ -765,7 +765,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 <tbody id="online-visitors-table">
                                     <?php foreach ($online_visitors as $visitor): 
                                         $country_display = $visitor->country ?: esc_html__('Unknown', 'maneli-car-inquiry');
-                                        $country_flag = $visitor->country_flag ?? Maneli_Visitor_Statistics::get_country_flag_class($visitor->country_code ?? '');
+                                        $country_flag_icon = $visitor->country_flag_icon ?? $visitor->country_flag ?? Maneli_Visitor_Statistics::get_country_flag_icon($visitor->country_code ?? '', $visitor->country ?? '');
                                         $browser_display = $visitor->browser ?: esc_html__('Unknown', 'maneli-car-inquiry');
                                         $os_display = $visitor->os ?: esc_html__('Unknown', 'maneli-car-inquiry');
                                         $device_display = $visitor->device_type_label ?? Maneli_Visitor_Statistics::translate_device_type($visitor->device_type ?? '');
@@ -777,7 +777,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <tr>
                                         <td><?php echo esc_html($visitor->ip_address); ?></td>
                                         <td>
-                                            <span class="<?php echo esc_attr($country_flag); ?> me-2"></span>
+                                            <span class="maneli-emoji-flag me-2"><?php echo esc_html($country_flag_icon); ?></span>
                                             <?php echo esc_html($country_display); ?>
                                         </td>
                                         <td><?php echo esc_html($browser_display); ?></td>

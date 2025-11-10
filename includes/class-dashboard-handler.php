@@ -539,7 +539,7 @@ class Maneli_Dashboard_Handler {
                         'endDate' => $end_date,
                         'dailyStats' => $daily_stats,
                         'countryNames' => Maneli_Visitor_Statistics::get_country_translation_map(),
-                        'countryFlags' => Maneli_Visitor_Statistics::get_country_flag_map(),
+                        'countryFlagIcons' => Maneli_Visitor_Statistics::get_country_flag_map(),
                         'browserNames' => Maneli_Visitor_Statistics::get_browser_translation_map(),
                         'osNames' => Maneli_Visitor_Statistics::get_os_translation_map(),
                         'deviceNames' => Maneli_Visitor_Statistics::get_device_type_translation_map(),

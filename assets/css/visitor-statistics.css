@@ -184,6 +184,23 @@
     opacity: 0.5;
 }
 
+.maneli-emoji-flag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+html[dir="rtl"] .maneli-emoji-flag {
+    margin-left: 0.5rem;
+}
+
+html:not([dir="rtl"]) .maneli-emoji-flag {
+    margin-right: 0.5rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .visitor-statistics-page .card.custom-card {

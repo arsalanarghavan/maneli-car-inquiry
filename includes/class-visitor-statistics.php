@@ -13,6 +13,13 @@ if (!defined('ABSPATH')) {
 class Maneli_Visitor_Statistics {
     
     /**
+     * Cached lookup tables for country metadata.
+     *
+     * @var array|null
+     */
+    private static $country_lookup_tables = null;
+    
+    /**
      * Get client IP address
      */
     private static function get_client_ip() {
@@ -835,7 +842,7 @@ class Maneli_Visitor_Statistics {
         $visits_table = $wpdb->prefix . 'maneli_visits';
         $visitors_table = $wpdb->prefix . 'maneli_visitors';
         
-        $results = $wpdb->get_results($wpdb->prepare(
+        $raw_results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
                 vis.browser,
                 COUNT(DISTINCT v.id) as visit_count,
@@ -850,7 +857,20 @@ class Maneli_Visitor_Statistics {
             ORDER BY visit_count DESC",
             $start_date,
             $end_date
-        ));
+        ), ARRAY_A);
+        
+        $results = [];
+        foreach ($raw_results as $row) {
+            $browser_raw = isset($row['browser']) ? trim((string) $row['browser']) : '';
+            $browser_key = strtolower($browser_raw);
+            $results[] = [
+                'browser' => $browser_raw,
+                'browser_label' => self::translate_browser_name($browser_raw),
+                'browser_key' => $browser_key,
+                'visit_count' => isset($row['visit_count']) ? (int) $row['visit_count'] : 0,
+                'unique_visitors' => isset($row['unique_visitors']) ? (int) $row['unique_visitors'] : 0,
+            ];
+        }
         
         return $results;
     }
@@ -871,7 +891,7 @@ class Maneli_Visitor_Statistics {
         $visits_table = $wpdb->prefix . 'maneli_visits';
         $visitors_table = $wpdb->prefix . 'maneli_visitors';
         
-        $results = $wpdb->get_results($wpdb->prepare(
+        $raw_results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
                 vis.os,
                 COUNT(DISTINCT v.id) as visit_count,
@@ -886,7 +906,20 @@ class Maneli_Visitor_Statistics {
             ORDER BY visit_count DESC",
             $start_date,
             $end_date
-        ));
+        ), ARRAY_A);
+        
+        $results = [];
+        foreach ($raw_results as $row) {
+            $os_raw = isset($row['os']) ? trim((string) $row['os']) : '';
+            $os_key = strtolower($os_raw);
+            $results[] = [
+                'os' => $os_raw,
+                'os_label' => self::translate_os_name($os_raw),
+                'os_key' => $os_key,
+                'visit_count' => isset($row['visit_count']) ? (int) $row['visit_count'] : 0,
+                'unique_visitors' => isset($row['unique_visitors']) ? (int) $row['unique_visitors'] : 0,
+            ];
+        }
         
         return $results;
     }
@@ -907,7 +940,7 @@ class Maneli_Visitor_Statistics {
         $visits_table = $wpdb->prefix . 'maneli_visits';
         $visitors_table = $wpdb->prefix . 'maneli_visitors';
         
-        $results = $wpdb->get_results($wpdb->prepare(
+        $raw_results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
                 vis.device_type,
                 COUNT(DISTINCT v.id) as visit_count,
@@ -922,7 +955,21 @@ class Maneli_Visitor_Statistics {
             ORDER BY visit_count DESC",
             $start_date,
             $end_date
-        ));
+        ), ARRAY_A);
+        
+        $results = [];
+        foreach ($raw_results as $row) {
+            $device_type_raw = isset($row['device_type']) ? strtolower(trim((string) $row['device_type'])) : '';
+            if ($device_type_raw === '') {
+                $device_type_raw = 'unknown';
+            }
+            $results[] = [
+                'device_type' => $device_type_raw,
+                'device_label' => self::translate_device_type($device_type_raw),
+                'visit_count' => isset($row['visit_count']) ? (int) $row['visit_count'] : 0,
+                'unique_visitors' => isset($row['unique_visitors']) ? (int) $row['unique_visitors'] : 0,
+            ];
+        }
         
         return $results;
     }
@@ -1135,7 +1182,9 @@ class Maneli_Visitor_Statistics {
                 $visitor->os      = self::translate_os_name($visitor->os);
                 $visitor->device_type_label = self::translate_device_type($visitor->device_type);
                 $visitor->time_ago = self::format_time_ago($visitor->visit_date, $now);
-                $visitor->country_flag = self::get_country_flag_class($visitor->country_code);
+                $flag_icon = self::get_country_flag_icon($visitor->country_code, $visitor->country);
+                $visitor->country_flag_icon = $flag_icon;
+                $visitor->country_flag = $flag_icon;
             }
             unset($visitor);
         }
@@ -1283,21 +1332,10 @@ class Maneli_Visitor_Statistics {
      * Translate country name using WooCommerce or fallback list
      */
     public static function translate_country_name($country_code, $fallback = '') {
-        $country_code = strtoupper((string) $country_code);
-        $countries = self::get_country_translation_map();
-        if ($country_code && isset($countries[$country_code])) {
-            return $countries[$country_code];
+        $entry = self::resolve_country_entry($country_code, $fallback);
+        if ($entry !== null) {
+            return $entry['fa'];
         }
-        
-        $fallback = trim((string) $fallback);
-        if ($fallback !== '') {
-            $fallback_key = strtolower($fallback);
-            $fallback_map = self::get_country_name_fallback_map();
-            if (isset($fallback_map[$fallback_key])) {
-                return $fallback_map[$fallback_key];
-            }
-        }
-        
         return esc_html__('Unknown', 'maneli-car-inquiry');
     }
     
@@ -1305,33 +1343,33 @@ class Maneli_Visitor_Statistics {
      * Get map of ISO country code => translated country name
      */
     public static function get_country_translation_map() {
-        static $map = null;
-        if ($map !== null) {
-            return $map;
+        static $translated = null;
+        if ($translated !== null) {
+            return $translated;
         }
         
-        $map = [];
+        $translated = [];
         if (function_exists('WC') && WC()->countries) {
             $countries = WC()->countries->get_countries();
             if (!empty($countries)) {
                 foreach ($countries as $code => $name) {
-                    $map[strtoupper($code)] = $name;
+                    $upper_code = strtoupper($code);
+                    $entry = self::resolve_country_entry($upper_code, $name);
+                    $translated[$upper_code] = $entry ? $entry['fa'] : $name;
                 }
             }
         }
         
-        if (empty($map)) {
-            $fallback = self::get_country_name_fallback_map();
-            foreach ($fallback as $code => $label) {
-                if (strlen($code) === 2) {
-                    $map[strtoupper($code)] = $label;
-                }
+        $lookup = self::build_country_lookup_tables();
+        foreach ($lookup['by_code'] as $code => $label) {
+            if (!isset($translated[$code])) {
+                $translated[$code] = $label;
             }
         }
         
-        $map['UNKNOWN'] = esc_html__('Unknown', 'maneli-car-inquiry');
+        $translated['UNKNOWN'] = esc_html__('Unknown', 'maneli-car-inquiry');
         
-        return $map;
+        return $translated;
     }
     
     /**
@@ -1339,13 +1377,135 @@ class Maneli_Visitor_Statistics {
      */
     public static function get_country_flag_map() {
         $flags = [];
-        $countries = self::get_country_translation_map();
-        foreach ($countries as $code => $name) {
-            $flags[$code] = self::get_country_flag_class($code);
+        $lookup = self::build_country_lookup_tables();
+        foreach ($lookup['by_code'] as $code => $label) {
+            $flags[$code] = self::get_country_flag_icon($code);
         }
-        $flags['UNKNOWN'] = self::get_country_flag_class('unknown');
+        $flags['UNKNOWN'] = self::get_country_flag_icon('unknown');
         $flags['unknown'] = $flags['UNKNOWN'];
         return $flags;
+    }
+    
+    /**
+     * Build and cache country lookup tables (by code/name).
+     */
+    private static function build_country_lookup_tables() {
+        if (self::$country_lookup_tables !== null) {
+            return self::$country_lookup_tables;
+        }
+        
+        $definitions = self::get_country_definitions();
+        $by_code = [];
+        $by_name = [];
+        
+        foreach ($definitions as $code => $names) {
+            $upper_code = strtoupper($code);
+            $fa = $names['fa'];
+            $by_code[$upper_code] = $fa;
+            
+            $variants = self::generate_country_name_variants($names['en']);
+            $variants[] = strtolower($upper_code);
+            $variants[] = strtolower($names['en'] . ' (' . $upper_code . ')');
+            $variants[] = strtolower($names['en'] . ' (' . strtolower($upper_code) . ')');
+            
+            foreach ($variants as $variant) {
+                if ($variant === '') {
+                    continue;
+                }
+                $by_name[$variant] = [
+                    'code' => $upper_code,
+                    'fa'   => $fa,
+                ];
+            }
+        }
+        
+        $unknown_label = esc_html__('Unknown', 'maneli-car-inquiry');
+        $by_code['UNKNOWN'] = $unknown_label;
+        $by_name['unknown'] = [
+            'code' => '',
+            'fa'   => $unknown_label,
+        ];
+        
+        self::$country_lookup_tables = [
+            'definitions' => $definitions,
+            'by_code'     => $by_code,
+            'by_name'     => $by_name,
+        ];
+        
+        return self::$country_lookup_tables;
+    }
+    
+    /**
+     * Generate lookup variants for a country name.
+     */
+    private static function generate_country_name_variants($value) {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return [];
+        }
+        
+        $variants = [];
+        $lower = strtolower($value);
+        $variants[] = $lower;
+        $variants[] = preg_replace('/^the\s+/', '', $lower);
+        $variants[] = preg_replace('/\s+/', ' ', preg_replace('/\s*\((.*?)\)\s*/', ' ', $lower));
+        $variants[] = str_replace(['-', '_'], ' ', $lower);
+        
+        if (preg_match_all('/\((.*?)\)/', $value, $matches)) {
+            foreach ($matches[1] as $match) {
+                $match = strtolower(trim($match));
+                if ($match !== '') {
+                    $variants[] = $match;
+                }
+            }
+        }
+        
+        // Remove any duplicate or empty variants.
+        $variants = array_unique(array_filter(array_map(function ($item) {
+            return trim(preg_replace('/\s+/', ' ', $item));
+        }, $variants)));
+        
+        return $variants;
+    }
+    
+    /**
+     * Resolve country entry (code + translated label) using code/name
+     */
+    private static function resolve_country_entry($country_code, $fallback = '') {
+        $lookup = self::build_country_lookup_tables();
+        
+        $code = strtoupper(trim((string) $country_code));
+        if ($code !== '' && isset($lookup['by_code'][$code])) {
+            return [
+                'code' => $code,
+                'fa'   => $lookup['by_code'][$code],
+            ];
+        }
+        
+        $candidates = array_merge(
+            self::generate_country_name_variants($country_code),
+            self::generate_country_name_variants($fallback)
+        );
+        
+        foreach ($candidates as $candidate) {
+            if ($candidate === '') {
+                continue;
+            }
+            
+            if (isset($lookup['by_name'][$candidate])) {
+                return $lookup['by_name'][$candidate];
+            }
+            
+            $candidate_code = strtoupper($candidate);
+            if ($candidate_code !== '' && isset($lookup['by_code'][$candidate_code])) {
+                return [
+                    'code' => $candidate_code,
+                    'fa'   => $lookup['by_code'][$candidate_code],
+                ];
+            }
+        }
+        
+        return null;
     }
     
     /**
@@ -1358,7 +1518,34 @@ class Maneli_Visitor_Statistics {
         }
         
         $map = [];
-        $countries = [
+        $definitions = self::get_country_definitions();
+        foreach ($definitions as $code => $names) {
+            $upper_code = strtoupper($code);
+            $fa = $names['fa'];
+            $map[$upper_code] = $fa;
+            $map[strtolower($upper_code)] = $fa;
+            
+            $variants = self::generate_country_name_variants($names['en']);
+            foreach ($variants as $variant) {
+                $map[$variant] = $fa;
+            }
+            
+            $map[$names['en']] = $fa;
+        }
+        
+        $unknown_label = esc_html__('Unknown', 'maneli-car-inquiry');
+        $map['unknown'] = $unknown_label;
+        $map['UNKNOWN'] = $unknown_label;
+        
+        return $map;
+    }
+    
+    /**
+     * Country definitions (ISO => [en, fa])
+     */
+    private static function get_country_definitions() {
+        return [
+            'LOC' => ['en' => 'Local', 'fa' => 'محلی'],
             'AF' => ['en' => 'Afghanistan', 'fa' => 'افغانستان'],
             'AX' => ['en' => 'Åland Islands', 'fa' => 'جزایر الند'],
             'AL' => ['en' => 'Albania', 'fa' => 'آلبانی'],
@@ -1629,12 +1816,40 @@ class Maneli_Visitor_Statistics {
     /**
      * Return CSS class for country flag
      */
-    public static function get_country_flag_class($country_code) {
-        $country_code = strtolower((string) $country_code);
-        if (empty($country_code) || $country_code === 'loc' || $country_code === 'unknown') {
-            return 'flag-icon flag-icon-un';
+    public static function get_country_flag_icon($country_code, $fallback = '') {
+        $entry = self::resolve_country_entry($country_code, $fallback);
+        if ($entry && !empty($entry['code'])) {
+            $code = strtoupper($entry['code']);
+            if ($code === 'LOC') {
+                return '🏠';
+            }
+            if ($code === 'UNKNOWN') {
+                return '🌐';
+            }
+            if (strlen($code) === 2 && ctype_alpha($code)) {
+                return self::convert_country_code_to_flag($code);
+            }
         }
-        return 'flag-icon flag-icon-' . esc_attr($country_code);
+        return '🌐';
+    }
+
+    /**
+     * Convert ISO country code (2 letters) to Unicode flag emoji.
+     */
+    private static function convert_country_code_to_flag($code) {
+        $code = strtoupper($code);
+        if (strlen($code) !== 2) {
+            return '🌐';
+        }
+        $offset = 127397; // 0x1F1E6 - ord('A')
+        $first = ord($code[0]);
+        $second = ord($code[1]);
+        if ($first < 65 || $first > 90 || $second < 65 || $second > 90) {
+            return '🌐';
+        }
+        $flag = mb_convert_encoding('&#' . ($offset + $first) . ';', 'UTF-8', 'HTML-ENTITIES');
+        $flag .= mb_convert_encoding('&#' . ($offset + $second) . ';', 'UTF-8', 'HTML-ENTITIES');
+        return $flag;
     }
     
     /**

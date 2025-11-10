@@ -48,7 +48,7 @@
             unknown: unknownLabel
         };
         var countryNames = maneliVisitorStats.countryNames || {};
-        var countryFlags = maneliVisitorStats.countryFlags || {};
+        var countryFlagIcons = maneliVisitorStats.countryFlagIcons || maneliVisitorStats.countryFlags || {};
         var browserNames = maneliVisitorStats.browserNames || {};
         var osNames = maneliVisitorStats.osNames || {};
         var deviceNames = maneliVisitorStats.deviceNames || {};
@@ -233,11 +233,13 @@
                         var series = [];
                         
                         response.data.forEach(function(item) {
-                            var browserLabel = item.browser || 'unknown';
-                            var browserKey = browserLabel.toLowerCase();
-                            var localizedBrowser = browserNames[browserKey] || browserNames[item.browser] || browserNames[browserLabel] || unknownLabel;
-                            labels.push(localizedBrowser);
-                            series.push(parseInt(item.visit_count) || 0);
+                            var browserKey = (item.browser_key || '').toLowerCase();
+                            var browserLabel = item.browser_label || browserNames[browserKey] || browserNames[item.browser] || browserNames[(item.browser || '').toLowerCase()] || null;
+                            if (!browserLabel || browserLabel === 'Unknown') {
+                                browserLabel = unknownLabel;
+                            }
+                            labels.push(browserLabel);
+                            series.push(parseInt(item.visit_count, 10) || 0);
                         });
                         
                         var options = {
@@ -302,11 +304,13 @@
                         var series = [];
                         
                         response.data.forEach(function(item) {
-                            var osLabel = item.os || 'unknown';
-                            var osKey = osLabel.toLowerCase();
-                            var localizedOS = osNames[osKey] || osNames[item.os] || osNames[osLabel] || unknownLabel;
-                            labels.push(localizedOS);
-                            series.push(parseInt(item.visit_count) || 0);
+                            var osKey = (item.os_key || '').toLowerCase();
+                            var osLabel = item.os_label || osNames[osKey] || osNames[item.os] || osNames[(item.os || '').toLowerCase()] || null;
+                            if (!osLabel || osLabel === 'Unknown') {
+                                osLabel = unknownLabel;
+                            }
+                            labels.push(osLabel);
+                            series.push(parseInt(item.visit_count, 10) || 0);
                         });
                         
                         var options = {
@@ -372,12 +376,12 @@
                         
                         response.data.forEach(function(item) {
                             var deviceType = (item.device_type || 'unknown').toLowerCase();
-                            if (!deviceLabels.hasOwnProperty(deviceType)) {
-                                deviceType = 'unknown';
+                            var localizedDevice = item.device_label || deviceNames[deviceType] || deviceLabels[deviceType] || deviceLabels.unknown;
+                            if (!localizedDevice || localizedDevice === 'Unknown') {
+                                localizedDevice = unknownLabel;
                             }
-                            var localizedDevice = deviceNames[deviceType] || deviceLabels[deviceType];
                             labels.push(localizedDevice);
-                            series.push(parseInt(item.visit_count) || 0);
+                            series.push(parseInt(item.visit_count, 10) || 0);
                         });
                         
                         var options = {
@@ -468,7 +472,7 @@
                                 if (countryName === 'Unknown') {
                                     countryName = unknownLabel;
                                 }
-                                var flagClass = visitor.country_flag || countryFlags[countryCode] || 'flag-icon flag-icon-un';
+                                var flagIcon = visitor.country_flag_icon || visitor.country_flag || countryFlagIcons[countryCode] || countryFlagIcons[countryCode.toLowerCase()] || '🌐';
                                 var browserKey = (visitor.browser || '').toLowerCase();
                                 var browserName = visitor.browser || browserNames[browserKey] || unknownLabel;
                                 if (browserName === 'Unknown') {
@@ -490,7 +494,7 @@
                                 
                                 var row = '<tr>' +
                                     '<td>' + escapeHtml(visitor.ip_address) + '</td>' +
-                                    '<td><span class="' + escapeHtml(flagClass) + ' me-2"></span>' + escapeHtml(countryName) + '</td>' +
+                                    '<td><span class="maneli-emoji-flag me-2">' + escapeHtml(flagIcon) + '</span>' + escapeHtml(countryName) + '</td>' +
                                     '<td>' + escapeHtml(browserName) + '</td>' +
                                     '<td>' + escapeHtml(osName) + '</td>' +
                                     '<td>' + escapeHtml(deviceTypeLabel) + '</td>' +

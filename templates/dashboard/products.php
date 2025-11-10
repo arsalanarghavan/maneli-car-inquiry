@@ -64,29 +64,66 @@ if (!empty($filter_status)) {
 
 // Brand filter
 if (!empty($filter_brand)) {
-    // First try taxonomy pa_brand
-    $brand_tax_check = get_terms(['taxonomy' => 'pa_brand', 'hide_empty' => false]);
-    if (!empty($brand_tax_check) && !is_wp_error($brand_tax_check)) {
-        // Use taxonomy
-        if (!isset($query_args['tax_query'])) {
-            $query_args['tax_query'] = [];
+    $brand_product_ids = [];
+    $brand_meta_candidates = [$filter_brand];
+
+    $brand_taxonomies = ['product_brand', 'pa_brand'];
+    foreach ($brand_taxonomies as $brand_taxonomy) {
+        $brand_term = get_term_by('slug', $filter_brand, $brand_taxonomy);
+        if ($brand_term && !is_wp_error($brand_term)) {
+            $term_products = get_posts([
+                'post_type' => 'product',
+                'posts_per_page' => -1,
+                'fields' => 'ids',
+                'tax_query' => [
+                    [
+                        'taxonomy' => $brand_taxonomy,
+                        'field' => 'term_id',
+                        'terms' => [$brand_term->term_id],
+                        'include_children' => false,
+                    ]
+                ],
+                'post_status' => ['publish', 'draft', 'private', 'pending', 'future'],
+                'suppress_filters' => true,
+            ]);
+            if (!empty($term_products)) {
+                $brand_product_ids = array_merge($brand_product_ids, array_map('intval', $term_products));
+            }
+            $brand_meta_candidates[] = $brand_term->name;
+            $brand_meta_candidates[] = $brand_term->slug;
         }
-        $query_args['tax_query'][] = [
-            'taxonomy' => 'pa_brand',
-            'field' => 'slug',
-            'terms' => $filter_brand,
-            'operator' => 'IN'
-        ];
+    }
+
+    $brand_meta_candidates = array_values(array_unique(array_filter(array_map('trim', $brand_meta_candidates))));
+    if (!empty($brand_meta_candidates)) {
+        $meta_products = get_posts([
+            'post_type' => 'product',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'meta_query' => [
+                [
+                    'key' => '_maneli_car_brand',
+                    'value' => $brand_meta_candidates,
+                    'compare' => 'IN'
+                ]
+            ],
+            'post_status' => ['publish', 'draft', 'private', 'pending', 'future'],
+            'suppress_filters' => true,
+        ]);
+        if (!empty($meta_products)) {
+            $brand_product_ids = array_merge($brand_product_ids, array_map('intval', $meta_products));
+        }
+    }
+
+    $brand_product_ids = array_values(array_unique(array_filter($brand_product_ids)));
+
+    if (!empty($brand_product_ids)) {
+        if (!empty($query_args['post__in'] ?? [])) {
+            $brand_product_ids = array_values(array_intersect($query_args['post__in'], $brand_product_ids));
+        }
+        $query_args['post__in'] = !empty($brand_product_ids) ? $brand_product_ids : [0];
     } else {
-        // Use meta _maneli_car_brand
-        if (!isset($query_args['meta_query'])) {
-            $query_args['meta_query'] = [];
-        }
-        $query_args['meta_query'][] = [
-            'key' => '_maneli_car_brand',
-            'value' => $filter_brand,
-            'compare' => 'LIKE'
-        ];
+        $query_args['post__in'] = [0];
     }
 }
 
@@ -284,24 +321,38 @@ $popular_products_query = new WP_Query([
 // Get brands for filter (try taxonomy first, then get unique from meta)
 $brands = [];
 $brand_taxonomy = get_terms([
-    'taxonomy' => 'pa_brand',
+    'taxonomy' => 'product_brand',
     'hide_empty' => false,
 ]);
 if (!empty($brand_taxonomy) && !is_wp_error($brand_taxonomy)) {
     foreach ($brand_taxonomy as $brand_term) {
         $brands[$brand_term->slug] = $brand_term->name;
     }
-} else {
-    // Get unique brands from meta
-    global $wpdb;
-    $meta_brands = $wpdb->get_col("
-        SELECT DISTINCT meta_value 
-        FROM {$wpdb->postmeta} 
-        WHERE meta_key = '_maneli_car_brand' 
-        AND meta_value != '' 
-        ORDER BY meta_value ASC
-    ");
-    foreach ($meta_brands as $brand_value) {
+}
+
+$attribute_brands = get_terms([
+    'taxonomy' => 'pa_brand',
+    'hide_empty' => false,
+]);
+if (!empty($attribute_brands) && !is_wp_error($attribute_brands)) {
+    foreach ($attribute_brands as $brand_term) {
+        if (!isset($brands[$brand_term->slug])) {
+            $brands[$brand_term->slug] = $brand_term->name;
+        }
+    }
+}
+
+// Include meta-only brands as fallback/extra options
+global $wpdb;
+$meta_brands = $wpdb->get_col("
+    SELECT DISTINCT meta_value 
+    FROM {$wpdb->postmeta} 
+    WHERE meta_key = '_maneli_car_brand' 
+    AND meta_value != '' 
+    ORDER BY meta_value ASC
+");
+foreach ($meta_brands as $brand_value) {
+    if (!isset($brands[$brand_value])) {
         $brands[$brand_value] = $brand_value;
     }
 }
