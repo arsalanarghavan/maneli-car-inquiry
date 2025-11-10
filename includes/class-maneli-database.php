@@ -486,6 +486,8 @@ class Maneli_Database {
         global $wpdb;
         $table = $wpdb->prefix . 'maneli_system_logs';
         
+        $session_user_id = self::get_session_user_id();
+
         $defaults = array(
             'log_type' => 'debug',
             'severity' => 'info',
@@ -493,7 +495,7 @@ class Maneli_Database {
             'context' => null,
             'file' => null,
             'line' => null,
-            'user_id' => get_current_user_id() ?: null,
+            'user_id' => get_current_user_id() ?: ($session_user_id ?: null),
             'ip_address' => self::get_client_ip(),
             'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null,
         );
@@ -526,8 +528,10 @@ class Maneli_Database {
         global $wpdb;
         $table = $wpdb->prefix . 'maneli_user_logs';
         
+        $session_user_id = self::get_session_user_id();
+
         $defaults = array(
-            'user_id' => get_current_user_id(),
+            'user_id' => get_current_user_id() ?: $session_user_id,
             'action_type' => 'unknown',
             'action_description' => '',
             'target_type' => null,
@@ -817,5 +821,27 @@ class Maneli_Database {
         }
         
         return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
+    }
+
+    /**
+     * Retrieve the user ID stored in the plugin session if available
+     */
+    private static function get_session_user_id() {
+        if (class_exists('Maneli_Session')) {
+            $session = new Maneli_Session();
+            if (session_status() === PHP_SESSION_NONE) {
+                $session->start_session();
+            }
+            $user_id = $session->get_user_id();
+            if ($user_id) {
+                return (int) $user_id;
+            }
+        }
+
+        if (isset($_SESSION['maneli']['user_id']) && !empty($_SESSION['maneli']['user_id'])) {
+            return (int) $_SESSION['maneli']['user_id'];
+        }
+
+        return null;
     }
 }

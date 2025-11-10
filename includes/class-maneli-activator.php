@@ -26,6 +26,10 @@ class Maneli_Activator {
         
         // Flush rewrite rules
         flush_rewrite_rules();
+
+        // Store current database schema version
+        $current_version = defined('MANELI_DB_VERSION') ? MANELI_DB_VERSION : MANELI_VERSION;
+        update_option('maneli_db_version', $current_version);
     }
 
     /**
@@ -292,6 +296,46 @@ class Maneli_Activator {
         
         if (!wp_next_scheduled('maneli_process_scheduled_notifications')) {
             wp_schedule_event(time(), 'hourly', 'maneli_process_scheduled_notifications');
+        }
+    }
+
+    /**
+     * Ensure tables exist without triggering other activation side effects
+     */
+    public static function ensure_tables() {
+        self::create_tables();
+    }
+
+    /**
+     * Maybe run database migrations or create newly introduced tables
+     */
+    public static function maybe_run_updates() {
+        global $wpdb;
+
+        $current_version = defined('MANELI_DB_VERSION') ? MANELI_DB_VERSION : MANELI_VERSION;
+        $stored_version = get_option('maneli_db_version');
+
+        // Check if any of the visitor statistics tables are missing
+        $tables_to_check = [
+            $wpdb->prefix . 'maneli_visitors',
+            $wpdb->prefix . 'maneli_visits',
+            $wpdb->prefix . 'maneli_pages',
+            $wpdb->prefix . 'maneli_search_engines',
+            $wpdb->prefix . 'maneli_referrers',
+        ];
+
+        $missing_tables = false;
+        foreach ($tables_to_check as $table_name) {
+            $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
+            if ($result !== $table_name) {
+                $missing_tables = true;
+                break;
+            }
+        }
+
+        if ($missing_tables || empty($stored_version) || version_compare($stored_version, $current_version, '<')) {
+            self::create_tables();
+            update_option('maneli_db_version', $current_version);
         }
     }
 

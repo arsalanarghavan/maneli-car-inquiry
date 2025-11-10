@@ -71,6 +71,7 @@ final class Maneli_Car_Inquiry_Plugin {
             add_action('admin_notices', [$this, 'woocommerce_not_active_notice']);
             return;
         }
+        $this->maybe_run_database_updates();
         $this->includes();
         $this->init_classes();
     }
@@ -83,6 +84,7 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-activator.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-roles-caps.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-hooks.php';
@@ -114,14 +116,14 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-visitor-statistics-handler.php';
         
+        // Dashboard session handler must load before logger to support session-based authentication in logging
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-session.php';
+        
         // Logger
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-logger.php';
         
         // Frontend Features
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
-        
-        // Dashboard - Load Session class early
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-session.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
     }
@@ -154,6 +156,23 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Initialize Dashboard Handler
         Maneli_Dashboard_Handler::instance();
+    }
+
+    /**
+     * Ensure database schema is up to date before loading other components
+     */
+    private function maybe_run_database_updates() {
+        if (!class_exists('Maneli_Activator')) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-activator.php';
+        }
+
+        if (method_exists('Maneli_Activator', 'maybe_run_updates')) {
+            Maneli_Activator::maybe_run_updates();
+        } else {
+            Maneli_Activator::ensure_tables();
+            $current_version = defined('MANELI_DB_VERSION') ? MANELI_DB_VERSION : MANELI_VERSION;
+            update_option('maneli_db_version', $current_version);
+        }
     }
 
     /**

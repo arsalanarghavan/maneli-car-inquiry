@@ -15,6 +15,18 @@ class Maneli_Logger {
      * Instance
      */
     private static $instance = null;
+    
+    /**
+     * Cached session-aware user ID to avoid repeated lookups
+     */
+    private $active_user_id = null;
+
+    /**
+     * Cached plugin options for the current request
+     *
+     * @var array|null
+     */
+    private $options_cache = null;
 
     /**
      * Get instance
@@ -39,6 +51,78 @@ class Maneli_Logger {
     private function init_hooks() {
         // Hook into error_log to capture PHP errors
         add_action('wp_loaded', array($this, 'setup_error_log_hook'));
+    }
+
+    /**
+     * Retrieve the active user ID from WordPress or the plugin session
+     */
+    private function get_active_user_id() {
+        if ($this->active_user_id !== null) {
+            return $this->active_user_id ?: null;
+        }
+
+        $user_id = get_current_user_id();
+
+        if (!$user_id) {
+            // Attempt to use the plugin session if available
+            if (class_exists('Maneli_Session')) {
+                $session = new Maneli_Session();
+                if (session_status() === PHP_SESSION_NONE) {
+                    $session->start_session();
+                }
+                $session_user_id = $session->get_user_id();
+                if ($session_user_id) {
+                    $user_id = (int) $session_user_id;
+                }
+            } elseif (isset($_SESSION['maneli']['user_id'])) {
+                $user_id = (int) $_SESSION['maneli']['user_id'];
+            }
+        }
+
+        $this->active_user_id = $user_id ?: 0;
+
+        return $this->active_user_id ?: null;
+    }
+
+    /**
+     * Retrieve plugin logging options with simple caching
+     */
+    private function get_logging_options() {
+        if ($this->options_cache === null) {
+            $this->options_cache = get_option('maneli_inquiry_all_options', []);
+        }
+
+        return $this->options_cache;
+    }
+
+    /**
+     * Determine whether an option flag is enabled, with support for various truthy values.
+     *
+     * @param string $key
+     * @param bool   $default
+     *
+     * @return bool
+     */
+    private function is_option_enabled($key, $default = false) {
+        $options = $this->get_logging_options();
+
+        if (!array_key_exists($key, $options)) {
+            return $default;
+        }
+
+        $value = $options[$key];
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return intval($value) === 1;
+        }
+
+        $value = strtolower(trim((string) $value));
+
+        return in_array($value, array('1', 'true', 'yes', 'on'), true);
     }
 
     /**
@@ -70,8 +154,7 @@ class Maneli_Logger {
      * Check if logging is enabled
      */
     private function is_logging_enabled() {
-        $options = get_option('maneli_inquiry_all_options', []);
-        return !empty($options['enable_logging_system']) && $options['enable_logging_system'] == '1';
+        return $this->is_option_enabled('enable_logging_system', true);
     }
 
     /**
@@ -81,18 +164,16 @@ class Maneli_Logger {
         if (!$this->is_logging_enabled()) {
             return false;
         }
-        
-        $options = get_option('maneli_inquiry_all_options', []);
-        
+
         switch ($log_type) {
             case 'error':
-                return !empty($options['log_system_errors']) && $options['log_system_errors'] == '1';
+                return $this->is_option_enabled('log_system_errors', true);
             case 'debug':
-                return !empty($options['log_system_debug']) && $options['log_system_debug'] == '1';
+                return $this->is_option_enabled('log_system_debug', false);
             case 'console':
-                return !empty($options['log_console_messages']) && $options['log_console_messages'] == '1';
+                return $this->is_option_enabled('log_console_messages', true);
             case 'button_error':
-                return !empty($options['log_button_errors']) && $options['log_button_errors'] == '1';
+                return $this->is_option_enabled('log_button_errors', true);
             default:
                 return true;
         }
@@ -102,8 +183,7 @@ class Maneli_Logger {
      * Check if user logging is enabled
      */
     private function is_user_logging_enabled() {
-        $options = get_option('maneli_inquiry_all_options', []);
-        return !empty($options['enable_user_logging']) && $options['enable_user_logging'] == '1';
+        return $this->is_option_enabled('enable_user_logging', true);
     }
 
     /**
@@ -113,18 +193,16 @@ class Maneli_Logger {
         if (!$this->is_user_logging_enabled()) {
             return false;
         }
-        
-        $options = get_option('maneli_inquiry_all_options', []);
-        
+
         switch ($action_type) {
             case 'button_click':
-                return !empty($options['log_button_clicks']) && $options['log_button_clicks'] == '1';
+                return $this->is_option_enabled('log_button_clicks', true);
             case 'form_submit':
-                return !empty($options['log_form_submissions']) && $options['log_form_submissions'] == '1';
+                return $this->is_option_enabled('log_form_submissions', true);
             case 'ajax_call':
-                return !empty($options['log_ajax_calls']) && $options['log_ajax_calls'] == '1';
+                return $this->is_option_enabled('log_ajax_calls', true);
             case 'page_view':
-                return !empty($options['log_page_views']) && $options['log_page_views'] == '1';
+                return $this->is_option_enabled('log_page_views', false);
             default:
                 return true;
         }
@@ -134,7 +212,7 @@ class Maneli_Logger {
      * Truncate message if exceeds limit
      */
     private function truncate_message($message) {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = $this->get_logging_options();
         $max_size = isset($options['log_max_file_size']) ? intval($options['log_max_file_size']) : 5000;
         
         if ($max_size > 0 && strlen($message) > $max_size) {
@@ -164,6 +242,8 @@ class Maneli_Logger {
         // Truncate message if needed
         $message = $this->truncate_message($message);
 
+        $user_id = $this->get_active_user_id();
+
         return Maneli_Database::log_system_log(array(
             'log_type' => $log_type,
             'severity' => $severity,
@@ -171,6 +251,7 @@ class Maneli_Logger {
             'context' => $context,
             'file' => $file,
             'line' => $line,
+            'user_id' => $user_id,
         ));
     }
 
@@ -183,7 +264,7 @@ class Maneli_Logger {
             return false;
         }
         
-        $user_id = get_current_user_id();
+        $user_id = $this->get_active_user_id();
         if (!$user_id) {
             return false;
         }

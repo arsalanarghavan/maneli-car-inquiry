@@ -3417,6 +3417,22 @@ msgstr "اطلاعات تماس"
 msgid "Contact Number"
 msgstr "شماره تماس"
 
+#: includes/class-settings-page.php
+msgid "Show Finnotech Inquiry Structures in Reports"
+msgstr "نمایش ساختار استعلام‌های فینوتک در گزارش‌ها"
+
+#: includes/class-settings-page.php
+msgid "Display Finnotech inquiry sections (even when empty) in manager and customer reports."
+msgstr "نمایش بخش‌های استعلام فینوتک (حتی در صورت خالی بودن) در گزارش‌های مدیر و مشتری."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No data received for this section yet."
+msgstr "هنوز داده‌ای برای این بخش دریافت نشده است."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "This Finnotech inquiry is disabled in settings."
+msgstr "این استعلام فینوتک در تنظیمات غیرفعال است."
+
 
 msgid "Continue to Next Step"
 msgstr "ادامه به مرحله بعد"
@@ -9151,3 +9167,22 @@ msgstr "ارسال مجدد"
 msgid "Rate limit exceeded or service temporarily unavailable"
 msgstr "محدودیت ارسال پیامک رد شده یا سرویس موقتاً در دسترس نیست"
 
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "Not available"
+msgstr "موجود نیست"
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No judgment records available."
+msgstr "هیچ سابقه‌ای برای احکام مالی موجود نیست."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No negative factors recorded."
+msgstr "هیچ عامل منفی ثبت نشده است."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No credit score history available."
+msgstr "هیچ سابقه‌ای برای امتیاز اعتباری موجود نیست."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No contract records available."
+msgstr "هیچ رکوردی از قراردادها موجود نیست."

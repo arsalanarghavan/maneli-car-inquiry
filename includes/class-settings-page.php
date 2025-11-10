@@ -1165,6 +1165,7 @@ class Maneli_Settings_Page {
                             ['name' => 'finnotech_credit_score_enabled', 'label' => esc_html__('Enable Credit Score Report', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable credit score decrease reasons inquiry (دلایل کاهش امتیاز اعتباری).', 'maneli-car-inquiry')],
                             ['name' => 'finnotech_collaterals_enabled', 'label' => esc_html__('Enable Collaterals Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable contracts summary inquiry (وام‌ها/تسهیلات).', 'maneli-car-inquiry')],
                             ['name' => 'finnotech_cheque_color_enabled', 'label' => esc_html__('Enable Cheque Color Inquiry', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Enable Sadad cheque status inquiry (وضعیت چک‌های صیادی).', 'maneli-car-inquiry')],
+                            ['name' => 'finnotech_show_inquiry_structures', 'label' => esc_html__('Show Finnotech Inquiry Structures in Reports', 'maneli-car-inquiry'), 'type' => 'switch', 'desc' => esc_html__('Display Finnotech inquiry sections (even when empty) in manager and customer reports.', 'maneli-car-inquiry'), 'default' => '1'],
                         ]
                     ]
                 ]

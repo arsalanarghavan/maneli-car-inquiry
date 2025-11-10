@@ -21,7 +21,7 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
      * @param string     $format The desired output format (e.g., 'Y/m/d').
      * @return string The formatted Jalali date.
      */
-    function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d') {
+    function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d', $convert_digits = true) {
         $g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
         $gy = (int)$gy;
@@ -53,6 +53,16 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
             [$jy, sprintf('%02d', $jm), sprintf('%02d', $jd)],
             $format
         );
+
+        if ($convert_digits) {
+            if (function_exists('persian_numbers_no_separator')) {
+                return persian_numbers_no_separator($formatted_date);
+            }
+
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            return str_replace($english_digits, $persian_digits, (string)$formatted_date);
+        }
 
         return $formatted_date;
     }

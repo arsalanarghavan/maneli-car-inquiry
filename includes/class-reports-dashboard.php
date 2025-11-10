@@ -218,6 +218,9 @@ class Maneli_Reports_Dashboard {
             'orderby' => 'display_name',
             'order' => 'ASC',
         ]);
+        $expert_role_users = array_filter($experts, function ($user) {
+            return in_array('maneli_expert', (array) $user->roles, true);
+        });
         
         $experts_stats = [];
         
@@ -907,7 +910,7 @@ class Maneli_Reports_Dashboard {
             'daily' => $daily_stats,
             'monthly' => $monthly_stats,
             'total_profit' => $total_profit,
-            'total_experts' => count($experts),
+            'total_experts' => count($expert_role_users),
             'total_customers' => count_users()['avail_roles']['customer'] ?? 0,
         ];
     }

@@ -3335,3 +3335,39 @@ msgid "Server error. Please contact support if the problem persists."
 msgstr "Server error. Please contact support if the problem persists."
 msgid "SMS history modal not found."
 msgstr "SMS history modal not found."
+
+#: includes/class-settings-page.php
+msgid "Show Finnotech Inquiry Structures in Reports"
+msgstr "Show Finnotech Inquiry Structures in Reports"
+
+#: includes/class-settings-page.php
+msgid "Display Finnotech inquiry sections (even when empty) in manager and customer reports."
+msgstr "Display Finnotech inquiry sections (even when empty) in manager and customer reports."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No data received for this section yet."
+msgstr "No data received for this section yet."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "This Finnotech inquiry is disabled in settings."
+msgstr "This Finnotech inquiry is disabled in settings."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "Not available"
+msgstr "Not available"
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No judgment records available."
+msgstr "No judgment records available."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No negative factors recorded."
+msgstr "No negative factors recorded."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No credit score history available."
+msgstr "No credit score history available."
+
+#: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
+msgid "No contract records available."
+msgstr "No contract records available."

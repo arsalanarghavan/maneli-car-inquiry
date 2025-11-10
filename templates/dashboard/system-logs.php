@@ -112,6 +112,79 @@ function convert_jalali_to_gregorian_date($date_str) {
     return $date_str;
 }
 
+if (!function_exists('maneli_format_relative_path')) {
+    function maneli_format_relative_path($path) {
+        if (empty($path)) {
+            return '';
+        }
+        $normalized = str_replace('\\', '/', $path);
+        $root = str_replace('\\', '/', ABSPATH);
+        if (strpos($normalized, $root) === 0) {
+            $normalized = ltrim(substr($normalized, strlen($root)), '/');
+        }
+        return $normalized;
+    }
+}
+
+if (!function_exists('maneli_to_persian_digits')) {
+    function maneli_to_persian_digits($value) {
+        $digits = array('0','1','2','3','4','5','6','7','8','9');
+        $persian = array('۰','۱','۲','۳','۴','۵','۶','۷','۸','۹');
+        return str_replace($digits, $persian, (string) $value);
+    }
+}
+
+if (!function_exists('maneli_translate_log_label')) {
+    function maneli_translate_log_label($label, $type = 'severity') {
+        $maps = array(
+            'severity' => array(
+                'info' => __('اطلاعات', 'maneli-car-inquiry'),
+                'warning' => __('هشدار', 'maneli-car-inquiry'),
+                'error' => __('خطا', 'maneli-car-inquiry'),
+                'critical' => __('بحرانی', 'maneli-car-inquiry'),
+            ),
+            'type' => array(
+                'error' => __('خطا', 'maneli-car-inquiry'),
+                'debug' => __('اشکال‌زدایی', 'maneli-car-inquiry'),
+                'console' => __('کنسول', 'maneli-car-inquiry'),
+                'button_error' => __('خطای دکمه', 'maneli-car-inquiry'),
+            ),
+        );
+        $label = strtolower((string) $label);
+        if (isset($maps[$type][$label])) {
+            return $maps[$type][$label];
+        }
+        return $label;
+    }
+}
+
+if (!function_exists('maneli_format_persian_datetime')) {
+    function maneli_format_persian_datetime($datetime) {
+        $timestamp = strtotime($datetime);
+        if (!$timestamp) {
+            return '';
+        }
+        $greg_date = date('Y-m-d H:i:s', $timestamp);
+        $date_parts = explode(' ', $greg_date);
+        $date = isset($date_parts[0]) ? $date_parts[0] : '';
+        $time = isset($date_parts[1]) ? $date_parts[1] : '';
+
+        if (!empty($date)) {
+            $ymd = explode('-', $date);
+            if (count($ymd) === 3) {
+                $jalali_date = maneli_gregorian_to_jalali($ymd[0], $ymd[1], $ymd[2], 'Y/m/d');
+            } else {
+                $jalali_date = $date;
+            }
+        } else {
+            $jalali_date = '';
+        }
+
+        $result = trim($jalali_date . ' ' . $time);
+        return maneli_to_persian_digits($result);
+    }
+}
+
 // Get filters
 $log_type = isset($_GET['log_type']) ? sanitize_text_field($_GET['log_type']) : '';
 $severity = isset($_GET['severity']) ? sanitize_text_field($_GET['severity']) : '';
@@ -141,6 +214,7 @@ $args = array(
 $logs = $logger->get_system_logs($args);
 $total_logs = $logger->get_system_logs_count($args);
 $total_pages = ceil($total_logs / $per_page);
+$total_logs_label = maneli_to_persian_digits(number_format($total_logs));
 ?>
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -219,7 +293,7 @@ $total_pages = ceil($total_logs / $per_page);
                 <div class="card custom-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0"><?php esc_html_e('System Logs', 'maneli-car-inquiry'); ?></h5>
-                        <span class="badge bg-primary"><?php echo number_format($total_logs); ?> <?php esc_html_e('Logs', 'maneli-car-inquiry'); ?></span>
+                        <span class="badge bg-primary"><?php echo esc_html($total_logs_label); ?> <?php esc_html_e('Logs', 'maneli-car-inquiry'); ?></span>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($logs)): ?>
@@ -241,52 +315,70 @@ $total_pages = ceil($total_logs / $per_page);
                                         <?php foreach ($logs as $log): ?>
                                             <?php
                                             $user = $log->user_id ? get_user_by('ID', $log->user_id) : null;
-                                            $severity_class = 'badge-info';
-                                            if ($log->severity === 'error') $severity_class = 'badge-danger';
-                                            elseif ($log->severity === 'warning') $severity_class = 'badge-warning';
-                                            elseif ($log->severity === 'critical') $severity_class = 'badge-danger';
+                                            $severity_class = 'bg-info';
+                                            if ($log->severity === 'error') $severity_class = 'bg-danger';
+                                            elseif ($log->severity === 'warning') $severity_class = 'bg-warning text-dark';
+                                            elseif ($log->severity === 'critical') $severity_class = 'bg-danger';
                                             
-                                            $log_type_class = 'badge-secondary';
-                                            if ($log->log_type === 'error') $log_type_class = 'badge-danger';
-                                            elseif ($log->log_type === 'debug') $log_type_class = 'badge-info';
-                                            elseif ($log->log_type === 'console') $log_type_class = 'badge-primary';
-                                            elseif ($log->log_type === 'button_error') $log_type_class = 'badge-warning';
+                                            $log_type_class = 'bg-secondary';
+                                            if ($log->log_type === 'error') $log_type_class = 'bg-danger';
+                                            elseif ($log->log_type === 'debug') $log_type_class = 'bg-info';
+                                            elseif ($log->log_type === 'console') $log_type_class = 'bg-primary';
+                                            elseif ($log->log_type === 'button_error') $log_type_class = 'bg-warning text-dark';
                                             
                                             $context = $log->context ? json_decode($log->context, true) : null;
+                                            $relative_path = maneli_format_relative_path($log->file);
+                                            $user_display = '';
+                                            $user_title = '';
+
+                                            if ($user) {
+                                                $user_display = $user->display_name;
+                                                $user_title = sprintf(__('User ID: %d', 'maneli-car-inquiry'), $user->ID);
+                                            } elseif (!empty($log->ip_address)) {
+                                                $user_display = $log->ip_address;
+                                                $user_title = $log->user_agent ?: '';
+                                            } elseif (!empty($log->user_agent)) {
+                                                $user_display = mb_strimwidth($log->user_agent, 0, 35, '…', 'UTF-8');
+                                                $user_title = $log->user_agent;
+                                            }
                                             ?>
                                             <tr>
-                                                <td><?php echo esc_html($log->id); ?></td>
-                                                <td><span class="badge <?php echo esc_attr($log_type_class); ?>"><?php echo esc_html(ucfirst($log->log_type)); ?></span></td>
-                                                <td><span class="badge <?php echo esc_attr($severity_class); ?>"><?php echo esc_html(ucfirst($log->severity)); ?></span></td>
+                                                <td><?php echo esc_html(maneli_to_persian_digits($log->id)); ?></td>
+                                                <td><span class="badge <?php echo esc_attr($log_type_class); ?>"><?php echo esc_html(maneli_translate_log_label($log->log_type, 'type')); ?></span></td>
+                                                <td><span class="badge <?php echo esc_attr($severity_class); ?>"><?php echo esc_html(maneli_translate_log_label($log->severity, 'severity')); ?></span></td>
                                                 <td>
-                                                    <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?php echo esc_attr($log->message); ?>">
+                                                    <div class="log-message" title="<?php echo esc_attr($log->message); ?>">
                                                         <?php echo esc_html($log->message); ?>
                                                     </div>
+                                                    <?php if ($context): ?>
+                                                        <span class="badge bg-light text-dark mt-1" title="<?php echo esc_attr(json_encode($context, JSON_UNESCAPED_UNICODE)); ?>">
+                                                            <?php esc_html_e('Context', 'maneli-car-inquiry'); ?>
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <?php if ($log->file): ?>
-                                                        <small><?php echo esc_html(basename($log->file)); ?><?php echo $log->line ? ':' . esc_html($log->line) : ''; ?></small>
+                                                    <?php if ($relative_path): ?>
+                                                        <div class="file-path" title="<?php echo esc_attr($log->file); ?>">
+                                                        <?php echo esc_html($relative_path); ?>
+                                                        </div>
+                                                        <?php if ($log->line): ?>
+                                                        <small class="text-muted"><?php echo esc_html(sprintf(__('Line %s', 'maneli-car-inquiry'), maneli_to_persian_digits($log->line))); ?></small>
+                                                        <?php endif; ?>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <?php if ($user): ?>
-                                                        <?php echo esc_html($user->display_name); ?>
+                                                    <?php if (!empty($user_display)): ?>
+                                                        <span title="<?php echo esc_attr($user_title); ?>">
+                                                            <?php echo esc_html($user_display); ?>
+                                                        </span>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <?php
-                                                    $date_time = strtotime($log->created_at);
-                                                    $greg_date = date('Y-m-d H:i:s', $date_time);
-                                                    $date_parts = explode(' ', $greg_date);
-                                                    $date_part = explode('-', $date_parts[0]);
-                                                    $time_part = $date_parts[1] ?? '00:00:00';
-                                                    $jalali_date = maneli_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
-                                                    echo esc_html($jalali_date . ' ' . $time_part);
-                                                    ?>
+                                                    <?php echo esc_html(maneli_format_persian_datetime($log->created_at)); ?>
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary" onclick="showLogDetails(<?php echo esc_js($log->id); ?>)">
@@ -322,7 +414,7 @@ $total_pages = ceil($total_logs / $per_page);
                                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                             <?php if ($i == 1 || $i == $total_pages || ($i >= $page_num - 2 && $i <= $page_num + 2)): ?>
                                                 <li class="page-item <?php echo $i == $page_num ? 'active' : ''; ?>">
-                                                    <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $i, $current_url)); ?>"><?php echo $i; ?></a>
+                                                    <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $i, $current_url)); ?>"><?php echo esc_html(maneli_to_persian_digits($i)); ?></a>
                                                 </li>
                                             <?php elseif ($i == $page_num - 3 || $i == $page_num + 3): ?>
                                                 <li class="page-item disabled">
@@ -369,6 +461,15 @@ $total_pages = ceil($total_logs / $per_page);
 
 <script>
 jQuery(document).ready(function($) {
+    $('.file-path').each(function() {
+        var $el = $(this);
+        if (!$el.attr('title')) {
+            $el.attr('title', $el.text());
+        }
+    });
+});
+
+jQuery(document).ready(function($) {
     // Initialize Persian Datepicker
     if (typeof persianDatepicker !== 'undefined') {
         $('#date-from-picker').persianDatepicker({
@@ -409,4 +510,18 @@ function showLogDetails(logId) {
     });
 }
 </script>
+
+<style>
+.log-message {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 360px;
+}
+.file-path {
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
 

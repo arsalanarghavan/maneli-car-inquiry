@@ -36,6 +36,7 @@ if (!defined('MANELI_PLUGIN_URL')) {
     define('MANELI_PLUGIN_URL', MANELI_INQUIRY_PLUGIN_URL);
 }
 define('MANELI_VERSION', '0.2.20');
+define('MANELI_DB_VERSION', '1.1.0');
 
 /**
  * External API Endpoints (Centralized for Security and Maintenance)

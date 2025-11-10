@@ -27,6 +27,25 @@ class Maneli_Ajax_Handler {
     }
 
     /**
+     * Determine if the current request belongs to an authenticated plugin user
+     */
+    private function is_plugin_user_logged_in() {
+        if (is_user_logged_in()) {
+            return true;
+        }
+
+        if (class_exists('Maneli_Session')) {
+            $session = new Maneli_Session();
+            if (session_status() === PHP_SESSION_NONE) {
+                $session->start_session();
+            }
+            return $session->is_logged_in();
+        }
+
+        return isset($_SESSION['maneli']['user_id']) && !empty($_SESSION['maneli']['user_id']);
+    }
+
+    /**
      * Convert Jalali date to Gregorian date
      * 
      * @param string $date_str Date string in Jalali format (Y/m/d) or Gregorian format (Y-m-d)
@@ -6234,7 +6253,7 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_log_console() {
         // Light nonce check - this is called from frontend
-        if (!is_user_logged_in()) {
+        if (!$this->is_plugin_user_logged_in()) {
             return;
         }
 
@@ -6254,7 +6273,7 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_log_user_action() {
         // Light nonce check - this is called from frontend
-        if (!is_user_logged_in()) {
+        if (!$this->is_plugin_user_logged_in()) {
             return;
         }
 

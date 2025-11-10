@@ -154,6 +154,55 @@ class Maneli_Visitor_Statistics {
             }
         }
         
+        // Fallback OS detection
+        if ($result['os'] === 'Unknown') {
+            if (stripos($user_agent, 'windows') !== false) {
+                $result['os'] = 'Windows';
+            } elseif (stripos($user_agent, 'macintosh') !== false || stripos($user_agent, 'mac os') !== false) {
+                $result['os'] = 'macOS';
+            } elseif (stripos($user_agent, 'linux') !== false || stripos($user_agent, 'x11') !== false) {
+                $result['os'] = 'Linux';
+            } elseif (stripos($user_agent, 'android') !== false) {
+                $result['os'] = 'Android';
+                $result['device_type'] = 'mobile';
+            } elseif (stripos($user_agent, 'iphone') !== false || stripos($user_agent, 'ipod') !== false) {
+                $result['os'] = 'iOS';
+                $result['device_type'] = 'mobile';
+            } elseif (stripos($user_agent, 'ipad') !== false) {
+                $result['os'] = 'iPadOS';
+                $result['device_type'] = 'tablet';
+            }
+        }
+
+        // Fallback browser detection
+        if ($result['browser'] === 'Unknown') {
+            if (stripos($user_agent, 'edg') !== false || stripos($user_agent, 'edge') !== false) {
+                $result['browser'] = 'Edge';
+            } elseif (stripos($user_agent, 'opr') !== false || stripos($user_agent, 'opera') !== false) {
+                $result['browser'] = 'Opera';
+            } elseif (stripos($user_agent, 'chrome') !== false && stripos($user_agent, 'chromium') === false) {
+                $result['browser'] = 'Chrome';
+            } elseif (stripos($user_agent, 'safari') !== false && stripos($user_agent, 'chrome') === false) {
+                $result['browser'] = 'Safari';
+            } elseif (stripos($user_agent, 'firefox') !== false) {
+                $result['browser'] = 'Firefox';
+            } elseif (stripos($user_agent, 'chromium') !== false) {
+                $result['browser'] = 'Chromium';
+            } elseif (stripos($user_agent, 'msie') !== false || stripos($user_agent, 'trident') !== false) {
+                $result['browser'] = 'IE';
+            }
+        }
+
+        // Fallback device type detection
+        if ($result['device_type'] === 'desktop') {
+            $ua_lower = strtolower($user_agent);
+            if (strpos($ua_lower, 'mobile') !== false || strpos($ua_lower, 'iphone') !== false || strpos($ua_lower, 'android') !== false || strpos($ua_lower, 'blackberry') !== false) {
+                $result['device_type'] = 'mobile';
+            } elseif (strpos($ua_lower, 'tablet') !== false || strpos($ua_lower, 'ipad') !== false || strpos($ua_lower, 'kindle') !== false) {
+                $result['device_type'] = 'tablet';
+            }
+        }
+
         return $result;
     }
     
@@ -161,19 +210,101 @@ class Maneli_Visitor_Statistics {
      * Get country from IP (simple detection - can be enhanced with GeoIP service)
      */
     private static function get_country_from_ip($ip) {
-        // Simple detection based on IP ranges
-        // For production, use a GeoIP service like MaxMind or ipapi.co
-        $country = 'Unknown';
-        $country_code = '';
-        
-        // Check if IP is localhost or private
-        if ($ip === '127.0.0.1' || $ip === '::1' || strpos($ip, '192.168.') === 0 || strpos($ip, '10.') === 0) {
+        $default_location = [
+            'country' => 'Unknown',
+            'country_code' => ''
+        ];
+
+        // Allow site owners to disable GeoIP lookup if desired.
+        $geoip_enabled = apply_filters('maneli_enable_geoip_lookup', true, $ip);
+        if (!$geoip_enabled) {
+            return $default_location;
+        }
+
+        if (self::is_private_ip($ip)) {
             return ['country' => 'Local', 'country_code' => 'LOC'];
         }
-        
-        // You can integrate with a GeoIP service here
-        // For now, return Unknown
-        return ['country' => $country, 'country_code' => $country_code];
+
+        $transient_key = 'maneli_geoip_' . md5($ip);
+        $cached_value = get_transient($transient_key);
+        if ($cached_value !== false && is_array($cached_value)) {
+            return $cached_value;
+        }
+
+        $geoip_endpoint = apply_filters(
+            'maneli_geoip_endpoint',
+            sprintf('https://ipwho.is/%s?output=json', rawurlencode($ip)),
+            $ip
+        );
+
+        $request_args = apply_filters(
+            'maneli_geoip_request_args',
+            [
+                'timeout' => 5,
+                'redirection' => 2,
+            ],
+            $ip
+        );
+
+        $country_data = $default_location;
+        $response = wp_remote_get($geoip_endpoint, $request_args);
+
+        if (!is_wp_error($response)) {
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+
+            if (is_array($data)) {
+                // ipwho.is format
+                if (isset($data['success']) && $data['success'] === true) {
+                    $country_name = isset($data['country']) ? sanitize_text_field($data['country']) : '';
+                    $country_code = isset($data['country_code']) ? sanitize_text_field($data['country_code']) : '';
+
+                    if (!empty($country_name)) {
+                        $country_data = [
+                            'country' => $country_name,
+                            'country_code' => strtoupper($country_code)
+                        ];
+                    }
+                }
+
+                // ipapi.co format fallback
+                if (isset($data['country_name']) && !empty($data['country_name'])) {
+                    $country_data = [
+                        'country' => sanitize_text_field($data['country_name']),
+                        'country_code' => isset($data['country']) ? strtoupper(sanitize_text_field($data['country'])) : ''
+                    ];
+                }
+
+                // ip-api.com fallback
+                if (isset($data['status']) && $data['status'] === 'success' && isset($data['country'])) {
+                    $country_data = [
+                        'country' => sanitize_text_field($data['country']),
+                        'country_code' => isset($data['countryCode']) ? strtoupper(sanitize_text_field($data['countryCode'])) : ''
+                    ];
+                }
+            }
+        }
+
+        // Cache result (including Unknown) for 12 hours to avoid rate limits.
+        set_transient($transient_key, $country_data, HOUR_IN_SECONDS * 12);
+
+        return $country_data;
+    }
+
+    /**
+     * Determine if IP is private or local
+     */
+    private static function is_private_ip($ip) {
+        if ($ip === '127.0.0.1' || $ip === '::1') {
+            return true;
+        }
+
+        // Filter out private ranges
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return true;
+        }
+
+        return false;
     }
     
     /**

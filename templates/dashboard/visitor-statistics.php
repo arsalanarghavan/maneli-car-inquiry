@@ -116,6 +116,9 @@ if (preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $end_date_input, $matches)) {
     $end_date_display = maneli_gregorian_to_jalali(date('Y', strtotime($end_date)), date('m', strtotime($end_date)), date('d', strtotime($end_date)), 'Y/m/d');
 }
 
+$start_date_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($start_date_display) : $start_date_display;
+$end_date_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($end_date_display) : $end_date_display;
+
 // Get overall statistics
 $overall_stats = Maneli_Visitor_Statistics::get_overall_stats($start_date, $end_date);
 $daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
@@ -347,6 +350,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                             $date_parts = explode('-', $stat->date);
                                             $display_date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
                                         }
+                                        $display_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($display_date) : $display_date;
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($display_date); ?></td>
@@ -457,7 +461,16 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 <tbody>
                                     <?php foreach ($top_products as $product): ?>
                                     <tr>
-                                        <td><?php echo esc_html($product->product_name ?: 'Product #' . $product->product_id); ?></td>
+                                        <td>
+                                            <?php
+                                            $product_label = $product->product_name;
+                                            if (empty($product_label)) {
+                                                $product_id_for_display = function_exists('maneli_number_format_persian') ? maneli_number_format_persian($product->product_id) : $product->product_id;
+                                                $product_label = sprintf(esc_html__('Product #%s', 'maneli-car-inquiry'), $product_id_for_display);
+                                            }
+                                            echo esc_html($product_label);
+                                            ?>
+                                        </td>
                                         <td><?php echo maneli_number_format_persian($product->visit_count); ?></td>
                                         <td><?php echo maneli_number_format_persian($product->unique_visitors); ?></td>
                                     </tr>
