@@ -25,6 +25,36 @@ class Maneli_Ajax_Handler {
         $logger = Maneli_Logger::instance();
         $logger->log_user_action($action_type, $description, $target_type, $target_id, $metadata);
     }
+    
+    /**
+     * Resolve a WordPress user ID from a phone number stored in session.
+     *
+     * @param string $phone Phone number from session.
+     * @return int Resolved user ID or 0 if not found.
+     */
+    private function resolve_user_id_by_phone($phone) {
+        $phone = sanitize_text_field($phone);
+        
+        if (empty($phone)) {
+            return 0;
+        }
+        
+        $user = get_user_by('login', $phone);
+        if (!$user) {
+            $user_query = get_users([
+                'meta_key' => 'mobile_number',
+                'meta_value' => $phone,
+                'number' => 1,
+                'fields' => 'ID',
+            ]);
+            
+            if (!empty($user_query)) {
+                $user = get_user_by('ID', $user_query[0]);
+            }
+        }
+        
+        return $user ? (int)$user->ID : 0;
+    }
 
     /**
      * Determine if the current request belongs to an authenticated plugin user
@@ -357,11 +387,17 @@ class Maneli_Ajax_Handler {
         
         // Notification handlers
         add_action('wp_ajax_maneli_get_notifications', [$this, 'ajax_get_notifications']);
+        add_action('wp_ajax_nopriv_maneli_get_notifications', [$this, 'ajax_get_notifications']);
         add_action('wp_ajax_maneli_get_unread_count', [$this, 'ajax_get_unread_count']);
+        add_action('wp_ajax_nopriv_maneli_get_unread_count', [$this, 'ajax_get_unread_count']);
         add_action('wp_ajax_maneli_mark_notification_read', [$this, 'ajax_mark_notification_read']);
+        add_action('wp_ajax_nopriv_maneli_mark_notification_read', [$this, 'ajax_mark_notification_read']);
         add_action('wp_ajax_maneli_mark_all_notifications_read', [$this, 'ajax_mark_all_notifications_read']);
+        add_action('wp_ajax_nopriv_maneli_mark_all_notifications_read', [$this, 'ajax_mark_all_notifications_read']);
         add_action('wp_ajax_maneli_delete_notification', [$this, 'ajax_delete_notification']);
+        add_action('wp_ajax_nopriv_maneli_delete_notification', [$this, 'ajax_delete_notification']);
         add_action('wp_ajax_maneli_delete_all_read_notifications', [$this, 'ajax_delete_all_read_notifications']);
+        add_action('wp_ajax_nopriv_maneli_delete_all_read_notifications', [$this, 'ajax_delete_all_read_notifications']);
         
         // Profile settings handlers
         add_action('wp_ajax_maneli_upload_profile_image', [$this, 'ajax_upload_profile_image']);
@@ -3222,6 +3258,24 @@ class Maneli_Ajax_Handler {
             $user_id = (int)$_SESSION['maneli_user_id'];
             if ($user_id > 0 && get_user_by('ID', $user_id)) {
                 return $user_id;
+            }
+        }
+        
+        // Resolve user ID via stored phone number for session-based logins
+        $session_phone_keys = ['maneli_user_phone', 'maneli_sms_phone'];
+        foreach ($session_phone_keys as $key) {
+            if (!empty($_SESSION[$key])) {
+                $resolved = $this->resolve_user_id_by_phone($_SESSION[$key]);
+                if ($resolved) {
+                    return $resolved;
+                }
+            }
+        }
+
+        if (!empty($_SESSION['maneli']) && !empty($_SESSION['maneli']['user_phone'])) {
+            $resolved = $this->resolve_user_id_by_phone($_SESSION['maneli']['user_phone']);
+            if ($resolved) {
+                return $resolved;
             }
         }
         

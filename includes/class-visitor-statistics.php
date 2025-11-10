@@ -1199,6 +1199,28 @@ class Maneli_Visitor_Statistics {
             'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
         ];
     }
+
+    /**
+     * Translate device model label
+     */
+    public static function translate_device_model($device_model) {
+        $device_model = trim((string) $device_model);
+        if ($device_model === '') {
+            return esc_html__('Unknown', 'maneli-car-inquiry');
+        }
+        
+        $lookup = strtolower($device_model);
+        $map = [
+            'desktop' => esc_html__('Desktop', 'maneli-car-inquiry'),
+            'android device' => esc_html__('Android Device', 'maneli-car-inquiry'),
+            'mobile device' => esc_html__('Mobile Device', 'maneli-car-inquiry'),
+            'tablet device' => esc_html__('Tablet Device', 'maneli-car-inquiry'),
+            'iphone' => esc_html__('iPhone', 'maneli-car-inquiry'),
+            'ipad' => esc_html__('iPad', 'maneli-car-inquiry'),
+        ];
+        
+        return $map[$lookup] ?? $device_model;
+    }
     
     /**
      * Translate browser name
@@ -1307,7 +1329,23 @@ class Maneli_Visitor_Statistics {
             }
         }
         
+        $map['UNKNOWN'] = esc_html__('Unknown', 'maneli-car-inquiry');
+        
         return $map;
+    }
+    
+    /**
+     * Map of ISO country code => flag CSS class
+     */
+    public static function get_country_flag_map() {
+        $flags = [];
+        $countries = self::get_country_translation_map();
+        foreach ($countries as $code => $name) {
+            $flags[$code] = self::get_country_flag_class($code);
+        }
+        $flags['UNKNOWN'] = self::get_country_flag_class('unknown');
+        $flags['unknown'] = $flags['UNKNOWN'];
+        return $flags;
     }
     
     /**
@@ -1319,32 +1357,36 @@ class Maneli_Visitor_Statistics {
             return $map;
         }
         
-        $map = [
-            'IR' => esc_html__('Iran', 'maneli-car-inquiry'),
-            'US' => esc_html__('United States', 'maneli-car-inquiry'),
-            'GB' => esc_html__('United Kingdom', 'maneli-car-inquiry'),
-            'DE' => esc_html__('Germany', 'maneli-car-inquiry'),
-            'FR' => esc_html__('France', 'maneli-car-inquiry'),
-            'IT' => esc_html__('Italy', 'maneli-car-inquiry'),
-            'ES' => esc_html__('Spain', 'maneli-car-inquiry'),
-            'CA' => esc_html__('Canada', 'maneli-car-inquiry'),
-            'RU' => esc_html__('Russia', 'maneli-car-inquiry'),
-            'TR' => esc_html__('Turkey', 'maneli-car-inquiry'),
-            'CN' => esc_html__('China', 'maneli-car-inquiry'),
-            'JP' => esc_html__('Japan', 'maneli-car-inquiry'),
-            'IN' => esc_html__('India', 'maneli-car-inquiry'),
-            'BR' => esc_html__('Brazil', 'maneli-car-inquiry'),
-            'AU' => esc_html__('Australia', 'maneli-car-inquiry'),
-            'AE' => esc_html__('United Arab Emirates', 'maneli-car-inquiry'),
-            'SA' => esc_html__('Saudi Arabia', 'maneli-car-inquiry'),
-            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+        $map = [];
+        $entries = [
+            'IR' => 'Iran',
+            'US' => 'United States',
+            'GB' => 'United Kingdom',
+            'DE' => 'Germany',
+            'FR' => 'France',
+            'IT' => 'Italy',
+            'ES' => 'Spain',
+            'CA' => 'Canada',
+            'RU' => 'Russia',
+            'TR' => 'Turkey',
+            'CN' => 'China',
+            'JP' => 'Japan',
+            'IN' => 'India',
+            'BR' => 'Brazil',
+            'AU' => 'Australia',
+            'AE' => 'United Arab Emirates',
+            'SA' => 'Saudi Arabia',
         ];
         
-        foreach ($map as $code => $label) {
-            if (strlen($code) === 2) {
-                $map[strtolower($label)] = $label;
-            }
+        foreach ($entries as $code => $english_name) {
+            $label = esc_html__($english_name, 'maneli-car-inquiry');
+            $upper_code = strtoupper($code);
+            $map[$upper_code] = $label;
+            $map[strtolower($upper_code)] = $label;
+            $map[strtolower($english_name)] = $label;
         }
+        
+        $map['unknown'] = esc_html__('Unknown', 'maneli-car-inquiry');
         
         return $map;
     }
@@ -1354,7 +1396,7 @@ class Maneli_Visitor_Statistics {
      */
     public static function get_country_flag_class($country_code) {
         $country_code = strtolower((string) $country_code);
-        if (empty($country_code) || $country_code === 'loc') {
+        if (empty($country_code) || $country_code === 'loc' || $country_code === 'unknown') {
             return 'flag-icon flag-icon-un';
         }
         return 'flag-icon flag-icon-' . esc_attr($country_code);
@@ -1371,6 +1413,11 @@ class Maneli_Visitor_Statistics {
         $timestamp = strtotime($datetime);
         if ($timestamp === false) {
             return '';
+        }
+        
+        $diff_seconds = abs($current_timestamp - $timestamp);
+        if ($diff_seconds < 5) {
+            return esc_html__('Moments ago', 'maneli-car-inquiry');
         }
         
         $diff_text = human_time_diff($timestamp, $current_timestamp);

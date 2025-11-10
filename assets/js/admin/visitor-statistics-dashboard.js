@@ -47,6 +47,11 @@
             tablet: translations.deviceTablet || 'Tablet',
             unknown: unknownLabel
         };
+        var countryNames = maneliVisitorStats.countryNames || {};
+        var countryFlags = maneliVisitorStats.countryFlags || {};
+        var browserNames = maneliVisitorStats.browserNames || {};
+        var osNames = maneliVisitorStats.osNames || {};
+        var deviceNames = maneliVisitorStats.deviceNames || {};
         var dailyStatsData = maneliVisitorStats.dailyStats || [];
         
         /**
@@ -228,11 +233,10 @@
                         var series = [];
                         
                         response.data.forEach(function(item) {
-                            var browserLabel = item.browser || unknownLabel;
-                            if (browserLabel === 'Unknown') {
-                                browserLabel = unknownLabel;
-                            }
-                            labels.push(browserLabel);
+                            var browserLabel = item.browser || 'unknown';
+                            var browserKey = browserLabel.toLowerCase();
+                            var localizedBrowser = browserNames[browserKey] || browserNames[item.browser] || browserNames[browserLabel] || unknownLabel;
+                            labels.push(localizedBrowser);
                             series.push(parseInt(item.visit_count) || 0);
                         });
                         
@@ -298,11 +302,10 @@
                         var series = [];
                         
                         response.data.forEach(function(item) {
-                            var osLabel = item.os || unknownLabel;
-                            if (osLabel === 'Unknown') {
-                                osLabel = unknownLabel;
-                            }
-                            labels.push(osLabel);
+                            var osLabel = item.os || 'unknown';
+                            var osKey = osLabel.toLowerCase();
+                            var localizedOS = osNames[osKey] || osNames[item.os] || osNames[osLabel] || unknownLabel;
+                            labels.push(localizedOS);
                             series.push(parseInt(item.visit_count) || 0);
                         });
                         
@@ -372,7 +375,8 @@
                             if (!deviceLabels.hasOwnProperty(deviceType)) {
                                 deviceType = 'unknown';
                             }
-                            labels.push(deviceLabels[deviceType]);
+                            var localizedDevice = deviceNames[deviceType] || deviceLabels[deviceType];
+                            labels.push(localizedDevice);
                             series.push(parseInt(item.visit_count) || 0);
                         });
                         
@@ -459,21 +463,37 @@
                             tbody.html('<tr><td colspan="7" class="text-center text-muted">' + maneliVisitorStats.translations.noData + '</td></tr>');
                         } else {
                             response.data.forEach(function(visitor) {
-                                var country = visitor.country || unknownLabel;
-                                var browser = visitor.browser || unknownLabel;
-                                var os = visitor.os || unknownLabel;
-                                var deviceType = visitor.device_type_label || deviceLabels[(visitor.device_type || '').toLowerCase()] || deviceLabels.unknown;
+                                var countryCode = (visitor.country_code || '').toUpperCase();
+                                var countryName = visitor.country || countryNames[countryCode] || unknownLabel;
+                                if (countryName === 'Unknown') {
+                                    countryName = unknownLabel;
+                                }
+                                var flagClass = visitor.country_flag || countryFlags[countryCode] || 'flag-icon flag-icon-un';
+                                var browserKey = (visitor.browser || '').toLowerCase();
+                                var browserName = visitor.browser || browserNames[browserKey] || unknownLabel;
+                                if (browserName === 'Unknown') {
+                                    browserName = unknownLabel;
+                                }
+                                var osKey = (visitor.os || '').toLowerCase();
+                                var osName = visitor.os || osNames[osKey] || unknownLabel;
+                                if (osName === 'Unknown') {
+                                    osName = unknownLabel;
+                                }
+                                var deviceTypeKey = (visitor.device_type || '').toLowerCase();
+                                var deviceTypeLabel = visitor.device_type_label || deviceNames[deviceTypeKey] || deviceLabels[deviceTypeKey] || deviceLabels.unknown;
+                                
                                 var timeAgo = visitor.time_ago || getTimeAgo(visitor.visit_date);
                                 if (!timeAgo) {
                                     timeAgo = translations.momentsAgo || ('0 ' + (translations.unitSecond || 'second') + ' ' + (translations.ago || 'ago'));
                                 }
                                 timeAgo = toPersianDigits(timeAgo);
+                                
                                 var row = '<tr>' +
                                     '<td>' + escapeHtml(visitor.ip_address) + '</td>' +
-                                    '<td>' + escapeHtml(country === 'Unknown' ? unknownLabel : country) + '</td>' +
-                                    '<td>' + escapeHtml(browser === 'Unknown' ? unknownLabel : browser) + '</td>' +
-                                    '<td>' + escapeHtml(os === 'Unknown' ? unknownLabel : os) + '</td>' +
-                                    '<td>' + escapeHtml(deviceType) + '</td>' +
+                                    '<td><span class="' + escapeHtml(flagClass) + ' me-2"></span>' + escapeHtml(countryName) + '</td>' +
+                                    '<td>' + escapeHtml(browserName) + '</td>' +
+                                    '<td>' + escapeHtml(osName) + '</td>' +
+                                    '<td>' + escapeHtml(deviceTypeLabel) + '</td>' +
                                     '<td><div class="text-truncate" style="max-width: 200px;" title="' + escapeHtml(visitor.page_url || '') + '">' + 
                                         escapeHtml(visitor.page_title || visitor.page_url || '') + '</div></td>' +
                                     '<td>' + timeAgo + '</td>' +

@@ -596,7 +596,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 <tbody>
                                     <?php foreach ($device_model_stats as $model): ?>
                                     <tr>
-                                        <td><?php echo esc_html($model->device_model); ?></td>
+                                        <?php $model_label = Maneli_Visitor_Statistics::translate_device_model($model->device_model); ?>
+                                        <td><?php echo esc_html($model_label); ?></td>
                                         <td><?php echo maneli_number_format_persian($model->visit_count); ?></td>
                                         <td><?php echo maneli_number_format_persian($model->unique_visitors); ?></td>
                                     </tr>
@@ -764,9 +765,10 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 <tbody id="online-visitors-table">
                                     <?php foreach ($online_visitors as $visitor): 
                                         $country_display = $visitor->country ?: esc_html__('Unknown', 'maneli-car-inquiry');
+                                        $country_flag = $visitor->country_flag ?? Maneli_Visitor_Statistics::get_country_flag_class($visitor->country_code ?? '');
                                         $browser_display = $visitor->browser ?: esc_html__('Unknown', 'maneli-car-inquiry');
                                         $os_display = $visitor->os ?: esc_html__('Unknown', 'maneli-car-inquiry');
-                                        $device_display = $visitor->device_type_label ?? ($visitor->device_type ?: esc_html__('Unknown', 'maneli-car-inquiry'));
+                                        $device_display = $visitor->device_type_label ?? Maneli_Visitor_Statistics::translate_device_type($visitor->device_type ?? '');
                                         if (function_exists('persian_numbers_no_separator')) {
                                             $device_display = persian_numbers_no_separator($device_display);
                                         }
@@ -774,7 +776,10 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($visitor->ip_address); ?></td>
-                                        <td><?php echo esc_html($country_display); ?></td>
+                                        <td>
+                                            <span class="<?php echo esc_attr($country_flag); ?> me-2"></span>
+                                            <?php echo esc_html($country_display); ?>
+                                        </td>
                                         <td><?php echo esc_html($browser_display); ?></td>
                                         <td><?php echo esc_html($os_display); ?></td>
                                         <td><?php echo esc_html($device_display); ?></td>

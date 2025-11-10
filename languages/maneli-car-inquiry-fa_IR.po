@@ -4930,6 +4930,111 @@ msgstr "ساعت"
 msgid "day"
 msgstr "روز"
 
+msgid "Chrome"
+msgstr "کروم"
+
+msgid "Firefox"
+msgstr "فایرفاکس"
+
+msgid "Safari"
+msgstr "سافاری"
+
+msgid "Edge"
+msgstr "مایکروسافت اج"
+
+msgid "Internet Explorer"
+msgstr "اینترنت اکسپلورر"
+
+msgid "Opera"
+msgstr "اپرا"
+
+msgid "Chromium"
+msgstr "کرومیوم"
+
+msgid "Windows"
+msgstr "ویندوز"
+
+msgid "macOS"
+msgstr "مک‌اواس"
+
+msgid "Linux"
+msgstr "لینوکس"
+
+msgid "Android"
+msgstr "اندروید"
+
+msgid "iOS"
+msgstr "آی‌او‌اس"
+
+msgid "iPadOS"
+msgstr "آی‌پد او‌اس"
+
+msgid "Android Device"
+msgstr "دستگاه اندرویدی"
+
+msgid "Mobile Device"
+msgstr "دستگاه موبایل"
+
+msgid "Tablet Device"
+msgstr "دستگاه تبلت"
+
+msgid "iPhone"
+msgstr "آیفون"
+
+msgid "iPad"
+msgstr "آی‌پد"
+
+msgid "Iran"
+msgstr "ایران"
+
+msgid "United States"
+msgstr "ایالات متحده آمریکا"
+
+msgid "United Kingdom"
+msgstr "بریتانیا"
+
+msgid "Germany"
+msgstr "آلمان"
+
+msgid "France"
+msgstr "فرانسه"
+
+msgid "Italy"
+msgstr "ایتالیا"
+
+msgid "Spain"
+msgstr "اسپانیا"
+
+msgid "Canada"
+msgstr "کانادا"
+
+msgid "Russia"
+msgstr "روسیه"
+
+msgid "Turkey"
+msgstr "ترکیه"
+
+msgid "China"
+msgstr "چین"
+
+msgid "Japan"
+msgstr "ژاپن"
+
+msgid "India"
+msgstr "هند"
+
+msgid "Brazil"
+msgstr "برزیل"
+
+msgid "Australia"
+msgstr "استرالیا"
+
+msgid "United Arab Emirates"
+msgstr "امارات متحده عربی"
+
+msgid "Saudi Arabia"
+msgstr "عربستان سعودی"
+
 msgid "Sale Status"
 msgstr "وضعیت فروش"
 

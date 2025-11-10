@@ -421,6 +421,9 @@ class Maneli_Dashboard_Handler {
                     wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
                 }
                 
+                // Flag icons for country display
+                wp_enqueue_style('maneli-flag-icons', 'https://cdn.jsdelivr.net/npm/flag-icon-css@3.5.0/css/flag-icon.min.css', [], '3.5.0');
+                
                 // Visitor Statistics Dashboard Script
                 $dashboard_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/admin/visitor-statistics-dashboard.js';
                 if (file_exists($dashboard_js_path)) {
@@ -535,6 +538,11 @@ class Maneli_Dashboard_Handler {
                         'startDate' => $start_date,
                         'endDate' => $end_date,
                         'dailyStats' => $daily_stats,
+                        'countryNames' => Maneli_Visitor_Statistics::get_country_translation_map(),
+                        'countryFlags' => Maneli_Visitor_Statistics::get_country_flag_map(),
+                        'browserNames' => Maneli_Visitor_Statistics::get_browser_translation_map(),
+                        'osNames' => Maneli_Visitor_Statistics::get_os_translation_map(),
+                        'deviceNames' => Maneli_Visitor_Statistics::get_device_type_translation_map(),
                         'translations' => [
                             'loading' => esc_html__('Loading...', 'maneli-car-inquiry'),
                             'error' => esc_html__('Error loading data', 'maneli-car-inquiry'),
