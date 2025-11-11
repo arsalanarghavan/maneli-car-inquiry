@@ -93,15 +93,22 @@ class Maneli_User_Profile {
             return;
         }
 
-        wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
-        wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
+        $datepicker_loaded = false;
+        if (function_exists('maneli_enqueue_persian_datepicker')) {
+            $datepicker_loaded = maneli_enqueue_persian_datepicker();
+        }
         
         // FIX: Removed the wp_add_inline_script block.
         // The initialization logic is now assumed to be in the centralized JS file.
+        $profile_deps = [];
+        if ($datepicker_loaded) {
+            $profile_deps[] = 'maneli-persian-datepicker';
+        }
+
         wp_enqueue_script(
             'maneli-profile-datepicker-init',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
-            ['maneli-persian-datepicker'],
+            $profile_deps,
             filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'),
             true
         );

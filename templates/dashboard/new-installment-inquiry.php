@@ -40,17 +40,25 @@ if (!wp_script_is('select2', 'enqueued')) {
     wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
 }
 
-// Enqueue Persian Datepicker - use persianDatepicker like in expert reports
-if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
-    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
-}
-if (!wp_style_is('maneli-persian-datepicker', 'enqueued')) {
-    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+// Enqueue Persian Datepicker - use persianDatepicker like in expert reports when locale is Persian
+$datepicker_dependency_loaded = false;
+if (function_exists('maneli_enqueue_persian_datepicker')) {
+    $datepicker_dependency_loaded = maneli_enqueue_persian_datepicker();
 }
 
 // Enqueue inquiry form script (for datepicker initialization)
 if (!wp_script_is('maneli-inquiry-form-js', 'enqueued')) {
-    wp_enqueue_script('maneli-inquiry-form-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js', ['jquery', 'maneli-persian-datepicker'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'), true);
+    $inquiry_form_deps = ['jquery'];
+    if ($datepicker_dependency_loaded) {
+        $inquiry_form_deps[] = 'maneli-persian-datepicker';
+    }
+    wp_enqueue_script(
+        'maneli-inquiry-form-js',
+        MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
+        $inquiry_form_deps,
+        filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'),
+        true
+    );
 }
 
 // Enqueue expert panel JS (for car search and calculator)
@@ -256,7 +264,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-id-card me-1 text-muted"></i>
                                                 کد ملی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="national_code" class="form-control" placeholder="0123456789" required pattern="\d{10}" maxlength="10">
+                                            <input type="text" name="national_code" class="form-control" placeholder="0123456789" maxlength="10" pattern="\d{10}">
                                             <div class="invalid-feedback">لطفاً کد ملی 10 رقمی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -409,7 +417,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-id-card me-1 text-muted"></i>
                                                 کد ملی
                                             </label>
-                                            <input type="text" name="issuer_national_code" class="form-control" placeholder="0123456789" pattern="\d{10}" maxlength="10">
+                                            <input type="text" name="issuer_national_code" class="form-control" placeholder="0123456789" maxlength="10" pattern="\d{10}">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">

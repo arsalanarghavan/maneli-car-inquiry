@@ -9478,3 +9478,59 @@ msgstr "No credit score history available."
 #: templates/shortcodes/inquiry-lists/report-customer-installment.php
 msgid "No contract records available."
 msgstr "No contract records available."
+
+#: templates/dashboard.php
+msgid "%1$s Designed with %2$s by %3$s"
+msgstr "%1$s Designed with %2$s by %3$s"
+
+#: templates/dashboard.php
+msgid "Puzzling Institute"
+msgstr "Puzzling Institute"
+
+#: templates/dashboard.php
+msgid "Hide Sidebar"
+msgstr "Hide Sidebar"
+
+#: templates/dashboard.php
+msgid "Persian"
+msgstr "Persian"
+
+#: templates/dashboard.php
+msgid "English"
+msgstr "English"
+
+#: templates/dashboard.php
+msgid "5 unread"
+msgstr "5 unread"
+
+#: templates/dashboard.php
+msgid "Message title"
+msgstr "Message title"
+
+#: templates/dashboard.php
+msgid "Just now"
+msgstr "Just now"
+
+#: templates/dashboard.php
+msgid "2 hours ago"
+msgstr "2 hours ago"
+
+#: templates/dashboard.php
+msgid "1 day ago"
+msgstr "1 day ago"
+
+#: templates/dashboard.php
+msgid "5 hours ago"
+msgstr "5 hours ago"
+
+#: templates/dashboard.php
+msgid "View all"
+msgstr "View all"
+
+#: templates/dashboard.php
+msgid "No alerts available"
+msgstr "No alerts available"
+
+#: templates/dashboard.php
+msgid "User name"
+msgstr "User name"

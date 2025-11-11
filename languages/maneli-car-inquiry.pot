@@ -3656,3 +3656,59 @@ msgstr ""
 
 msgid "Enable the legacy Finotex cheque color inquiry API (deprecated, use Finnotech API Services instead)."
 msgstr ""
+
+#: templates/dashboard.php
+msgid "%1$s Designed with %2$s by %3$s"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "Puzzling Institute"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "Hide Sidebar"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "Persian"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "English"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "5 unread"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "Message title"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "Just now"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "2 hours ago"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "1 day ago"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "5 hours ago"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "View all"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "No alerts available"
+msgstr ""
+
+#: templates/dashboard.php
+msgid "User name"
+msgstr ""

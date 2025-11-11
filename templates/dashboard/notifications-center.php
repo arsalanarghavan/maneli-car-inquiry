@@ -112,8 +112,9 @@ if (!function_exists('persian_numbers')) {
 
 // Enqueue Persian Datepicker
 if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
-    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
-    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+    if (function_exists('maneli_enqueue_persian_datepicker')) {
+        maneli_enqueue_persian_datepicker();
+    }
 }
 
 // Enqueue Chart.js for charts

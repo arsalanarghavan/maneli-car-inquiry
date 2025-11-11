@@ -56,15 +56,24 @@ if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert
 }
 
 // Enqueue datepicker and inquiry frontend behaviors (for wizard steps)
-// Use the same persianDatepicker library that's used in expert reports
-if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
-    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
+// Use the same persianDatepicker library that's used in expert reports when locale is Persian
+$datepicker_dependency_loaded = false;
+if (function_exists('maneli_enqueue_persian_datepicker')) {
+    $datepicker_dependency_loaded = maneli_enqueue_persian_datepicker();
 }
-if (!wp_style_is('maneli-persian-datepicker', 'enqueued')) {
-    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
-}
+
 if (!wp_script_is('maneli-inquiry-form-js', 'enqueued')) {
-    wp_enqueue_script('maneli-inquiry-form-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js', ['jquery', 'maneli-persian-datepicker', 'sweetalert2'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'), true);
+    $inquiry_form_deps = ['jquery', 'sweetalert2'];
+    if ($datepicker_dependency_loaded) {
+        $inquiry_form_deps[] = 'maneli-persian-datepicker';
+    }
+    wp_enqueue_script(
+        'maneli-inquiry-form-js',
+        MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
+        $inquiry_form_deps,
+        filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'),
+        true
+    );
 }
 
 // Localize AJAX and nonces for inquiry frontend (confirm car catalog, meetings, car selection)

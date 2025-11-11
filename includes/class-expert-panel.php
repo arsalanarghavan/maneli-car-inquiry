@@ -39,15 +39,21 @@ class Maneli_Expert_Panel {
             return;
         }
         
-        // Enqueue datepicker for birth date fields
-        wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
-        wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+        $datepicker_loaded = false;
+        if (function_exists('maneli_enqueue_persian_datepicker')) {
+            $datepicker_loaded = maneli_enqueue_persian_datepicker();
+        }
         
         // Enqueue the expert panel JavaScript file
+        $expert_panel_deps = ['jquery', 'select2'];
+        if ($datepicker_loaded) {
+            $expert_panel_deps[] = 'maneli-persian-datepicker';
+        }
+
         wp_enqueue_script(
             'maneli-expert-panel-js',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js',
-            ['jquery', 'select2', 'maneli-persian-datepicker'],
+            $expert_panel_deps,
             '1.0.2',
             true
         );

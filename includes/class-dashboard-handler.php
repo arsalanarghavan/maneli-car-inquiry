@@ -75,6 +75,9 @@ class Maneli_Dashboard_Handler {
         add_filter('show_admin_bar', [$this, 'disable_admin_bar_for_plugin_roles'], 999);
         add_action('template_redirect', [$this, 'hide_admin_bar_in_dashboard']);
         
+        // Locale override based on dashboard language preference
+        add_filter('determine_locale', [$this, 'maybe_override_locale']);
+        
         // Show notice if rewrite rules need flushing
         if (get_option('maneli_dashboard_rules_flushed') !== '4') {
             add_action('admin_notices', [$this, 'show_rewrite_flush_notice']);
@@ -288,7 +291,12 @@ class Maneli_Dashboard_Handler {
                 wp_enqueue_style('maneli-fonts', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-fonts.css', [], '1.0.0');
                 $font_deps[] = 'maneli-fonts';
             }
-            wp_enqueue_style('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', $font_deps, '5.3.0');
+            $preferred_language = $this->get_preferred_language_slug();
+
+            $is_rtl = ($preferred_language === 'fa');
+            $bootstrap_file = $is_rtl ? 'bootstrap.rtl.min.css' : 'bootstrap.min.css';
+
+            wp_enqueue_style('maneli-bootstrap', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/' . $bootstrap_file, $font_deps, '5.3.0');
             wp_enqueue_style('maneli-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/styles.css', ['maneli-bootstrap'], '1.0.0');
             
             // Line Awesome Complete - فایل CSS کامل و مستقل
@@ -303,15 +311,21 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_style('maneli-pickr', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@simonwep/pickr/themes/nano.min.css', [], '1.0.0');
             wp_enqueue_style('maneli-choices', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/choices.js/public/assets/styles/choices.min.css', [], '1.0.0');
             wp_enqueue_style('maneli-autocomplete', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/@tarekraafat/autocomplete.js/css/autoComplete.css', [], '1.0.0');
-            wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+
+            if (function_exists('maneli_enqueue_persian_datepicker')) {
+                maneli_enqueue_persian_datepicker();
+            }
+
             // Force RTL and Persian Font - check if file exists
+            $base_fix_deps = ['maneli-styles', 'maneli-bootstrap'];
+            $dashboard_fix_deps = $base_fix_deps;
+
+            if ($is_rtl) {
             $rtl_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-rtl-force.css';
-            $rtl_deps = ['maneli-styles', 'maneli-bootstrap'];
             if (file_exists($rtl_css_path)) {
-                wp_enqueue_style('maneli-rtl-force', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-rtl-force.css', $rtl_deps, '1.0.0');
+                    wp_enqueue_style('maneli-rtl-force', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-rtl-force.css', $base_fix_deps, '1.0.0');
                 $dashboard_fix_deps = ['maneli-rtl-force'];
-            } else {
-                $dashboard_fix_deps = $rtl_deps;
+                }
             }
             
             // Dashboard Additional Fixes - check if file exists
@@ -354,7 +368,7 @@ class Maneli_Dashboard_Handler {
             wp_enqueue_script('maneli-defaultmenu', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/defaultmenu.min.js', ['jquery'], '1.0.0', true);
             wp_enqueue_script('maneli-custom', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/custom.js', ['jquery', 'maneli-bootstrap'], '1.0.0', true);
             wp_enqueue_script('maneli-custom-switcher', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/custom-switcher.min.js', ['jquery'], '1.0.0', true);
-            wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
+            // maneli_enqueue_persian_datepicker() handles Persian datepicker assets when needed.
             // Real-time notifications
             wp_enqueue_script('maneli-notifications', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/notifications.js', ['jquery'], '1.0.0', true);
             // Localize script for notifications
@@ -416,9 +430,8 @@ class Maneli_Dashboard_Handler {
                 }
                 
                 // Persian Datepicker
-                if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
-                    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
-                    wp_enqueue_style('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css', [], '1.0.0');
+                if (function_exists('maneli_enqueue_persian_datepicker')) {
+                    maneli_enqueue_persian_datepicker();
                 }
                 
                 // Flag icons for country display
@@ -668,12 +681,8 @@ class Maneli_Dashboard_Handler {
                 
                 // Use persianDatepicker (same as in expert reports and inquiry forms)
                 $datepicker_enqueued = false;
-                // Check if persianDatepicker is already enqueued by dashboard handler
-                if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
-                    wp_enqueue_script('maneli-persian-datepicker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js', ['jquery'], '1.0.0', true);
-                    $datepicker_enqueued = true;
-                } else {
-                    $datepicker_enqueued = true; // Already enqueued
+                if (function_exists('maneli_enqueue_persian_datepicker')) {
+                    $datepicker_enqueued = maneli_enqueue_persian_datepicker();
                 }
                 
                 // Debug script first (loads before everything, in header)
@@ -1125,6 +1134,64 @@ class Maneli_Dashboard_Handler {
                 'dashboard_url' => home_url('/dashboard')
             ]);
         }
+    }
+
+    /**
+     * Override locale based on stored language preference.
+     *
+     * @param string $locale Current locale.
+     * @return string Modified locale.
+     */
+    public function maybe_override_locale($locale) {
+        $preferred_locale = $this->get_preferred_locale_code();
+        if (!$preferred_locale) {
+            return $locale;
+        }
+
+        // Avoid overriding admin pages unless requested through AJAX.
+        if (is_admin() && !wp_doing_ajax()) {
+            return $locale;
+        }
+
+        return $preferred_locale;
+    }
+
+    /**
+     * Resolve preferred locale code from cookie.
+     *
+     * @return string|null Locale code like fa_IR or en_US.
+     */
+    private function get_preferred_locale_code() {
+        $language = $this->get_preferred_language_slug();
+
+        if ($language === 'en') {
+            return 'en_US';
+        }
+
+        if ($language === 'fa') {
+            return 'fa_IR';
+        }
+
+        return null;
+    }
+
+    /**
+     * Get preferred language slug (fa/en) inferred from cookie.
+     *
+     * @return string
+     */
+    public function get_preferred_language_slug() {
+        $preferred_language = 'fa';
+
+        if (!empty($_COOKIE['maneli_language'])) {
+            $cookie_language = sanitize_text_field(wp_unslash($_COOKIE['maneli_language']));
+            $cookie_language = strtolower($cookie_language);
+            if (in_array($cookie_language, ['en', 'en_us', 'en-us', 'english'], true)) {
+                $preferred_language = 'en';
+            }
+        }
+
+        return $preferred_language;
     }
     
     /**

@@ -35,18 +35,30 @@ $sidebar_menu = ob_get_clean();
 // Get the dashboard HTML content
 $dashboard_html = file_get_contents(MANELI_PLUGIN_DIR . 'templates/dashboard-base.html');
 
-// Check localStorage for language preference (client-side)
-// Default is RTL/Farsi, but JavaScript will override based on localStorage
+$preferred_language = method_exists($handler, 'get_preferred_language_slug')
+    ? $handler->get_preferred_language_slug()
+    : 'fa';
 
-// Force RTL for all users and roles by default
-// JavaScript will handle the dynamic language switching based on localStorage
-if (strpos($dashboard_html, 'dir=') === false) {
-    $dashboard_html = preg_replace('/(<html[^>]*)>/i', '$1 dir="rtl" lang="fa">', $dashboard_html, 1);
-} else {
-    // Make sure both dir and lang are set
-    if (strpos($dashboard_html, 'lang=') === false) {
-        $dashboard_html = preg_replace('/(<html[^>]*dir=["\'][^"\']*["\'])/i', '$0 lang="fa"', $dashboard_html, 1);
-    }
+$preferred_dir = $preferred_language === 'fa' ? 'rtl' : 'ltr';
+$preferred_lang_attr = $preferred_language === 'fa' ? 'fa' : 'en';
+
+// Normalize existing dir/lang attributes and apply preference
+$dashboard_html = preg_replace('/\sdir=["\'][^"\']*["\']/', '', $dashboard_html, 1);
+$dashboard_html = preg_replace('/\slang=["\'][^"\']*["\']/', '', $dashboard_html, 1);
+$html_language_attributes = sprintf(
+    ' dir="%s" lang="%s"',
+    esc_attr($preferred_dir),
+    esc_attr($preferred_lang_attr)
+);
+$dashboard_html = preg_replace('/(<html[^>]*)>/i', '$1' . $html_language_attributes . '>', $dashboard_html, 1);
+
+// Update bootstrap CSS path for LTR preference
+if ($preferred_language !== 'fa') {
+    $dashboard_html = str_replace(
+        'assets/libs/bootstrap/css/bootstrap.rtl.min.css',
+        'assets/libs/bootstrap/css/bootstrap.min.css',
+        $dashboard_html
+    );
 }
 
 // Extract the sidebar part from the HTML and replace with dynamic sidebar
@@ -57,6 +69,62 @@ $dashboard_html = preg_replace($pattern, $replacement, $dashboard_html);
 
 // Replace asset paths to use WordPress URLs
 $dashboard_html = str_replace('./assets/', MANELI_PLUGIN_URL . 'assets/', $dashboard_html);
+
+// Inject translated header text
+$header_replacements = [
+    '%%MANELI_HEADER_SIDEBAR_TOGGLE_LABEL%%' => esc_attr__('Hide Sidebar', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_SEARCH_PLACEHOLDER%%' => esc_attr__('Search...', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_LANGUAGE_FA%%' => esc_html__('Persian', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_LANGUAGE_EN%%' => esc_html__('English', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATIONS_TITLE%%' => esc_html__('Alerts', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATIONS_UNREAD%%' => esc_html__('5 unread', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TITLE%%' => esc_html__('Message title', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_DESCRIPTION%%' => esc_html__('Description', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_NOW%%' => esc_html__('Just now', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_TWO_HOURS%%' => esc_html__('2 hours ago', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_ONE_DAY%%' => esc_html__('1 day ago', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_FIVE_HOURS%%' => esc_html__('5 hours ago', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_VIEW_ALL%%' => esc_html__('View all', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_NO_NOTIFICATIONS%%' => esc_html__('No alerts available', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_NAME%%' => esc_html__('User name', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_ROLE%%' => esc_html__('Role', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_MODAL_SEARCH_PLACEHOLDER%%' => esc_attr__('Search', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_MODAL_SEARCH_ARIA%%' => esc_attr__('Search', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_ACCOUNT%%' => esc_html__('Account', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_EMAIL%%' => esc_html__('Email', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_FILE_MANAGER%%' => esc_html__('File manager', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_SETTINGS%%' => esc_html__('Settings', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_SUPPORT%%' => esc_html__('Support', 'maneli-car-inquiry'),
+    '%%MANELI_HEADER_PROFILE_LOGOUT%%' => esc_html__('Log out', 'maneli-car-inquiry'),
+];
+
+$dashboard_html = str_replace(
+    array_keys($header_replacements),
+    array_values($header_replacements),
+    $dashboard_html
+);
+
+// Inject translated footer text
+$company_name = __('Puzzling Institute', 'maneli-car-inquiry');
+$company_link = sprintf(
+    '<a href="%1$s" target="_blank" rel="noopener"><span class="fw-medium text-primary">%2$s</span></a>',
+    esc_url('https://puzzlingco.com'),
+    esc_html($company_name)
+);
+
+/* translators: 1: year span HTML, 2: heart icon HTML, 3: linked company name */
+$footer_text = sprintf(
+    __('%1$s Designed with %2$s by %3$s', 'maneli-car-inquiry'),
+    '<span id="year"></span>',
+    '<span class="bi bi-heart-fill text-danger" aria-hidden="true"></span>',
+    $company_link
+);
+
+$dashboard_html = str_replace(
+    '%%MANELI_DASHBOARD_FOOTER%%',
+    wp_kses_post($footer_text),
+    $dashboard_html
+);
 
 // Replace jQuery CDN with WordPress jQuery (more reliable)
 // CRITICAL: jQuery must load first for everything to work
@@ -203,41 +271,114 @@ $pattern = '/(<!-- Language Switching Function -->)(.*?)(Load saved language pre
 $fixed_script = '
 <!-- Language Switching Function -->
 <script>
-    function changeLanguage(lang) {
-        // Store language preference in localStorage
-        localStorage.setItem(\'maneli_language\', lang);
-        
-        // Mark that we are reloading to prevent infinite loop
-        localStorage.setItem(\'maneli_language_changing\', \'true\');
-        
-        // Reload page to apply language changes
-        window.location.reload();
-    }
-    
-    // Load saved language preference on page load
-    document.addEventListener(\'DOMContentLoaded\', function() {
-        // Clear the changing flag if it exists
-        if (localStorage.getItem(\'maneli_language_changing\') === \'true\') {
-            localStorage.removeItem(\'maneli_language_changing\');
-            return; // Don\'t check again after manual change
+    (function() {
+        const COOKIE_NAME = \'maneli_language\';
+        const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
+        function shouldUsePersianDates() {
+            return document.documentElement && document.documentElement.lang === \'fa\';
         }
-        
-        const savedLang = localStorage.getItem(\'maneli_language\') || \'fa\';
-        const currentLang = document.documentElement.lang || \'fa\';
-        const currentDir = document.documentElement.dir || \'rtl\';
-        
-        // Check if language needs to be changed
-        const needsChange = savedLang !== currentLang || 
-                            (savedLang === \'fa\' && currentDir !== \'rtl\') || 
-                            (savedLang !== \'fa\' && currentDir !== \'ltr\');
-        
-        // Only reload if language is different and we haven\'t changed it manually
-        if (needsChange) {
-            setTimeout(function() {
-                changeLanguage(savedLang);
-            }, 100);
+
+        window.maneliShouldUsePersianDates = shouldUsePersianDates;
+
+        function normalizeLanguage(lang) {
+            if (!lang) {
+                return \'fa\';
+            }
+            const value = String(lang).toLowerCase();
+            if (value === \'en_us\' || value === \'en-us\' || value === \'english\') {
+                return \'en\';
+            }
+            return value === \'en\' ? \'en\' : \'fa\';
         }
-    });
+
+        function setLanguageCookie(lang) {
+            try {
+                const normalized = normalizeLanguage(lang);
+                document.cookie = COOKIE_NAME + \'=\' + normalized + \'; path=/; max-age=\' + COOKIE_MAX_AGE + \'; SameSite=Lax\';
+            } catch (error) {
+                console.warn(\'[Maneli] Unable to persist language cookie\', error);
+            }
+        }
+
+        function applyLanguage(lang) {
+            const normalized = normalizeLanguage(lang);
+            const html = document.documentElement;
+            const body = document.body;
+
+            if (html) {
+                html.lang = normalized === \'fa\' ? \'fa\' : \'en\';
+                html.dir = normalized === \'fa\' ? \'rtl\' : \'ltr\';
+                html.classList.toggle(\'rtl\', normalized === \'fa\');
+                html.classList.toggle(\'ltr\', normalized !== \'fa\');
+            }
+
+            if (body) {
+                body.classList.toggle(\'rtl\', normalized === \'fa\');
+                body.classList.toggle(\'ltr\', normalized !== \'fa\');
+            }
+
+            const styleLink = document.getElementById(\'style\');
+            if (styleLink) {
+                const currentHref = styleLink.getAttribute(\'href\') || \'\';
+                const storedRtl = styleLink.dataset.rtlHref || styleLink.getAttribute(\'data-rtl-href\');
+                const storedLtr = styleLink.dataset.ltrHref || styleLink.getAttribute(\'data-ltr-href\');
+                const rtlHref = storedRtl || (currentHref.includes(\'bootstrap.min.css\') ? currentHref.replace(\'bootstrap.min.css\', \'bootstrap.rtl.min.css\') : currentHref);
+                const ltrHref = storedLtr || (currentHref.includes(\'bootstrap.rtl.min.css\') ? currentHref.replace(\'bootstrap.rtl.min.css\', \'bootstrap.min.css\') : currentHref);
+
+                styleLink.dataset.rtlHref = rtlHref;
+                styleLink.dataset.ltrHref = ltrHref;
+
+                styleLink.setAttribute(\'href\', normalized === \'fa\' ? rtlHref : ltrHref);
+            }
+
+            return normalized;
+        }
+
+        window.changeLanguage = function(lang) {
+            const normalized = normalizeLanguage(lang);
+            const currentLang = normalizeLanguage(document.documentElement.lang);
+            const currentDir = (document.documentElement.dir || \'rtl\').toLowerCase();
+
+            localStorage.setItem(\'maneli_language\', normalized);
+            setLanguageCookie(normalized);
+
+            // Apply immediately for visual feedback
+            applyLanguage(normalized);
+
+            const requiresReload = normalized !== currentLang ||
+                (normalized === \'fa\' && currentDir !== \'rtl\') ||
+                (normalized !== \'fa\' && currentDir !== \'ltr\');
+
+            if (requiresReload) {
+                localStorage.setItem(\'maneli_language_changing\', \'true\');
+                window.location.reload();
+            }
+        };
+
+        document.addEventListener(\'DOMContentLoaded\', function() {
+            const savedLang = normalizeLanguage(localStorage.getItem(\'maneli_language\'));
+            const appliedLang = applyLanguage(savedLang);
+            setLanguageCookie(appliedLang);
+
+            if (localStorage.getItem(\'maneli_language_changing\') === \'true\') {
+                localStorage.removeItem(\'maneli_language_changing\');
+                return;
+            }
+
+            const currentLang = normalizeLanguage(document.documentElement.lang);
+            const currentDir = (document.documentElement.dir || \'rtl\').toLowerCase();
+
+            const needsReload = appliedLang !== currentLang ||
+                (appliedLang === \'fa\' && currentDir !== \'rtl\') ||
+                (appliedLang !== \'fa\' && currentDir !== \'ltr\');
+
+            if (needsReload) {
+                localStorage.setItem(\'maneli_language_changing\', \'true\');
+                window.location.reload();
+            }
+        });
+    })();
 </script>';
 $dashboard_html = preg_replace($pattern, $fixed_script, $dashboard_html);
 
@@ -568,6 +709,10 @@ if ($dashboard_page === 'visitor-statistics') {
         $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
         $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
     }
+    if ($preferred_language !== 'fa') {
+        $dashboard_html = str_replace('<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL, '', $dashboard_html);
+        $dashboard_html = str_replace('<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL, '', $dashboard_html);
+    }
     
     // Visitor Statistics Dashboard Script
     $dashboard_js_path = MANELI_PLUGIN_DIR . 'assets/js/admin/visitor-statistics-dashboard.js';
@@ -836,12 +981,14 @@ if ($need_inquiry_scripts) {
         if (file_exists($form_wizard_file)) {
             $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/form-wizard.js?v=' . filemtime($form_wizard_file)) . '"></script>' . PHP_EOL;
         }
-        // Datepicker for identity form - use persianDatepicker like in expert reports
-        $datepicker_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/persianDatepicker-default.css';
-        $datepicker_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/persianDatepicker.min.js';
-        if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
-            $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
-            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+        // Persian Datepicker
+        if ($preferred_language === 'fa') {
+            $datepicker_css = MANELI_PLUGIN_DIR . 'assets/css/persianDatepicker-default.css';
+            $datepicker_js = MANELI_PLUGIN_DIR . 'assets/js/persianDatepicker.min.js';
+            if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
+                $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+                $scripts_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+            }
         }
         // Inquiry form JS
         $inquiry_form_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';

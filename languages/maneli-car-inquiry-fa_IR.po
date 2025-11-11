@@ -10012,3 +10012,59 @@ msgstr "هیچ سابقه‌ای برای امتیاز اعتباری موجود
 #: templates/shortcodes/inquiry-lists/report-admin-installment.php templates/shortcodes/inquiry-lists/report-customer-installment.php
 msgid "No contract records available."
 msgstr "هیچ رکوردی از قراردادها موجود نیست."
+
+#: templates/dashboard.php
+msgid "%1$s Designed with %2$s by %3$s"
+msgstr "%1$s طراحی با %2$s توسط %3$s"
+
+#: templates/dashboard.php
+msgid "Puzzling Institute"
+msgstr "موسسه پازلینگ"
+
+#: templates/dashboard.php
+msgid "Hide Sidebar"
+msgstr "پنهان کردن سایدبار"
+
+#: templates/dashboard.php
+msgid "Persian"
+msgstr "فارسی"
+
+#: templates/dashboard.php
+msgid "English"
+msgstr "انگلیسی"
+
+#: templates/dashboard.php
+msgid "5 unread"
+msgstr "5 خوانده نشده"
+
+#: templates/dashboard.php
+msgid "Message title"
+msgstr "عنوان پیام"
+
+#: templates/dashboard.php
+msgid "Just now"
+msgstr "همین الان"
+
+#: templates/dashboard.php
+msgid "2 hours ago"
+msgstr "2 ساعت پیش"
+
+#: templates/dashboard.php
+msgid "1 day ago"
+msgstr "1 روز پیش"
+
+#: templates/dashboard.php
+msgid "5 hours ago"
+msgstr "5 ساعت پیش"
+
+#: templates/dashboard.php
+msgid "View all"
+msgstr "مشاهده همه"
+
+#: templates/dashboard.php
+msgid "No alerts available"
+msgstr "هشداری وجود ندارد"
+
+#: templates/dashboard.php
+msgid "User name"
+msgstr "نام کاربر"

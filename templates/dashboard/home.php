@@ -1576,6 +1576,16 @@ if ($is_customer) {
     <script>
     // تابع تبدیل تاریخ میلادی به شمسی
     function maneli_gregorian_to_jalali(gy, gm, gd, format) {
+        const usePersianDates = typeof window !== 'undefined' && typeof window.maneliShouldUsePersianDates === 'function' ? window.maneliShouldUsePersianDates() : true;
+        const pad = (value) => (value < 10 ? '0' + value : value);
+
+        if (!usePersianDates) {
+            if (format === 'Y/m/d') {
+                return gy + '/' + pad(gm) + '/' + pad(gd);
+            }
+            return gy + '/' + gm + '/' + gd;
+        }
+
         const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
         let jy = gy <= 1600 ? 0 : 979;
         gy -= gy <= 1600 ? 621 : 1600;
@@ -1610,6 +1620,9 @@ if ($is_customer) {
             const year = date.getFullYear();
             const month = date.getMonth() + 1;
             const day = date.getDate();
+            if (typeof window !== 'undefined' && typeof window.maneliShouldUsePersianDates === 'function' && !window.maneliShouldUsePersianDates()) {
+                return year + '/' + (month < 10 ? '0' + month : month) + '/' + (day < 10 ? '0' + day : day);
+            }
             return maneli_gregorian_to_jalali(year, month, day, 'Y/m/d');
         } catch (e) {
             console.log('Error converting date:', e);

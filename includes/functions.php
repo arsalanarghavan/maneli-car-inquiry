@@ -28,6 +28,21 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
         $gm = (int)$gm;
         $gd = (int)$gd;
 
+        if (function_exists('maneli_should_use_persian_digits') && !maneli_should_use_persian_digits()) {
+            try {
+                $timezone = function_exists('wp_timezone') ? wp_timezone() : new DateTimeZone('UTC');
+                $date = DateTime::createFromFormat('!Y-n-j', sprintf('%04d-%d-%d', $gy, $gm, $gd), $timezone);
+            } catch (Exception $e) {
+                $date = false;
+            }
+
+            if ($date instanceof DateTime) {
+                return $date->format($format);
+            }
+
+            return sprintf('%04d/%02d/%02d', $gy, $gm, $gd);
+        }
+
         $jy = ($gy <= 1600) ? 0 : 979;
         $gy -= ($gy <= 1600) ? 621 : 1600;
         
@@ -203,27 +218,28 @@ if (!function_exists('maneli_get_template_part')) {
 
 if (!function_exists('maneli_number_format_persian')) {
     /**
-     * Format number with Persian digits and thousand separators
+     * Format number with localized digits and thousand separators.
+     * Returns Persian digits only when current locale is fa.
      * 
      * @param int|float $number The number to format
      * @param int $decimals Number of decimal places
-     * @return string Formatted number with Persian digits
+     * @return string Formatted number respecting current locale
      */
     function maneli_number_format_persian($number, $decimals = 0) {
         if (!is_numeric($number)) {
-            return '۰';
+            return maneli_should_use_persian_digits() ? '۰' : '0';
         }
         
-        $formatted = number_format((float)$number, $decimals, '.', ',');
-        
-        // Convert English digits to Persian
+        $formatted = number_format_i18n((float)$number, $decimals);
+
+        if (!maneli_should_use_persian_digits()) {
+            return $formatted;
+        }
+
         $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        
-        // Convert digits to Persian
-        $result = str_replace($english_digits, $persian_digits, $formatted);
-        
-        return $result;
+
+        return str_replace($english_digits, $persian_digits, $formatted);
     }
 }
 
@@ -236,6 +252,10 @@ if (!function_exists('persian_numbers')) {
      * @return string String with Persian digits
      */
     function persian_numbers($str) {
+        if (!maneli_should_use_persian_digits()) {
+            return (string) $str;
+        }
+
         // Use maneli_number_format_persian if it exists and input is numeric
         if (function_exists('maneli_number_format_persian') && is_numeric($str)) {
             return maneli_number_format_persian($str);
@@ -259,9 +279,61 @@ if (!function_exists('persian_numbers_no_separator')) {
      * @return string String with Persian digits
      */
     function persian_numbers_no_separator($str) {
-        // Convert digits to Persian
+        if (!maneli_should_use_persian_digits()) {
+            return (string) $str;
+        }
+
         $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         return str_replace($english, $persian, (string)$str);
+    }
+}
+
+if (!function_exists('maneli_should_use_persian_digits')) {
+    /**
+     * Determine if Persian digits should be used based on locale preference.
+     *
+     * @return bool
+     */
+    function maneli_should_use_persian_digits() {
+        $locale = function_exists('determine_locale') ? determine_locale() : (function_exists('get_locale') ? get_locale() : 'fa_IR');
+        return strpos($locale, 'fa') === 0;
+    }
+}
+
+if (!function_exists('maneli_enqueue_persian_datepicker')) {
+    /**
+     * Enqueue Persian datepicker assets only when Persian locale is active.
+     *
+     * @param array $deps Optional dependencies for the script.
+     * @param string $version Script/style version.
+     * @param bool $in_footer Whether to load the script in footer.
+     * @return bool True if enqueued, false otherwise.
+     */
+    function maneli_enqueue_persian_datepicker($deps = ['jquery'], $version = '1.0.0', $in_footer = true) {
+        if (!maneli_should_use_persian_digits()) {
+            return false;
+        }
+
+        if (!wp_style_is('maneli-persian-datepicker', 'enqueued')) {
+            wp_enqueue_style(
+                'maneli-persian-datepicker',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css',
+                [],
+                $version
+            );
+        }
+
+        if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
+            wp_enqueue_script(
+                'maneli-persian-datepicker',
+                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js',
+                $deps,
+                $version,
+                $in_footer
+            );
+        }
+
+        return true;
     }
 }

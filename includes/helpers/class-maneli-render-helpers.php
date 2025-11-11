@@ -69,26 +69,36 @@ class Maneli_Render_Helpers {
      * @return string The formatted Jalali date.
      */
     public static function maneli_gregorian_to_jalali($gregorian_date_time, $format = 'Y/m/d H:i') {
+        $timestamp = strtotime($gregorian_date_time);
+        if ($timestamp === false) {
+            return (string) $gregorian_date_time;
+        }
+
+        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+
         if (function_exists('maneli_gregorian_to_jalali')) {
-            $timestamp = strtotime($gregorian_date_time);
-            
-            // تبدیل تاریخ به شمسی
-            $jalali_date = maneli_gregorian_to_jalali(
-                date('Y', $timestamp), 
-                date('m', $timestamp), 
-                date('d', $timestamp), 
+            $base_date = maneli_gregorian_to_jalali(
+                date('Y', $timestamp),
+                date('m', $timestamp),
+                date('d', $timestamp),
                 'Y/m/d'
             );
-            
-            // اگر فرمت شامل ساعت باشد، آن را اضافه کن
-            if (strpos($format, 'H:i') !== false || strpos($format, 'H:i:s') !== false) {
-                $time = date('H:i', $timestamp);
-                return $jalali_date . ' ' . $time;
+
+            $needs_time = strpos($format, 'H:i') !== false || strpos($format, 'H:i:s') !== false;
+
+            if ($needs_time) {
+                $time_format = strpos($format, 'H:i:s') !== false ? 'H:i:s' : 'H:i';
+                $time = function_exists('wp_date') ? wp_date($time_format, $timestamp) : date($time_format, $timestamp);
+                if ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
+                    $time = persian_numbers_no_separator($time);
+                }
+                return trim($base_date . ' ' . $time);
             }
-            
-            return $jalali_date;
+
+            return $base_date;
         }
-        return date($format, strtotime($gregorian_date_time));
+
+        return function_exists('wp_date') ? wp_date($format, $timestamp) : date($format, $timestamp);
     }
 
     /**
