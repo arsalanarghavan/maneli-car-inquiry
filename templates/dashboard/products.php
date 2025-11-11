@@ -899,6 +899,18 @@ $product_categories = get_terms([
     background-color: #fff5f5;
 }
 
+.maneli-year-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background-color: rgba(76, 110, 245, 0.12);
+    color: #3b4ad9;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
 .spinner {
     display: inline-block;
     width: 16px;

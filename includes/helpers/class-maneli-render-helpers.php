@@ -251,6 +251,19 @@ class Maneli_Render_Helpers {
         $min_downpayment = get_post_meta($product_id, 'min_downpayment', true);
         $car_colors = get_post_meta($product_id, '_maneli_car_colors', true);
         $car_status = get_post_meta($product_id, '_maneli_car_status', true);
+        $manufacture_year = get_post_meta($product_id, '_maneli_car_year', true);
+        $manufacture_year_raw = is_scalar($manufacture_year) ? trim((string) $manufacture_year) : '';
+        $manufacture_year_clean = '';
+        if ($manufacture_year_raw !== '') {
+            $manufacture_year_clean = preg_replace('/[^\p{N}]/u', '', $manufacture_year_raw);
+        }
+        if ($manufacture_year_clean !== '') {
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $manufacture_year_display = str_replace($english_digits, $persian_digits, $manufacture_year_clean);
+        } else {
+            $manufacture_year_display = '';
+        }
         
         // Get product categories
         $categories = wc_get_product_category_list($product_id, ', ', '', '');
@@ -289,6 +302,9 @@ class Maneli_Render_Helpers {
                             <a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank" class="text-primary">
                                 <?php echo persian_numbers(esc_html($product->get_name())); ?>
                             </a>
+                            <?php if ($manufacture_year_display !== '') : ?>
+                                <span class="badge maneli-year-badge ms-2"><?php echo esc_html($manufacture_year_display); ?></span>
+                            <?php endif; ?>
                         </p>
                     </div>
                 </div>

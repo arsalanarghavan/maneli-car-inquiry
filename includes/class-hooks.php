@@ -47,6 +47,10 @@ class Maneli_Hooks {
         add_action('wp_footer', [$this, 'track_visitor_statistics'], 999);
         add_action('template_redirect', [$this, 'track_visitor_statistics_server_side'], 1);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_visitor_tracking_scripts']);
+
+        // Frontend product title enhancements
+        add_filter('the_title', [$this, 'append_year_badge_to_single_product_title'], 20, 2);
+        add_action('wp_head', [$this, 'output_single_product_year_badge_style'], 50);
         
         // Log cleanup cron job
         add_action('maneli_cleanup_old_logs', [$this, 'cleanup_old_logs']);
@@ -94,6 +98,121 @@ class Maneli_Hooks {
         }
         
         update_option('maneli_display_names_updated_v2', 'yes');
+    }
+
+    /**
+     * Appends the manufacturing year badge to the WooCommerce single product title.
+     *
+     * @param string $title   The original post title.
+     * @param int    $post_id The post ID associated with the title.
+     *
+     * @return string
+     */
+    public function append_year_badge_to_single_product_title($title, $post_id) {
+        if (is_admin()) {
+            return $title;
+        }
+
+        if (!is_singular('product')) {
+            return $title;
+        }
+
+        $queried_product_id = get_queried_object_id();
+        if ((int) $post_id !== (int) $queried_product_id) {
+            return $title;
+        }
+
+        $post = get_post($post_id);
+        if (!$post || $post->post_type !== 'product') {
+            return $title;
+        }
+
+        $manufacture_year_raw = get_post_meta($post_id, '_maneli_car_year', true);
+        $manufacture_year_clean = $this->sanitize_product_year($manufacture_year_raw);
+
+        if ($manufacture_year_clean === '') {
+            return $title;
+        }
+
+        $manufacture_year_display = $this->convert_to_persian_digits($manufacture_year_clean);
+
+        $badge_html = sprintf(
+            ' <span class="maneli-year-badge maneli-year-badge--single">%s</span>',
+            esc_html($manufacture_year_display)
+        );
+
+        return $title . $badge_html;
+    }
+
+    /**
+     * Outputs inline styles for the product year badge on single product pages.
+     *
+     * @return void
+     */
+    public function output_single_product_year_badge_style() {
+        if (!is_singular('product')) {
+            return;
+        }
+
+        echo '<style id="maneli-single-product-year-badge">
+.single-product .product_title.entry-title .maneli-year-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(76,110,245,0.18), rgba(59,74,217,0.22));
+    color: #2432a7;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-inline-start: 0.5rem;
+    box-shadow: 0 6px 16px rgba(59, 74, 217, 0.18);
+}
+
+.single-product .product_title.entry-title .maneli-year-badge--single {
+    letter-spacing: 0.08em;
+}
+</style>';
+    }
+
+    /**
+     * Normalizes the manufacturing year value.
+     *
+     * @param mixed $year Raw year value.
+     *
+     * @return string
+     */
+    private function sanitize_product_year($year) {
+        if (!is_scalar($year)) {
+            return '';
+        }
+
+        $year_string = trim((string) $year);
+
+        if ($year_string === '') {
+            return '';
+        }
+
+        $separators = ['،', '٬', ',', '/', '\\', '-', '_'];
+        $year_string = str_replace($separators, '', $year_string);
+        $year_string = preg_replace('/\s+/u', '', $year_string);
+        $year_string = preg_replace('/[^\p{N}]/u', '', $year_string);
+
+        return $year_string;
+    }
+
+    /**
+     * Converts English digits to Persian digits.
+     *
+     * @param string $value Input numeric string.
+     *
+     * @return string
+     */
+    private function convert_to_persian_digits($value) {
+        $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+
+        return str_replace($english_digits, $persian_digits, (string) $value);
     }
 
     /**
