@@ -352,7 +352,33 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         window.maneliPersianHelpers = {};
     }
     
+    const shouldUsePersianDigits = (function() {
+        try {
+            const cookieMatch = document.cookie.match(/(?:^|;\s*)maneli_language=([^;]+)/);
+            if (cookieMatch) {
+                const lang = decodeURIComponent(cookieMatch[1]).toLowerCase();
+                if (['en', 'en-us', 'en_us', 'english'].includes(lang)) {
+                    return false;
+                }
+                if (['fa', 'fa-ir', 'fa_ir', 'persian'].includes(lang)) {
+                    return true;
+                }
+            }
+            const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+            if (htmlLang.startsWith('fa')) {
+                return true;
+            }
+            if (htmlLang.startsWith('en')) {
+                return false;
+            }
+        } catch (error) {
+            console.warn('Unable to detect digit preference', error);
+        }
+        return true;
+    })();
+
     window.maneliPersianHelpers = {
+        usePersianDigits: shouldUsePersianDigits,
         persianToEnglish: function(str) {
             if (!str) return '';
             const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -366,6 +392,9 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         
         englishToPersian: function(str) {
             if (!str) return '';
+            if (!shouldUsePersianDigits) {
+                return String(str);
+            }
             const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
             let result = String(str);
@@ -383,7 +412,8 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
             numStr = numStr.replace(/[^\d]/g, '');
             if (!numStr) return '';
             // Add thousand separators
-            const formatted = parseInt(numStr, 10).toLocaleString('en-US');
+            const locale = shouldUsePersianDigits ? 'fa-IR' : 'en-US';
+            const formatted = parseInt(numStr, 10).toLocaleString(locale);
             // Convert to Persian
             return window.maneliPersianHelpers.englishToPersian(formatted);
         },
@@ -424,11 +454,16 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         }
         
         function englishToPersian(str) {
-            return window.maneliPersianHelpers ? window.maneliPersianHelpers.englishToPersian(str) : str;
+            return (window.maneliPersianHelpers && window.maneliPersianHelpers.usePersianDigits)
+                ? window.maneliPersianHelpers.englishToPersian(str)
+                : str;
         }
         
         function formatNumberWithSeparators(value) {
-            return window.maneliPersianHelpers ? window.maneliPersianHelpers.formatNumberWithSeparators(value) : value;
+            if (!window.maneliPersianHelpers) {
+                return value;
+            }
+            return window.maneliPersianHelpers.formatNumberWithSeparators(value);
         }
         
         function getRawNumber(value) {

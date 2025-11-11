@@ -6601,6 +6601,14 @@ msgstr "قیمت نقدی ناموجود"
 msgid "Installment Price Missing"
 msgstr "قیمت اقساطی ناموجود"
 
+#: templates/dashboard/products.php
+msgid "Edit Product Prices & Status"
+msgstr "ویرایش قیمت و وضعیت محصولات"
+
+#: templates/dashboard/products.php
+msgid "New Product"
+msgstr "محصول جدید"
+
 # Notification Center Translations
 msgid "Notification Center"
 msgstr "مرکز اطلاع‌رسانی"

@@ -296,6 +296,17 @@ if (!function_exists('maneli_should_use_persian_digits')) {
      * @return bool
      */
     function maneli_should_use_persian_digits() {
+        // Respect dashboard language preference cookie first.
+        if (!empty($_COOKIE['maneli_language'])) {
+            $cookie_lang = strtolower(sanitize_text_field(wp_unslash($_COOKIE['maneli_language'])));
+            if (in_array($cookie_lang, ['en', 'en-us', 'en_us', 'english'], true)) {
+                return false;
+            }
+            if (in_array($cookie_lang, ['fa', 'fa_ir', 'fa-ir', 'persian'], true)) {
+                return true;
+            }
+        }
+
         $locale = function_exists('determine_locale') ? determine_locale() : (function_exists('get_locale') ? get_locale() : 'fa_IR');
         return strpos($locale, 'fa') === 0;
     }

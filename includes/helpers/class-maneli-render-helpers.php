@@ -243,18 +243,9 @@ class Maneli_Render_Helpers {
     public static function render_product_editor_row($product) {
         if (!($product instanceof WC_Product)) return;
         
-        // Helper function to convert numbers to Persian
-        if (!function_exists('persian_numbers')) {
-            function persian_numbers($str) {
-                // Use maneli_number_format_persian if it exists for better formatting
-                if (function_exists('maneli_number_format_persian') && is_numeric($str)) {
-                    return maneli_number_format_persian($str);
-                }
-                $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-                return str_replace($english, $persian, $str);
-            }
-        }
+        $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
         
         $product_id = $product->get_id();
         $installment_price = get_post_meta($product_id, 'installment_price', true);
@@ -265,14 +256,14 @@ class Maneli_Render_Helpers {
         $manufacture_year_raw = is_scalar($manufacture_year) ? trim((string) $manufacture_year) : '';
         $manufacture_year_clean = '';
         if ($manufacture_year_raw !== '') {
-            $manufacture_year_clean = preg_replace('/[^\p{N}]/u', '', $manufacture_year_raw);
+            $normalized_year = str_replace($persian_digits, $english_digits, $manufacture_year_raw);
+            $manufacture_year_clean = preg_replace('/[^0-9]/', '', $normalized_year);
         }
+        $manufacture_year_display = '';
         if ($manufacture_year_clean !== '') {
-            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-            $manufacture_year_display = str_replace($english_digits, $persian_digits, $manufacture_year_clean);
-        } else {
-            $manufacture_year_display = '';
+            $manufacture_year_display = $use_persian_digits
+                ? str_replace($english_digits, $persian_digits, $manufacture_year_clean)
+                : $manufacture_year_clean;
         }
         
         // Get product categories
@@ -297,9 +288,28 @@ class Maneli_Render_Helpers {
         
         // Format prices for display (Persian numbers with thousand separators)
         $regular_price = $product->get_regular_price();
-        $regular_price_formatted = $regular_price ? persian_numbers(number_format($regular_price, 0, '.', ',')) : '';
-        $installment_price_formatted = $installment_price ? persian_numbers(number_format($installment_price, 0, '.', ',')) : '';
-        $min_downpayment_formatted = $min_downpayment ? persian_numbers(number_format($min_downpayment, 0, '.', ',')) : '';
+        $regular_price_numeric = $regular_price !== '' ? str_replace($persian_digits, $english_digits, (string) $regular_price) : '';
+        $installment_price_numeric = $installment_price !== '' ? str_replace($persian_digits, $english_digits, (string) $installment_price) : '';
+        $min_downpayment_numeric = $min_downpayment !== '' ? str_replace($persian_digits, $english_digits, (string) $min_downpayment) : '';
+
+        $format_display_number = function($value) use ($use_persian_digits) {
+            if ($value === '' || $value === null) {
+                return '';
+            }
+            if ($use_persian_digits && function_exists('maneli_number_format_persian')) {
+                return maneli_number_format_persian($value, 0);
+            }
+            return number_format((float) str_replace(',', '', (string) $value), 0, '.', ',');
+        };
+
+        $regular_price_formatted = $format_display_number($regular_price_numeric);
+        $installment_price_formatted = $format_display_number($installment_price_numeric);
+        $min_downpayment_formatted = $format_display_number($min_downpayment_numeric);
+
+        $product_name = $product->get_name();
+        $product_name_display = $use_persian_digits
+            ? str_replace($english_digits, $persian_digits, $product_name)
+            : str_replace($persian_digits, $english_digits, $product_name);
         ?>
         <tr class="product-list">
             <td>
@@ -310,7 +320,7 @@ class Maneli_Render_Helpers {
                     <div>
                         <p class="fw-semibold mb-0 d-flex align-items-center">
                             <a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank" class="text-primary">
-                                <?php echo persian_numbers(esc_html($product->get_name())); ?>
+                                <?php echo esc_html($product_name_display); ?>
                             </a>
                             <?php if ($manufacture_year_display !== '') : ?>
                                 <span class="badge maneli-year-badge ms-2"><?php echo esc_html($manufacture_year_display); ?></span>
@@ -327,7 +337,7 @@ class Maneli_Render_Helpers {
                     <input type="text" class="manli-data-input manli-price-input form-control form-control-sm flex-grow-1" 
                            data-product-id="<?php echo esc_attr($product_id); ?>" 
                            data-field-type="regular_price" 
-                           data-raw-value="<?php echo esc_attr($regular_price); ?>"
+                           data-raw-value="<?php echo esc_attr($regular_price_numeric); ?>"
                            value="<?php echo esc_attr($regular_price_formatted); ?>" 
                            placeholder="<?php echo esc_attr__('Cash Price', 'maneli-car-inquiry'); ?>">
                     <span class="spinner"></span>
@@ -339,7 +349,7 @@ class Maneli_Render_Helpers {
                     <input type="text" class="manli-data-input manli-price-input form-control form-control-sm flex-grow-1" 
                            data-product-id="<?php echo esc_attr($product_id); ?>" 
                            data-field-type="installment_price" 
-                           data-raw-value="<?php echo esc_attr($installment_price); ?>"
+                           data-raw-value="<?php echo esc_attr($installment_price_numeric); ?>"
                            value="<?php echo esc_attr($installment_price_formatted); ?>" 
                            placeholder="<?php echo esc_attr__('Installment Price', 'maneli-car-inquiry'); ?>">
                     <span class="spinner"></span>
@@ -351,7 +361,7 @@ class Maneli_Render_Helpers {
                     <input type="text" class="manli-data-input manli-price-input form-control form-control-sm flex-grow-1" 
                            data-product-id="<?php echo esc_attr($product_id); ?>" 
                            data-field-type="min_downpayment" 
-                           data-raw-value="<?php echo esc_attr($min_downpayment); ?>"
+                           data-raw-value="<?php echo esc_attr($min_downpayment_numeric); ?>"
                            value="<?php echo esc_attr($min_downpayment_formatted); ?>" 
                            placeholder="<?php echo esc_attr__('Minimum Down Payment', 'maneli-car-inquiry'); ?>">
                     <span class="spinner"></span>

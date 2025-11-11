@@ -991,7 +991,7 @@ if ($need_inquiry_scripts) {
         if ($preferred_language === 'fa') {
             $datepicker_css = MANELI_PLUGIN_DIR . 'assets/css/persianDatepicker-default.css';
             $datepicker_js = MANELI_PLUGIN_DIR . 'assets/js/persianDatepicker.min.js';
-            if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
+        if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
                 $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
                 $scripts_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
             }

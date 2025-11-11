@@ -143,7 +143,7 @@
         
         <!-- Color Picker Css -->
         <link rel="stylesheet" href="./assets/libs/flatpickr/flatpickr.min.css">
-        <link rel="stylesheet" href="./assets/libs/%4@simonwep/pickr/themes/nano.min.css">
+        <link rel="stylesheet" href="./assets/libs/%40simonwep/pickr/themes/nano.min.css">
 
         <!-- Choices Css -->
         <link rel="stylesheet" href="./assets/libs/choices.js/public/assets/styles/choices.min.css">
@@ -152,7 +152,7 @@
         <link rel="stylesheet" href="./assets/libs/flatpickr/flatpickr.min.css">
 
         <!-- Auto Complete CSS -->
-        <link rel="stylesheet" href="./assets/libs/%4@tarekraafat/autocomplete.js/css/autoComplete.css">
+        <link rel="stylesheet" href="./assets/libs/%40tarekraafat/autocomplete.js/css/autoComplete.css">
         <!-- End::Styles -->
 
         
@@ -2554,7 +2554,7 @@
         <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
         <!-- Popper JS -->
-        <script src="./assets/libs/%4@popperjs/core/umd/popper.min.js"></script>
+        <script src="./assets/libs/%40popperjs/core/umd/popper.min.js"></script>
 
         <!-- Bootstrap JS -->
         <script src="./assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -2567,10 +2567,10 @@
          <script src="./assets/js/simplebar.js"></script>
 
          <!-- Auto Complete JS -->
-         <script src="./assets/libs/%4@tarekraafat/autocomplete.js/autoComplete.min.js"></script>
+         <script src="./assets/libs/%40tarekraafat/autocomplete.js/autoComplete.min.js"></script>
 
          <!-- Color Picker JS -->
-         <script src="./assets/libs/%4@simonwep/pickr/pickr.es5.min.js"></script>
+         <script src="./assets/libs/%40simonwep/pickr/pickr.es5.min.js"></script>
 
          <!-- Date & Time Picker JS -->
          <script src="./assets/libs/flatpickr/flatpickr.min.js"></script>
@@ -2753,7 +2753,7 @@
                 }
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
+            function attachFallbackHandler() {
                 var sidemenuToggle = document.querySelector('.sidemenu-toggle');
                 if (!sidemenuToggle) {
                     return;
@@ -2764,21 +2764,25 @@
                     event.stopPropagation();
 
                     if (typeof window.toggleSidemenu === 'function') {
-                        try {
-                            window.toggleSidemenu();
-                            return;
-                        } catch (error) {
-                            console.warn('[Maneli] toggleSidemenu threw an error, using fallback.', error);
-                        }
+                        window.toggleSidemenu();
+                        return;
                     }
 
                     fallbackToggleSidemenu();
                 });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof window.toggleSidemenu === 'function') {
+                    return;
+                }
+                attachFallbackHandler();
             });
 
             window.addEventListener('load', function() {
                 if (typeof window.toggleSidemenu !== 'function') {
                     window.toggleSidemenu = fallbackToggleSidemenu;
+                    attachFallbackHandler();
                 }
             });
         })();

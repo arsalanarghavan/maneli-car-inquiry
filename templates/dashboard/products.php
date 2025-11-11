@@ -8,9 +8,12 @@
 // Helper function to convert numbers to Persian
 if (!function_exists('persian_numbers')) {
     function persian_numbers($str) {
+        if (function_exists('maneli_should_use_persian_digits') && !maneli_should_use_persian_digits()) {
+            return (string) $str;
+        }
         $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        return str_replace($english, $persian, $str);
+        return str_replace($english, $persian, (string) $str);
     }
 }
 
@@ -655,11 +658,11 @@ $product_categories = get_terms([
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="card-title">
                     <i class="la la-edit me-2"></i>
-                    ویرایش قیمت و وضعیت محصولات
+                    <?php esc_html_e('Edit Product Prices & Status', 'maneli-car-inquiry'); ?>
                 </div>
                 <a href="<?php echo home_url('/dashboard/add-product'); ?>" class="btn btn-primary btn-wave">
                     <i class="la la-plus me-1"></i>
-                    محصول جدید
+                    <?php esc_html_e('New Product', 'maneli-car-inquiry'); ?>
                 </a>
             </div>
             <div class="card-body">
@@ -972,7 +975,33 @@ $product_categories = get_terms([
         window.maneliPersianHelpers = {};
     }
     
+    const shouldUsePersianDigits = (function() {
+        try {
+            const cookieMatch = document.cookie.match(/(?:^|;\s*)maneli_language=([^;]+)/);
+            if (cookieMatch) {
+                const lang = decodeURIComponent(cookieMatch[1]).toLowerCase();
+                if (['en', 'en-us', 'en_us', 'english'].includes(lang)) {
+                    return false;
+                }
+                if (['fa', 'fa-ir', 'fa_ir', 'persian'].includes(lang)) {
+                    return true;
+                }
+            }
+            const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+            if (htmlLang.startsWith('fa')) {
+                return true;
+            }
+            if (htmlLang.startsWith('en')) {
+                return false;
+            }
+        } catch (e) {
+            console.warn('detecting digit preference failed', e);
+        }
+        return true;
+    })();
+
     window.maneliPersianHelpers = {
+        usePersianDigits: shouldUsePersianDigits,
         persianToEnglish: function(str) {
         const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -984,6 +1013,9 @@ $product_categories = get_terms([
         },
         
         englishToPersian: function(str) {
+            if (!shouldUsePersianDigits) {
+                return str;
+            }
             const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
             let result = str;
@@ -1001,7 +1033,8 @@ $product_categories = get_terms([
             numStr = numStr.replace(/[^\d]/g, '');
             if (!numStr) return '';
             // Add thousand separators
-            const formatted = parseInt(numStr, 10).toLocaleString('en-US');
+            const locale = shouldUsePersianDigits ? 'fa-IR' : 'en-US';
+            const formatted = parseInt(numStr, 10).toLocaleString(locale);
             // Convert to Persian
             return window.maneliPersianHelpers.englishToPersian(formatted);
         },

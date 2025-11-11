@@ -313,3 +313,47 @@
     max-height: 2.5rem !important;
 }
 
+/* Keep vertical rhythm and add indicator when sidebar shows only icons */
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item {
+    min-height: 3.25rem;
+    padding-block: 0.95rem;
+    padding-inline: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+}
+
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after {
+    content: "";
+    width: 0.35rem;
+    height: 0.35rem;
+    border-radius: 50%;
+    background: var(--menu-prime-color);
+    opacity: 0.55;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after {
+    opacity: 1;
+    transform: scale(1.15);
+}
+

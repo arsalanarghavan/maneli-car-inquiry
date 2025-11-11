@@ -5770,6 +5770,14 @@ msgstr "Cash Price Missing"
 msgid "Installment Price Missing"
 msgstr "Installment Price Missing"
 
+#: templates/dashboard/products.php
+msgid "Edit Product Prices & Status"
+msgstr "Edit Product Prices & Status"
+
+#: templates/dashboard/products.php
+msgid "New Product"
+msgstr "New Product"
+
 # Notification Center Translations
 msgid "Notification Center"
 msgstr "Notification Center"
