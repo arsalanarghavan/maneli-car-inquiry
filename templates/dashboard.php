@@ -891,6 +891,10 @@ $dark_mode_toggle_script = '<script>
             localStorage.removeItem("bodyBgRGB");
             console.log("Maneli: Switched to dark mode");
         }
+
+        if (window.maneliUpdateHeaderIcons) {
+            window.maneliUpdateHeaderIcons();
+        }
     }
     
     function initManeliDarkModeToggle() {

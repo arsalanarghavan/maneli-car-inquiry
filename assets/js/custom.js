@@ -244,6 +244,67 @@
     nanoButtons1[0].click();
     /* for theme background */
   }
+
+  /**
+   * Update header icon colors and borders based on the current theme variables.
+   * The icons occasionally fail to pick up the new CSS variable values when the theme
+   * is toggled via JavaScript, so we explicitly set them after every toggle.
+   */
+  function updateHeaderIconsTheme() {
+    const html = document.documentElement;
+    if (!html) {
+      return;
+    }
+
+    const computed = window.getComputedStyle(html);
+    const iconColor =
+      (computed.getPropertyValue("--header-prime-color") ||
+        computed.getPropertyValue("--default-text-color") ||
+        "").trim();
+    const borderColor =
+      (computed.getPropertyValue("--header-border-color") || "").trim();
+
+    if (!iconColor && !borderColor) {
+      return;
+    }
+
+    document
+      .querySelectorAll(".main-header-container .header-link-icon")
+      .forEach((icon) => {
+        icon.style.color = iconColor;
+        if (borderColor) {
+          icon.style.borderColor = borderColor;
+        }
+
+        if (icon.tagName.toLowerCase() === "svg") {
+          icon.style.stroke = iconColor;
+          icon
+            .querySelectorAll(
+              "path, circle, rect, line, polyline, polygon, ellipse"
+            )
+            .forEach((shape) => {
+              shape.style.stroke = iconColor;
+              const fillAttr = shape.getAttribute("fill");
+              if (!fillAttr || fillAttr === "currentColor") {
+                shape.style.fill = iconColor;
+              }
+            });
+        }
+      });
+  }
+
+  window.maneliUpdateHeaderIcons = function () {
+    window.requestAnimationFrame(updateHeaderIconsTheme);
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", window.maneliUpdateHeaderIcons);
+  } else {
+    window.maneliUpdateHeaderIcons();
+  }
+
+  window.addEventListener("load", window.maneliUpdateHeaderIcons);
+
   /* header theme toggle */
   function toggleTheme() {
     let html = document.querySelector("html");
@@ -309,6 +370,10 @@
       localStorage.setItem("xintraHeader", "dark");
       localStorage.removeItem("bodylightRGB");
       localStorage.removeItem("bodyBgRGB");
+    }
+
+    if (window.maneliUpdateHeaderIcons) {
+      window.maneliUpdateHeaderIcons();
     }
   }
   // Dark mode toggle - initialize with better timing and multiple retries
