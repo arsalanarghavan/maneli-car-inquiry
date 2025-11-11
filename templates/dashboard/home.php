@@ -59,6 +59,12 @@ $maneli_format_date_output = static function($date_string) use ($maneli_use_pers
     return $date_string;
 };
 
+$cash_count = 0;
+$installment_count = 0;
+$total_customer_inquiries = 0;
+$cash_percentage = 0;
+$installment_percentage = 0;
+
 if ($is_customer) {
     // ════════════════════════════════════════════════════════════
     // CUSTOMER DASHBOARD
@@ -648,7 +654,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo esc_html($maneli_format_number($stats['total_inquiries'] ?? 0)); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo esc_html($maneli_format_number($total_customer_inquiries)); ?></h4>
                             <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></span>
                         </div>
                         <div class="d-flex align-items-center justify-content-between mt-3">
@@ -672,34 +678,12 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo esc_html($maneli_format_number($stats['cash_inquiries'] ?? 0)); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo esc_html($maneli_format_number($cash_count)); ?></h4>
                             <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
                         </div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <span class="text-warning fw-medium"><?php echo esc_html($maneli_format_number($cash_percentage, 1)); ?>%</span>
-                            <span class="text-muted fs-12"><?php esc_html_e('of total inquiries', 'maneli-car-inquiry'); ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-4 col-xl">
-                <div class="card custom-card crm-card overflow-hidden">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between mb-2">
-                            <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-lg">
-                                <span class="avatar avatar-md avatar-rounded bg-info svg-white">
-                                    <i class="la la-calendar-check fs-20"></i>
-                                </span>
-                            </div>
-                        </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo esc_html($maneli_format_number($stats['installment_inquiries'] ?? 0)); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo esc_html($maneli_format_number($installment_count)); ?></h4>
                             <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></span>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <span class="text-info fw-medium"><?php echo esc_html($maneli_format_number($installment_percentage, 1)); ?>%</span>
-                            <span class="text-muted fs-12"><?php esc_html_e('of total inquiries', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
                 </div>

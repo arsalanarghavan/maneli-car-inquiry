@@ -1752,6 +1752,10 @@ msgstr ""
 msgid "Maneli Experts"
 msgstr ""
 
+#: templates/dashboard/home.php
+msgid "Registered Experts"
+msgstr ""
+
 msgid "Maneli Manager"
 msgstr ""
 

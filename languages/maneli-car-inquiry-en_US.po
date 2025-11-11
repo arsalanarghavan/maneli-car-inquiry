@@ -1233,6 +1233,10 @@ msgstr "Total Users"
 msgid "Maneli Experts"
 msgstr "Maneli Experts"
 
+#: templates/dashboard/home.php
+msgid "Registered Experts"
+msgstr "Registered Experts"
+
 msgid "Managers"
 msgstr "Managers"
 

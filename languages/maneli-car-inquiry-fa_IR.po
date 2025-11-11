@@ -1618,6 +1618,10 @@ msgstr "کل کاربران"
 msgid "Maneli Experts"
 msgstr "کارشناسان مانلی"
 
+#: templates/dashboard/home.php
+msgid "Registered Experts"
+msgstr "کارشناسان ثبت‌شده"
+
 
 msgid "Managers"
 msgstr "مدیران"
