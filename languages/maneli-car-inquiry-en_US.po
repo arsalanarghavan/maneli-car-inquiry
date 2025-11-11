@@ -5526,6 +5526,22 @@ msgstr "Total Notifications"
 msgid "Unread"
 msgstr "Unread"
 
+#: templates/dashboard/notifications.php
+msgid "All Notifications"
+msgstr "All Notifications"
+
+msgid "%s ago"
+msgstr "%s ago"
+
+msgid "%s unread"
+msgstr "%s unread"
+
+msgid "%1$s %2$s ago"
+msgstr "%1$s %2$s ago"
+
+msgid "No unread"
+msgstr "No unread"
+
 msgid "Read"
 msgstr "Read"
 

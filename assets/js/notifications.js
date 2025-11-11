@@ -45,11 +45,20 @@
                     if (response.success && response.data.count !== undefined) {
                         var count = response.data.count;
                         var $badge = $('.header-icon-pulse');
+                        var $badgeLabel = $('#header-unread-label');
                         
                         if (count > 0) {
                             $badge.text(count).show();
+                            if ($badgeLabel.length) {
+                                var template = $badgeLabel.data('template') || '%s unread';
+                                $badgeLabel.text(template.replace('%s', count));
+                            }
                         } else {
                             $badge.hide();
+                            if ($badgeLabel.length) {
+                                var emptyText = $badgeLabel.data('empty') || '';
+                                $badgeLabel.text(emptyText);
+                            }
                         }
                     }
                 },

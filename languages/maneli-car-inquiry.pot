@@ -1756,6 +1756,18 @@ msgstr ""
 msgid "Registered Experts"
 msgstr ""
 
+msgid "%s ago"
+msgstr ""
+
+msgid "%s unread"
+msgstr ""
+
+msgid "%1$s %2$s ago"
+msgstr ""
+
+msgid "No unread"
+msgstr ""
+
 msgid "Maneli Manager"
 msgstr ""
 

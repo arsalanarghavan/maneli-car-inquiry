@@ -6333,6 +6333,21 @@ msgstr "فیلترها فعال"
 msgid "Total Notifications"
 msgstr "کل اعلان‌ها"
 
+msgid "All Notifications"
+msgstr "همه اعلان‌ها"
+
+msgid "%s ago"
+msgstr "%s پیش"
+
+msgid "%s unread"
+msgstr "%s خوانده نشده"
+
+msgid "%1$s %2$s ago"
+msgstr "%1$s %2$s پیش"
+
+msgid "No unread"
+msgstr "بدون اعلان خوانده نشده"
+
 
 msgid "Unread"
 msgstr "خوانده نشده"

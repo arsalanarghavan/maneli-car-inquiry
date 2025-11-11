@@ -12,6 +12,9 @@ $current_user = wp_get_current_user();
 $is_admin = current_user_can('manage_maneli_inquiries');
 $is_expert = in_array('maneli_expert', $current_user->roles, true);
 
+$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+$use_jalali_calendar = $use_persian_digits;
+
 if (!$is_admin && !$is_expert) {
     wp_redirect(home_url('/dashboard'));
     exit;
@@ -88,29 +91,64 @@ $today_meetings = 0;
 $week_meetings = 0;
 
 // Jalali month names
-$jalali_months = [
-    esc_html__('Farvardin', 'maneli-car-inquiry'),
-    esc_html__('Ordibehesht', 'maneli-car-inquiry'),
-    esc_html__('Khordad', 'maneli-car-inquiry'),
-    esc_html__('Tir', 'maneli-car-inquiry'),
-    esc_html__('Mordad', 'maneli-car-inquiry'),
-    esc_html__('Shahrivar', 'maneli-car-inquiry'),
-    esc_html__('Mehr', 'maneli-car-inquiry'),
-    esc_html__('Aban', 'maneli-car-inquiry'),
-    esc_html__('Azar', 'maneli-car-inquiry'),
-    esc_html__('Dey', 'maneli-car-inquiry'),
-    esc_html__('Bahman', 'maneli-car-inquiry'),
-    esc_html__('Esfand', 'maneli-car-inquiry')
-];
-$jalali_days = [
-    esc_html__('Saturday', 'maneli-car-inquiry'),
-    esc_html__('Sunday', 'maneli-car-inquiry'),
-    esc_html__('Monday', 'maneli-car-inquiry'),
-    esc_html__('Tuesday', 'maneli-car-inquiry'),
-    esc_html__('Wednesday', 'maneli-car-inquiry'),
-    esc_html__('Thursday', 'maneli-car-inquiry'),
-    esc_html__('Friday', 'maneli-car-inquiry')
-];
+if ($use_jalali_calendar) {
+    $jalali_months = [
+        esc_html__('Farvardin', 'maneli-car-inquiry'),
+        esc_html__('Ordibehesht', 'maneli-car-inquiry'),
+        esc_html__('Khordad', 'maneli-car-inquiry'),
+        esc_html__('Tir', 'maneli-car-inquiry'),
+        esc_html__('Mordad', 'maneli-car-inquiry'),
+        esc_html__('Shahrivar', 'maneli-car-inquiry'),
+        esc_html__('Mehr', 'maneli-car-inquiry'),
+        esc_html__('Aban', 'maneli-car-inquiry'),
+        esc_html__('Azar', 'maneli-car-inquiry'),
+        esc_html__('Dey', 'maneli-car-inquiry'),
+        esc_html__('Bahman', 'maneli-car-inquiry'),
+        esc_html__('Esfand', 'maneli-car-inquiry')
+    ];
+    $jalali_days = [
+        esc_html__('Saturday', 'maneli-car-inquiry'),
+        esc_html__('Sunday', 'maneli-car-inquiry'),
+        esc_html__('Monday', 'maneli-car-inquiry'),
+        esc_html__('Tuesday', 'maneli-car-inquiry'),
+        esc_html__('Wednesday', 'maneli-car-inquiry'),
+        esc_html__('Thursday', 'maneli-car-inquiry'),
+        esc_html__('Friday', 'maneli-car-inquiry')
+    ];
+} else {
+    $jalali_months = [
+        esc_html__('January', 'maneli-car-inquiry'),
+        esc_html__('February', 'maneli-car-inquiry'),
+        esc_html__('March', 'maneli-car-inquiry'),
+        esc_html__('April', 'maneli-car-inquiry'),
+        esc_html__('May', 'maneli-car-inquiry'),
+        esc_html__('June', 'maneli-car-inquiry'),
+        esc_html__('July', 'maneli-car-inquiry'),
+        esc_html__('August', 'maneli-car-inquiry'),
+        esc_html__('September', 'maneli-car-inquiry'),
+        esc_html__('October', 'maneli-car-inquiry'),
+        esc_html__('November', 'maneli-car-inquiry'),
+        esc_html__('December', 'maneli-car-inquiry')
+    ];
+    $jalali_days = [
+        esc_html__('Sunday', 'maneli-car-inquiry'),
+        esc_html__('Monday', 'maneli-car-inquiry'),
+        esc_html__('Tuesday', 'maneli-car-inquiry'),
+        esc_html__('Wednesday', 'maneli-car-inquiry'),
+        esc_html__('Thursday', 'maneli-car-inquiry'),
+        esc_html__('Friday', 'maneli-car-inquiry'),
+        esc_html__('Saturday', 'maneli-car-inquiry')
+    ];
+}
+
+$persian_digit_chars = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+$english_digit_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+$normalize_digits = static function ($value) use ($persian_digit_chars, $english_digit_chars) {
+    if (!is_string($value)) {
+        $value = (string) $value;
+    }
+    return str_replace($persian_digit_chars, $english_digit_chars, $value);
+};
 
 // Helper function to convert Jalali to Gregorian (based on FullCalendar algorithm)
 if (!function_exists('maneli_jalali_to_gregorian')) {
@@ -206,7 +244,7 @@ function convert_date_to_gregorian($date_str) {
 }
 
 // Helper function to process meeting data
-function process_meeting_data($start, $inquiry_id, $inquiry_type, $is_scheduled_session, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user_id, $today) {
+function process_meeting_data($start, $inquiry_id, $inquiry_type, $is_scheduled_session, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user_id, $today, $use_jalali_calendar, $use_persian_digits, $normalize_digits) {
     if (empty($start)) return null;
     
     // Ensure inquiry_id is an integer
@@ -274,24 +312,24 @@ function process_meeting_data($start, $inquiry_id, $inquiry_type, $is_scheduled_
     $month = (int)date('m', $start_timestamp);
     $day = (int)date('d', $start_timestamp);
     
-    if (function_exists('maneli_gregorian_to_jalali')) {
-        $jalali_date = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d');
+    if ($use_jalali_calendar && function_exists('maneli_gregorian_to_jalali')) {
+        $jalali_date = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d', $use_persian_digits);
         $jalali_parts = explode('/', $jalali_date);
+        $jalali_parts = array_map($normalize_digits, $jalali_parts);
         $jalali_year = (int)$jalali_parts[0];
         $jalali_month = (int)$jalali_parts[1];
         $jalali_day = (int)$jalali_parts[2];
         $jalali_month_name = $jalali_months[$jalali_month - 1] ?? '';
-        // Map date('w') (0=Sunday, 6=Saturday) to jalali_days array (0=Saturday, 6=Friday)
         $day_of_week = date('w', $start_timestamp);
         $jalali_day_index = ($day_of_week + 1) % 7;
         $jalali_day_name = $jalali_days[$jalali_day_index] ?? '';
     } else {
-        $jalali_date = $date_str;
-        $jalali_year = $year;
-        $jalali_month = $month;
-        $jalali_day = $day;
-        $jalali_month_name = '';
-        $jalali_day_name = '';
+        $jalali_date = date_i18n('Y-m-d', $start_timestamp);
+        $jalali_year = (int)date('Y', $start_timestamp);
+        $jalali_month = (int)date('m', $start_timestamp);
+        $jalali_day = (int)date('d', $start_timestamp);
+        $jalali_month_name = $jalali_months[$jalali_month - 1] ?? date_i18n('F', $start_timestamp);
+        $jalali_day_name = $jalali_days[date('w', $start_timestamp)] ?? date_i18n('l', $start_timestamp);
     }
     
     return [
@@ -321,7 +359,7 @@ foreach ($meetings as $m) {
     $inquiry_id = absint(get_post_meta($m->ID, 'meeting_inquiry_id', true));
     $inquiry_type = get_post_meta($m->ID, 'meeting_inquiry_type', true);
     
-    $meeting_data = process_meeting_data($start, $inquiry_id, $inquiry_type, false, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today);
+    $meeting_data = process_meeting_data($start, $inquiry_id, $inquiry_type, false, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today, $use_jalali_calendar, $use_persian_digits, $normalize_digits);
     if ($meeting_data) {
         $meeting_data['id'] = $m->ID;
         $meetings_data[] = $meeting_data;
@@ -345,7 +383,7 @@ foreach ($cash_inquiries as $inquiry) {
     if (!$meeting_date_gregorian) continue;
     
     $start = $meeting_date_gregorian . ' ' . $meeting_time;
-    $meeting_data = process_meeting_data($start, $inquiry_id, 'cash', true, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today);
+    $meeting_data = process_meeting_data($start, $inquiry_id, 'cash', true, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today, $use_jalali_calendar, $use_persian_digits, $normalize_digits);
     if ($meeting_data) {
         $meeting_data['id'] = 'cash_' . $inquiry_id;
         $meetings_data[] = $meeting_data;
@@ -369,7 +407,7 @@ foreach ($installment_inquiries as $inquiry) {
     if (!$meeting_date_gregorian) continue;
     
     $start = $meeting_date_gregorian . ' ' . $meeting_time;
-    $meeting_data = process_meeting_data($start, $inquiry_id, 'installment', true, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today);
+    $meeting_data = process_meeting_data($start, $inquiry_id, 'installment', true, $jalali_months, $jalali_days, $is_expert, $is_admin, $current_user->ID, $today, $use_jalali_calendar, $use_persian_digits, $normalize_digits);
     if ($meeting_data) {
         $meeting_data['id'] = 'installment_' . $inquiry_id;
         $meetings_data[] = $meeting_data;
@@ -424,17 +462,22 @@ while ($current_date <= $end_date) {
     $month = (int)date('m', $current_date);
     $day = (int)date('d', $current_date);
     
-    if (function_exists('maneli_gregorian_to_jalali')) {
-        $jalali = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d');
+    if ($use_jalali_calendar && function_exists('maneli_gregorian_to_jalali')) {
+        $jalali = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d', $use_persian_digits);
         $jalali_parts = explode('/', $jalali);
+        $jalali_parts = array_map($normalize_digits, $jalali_parts);
+        $jalali_year = (int)$jalali_parts[0];
+        $jalali_month = (int)$jalali_parts[1];
+        $jalali_day = (int)$jalali_parts[2];
+        $day_of_week = date('w', $current_date);
+        $jalali_day_index = ($day_of_week + 1) % 7;
         $date_mapping[$greg_date] = [
             'jalali_date' => $jalali,
-            'jalali_year' => (int)$jalali_parts[0],
-            'jalali_month' => (int)$jalali_parts[1],
-            'jalali_day' => (int)$jalali_parts[2],
-            'jalali_month_name' => $jalali_months[(int)$jalali_parts[1] - 1] ?? '',
-            // Map date('w') (0=Sunday, 6=Saturday) to jalali_days array (0=Saturday, 6=Friday)
-            'jalali_day_name' => $jalali_days[((date('w', $current_date) + 1) % 7)] ?? '',
+            'jalali_year' => $jalali_year,
+            'jalali_month' => $jalali_month,
+            'jalali_day' => $jalali_day,
+            'jalali_month_name' => $jalali_months[$jalali_month - 1] ?? '',
+            'jalali_day_name' => $jalali_days[$jalali_day_index] ?? '',
         ];
     } else {
         $date_mapping[$greg_date] = [
@@ -442,9 +485,8 @@ while ($current_date <= $end_date) {
             'jalali_year' => $year,
             'jalali_month' => $month,
             'jalali_day' => $day,
-            'jalali_month_name' => '',
-            'day_of_week' => date('w', $current_date),
-            'jalali_day_name' => '',
+            'jalali_month_name' => date_i18n('F', $current_date),
+            'jalali_day_name' => $jalali_days[date('w', $current_date)] ?? date_i18n('l', $current_date),
         ];
     }
     $current_date = strtotime('+1 day', $current_date);
@@ -834,6 +876,8 @@ $total_meetings = count($meetings_data);
     const startHour = '<?php echo esc_js($start_hour); ?>';
     const endHour = '<?php echo esc_js($end_hour); ?>';
     const todayGreg = '<?php echo esc_js($today); ?>';
+    const shouldUsePersianDigits = <?php echo $use_persian_digits ? 'true' : 'false'; ?>;
+    const useJalaliCalendar = <?php echo $use_jalali_calendar ? 'true' : 'false'; ?>;
     
     // Calendar texts
     const texts = {
@@ -850,8 +894,11 @@ $total_meetings = count($meetings_data);
     
     // Helper: Convert to Persian digits
     function toPersian(str) {
+        if (!shouldUsePersianDigits) {
+            return String(str);
+        }
         const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        return String(str).replace(/[0-9]/g, (w) => persian[parseInt(w)]);
+        return String(str).replace(/[0-9]/g, (w) => persian[parseInt(w, 10)]);
     }
     
     // Helper: Convert Persian digits to English (for URLs)
@@ -938,21 +985,18 @@ $total_meetings = count($meetings_data);
     
     // Weekly Calendar
     let currentWeekStart = new Date();
-    // Find Saturday of current week (Saturday = first day of week)
-    // getDay(): 0=Sunday, 1=Monday, ..., 6=Saturday
-    // We want Saturday (6) to be the first day
     const dayOfWeek = currentWeekStart.getDay();
-    if (dayOfWeek === 6) {
-        // Already Saturday, no change needed
-        currentWeekStart.setDate(currentWeekStart.getDate());
-    } else if (dayOfWeek === 0) {
-        // Sunday, go back 1 day
-        currentWeekStart.setDate(currentWeekStart.getDate() - 1);
-                } else {
-        // Monday-Friday, go back to Saturday
-        currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek + 1));
+    if (useJalaliCalendar) {
+        if (dayOfWeek === 6) {
+            currentWeekStart.setDate(currentWeekStart.getDate());
+        } else if (dayOfWeek === 0) {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 1);
+        } else {
+            currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek + 1));
+        }
+    } else {
+        currentWeekStart.setDate(currentWeekStart.getDate() - dayOfWeek);
     }
-    // Set to start of day
     currentWeekStart.setHours(0, 0, 0, 0);
     
     function renderWeeklyCalendar() {
@@ -1122,10 +1166,8 @@ $total_meetings = count($meetings_data);
         // Get first day of Jalali month
         const firstDay = monthDays[0].date;
         
-        // Get starting day (adjust for Saturday = first day of week)
-        // getDay(): 0=Sunday, 1=Monday, ..., 6=Saturday
-        // jalaliDays array: [0]=Saturday, [1]=Sunday, [2]=Monday, ..., [6]=Friday
-        let startDay = (firstDay.getDay() + 1) % 7;
+        // Determine starting day based on active calendar
+        let startDay = useJalaliCalendar ? (firstDay.getDay() + 1) % 7 : firstDay.getDay();
         
         let html = '<div class="monthly-calendar-grid">';
         

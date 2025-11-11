@@ -3308,22 +3308,151 @@ class Maneli_Ajax_Handler {
         }
         
         $notifications = Maneli_Notification_Handler::get_notifications($args);
+
+        $user_locale = function_exists('get_user_locale') ? get_user_locale($user_id) : get_locale();
+        $switched_locale = false;
+        if ($user_locale && function_exists('switch_to_locale')) {
+            $current_locale = function_exists('determine_locale') ? determine_locale() : get_locale();
+            if ($current_locale !== $user_locale) {
+                switch_to_locale($user_locale);
+                $switched_locale = true;
+            }
+        }
         
         // Format for output
         $formatted_notifications = array();
         foreach ($notifications as $notification) {
+            $localized = $this->localize_notification_entry($notification);
+            $created_at = $notification->created_at;
+            $time_diff = human_time_diff(strtotime($created_at), current_time('timestamp'));
+            $localized_time = $this->format_relative_time($time_diff);
+
             $formatted_notifications[] = array(
                 'id' => $notification->id,
-                'title' => $notification->title,
-                'message' => $notification->message,
+                'title' => $localized['title'],
+                'message' => $localized['message'],
                 'type' => $notification->type,
                 'link' => $notification->link,
                 'is_read' => (bool)$notification->is_read,
-                'created_at' => sprintf(esc_html__('%s ago', 'maneli-car-inquiry'), human_time_diff(strtotime($notification->created_at), current_time('timestamp'))),
+                'created_at' => $localized_time,
             );
         }
-        
+
+        if ($switched_locale && function_exists('restore_previous_locale')) {
+            restore_previous_locale();
+        }
+
         wp_send_json_success(['notifications' => $formatted_notifications]);
+    }
+
+    /**
+     * Translate human readable time difference.
+     *
+     * @param string $time_diff e.g. "6 hours"
+     * @return string Localized relative time.
+     */
+    private function format_relative_time($time_diff) {
+        if (empty($time_diff)) {
+            return '';
+        }
+
+        // Attempt to split "6 hours" into [6, hours]
+        $parts = explode(' ', $time_diff, 2);
+        if (count($parts) < 2) {
+            return sprintf(esc_html__('%s ago', 'maneli-car-inquiry'), $time_diff);
+        }
+
+        list($number, $unit) = $parts;
+
+        // Translate common units
+        $unit_key = strtolower($unit);
+        $unit_translations = array(
+            'second' => esc_html__('second', 'maneli-car-inquiry'),
+            'seconds' => esc_html__('seconds', 'maneli-car-inquiry'),
+            'minute' => esc_html__('minute', 'maneli-car-inquiry'),
+            'minutes' => esc_html__('minutes', 'maneli-car-inquiry'),
+            'hour' => esc_html__('hour', 'maneli-car-inquiry'),
+            'hours' => esc_html__('hours', 'maneli-car-inquiry'),
+            'day' => esc_html__('day', 'maneli-car-inquiry'),
+            'days' => esc_html__('days', 'maneli-car-inquiry'),
+            'week' => esc_html__('week', 'maneli-car-inquiry'),
+            'weeks' => esc_html__('weeks', 'maneli-car-inquiry'),
+            'month' => esc_html__('month', 'maneli-car-inquiry'),
+            'months' => esc_html__('months', 'maneli-car-inquiry'),
+            'year' => esc_html__('year', 'maneli-car-inquiry'),
+            'years' => esc_html__('years', 'maneli-car-inquiry'),
+        );
+
+        if (isset($unit_translations[$unit_key])) {
+            $unit = $unit_translations[$unit_key];
+        }
+
+        return sprintf(
+            esc_html__('%1$s %2$s ago', 'maneli-car-inquiry'),
+            $number,
+            $unit
+        );
+    }
+    /**
+     * Localize notification content if it was stored in a different language.
+     *
+     * @param object $notification
+     * @return array{title:string,message:string}
+     */
+    private function localize_notification_entry($notification) {
+        $title = $notification->title;
+        $message = $notification->message;
+
+        if ($notification->type === 'inquiry_new') {
+            // Normalize cash inquiry notification
+            if ($this->string_contains($title, 'New Cash Inquiry')) {
+                $title = esc_html__('New Cash Inquiry', 'maneli-car-inquiry');
+            } elseif ($this->string_contains($title, 'New Installment Inquiry')) {
+                $title = esc_html__('New Installment Inquiry', 'maneli-car-inquiry');
+            }
+
+            if (preg_match('/A new cash inquiry from (.+) for (.+) has been registered/i', $message, $matches)) {
+                $customer = $matches[1];
+                $car = $matches[2];
+                $message = sprintf(
+                    esc_html__('A new cash inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    $customer,
+                    $car
+                );
+            } elseif (preg_match('/A new installment inquiry from (.+) for (.+) has been registered/i', $message, $matches)) {
+                $customer = $matches[1];
+                $car = $matches[2];
+                $message = sprintf(
+                    esc_html__('A new installment inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    $customer,
+                    $car
+                );
+            }
+        }
+
+        return [
+            'title' => $title,
+            'message' => $message,
+        ];
+    }
+
+    /**
+     * Determine if needle exists within haystack (multibyte-safe).
+     *
+     * @param string $haystack
+     * @param string $needle
+     * @return bool
+     */
+    private function string_contains($haystack, $needle) {
+        if ($haystack === '' || $needle === '') {
+            return false;
+        }
+
+        if (function_exists('mb_stripos')) {
+            return mb_stripos($haystack, $needle) !== false;
+        }
+
+        return stripos($haystack, $needle) !== false;
     }
     
     /**
