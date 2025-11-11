@@ -2735,52 +2735,57 @@
         <script src="./assets/js/sidebar-toggle.js"></script>
         
         <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var sidemenuToggle = document.querySelector('.sidemenu-toggle');
-            if (!sidemenuToggle) {
-                return;
+        (function() {
+            function fallbackToggleSidemenu() {
+                var html = document.documentElement;
+                var body = document.body;
+                if (!html || !body) {
+                    return;
+                }
+
+                var isOpen = html.classList.toggle('sidenav-toggled');
+                body.classList.toggle('sidebar-open', isOpen);
+
+                if (html.getAttribute('data-toggled') === 'open') {
+                    html.setAttribute('data-toggled', 'close');
+                } else if (html.getAttribute('data-toggled') === 'close') {
+                    html.setAttribute('data-toggled', 'open');
+                }
             }
 
-            sidemenuToggle.addEventListener('click', function(event) {
-                if (typeof toggleSidemenu === 'function') {
+            document.addEventListener('DOMContentLoaded', function() {
+                var sidemenuToggle = document.querySelector('.sidemenu-toggle');
+                if (!sidemenuToggle) {
+                    return;
+                }
+
+                sidemenuToggle.addEventListener('click', function(event) {
                     event.preventDefault();
                     event.stopPropagation();
-                    toggleSidemenu();
-                } else {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    document.body.classList.toggle('sidebar-open');
-                    document.documentElement.classList.toggle('sidenav-toggled');
+
+                    if (typeof window.toggleSidemenu === 'function') {
+                        try {
+                            window.toggleSidemenu();
+                            return;
+                        } catch (error) {
+                            console.warn('[Maneli] toggleSidemenu threw an error, using fallback.', error);
+                        }
+                    }
+
+                    fallbackToggleSidemenu();
+                });
+            });
+
+            window.addEventListener('load', function() {
+                if (typeof window.toggleSidemenu !== 'function') {
+                    window.toggleSidemenu = fallbackToggleSidemenu;
                 }
             });
-        });
+        })();
         </script>
 
+        <!-- Function to toggle fullscreen mode -->
         <script>
-        /* Sidebar toggle fallback */
-        document.addEventListener('DOMContentLoaded', function() {
-            var sidemenuToggle = document.querySelector('.sidemenu-toggle');
-            if (!sidemenuToggle) {
-                return;
-            }
-
-            sidemenuToggle.addEventListener('click', function(event) {
-                if (typeof toggleSidemenu === 'function') {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    toggleSidemenu();
-                } else {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    document.body.classList.toggle('sidebar-open');
-                    document.documentElement.classList.toggle('sidenav-toggled');
-                }
-            });
-        });
-        
-        /* Function to toggle fullscreen mode */
-
-</script>
     </body> 
 
 </html>

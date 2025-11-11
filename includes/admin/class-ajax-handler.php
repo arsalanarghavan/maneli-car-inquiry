@@ -3369,18 +3369,26 @@ class Maneli_Ajax_Handler {
         $unit_translations = array(
             'second' => esc_html__('second', 'maneli-car-inquiry'),
             'seconds' => esc_html__('seconds', 'maneli-car-inquiry'),
+            'ثانیه' => esc_html__('seconds', 'maneli-car-inquiry'),
+            'ثانیه\u200c' => esc_html__('seconds', 'maneli-car-inquiry'),
             'minute' => esc_html__('minute', 'maneli-car-inquiry'),
             'minutes' => esc_html__('minutes', 'maneli-car-inquiry'),
+            'دقیقه' => esc_html__('minutes', 'maneli-car-inquiry'),
             'hour' => esc_html__('hour', 'maneli-car-inquiry'),
             'hours' => esc_html__('hours', 'maneli-car-inquiry'),
+            'ساعت' => esc_html__('hours', 'maneli-car-inquiry'),
             'day' => esc_html__('day', 'maneli-car-inquiry'),
             'days' => esc_html__('days', 'maneli-car-inquiry'),
+            'روز' => esc_html__('days', 'maneli-car-inquiry'),
             'week' => esc_html__('week', 'maneli-car-inquiry'),
             'weeks' => esc_html__('weeks', 'maneli-car-inquiry'),
+            'هفته' => esc_html__('weeks', 'maneli-car-inquiry'),
             'month' => esc_html__('month', 'maneli-car-inquiry'),
             'months' => esc_html__('months', 'maneli-car-inquiry'),
+            'ماه' => esc_html__('months', 'maneli-car-inquiry'),
             'year' => esc_html__('year', 'maneli-car-inquiry'),
             'years' => esc_html__('years', 'maneli-car-inquiry'),
+            'سال' => esc_html__('years', 'maneli-car-inquiry'),
         );
 
         if (isset($unit_translations[$unit_key])) {
@@ -3393,6 +3401,7 @@ class Maneli_Ajax_Handler {
             $unit
         );
     }
+
     /**
      * Localize notification content if it was stored in a different language.
      *
@@ -3405,9 +3414,9 @@ class Maneli_Ajax_Handler {
 
         if ($notification->type === 'inquiry_new') {
             // Normalize cash inquiry notification
-            if ($this->string_contains($title, 'New Cash Inquiry')) {
+            if ($this->string_contains($title, 'New Cash Inquiry') || $this->string_contains($title, 'استعلام نقدی جدید')) {
                 $title = esc_html__('New Cash Inquiry', 'maneli-car-inquiry');
-            } elseif ($this->string_contains($title, 'New Installment Inquiry')) {
+            } elseif ($this->string_contains($title, 'New Installment Inquiry') || $this->string_contains($title, 'استعلام اقساطی جدید')) {
                 $title = esc_html__('New Installment Inquiry', 'maneli-car-inquiry');
             }
 
@@ -3419,7 +3428,23 @@ class Maneli_Ajax_Handler {
                     $customer,
                     $car
                 );
+            } elseif (preg_match('/یک استعلام نقدی جدید از (.+) برای (.+) ثبت شده است/u', $message, $matches)) {
+                $customer = $matches[1];
+                $car = $matches[2];
+                $message = sprintf(
+                    esc_html__('A new cash inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    $customer,
+                    $car
+                );
             } elseif (preg_match('/A new installment inquiry from (.+) for (.+) has been registered/i', $message, $matches)) {
+                $customer = $matches[1];
+                $car = $matches[2];
+                $message = sprintf(
+                    esc_html__('A new installment inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    $customer,
+                    $car
+                );
+            } elseif (preg_match('/یک استعلام اقساطی جدید از (.+) برای (.+) ثبت شده است/u', $message, $matches)) {
                 $customer = $matches[1];
                 $car = $matches[2];
                 $message = sprintf(

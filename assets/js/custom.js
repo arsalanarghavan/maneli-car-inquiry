@@ -257,12 +257,53 @@
     }
 
     const computed = window.getComputedStyle(html);
-    const iconColor =
+    let iconColor =
       (computed.getPropertyValue("--header-prime-color") ||
         computed.getPropertyValue("--default-text-color") ||
         "").trim();
-    const borderColor =
+    let borderColor =
       (computed.getPropertyValue("--header-border-color") || "").trim();
+    const fallbackColor =
+      (computed.getPropertyValue("--default-text-color") || "").trim() ||
+      "#0f172a";
+    const headerStyle = (html.getAttribute("data-header-styles") || "").toLowerCase();
+
+    function normalizeColor(value) {
+      return (value || "")
+        .replace(/\s+/g, "")
+        .replace(/;$/, "")
+        .toLowerCase();
+    }
+
+    function isColorLight(value) {
+      const color = normalizeColor(value);
+      if (!color) return false;
+      return (
+        color === "#fff" ||
+        color === "#ffffff" ||
+        color === "fff" ||
+        color === "ffffff" ||
+        color === "white" ||
+        color === "rgb(255,255,255)" ||
+        color === "rgba(255,255,255,1)" ||
+        color === "rgba(255,255,255,1.0)" ||
+        color === "hsl(0,0%,100%)"
+      );
+    }
+
+    if (!iconColor || headerStyle === "light") {
+      if (!iconColor || isColorLight(iconColor)) {
+        iconColor = fallbackColor;
+      }
+    }
+
+    if (!iconColor) {
+      iconColor = fallbackColor;
+    }
+
+    if (!borderColor || isColorLight(borderColor)) {
+      borderColor = fallbackColor;
+    }
 
     if (!iconColor && !borderColor) {
       return;
