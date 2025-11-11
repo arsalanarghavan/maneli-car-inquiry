@@ -1233,6 +1233,15 @@ msgstr "Total Users"
 msgid "Maneli Experts"
 msgstr "Maneli Experts"
 
+#: includes/public/class-cash-inquiry-handler.php
+msgid "New Cash Inquiry"
+msgstr "New Cash Inquiry"
+
+#: includes/public/class-cash-inquiry-handler.php
+#, php-format
+msgid "A new cash inquiry from %s for %s has been registered"
+msgstr "A new cash inquiry from %s for %s has been registered"
+
 #: templates/dashboard/home.php
 msgid "Registered Experts"
 msgstr "Registered Experts"

@@ -657,12 +657,6 @@ if ($is_customer) {
                             <h4 class="mb-0 d-flex align-items-center"><?php echo esc_html($maneli_format_number($total_customer_inquiries)); ?></h4>
                             <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></span>
                         </div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <span class="text-success fw-medium">
-                                <i class="la la-arrow-<?php echo $total_growth > 0 ? 'up' : 'down'; ?> fs-11"></i><?php echo esc_html($maneli_format_number($total_growth, 1)); ?>%
-                            </span>
-                            <span class="text-muted fs-12"><?php esc_html_e('vs last 30 days', 'maneli-car-inquiry'); ?></span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -681,6 +675,20 @@ if ($is_customer) {
                             <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo esc_html($maneli_format_number($cash_count)); ?></h4>
                             <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl">
+                <div class="card custom-card crm-card overflow-hidden">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="p-2 border border-info border-opacity-10 bg-info-transparent rounded-pill">
+                                <span class="avatar avatar-md avatar-rounded bg-info svg-white">
+                                    <i class="la la-credit-card fs-20"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center text-info"><?php echo esc_html($maneli_format_number($installment_count)); ?></h4>
                             <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></span>
@@ -749,12 +757,6 @@ if ($is_customer) {
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo esc_html($maneli_format_number($stats['total_inquiries'] ?? 0)); ?></h4>
                             <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></span>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <span class="text-success fw-medium">
-                                <i class="la la-arrow-<?php echo $total_growth > 0 ? 'up' : 'down'; ?> fs-11"></i><?php echo esc_html($maneli_format_number($total_growth, 1)); ?>%
-                            </span>
-                            <span class="text-muted fs-12"><?php esc_html_e('vs last 30 days', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -1671,21 +1673,21 @@ if ($is_customer) {
                             const usePersianDigits = typeof window.maneliShouldUsePersianDates === 'function' ? window.maneliShouldUsePersianDates() : true;
                             let displayCredit = String(formatted);
                             if (usePersianDigits) {
-                                const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                                const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-                                for (let i = 0; i < 10; i++) {
+                            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                            for (let i = 0; i < 10; i++) {
                                     displayCredit = displayCredit.split(englishDigits[i]).join(persianDigits[i]);
                                 }
                             }
-                             
-                             // Determine color based on credit amount
-                             let creditClass = 'text-info';
-                             if (credit < 1000) {
-                                 creditClass = 'text-danger';
-                             } else if (credit < 5000) {
-                                 creditClass = 'text-warning';
-                             }
-                             
+                            
+                            // Determine color based on credit amount
+                            let creditClass = 'text-info';
+                            if (credit < 1000) {
+                                creditClass = 'text-danger';
+                            } else if (credit < 5000) {
+                                creditClass = 'text-warning';
+                            }
+                            
                             creditDisplay.innerHTML = '<span class="' + creditClass + '">' + displayCredit + '</span>';
                         } else {
                             creditDisplay.innerHTML = '<span class="text-danger"><?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?></span>';

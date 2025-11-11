@@ -71,6 +71,8 @@ if ($notification_user_id > 0) {
     $read_count = $total_notifications - $unread_count;
 }
 
+$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+
 // Get all new inquiries (for admin and experts)
 $new_inquiries = [];
 if ($is_admin || $is_expert) {
@@ -304,20 +306,20 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="all-tab" data-filter="all" type="button" role="tab">
                             <i class="la la-list me-1"></i>
-                            همه اعلان‌ها
+                            <?php esc_html_e('All Notifications', 'maneli-car-inquiry'); ?>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="unread-tab" data-filter="unread" type="button" role="tab">
                             <i class="la la-bell-slash me-1"></i>
-                            خوانده نشده
+                            <?php esc_html_e('Unread', 'maneli-car-inquiry'); ?>
                             <span class="badge bg-danger ms-1" id="unread-badge"><?php echo maneli_number_format_persian($unread_count); ?></span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="read-tab" data-filter="read" type="button" role="tab">
                             <i class="la la-check-circle me-1"></i>
-                            خوانده شده
+                            <?php esc_html_e('Read', 'maneli-car-inquiry'); ?>
                         </button>
                     </li>
                 </ul>
@@ -331,9 +333,9 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     <!-- Notifications will be loaded here -->
                     <div class="text-center py-5">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">در حال بارگذاری...</span>
+                            <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
                         </div>
-                        <p class="text-muted mt-3">در حال بارگذاری اعلان‌ها...</p>
+                        <p class="text-muted mt-3"><?php esc_html_e('Loading notifications...', 'maneli-car-inquiry'); ?></p>
                     </div>
                 </div>
             </div>
@@ -381,8 +383,14 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
             deleteAllReadConfirm: <?php echo wp_json_encode(esc_html__('Are you sure you want to delete all read notifications?', 'maneli-car-inquiry')); ?>,
             deleting: <?php echo wp_json_encode(esc_html__('Deleting...', 'maneli-car-inquiry')); ?>,
             deleteRead: <?php echo wp_json_encode(esc_html__('Delete Read', 'maneli-car-inquiry')); ?>,
-            deleteConfirm: <?php echo wp_json_encode(esc_html__('Are you sure you want to delete this notification?', 'maneli-car-inquiry')); ?>
+            deleteConfirm: <?php echo wp_json_encode(esc_html__('Are you sure you want to delete this notification?', 'maneli-car-inquiry')); ?>,
+            loadingShort: <?php echo wp_json_encode(esc_html__('Loading...', 'maneli-car-inquiry')); ?>,
+            loadingLong: <?php echo wp_json_encode(esc_html__('Loading notifications...', 'maneli-car-inquiry')); ?>,
+            unreadLabel: <?php echo wp_json_encode(esc_html__('%s unread', 'maneli-car-inquiry')); ?>,
+            errorPrefix: <?php echo wp_json_encode(esc_html__('Error: ', 'maneli-car-inquiry')); ?>
         };
+
+        const shouldUsePersianDigits = <?php echo $use_persian_digits ? 'true' : 'false'; ?>;
         
         // Load notifications
     function loadNotifications(filter) {
@@ -402,7 +410,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
         $('#notifications-container').html(
             '<div class="text-center py-3">' +
             '<div class="spinner-border spinner-border-sm text-primary" role="status"></div>' +
-            '<p class="text-muted mt-2 mb-0">در حال بارگذاری...</p>' +
+            '<p class="text-muted mt-2 mb-0">' + notifTranslations.loadingShort + '</p>' +
             '</div>'
         );
         
@@ -525,10 +533,12 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     var unread = response.data.count || 0;
                     var total = parseInt($('#notifications-container .notification-item').length) || 0;
                     var read = total - parseInt($('#notifications-container .notification-item.unread-notification').length) || 0;
+                    var unreadText = notifTranslations.unreadLabel.replace('%s', formatNotificationNumber(unread));
+                    var unreadZeroText = notifTranslations.unreadLabel.replace('%s', formatNotificationNumber(0));
                     
-                    $('#unread-count').text(formatPersianNumber(unread));
-                    $('#unread-badge').text(formatPersianNumber(unread));
-                    $('#read-count').text(formatPersianNumber(read));
+                    $('#unread-count').text(formatNotificationNumber(unread));
+                    $('#unread-badge').text(formatNotificationNumber(unread));
+                    $('#read-count').text(formatNotificationNumber(read));
                     
                     if (unread === 0) {
                         $('#unread-badge').hide();
@@ -540,7 +550,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     var $headerBadge = $('.header-icon-pulse');
                     if ($headerBadge.length) {
                         if (unread > 0) {
-                            $headerBadge.text(formatPersianNumber(unread)).show();
+                            $headerBadge.text(formatNotificationNumber(unread)).show();
                         } else {
                             $headerBadge.hide();
                         }
@@ -549,20 +559,23 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     // Update header notification count badge if exists
                     var $headerCountBadge = $('#notifiation-data');
                     if ($headerCountBadge.length && unread > 0) {
-                        $headerCountBadge.text(formatPersianNumber(unread) + ' خوانده نشده');
+                        $headerCountBadge.text(unreadText);
                     } else if ($headerCountBadge.length) {
-                        $headerCountBadge.text('0 خوانده نشده');
+                        $headerCountBadge.text(unreadZeroText);
                     }
                 }
             }
         });
     }
     
-    // Format Persian number
-    function formatPersianNumber(num) {
+    // Format localized number
+    function formatNotificationNumber(num) {
+        if (!shouldUsePersianDigits) {
+            return String(num);
+        }
         var persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return String(num).replace(/\d/g, function(w) {
-            return persianDigits[parseInt(w)];
+            return persianDigits[parseInt(w, 10)];
         });
     }
     
@@ -610,7 +623,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                         }
                     }
                 } else {
-                    alert('خطا: ' + (response.data.message || notifTranslations.operationFailed));
+                    alert(notifTranslations.errorPrefix + (response.data.message || notifTranslations.operationFailed));
                 }
             },
             error: function() {
@@ -643,7 +656,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     loadNotifications(currentFilter);
                     updateCounts();
                 } else {
-                    alert('خطا: ' + (response.data.message || notifTranslations.operationFailed));
+                    alert(notifTranslations.errorPrefix + (response.data.message || notifTranslations.operationFailed));
                 }
             },
             error: function() {

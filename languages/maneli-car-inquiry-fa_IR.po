@@ -1618,6 +1618,15 @@ msgstr "کل کاربران"
 msgid "Maneli Experts"
 msgstr "کارشناسان مانلی"
 
+#: includes/public/class-cash-inquiry-handler.php
+msgid "New Cash Inquiry"
+msgstr "استعلام نقدی جدید"
+
+#: includes/public/class-cash-inquiry-handler.php
+#, php-format
+msgid "A new cash inquiry from %s for %s has been registered"
+msgstr "یک استعلام نقدی جدید از %s برای %s ثبت شده است"
+
 #: templates/dashboard/home.php
 msgid "Registered Experts"
 msgstr "کارشناسان ثبت‌شده"

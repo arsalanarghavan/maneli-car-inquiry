@@ -143,7 +143,7 @@
         
         <!-- Color Picker Css -->
         <link rel="stylesheet" href="./assets/libs/flatpickr/flatpickr.min.css">
-        <link rel="stylesheet" href="./assets/libs/%40simonwep/pickr/themes/nano.min.css">
+        <link rel="stylesheet" href="./assets/libs/%4@simonwep/pickr/themes/nano.min.css">
 
         <!-- Choices Css -->
         <link rel="stylesheet" href="./assets/libs/choices.js/public/assets/styles/choices.min.css">
@@ -152,7 +152,7 @@
         <link rel="stylesheet" href="./assets/libs/flatpickr/flatpickr.min.css">
 
         <!-- Auto Complete CSS -->
-        <link rel="stylesheet" href="./assets/libs/%40tarekraafat/autocomplete.js/css/autoComplete.css">
+        <link rel="stylesheet" href="./assets/libs/%4@tarekraafat/autocomplete.js/css/autoComplete.css">
         <!-- End::Styles -->
 
         
@@ -2664,7 +2664,7 @@
             // We just need to wait for it to load
             var sidemenuToggle = document.querySelector('.sidemenu-toggle');
             if (sidemenuToggle && typeof toggleSidemenu === 'function') {
-                console.log('Sidebar toggle is working');
+                // default menu handles toggling
             }
         });
         
@@ -2734,6 +2734,53 @@
         <!-- Sidebar Toggle and Dark Mode JS -->
         <script src="./assets/js/sidebar-toggle.js"></script>
         
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidemenuToggle = document.querySelector('.sidemenu-toggle');
+            if (!sidemenuToggle) {
+                return;
+            }
+
+            sidemenuToggle.addEventListener('click', function(event) {
+                if (typeof toggleSidemenu === 'function') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleSidemenu();
+                } else {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    document.body.classList.toggle('sidebar-open');
+                    document.documentElement.classList.toggle('sidenav-toggled');
+                }
+            });
+        });
+        </script>
+
+        <script>
+        /* Sidebar toggle fallback */
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidemenuToggle = document.querySelector('.sidemenu-toggle');
+            if (!sidemenuToggle) {
+                return;
+            }
+
+            sidemenuToggle.addEventListener('click', function(event) {
+                if (typeof toggleSidemenu === 'function') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleSidemenu();
+                } else {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    document.body.classList.toggle('sidebar-open');
+                    document.documentElement.classList.toggle('sidenav-toggled');
+                }
+            });
+        });
+        
+        /* Function to toggle fullscreen mode */
+
+</script>
     </body> 
 
 </html>
