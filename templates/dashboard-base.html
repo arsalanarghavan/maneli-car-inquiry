@@ -2604,14 +2604,14 @@
             $(document).ready(function() {
                 
                 if (typeof window.maneliShouldUsePersianDates === 'function' && window.maneliShouldUsePersianDates() && typeof jQuery !== 'undefined' && typeof jQuery.fn.persianDatepicker === 'function') {
-                    $('#daterange').persianDatepicker({
+                $('#daterange').persianDatepicker({
                         onShow: function() {
                           
                         },
                         onSelect: function () {
                              
                         }
-                    });
+                });
                 }
                 
                 
@@ -2743,13 +2743,44 @@
                     return;
                 }
 
-                var isOpen = html.classList.toggle('sidenav-toggled');
-                body.classList.toggle('sidebar-open', isOpen);
+                var navStyle = html.getAttribute('data-nav-style') || 'icon-click';
+                var viewportWide = window.innerWidth >= 992;
 
-                if (html.getAttribute('data-toggled') === 'open') {
-                    html.setAttribute('data-toggled', 'close');
-                } else if (html.getAttribute('data-toggled') === 'close') {
-                    html.setAttribute('data-toggled', 'open');
+                if (viewportWide) {
+                    var closedValue;
+                    switch (navStyle) {
+                        case 'menu-click':
+                            closedValue = 'menu-click-closed';
+                            break;
+                        case 'menu-hover':
+                            closedValue = 'menu-hover-closed';
+                            break;
+                        case 'icon-hover':
+                            closedValue = 'icon-hover-closed';
+                            break;
+                        case 'icon-click':
+                        default:
+                            closedValue = 'icon-click-closed';
+                            break;
+                    }
+
+                    if (html.getAttribute('data-toggled') === closedValue) {
+                        html.removeAttribute('data-toggled');
+                        body.classList.remove('sidebar-open');
+                        html.classList.remove('sidenav-toggled');
+                    } else {
+                        html.setAttribute('data-toggled', closedValue);
+                        body.classList.add('sidebar-open');
+                        html.classList.add('sidenav-toggled');
+                    }
+                } else {
+                    if (html.getAttribute('data-toggled') === 'open') {
+                        html.setAttribute('data-toggled', 'close');
+                        body.classList.remove('sidebar-open');
+                    } else {
+                        html.setAttribute('data-toggled', 'open');
+                        body.classList.add('sidebar-open');
+                    }
                 }
             }
 

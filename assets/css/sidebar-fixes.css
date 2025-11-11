@@ -314,27 +314,40 @@
 }
 
 /* Keep vertical rhythm and add indicator when sidebar shows only icons */
+[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
+[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide > .side-menu__item,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
 [data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
 [data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
 [data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
 [data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item,
 [data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item {
-    min-height: 3.25rem;
-    padding-block: 0.95rem;
-    padding-inline: 0.75rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.45rem;
+    position: relative !important;
+    min-height: 3.25rem !important;
+    padding-block: 0.95rem !important;
+    padding-inline: 0.75rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    text-align: center !important;
 }
 
-[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
-[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
-[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
-[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
-[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after {
+[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
+[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub > .side-menu__item::after,
+[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide > .side-menu__item::after,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after {
     content: "";
+    display: block;
     width: 0.35rem;
     height: 0.35rem;
     border-radius: 50%;
@@ -343,17 +356,36 @@
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
-[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
-[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
-[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
-[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub:hover > .side-menu__item::after,
-[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
-[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
-[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
-[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after,
-[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.has-sub.open > .side-menu__item::after {
+[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
+[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
+[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after {
     opacity: 1;
     transform: scale(1.15);
+}
+
+.sidenav-toggled .app-sidebar .side-menu__label {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+.sidenav-toggled .app-sidebar .side-menu__icon {
+    display: flex !important;
+    margin-inline: 0 !important;
+    justify-content: center !important;
+    font-size: 1.25rem !important;
+    line-height: 1 !important;
 }
 

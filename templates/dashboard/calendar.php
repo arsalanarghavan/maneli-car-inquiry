@@ -92,29 +92,29 @@ $week_meetings = 0;
 
 // Jalali month names
 if ($use_jalali_calendar) {
-    $jalali_months = [
-        esc_html__('Farvardin', 'maneli-car-inquiry'),
-        esc_html__('Ordibehesht', 'maneli-car-inquiry'),
-        esc_html__('Khordad', 'maneli-car-inquiry'),
-        esc_html__('Tir', 'maneli-car-inquiry'),
-        esc_html__('Mordad', 'maneli-car-inquiry'),
-        esc_html__('Shahrivar', 'maneli-car-inquiry'),
-        esc_html__('Mehr', 'maneli-car-inquiry'),
-        esc_html__('Aban', 'maneli-car-inquiry'),
-        esc_html__('Azar', 'maneli-car-inquiry'),
-        esc_html__('Dey', 'maneli-car-inquiry'),
-        esc_html__('Bahman', 'maneli-car-inquiry'),
-        esc_html__('Esfand', 'maneli-car-inquiry')
-    ];
-    $jalali_days = [
-        esc_html__('Saturday', 'maneli-car-inquiry'),
-        esc_html__('Sunday', 'maneli-car-inquiry'),
-        esc_html__('Monday', 'maneli-car-inquiry'),
-        esc_html__('Tuesday', 'maneli-car-inquiry'),
-        esc_html__('Wednesday', 'maneli-car-inquiry'),
-        esc_html__('Thursday', 'maneli-car-inquiry'),
-        esc_html__('Friday', 'maneli-car-inquiry')
-    ];
+$jalali_months = [
+    esc_html__('Farvardin', 'maneli-car-inquiry'),
+    esc_html__('Ordibehesht', 'maneli-car-inquiry'),
+    esc_html__('Khordad', 'maneli-car-inquiry'),
+    esc_html__('Tir', 'maneli-car-inquiry'),
+    esc_html__('Mordad', 'maneli-car-inquiry'),
+    esc_html__('Shahrivar', 'maneli-car-inquiry'),
+    esc_html__('Mehr', 'maneli-car-inquiry'),
+    esc_html__('Aban', 'maneli-car-inquiry'),
+    esc_html__('Azar', 'maneli-car-inquiry'),
+    esc_html__('Dey', 'maneli-car-inquiry'),
+    esc_html__('Bahman', 'maneli-car-inquiry'),
+    esc_html__('Esfand', 'maneli-car-inquiry')
+];
+$jalali_days = [
+    esc_html__('Saturday', 'maneli-car-inquiry'),
+    esc_html__('Sunday', 'maneli-car-inquiry'),
+    esc_html__('Monday', 'maneli-car-inquiry'),
+    esc_html__('Tuesday', 'maneli-car-inquiry'),
+    esc_html__('Wednesday', 'maneli-car-inquiry'),
+    esc_html__('Thursday', 'maneli-car-inquiry'),
+    esc_html__('Friday', 'maneli-car-inquiry')
+];
 } else {
     $jalali_months = [
         esc_html__('January', 'maneli-car-inquiry'),
@@ -987,13 +987,13 @@ $total_meetings = count($meetings_data);
     let currentWeekStart = new Date();
     const dayOfWeek = currentWeekStart.getDay();
     if (useJalaliCalendar) {
-        if (dayOfWeek === 6) {
-            currentWeekStart.setDate(currentWeekStart.getDate());
-        } else if (dayOfWeek === 0) {
-            currentWeekStart.setDate(currentWeekStart.getDate() - 1);
-        } else {
-            currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek + 1));
-        }
+    if (dayOfWeek === 6) {
+        currentWeekStart.setDate(currentWeekStart.getDate());
+    } else if (dayOfWeek === 0) {
+        currentWeekStart.setDate(currentWeekStart.getDate() - 1);
+                } else {
+        currentWeekStart.setDate(currentWeekStart.getDate() - (dayOfWeek + 1));
+    }
     } else {
         currentWeekStart.setDate(currentWeekStart.getDate() - dayOfWeek);
     }
