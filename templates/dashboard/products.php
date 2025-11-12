@@ -694,9 +694,9 @@ $product_categories = get_terms([
                             </div>
                             
                             <!-- Filters Row - Full Width in One Line -->
-                            <div class="row g-2 align-items-end">
+                            <div class="row g-3 align-items-end">
                                 <!-- Status Filter -->
-                                <div class="col">
+                                <div class="col-6 col-lg-2">
                                     <label for="filter_status" class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
                                     <select name="filter_status" id="filter_status" class="form-control form-select">
                                         <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
@@ -707,7 +707,7 @@ $product_categories = get_terms([
                                 </div>
                                 
                                 <!-- Brand Filter -->
-                                <div class="col">
+                                <div class="col-6 col-lg-2">
                                     <label for="filter_brand" class="form-label"><?php esc_html_e('Brand', 'maneli-car-inquiry'); ?></label>
                                     <select name="filter_brand" id="filter_brand" class="form-control form-select">
                                         <option value=""><?php esc_html_e('All Brands', 'maneli-car-inquiry'); ?></option>
@@ -723,7 +723,7 @@ $product_categories = get_terms([
                                 </div>
                                 
                                 <!-- Category Filter -->
-                                <div class="col">
+                                <div class="col-6 col-lg-2">
                                     <label for="filter_category" class="form-label"><?php esc_html_e('Category', 'maneli-car-inquiry'); ?></label>
                                     <select name="filter_category" id="filter_category" class="form-control form-select">
                                         <option value=""><?php esc_html_e('All Categories', 'maneli-car-inquiry'); ?></option>
@@ -739,7 +739,7 @@ $product_categories = get_terms([
                                 </div>
                                 
                                 <!-- Price Availability Filter -->
-                                <div class="col">
+                                <div class="col-6 col-lg-2">
                                     <label for="filter_price" class="form-label"><?php esc_html_e('Price Availability', 'maneli-car-inquiry'); ?></label>
                                     <select name="filter_price" id="filter_price" class="form-control form-select">
                                         <option value=""><?php esc_html_e('All Products', 'maneli-car-inquiry'); ?></option>
@@ -751,17 +751,20 @@ $product_categories = get_terms([
                                 </div>
                                 
                                 <!-- Action Buttons -->
-                                <div class="col-auto">
-                                    <label class="form-label d-block" style="visibility: hidden;">&nbsp;</label>
-                                    <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary btn-wave">
-                                            <i class="la la-filter me-1"></i>
-                                            <?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
-                                        </button>
-                                        <a href="<?php echo esc_url(home_url('/dashboard/products')); ?>" class="btn btn-secondary btn-wave">
-                                            <i class="la la-times me-1"></i>
-                                            <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
-                                        </a>
+                                <div class="col-12 col-lg-2">
+                                    <div class="row g-2">
+                                        <div class="col-6 col-lg-6">
+                                            <button type="submit" class="btn btn-primary btn-wave w-100">
+                                                <i class="la la-filter me-1"></i>
+                                                <?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
+                                            </button>
+                                        </div>
+                                        <div class="col-6 col-lg-6">
+                                            <a href="<?php echo esc_url(home_url('/dashboard/products')); ?>" class="btn btn-secondary btn-wave w-100">
+                                                <i class="la la-times me-1"></i>
+                                                <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

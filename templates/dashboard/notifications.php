@@ -141,15 +141,21 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                 </nav>
                 <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Notifications and Alerts', 'maneli-car-inquiry'); ?></h1>
             </div>
-            <div class="btn-list">
-                <button type="button" class="btn btn-primary btn-wave" id="mark-all-read-btn">
-                    <i class="la la-check-double me-1"></i>
-                    <?php esc_html_e('Mark All as Read', 'maneli-car-inquiry'); ?>
-                </button>
-                <button type="button" class="btn btn-light btn-wave" id="delete-read-btn">
-                    <i class="la la-trash me-1"></i>
-                    <?php esc_html_e('Delete Read', 'maneli-car-inquiry'); ?>
-                </button>
+            <div class="btn-list w-100 w-lg-auto">
+                <div class="row g-2 g-lg-0">
+                    <div class="col-6 col-lg-auto">
+                        <button type="button" class="btn btn-primary btn-wave w-100 w-lg-auto" id="mark-all-read-btn">
+                            <i class="la la-check-double me-1"></i>
+                            <?php esc_html_e('Mark All as Read', 'maneli-car-inquiry'); ?>
+                        </button>
+                    </div>
+                    <div class="col-6 col-lg-auto">
+                        <button type="button" class="btn btn-light btn-wave w-100 w-lg-auto" id="delete-read-btn">
+                            <i class="la la-trash me-1"></i>
+                            <?php esc_html_e('Delete Read', 'maneli-car-inquiry'); ?>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- End::page-header -->
@@ -239,11 +245,26 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
 .card.custom-card.crm-card .bg-danger {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
 }
+
+.notification-tabs-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.notification-tabs-scroll .nav {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+}
+
+.notification-tabs-scroll .nav-link {
+    white-space: nowrap;
+}
+
 </style>
 
         <!-- Statistics Cards -->
         <div class="row mb-4">
-            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6 col-xl-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -261,7 +282,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -279,7 +300,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     </div>
                 </div>
             </div>
-            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -300,7 +321,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
         </div>
 
         <!-- Filter Tabs -->
-        <div class="card custom-card mb-4">
+        <div class="card custom-card mb-4 notification-tabs-scroll">
             <div class="card-body">
                 <ul class="nav nav-pills mb-0" id="notification-filter-tabs" role="tablist">
                     <li class="nav-item" role="presentation">

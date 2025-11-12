@@ -104,3 +104,54 @@ div.kamadatepicker-body .kamadatepicker-day.disabled {
 div.kamadatepicker-body .kamadatepicker-day.disabled:hover {
     background-color: transparent;
 }
+
+/* === Dark Mode Overrides === */
+[data-theme-mode="dark"] div.kamadatepicker-container {
+    background: #000000 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.55) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-header {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-header .kamadatepicker-month-name {
+    color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-header button {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-header button:hover {
+    background-color: rgba(73, 168, 255, 0.18) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-body .kamadatepicker-day-name {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-body .kamadatepicker-day {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-body .kamadatepicker-day:hover:not(.selected) {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-body .kamadatepicker-day.today {
+    border-color: #49a8ff !important;
+    color: #49a8ff !important;
+    background: rgba(73, 168, 255, 0.1) !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-body .kamadatepicker-day.selected {
+    background-color: #49a8ff !important;
+    color: #0b1e33 !important;
+}
+
+[data-theme-mode="dark"] div.kamadatepicker-body .kamadatepicker-day.disabled {
+    color: rgba(255, 255, 255, 0.25) !important;
+}

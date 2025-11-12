@@ -112,8 +112,8 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                             <div class="maneli-mobile-filter-body" data-maneli-filter-body>
                             <form id="maneli-cash-inquiry-filter-form" onsubmit="return false;">
                                 <!-- Search Field -->
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-12">
+                                <div class="row g-3">
+                                    <div class="col-12">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">
                                                 <i class="la la-search"></i>
@@ -124,8 +124,8 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                                 </div>
                                 
                                 <!-- Filter Controls -->
-                                <div class="row g-2 align-items-end mb-3">
-                                    <div class="col">
+                                <div class="row g-3 align-items-end mt-1">
+                                    <div class="col-6 col-lg-2">
                                         <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
                                         <select id="cash-inquiry-status-filter" class="form-select form-select-sm">
                                             <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
@@ -135,7 +135,7 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                                         </select>
                                     </div>
                                     
-                                    <div class="col">
+                                    <div class="col-6 col-lg-2">
                                         <label class="form-label"><?php esc_html_e('Sort:', 'maneli-car-inquiry'); ?></label>
                                         <select id="cash-inquiry-sort-filter" class="form-select form-select-sm">
                                             <option value="default"><?php esc_html_e('Default (Newest First)', 'maneli-car-inquiry'); ?></option>
@@ -146,17 +146,20 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                                     </div>
                                     
                                     <!-- Action Buttons -->
-                                    <div class="col-auto">
-                                        <label class="form-label d-block" style="visibility: hidden;">&nbsp;</label>
-                                        <div class="d-flex gap-2">
-                                            <button type="button" id="cash-inquiry-reset-filters" class="btn btn-outline-secondary btn-sm">
-                                                <i class="la la-refresh me-1"></i>
-                                                <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
-                                            </button>
-                                            <button type="button" id="cash-inquiry-apply-filters" class="btn btn-primary btn-sm">
-                                                <i class="la la-filter me-1"></i>
-                                                <?php esc_html_e('Apply', 'maneli-car-inquiry'); ?>
-                                            </button>
+                                    <div class="col-12 col-lg-2">
+                                        <div class="row g-2">
+                                            <div class="col-6 col-lg-6">
+                                                <button type="button" id="cash-inquiry-apply-filters" class="btn btn-primary btn-sm w-100">
+                                                    <i class="la la-filter me-1"></i>
+                                                    <?php esc_html_e('Apply', 'maneli-car-inquiry'); ?>
+                                                </button>
+                                            </div>
+                                            <div class="col-6 col-lg-6">
+                                                <button type="button" id="cash-inquiry-reset-filters" class="btn btn-outline-secondary btn-sm w-100">
+                                                    <i class="la la-refresh me-1"></i>
+                                                    <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

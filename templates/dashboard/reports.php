@@ -161,133 +161,142 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <i class="la la-filter"></i><?php esc_html_e('Advanced Filters', 'maneli-car-inquiry'); ?>
                             <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
                 </div>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="resetFilters()" data-ignore-filter-toggle>
+                        <button class="btn btn-sm btn-outline-secondary d-none d-lg-inline-flex" onclick="resetFilters()" data-ignore-filter-toggle>
                             <i class="la la-refresh me-1"></i><?php esc_html_e('Reset Filters', 'maneli-car-inquiry'); ?>
                         </button>
                     </div>
                     <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
-                        <form id="reports-filter-form" method="get" class="row g-3">
-                            <!-- Period Filter -->
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('Time Period:', 'maneli-car-inquiry'); ?></label>
-                                <select name="period" id="period-filter" class="form-select">
-                                    <option value="today" <?php selected($period, 'today'); ?>><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
-                                    <option value="yesterday" <?php selected($period, 'yesterday'); ?>><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
-                                    <option value="weekly" <?php selected($period, 'weekly'); ?>><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
-                                    <option value="monthly" <?php selected($period, 'monthly'); ?>><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
-                                    <option value="yearly" <?php selected($period, 'yearly'); ?>><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
-                                    <option value="all" <?php selected($period, 'all'); ?>><?php esc_html_e('All', 'maneli-car-inquiry'); ?></option>
-                                    <option value="custom" <?php selected($period, 'custom'); ?>><?php esc_html_e('Custom Range', 'maneli-car-inquiry'); ?></option>
-                                </select>
-                            </div>
-                            
-                            <!-- Custom Date Range (shown when custom is selected) -->
-                            <div class="col-md-2 maneli-initially-hidden" id="custom-date-start" <?php echo $period === 'custom' ? '' : 'style="display: none;"'; ?>>
-                                <label class="form-label"><?php esc_html_e('From Date:', 'maneli-car-inquiry'); ?></label>
-                                <?php 
-                                // Convert Gregorian to Jalali for display
-                                $start_jalali = '';
-                                if ($custom_start) {
-                                    $start_parts = explode('-', $custom_start);
-                                    if (count($start_parts) == 3) {
-                                        $start_jalali = maneli_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
-                                    }
-                                } elseif ($start_date) {
-                                    $start_parts = explode('-', $start_date);
-                                    if (count($start_parts) == 3) {
-                                        $start_jalali = maneli_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
-                                    }
-                                }
-                                ?>
-                                <input type="text" id="start-date-filter-jalali" class="form-control maneli-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($start_jalali); ?>" autocomplete="off">
-                                <input type="hidden" name="start_date" id="start-date-filter" value="<?php echo esc_attr($custom_start ?: $start_date); ?>">
-                            </div>
-                            <div class="col-md-2 maneli-initially-hidden" id="custom-date-end"<?php echo $period === 'custom' ? '' : ' style="display: none;"'; ?>>
-                                <label class="form-label"><?php esc_html_e('To Date:', 'maneli-car-inquiry'); ?></label>
-                                <?php 
-                                // Convert Gregorian to Jalali for display
-                                $end_jalali = '';
-                                if ($custom_end) {
-                                    $end_parts = explode('-', $custom_end);
-                                    if (count($end_parts) == 3) {
-                                        $end_jalali = maneli_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
-                                    }
-                                } elseif ($end_date) {
-                                    $end_parts = explode('-', $end_date);
-                                    if (count($end_parts) == 3) {
-                                        $end_jalali = maneli_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
-                                    }
-                                }
-                                ?>
-                                <input type="text" id="end-date-filter-jalali" class="form-control maneli-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($end_jalali); ?>" autocomplete="off">
-                                <input type="hidden" name="end_date" id="end-date-filter" value="<?php echo esc_attr($custom_end ?: $end_date); ?>">
-                            </div>
-                            
-                            <?php if (($is_admin || $is_manager) && !$filter_expert): ?>
-                            <!-- Expert Filter -->
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
-                                <select name="filter_expert" id="expert-filter" class="form-select">
-                                    <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
-                                    <?php
-                                    $all_experts = get_users(['role__in' => ['maneli_expert', 'maneli_admin', 'administrator'], 'orderby' => 'display_name']);
-                                    foreach ($all_experts as $expert):
-                                    ?>
-                                        <option value="<?php echo esc_attr($expert->ID); ?>" <?php selected($filter_expert, $expert->ID); ?>>
-                                            <?php echo esc_html($expert->display_name); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                </div>
-                    <?php endif; ?>
-                            
-                            <!-- Status Filter -->
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
-                                <select name="filter_status" id="status-filter" class="form-select">
-                                    <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                                    <?php
-                                    if (class_exists('Maneli_CPT_Handler')) {
-                                        $cash_statuses = Maneli_CPT_Handler::get_all_cash_inquiry_statuses();
-                                        foreach ($cash_statuses as $key => $label):
-                                    ?>
-                                        <option value="<?php echo esc_attr($key); ?>" <?php selected($filter_status, $key); ?>>
-                                            <?php echo esc_html($label); ?>
-                                        </option>
-                                    <?php 
-                                        endforeach;
-                                    }
-                                    ?>
-                                </select>
-                </div>
-                            
-                            <!-- Type Filter -->
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('Type:', 'maneli-car-inquiry'); ?></label>
-                                <select name="filter_type" id="type-filter" class="form-select">
-                                    <option value="all" <?php selected($filter_type, 'all'); ?>><?php esc_html_e('All', 'maneli-car-inquiry'); ?></option>
-                                    <option value="cash" <?php selected($filter_type, 'cash'); ?>><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></option>
-                                    <option value="installment" <?php selected($filter_type, 'installment'); ?>><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></option>
-                                </select>
-            </div>
-                            
-                            <!-- Product Filter -->
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('Product', 'maneli-car-inquiry'); ?>:</label>
-                                <select name="filter_product" id="product-filter" class="form-select">
-                                    <option value=""><?php esc_html_e('All Products', 'maneli-car-inquiry'); ?></option>
-                                    <?php
-                                    $products = get_posts(['post_type' => 'product', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC']);
-                                    foreach ($products as $product):
-                                    ?>
-                                        <option value="<?php echo esc_attr($product->ID); ?>" <?php selected($filter_product, $product->ID); ?>>
-                                            <?php echo esc_html($product->post_title); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-        </div>
+                        <form id="reports-filter-form" method="get">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-6 col-xl-2">
+                                    <label class="form-label"><?php esc_html_e('Time Period:', 'maneli-car-inquiry'); ?></label>
+                                    <select name="period" id="period-filter" class="form-select">
+                                        <option value="today" <?php selected($period, 'today'); ?>><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
+                                        <option value="yesterday" <?php selected($period, 'yesterday'); ?>><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
+                                        <option value="weekly" <?php selected($period, 'weekly'); ?>><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
+                                        <option value="monthly" <?php selected($period, 'monthly'); ?>><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
+                                        <option value="yearly" <?php selected($period, 'yearly'); ?>><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
+                                        <option value="all" <?php selected($period, 'all'); ?>><?php esc_html_e('All', 'maneli-car-inquiry'); ?></option>
+                                        <option value="custom" <?php selected($period, 'custom'); ?>><?php esc_html_e('Custom Range', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
 
-                            <!-- Apply Button -->
+                                <!-- Custom Date Range (shown when custom is selected) -->
+                                <div class="col-6 col-xl-2 maneli-initially-hidden" id="custom-date-start" <?php echo $period === 'custom' ? '' : 'style="display: none;"'; ?>>
+                                    <label class="form-label"><?php esc_html_e('From Date:', 'maneli-car-inquiry'); ?></label>
+                                    <?php 
+                                    $start_jalali = '';
+                                    if ($custom_start) {
+                                        $start_parts = explode('-', $custom_start);
+                                        if (count($start_parts) == 3) {
+                                            $start_jalali = maneli_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
+                                        }
+                                    } elseif ($start_date) {
+                                        $start_parts = explode('-', $start_date);
+                                        if (count($start_parts) == 3) {
+                                            $start_jalali = maneli_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
+                                        }
+                                    }
+                                    ?>
+                                    <input type="text" id="start-date-filter-jalali" class="form-control maneli-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($start_jalali); ?>" autocomplete="off">
+                                    <input type="hidden" name="start_date" id="start-date-filter" value="<?php echo esc_attr($custom_start ?: $start_date); ?>">
+                                </div>
+                                <div class="col-6 col-xl-2 maneli-initially-hidden" id="custom-date-end"<?php echo $period === 'custom' ? '' : ' style="display: none;"'; ?>>
+                                    <label class="form-label"><?php esc_html_e('To Date:', 'maneli-car-inquiry'); ?></label>
+                                    <?php 
+                                    $end_jalali = '';
+                                    if ($custom_end) {
+                                        $end_parts = explode('-', $custom_end);
+                                        if (count($end_parts) == 3) {
+                                            $end_jalali = maneli_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
+                                        }
+                                    } elseif ($end_date) {
+                                        $end_parts = explode('-', $end_date);
+                                        if (count($end_parts) == 3) {
+                                            $end_jalali = maneli_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
+                                        }
+                                    }
+                                    ?>
+                                    <input type="text" id="end-date-filter-jalali" class="form-control maneli-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($end_jalali); ?>" autocomplete="off">
+                                    <input type="hidden" name="end_date" id="end-date-filter" value="<?php echo esc_attr($custom_end ?: $end_date); ?>">
+                                </div>
+
+                                <?php if (($is_admin || $is_manager) && !$filter_expert): ?>
+                                <div class="col-6 col-xl-2">
+                                    <label class="form-label"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
+                                    <select name="filter_expert" id="expert-filter" class="form-select">
+                                        <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
+                                        <?php
+                                        $all_experts = get_users(['role__in' => ['maneli_expert', 'maneli_admin', 'administrator'], 'orderby' => 'display_name']);
+                                        foreach ($all_experts as $expert):
+                                        ?>
+                                            <option value="<?php echo esc_attr($expert->ID); ?>" <?php selected($filter_expert, $expert->ID); ?>>
+                                                <?php echo esc_html($expert->display_name); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <?php endif; ?>
+
+                                <div class="col-6 col-xl-2">
+                                    <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
+                                    <select name="filter_status" id="status-filter" class="form-select">
+                                        <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
+                                        <?php
+                                        if (class_exists('Maneli_CPT_Handler')) {
+                                            $cash_statuses = Maneli_CPT_Handler::get_all_cash_inquiry_statuses();
+                                            foreach ($cash_statuses as $key => $label):
+                                        ?>
+                                            <option value="<?php echo esc_attr($key); ?>" <?php selected($filter_status, $key); ?>>
+                                                <?php echo esc_html($label); ?>
+                                            </option>
+                                        <?php 
+                                            endforeach;
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-6 col-xl-2">
+                                    <label class="form-label"><?php esc_html_e('Type:', 'maneli-car-inquiry'); ?></label>
+                                    <select name="filter_type" id="type-filter" class="form-select">
+                                        <option value="all" <?php selected($filter_type, 'all'); ?>><?php esc_html_e('All', 'maneli-car-inquiry'); ?></option>
+                                        <option value="cash" <?php selected($filter_type, 'cash'); ?>><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></option>
+                                        <option value="installment" <?php selected($filter_type, 'installment'); ?>><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-6 col-xl-2">
+                                    <label class="form-label"><?php esc_html_e('Product', 'maneli-car-inquiry'); ?>:</label>
+                                    <select name="filter_product" id="product-filter" class="form-select">
+                                        <option value=""><?php esc_html_e('All Products', 'maneli-car-inquiry'); ?></option>
+                                        <?php
+                                        $products = get_posts(['post_type' => 'product', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC']);
+                                        foreach ($products as $product):
+                                        ?>
+                                            <option value="<?php echo esc_attr($product->ID); ?>" <?php selected($filter_product, $product->ID); ?>>
+                                                <?php echo esc_html($product->post_title); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 col-xl-2">
+                                    <div class="row g-2">
+                                        <div class="col-6 col-xl-6">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="la la-filter me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
+                                            </button>
+                                        </div>
+                                        <div class="col-6 col-xl-6">
+                                            <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                                                <i class="la la-refresh me-1"></i><?php esc_html_e('Reset Filters', 'maneli-car-inquiry'); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <?php
                             $selected_range_text = '';
                             if (function_exists('maneli_gregorian_to_jalali')) {
@@ -298,14 +307,13 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 $selected_range_text = sprintf(esc_html__('%1$s to %2$s', 'maneli-car-inquiry'), $start_date, $end_date);
                             }
                             ?>
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="la la-filter me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
-                                </button>
-                                <span class="text-muted ms-3">
-                                    <?php esc_html_e('Selected Range:', 'maneli-car-inquiry'); ?> <strong><?php echo esc_html($period_label); ?></strong>
-                                    (<?php echo esc_html($selected_range_text); ?>)
-                                </span>
+                            <div class="row g-2 mt-3 align-items-center">
+                                <div class="col-12 col-lg-auto">
+                                    <span class="text-muted d-block d-lg-inline mt-2 mt-lg-0">
+                                        <?php esc_html_e('Selected Range:', 'maneli-car-inquiry'); ?> <strong><?php echo esc_html($period_label); ?></strong>
+                                        (<?php echo esc_html($selected_range_text); ?>)
+                                    </span>
+                                </div>
                             </div>
                         </form>
                     </div>

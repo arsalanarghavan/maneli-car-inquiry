@@ -336,40 +336,53 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                 </div>
             </div>
             <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
-                <form method="get" action="<?php echo esc_url(home_url('/dashboard/notifications/email')); ?>" class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
-                        <select name="status" class="form-control form-select">
-                            <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                            <option value="sent" <?php selected($status_filter, 'sent'); ?>><?php esc_html_e('Sent', 'maneli-car-inquiry'); ?></option>
-                            <option value="failed" <?php selected($status_filter, 'failed'); ?>><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></option>
-                            <option value="pending" <?php selected($status_filter, 'pending'); ?>><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></option>
-                        </select>
+                <form method="get" action="<?php echo esc_url(home_url('/dashboard/notifications/email')); ?>">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
+                            <input type="text" name="search" class="form-control" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label"><?php esc_html_e('Date From', 'maneli-car-inquiry'); ?></label>
-                        <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
+
+                    <div class="row g-3 align-items-end mt-1">
+                        <div class="col-6 col-lg-3">
+                            <label class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
+                            <select name="status" class="form-control form-select">
+                                <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
+                                <option value="sent" <?php selected($status_filter, 'sent'); ?>><?php esc_html_e('Sent', 'maneli-car-inquiry'); ?></option>
+                                <option value="failed" <?php selected($status_filter, 'failed'); ?>><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></option>
+                                <option value="pending" <?php selected($status_filter, 'pending'); ?>><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <label class="form-label"><?php esc_html_e('Date From', 'maneli-car-inquiry'); ?></label>
+                            <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <label class="form-label"><?php esc_html_e('Date To', 'maneli-car-inquiry'); ?></label>
+                            <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label"><?php esc_html_e('Date To', 'maneli-car-inquiry'); ?></label>
-                        <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
-                        <input type="text" name="search" class="form-control" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
-                    </div>
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary btn-wave">
-                            <i class="ri-search-line me-1"></i>
-                            <?php esc_html_e('Filter', 'maneli-car-inquiry'); ?>
-                        </button>
-                        <a href="<?php echo esc_url(home_url('/dashboard/notifications/email')); ?>" class="btn btn-secondary btn-wave">
-                            <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
-                        </a>
-                        <button type="button" class="btn btn-success btn-wave" id="exportBtn">
-                            <i class="ri-download-line me-1"></i>
-                            <?php esc_html_e('Export', 'maneli-car-inquiry'); ?>
-                        </button>
+
+                    <div class="row g-2 mt-3">
+                        <div class="col-6 col-lg-auto">
+                            <button type="submit" class="btn btn-primary btn-wave w-100">
+                                <i class="ri-search-line me-1"></i>
+                                <?php esc_html_e('Filter', 'maneli-car-inquiry'); ?>
+                            </button>
+                        </div>
+                        <div class="col-6 col-lg-auto">
+                            <a href="<?php echo esc_url(home_url('/dashboard/notifications/email')); ?>" class="btn btn-secondary btn-wave w-100">
+                                <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
+                            </a>
+                        </div>
+                        <div class="col-6 col-lg-auto">
+                            <button type="button" class="btn btn-success btn-wave w-100" id="exportBtn">
+                                <i class="ri-download-line me-1"></i>
+                                <?php esc_html_e('Export', 'maneli-car-inquiry'); ?>
+                            </button>
+                        </div>
+                        <div class="col-6 d-lg-none"></div>
                     </div>
                 </form>
             </div>

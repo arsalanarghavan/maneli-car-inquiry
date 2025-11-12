@@ -243,52 +243,59 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                         </div>
                     </div>
                     <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
-                        <form id="visitor-stats-filter-form" method="get" class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label"><?php esc_html_e('Period:', 'maneli-car-inquiry'); ?></label>
-                                <select name="period" id="period-filter" class="form-select">
-                                    <option value="today"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
-                                    <option value="yesterday"><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
-                                    <option value="week" <?php selected($start_date, date('Y-m-d', strtotime('-7 days'))); ?>><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
-                                    <option value="month" <?php selected($start_date, date('Y-m-d', strtotime('-30 days'))); ?>><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
-                                    <option value="3months"><?php esc_html_e('Last 3 Months', 'maneli-car-inquiry'); ?></option>
-                                    <option value="6months"><?php esc_html_e('Last 6 Months', 'maneli-car-inquiry'); ?></option>
-                                    <option value="year"><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
-                                    <option value="custom"><?php esc_html_e('Custom Range', 'maneli-car-inquiry'); ?></option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 maneli-initially-hidden" id="custom-start-date">
-                                <label class="form-label">
-                                    <?php echo esc_html($use_persian_digits ? __('From Date (Solar):', 'maneli-car-inquiry') : __('From Date:', 'maneli-car-inquiry')); ?>
-                                </label>
-                                <input
-                                    <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
-                                    name="start_date"
-                                    id="start-date-picker"
-                                    class="form-control"
-                                    value="<?php echo esc_attr($start_date_display); ?>"
-                                    placeholder="<?php echo esc_attr($use_persian_digits ? 'YYYY/MM/DD' : 'YYYY-MM-DD'); ?>"
-                                    <?php echo $use_persian_digits ? '' : 'pattern="\\d{4}-\\d{2}-\\d{2}"'; ?>
-                                >
-                            </div>
-                            <div class="col-md-3 maneli-initially-hidden" id="custom-end-date">
-                                <label class="form-label">
-                                    <?php echo esc_html($use_persian_digits ? __('To Date (Solar):', 'maneli-car-inquiry') : __('To Date:', 'maneli-car-inquiry')); ?>
-                                </label>
-                                <input
-                                    <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
-                                    name="end_date"
-                                    id="end-date-picker"
-                                    class="form-control"
-                                    value="<?php echo esc_attr($end_date_display); ?>"
-                                    placeholder="<?php echo esc_attr($use_persian_digits ? 'YYYY/MM/DD' : 'YYYY-MM-DD'); ?>"
-                                    <?php echo $use_persian_digits ? '' : 'pattern="\\d{4}-\\d{2}-\\d{2}"'; ?>
-                                >
-                            </div>
-                            <div class="col-md-3 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary btn-wave w-100">
-                                    <i class="ri-filter-line me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
-                                </button>
+                        <form id="visitor-stats-filter-form" method="get">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-lg-3">
+                                    <label class="form-label"><?php esc_html_e('Period:', 'maneli-car-inquiry'); ?></label>
+                                    <select name="period" id="period-filter" class="form-select">
+                                        <option value="today"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
+                                        <option value="yesterday"><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
+                                        <option value="week" <?php selected($start_date, date('Y-m-d', strtotime('-7 days'))); ?>><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
+                                        <option value="month" <?php selected($start_date, date('Y-m-d', strtotime('-30 days'))); ?>><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
+                                        <option value="3months"><?php esc_html_e('Last 3 Months', 'maneli-car-inquiry'); ?></option>
+                                        <option value="6months"><?php esc_html_e('Last 6 Months', 'maneli-car-inquiry'); ?></option>
+                                        <option value="year"><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
+                                        <option value="custom"><?php esc_html_e('Custom Range', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-lg-3 maneli-initially-hidden" id="custom-start-date">
+                                    <label class="form-label">
+                                        <?php echo esc_html($use_persian_digits ? __('From Date (Solar):', 'maneli-car-inquiry') : __('From Date:', 'maneli-car-inquiry')); ?>
+                                    </label>
+                                    <input
+                                        <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
+                                        name="start_date"
+                                        id="start-date-picker"
+                                        class="form-control"
+                                        value="<?php echo esc_attr($start_date_display); ?>"
+                                        placeholder="<?php echo esc_attr($use_persian_digits ? 'YYYY/MM/DD' : 'YYYY-MM-DD'); ?>"
+                                        <?php echo $use_persian_digits ? '' : 'pattern="\d{4}-\d{2}-\d{2}"'; ?>
+                                    >
+                                </div>
+                                <div class="col-6 col-lg-3 maneli-initially-hidden" id="custom-end-date">
+                                    <label class="form-label">
+                                        <?php echo esc_html($use_persian_digits ? __('To Date (Solar):', 'maneli-car-inquiry') : __('To Date:', 'maneli-car-inquiry')); ?>
+                                    </label>
+                                    <input
+                                        <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
+                                        name="end_date"
+                                        id="end-date-picker"
+                                        class="form-control"
+                                        value="<?php echo esc_attr($end_date_display); ?>"
+                                        placeholder="<?php echo esc_attr($use_persian_digits ? 'YYYY/MM/DD' : 'YYYY-MM-DD'); ?>"
+                                        <?php echo $use_persian_digits ? '' : 'pattern="\d{4}-\d{2}-\d{2}"'; ?>
+                                    >
+                                </div>
+                                <div class="col-12 col-lg-3">
+                                    <div class="row g-2">
+                                        <div class="col-6 col-lg-12">
+                                            <button type="submit" class="btn btn-primary btn-wave w-100">
+                                                <i class="ri-filter-line me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
+                                            </button>
+                                        </div>
+                                        <div class="col-6 d-lg-none"></div>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>

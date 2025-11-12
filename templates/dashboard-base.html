@@ -2633,39 +2633,67 @@
         
         <!-- Language Switching Function -->
         <script>
-            function changeLanguage(lang) {
-                // Store language preference in localStorage
-                localStorage.setItem('maneli_language', lang);
-                
-                // Update HTML lang attribute
-                document.documentElement.lang = lang;
-                
-                // Update RTL/LTR direction
-                if (lang === 'fa') {
-                    document.documentElement.dir = 'rtl';
-                    document.documentElement.classList.add('rtl');
-                    document.documentElement.classList.remove('ltr');
-                } else {
-                    document.documentElement.dir = 'ltr';
-                    document.documentElement.classList.add('ltr');
-                    document.documentElement.classList.remove('rtl');
+            (function() {
+                const COOKIE_NAME = 'maneli_language';
+                const COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+
+                function setLanguageCookie(lang) {
+                    try {
+                        document.cookie = COOKIE_NAME + '=' + lang + '; path=/; max-age=' + COOKIE_MAX_AGE + '; SameSite=Lax';
+                    } catch (error) {
+                        console.warn('[Maneli] Unable to persist language cookie (base)', error);
+                    }
                 }
-                
-                // Reload page to apply language changes
-                window.location.reload();
-            }
-            
-            // Load saved language preference on page load
-            document.addEventListener('DOMContentLoaded', function() {
-                const savedLang = localStorage.getItem('maneli_language') || 'fa';
-                const currentLang = document.documentElement.lang || 'fa';
-                const currentDir = document.documentElement.dir || 'rtl';
-                
-                // Only apply if language/direction is different
-                if (savedLang !== currentLang || (savedLang === 'fa' && currentDir !== 'rtl') || (savedLang !== 'fa' && currentDir !== 'ltr')) {
-                    changeLanguage(savedLang);
+
+                function persistLanguage(lang) {
+                    try {
+                        localStorage.setItem('maneli_language', lang);
+                    } catch (error) {
+                        console.warn('[Maneli] Unable to persist language preference (base)', error);
+                    }
+                    setLanguageCookie(lang);
                 }
-            });
+
+                function fallbackChangeLanguage(lang) {
+                    const normalized = (typeof lang === 'string' && lang.toLowerCase().startsWith('en')) ? 'en' : 'fa';
+                    persistLanguage(normalized);
+
+                    document.documentElement.lang = normalized === 'en' ? 'en' : 'fa';
+                    document.documentElement.dir = normalized === 'en' ? 'ltr' : 'rtl';
+                    document.documentElement.classList.toggle('rtl', normalized !== 'en');
+                    document.documentElement.classList.toggle('ltr', normalized === 'en');
+
+                    window.location.reload();
+                }
+
+                if (typeof window.changeLanguage !== 'function') {
+                    window.changeLanguage = fallbackChangeLanguage;
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    let savedLang = null;
+                    try {
+                        savedLang = localStorage.getItem('maneli_language');
+                    } catch (error) {
+                        savedLang = null;
+                    }
+
+                    if (!savedLang) {
+                        return;
+                    }
+
+                    const saved = savedLang.toLowerCase();
+                    const expected = saved.startsWith('en') ? 'en' : 'fa';
+                    const currentLang = (document.documentElement.lang || '').toLowerCase();
+                    const currentDir = (document.documentElement.dir || '').toLowerCase();
+
+                    if (expected !== currentLang ||
+                        (expected === 'fa' && currentDir !== 'rtl') ||
+                        (expected === 'en' && currentDir !== 'ltr')) {
+                        window.changeLanguage(expected);
+                    }
+                });
+            })();
         </script>
         
         <script>

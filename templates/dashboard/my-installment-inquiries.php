@@ -110,8 +110,8 @@ $current_url = home_url('/dashboard/my-installment-inquiries');
                             </button>
                             <div class="maneli-mobile-filter-body" data-maneli-filter-body>
                             <form id="maneli-inquiry-filter-form" onsubmit="return false;">
-                                <div class="row g-3 mb-3">
-                                    <div class="col-md-12">
+                                <div class="row g-3">
+                                    <div class="col-12">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text">
                                                 <i class="la la-search"></i>
@@ -121,8 +121,8 @@ $current_url = home_url('/dashboard/my-installment-inquiries');
                                     </div>
                                 </div>
                                 
-                                <div class="row g-2 align-items-end mb-3">
-                                    <div class="col">
+                                <div class="row g-3 align-items-end mt-1">
+                                    <div class="col-6 col-lg-2">
                                         <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
                                         <select id="status-filter" class="form-select form-select-sm">
                                             <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
@@ -132,7 +132,7 @@ $current_url = home_url('/dashboard/my-installment-inquiries');
                                         </select>
                                     </div>
                                     
-                                    <div class="col">
+                                    <div class="col-6 col-lg-2">
                                         <label class="form-label"><?php esc_html_e('Sort:', 'maneli-car-inquiry'); ?></label>
                                         <select id="inquiry-sort-filter" class="form-select form-select-sm">
                                             <option value="default"><?php esc_html_e('Default (Newest First)', 'maneli-car-inquiry'); ?></option>
@@ -143,17 +143,20 @@ $current_url = home_url('/dashboard/my-installment-inquiries');
                                     </div>
                                     
                                     <!-- Action Buttons -->
-                                    <div class="col-auto">
-                                        <label class="form-label d-block" style="visibility: hidden;">&nbsp;</label>
-                                        <div class="d-flex gap-2">
-                                            <button type="button" id="inquiry-reset-filters" class="btn btn-outline-secondary btn-sm">
-                                                <i class="la la-refresh me-1"></i>
-                                                <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
-                                            </button>
-                                            <button type="button" id="inquiry-apply-filters" class="btn btn-primary btn-sm">
-                                                <i class="la la-filter me-1"></i>
-                                                <?php esc_html_e('Apply', 'maneli-car-inquiry'); ?>
-                                            </button>
+                                    <div class="col-12 col-lg-2">
+                                        <div class="row g-2">
+                                            <div class="col-6 col-lg-6">
+                                                <button type="button" id="inquiry-apply-filters" class="btn btn-primary btn-sm w-100">
+                                                    <i class="la la-filter me-1"></i>
+                                                    <?php esc_html_e('Apply', 'maneli-car-inquiry'); ?>
+                                                </button>
+                                            </div>
+                                            <div class="col-6 col-lg-6">
+                                                <button type="button" id="inquiry-reset-filters" class="btn btn-outline-secondary btn-sm w-100">
+                                                    <i class="la la-refresh me-1"></i>
+                                                    <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

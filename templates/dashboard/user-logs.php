@@ -230,11 +230,15 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
                                     <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
                                     <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to_raw); ?>" placeholder="1403/01/01">
                                 </div>
-                                <div class="col-6 col-lg-1">
-                                    <button type="submit" class="btn btn-primary w-100 w-lg-auto"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
-                                </div>
-                                <div class="col-6 col-lg-1">
-                                    <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>" class="btn btn-secondary w-100 w-lg-auto"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+                                <div class="col-12 col-lg-2">
+                                    <div class="row g-2">
+                                        <div class="col-6 col-lg-6">
+                                            <button type="submit" class="btn btn-primary w-100"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
+                                        </div>
+                                        <div class="col-6 col-lg-6">
+                                            <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>" class="btn btn-secondary w-100"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </form>

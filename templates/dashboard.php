@@ -302,6 +302,7 @@ $fixed_script = <<<'HTML'
     (function() {
         const COOKIE_NAME = 'maneli_language';
         const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+        const SERVER_LANGUAGE = <?php echo wp_json_encode($preferred_language === 'fa' ? 'fa' : 'en'); ?>;
 
         function shouldUsePersianDates() {
             return document.documentElement && document.documentElement.lang === 'fa';
@@ -310,12 +311,13 @@ $fixed_script = <<<'HTML'
         window.maneliShouldUsePersianDates = shouldUsePersianDates;
 
         function normalizeLanguage(lang) {
+            const serverNormalized = (SERVER_LANGUAGE === 'en') ? 'en' : 'fa';
             if (!lang) {
-                return 'fa';
+                return serverNormalized;
             }
             const value = String(lang).toLowerCase().trim();
             if (value === '') {
-                return 'fa';
+                return serverNormalized;
             }
             if (value.startsWith('en') || value === 'english') {
                 return 'en';
@@ -323,7 +325,7 @@ $fixed_script = <<<'HTML'
             if (value.startsWith('fa') || value === 'persian') {
                 return 'fa';
             }
-            return value === 'en' ? 'en' : 'fa';
+            return serverNormalized;
         }
 
         function setLanguageCookie(lang) {
@@ -368,6 +370,8 @@ $fixed_script = <<<'HTML'
 
             return normalized;
         }
+
+        window.maneliServerLanguage = SERVER_LANGUAGE;
 
         window.changeLanguage = function(lang) {
             const normalized = normalizeLanguage(lang);
@@ -417,6 +421,7 @@ $fixed_script = <<<'HTML'
 <!-- Digit & Locale Utilities -->
 <script>
     (function(window, document) {
+        const SERVER_LANGUAGE = (typeof window !== 'undefined' && window.maneliServerLanguage) ? String(window.maneliServerLanguage).toLowerCase() : '';
         const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
         const ENGLISH_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -424,22 +429,16 @@ $fixed_script = <<<'HTML'
 
         function normalizeLanguage(value) {
             if (!value) {
-                return '';
+                return SERVER_LANGUAGE || '';
             }
             const lower = String(value).toLowerCase();
-            if (lower === 'en_us' || lower === 'en-us' || lower === 'english') {
+            if (lower.startsWith('en') || lower === 'english' || lower === 'ltr') {
                 return 'en';
             }
-            if (lower === 'fa_ir' || lower === 'fa-ir' || lower === 'persian') {
+            if (lower.startsWith('fa') || lower === 'persian' || lower === 'rtl') {
                 return 'fa';
             }
-            if (lower.startsWith('en')) {
-                return 'en';
-            }
-            if (lower.startsWith('fa')) {
-                return 'fa';
-            }
-            return '';
+            return SERVER_LANGUAGE || '';
         }
 
         function toStringSafe(input) {
@@ -513,6 +512,12 @@ $fixed_script = <<<'HTML'
         }
 
         function detectLanguage() {
+            if (SERVER_LANGUAGE) {
+                const normalizedServer = normalizeLanguage(SERVER_LANGUAGE);
+                if (normalizedServer) {
+                    return normalizedServer;
+                }
+            }
             const fromLocalStorage = function() {
                 if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
                     return '';
@@ -572,7 +577,7 @@ $fixed_script = <<<'HTML'
                     return candidate;
                 }
             }
-            return 'fa';
+            return SERVER_LANGUAGE || 'fa';
         }
 
         function shouldUsePersianDigits() {

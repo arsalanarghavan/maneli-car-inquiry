@@ -289,42 +289,53 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                         </h5>
                     </div>
                     <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
-                        <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="filters-toolbar" novalidate>
-                            <div class="filters-field">
-                                <label class="form-label"><?php esc_html_e('Log Type', 'maneli-car-inquiry'); ?></label>
-                                <select name="log_type" class="form-select">
-                                    <option value=""><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
-                                    <option value="error" <?php selected($log_type, 'error'); ?>><?php esc_html_e('Error', 'maneli-car-inquiry'); ?></option>
-                                    <option value="debug" <?php selected($log_type, 'debug'); ?>><?php esc_html_e('Debug', 'maneli-car-inquiry'); ?></option>
-                                    <option value="console" <?php selected($log_type, 'console'); ?>><?php esc_html_e('Console', 'maneli-car-inquiry'); ?></option>
-                                    <option value="button_error" <?php selected($log_type, 'button_error'); ?>><?php esc_html_e('Button Error', 'maneli-car-inquiry'); ?></option>
-                                </select>
+                        <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" novalidate>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
+                                    <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
+                                </div>
                             </div>
-                            <div class="filters-field">
-                                <label class="form-label"><?php esc_html_e('Severity', 'maneli-car-inquiry'); ?></label>
-                                <select name="severity" class="form-select">
-                                    <option value=""><?php esc_html_e('All Severities', 'maneli-car-inquiry'); ?></option>
-                                    <option value="info" <?php selected($severity, 'info'); ?>><?php esc_html_e('Info', 'maneli-car-inquiry'); ?></option>
-                                    <option value="warning" <?php selected($severity, 'warning'); ?>><?php esc_html_e('Warning', 'maneli-car-inquiry'); ?></option>
-                                    <option value="error" <?php selected($severity, 'error'); ?>><?php esc_html_e('Error', 'maneli-car-inquiry'); ?></option>
-                                    <option value="critical" <?php selected($severity, 'critical'); ?>><?php esc_html_e('Critical', 'maneli-car-inquiry'); ?></option>
-                                </select>
+
+                            <div class="row g-3 align-items-end mt-1">
+                                <div class="col-6 col-lg-3">
+                                    <label class="form-label"><?php esc_html_e('Log Type', 'maneli-car-inquiry'); ?></label>
+                                    <select name="log_type" class="form-select">
+                                        <option value=""><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
+                                        <option value="error" <?php selected($log_type, 'error'); ?>><?php esc_html_e('Error', 'maneli-car-inquiry'); ?></option>
+                                        <option value="debug" <?php selected($log_type, 'debug'); ?>><?php esc_html_e('Debug', 'maneli-car-inquiry'); ?></option>
+                                        <option value="console" <?php selected($log_type, 'console'); ?>><?php esc_html_e('Console', 'maneli-car-inquiry'); ?></option>
+                                        <option value="button_error" <?php selected($log_type, 'button_error'); ?>><?php esc_html_e('Button Error', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                    <label class="form-label"><?php esc_html_e('Severity', 'maneli-car-inquiry'); ?></label>
+                                    <select name="severity" class="form-select">
+                                        <option value=""><?php esc_html_e('All Severities', 'maneli-car-inquiry'); ?></option>
+                                        <option value="info" <?php selected($severity, 'info'); ?>><?php esc_html_e('Info', 'maneli-car-inquiry'); ?></option>
+                                        <option value="warning" <?php selected($severity, 'warning'); ?>><?php esc_html_e('Warning', 'maneli-car-inquiry'); ?></option>
+                                        <option value="error" <?php selected($severity, 'error'); ?>><?php esc_html_e('Error', 'maneli-car-inquiry'); ?></option>
+                                        <option value="critical" <?php selected($severity, 'critical'); ?>><?php esc_html_e('Critical', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                    <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
+                                    <input type="<?php echo esc_attr($date_input_type); ?>" name="date_from" id="date-from-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_from_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                    <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
+                                    <input type="<?php echo esc_attr($date_input_type); ?>" name="date_to" id="date-to-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_to_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
+                                </div>
                             </div>
-                            <div class="filters-field">
-                                <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="<?php echo esc_attr($date_input_type); ?>" name="date_from" id="date-from-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_from_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
-                            </div>
-                            <div class="filters-field">
-                                <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="<?php echo esc_attr($date_input_type); ?>" name="date_to" id="date-to-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_to_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
-                            </div>
-                            <div class="filters-field">
-                                <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
-                            </div>
-                            <div class="filters-actions">
-                                <button type="submit" class="btn btn-primary"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
-                                <a href="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="btn btn-secondary"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+
+                            <div class="row g-2 mt-3">
+                                <div class="col-6 col-lg-auto">
+                                    <button type="submit" class="btn btn-primary w-100"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
+                                </div>
+                                <div class="col-6 col-lg-auto">
+                                    <a href="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="btn btn-secondary w-100"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+                                </div>
+                                <div class="col-6 d-lg-none"></div>
                             </div>
                         </form>
                     </div>

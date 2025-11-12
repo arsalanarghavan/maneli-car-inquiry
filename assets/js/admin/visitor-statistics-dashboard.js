@@ -64,6 +64,9 @@
         if (!resolvedLocale) {
             resolvedLocale = normalizeLocale(maneliVisitorStats.wpLocale);
         }
+        if (!resolvedLocale && typeof window !== 'undefined' && window.maneliServerLanguage) {
+            resolvedLocale = normalizeLocale(window.maneliServerLanguage);
+        }
         var usePersianDigits = (function resolveUsePersianDigits() {
             if (resolvedLocale === 'en' || resolvedLocale === 'en-us' || resolvedLocale === 'en_us') {
                 return false;
