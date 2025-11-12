@@ -488,12 +488,16 @@ class Maneli_Reports_Dashboard {
         
         // سازماندهی داده‌ها
         $result = [];
+        $use_persian_labels = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
         foreach ($monthly_data as $row) {
             $month = $row->month;
             if (!isset($result[$month])) {
                 $result[$month] = [
                     'month' => $month,
                     'month_persian' => self::convert_to_persian_month($month),
+                    'month_label' => $use_persian_labels
+                        ? self::convert_to_persian_month($month)
+                        : date_i18n('F Y', strtotime($month . '-01')),
                     'cash' => 0,
                     'installment' => 0,
                     'total' => 0,
@@ -1127,11 +1131,11 @@ class Maneli_Reports_Dashboard {
         $stats = self::get_overall_statistics($start_date, $end_date, $expert_id);
         
         return [
-            ['status' => 'تکمیل شده', 'count' => $stats['completed'], 'color' => '#10b981'],
-            ['status' => 'در انتظار', 'count' => $stats['new'] + $stats['in_progress'], 'color' => '#f59e0b'],
-            ['status' => 'رد شده', 'count' => $stats['rejected'], 'color' => '#ef4444'],
-            ['status' => 'ارجاع داده شده', 'count' => $stats['referred'], 'color' => '#3b82f6'],
-            ['status' => 'پیگیری برنامه‌ریزی', 'count' => $stats['followup_scheduled'], 'color' => '#8b5cf6'],
+            ['status' => esc_html__('Completed', 'maneli-car-inquiry'), 'count' => $stats['completed'], 'color' => '#10b981'],
+            ['status' => esc_html__('Pending', 'maneli-car-inquiry'), 'count' => $stats['new'] + $stats['in_progress'], 'color' => '#f59e0b'],
+            ['status' => esc_html__('Rejected', 'maneli-car-inquiry'), 'count' => $stats['rejected'], 'color' => '#ef4444'],
+            ['status' => esc_html__('Referred', 'maneli-car-inquiry'), 'count' => $stats['referred'], 'color' => '#3b82f6'],
+            ['status' => esc_html__('Follow Up Scheduled', 'maneli-car-inquiry'), 'count' => $stats['followup_scheduled'], 'color' => '#8b5cf6'],
         ];
     }
     

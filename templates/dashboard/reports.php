@@ -1402,7 +1402,7 @@ function initCharts() {
                 if (!monthlyData || monthlyData.length === 0) {
                     console.warn('Monthly stats is empty!');
                 }
-                const monthlyLabels = monthlyData.map(item => String(item.month_persian || item.month || ''));
+                const monthlyLabels = monthlyData.map(item => String(item.month_label || item.month_persian || item.month || ''));
                 const monthlyTotals = monthlyData.map(item => {
                     const val = item.total || item['total'] || 0;
                     return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
