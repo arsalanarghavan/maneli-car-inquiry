@@ -2888,6 +2888,297 @@
 
         <script>
         (function() {
+            var mobileQuery = window.matchMedia('(max-width: 767.98px)');
+
+            function normaliseIndex(index, length) {
+                if (!Number.isFinite(index)) {
+                    return 0;
+                }
+                if (index < 0) {
+                    return 0;
+                }
+                if (index >= length) {
+                    return length - 1;
+                }
+                return index;
+            }
+
+            function createStatusCard(status, index) {
+                var card = document.createElement('div');
+                card.className = 'maneli-status-mobile-card';
+                card.dataset.index = index;
+
+                var surface = document.createElement('div');
+                surface.className = 'maneli-status-card-surface';
+
+                var iconWrap = document.createElement('div');
+                iconWrap.className = 'd-flex justify-content-center';
+
+                var avatar = document.createElement('span');
+                var baseColor = typeof status.color === 'string' && status.color ? status.color : 'primary';
+                avatar.className = 'avatar avatar-lg rounded-circle bg-' + baseColor + ' d-inline-flex align-items-center justify-content-center text-white';
+
+                var icon = document.createElement('i');
+                var iconClass = typeof status.icon === 'string' && status.icon ? status.icon : 'la-info-circle';
+                icon.className = 'la ' + iconClass + ' fs-20';
+                avatar.appendChild(icon);
+                iconWrap.appendChild(avatar);
+                surface.appendChild(iconWrap);
+
+                var title = document.createElement('h6');
+                title.className = 'mt-3 mb-2 fw-semibold text-body';
+                title.textContent = typeof status.label === 'string' ? status.label : '';
+                surface.appendChild(title);
+
+                var badgeText = typeof status.state_label === 'string' ? status.state_label : '';
+                if (badgeText) {
+                    var badge = document.createElement('span');
+                    var badgeClass = 'badge ';
+                    if (status.state === 'current') {
+                        badgeClass += 'bg-primary-transparent text-primary';
+                    } else if (status.state === 'passed') {
+                        badgeClass += 'bg-success-transparent text-success';
+                    } else {
+                        badgeClass += 'bg-secondary-transparent text-secondary';
+                    }
+                    badge.className = badgeClass.trim();
+                    badge.textContent = badgeText;
+                    surface.appendChild(badge);
+                }
+
+                card.appendChild(surface);
+                return card;
+            }
+
+            function applyActiveState(cards, activeIndex, direction) {
+                var isRtl = direction === 'rtl';
+                cards.forEach(function(card, index) {
+                    card.classList.remove('is-active', 'is-prev', 'is-next', 'is-before', 'is-after');
+                    if (index === activeIndex) {
+                        card.classList.add('is-active');
+                    } else if (index === activeIndex - 1) {
+                        card.classList.add(isRtl ? 'is-next' : 'is-prev');
+                    } else if (index === activeIndex + 1) {
+                        card.classList.add(isRtl ? 'is-prev' : 'is-next');
+                    } else if (index < activeIndex - 1) {
+                        card.classList.add(isRtl ? 'is-after' : 'is-before');
+                    } else if (index > activeIndex + 1) {
+                        card.classList.add(isRtl ? 'is-before' : 'is-after');
+                    }
+                });
+            }
+
+            function initialiseStatusSlider(container) {
+                if (!container || container.__maneliStatusInitialised) {
+                    return;
+                }
+
+                var raw = container.getAttribute('data-statuses');
+                if (!raw) {
+                    return;
+                }
+
+                var statuses;
+                try {
+                    statuses = JSON.parse(raw);
+                } catch (error) {
+                    console.error('Maneli status slider: invalid JSON', error);
+                    return;
+                }
+
+                if (!Array.isArray(statuses) || statuses.length === 0) {
+                    return;
+                }
+
+                container.__maneliStatusInitialised = true;
+
+                var direction = container.getAttribute('data-status-direction') === 'rtl' ? 'rtl' : 'ltr';
+                var currentIndex = normaliseIndex(parseInt(container.getAttribute('data-current-index'), 10), statuses.length);
+                if (!Number.isFinite(currentIndex) || currentIndex < 0 || currentIndex >= statuses.length) {
+                    var derivedIndex = statuses.findIndex(function(status) {
+                        return status && status.state === 'current';
+                    });
+                    currentIndex = derivedIndex >= 0 ? derivedIndex : 0;
+                }
+
+                container.setAttribute('role', 'group');
+                if (!container.hasAttribute('tabindex')) {
+                    container.setAttribute('tabindex', '0');
+                }
+
+                var stage = document.createElement('div');
+                stage.className = 'maneli-status-mobile-stage';
+                container.appendChild(stage);
+
+                var prevButton = document.createElement('button');
+                prevButton.type = 'button';
+                prevButton.className = 'maneli-status-nav maneli-status-nav-prev';
+                var prevLabel = container.getAttribute('data-label-prev') || 'Previous status';
+                prevButton.setAttribute('aria-label', prevLabel);
+                prevButton.innerHTML = direction === 'rtl' ? '<i class="la la-angle-right"></i>' : '<i class="la la-angle-left"></i>';
+                prevButton.setAttribute('type', 'button');
+
+                var nextButton = document.createElement('button');
+                nextButton.type = 'button';
+                nextButton.className = 'maneli-status-nav maneli-status-nav-next';
+                var nextLabel = container.getAttribute('data-label-next') || 'Next status';
+                nextButton.setAttribute('aria-label', nextLabel);
+                nextButton.innerHTML = direction === 'rtl' ? '<i class="la la-angle-left"></i>' : '<i class="la la-angle-right"></i>';
+                nextButton.setAttribute('type', 'button');
+
+                container.appendChild(prevButton);
+                container.appendChild(nextButton);
+
+                var cards = statuses.map(function(status, index) {
+                    var card = createStatusCard(status || {}, index);
+                    stage.appendChild(card);
+                    return card;
+                });
+
+                function updateNavState(active) {
+                    prevButton.disabled = active <= 0;
+                    nextButton.disabled = active >= cards.length - 1;
+                }
+
+                function goTo(index) {
+                    var normalised = normaliseIndex(index, cards.length);
+                    if (normalised === currentIndex) {
+                        return;
+                    }
+                    currentIndex = normalised;
+                    container.setAttribute('data-active-index', String(currentIndex));
+                    applyActiveState(cards, currentIndex, direction);
+                    updateNavState(currentIndex);
+                }
+
+                prevButton.addEventListener('click', function() {
+                    goTo(currentIndex - 1);
+                });
+
+                nextButton.addEventListener('click', function() {
+                    goTo(currentIndex + 1);
+                });
+
+                stage.addEventListener('click', function(event) {
+                    var card = event.target.closest('.maneli-status-mobile-card');
+                    if (!card || !card.dataset.index) {
+                        return;
+                    }
+                    goTo(parseInt(card.dataset.index, 10));
+                });
+
+                container.addEventListener('keydown', function(event) {
+                    if (event.key === 'ArrowLeft') {
+                        event.preventDefault();
+                        if (direction === 'rtl') {
+                            goTo(currentIndex + 1);
+                        } else {
+                            goTo(currentIndex - 1);
+                        }
+                    } else if (event.key === 'ArrowRight') {
+                        event.preventDefault();
+                        if (direction === 'rtl') {
+                            goTo(currentIndex - 1);
+                        } else {
+                            goTo(currentIndex + 1);
+                        }
+                    }
+                });
+
+                var swipeStartX = null;
+                var swipeStartY = null;
+
+                stage.addEventListener('touchstart', function(event) {
+                    if (!mobileQuery.matches || !event.touches || event.touches.length !== 1) {
+                        return;
+                    }
+                    swipeStartX = event.touches[0].clientX;
+                    swipeStartY = event.touches[0].clientY;
+                }, { passive: true });
+
+                stage.addEventListener('touchend', function(event) {
+                    if (swipeStartX === null || swipeStartY === null) {
+                        swipeStartX = null;
+                        swipeStartY = null;
+                        return;
+                    }
+
+                    var touch = event.changedTouches && event.changedTouches[0];
+                    if (!touch) {
+                        swipeStartX = null;
+                        swipeStartY = null;
+                        return;
+                    }
+
+                    var deltaX = touch.clientX - swipeStartX;
+                    var deltaY = touch.clientY - swipeStartY;
+
+                    swipeStartX = null;
+                    swipeStartY = null;
+
+                    if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY)) {
+                        return;
+                    }
+
+                    if (deltaX < 0) {
+                        if (direction === 'rtl') {
+                            goTo(currentIndex - 1);
+                        } else {
+                            goTo(currentIndex + 1);
+                        }
+                    } else {
+                        if (direction === 'rtl') {
+                            goTo(currentIndex + 1);
+                        } else {
+                            goTo(currentIndex - 1);
+                        }
+                    }
+                }, { passive: true });
+
+                applyActiveState(cards, currentIndex, direction);
+                updateNavState(currentIndex);
+
+                mobileQuery.addEventListener('change', function(event) {
+                    if (event.matches) {
+                        applyActiveState(cards, currentIndex, direction);
+                        updateNavState(currentIndex);
+                    }
+                });
+            }
+
+            function scanStatusRoadmaps(root) {
+                var scope = root || document;
+                var nodes = scope.querySelectorAll('[data-maneli-status-mobile]');
+                nodes.forEach(initialiseStatusSlider);
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                if (mobileQuery.matches) {
+                    scanStatusRoadmaps(document);
+                } else {
+                    // Still initialise so interactions are ready if viewport shrinks
+                    scanStatusRoadmaps(document);
+                }
+            });
+
+            if ('MutationObserver' in window) {
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node instanceof HTMLElement) {
+                                scanStatusRoadmaps(node);
+                            }
+                        });
+                    });
+                });
+
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        })();
+        </script>
+
+        <script>
+        (function() {
             function fallbackToggleSidemenu() {
                 var html = document.documentElement;
                 var body = document.body;

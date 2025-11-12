@@ -163,11 +163,15 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
                 $is_rtl_view = ($preferred_language_slug === 'fa');
                 $arrow_icon_class = $is_rtl_view ? 'la-arrow-left' : 'la-arrow-right';
                 $roadmap_direction_class = $is_rtl_view ? 'status-roadmap-rtl' : 'status-roadmap-ltr';
+
+                $status_steps_payload = [];
+                $status_steps_index = 0;
+                $status_steps_current_index = 0;
                 ?>
                 
                 <!-- Main Flow -->
                 <div class="status-roadmap mb-3 <?php echo esc_attr($roadmap_direction_class); ?>">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap maneli-status-desktop">
                         <?php foreach ($all_statuses as $status_key => $status_info): 
                             $is_current = ($status_key === $current_status);
                             $is_passed = !$is_current && !$status_reached;
@@ -178,6 +182,22 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
                             
                             $opacity = $is_passed ? '1' : ($is_current ? '1' : '0.3');
                             $badge_class = $is_current ? 'bg-' . $status_info['color'] : ($is_passed ? 'bg-success-light' : 'bg-light text-muted');
+
+                            $status_steps_payload[] = [
+                                'key' => $status_key,
+                                'label' => wp_strip_all_tags($status_info['label']),
+                                'icon' => $status_info['icon'],
+                                'color' => $status_info['color'],
+                                'state' => $is_current ? 'current' : ($is_passed ? 'passed' : 'upcoming'),
+                                'state_label' => $is_current
+                                    ? esc_html__('Current Status', 'maneli-car-inquiry')
+                                    : ($is_passed ? esc_html__('Completed Stage', 'maneli-car-inquiry') : esc_html__('Upcoming Stage', 'maneli-car-inquiry'))
+                            ];
+
+                            if ($is_current) {
+                                $status_steps_current_index = $status_steps_index;
+                            }
+                            $status_steps_index++;
                         ?>
                             <div class="status-step text-center maneli-status-step" style="opacity: <?php echo esc_attr($opacity); ?>; flex: 1; position: relative;">
                                 <?php if ($is_current): ?>
@@ -209,6 +229,15 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
+                    <div
+                        class="maneli-status-mobile d-none"
+                        data-maneli-status-mobile
+                        data-status-direction="<?php echo esc_attr($is_rtl_view ? 'rtl' : 'ltr'); ?>"
+                        data-current-index="<?php echo esc_attr($status_steps_current_index); ?>"
+                        data-statuses="<?php echo esc_attr(wp_json_encode($status_steps_payload)); ?>"
+                        data-label-prev="<?php echo esc_attr(esc_html__('Previous status', 'maneli-car-inquiry')); ?>"
+                        data-label-next="<?php echo esc_attr(esc_html__('Next status', 'maneli-car-inquiry')); ?>"
+                    ></div>
                 </div>
                 
                 <!-- End Statuses -->

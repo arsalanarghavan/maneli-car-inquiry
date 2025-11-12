@@ -278,8 +278,8 @@ $dashboard_html = str_replace('src: url("./font/', 'src: url("' . MANELI_PLUGIN_
 $dashboard_html = str_replace('url(\'../fonts/', 'url(\'' . MANELI_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
 $dashboard_html = str_replace('url("../fonts/', 'url("' . MANELI_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
 
-// Remove sales-dashboard.js and apexcharts if not on home page
-if ($dashboard_page !== 'home') {
+// Remove sales-dashboard.js and apexcharts when we're not on the home or visitor statistics pages
+if ($dashboard_page !== 'home' && $dashboard_page !== 'visitor-statistics') {
     // Remove ApexCharts script
     $dashboard_html = preg_replace('/<script src=".*?apexcharts\.min\.js"><\/script>\s*/', '', $dashboard_html);
     $dashboard_html = preg_replace('/<!-- Apex Charts JS -->\s*/', '', $dashboard_html);

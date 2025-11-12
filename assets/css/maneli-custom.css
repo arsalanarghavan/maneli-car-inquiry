@@ -202,86 +202,97 @@
     to { transform: rotate(360deg); }
 }
 
-/* Sidebar Size Adjustments - Fixed Width for Consistent Sizing */
-.app-sidebar {
-    width: 240px !important;
-    min-width: 240px !important;
-    max-width: 240px !important;
-    transition: width 0.3s ease;
+/* Sidebar Size Adjustments - Fixed Width for Consistent Sizing (desktop only) */
+@media (min-width: 992px) {
+    .app-sidebar {
+        width: 240px !important;
+        min-width: 240px !important;
+        max-width: 240px !important;
+        transition: width 0.3s ease;
+    }
+
+    .app-sidebar.sticky {
+        width: 240px !important;
+    }
+
+    .app-sidebar .main-sidebar-header {
+        width: 240px !important;
+        min-width: 240px !important;
+        max-width: 240px !important;
+    }
+
+    /* Force app-content and app-header to adjust for sidebar */
+    .app-content {
+        margin-inline-start: 240px !important;
+        width: calc(100% - 240px) !important;
+        transition: margin-inline-start 0.3s ease, width 0.3s ease;
+    }
+
+    .app-header {
+        padding-inline-start: 240px !important;
+        width: calc(100% - 240px) !important;
+        transition: padding-inline-start 0.3s ease, width 0.3s ease;
+    }
+
+    /* Override all possible variations */
+    [data-nav-layout=vertical] .app-content {
+        margin-inline-start: 240px !important;
+    }
+
+    [data-nav-layout=vertical] .app-header {
+        padding-inline-start: 240px !important;
+    }
+
+    [data-width=boxed] .app-content {
+        margin-inline-start: 240px !important;
+    }
+
+    [data-nav-style=menu-click] .app-content,
+    [data-nav-style=menu-hover] .app-content,
+    [data-nav-style=icon-click] .app-content,
+    [data-nav-style=icon-hover] .app-content {
+        margin-inline-start: 240px !important;
+    }
+
+    /* When sidebar is closed/toggled */
+    [data-toggled=close] .app-sidebar,
+    [data-toggled=icon-click-closed] .app-sidebar,
+    [data-toggled=icon-hover-closed] .app-sidebar {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+    }
+
+    [data-toggled=close] .app-sidebar .main-sidebar-header,
+    [data-toggled=icon-click-closed] .app-sidebar .main-sidebar-header,
+    [data-toggled=icon-hover-closed] .app-sidebar .main-sidebar-header {
+        width: 80px !important;
+        min-width: 80px !important;
+        max-width: 80px !important;
+    }
+
+    [data-toggled=close] .app-content,
+    [data-toggled=icon-click-closed] .app-content,
+    [data-toggled=icon-hover-closed] .app-content {
+        margin-inline-start: 80px !important;
+        width: calc(100% - 80px) !important;
+    }
+
+    [data-toggled=close] .app-header,
+    [data-toggled=icon-click-closed] .app-header,
+    [data-toggled=icon-hover-closed] .app-header {
+        padding-inline-start: 80px !important;
+        width: calc(100% - 80px) !important;
+    }
 }
 
-.app-sidebar.sticky {
-    width: 240px !important;
-}
-
-.app-sidebar .main-sidebar-header {
-    width: 240px !important;
-    min-width: 240px !important;
-    max-width: 240px !important;
-}
-
-/* Force app-content and app-header to adjust for sidebar */
-.app-content {
-    margin-inline-start: 240px !important;
-    width: calc(100% - 240px) !important;
-    transition: margin-inline-start 0.3s ease, width 0.3s ease;
-}
-
-.app-header {
-    padding-inline-start: 240px !important;
-    width: calc(100% - 240px) !important;
-    transition: padding-inline-start 0.3s ease, width 0.3s ease;
-}
-
-/* Override all possible variations */
-[data-nav-layout=vertical] .app-content {
-    margin-inline-start: 240px !important;
-}
-
-[data-nav-layout=vertical] .app-header {
-    padding-inline-start: 240px !important;
-}
-
-[data-width=boxed] .app-content {
-    margin-inline-start: 240px !important;
-}
-
-[data-nav-style=menu-click] .app-content,
-[data-nav-style=menu-hover] .app-content,
-[data-nav-style=icon-click] .app-content,
-[data-nav-style=icon-hover] .app-content {
-    margin-inline-start: 240px !important;
-}
-
-/* When sidebar is closed/toggled */
-[data-toggled=close] .app-sidebar,
-[data-toggled=icon-click-closed] .app-sidebar,
-[data-toggled=icon-hover-closed] .app-sidebar {
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-}
-
-[data-toggled=close] .app-sidebar .main-sidebar-header,
-[data-toggled=icon-click-closed] .app-sidebar .main-sidebar-header,
-[data-toggled=icon-hover-closed] .app-sidebar .main-sidebar-header {
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-}
-
-[data-toggled=close] .app-content,
-[data-toggled=icon-click-closed] .app-content,
-[data-toggled=icon-hover-closed] .app-content {
-    margin-inline-start: 80px !important;
-    width: calc(100% - 80px) !important;
-}
-
-[data-toggled=close] .app-header,
-[data-toggled=icon-click-closed] .app-header,
-[data-toggled=icon-hover-closed] .app-header {
-    padding-inline-start: 80px !important;
-    width: calc(100% - 80px) !important;
+@media (max-width: 991.98px) {
+    .app-content,
+    .app-header {
+        margin-inline-start: 0 !important;
+        padding-inline-start: 0 !important;
+        width: 100% !important;
+    }
 }
 
 /* Sidebar Menu Items Size Adjustments */

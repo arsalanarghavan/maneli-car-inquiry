@@ -92,6 +92,21 @@
 
         // Align ApexCharts default locale with digit preference
         var apexLocale = usePersianDigits ? 'fa' : 'en';
+        if (apexLocale === 'fa') {
+            try {
+                var apexLocales = (window.Apex && window.Apex.chart && window.Apex.chart.locales) || [];
+                var hasFarsiLocale = Array.isArray(apexLocales) && apexLocales.some(function(locale) {
+                    return locale && locale.name === 'fa';
+                });
+                if (!hasFarsiLocale) {
+                    console.warn('ApexCharts fa locale not found. Falling back to en.');
+                    apexLocale = 'en';
+                }
+            } catch (localeCheckError) {
+                console.warn('ApexCharts locale detection failed. Falling back to en.', localeCheckError);
+                apexLocale = 'en';
+            }
+        }
         window.Apex = window.Apex || {};
         window.Apex.chart = window.Apex.chart || {};
         window.Apex.chart.defaultLocale = apexLocale;

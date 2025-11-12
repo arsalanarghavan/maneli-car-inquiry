@@ -537,6 +537,10 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
     font-size: 0.68rem;
 }
 
+.maneli-status-desktop {
+    width: 100%;
+}
+
 /* Mobile filter collapse behaviour */
 @media (max-width: 767.98px) {
     [data-maneli-mobile-filter] {
@@ -546,6 +550,74 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
     [data-maneli-mobile-filter] [data-maneli-filter-body] {
         display: none;
         margin-top: 0.75rem;
+    }
+
+    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn,
+    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.65rem;
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0.04) 100%);
+        color: inherit;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-align: start;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        outline: none;
+    }
+
+    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn:focus-visible,
+    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle:focus-visible {
+        border-color: rgba(37, 99, 235, 0.55);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn:hover,
+    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle:hover {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.16) 0%, rgba(37, 99, 235, 0.08) 100%);
+    }
+
+    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle-btn,
+    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle {
+        border-color: rgba(37, 99, 235, 0.55);
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0.1) 100%);
+        box-shadow: 0 10px 26px rgba(37, 99, 235, 0.18);
+    }
+
+    [data-theme-mode="dark"] [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn,
+    [data-theme-mode="dark"] [data-maneli-mobile-filter] .maneli-mobile-filter-toggle {
+        border-color: rgba(96, 165, 250, 0.35);
+        background: linear-gradient(135deg, rgba(96, 165, 250, 0.14) 0%, rgba(30, 64, 175, 0.08) 100%);
+        box-shadow: 0 6px 18px rgba(30, 64, 175, 0.22);
+        color: rgba(226, 232, 240, 0.92);
+    }
+
+    [data-theme-mode="dark"] [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle-btn,
+    [data-theme-mode="dark"] [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle {
+        border-color: rgba(147, 197, 253, 0.6);
+        background: linear-gradient(135deg, rgba(96, 165, 250, 0.24) 0%, rgba(30, 64, 175, 0.12) 100%);
+        box-shadow: 0 12px 32px rgba(30, 64, 175, 0.35);
+    }
+
+    [data-maneli-mobile-filter] .maneli-mobile-filter-arrow {
+        transition: transform 0.3s ease;
+    }
+
+    [data-maneli-mobile-filter][data-filter-open="true"] [data-maneli-filter-body] {
+        display: block;
+        animation: maneli-filter-slide-down 0.2s ease-out;
+    }
+
+    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-arrow {
+        transform: rotate(180deg);
     }
 
     .maneli-mobile-card-scroll {
@@ -590,7 +662,7 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         width: 100%;
     }
 
-    .status-roadmap [data-maneli-status-track] {
+    .status-roadmap .maneli-status-desktop {
         display: none !important;
     }
 
@@ -605,6 +677,8 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
     .maneli-status-mobile {
         min-height: 220px;
         padding-bottom: 1rem;
+        overflow: hidden;
+        position: relative;
     }
 
     .maneli-status-mobile::before,
@@ -635,6 +709,7 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
     .maneli-status-mobile-stage {
         position: relative;
         height: 210px;
+        width: 100%;
         touch-action: pan-y;
     }
 
@@ -643,6 +718,7 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         inset-block-start: 0;
         inset-inline-start: 50%;
         width: 82%;
+        max-width: 320px;
         transform: translateX(-50%) scale(0.88);
         opacity: 0;
         pointer-events: none;
@@ -671,11 +747,11 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
     }
 
     .maneli-status-mobile-card.is-prev {
-        transform: translateX(calc(-50% - 70%)) scale(0.85);
+        transform: translateX(calc(-50% - 72%)) scale(0.86);
     }
 
     .maneli-status-mobile-card.is-next {
-        transform: translateX(calc(-50% + 70%)) scale(0.85);
+        transform: translateX(calc(-50% + 72%)) scale(0.86);
     }
 
     .maneli-status-mobile-card.is-before {
@@ -694,6 +770,11 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         opacity: 0.85;
     }
 
+    .maneli-status-mobile-card.is-prev .maneli-status-card-surface,
+    .maneli-status-mobile-card.is-next .maneli-status-card-surface {
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    }
+
     .maneli-status-mobile-card.is-prev .avatar,
     .maneli-status-mobile-card.is-next .avatar {
         opacity: 0.85;
@@ -709,10 +790,52 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         align-items: center;
         justify-content: center;
         gap: 0.35rem;
+        padding-inline: 0.75rem;
+        padding-block: 0.35rem;
     }
 
     .maneli-status-mobile-card .pulse-ring {
         display: none;
+    }
+
+    .maneli-status-nav {
+        position: absolute;
+        inset-block-start: 50%;
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: rgba(15, 23, 42, 0.08);
+        color: inherit;
+        z-index: 6;
+        transform: translateY(-50%);
+        transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .maneli-status-nav:focus-visible {
+        outline: 2px solid var(--primary-color, #2563eb);
+        outline-offset: 2px;
+    }
+
+    .maneli-status-nav:hover {
+        background: rgba(37, 99, 235, 0.18);
+        color: var(--primary-color, #2563eb);
+    }
+
+    .maneli-status-nav:disabled {
+        opacity: 0.35;
+        pointer-events: none;
+    }
+
+    .maneli-status-nav-prev {
+        inset-inline-start: 0.35rem;
+    }
+
+    .maneli-status-nav-next {
+        inset-inline-end: 0.35rem;
     }
 }
 
