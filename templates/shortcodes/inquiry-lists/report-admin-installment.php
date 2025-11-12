@@ -199,6 +199,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         
                         $current_status = $tracking_status;
                         $status_reached = false;
+
+                        $dashboard_handler = Maneli_Dashboard_Handler::instance();
+                        $preferred_language_slug = method_exists($dashboard_handler, 'get_preferred_language_slug')
+                            ? $dashboard_handler->get_preferred_language_slug()
+                            : (is_rtl() ? 'fa' : 'en');
+                        $is_rtl_view = ($preferred_language_slug === 'fa');
+                        $arrow_icon_class = $is_rtl_view ? 'la-arrow-left' : 'la-arrow-right';
+                        $roadmap_direction_class = $is_rtl_view ? 'status-roadmap-rtl' : 'status-roadmap-ltr';
                         
                         // Check if current status is an end status
                         $is_end_status = in_array($current_status, ['completed', 'rejected']);
@@ -208,7 +216,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         ?>
                         
                         <!-- Main Flow -->
-                        <div class="status-roadmap mb-3">
+                        <div class="status-roadmap mb-3 <?php echo esc_attr($roadmap_direction_class); ?>">
                             <div class="d-flex align-items-center justify-content-between flex-wrap">
                                 <?php foreach ($all_statuses as $status_key => $status_info): 
                                     $is_current = ($status_key === $current_status);
@@ -245,7 +253,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                         <?php endif; ?>
                                     </div>
                                     <div class="status-arrow maneli-status-arrow" style="opacity: <?php echo esc_attr($opacity); ?>;">
-                                        <i class="la la-arrow-left fs-18 text-muted"></i>
+                                        <i class="la <?php echo esc_attr($arrow_icon_class); ?> fs-18 text-muted"></i>
                                     </div>
                                 <?php endforeach; ?>
                                 

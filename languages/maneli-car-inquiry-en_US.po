@@ -2874,6 +2874,9 @@ msgstr "Enter father\\"
 msgid "Enter mobile number"
 msgstr "Enter mobile number"
 
+msgid "Password is generated automatically. The user can reset it via \"Forgot Password\"."
+msgstr "Password is generated automatically. The user can reset it via \"Forgot Password\"."
+
 msgid "Enter name"
 msgstr "Enter name"
 
@@ -3617,9 +3620,6 @@ msgstr "Undo Changes"
 
 msgid "Week"
 msgstr "Week"
-
-msgid "New User"
-msgstr "New User"
 
 msgid "Residency Status:"
 msgstr "Residency Status:"

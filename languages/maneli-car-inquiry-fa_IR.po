@@ -3676,6 +3676,9 @@ msgstr "وارد کردن نام پدر"
 msgid "Enter mobile number"
 msgstr "وارد کردن شماره موبایل"
 
+msgid "Password is generated automatically. The user can reset it via \"Forgot Password\"."
+msgstr "رمز عبور به صورت خودکار ساخته می‌شود و کاربر می‌تواند از طریق \"فراموشی رمز عبور\" رمز خود را تنظیم کند."
+
 
 msgid "Enter name"
 msgstr "وارد کردن نام"
@@ -4416,9 +4419,6 @@ msgstr "بازگردانی تغییرات"
 
 msgid "Week"
 msgstr "هفته"
-
-msgid "User Management"
-msgstr "مدیریت کاربران"
 
 msgid "New User"
 msgstr "کاربر جدید"

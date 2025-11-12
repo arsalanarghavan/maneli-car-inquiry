@@ -493,7 +493,7 @@ $active_users_count = $active_users_query->get_total();
             <div class="modal-header bg-primary-transparent">
                 <h5 class="modal-title">
                     <i class="la la-user-plus me-2"></i>
-                    افزودن کاربر جدید
+                    <?php esc_html_e('Add New User', 'maneli-car-inquiry'); ?>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -501,20 +501,34 @@ $active_users_count = $active_users_query->get_total();
                 <form id="add-user-form">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">نام *</label>
+                            <label class="form-label fw-semibold" for="new-first-name">
+                                <?php esc_html_e('First Name', 'maneli-car-inquiry'); ?>
+                                <span class="text-danger">*</span>
+                            </label>
                             <input type="text" class="form-control" id="new-first-name" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">نام خانوادگی *</label>
+                            <label class="form-label fw-semibold" for="new-last-name">
+                                <?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?>
+                                <span class="text-danger">*</span>
+                            </label>
                             <input type="text" class="form-control" id="new-last-name" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">شماره موبایل *</label>
-                            <input type="tel" class="form-control" id="new-mobile" placeholder="09123456789" required>
-                            <small class="text-muted">رمز عبور به صورت خودکار ساخته می‌شود و کاربر می‌تواند از طریق فراموشی رمز عبور، رمز خود را تنظیم کند.</small>
+                            <label class="form-label fw-semibold" for="new-mobile">
+                                <?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?>
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="tel" class="form-control" id="new-mobile" placeholder="<?php esc_attr_e('Enter mobile number', 'maneli-car-inquiry'); ?>" required>
+                            <small class="text-muted">
+                                <?php esc_html_e("Password is generated automatically. The user can reset it via \"Forgot Password\".", 'maneli-car-inquiry'); ?>
+                            </small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">نقش *</label>
+                            <label class="form-label fw-semibold" for="new-role">
+                                <?php esc_html_e('Role', 'maneli-car-inquiry'); ?>
+                                <span class="text-danger">*</span>
+                            </label>
                             <select class="form-select" id="new-role" required>
                                 <option value="customer"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></option>
                                 <option value="maneli_expert"><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></option>

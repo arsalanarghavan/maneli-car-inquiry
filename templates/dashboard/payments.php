@@ -24,6 +24,19 @@ $options = get_option('maneli_inquiry_all_options', []);
 $active_gateway = $options['active_gateway'] ?? 'zarinpal';
 $inquiry_fee = (int)($options['inquiry_fee'] ?? 0);
 
+// Localization helpers for labels
+$payment_type_labels = [
+    'inquiry_fee' => esc_html__('Inquiry Fee Payment', 'maneli-car-inquiry'),
+    'cash_down_payment' => esc_html__('Cash Car Down Payment', 'maneli-car-inquiry'),
+];
+
+$gateway_labels = [
+    'zarinpal' => esc_html__('Zarinpal Gateway', 'maneli-car-inquiry'),
+    'sadad' => esc_html__('Sadad Gateway', 'maneli-car-inquiry'),
+];
+
+$default_gateway_label = esc_html__('Bank Gateway', 'maneli-car-inquiry');
+
 // Get search and filter parameters
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
 $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
@@ -81,7 +94,7 @@ foreach ($installment_inquiries as $inquiry) {
         'inquiry_id' => $inquiry->ID,
         'inquiry_type' => 'installment',
         'payment_type' => 'inquiry_fee',
-        'payment_type_label' => 'پرداخت هزینه استعلام',
+        'payment_type_label' => $payment_type_labels['inquiry_fee'] ?? esc_html__('Inquiry Fee Payment', 'maneli-car-inquiry'),
         'product_id' => $product_id,
         'product_name' => $product ? $product->get_name() : '-',
         'user_id' => $user_id,
@@ -89,7 +102,7 @@ foreach ($installment_inquiries as $inquiry) {
         'mobile_number' => $mobile_number,
         'amount' => $paid_amount,
         'gateway' => $active_gateway,
-        'gateway_label' => $active_gateway === 'zarinpal' ? 'درگاه زرین پال' : ($active_gateway === 'sadad' ? 'درگاه سداد' : 'درگاه بانکی'),
+        'gateway_label' => $gateway_labels[$active_gateway] ?? $default_gateway_label,
         'payment_date' => $payment_date,
         'status' => 'completed'
     ];
@@ -125,7 +138,7 @@ foreach ($cash_inquiries as $inquiry) {
         'inquiry_id' => $inquiry->ID,
         'inquiry_type' => 'cash',
         'payment_type' => 'cash_down_payment',
-        'payment_type_label' => 'پیش پرداخت خودروی نقدی',
+        'payment_type_label' => $payment_type_labels['cash_down_payment'] ?? esc_html__('Cash Car Down Payment', 'maneli-car-inquiry'),
         'product_id' => $product_id,
         'product_name' => $product ? $product->get_name() : '-',
         'user_id' => $user_id,
@@ -133,7 +146,7 @@ foreach ($cash_inquiries as $inquiry) {
         'mobile_number' => $mobile_number,
         'amount' => (int)$downpayment,
         'gateway' => $active_gateway,
-        'gateway_label' => $active_gateway === 'zarinpal' ? 'درگاه زرین پال' : ($active_gateway === 'sadad' ? 'درگاه سداد' : 'درگاه بانکی'),
+        'gateway_label' => $gateway_labels[$active_gateway] ?? $default_gateway_label,
         'payment_date' => $payment_date ?: $inquiry->post_date,
         'status' => 'completed'
     ];
