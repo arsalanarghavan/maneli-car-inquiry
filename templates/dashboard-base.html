@@ -3006,10 +3006,6 @@
                     container.setAttribute('tabindex', '0');
                 }
 
-                var stage = document.createElement('div');
-                stage.className = 'maneli-status-mobile-stage';
-                container.appendChild(stage);
-
                 var prevButton = document.createElement('button');
                 prevButton.type = 'button';
                 prevButton.className = 'maneli-status-nav maneli-status-nav-prev';
@@ -3025,6 +3021,10 @@
                 nextButton.setAttribute('aria-label', nextLabel);
                 nextButton.innerHTML = direction === 'rtl' ? '<i class="la la-angle-left"></i>' : '<i class="la la-angle-right"></i>';
                 nextButton.setAttribute('type', 'button');
+
+                var stage = document.createElement('div');
+                stage.className = 'maneli-status-mobile-stage';
+                container.appendChild(stage);
 
                 container.appendChild(prevButton);
                 container.appendChild(nextButton);
