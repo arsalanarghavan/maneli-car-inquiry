@@ -255,16 +255,38 @@
 [data-toggled="menu-hover-closed"] .app-sidebar .slide__category,
 [data-toggled="icon-hover-closed"] .app-sidebar .slide__category,
 [data-toggled="icon-text-close"] .app-sidebar .slide__category {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0.45rem 0 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     font-size: 0 !important;
     line-height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    position: relative !important;
+    min-height: 1.25rem !important;
+}
+
+[data-toggled*="closed"] .app-sidebar .slide__category::before,
+[data-toggled*="close"] .app-sidebar .slide__category::before,
+[data-toggled="icon-click-closed"] .app-sidebar .slide__category::before,
+[data-toggled="menu-click-closed"] .app-sidebar .slide__category::before,
+[data-toggled="menu-hover-closed"] .app-sidebar .slide__category::before,
+[data-toggled="icon-hover-closed"] .app-sidebar .slide__category::before,
+[data-toggled="icon-text-close"] .app-sidebar .slide__category::before {
+    content: "";
+    width: 0.38rem;
+    height: 0.38rem;
+    border-radius: 50%;
+    background: var(--menu-prime-color, currentColor);
+    border: 0.075rem solid currentColor;
+    opacity: 0.85;
+    display: block;
+    margin-inline: auto;
+    transform: translateY(0.1rem);
+    box-shadow: 0 0 0.15rem rgba(0, 0, 0, 0.2);
 }
 
 /* Hide category-name spans inside slide__category */
@@ -353,6 +375,17 @@
     pointer-events: none;
 }
 
+[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide > .side-menu__item::after,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
+[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after {
+    display: none !important;
+}
+
 html[data-toggled*="closed"] .app-sidebar .simplebar-content .side-menu__item,
 .sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .simplebar-content .side-menu__item {
     position: relative !important;
@@ -369,8 +402,6 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .side-menu__item .s
     margin-inline: 0 !important;
     display: flex !important;
     justify-content: center !important;
-    font-size: 1.3rem !important;
-    line-height: 1 !important;
 }
 
 html[data-toggled*="closed"] .app-sidebar .simplebar-content .side-menu__item::after,
@@ -397,29 +428,45 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide.open > .side
     transform: translateX(-50%) scale(1.2);
 }
 
-html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide,
-.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .simplebar-content .slide {
-    margin-block: 0.35rem !important;
+html[data-toggled*="closed"] .app-sidebar .simplebar-content .side-menu__item::after,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .simplebar-content .side-menu__item::after {
+    display: none !important;
 }
 
-[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item:hover::after,
-[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
-[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
-.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
-[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
-[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
-[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
-[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after,
-[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide.open > .side-menu__item::after {
-    opacity: 1;
-    transform: translateX(-50%) scale(1.15);
+html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .simplebar-content .slide {
+    margin-block: 0.45rem !important;
+}
+
+html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .simplebar-content .slide__category {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-block: 0.4rem !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    height: 1.1rem !important;
+    position: relative !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category::before,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .simplebar-content .slide__category::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.55;
+}
+
+html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > *,
+.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .simplebar-content .slide__category > * {
+    display: none !important;
 }
 
 .sidenav-toggled .app-sidebar .side-menu__label {
@@ -431,7 +478,5 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide,
     display: flex !important;
     margin-inline: 0 !important;
     justify-content: center !important;
-    font-size: 1.25rem !important;
-    line-height: 1 !important;
 }
 
