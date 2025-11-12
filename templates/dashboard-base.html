@@ -130,7 +130,7 @@
         <link href="./assets/css/styles.css" rel="stylesheet">
 
         <!-- Sidebar Fixes Css -->
-		<link href="./assets/css/sidebar-fixes.css?v=20251113a" rel="stylesheet">
+		<link href="./assets/css/sidebar-fixes.css?v=20251113b" rel="stylesheet">
 
         <!-- Icons Css -->
         <link href="./assets/css/icons.css" rel="stylesheet">
@@ -2745,6 +2745,116 @@
         <!-- Sidebar Toggle and Dark Mode JS -->
         <script src="./assets/js/sidebar-toggle.js"></script>
         
+        <script>
+        (function() {
+            var mobileQuery = window.matchMedia('(max-width: 767.98px)');
+
+            function setExpanded(container, toggle, expanded) {
+                container.setAttribute('data-filter-open', expanded ? 'true' : 'false');
+                toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            }
+
+            function initialiseFilter(container) {
+                if (!container || container.__maneliFilterInitialised) {
+                    return;
+                }
+
+                var toggle = container.querySelector('[data-maneli-filter-toggle]');
+                var body = container.querySelector('[data-maneli-filter-body]');
+
+                if (!toggle || !body) {
+                    return;
+                }
+
+                container.__maneliFilterInitialised = true;
+
+                if (toggle.tagName !== 'BUTTON') {
+                    if (!toggle.hasAttribute('role')) {
+                        toggle.setAttribute('role', 'button');
+                    }
+                    if (!toggle.hasAttribute('tabindex')) {
+                        toggle.setAttribute('tabindex', '0');
+                    }
+                }
+
+                toggle.classList.add('maneli-mobile-filter-toggle');
+
+                function syncWithViewport() {
+                    if (mobileQuery.matches) {
+                        setExpanded(container, toggle, false);
+                    } else {
+                        setExpanded(container, toggle, true);
+                    }
+                }
+
+                syncWithViewport();
+
+                toggle.addEventListener('click', function(event) {
+                    if (!mobileQuery.matches) {
+                        return;
+                    }
+
+                    var interactive = event.target.closest('[data-ignore-filter-toggle], button, a, input, select, textarea, label');
+                    if (interactive && interactive !== toggle) {
+                        return;
+                    }
+
+                    var isOpen = container.getAttribute('data-filter-open') === 'true';
+                    setExpanded(container, toggle, !isOpen);
+
+                    if (!isOpen) {
+                        window.requestAnimationFrame(function() {
+                            body.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        });
+                    }
+                });
+
+                toggle.addEventListener('keydown', function(event) {
+                    if (!mobileQuery.matches) {
+                        return;
+                    }
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggle.click();
+                    }
+                });
+
+                mobileQuery.addEventListener('change', syncWithViewport);
+            }
+
+            function scan(root) {
+                if (!root) {
+                    return;
+                }
+
+                if (root.matches && root.matches('[data-maneli-mobile-filter]')) {
+                    initialiseFilter(root);
+                }
+
+                var nested = root.querySelectorAll ? root.querySelectorAll('[data-maneli-mobile-filter]') : [];
+                nested.forEach(initialiseFilter);
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                scan(document);
+            });
+
+            if ('MutationObserver' in window) {
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node instanceof HTMLElement) {
+                                scan(node);
+                            }
+                        });
+                    });
+                });
+
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        })();
+        </script>
+
         <script>
         (function() {
             function fallbackToggleSidemenu() {

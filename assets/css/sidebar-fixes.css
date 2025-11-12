@@ -514,3 +514,70 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
 
 /* Tooltip support for collapsed sidebar */
 
+/* Mobile filter collapse behaviour */
+@media (max-width: 767.98px) {
+    [data-maneli-mobile-filter] {
+        position: relative;
+    }
+
+    [data-maneli-mobile-filter] [data-maneli-filter-body] {
+        display: none;
+        margin-top: 0.75rem;
+    }
+
+    [data-maneli-mobile-filter][data-filter-open="true"] [data-maneli-filter-body] {
+        display: block;
+        animation: maneli-filter-slide-down 0.2s ease-out;
+    }
+
+    .maneli-mobile-filter-toggle,
+    [data-maneli-filter-toggle] {
+        cursor: pointer;
+    }
+
+    .maneli-mobile-filter-toggle .maneli-mobile-filter-arrow,
+    [data-maneli-filter-toggle] .maneli-mobile-filter-arrow {
+        transition: transform 0.2s ease;
+        display: inline-flex;
+        font-size: 1.25rem;
+    }
+
+    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-arrow {
+        transform: rotate(180deg);
+    }
+
+    .maneli-mobile-filter-toggle-btn {
+        background-color: transparent;
+        border: 0;
+        padding: 0.5rem 0;
+        font-weight: 600;
+        color: inherit;
+    }
+
+    .maneli-mobile-filter-toggle-btn:focus {
+        outline: none;
+        box-shadow: none;
+    }
+}
+
+@media (min-width: 768px) {
+    [data-maneli-mobile-filter] [data-maneli-filter-body] {
+        display: block !important;
+    }
+
+    .maneli-mobile-filter-arrow {
+        display: none !important;
+    }
+}
+
+@keyframes maneli-filter-slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

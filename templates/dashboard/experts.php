@@ -380,6 +380,17 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
             </div>
             <div class="card-body">
                         <!-- Filters -->
+                        <div class="maneli-mobile-filter mb-3" data-maneli-mobile-filter>
+                            <button
+                                type="button"
+                                class="maneli-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
+                                data-maneli-filter-toggle
+                                aria-expanded="false"
+                            >
+                                <span class="fw-semibold"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></span>
+                                <i class="ri-arrow-down-s-line maneli-mobile-filter-arrow"></i>
+                            </button>
+                            <div class="maneli-mobile-filter-body" data-maneli-filter-body>
                         <form method="get" action="" class="mb-3">
                             <div class="row g-3 mb-0">
                     <div class="col-md-4">
@@ -425,6 +436,8 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                     </div>
                 </div>
                         </form>
+                            </div>
+                        </div>
 
                         <!-- Table -->
                 <div class="table-responsive">

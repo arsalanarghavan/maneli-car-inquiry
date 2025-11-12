@@ -535,7 +535,14 @@ class Maneli_Dashboard_Handler {
                     $daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
                     
                     // Convert dates to Jalali format
-                    if (function_exists('maneli_gregorian_to_jalali')) {
+                    $preferred_locale_slug = $this->get_preferred_language_slug();
+
+                    $wp_locale = function_exists('determine_locale') ? determine_locale() : (function_exists('get_locale') ? get_locale() : 'fa_IR');
+                    if ($preferred_locale_slug === 'fa' && is_string($wp_locale) && stripos($wp_locale, 'en') === 0) {
+                        $preferred_locale_slug = 'en';
+                    }
+
+                    if ($preferred_locale_slug === 'fa' && function_exists('maneli_gregorian_to_jalali')) {
                         foreach ($daily_stats as &$stat) {
                             if (isset($stat->date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
                                 $date_parts = explode('-', $stat->date);
@@ -545,8 +552,6 @@ class Maneli_Dashboard_Handler {
                         unset($stat);
                     }
                     
-                    $preferred_locale_slug = $this->get_preferred_language_slug();
-
                     wp_localize_script('maneli-visitor-statistics-dashboard', 'maneliVisitorStats', [
                         'ajaxUrl' => admin_url('admin-ajax.php'),
                         'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
@@ -554,6 +559,7 @@ class Maneli_Dashboard_Handler {
                         'endDate' => $end_date,
                         'dailyStats' => $daily_stats,
                         'locale' => $preferred_locale_slug,
+                        'wpLocale' => $wp_locale,
                         'usePersianDigits' => ($preferred_locale_slug === 'fa'),
                         'countryNames' => Maneli_Visitor_Statistics::get_country_translation_map(),
                         'countryFlagIcons' => Maneli_Visitor_Statistics::get_country_flag_map(),
@@ -1194,8 +1200,12 @@ class Maneli_Dashboard_Handler {
         if (!empty($_COOKIE['maneli_language'])) {
             $cookie_language = sanitize_text_field(wp_unslash($_COOKIE['maneli_language']));
             $cookie_language = strtolower($cookie_language);
-            if (in_array($cookie_language, ['en', 'en_us', 'en-us', 'english'], true)) {
-                $preferred_language = 'en';
+            if ($cookie_language !== '') {
+                if (strpos($cookie_language, 'en') === 0 || in_array($cookie_language, ['english'], true)) {
+                    $preferred_language = 'en';
+                } elseif (strpos($cookie_language, 'fa') === 0 || in_array($cookie_language, ['persian'], true)) {
+                    $preferred_language = 'fa';
+                }
             }
         }
 

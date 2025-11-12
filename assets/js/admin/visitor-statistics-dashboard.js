@@ -61,6 +61,9 @@
         }
 
         var resolvedLocale = normalizeLocale(maneliVisitorStats.locale);
+        if (!resolvedLocale) {
+            resolvedLocale = normalizeLocale(maneliVisitorStats.wpLocale);
+        }
         var usePersianDigits = (function resolveUsePersianDigits() {
             if (resolvedLocale === 'en' || resolvedLocale === 'en-us' || resolvedLocale === 'en_us') {
                 return false;
@@ -83,6 +86,12 @@
             }
             return true;
         })();
+
+        // Align ApexCharts default locale with digit preference
+        var apexLocale = usePersianDigits ? 'fa' : 'en';
+        window.Apex = window.Apex || {};
+        window.Apex.chart = window.Apex.chart || {};
+        window.Apex.chart.defaultLocale = apexLocale;
         
         /**
          * Convert string digits to English digits.

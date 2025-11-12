@@ -228,13 +228,21 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
         <!-- Date Range Filter -->
         <div class="row mb-4">
             <div class="col-xl-12">
-                <div class="card custom-card">
+                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
                     <div class="card-header bg-light">
-                        <div class="card-title">
-                            <i class="ri-calendar-line me-2"></i><?php esc_html_e('Date Range Filter', 'maneli-car-inquiry'); ?>
+                        <div
+                            class="card-title d-flex align-items-center gap-2 maneli-mobile-filter-toggle"
+                            data-maneli-filter-toggle
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="false"
+                        >
+                            <i class="ri-calendar-line"></i>
+                            <?php esc_html_e('Date Range Filter', 'maneli-car-inquiry'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
                         <form id="visitor-stats-filter-form" method="get" class="row g-3">
                             <div class="col-md-3">
                                 <label class="form-label"><?php esc_html_e('Period:', 'maneli-car-inquiry'); ?></label>

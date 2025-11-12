@@ -313,9 +313,15 @@ $fixed_script = <<<'HTML'
             if (!lang) {
                 return 'fa';
             }
-            const value = String(lang).toLowerCase();
-            if (value === 'en_us' || value === 'en-us' || value === 'english') {
+            const value = String(lang).toLowerCase().trim();
+            if (value === '') {
+                return 'fa';
+            }
+            if (value.startsWith('en') || value === 'english') {
                 return 'en';
+            }
+            if (value.startsWith('fa') || value === 'persian') {
+                return 'fa';
             }
             return value === 'en' ? 'en' : 'fa';
         }
@@ -618,6 +624,64 @@ $fixed_script = <<<'HTML'
 
         window.maneliDigits = window.maneliLocale;
         window.maneliShouldUsePersianDates = shouldUsePersianDigits;
+
+        window.Apex = window.Apex || {};
+        window.Apex.chart = window.Apex.chart || {};
+
+        (function registerApexLocales() {
+            const existingLocales = Array.isArray(window.Apex.chart.locales) ? window.Apex.chart.locales.slice() : [];
+
+            function upsertLocale(locale) {
+                const index = existingLocales.findIndex(item => item && item.name === locale.name);
+                if (index >= 0) {
+                    existingLocales[index] = locale;
+                } else {
+                    existingLocales.push(locale);
+                }
+            }
+
+            upsertLocale({
+                name: 'fa',
+                options: {
+                    months: ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'],
+                    shortMonths: ['فرو', 'ارد', 'خرد', 'تیر', 'مرد', 'شهر', 'مهر', 'آبا', 'آذر', 'دی', 'بهم', 'اسف'],
+                    days: ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'],
+                    shortDays: ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش'],
+                    toolbar: {
+                        exportToSVG: 'دانلود SVG',
+                        exportToPNG: 'دانلود PNG',
+                        exportToCSV: 'دانلود CSV',
+                        selection: 'انتخاب',
+                        selectionZoom: 'بزرگنمایی انتخابی',
+                        zoomIn: 'بزرگنمایی',
+                        zoomOut: 'کوچک‌نمایی',
+                        pan: 'جابجایی',
+                        reset: 'بازنشانی زوم'
+                    }
+                }
+            });
+
+            upsertLocale({
+                name: 'en',
+                options: {
+                    toolbar: {
+                        exportToSVG: 'Download SVG',
+                        exportToPNG: 'Download PNG',
+                        exportToCSV: 'Download CSV',
+                        selection: 'Selection',
+                        selectionZoom: 'Selection Zoom',
+                        zoomIn: 'Zoom In',
+                        zoomOut: 'Zoom Out',
+                        pan: 'Pan',
+                        reset: 'Reset Zoom'
+                    }
+                }
+            });
+
+            window.Apex.chart.locales = existingLocales;
+        })();
+
+        window.Apex.chart.defaultLocale = shouldUsePersianDigits() ? 'fa' : 'en';
     })(window, document);
 </script>
 HTML;

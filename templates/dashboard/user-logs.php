@@ -169,57 +169,73 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
         <!-- Filters -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card custom-card">
+                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
                     <div class="card-header">
-                        <h5 class="card-title mb-0"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></h5>
+                        <h5
+                            class="card-title mb-0 maneli-mobile-filter-toggle d-flex align-items-center gap-2"
+                            data-maneli-filter-toggle
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="false"
+                        >
+                            <?php esc_html_e('Filters', 'maneli-car-inquiry'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                        </h5>
                     </div>
-                    <div class="card-body">
-                        <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>" class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label"><?php esc_html_e('User', 'maneli-car-inquiry'); ?></label>
-                                <select name="user_id" class="form-select">
-                                    <option value=""><?php esc_html_e('All Users', 'maneli-car-inquiry'); ?></option>
-                                    <?php foreach ($users as $user): ?>
-                                        <option value="<?php echo esc_attr($user->ID); ?>" <?php selected($user_id_filter, $user->ID); ?>>
-                                            <?php echo esc_html($user->display_name); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
+                        <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
+                                    <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
+                                </div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label"><?php esc_html_e('Action Type', 'maneli-car-inquiry'); ?></label>
-                                <select name="action_type" class="form-select">
-                                    <option value=""><?php esc_html_e('All Actions', 'maneli-car-inquiry'); ?></option>
-                                    <option value="button_click" <?php selected($action_type, 'button_click'); ?>><?php esc_html_e('Button Click', 'maneli-car-inquiry'); ?></option>
-                                    <option value="form_submit" <?php selected($action_type, 'form_submit'); ?>><?php esc_html_e('Form Submit', 'maneli-car-inquiry'); ?></option>
-                                    <option value="ajax_call" <?php selected($action_type, 'ajax_call'); ?>><?php esc_html_e('AJAX Call', 'maneli-car-inquiry'); ?></option>
-                                    <option value="page_view" <?php selected($action_type, 'page_view'); ?>><?php esc_html_e('Page View', 'maneli-car-inquiry'); ?></option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('Target Type', 'maneli-car-inquiry'); ?></label>
-                                <select name="target_type" class="form-select">
-                                    <option value=""><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
-                                    <option value="inquiry" <?php selected($target_type, 'inquiry'); ?>><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></option>
-                                    <option value="user" <?php selected($target_type, 'user'); ?>><?php esc_html_e('User', 'maneli-car-inquiry'); ?></option>
-                                    <option value="product" <?php selected($target_type, 'product'); ?>><?php esc_html_e('Product', 'maneli-car-inquiry'); ?></option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from_raw); ?>" placeholder="1403/01/01">
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to_raw); ?>" placeholder="1403/01/01">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
-                                <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>" class="btn btn-secondary"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+
+                            <div class="row g-3 align-items-end mt-1">
+                                <div class="col-6 col-lg-2">
+                                    <label class="form-label"><?php esc_html_e('User', 'maneli-car-inquiry'); ?></label>
+                                    <select name="user_id" class="form-select">
+                                        <option value=""><?php esc_html_e('All Users', 'maneli-car-inquiry'); ?></option>
+                                        <?php foreach ($users as $user): ?>
+                                            <option value="<?php echo esc_attr($user->ID); ?>" <?php selected($user_id_filter, $user->ID); ?>>
+                                                <?php echo esc_html($user->display_name); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-lg-2">
+                                    <label class="form-label"><?php esc_html_e('Action Type', 'maneli-car-inquiry'); ?></label>
+                                    <select name="action_type" class="form-select">
+                                        <option value=""><?php esc_html_e('All Actions', 'maneli-car-inquiry'); ?></option>
+                                        <option value="button_click" <?php selected($action_type, 'button_click'); ?>><?php esc_html_e('Button Click', 'maneli-car-inquiry'); ?></option>
+                                        <option value="form_submit" <?php selected($action_type, 'form_submit'); ?>><?php esc_html_e('Form Submit', 'maneli-car-inquiry'); ?></option>
+                                        <option value="ajax_call" <?php selected($action_type, 'ajax_call'); ?>><?php esc_html_e('AJAX Call', 'maneli-car-inquiry'); ?></option>
+                                        <option value="page_view" <?php selected($action_type, 'page_view'); ?>><?php esc_html_e('Page View', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-lg-2">
+                                    <label class="form-label"><?php esc_html_e('Target Type', 'maneli-car-inquiry'); ?></label>
+                                    <select name="target_type" class="form-select">
+                                        <option value=""><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
+                                        <option value="inquiry" <?php selected($target_type, 'inquiry'); ?>><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></option>
+                                        <option value="user" <?php selected($target_type, 'user'); ?>><?php esc_html_e('User', 'maneli-car-inquiry'); ?></option>
+                                        <option value="product" <?php selected($target_type, 'product'); ?>><?php esc_html_e('Product', 'maneli-car-inquiry'); ?></option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-lg-2">
+                                    <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
+                                    <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from_raw); ?>" placeholder="1403/01/01">
+                                </div>
+                                <div class="col-6 col-lg-2">
+                                    <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
+                                    <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to_raw); ?>" placeholder="1403/01/01">
+                                </div>
+                                <div class="col-6 col-lg-1">
+                                    <button type="submit" class="btn btn-primary w-100 w-lg-auto"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
+                                </div>
+                                <div class="col-6 col-lg-1">
+                                    <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>" class="btn btn-secondary w-100 w-lg-auto"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+                                </div>
                             </div>
                         </form>
                     </div>

@@ -275,11 +275,20 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
         <!-- Filters -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card custom-card">
+                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
                     <div class="card-header">
-                        <h5 class="card-title mb-0"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></h5>
+                        <h5
+                            class="card-title mb-0 maneli-mobile-filter-toggle d-flex align-items-center gap-2"
+                            data-maneli-filter-toggle
+                            role="button"
+                            tabindex="0"
+                            aria-expanded="false"
+                        >
+                            <?php esc_html_e('Filters', 'maneli-car-inquiry'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                        </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
                         <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="filters-toolbar" novalidate>
                             <div class="filters-field">
                                 <label class="form-label"><?php esc_html_e('Log Type', 'maneli-car-inquiry'); ?></label>

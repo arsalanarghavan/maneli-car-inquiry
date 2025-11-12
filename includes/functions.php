@@ -299,11 +299,13 @@ if (!function_exists('maneli_should_use_persian_digits')) {
         // Respect dashboard language preference cookie first.
         if (!empty($_COOKIE['maneli_language'])) {
             $cookie_lang = strtolower(sanitize_text_field(wp_unslash($_COOKIE['maneli_language'])));
-            if (in_array($cookie_lang, ['en', 'en-us', 'en_us', 'english'], true)) {
-                return false;
-            }
-            if (in_array($cookie_lang, ['fa', 'fa_ir', 'fa-ir', 'persian'], true)) {
-                return true;
+            if ($cookie_lang !== '') {
+                if (strpos($cookie_lang, 'en') === 0 || in_array($cookie_lang, ['english'], true)) {
+                    return false;
+                }
+                if (strpos($cookie_lang, 'fa') === 0 || in_array($cookie_lang, ['persian'], true)) {
+                    return true;
+                }
             }
         }
 

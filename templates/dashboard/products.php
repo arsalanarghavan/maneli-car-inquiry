@@ -668,6 +668,17 @@ $product_categories = get_terms([
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-12">
+                        <div class="maneli-mobile-filter" data-maneli-mobile-filter>
+                            <button
+                                type="button"
+                                class="maneli-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
+                                data-maneli-filter-toggle
+                                aria-expanded="false"
+                            >
+                                <span class="fw-semibold"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></span>
+                                <i class="ri-arrow-down-s-line maneli-mobile-filter-arrow"></i>
+                            </button>
+                            <div class="maneli-mobile-filter-body" data-maneli-filter-body>
                         <form method="get" action="" id="product-filter-form">
                             <input type="hidden" name="page" value="products">
                             
@@ -755,6 +766,8 @@ $product_categories = get_terms([
                                 </div>
                             </div>
                         </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

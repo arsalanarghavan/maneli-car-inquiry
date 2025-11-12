@@ -99,7 +99,17 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                     </div>
                     <div class="card-body p-0">
                         <!-- Filter Section -->
-                        <div class="p-3 border-bottom">
+                        <div class="p-3 border-bottom maneli-mobile-filter" data-maneli-mobile-filter>
+                            <button
+                                type="button"
+                                class="maneli-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
+                                data-maneli-filter-toggle
+                                aria-expanded="false"
+                            >
+                                <span class="fw-semibold"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></span>
+                                <i class="ri-arrow-down-s-line maneli-mobile-filter-arrow"></i>
+                            </button>
+                            <div class="maneli-mobile-filter-body" data-maneli-filter-body>
                             <form id="maneli-cash-inquiry-filter-form" onsubmit="return false;">
                                 <!-- Search Field -->
                                 <div class="row g-3 mb-3">
@@ -151,6 +161,7 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                                     </div>
                                 </div>
                             </form>
+                            </div>
                         </div>
 
                         <!-- Loading Indicator -->

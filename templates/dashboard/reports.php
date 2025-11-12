@@ -149,16 +149,23 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- Advanced Filters -->
         <div class="row mb-4">
     <div class="col-xl-12">
-                <div class="card custom-card">
+                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
                     <div class="card-header bg-light">
-                <div class="card-title">
-                            <i class="la la-filter me-2"></i><?php esc_html_e('Advanced Filters', 'maneli-car-inquiry'); ?>
+                <div
+                    class="card-title d-flex align-items-center gap-2 maneli-mobile-filter-toggle"
+                    data-maneli-filter-toggle
+                    role="button"
+                    tabindex="0"
+                    aria-expanded="false"
+                >
+                            <i class="la la-filter"></i><?php esc_html_e('Advanced Filters', 'maneli-car-inquiry'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
                 </div>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="resetFilters()">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="resetFilters()" data-ignore-filter-toggle>
                             <i class="la la-refresh me-1"></i><?php esc_html_e('Reset Filters', 'maneli-car-inquiry'); ?>
                         </button>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
                         <form id="reports-filter-form" method="get" class="row g-3">
                             <!-- Period Filter -->
                             <div class="col-md-2">

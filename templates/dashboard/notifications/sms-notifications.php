@@ -296,10 +296,19 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- End::row-1 -->
         
         <!-- Filters and Actions -->
-        <div class="card custom-card mb-4">
+        <div class="card custom-card mb-4 maneli-mobile-filter-card" data-maneli-mobile-filter>
             <div class="card-header">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <h5 class="mb-0"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></h5>
+                    <h5
+                        class="mb-0 maneli-mobile-filter-toggle d-flex align-items-center gap-2"
+                        data-maneli-filter-toggle
+                        role="button"
+                        tabindex="0"
+                        aria-expanded="false"
+                    >
+                        <?php esc_html_e('Filters', 'maneli-car-inquiry'); ?>
+                        <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                    </h5>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-success btn-wave" data-bs-toggle="modal" data-bs-target="#sendSingleModal">
                             <i class="ri-message-2-line me-1"></i>
@@ -316,7 +325,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     </div>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
                 <form method="get" action="<?php echo esc_url(home_url('/dashboard/notifications/sms')); ?>" class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
