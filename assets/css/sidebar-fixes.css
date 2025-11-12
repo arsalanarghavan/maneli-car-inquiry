@@ -245,6 +245,16 @@
     transition: width 0.05s ease;
 }
 
+@media (max-width: 991.98px) {
+    html[data-nav-layout="vertical"]:not([data-toggled="open"]) .app-sidebar {
+        transform: translateX(-12.5rem);
+    }
+
+    html[data-nav-layout="vertical"][dir="rtl"]:not([data-toggled="open"]) .app-sidebar {
+        transform: translateX(12.5rem);
+    }
+}
+
 .app-sidebar .main-sidebar-header {
     transition: all 0.05s ease;
 }
@@ -492,6 +502,41 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
 
 /* Tooltip support for collapsed sidebar */
 
+/* Status roadmap mobile slider */
+.maneli-status-mobile {
+    display: none;
+    position: relative;
+}
+
+.maneli-status-mobile-stage {
+    position: relative;
+}
+
+.maneli-status-mobile-card {
+    position: relative;
+}
+
+.maneli-status-card-surface {
+    border-radius: 1rem;
+    background: var(--bs-body-bg, #ffffff);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    padding: 1.1rem;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+[data-theme-mode="dark"] .maneli-status-card-surface {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+.maneli-status-mobile-card .maneli-status-mobile-content {
+    text-align: center;
+}
+
+.maneli-status-mobile-card .maneli-status-mobile-content .badge {
+    font-size: 0.68rem;
+}
+
 /* Mobile filter collapse behaviour */
 @media (max-width: 767.98px) {
     [data-maneli-mobile-filter] {
@@ -545,52 +590,129 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         width: 100%;
     }
 
-    .maneli-desktop-filter-row {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto;
-        padding-bottom: 0.75rem;
+    .status-roadmap [data-maneli-status-track] {
+        display: none !important;
     }
 
-    .maneli-desktop-filter-row > [class^="col-"],
-    .maneli-desktop-filter-row > [class*=" col-"] {
-        max-width: none !important;
-        width: 100% !important;
-        flex: 0 0 auto !important;
+    .status-roadmap .maneli-status-arrow {
+        display: none !important;
     }
 
-    [data-maneli-mobile-filter][data-filter-open="true"] [data-maneli-filter-body] {
-        display: block;
-        animation: maneli-filter-slide-down 0.2s ease-out;
+    .status-roadmap .maneli-status-mobile {
+        display: block !important;
     }
 
-    .maneli-mobile-filter-toggle,
-    [data-maneli-filter-toggle] {
-        cursor: pointer;
+    .maneli-status-mobile {
+        min-height: 220px;
+        padding-bottom: 1rem;
     }
 
-    .maneli-mobile-filter-toggle .maneli-mobile-filter-arrow,
-    [data-maneli-filter-toggle] .maneli-mobile-filter-arrow {
-        transition: transform 0.2s ease;
+    .maneli-status-mobile::before,
+    .maneli-status-mobile::after {
+        content: "";
+        position: absolute;
+        inset-block: 12%;
+        width: 40px;
+        pointer-events: none;
+        z-index: 4;
+        background: linear-gradient(to right, var(--bs-body-bg, #fff) 0%, transparent 100%);
+    }
+
+    .maneli-status-mobile::before {
+        inset-inline-start: 0;
+    }
+
+    .maneli-status-mobile::after {
+        inset-inline-end: 0;
+        transform: scaleX(-1);
+    }
+
+    [data-theme-mode="dark"] .maneli-status-mobile::before,
+    [data-theme-mode="dark"] .maneli-status-mobile::after {
+        background: linear-gradient(to right, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0) 100%);
+    }
+
+    .maneli-status-mobile-stage {
+        position: relative;
+        height: 210px;
+        touch-action: pan-y;
+    }
+
+    .maneli-status-mobile-card {
+        position: absolute;
+        inset-block-start: 0;
+        inset-inline-start: 50%;
+        width: 82%;
+        transform: translateX(-50%) scale(0.88);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.35s ease, opacity 0.35s ease, filter 0.35s ease;
+        z-index: 1;
+    }
+
+    .maneli-status-mobile-card.is-active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(-50%) scale(1);
+        z-index: 5;
+        filter: drop-shadow(0 18px 32px rgba(15, 23, 42, 0.18));
+    }
+
+    .maneli-status-mobile-card.is-active .maneli-status-card-surface {
+        border-color: rgba(37, 99, 235, 0.4);
+    }
+
+    .maneli-status-mobile-card.is-prev,
+    .maneli-status-mobile-card.is-next {
+        opacity: 0.75;
+        pointer-events: auto;
+        z-index: 3;
+        filter: blur(0px);
+    }
+
+    .maneli-status-mobile-card.is-prev {
+        transform: translateX(calc(-50% - 70%)) scale(0.85);
+    }
+
+    .maneli-status-mobile-card.is-next {
+        transform: translateX(calc(-50% + 70%)) scale(0.85);
+    }
+
+    .maneli-status-mobile-card.is-before {
+        transform: translateX(calc(-50% - 140%)) scale(0.8);
+        opacity: 0;
+    }
+
+    .maneli-status-mobile-card.is-after {
+        transform: translateX(calc(-50% + 140%)) scale(0.8);
+        opacity: 0;
+    }
+
+    .maneli-status-mobile-card.is-prev .maneli-status-card-surface,
+    .maneli-status-mobile-card.is-next .maneli-status-card-surface {
+        border-color: rgba(148, 163, 184, 0.35);
+        opacity: 0.85;
+    }
+
+    .maneli-status-mobile-card.is-prev .avatar,
+    .maneli-status-mobile-card.is-next .avatar {
+        opacity: 0.85;
+    }
+
+    .maneli-status-mobile-card.is-active .avatar {
+        transform: scale(1.05);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
+    }
+
+    .maneli-status-mobile-card .badge {
         display: inline-flex;
-        font-size: 1.25rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
     }
 
-    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-arrow {
-        transform: rotate(180deg);
-    }
-
-    .maneli-mobile-filter-toggle-btn {
-        background-color: transparent;
-        border: 0;
-        padding: 0.5rem 0;
-        font-weight: 600;
-        color: inherit;
-    }
-
-    .maneli-mobile-filter-toggle-btn:focus {
-        outline: none;
-        box-shadow: none;
+    .maneli-status-mobile-card .pulse-ring {
+        display: none;
     }
 }
 
@@ -600,6 +722,10 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
     }
 
     .maneli-mobile-filter-arrow {
+        display: none !important;
+    }
+
+    .status-roadmap .maneli-status-mobile {
         display: none !important;
     }
 }
