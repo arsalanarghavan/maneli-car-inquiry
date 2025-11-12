@@ -395,7 +395,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                         <div class="card-title">
                             <?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?>
                         </div>
-                        <div class="btn-list">
+                        <div class="btn-list payments-header-actions">
                             <div class="custom-form-group flex-grow-1 me-2">
                                 <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search payments...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>" id="payment-search-input">
                                 <a href="javascript:void(0);" class="text-muted custom-form-btn" onclick="filterPayments()"><i class="ti ti-search"></i></a>
