@@ -256,7 +256,17 @@
                 },
                 tooltip: {
                     theme: 'light',
-                    fontFamily: 'IRANSans, Arial, sans-serif'
+                    fontFamily: 'IRANSans, Arial, sans-serif',
+                    x: {
+                        formatter: function(value) {
+                            return ensureLocalizedDigits(value);
+                        }
+                    },
+                    y: {
+                        formatter: function(value) {
+                            return formatLocalizedNumber(value);
+                        }
+                    }
                 }
             };
             
@@ -316,7 +326,12 @@
                             },
                             tooltip: {
                                 theme: 'light',
-                                fontFamily: 'IRANSans, Arial, sans-serif'
+                                fontFamily: 'IRANSans, Arial, sans-serif',
+                                y: {
+                                    formatter: function(value) {
+                                        return formatLocalizedNumber(value);
+                                    }
+                                }
                             },
                             dataLabels: {
                                 enabled: true,
@@ -387,7 +402,12 @@
                             },
                             tooltip: {
                                 theme: 'light',
-                                fontFamily: 'IRANSans, Arial, sans-serif'
+                                fontFamily: 'IRANSans, Arial, sans-serif',
+                                y: {
+                                    formatter: function(value) {
+                                        return formatLocalizedNumber(value);
+                                    }
+                                }
                             },
                             dataLabels: {
                                 enabled: true,
@@ -484,7 +504,12 @@
                             colors: ['#589bff', '#af6ded', '#f76565'],
                             tooltip: {
                                 theme: 'light',
-                                fontFamily: 'IRANSans, Arial, sans-serif'
+                                fontFamily: 'IRANSans, Arial, sans-serif',
+                                y: {
+                                    formatter: function(value) {
+                                        return formatLocalizedNumber(value);
+                                    }
+                                }
                             }
                         };
                         

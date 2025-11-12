@@ -448,10 +448,16 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                             $display_date = $visitor_stats_convert_digits($display_date);
                                         } else {
                                             $normalized_jalali = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($stat->date) : null;
-                                            if ($normalized_jalali) {
+                                if ($normalized_jalali) {
                                                 $parts = explode('/', $normalized_jalali);
-                                                if (count($parts) === 3) {
+                                    if (count($parts) === 3) {
+                                        $year = (int) $parts[0];
+                                        // Jalali years are currently around 1300-1500. Skip conversion if the value looks Gregorian.
+                                        if ($year > 0 && $year <= 1600) {
                                                     $display_date = maneli_jalali_to_gregorian($parts[0], $parts[1], $parts[2]);
+                                        } else {
+                                            $display_date = str_replace('/', '-', $normalized_jalali);
+                                        }
                                                 }
                                             }
                                             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $display_date)) {
