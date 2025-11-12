@@ -29,6 +29,29 @@ require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php
 $options = get_option('maneli_inquiry_all_options', []);
 $tracking_enabled = isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] == '1';
 
+$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+
+$visitor_stats_format_number = static function($value, $decimals = 0) use ($use_persian_digits) {
+    if ($use_persian_digits) {
+        return maneli_number_format_persian($value, $decimals);
+    }
+    $formatted = number_format_i18n((float) $value, $decimals);
+    if (function_exists('maneli_convert_to_english_digits')) {
+        return maneli_convert_to_english_digits($formatted);
+    }
+    return $formatted;
+};
+
+$visitor_stats_convert_digits = static function($value) use ($use_persian_digits) {
+    if ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
+        return persian_numbers_no_separator($value);
+    }
+    if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
+        return maneli_convert_to_english_digits($value);
+    }
+    return $value;
+};
+
 // Helper function to convert Jalali to Gregorian
 if (!function_exists('maneli_jalali_to_gregorian')) {
     function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
@@ -87,48 +110,61 @@ if (!function_exists('maneli_jalali_to_gregorian')) {
     }
 }
 
-// Get current Jalali date for default values (both Latin and Persian digits)
-$today_jalali_latin = maneli_gregorian_to_jalali(date('Y'), date('m'), date('d'), 'Y/m/d', false);
-$thirty_days_ago_gregorian = date('Y-m-d', strtotime('-30 days'));
-$thirty_days_ago_jalali_latin = maneli_gregorian_to_jalali(date('Y', strtotime('-30 days')), date('m', strtotime('-30 days')), date('d', strtotime('-30 days')), 'Y/m/d', false);
+// Determine defaults for start/end date displays based on locale
+$today_gregorian = current_time('Y-m-d');
+$thirty_days_ago_gregorian = date('Y-m-d', strtotime('-30 days', strtotime($today_gregorian)));
 
-// Get date range from query parameters (default: last 30 days)
-// If dates are in Jalali format (YYYY/MM/DD), convert to Gregorian for database
-$start_date_input_raw = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : $thirty_days_ago_jalali_latin;
-$end_date_input_raw = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : $today_jalali_latin;
-
-// Convert Jalali to Gregorian for database queries
-$start_date_normalized = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($start_date_input_raw) : null;
-$end_date_normalized   = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($end_date_input_raw) : null;
-
-if ($start_date_normalized) {
-    $start_parts = explode('/', $start_date_normalized);
-    $start_date = maneli_jalali_to_gregorian($start_parts[0], $start_parts[1], $start_parts[2]);
-    $start_date_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($start_date_normalized) : $start_date_normalized;
+if ($use_persian_digits) {
+    $default_start_display = maneli_gregorian_to_jalali(date('Y', strtotime($thirty_days_ago_gregorian)), date('m', strtotime($thirty_days_ago_gregorian)), date('d', strtotime($thirty_days_ago_gregorian)), 'Y/m/d', false);
+    $default_end_display   = maneli_gregorian_to_jalali(date('Y', strtotime($today_gregorian)), date('m', strtotime($today_gregorian)), date('d', strtotime($today_gregorian)), 'Y/m/d', false);
 } else {
-    $start_date_gregorian_raw = function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($start_date_input_raw) : $start_date_input_raw;
-    $start_timestamp = strtotime($start_date_gregorian_raw);
+    $default_start_display = date_i18n('Y-m-d', strtotime($thirty_days_ago_gregorian));
+    $default_end_display   = date_i18n('Y-m-d', strtotime($today_gregorian));
+}
+
+$start_date_input_raw = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : $default_start_display;
+$end_date_input_raw   = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : $default_end_display;
+
+if ($use_persian_digits) {
+    $start_date_normalized = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($start_date_input_raw) : null;
+    if ($start_date_normalized) {
+        $start_parts = explode('/', $start_date_normalized);
+        $start_date = maneli_jalali_to_gregorian($start_parts[0], $start_parts[1], $start_parts[2]);
+        $start_date_display = $visitor_stats_convert_digits($start_date_normalized);
+    } else {
+        $start_date = $thirty_days_ago_gregorian;
+        $start_date_display = $visitor_stats_convert_digits($default_start_display);
+    }
+
+    $end_date_normalized = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($end_date_input_raw) : null;
+    if ($end_date_normalized) {
+        $end_parts = explode('/', $end_date_normalized);
+        $end_date = maneli_jalali_to_gregorian($end_parts[0], $end_parts[1], $end_parts[2]);
+        $end_date_display = $visitor_stats_convert_digits($end_date_normalized);
+    } else {
+        $end_date = $today_gregorian;
+        $end_date_display = $visitor_stats_convert_digits($default_end_display);
+    }
+} else {
+    $start_timestamp = strtotime($start_date_input_raw);
     if ($start_timestamp === false) {
         $start_timestamp = strtotime($thirty_days_ago_gregorian);
     }
     $start_date = date('Y-m-d', $start_timestamp);
-    $start_date_display_latin = maneli_gregorian_to_jalali(date('Y', $start_timestamp), date('m', $start_timestamp), date('d', $start_timestamp), 'Y/m/d', false);
-    $start_date_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($start_date_display_latin) : $start_date_display_latin;
-}
+    $start_date_display = date_i18n('Y-m-d', $start_timestamp);
+    if (function_exists('maneli_convert_to_english_digits')) {
+        $start_date_display = maneli_convert_to_english_digits($start_date_display);
+    }
 
-if ($end_date_normalized) {
-    $end_parts = explode('/', $end_date_normalized);
-    $end_date = maneli_jalali_to_gregorian($end_parts[0], $end_parts[1], $end_parts[2]);
-    $end_date_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($end_date_normalized) : $end_date_normalized;
-} else {
-    $end_date_gregorian_raw = function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($end_date_input_raw) : $end_date_input_raw;
-    $end_timestamp = strtotime($end_date_gregorian_raw);
+    $end_timestamp = strtotime($end_date_input_raw);
     if ($end_timestamp === false) {
-        $end_timestamp = current_time('timestamp');
+        $end_timestamp = strtotime($today_gregorian);
     }
     $end_date = date('Y-m-d', $end_timestamp);
-    $end_date_display_latin = maneli_gregorian_to_jalali(date('Y', $end_timestamp), date('m', $end_timestamp), date('d', $end_timestamp), 'Y/m/d', false);
-    $end_date_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($end_date_display_latin) : $end_date_display_latin;
+    $end_date_display = date_i18n('Y-m-d', $end_timestamp);
+    if (function_exists('maneli_convert_to_english_digits')) {
+        $end_date_display = maneli_convert_to_english_digits($end_date_display);
+    }
 }
 
 // Ensure start date is not after end date
@@ -214,16 +250,36 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 </select>
                             </div>
                             <div class="col-md-3 maneli-initially-hidden" id="custom-start-date">
-                                <label class="form-label"><?php esc_html_e('From Date (Solar):', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="start_date" id="start-date-picker" class="form-control" value="<?php echo esc_attr($start_date_display); ?>" placeholder="YYYY/MM/DD">
+                                <label class="form-label">
+                                    <?php echo esc_html($use_persian_digits ? __('From Date (Solar):', 'maneli-car-inquiry') : __('From Date:', 'maneli-car-inquiry')); ?>
+                                </label>
+                                <input
+                                    <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
+                                    name="start_date"
+                                    id="start-date-picker"
+                                    class="form-control"
+                                    value="<?php echo esc_attr($start_date_display); ?>"
+                                    placeholder="<?php echo esc_attr($use_persian_digits ? 'YYYY/MM/DD' : 'YYYY-MM-DD'); ?>"
+                                    <?php echo $use_persian_digits ? '' : 'pattern="\\d{4}-\\d{2}-\\d{2}"'; ?>
+                                >
                             </div>
                             <div class="col-md-3 maneli-initially-hidden" id="custom-end-date">
-                                <label class="form-label"><?php esc_html_e('To Date (Solar):', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="end_date" id="end-date-picker" class="form-control" value="<?php echo esc_attr($end_date_display); ?>" placeholder="YYYY/MM/DD">
+                                <label class="form-label">
+                                    <?php echo esc_html($use_persian_digits ? __('To Date (Solar):', 'maneli-car-inquiry') : __('To Date:', 'maneli-car-inquiry')); ?>
+                                </label>
+                                <input
+                                    <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
+                                    name="end_date"
+                                    id="end-date-picker"
+                                    class="form-control"
+                                    value="<?php echo esc_attr($end_date_display); ?>"
+                                    placeholder="<?php echo esc_attr($use_persian_digits ? 'YYYY/MM/DD' : 'YYYY-MM-DD'); ?>"
+                                    <?php echo $use_persian_digits ? '' : 'pattern="\\d{4}-\\d{2}-\\d{2}"'; ?>
+                                >
                             </div>
                             <div class="col-md-3 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary btn-wave w-100">
-                                    <i class="ri-filter-line me-1"></i><?php esc_html_e('Apply Filter', 'maneli-car-inquiry'); ?>
+                                    <i class="ri-filter-line me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
                                 </button>
                             </div>
                         </form>
@@ -280,7 +336,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 </div>
                                 <div>
                                     <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Visits', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 maneli-stat-value" id="total-visits"><?php echo maneli_number_format_persian($overall_stats['total_visits']); ?></h4>
+                                    <h4 class="fw-semibold mb-0 maneli-stat-value" id="total-visits"><?php echo esc_html($visitor_stats_format_number($overall_stats['total_visits'])); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -299,7 +355,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 </div>
                                 <div>
                                     <p class="text-muted fs-14 mb-1"><?php esc_html_e('Unique Visitors', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 text-success maneli-stat-value" id="unique-visitors"><?php echo maneli_number_format_persian($overall_stats['unique_visitors']); ?></h4>
+                                    <h4 class="fw-semibold mb-0 text-success maneli-stat-value" id="unique-visitors"><?php echo esc_html($visitor_stats_format_number($overall_stats['unique_visitors'])); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -318,7 +374,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 </div>
                                 <div>
                                     <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Pages', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 text-info maneli-stat-value" id="total-pages"><?php echo maneli_number_format_persian($overall_stats['total_pages']); ?></h4>
+                                    <h4 class="fw-semibold mb-0 text-info maneli-stat-value" id="total-pages"><?php echo esc_html($visitor_stats_format_number($overall_stats['total_pages'])); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -337,7 +393,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 </div>
                                 <div>
                                     <p class="text-muted fs-14 mb-1"><?php esc_html_e('Online Now', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 text-warning maneli-stat-value" id="online-visitors"><?php echo maneli_number_format_persian(count($online_visitors)); ?></h4>
+                                    <h4 class="fw-semibold mb-0 text-warning maneli-stat-value" id="online-visitors"><?php echo esc_html($visitor_stats_format_number(count($online_visitors))); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -383,18 +439,31 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 </thead>
                                 <tbody id="daily-visits-table">
                                     <?php foreach (array_slice($daily_stats, -10) as $stat): 
-                                        // Convert date to Jalali if it's in Gregorian format
                                         $display_date = $stat->date;
-                                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
-                                            $date_parts = explode('-', $stat->date);
-                                            $display_date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
+                                        if ($use_persian_digits) {
+                                            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
+                                                $date_parts = explode('-', $stat->date);
+                                                $display_date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
+                                            }
+                                            $display_date = $visitor_stats_convert_digits($display_date);
+                                        } else {
+                                            $normalized_jalali = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($stat->date) : null;
+                                            if ($normalized_jalali) {
+                                                $parts = explode('/', $normalized_jalali);
+                                                if (count($parts) === 3) {
+                                                    $display_date = maneli_jalali_to_gregorian($parts[0], $parts[1], $parts[2]);
+                                                }
+                                            }
+                                            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $display_date)) {
+                                                $display_date = date_i18n('Y-m-d', strtotime($display_date));
+                                            }
+                                            $display_date = $visitor_stats_convert_digits($display_date);
                                         }
-                                        $display_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($display_date) : $display_date;
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($display_date); ?></td>
-                                        <td><?php echo maneli_number_format_persian($stat->visits); ?></td>
-                                        <td><?php echo maneli_number_format_persian($stat->unique_visitors); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($stat->visits)); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($stat->unique_visitors)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -427,7 +496,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                                 <?php echo esc_html($page->page_title ?: $page->page_url); ?>
                                             </div>
                                         </td>
-                                        <td><?php echo maneli_number_format_persian($page->visit_count); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($page->visit_count)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -504,14 +573,13 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                             <?php
                                             $product_label = $product->product_name;
                                             if (empty($product_label)) {
-                                                $product_id_for_display = function_exists('maneli_number_format_persian') ? maneli_number_format_persian($product->product_id) : $product->product_id;
-                                                $product_label = sprintf(esc_html__('Product #%s', 'maneli-car-inquiry'), $product_id_for_display);
+                                                $product_label = sprintf(esc_html__('Product #%s', 'maneli-car-inquiry'), $visitor_stats_format_number($product->product_id));
                                             }
                                             echo esc_html($product_label);
                                             ?>
                                         </td>
-                                        <td><?php echo maneli_number_format_persian($product->visit_count); ?></td>
-                                        <td><?php echo maneli_number_format_persian($product->unique_visitors); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($product->visit_count)); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($product->unique_visitors)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -545,8 +613,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <?php foreach ($search_engine_stats as $engine): ?>
                                     <tr>
                                         <td><?php echo esc_html(ucfirst($engine->search_engine)); ?></td>
-                                        <td><?php echo maneli_number_format_persian($engine->visit_count); ?></td>
-                                        <td><?php echo maneli_number_format_persian($engine->unique_visitors); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($engine->visit_count)); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($engine->unique_visitors)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -579,7 +647,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                                 <?php echo esc_html($referrer->referrer_domain); ?>
                                             </div>
                                         </td>
-                                        <td><?php echo maneli_number_format_persian($referrer->visit_count); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($referrer->visit_count)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -614,8 +682,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                     <tr>
                                         <?php $model_label = Maneli_Visitor_Statistics::translate_device_model($model->device_model); ?>
                                         <td><?php echo esc_html($model_label); ?></td>
-                                        <td><?php echo maneli_number_format_persian($model->visit_count); ?></td>
-                                        <td><?php echo maneli_number_format_persian($model->unique_visitors); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($model->visit_count)); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($model->unique_visitors)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -651,8 +719,8 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                             <span class="maneli-emoji-flag me-2"><?php echo esc_html($flag_icon); ?></span>
                                             <?php echo esc_html($country_name); ?>
                                         </td>
-                                        <td><?php echo maneli_number_format_persian($country->visit_count); ?></td>
-                                        <td><?php echo maneli_number_format_persian($country->unique_visitors); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($country->visit_count)); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($country->unique_visitors)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -693,7 +761,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                             <span class="maneli-emoji-flag me-2"><?php echo esc_html($active_flag); ?></span>
                                             <?php echo esc_html($active_country); ?>
                                         </td>
-                                        <td><?php echo maneli_number_format_persian($visitor->visit_count); ?></td>
+                                        <td><?php echo esc_html($visitor_stats_format_number($visitor->visit_count)); ?></td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -722,13 +790,29 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                 <tbody>
                                     <?php foreach (array_slice($recent_visitors, 0, 10) as $visit): 
                                         $visit_timestamp = strtotime($visit->visit_date);
-                                        $visit_date_jalali = maneli_gregorian_to_jalali(date('Y', $visit_timestamp), date('m', $visit_timestamp), date('d', $visit_timestamp), 'Y/m/d');
-                                        $visit_time = date('H:i', $visit_timestamp);
-                                        if (function_exists('persian_numbers_no_separator')) {
-                                            $visit_date_jalali = persian_numbers_no_separator($visit_date_jalali);
-                                            $visit_time = persian_numbers_no_separator($visit_time);
+                                        if ($visit_timestamp === false && isset($visit->visit_date)) {
+                                            $parts = preg_split('/\s+/', $visit->visit_date);
+                                            $date_part = $parts[0] ?? '';
+                                            $time_part = $parts[1] ?? '00:00';
+                                            $normalized_jalali = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($date_part) : null;
+                                            if ($normalized_jalali) {
+                                                $jalali_segments = explode('/', $normalized_jalali);
+                                                if (count($jalali_segments) === 3) {
+                                                    $gregorian_date = maneli_jalali_to_gregorian($jalali_segments[0], $jalali_segments[1], $jalali_segments[2]);
+                                                    $visit_timestamp = strtotime(trim($gregorian_date . ' ' . $time_part));
+                                                }
+                                            }
                                         }
-                                        $visit_datetime_display = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(trim($visit_date_jalali . ' ' . $visit_time)) : trim($visit_date_jalali . ' ' . $visit_time);
+                                        if ($visit_timestamp === false) {
+                                            $visit_timestamp = current_time('timestamp');
+                                        }
+                                        if ($use_persian_digits) {
+                                            $visit_date_display = maneli_gregorian_to_jalali(date('Y', $visit_timestamp), date('m', $visit_timestamp), date('d', $visit_timestamp), 'Y/m/d');
+                                            $visit_time_display = date('H:i', $visit_timestamp);
+                                            $visit_datetime_display = $visitor_stats_convert_digits(trim($visit_date_display . ' ' . $visit_time_display));
+                                        } else {
+                                            $visit_datetime_display = date_i18n('Y-m-d H:i', $visit_timestamp);
+                                        }
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($visit_datetime_display); ?></td>
@@ -785,10 +869,15 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                                         $browser_display = $visitor->browser ?: esc_html__('Unknown', 'maneli-car-inquiry');
                                         $os_display = $visitor->os ?: esc_html__('Unknown', 'maneli-car-inquiry');
                                         $device_display = $visitor->device_type_label ?? Maneli_Visitor_Statistics::translate_device_type($visitor->device_type ?? '');
-                                        if (function_exists('persian_numbers_no_separator')) {
+                                        if ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
                                             $device_display = persian_numbers_no_separator($device_display);
+                                        } elseif (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
+                                            $device_display = maneli_convert_to_english_digits($device_display);
                                         }
                                         $time_ago_display = $visitor->time_ago ?? '';
+                                        if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
+                                            $time_ago_display = maneli_convert_to_english_digits($time_ago_display);
+                                        }
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($visitor->ip_address); ?></td>
@@ -819,7 +908,13 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
 </div>
 
 <script type="text/javascript">
+window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
+    'usePersianDatepicker' => $use_persian_digits,
+]); ?>;
+</script>
+<script type="text/javascript">
 (function() {
+    var config = window.maneliVisitorStatsConfig || {};
     // Wait for jQuery to be available
     function initDatePickers() {
         if (typeof jQuery === 'undefined') {
@@ -828,19 +923,33 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
         }
         
         jQuery(document).ready(function($) {
-            // Initialize Persian Datepicker
-            if (typeof $.fn.persianDatepicker !== 'undefined') {
-                $('#start-date-picker').persianDatepicker({
-                    formatDate: 'YYYY/MM/DD',
-                    persianNumbers: true,
-                    autoClose: true
-                });
-                $('#end-date-picker').persianDatepicker({
-                    formatDate: 'YYYY/MM/DD',
-                    persianNumbers: true,
-                    autoClose: true
-                });
+            $('#period-filter').on('change', function() {
+                var period = $(this).val();
+                if (period === 'custom') {
+                    $('#custom-start-date, #custom-end-date').removeClass('maneli-initially-hidden').show();
+                } else {
+                    $('#custom-start-date, #custom-end-date').addClass('maneli-initially-hidden').hide();
+                }
+            });
+
+            if ($('#period-filter').val() === 'custom') {
+                $('#custom-start-date, #custom-end-date').removeClass('maneli-initially-hidden').show();
             }
+
+            if (!config.usePersianDatepicker || typeof $.fn.persianDatepicker === 'undefined') {
+                return;
+            }
+
+            $('#start-date-picker').persianDatepicker({
+                formatDate: 'YYYY/MM/DD',
+                persianNumbers: true,
+                autoClose: true
+            });
+            $('#end-date-picker').persianDatepicker({
+                formatDate: 'YYYY/MM/DD',
+                persianNumbers: true,
+                autoClose: true
+            });
 
             function maneliConvertDigitsToEnglish(str) {
                 var persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
@@ -877,16 +986,6 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                 var currentValue = $(this).val();
                 var normalizedValue = maneliNormalizeDateValue(currentValue);
                 $(this).val(normalizedValue);
-            });
-            
-            // Handle period filter change
-            $('#period-filter').on('change', function() {
-                var period = $(this).val();
-                if (period === 'custom') {
-                    $('#custom-start-date, #custom-end-date').removeClass('maneli-initially-hidden').show();
-                } else {
-                    $('#custom-start-date, #custom-end-date').addClass('maneli-initially-hidden').hide();
-                }
             });
         });
     }

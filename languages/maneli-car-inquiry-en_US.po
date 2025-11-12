@@ -9585,6 +9585,15 @@ msgstr "No alerts available"
 msgid "User name"
 msgstr "User name"
 
+msgid "1403/01/01"
+msgstr "1403/01/01"
+
+msgid "2024-01-01"
+msgstr "2024-01-01"
+
+msgid "The persianDatepicker plugin was not loaded in time on the system logs page."
+msgstr "The persianDatepicker plugin was not loaded in time on the system logs page."
+
 msgid "Payment ID is not specified."
 msgstr "Payment ID is not specified."
 

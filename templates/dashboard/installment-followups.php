@@ -86,6 +86,190 @@ if (!$is_admin) {
 $followups_query = new WP_Query($args);
 $followups = $followups_query->posts;
 
+$use_persian_digits_for_dashboard = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+
+if (!function_exists('maneli_installment_followup_convert_jalali_to_gregorian')) {
+    /**
+     * Convert a Jalali date (with possible Persian digits) to Gregorian (Y-m-d).
+     *
+     * @param string $jalali_date_string
+     * @return string|null
+     */
+    function maneli_installment_followup_convert_jalali_to_gregorian($jalali_date_string) {
+        if (!is_string($jalali_date_string) || $jalali_date_string === '') {
+            return null;
+        }
+
+        $value = $jalali_date_string;
+        if (function_exists('maneli_convert_to_english_digits')) {
+            $value = maneli_convert_to_english_digits($value);
+        }
+
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+
+        $value = str_replace(['-', '.'], '/', $value);
+
+        if (!preg_match('/^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/', $value, $matches)) {
+            return null;
+        }
+
+        $jy = (int) $matches[1];
+        $jm = (int) $matches[2];
+        $jd = (int) $matches[3];
+
+        if ($jy < 1300 || $jy > 1500) {
+            return null;
+        }
+
+        $jy -= 979;
+        $jm -= 1;
+        $jd -= 1;
+
+        $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+        $g_days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        $j_day_no = 365 * $jy + intdiv($jy, 33) * 8 + intdiv(($jy % 33 + 3), 4);
+
+        for ($i = 0; $i < $jm; ++$i) {
+            $j_day_no += $j_days_in_month[$i];
+        }
+
+        $j_day_no += $jd;
+
+        $g_day_no = $j_day_no + 79;
+        $gy = 1600 + 400 * intdiv($g_day_no, 146097);
+        $g_day_no %= 146097;
+
+        $leap = true;
+        if ($g_day_no >= 36525) {
+            $g_day_no--;
+            $gy += 100 * intdiv($g_day_no, 36524);
+            $g_day_no %= 36524;
+            if ($g_day_no >= 365) {
+                $g_day_no++;
+            } else {
+                $leap = false;
+            }
+        }
+
+        $gy += 4 * intdiv($g_day_no, 1461);
+        $g_day_no %= 1461;
+
+        if ($g_day_no >= 366) {
+            $leap = false;
+            $g_day_no--;
+            $gy += intdiv($g_day_no, 365);
+            $g_day_no %= 365;
+        }
+
+        $gm = 0;
+        while (
+            $gm < 12 &&
+            $g_day_no >= ($g_days_in_month[$gm] + ($gm === 1 && $leap ? 1 : 0))
+        ) {
+            $g_day_no -= $g_days_in_month[$gm] + ($gm === 1 && $leap ? 1 : 0);
+            $gm++;
+        }
+
+        $gd = $g_day_no + 1;
+        $gm += 1;
+
+        return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
+    }
+}
+
+$convert_followup_to_gregorian = static function ($date_string) {
+    if (empty($date_string)) {
+        return null;
+    }
+
+    $value = $date_string;
+    if (function_exists('maneli_convert_to_english_digits')) {
+        $value = maneli_convert_to_english_digits($value);
+    }
+
+    $value = trim((string) $value);
+    if ($value === '') {
+        return null;
+    }
+
+    $normalized_slash = str_replace(['-', '.'], '/', $value);
+    if (preg_match('/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/', $normalized_slash, $matches)) {
+        $year = (int) $matches[1];
+        $month = (int) $matches[2];
+        $day = (int) $matches[3];
+
+        if ($year >= 1300 && $year <= 1500) {
+            return maneli_installment_followup_convert_jalali_to_gregorian(sprintf('%04d/%02d/%02d', $year, $month, $day));
+        }
+
+        return sprintf('%04d-%02d-%02d', $year, $month, $day);
+    }
+
+    $timestamp = strtotime(str_replace('/', '-', $value));
+    if ($timestamp !== false) {
+        return date('Y-m-d', $timestamp);
+    }
+
+    return null;
+};
+
+$format_created_date_for_display = static function ($date_string) use ($use_persian_digits_for_dashboard) {
+    if (empty($date_string)) {
+        return '';
+    }
+
+    $timestamp = strtotime($date_string);
+    if ($timestamp === false) {
+        $value = (string) $date_string;
+        return $use_persian_digits_for_dashboard && function_exists('persian_numbers_no_separator')
+            ? persian_numbers_no_separator($value)
+            : (function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($value) : $value);
+    }
+
+    if ($use_persian_digits_for_dashboard) {
+        $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali(date('Y-m-d', $timestamp), 'Y/m/d');
+        return function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($jalali_date) : $jalali_date;
+    }
+
+    return function_exists('wp_date') ? wp_date('Y/m/d', $timestamp) : date('Y/m/d', $timestamp);
+};
+
+$format_followup_date_for_display = static function ($raw_value) use ($use_persian_digits_for_dashboard, $convert_followup_to_gregorian) {
+    if (!$raw_value) {
+        return '';
+    }
+
+    $greg_date = $convert_followup_to_gregorian($raw_value);
+
+    if ($use_persian_digits_for_dashboard) {
+        if ($greg_date) {
+            $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($greg_date, 'Y/m/d');
+            return function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($jalali_date) : $jalali_date;
+        }
+        return function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($raw_value) : $raw_value;
+    }
+
+    if ($greg_date) {
+        $timestamp = strtotime($greg_date);
+        if ($timestamp !== false) {
+            return function_exists('wp_date') ? wp_date('Y/m/d', $timestamp) : date('Y/m/d', $timestamp);
+        }
+        return $greg_date;
+    }
+
+    $english_digits = function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($raw_value) : $raw_value;
+    $timestamp = strtotime(str_replace('/', '-', $english_digits));
+    if ($timestamp !== false) {
+        return function_exists('wp_date') ? wp_date('Y/m/d', $timestamp) : date('Y/m/d', $timestamp);
+    }
+
+    return $english_digits;
+};
+
 // Calculate statistics
 $today = current_time('Y-m-d');
 $week_end = date('Y-m-d', strtotime('+7 days'));
@@ -99,9 +283,19 @@ foreach ($followups as $inquiry) {
     $total_count++;
     
     if ($follow_up_date) {
-        if ($follow_up_date === $today) $today_count++;
-        if ($follow_up_date < $today) $overdue_count++;
-        if ($follow_up_date <= $week_end) $week_count++;
+        $normalized_followup_for_compare = $convert_followup_to_gregorian($follow_up_date);
+
+        if ($normalized_followup_for_compare) {
+            if ($normalized_followup_for_compare === $today) {
+                $today_count++;
+            }
+            if ($normalized_followup_for_compare < $today) {
+                $overdue_count++;
+            }
+            if ($normalized_followup_for_compare <= $week_end) {
+                $week_count++;
+            }
+        }
     }
 }
 
@@ -608,6 +802,8 @@ foreach ($followups as $inquiry) {
                                     $customer = get_userdata($inquiry->post_author);
                                     $product_id = get_post_meta($inquiry_id, 'product_id', true);
                                     $follow_up_date = get_post_meta($inquiry_id, 'followup_date', true);
+                                    $follow_up_date_for_compare = $convert_followup_to_gregorian($follow_up_date);
+                                    $follow_up_date_display = $format_followup_date_for_display($follow_up_date);
                                     $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
                                     $tracking_status_label = Maneli_CPT_Handler::get_tracking_status_label($tracking_status);
                                     $expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
@@ -617,18 +813,7 @@ foreach ($followups as $inquiry) {
                                     $followup_history = get_post_meta($inquiry_id, 'followup_history', true) ?: [];
                                     
                                     // Convert dates to Jalali
-                                    $created_timestamp = strtotime($inquiry->post_date);
-                                    if (function_exists('maneli_gregorian_to_jalali')) {
-                                        $created_date = maneli_gregorian_to_jalali(
-                                            date('Y', $created_timestamp),
-                                            date('m', $created_timestamp),
-                                            date('d', $created_timestamp),
-                                            'Y/m/d'
-                                        );
-                                    } else {
-                                        $created_date = date('Y/m/d', $created_timestamp);
-                                    }
-                                    $created_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($created_date) : $created_date;
+                                    $created_date_display = $format_created_date_for_display($inquiry->post_date);
                                     
                                     // Status badge color
                                     $status_class_map = [
@@ -644,7 +829,7 @@ foreach ($followups as $inquiry) {
                                     $status_class = $status_class_map[$tracking_status] ?? 'secondary';
                                     
                                     // Overdue check
-                                    $is_overdue = $follow_up_date && $follow_up_date < $today;
+                                    $is_overdue = $follow_up_date_for_compare && $follow_up_date_for_compare < $today;
                                     $row_class = $is_overdue ? 'table-danger' : '';
                                 ?>
                                     <tr class="crm-contact contacts-list <?php echo $row_class; ?>">
@@ -656,18 +841,16 @@ foreach ($followups as $inquiry) {
                                                 <div>
                                                     <span class="d-block fw-medium"><?php echo esc_html($customer ? $customer->display_name : esc_html__('Unknown', 'maneli-car-inquiry')); ?></span>
                                                     <span class="d-block text-muted fs-11">
-                                                        <i class="la la-user me-1 fs-13 align-middle"></i><?php echo esc_html($created_date); ?>
+                                                        <i class="la la-user me-1 fs-13 align-middle"></i><?php echo esc_html($created_date_display); ?>
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
                                         <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">
-                                            <?php if ($follow_up_date): 
-                                                $follow_up_date_persian = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($follow_up_date) : $follow_up_date;
-                                            ?>
+                                            <?php if ($follow_up_date_display !== ''): ?>
                                                 <strong class="<?php echo $is_overdue ? 'text-danger' : 'text-success'; ?>">
-                                                    <?php echo esc_html($follow_up_date_persian); ?>
+                                                    <?php echo esc_html($follow_up_date_display); ?>
                                                 </strong>
                                                 <?php if ($is_overdue): ?>
                                                     <br><span class="badge bg-danger-transparent"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
@@ -691,7 +874,7 @@ foreach ($followups as $inquiry) {
                                                 <?php echo $expert ? esc_html($expert->display_name) : '<span class="text-muted">—</span>'; ?>
                                             </td>
                                         <?php endif; ?>
-                                        <td data-title="<?php esc_attr_e('Registration Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($created_date); ?></td>
+                                        <td data-title="<?php esc_attr_e('Registration Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($created_date_display); ?></td>
                                         <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
                                             <div class="btn-list">
                                                 <a href="<?php echo add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries')); ?>" 

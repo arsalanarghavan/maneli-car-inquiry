@@ -88,6 +88,10 @@ if (!function_exists('maneli_jalali_to_gregorian')) {
 function convert_jalali_to_gregorian_date($date_str) {
     if (empty($date_str)) return '';
     
+    if (function_exists('maneli_convert_to_english_digits')) {
+        $date_str = maneli_convert_to_english_digits($date_str);
+    }
+
     // Check if it's already in Gregorian format (YYYY-MM-DD)
     if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date_str)) {
         return $date_str;
@@ -125,11 +129,36 @@ if (!function_exists('maneli_format_relative_path')) {
     }
 }
 
-if (!function_exists('maneli_to_persian_digits')) {
-    function maneli_to_persian_digits($value) {
-        $digits = array('0','1','2','3','4','5','6','7','8','9',',');
-        $persian = array('۰','۱','۲','۳','۴','۵','۶','۷','۸','۹','،');
-        return str_replace($digits, $persian, (string) $value);
+if (!function_exists('maneli_format_localized_digits')) {
+    function maneli_format_localized_digits($value) {
+        static $cache_should_use_persian = null;
+
+        $value = (string) $value;
+
+        if ($cache_should_use_persian === null) {
+            $cache_should_use_persian = function_exists('maneli_should_use_persian_digits')
+                ? maneli_should_use_persian_digits()
+                : true;
+        }
+
+        $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $arabic_digits  = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+        if ($cache_should_use_persian) {
+            $value = str_replace($english_digits, $persian_digits, $value);
+            $value = str_replace(',', '،', $value);
+            return $value;
+        }
+
+        if (function_exists('maneli_convert_to_english_digits')) {
+            $value = maneli_convert_to_english_digits($value);
+        } else {
+            $value = str_replace($persian_digits, $english_digits, $value);
+            $value = str_replace($arabic_digits, $english_digits, $value);
+        }
+
+        return str_replace('،', ',', $value);
     }
 }
 
@@ -137,16 +166,16 @@ if (!function_exists('maneli_translate_log_label')) {
     function maneli_translate_log_label($label, $type = 'severity') {
         $maps = array(
             'severity' => array(
-                'info' => __('اطلاعات', 'maneli-car-inquiry'),
-                'warning' => __('هشدار', 'maneli-car-inquiry'),
-                'error' => __('خطا', 'maneli-car-inquiry'),
-                'critical' => __('بحرانی', 'maneli-car-inquiry'),
+                'info' => esc_html__('Info', 'maneli-car-inquiry'),
+                'warning' => esc_html__('Warning', 'maneli-car-inquiry'),
+                'error' => esc_html__('Error', 'maneli-car-inquiry'),
+                'critical' => esc_html__('Critical', 'maneli-car-inquiry'),
             ),
             'type' => array(
-                'error' => __('خطا', 'maneli-car-inquiry'),
-                'debug' => __('اشکال‌زدایی', 'maneli-car-inquiry'),
-                'console' => __('کنسول', 'maneli-car-inquiry'),
-                'button_error' => __('خطای دکمه', 'maneli-car-inquiry'),
+                'error' => esc_html__('Error', 'maneli-car-inquiry'),
+                'debug' => esc_html__('Debug', 'maneli-car-inquiry'),
+                'console' => esc_html__('Console', 'maneli-car-inquiry'),
+                'button_error' => esc_html__('Button Error', 'maneli-car-inquiry'),
             ),
         );
         $label = strtolower((string) $label);
@@ -157,30 +186,30 @@ if (!function_exists('maneli_translate_log_label')) {
     }
 }
 
-if (!function_exists('maneli_format_persian_datetime')) {
-    function maneli_format_persian_datetime($datetime) {
+if (!function_exists('maneli_format_log_datetime')) {
+    function maneli_format_log_datetime($datetime) {
         $timestamp = strtotime($datetime);
         if (!$timestamp) {
             return '';
         }
-        $greg_date = date('Y-m-d H:i:s', $timestamp);
-        $date_parts = explode(' ', $greg_date);
-        $date = isset($date_parts[0]) ? $date_parts[0] : '';
-        $time = isset($date_parts[1]) ? $date_parts[1] : '';
 
-        if (!empty($date)) {
-            $ymd = explode('-', $date);
-            if (count($ymd) === 3) {
-                $jalali_date = maneli_gregorian_to_jalali($ymd[0], $ymd[1], $ymd[2], 'Y/m/d');
-            } else {
-                $jalali_date = $date;
-            }
+        $year = date('Y', $timestamp);
+        $month = date('m', $timestamp);
+        $day = date('d', $timestamp);
+
+        if (function_exists('maneli_gregorian_to_jalali')) {
+            $date = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d', false);
         } else {
-            $jalali_date = '';
+            $date = function_exists('wp_date') ? wp_date('Y-m-d', $timestamp) : date('Y-m-d', $timestamp);
         }
 
-        $result = trim($jalali_date . ' ' . $time);
-        return maneli_to_persian_digits($result);
+        if (empty($date)) {
+            $date = function_exists('wp_date') ? wp_date('Y-m-d', $timestamp) : date('Y-m-d', $timestamp);
+        }
+
+        $time = function_exists('wp_date') ? wp_date('H:i:s', $timestamp) : date('H:i:s', $timestamp);
+
+        return maneli_format_localized_digits(trim($date . ' ' . $time));
     }
 }
 
@@ -194,6 +223,7 @@ $page_num = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
 $options = get_option('maneli_inquiry_all_options', []);
 $per_page = isset($options['max_logs_per_page']) ? max(10, intval($options['max_logs_per_page'])) : 50;
 $offset = ($page_num - 1) * $per_page;
+$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
 
 // Convert Jalali dates to Gregorian for database query
 $date_from = convert_jalali_to_gregorian_date($date_from_raw);
@@ -213,7 +243,12 @@ $args = array(
 $logs = $logger->get_system_logs($args);
 $total_logs = $logger->get_system_logs_count($args);
 $total_pages = ceil($total_logs / $per_page);
-$total_logs_label = maneli_to_persian_digits(number_format($total_logs));
+$total_logs_label = maneli_format_localized_digits(number_format($total_logs));
+$date_placeholder = $use_persian_digits
+    ? maneli_format_localized_digits(__('1403/01/01', 'maneli-car-inquiry'))
+    : maneli_format_localized_digits(__('2024-01-01', 'maneli-car-inquiry'));
+$date_from_display = maneli_format_localized_digits($date_from_raw);
+$date_to_display = maneli_format_localized_digits($date_to_raw);
 ?>
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -266,11 +301,11 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from_raw); ?>" placeholder="1403/01/01">
+                                <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to_raw); ?>" placeholder="1403/01/01">
+                                <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
                             </div>
                             <div class="col-md-2">
                                 <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
@@ -347,14 +382,14 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
                                                 $user_title = $log->user_agent;
                                             }
                                             if (!empty($user_display)) {
-                                                $user_display = maneli_to_persian_digits($user_display);
+                                                $user_display = maneli_format_localized_digits($user_display);
                                             }
                                             if (!empty($user_title)) {
-                                                $user_title = maneli_to_persian_digits($user_title);
+                                                $user_title = maneli_format_localized_digits($user_title);
                                             }
                                             ?>
                                             <tr>
-                                                <td><?php echo esc_html(maneli_to_persian_digits($log->id)); ?></td>
+                                                <td><?php echo esc_html(maneli_format_localized_digits($log->id)); ?></td>
                                                 <td><span class="badge <?php echo esc_attr($log_type_class); ?>"><?php echo esc_html(maneli_translate_log_label($log->log_type, 'type')); ?></span></td>
                                                 <td><span class="badge <?php echo esc_attr($severity_class); ?>"><?php echo esc_html(maneli_translate_log_label($log->severity, 'severity')); ?></span></td>
                                                 <td>
@@ -373,7 +408,7 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
                                                         <?php echo esc_html($relative_path); ?>
                                                         </div>
                                                         <?php if ($log->line): ?>
-                                                        <small class="text-muted"><?php echo esc_html(sprintf(__('Line %s', 'maneli-car-inquiry'), maneli_to_persian_digits($log->line))); ?></small>
+                                                        <small class="text-muted"><?php echo esc_html(sprintf(__('Line %s', 'maneli-car-inquiry'), maneli_format_localized_digits($log->line))); ?></small>
                                                         <?php endif; ?>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
@@ -389,7 +424,7 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <?php echo esc_html(maneli_format_persian_datetime($log->created_at)); ?>
+                                                    <?php echo esc_html(maneli_format_log_datetime($log->created_at)); ?>
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary" onclick="showLogDetails(<?php echo esc_js($log->id); ?>)">
@@ -425,7 +460,7 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
                                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                             <?php if ($i == 1 || $i == $total_pages || ($i >= $page_num - 2 && $i <= $page_num + 2)): ?>
                                                 <li class="page-item <?php echo $i == $page_num ? 'active' : ''; ?>">
-                                                    <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $i, $current_url)); ?>"><?php echo esc_html(maneli_to_persian_digits($i)); ?></a>
+                                                    <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $i, $current_url)); ?>"><?php echo esc_html(maneli_format_localized_digits($i)); ?></a>
                                                 </li>
                                             <?php elseif ($i == $page_num - 3 || $i == $page_num + 3): ?>
                                                 <li class="page-item disabled">
@@ -538,7 +573,7 @@ $total_logs_label = maneli_to_persian_digits(number_format($total_logs));
                             ensureDatepickerPlugin(callback);
                         }, 150);
                     } else {
-                        console.warn('persianDatepicker plugin was not loaded in time on system-logs page.');
+                        console.warn('<?php echo esc_js(__('The persianDatepicker plugin was not loaded in time on the system logs page.', 'maneli-car-inquiry')); ?>');
                     }
                     return;
                 }

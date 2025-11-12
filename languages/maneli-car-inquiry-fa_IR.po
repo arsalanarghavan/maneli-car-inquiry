@@ -10120,6 +10120,15 @@ msgstr "هشداری وجود ندارد"
 msgid "User name"
 msgstr "نام کاربر"
 
+msgid "1403/01/01"
+msgstr "۱۴۰۳/۰۱/۰۱"
+
+msgid "2024-01-01"
+msgstr "۲۰۲۴-۰۱-۰۱"
+
+msgid "The persianDatepicker plugin was not loaded in time on the system logs page."
+msgstr "افزونه PersianDatepicker در صفحه گزارش‌های سیستم به‌موقع بارگذاری نشد."
+
 msgid "Payment ID is not specified."
 msgstr "شناسه پرداخت مشخص نشده است."
 

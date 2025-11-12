@@ -1106,6 +1106,62 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
     }
 }
 
+[data-theme-mode=dark] .card-header.bg-light {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.85)) !important;
+    color: #e2e8f0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+[data-theme-mode=dark] .status-roadmap {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 18px;
+    box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.08);
+}
+
+[data-theme-mode=dark] .status-step[style*="opacity: 0.3"] {
+    opacity: 0.55 !important;
+}
+
+[data-theme-mode=dark] .status-step[style*="opacity: 0.3"] .avatar {
+    background-color: rgba(30, 41, 59, 0.85) !important;
+    color: rgba(148, 163, 184, 0.65);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+[data-theme-mode=dark] .status-step .avatar {
+    box-shadow: 0 10px 20px rgba(2, 6, 23, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+[data-theme-mode=dark] .status-step small {
+    color: #cbd5f5;
+}
+
+[data-theme-mode=dark] .status-step .badge {
+    background: rgba(15, 23, 42, 0.7);
+    color: #e2e8f0;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+[data-theme-mode=dark] .status-step .badge.bg-success-light,
+[data-theme-mode=dark] .status-step .badge.bg-light {
+    background: rgba(30, 41, 59, 0.9);
+    color: #cbd5f5;
+}
+
+[data-theme-mode=dark] .status-arrow i {
+    color: rgba(148, 163, 184, 0.65) !important;
+}
+
+[data-theme-mode=dark] .pulse-ring {
+    border-color: rgba(94, 234, 212, 0.75);
+    box-shadow: 0 0 0 6px rgba(45, 212, 191, 0.15);
+}
+
+[data-theme-mode=dark] .status-icon-wrapper .spinner-border {
+    color: #f8fafc !important;
+}
+
 /* Responsive roadmap for mobile */
 @media (max-width: 768px) {
     .status-roadmap .d-flex {

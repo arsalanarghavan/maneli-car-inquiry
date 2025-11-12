@@ -208,6 +208,27 @@ class Maneli_Render_Helpers {
                 .maneli-cheque-status-main.status-color-brown {background:linear-gradient(135deg,#f9eadf,#f3c999);color:#78350f;}
                 .maneli-cheque-status-main.status-color-red {background:linear-gradient(135deg,#fee2e2,#fca5a5);color:#7f1d1d;}
                 .maneli-cheque-status-main.status-color-undetermined {background:linear-gradient(135deg,#eef2f7,#cbd5f5);color:#1f2937;}
+                [data-theme-mode=dark] .maneli-cheque-status-card {border-color:rgba(148,163,184,0.25);background:rgba(15,23,42,0.85);}
+                [data-theme-mode=dark] .maneli-cheque-status-main {color:#e2e8f0;box-shadow:0 10px 30px rgba(2,6,23,0.35);}
+                [data-theme-mode=dark] .maneli-cheque-status-main .status-icon {background:rgba(15,23,42,0.65);box-shadow:0 10px 25px rgba(2,6,23,0.45);color:#f8fafc;}
+                [data-theme-mode=dark] .maneli-cheque-status-main .status-chip {background:rgba(15,23,42,0.55);color:#e2e8f0;box-shadow:0 5px 18px rgba(2,6,23,0.45);}
+                [data-theme-mode=dark] .maneli-cheque-status-main .status-desc {color:rgba(226,232,240,0.78);}
+                [data-theme-mode=dark] .maneli-cheque-status-legend {gap:.75rem;}
+                [data-theme-mode=dark] .maneli-cheque-chip {background:rgba(15,23,42,0.65);color:#cbd5f5;border-color:rgba(148,163,184,0.35);box-shadow:none;}
+                [data-theme-mode=dark] .maneli-cheque-chip .chip-dot {box-shadow:0 0 0 3px rgba(15,23,42,0.35);}
+                [data-theme-mode=dark] .maneli-cheque-chip.active {transform:translateY(-2px);box-shadow:0 10px 22px rgba(2,6,23,0.55);background:rgba(15,23,42,0.8);}
+                [data-theme-mode=dark] .maneli-cheque-chip.chip-white {color:#e2e8f0;background:linear-gradient(135deg,rgba(148,163,184,0.15),rgba(30,41,59,0.25));}
+                [data-theme-mode=dark] .maneli-cheque-chip.chip-yellow {color:#fde68a;background:linear-gradient(135deg,rgba(234,179,8,0.22),rgba(133,77,14,0.24));}
+                [data-theme-mode=dark] .maneli-cheque-chip.chip-orange {color:#fdba74;background:linear-gradient(135deg,rgba(251,146,60,0.22),rgba(194,65,12,0.26));}
+                [data-theme-mode=dark] .maneli-cheque-chip.chip-brown {color:#facc15;background:linear-gradient(135deg,rgba(214,158,46,0.25),rgba(120,53,15,0.3));}
+                [data-theme-mode=dark] .maneli-cheque-chip.chip-red {color:#fecaca;background:linear-gradient(135deg,rgba(248,113,113,0.22),rgba(185,28,28,0.3));}
+                [data-theme-mode=dark] .maneli-cheque-chip.chip-undetermined {color:#cbd5f5;background:linear-gradient(135deg,rgba(148,163,184,0.22),rgba(30,41,59,0.28));}
+                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-white {background:linear-gradient(135deg,#1e293b,#0f172a);color:#f8fafc;}
+                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-yellow {background:linear-gradient(135deg,#422006,#7c2d12);color:#fde68a;}
+                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-orange {background:linear-gradient(135deg,#431407,#7c2d12);color:#fdba74;}
+                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-brown {background:linear-gradient(135deg,#3f2510,#78350f);color:#facc15;}
+                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-red {background:linear-gradient(135deg,#450a0a,#991b1b);color:#fecaca;}
+                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-undetermined {background:linear-gradient(135deg,#1e293b,#334155);color:#cbd5f5;}
                 @media (max-width: 576px){.maneli-cheque-status-main{flex-direction:column;text-align:center;}.maneli-cheque-status-main .status-icon{margin-bottom:.75rem;}}
             </style>';
         }

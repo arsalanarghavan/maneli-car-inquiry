@@ -1334,9 +1334,18 @@ class Maneli_Visitor_Statistics {
     public static function translate_country_name($country_code, $fallback = '') {
         $entry = self::resolve_country_entry($country_code, $fallback);
         if ($entry !== null) {
-            return $entry['fa'];
+            return self::localize_country_label($entry['names']);
         }
-        return esc_html__('Unknown', 'maneli-car-inquiry');
+
+        $fallback_label = $fallback !== '' ? $fallback : esc_html__('Unknown', 'maneli-car-inquiry');
+        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
+            $fallback_label = maneli_convert_to_english_digits($fallback_label);
+        } elseif ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
+            $fallback_label = persian_numbers_no_separator($fallback_label);
+        }
+
+        return esc_html($fallback_label);
     }
     
     /**
@@ -1349,25 +1358,37 @@ class Maneli_Visitor_Statistics {
         }
         
         $translated = [];
+        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+
         if (function_exists('WC') && WC()->countries) {
             $countries = WC()->countries->get_countries();
             if (!empty($countries)) {
                 foreach ($countries as $code => $name) {
                     $upper_code = strtoupper($code);
                     $entry = self::resolve_country_entry($upper_code, $name);
-                    $translated[$upper_code] = $entry ? $entry['fa'] : $name;
+                    if ($entry) {
+                        $translated[$upper_code] = self::localize_country_label($entry['names']);
+                    } else {
+                        $base_label = $use_persian_digits ? $name : _x($name, 'country name', 'maneli-car-inquiry');
+                        if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
+                            $base_label = maneli_convert_to_english_digits($base_label);
+                        } elseif ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
+                            $base_label = persian_numbers_no_separator($base_label);
+                        }
+                        $translated[$upper_code] = esc_html($base_label);
+                    }
                 }
             }
         }
         
         $lookup = self::build_country_lookup_tables();
-        foreach ($lookup['by_code'] as $code => $label) {
+        foreach ($lookup['by_code'] as $code => $names) {
             if (!isset($translated[$code])) {
-                $translated[$code] = $label;
+                $translated[$code] = self::localize_country_label($names);
             }
         }
         
-        $translated['UNKNOWN'] = esc_html__('Unknown', 'maneli-car-inquiry');
+        $translated['UNKNOWN'] = self::localize_country_label($lookup['by_code']['UNKNOWN']);
         
         return $translated;
     }
@@ -1400,8 +1421,7 @@ class Maneli_Visitor_Statistics {
         
         foreach ($definitions as $code => $names) {
             $upper_code = strtoupper($code);
-            $fa = $names['fa'];
-            $by_code[$upper_code] = $fa;
+            $by_code[$upper_code] = $names;
             
             $variants = self::generate_country_name_variants($names['en']);
             $variants[] = strtolower($upper_code);
@@ -1414,16 +1434,19 @@ class Maneli_Visitor_Statistics {
                 }
                 $by_name[$variant] = [
                     'code' => $upper_code,
-                    'fa'   => $fa,
+                    'names'=> $names,
                 ];
             }
         }
         
-        $unknown_label = esc_html__('Unknown', 'maneli-car-inquiry');
-        $by_code['UNKNOWN'] = $unknown_label;
+        $unknown_names = [
+            'en' => esc_html__('Unknown', 'maneli-car-inquiry'),
+            'fa' => esc_html__('نامشخص', 'maneli-car-inquiry'),
+        ];
+        $by_code['UNKNOWN'] = $unknown_names;
         $by_name['unknown'] = [
             'code' => '',
-            'fa'   => $unknown_label,
+            'names'=> $unknown_names,
         ];
         
         self::$country_lookup_tables = [
@@ -1477,8 +1500,8 @@ class Maneli_Visitor_Statistics {
         $code = strtoupper(trim((string) $country_code));
         if ($code !== '' && isset($lookup['by_code'][$code])) {
             return [
-                'code' => $code,
-                'fa'   => $lookup['by_code'][$code],
+                'code'  => $code,
+                'names' => $lookup['by_code'][$code],
             ];
         }
         
@@ -1499,8 +1522,8 @@ class Maneli_Visitor_Statistics {
             $candidate_code = strtoupper($candidate);
             if ($candidate_code !== '' && isset($lookup['by_code'][$candidate_code])) {
                 return [
-                    'code' => $candidate_code,
-                    'fa'   => $lookup['by_code'][$candidate_code],
+                    'code'  => $candidate_code,
+                    'names' => $lookup['by_code'][$candidate_code],
                 ];
             }
         }
@@ -1521,29 +1544,319 @@ class Maneli_Visitor_Statistics {
         $definitions = self::get_country_definitions();
         foreach ($definitions as $code => $names) {
             $upper_code = strtoupper($code);
-            $fa = $names['fa'];
-            $map[$upper_code] = $fa;
-            $map[strtolower($upper_code)] = $fa;
+            $localized = self::localize_country_label($names);
+            $map[$upper_code] = $localized;
+            $map[strtolower($upper_code)] = $localized;
             
             $variants = self::generate_country_name_variants($names['en']);
             foreach ($variants as $variant) {
-                $map[$variant] = $fa;
+                $map[$variant] = $localized;
             }
             
-            $map[$names['en']] = $fa;
+            $map[$names['en']] = $localized;
         }
         
-        $unknown_label = esc_html__('Unknown', 'maneli-car-inquiry');
+        $unknown_label = self::localize_country_label([
+            'en' => esc_html__('Unknown', 'maneli-car-inquiry'),
+            'fa' => esc_html__('نامشخص', 'maneli-car-inquiry'),
+        ]);
         $map['unknown'] = $unknown_label;
         $map['UNKNOWN'] = $unknown_label;
         
         return $map;
+    }
+
+    /**
+     * Ensure country names are registered for translators.
+     */
+    private static function register_country_translation_strings() {
+        static $registered = false;
+        if ($registered) {
+            return;
+        }
+        $registered = true;
+
+        /* translators: country name */
+        _x('Local', 'country name', 'maneli-car-inquiry');
+        _x('Afghanistan', 'country name', 'maneli-car-inquiry');
+        _x('Åland Islands', 'country name', 'maneli-car-inquiry');
+        _x('Albania', 'country name', 'maneli-car-inquiry');
+        _x('Algeria', 'country name', 'maneli-car-inquiry');
+        _x('American Samoa', 'country name', 'maneli-car-inquiry');
+        _x('Andorra', 'country name', 'maneli-car-inquiry');
+        _x('Angola', 'country name', 'maneli-car-inquiry');
+        _x('Anguilla', 'country name', 'maneli-car-inquiry');
+        _x('Antarctica', 'country name', 'maneli-car-inquiry');
+        _x('Antigua and Barbuda', 'country name', 'maneli-car-inquiry');
+        _x('Argentina', 'country name', 'maneli-car-inquiry');
+        _x('Armenia', 'country name', 'maneli-car-inquiry');
+        _x('Aruba', 'country name', 'maneli-car-inquiry');
+        _x('Australia', 'country name', 'maneli-car-inquiry');
+        _x('Austria', 'country name', 'maneli-car-inquiry');
+        _x('Azerbaijan', 'country name', 'maneli-car-inquiry');
+        _x('Bahamas', 'country name', 'maneli-car-inquiry');
+        _x('Bahrain', 'country name', 'maneli-car-inquiry');
+        _x('Bangladesh', 'country name', 'maneli-car-inquiry');
+        _x('Barbados', 'country name', 'maneli-car-inquiry');
+        _x('Belarus', 'country name', 'maneli-car-inquiry');
+        _x('Belgium', 'country name', 'maneli-car-inquiry');
+        _x('Belize', 'country name', 'maneli-car-inquiry');
+        _x('Benin', 'country name', 'maneli-car-inquiry');
+        _x('Bermuda', 'country name', 'maneli-car-inquiry');
+        _x('Bhutan', 'country name', 'maneli-car-inquiry');
+        _x('Bolivia', 'country name', 'maneli-car-inquiry');
+        _x('Bonaire, Sint Eustatius and Saba', 'country name', 'maneli-car-inquiry');
+        _x('Bosnia and Herzegovina', 'country name', 'maneli-car-inquiry');
+        _x('Botswana', 'country name', 'maneli-car-inquiry');
+        _x('Bouvet Island', 'country name', 'maneli-car-inquiry');
+        _x('Brazil', 'country name', 'maneli-car-inquiry');
+        _x('British Indian Ocean Territory', 'country name', 'maneli-car-inquiry');
+        _x('Brunei Darussalam', 'country name', 'maneli-car-inquiry');
+        _x('Bulgaria', 'country name', 'maneli-car-inquiry');
+        _x('Burkina Faso', 'country name', 'maneli-car-inquiry');
+        _x('Burundi', 'country name', 'maneli-car-inquiry');
+        _x('Cabo Verde', 'country name', 'maneli-car-inquiry');
+        _x('Cambodia', 'country name', 'maneli-car-inquiry');
+        _x('Cameroon', 'country name', 'maneli-car-inquiry');
+        _x('Canada', 'country name', 'maneli-car-inquiry');
+        _x('Cayman Islands', 'country name', 'maneli-car-inquiry');
+        _x('Central African Republic', 'country name', 'maneli-car-inquiry');
+        _x('Chad', 'country name', 'maneli-car-inquiry');
+        _x('Chile', 'country name', 'maneli-car-inquiry');
+        _x('China', 'country name', 'maneli-car-inquiry');
+        _x('Christmas Island', 'country name', 'maneli-car-inquiry');
+        _x('Cocos (Keeling) Islands', 'country name', 'maneli-car-inquiry');
+        _x('Colombia', 'country name', 'maneli-car-inquiry');
+        _x('Comoros', 'country name', 'maneli-car-inquiry');
+        _x('Congo', 'country name', 'maneli-car-inquiry');
+        _x('Congo, Democratic Republic of the', 'country name', 'maneli-car-inquiry');
+        _x('Cook Islands', 'country name', 'maneli-car-inquiry');
+        _x('Costa Rica', 'country name', 'maneli-car-inquiry');
+        _x('Croatia', 'country name', 'maneli-car-inquiry');
+        _x('Cuba', 'country name', 'maneli-car-inquiry');
+        _x('Curaçao', 'country name', 'maneli-car-inquiry');
+        _x('Cyprus', 'country name', 'maneli-car-inquiry');
+        _x('Czechia', 'country name', 'maneli-car-inquiry');
+        _x('Denmark', 'country name', 'maneli-car-inquiry');
+        _x('Djibouti', 'country name', 'maneli-car-inquiry');
+        _x('Dominica', 'country name', 'maneli-car-inquiry');
+        _x('Dominican Republic', 'country name', 'maneli-car-inquiry');
+        _x('Ecuador', 'country name', 'maneli-car-inquiry');
+        _x('Egypt', 'country name', 'maneli-car-inquiry');
+        _x('El Salvador', 'country name', 'maneli-car-inquiry');
+        _x('Equatorial Guinea', 'country name', 'maneli-car-inquiry');
+        _x('Eritrea', 'country name', 'maneli-car-inquiry');
+        _x('Estonia', 'country name', 'maneli-car-inquiry');
+        _x('Eswatini', 'country name', 'maneli-car-inquiry');
+        _x('Ethiopia', 'country name', 'maneli-car-inquiry');
+        _x('Falkland Islands', 'country name', 'maneli-car-inquiry');
+        _x('Faroe Islands', 'country name', 'maneli-car-inquiry');
+        _x('Fiji', 'country name', 'maneli-car-inquiry');
+        _x('Finland', 'country name', 'maneli-car-inquiry');
+        _x('France', 'country name', 'maneli-car-inquiry');
+        _x('French Guiana', 'country name', 'maneli-car-inquiry');
+        _x('French Polynesia', 'country name', 'maneli-car-inquiry');
+        _x('French Southern Territories', 'country name', 'maneli-car-inquiry');
+        _x('Gabon', 'country name', 'maneli-car-inquiry');
+        _x('Gambia', 'country name', 'maneli-car-inquiry');
+        _x('Georgia', 'country name', 'maneli-car-inquiry');
+        _x('Germany', 'country name', 'maneli-car-inquiry');
+        _x('Ghana', 'country name', 'maneli-car-inquiry');
+        _x('Gibraltar', 'country name', 'maneli-car-inquiry');
+        _x('Greece', 'country name', 'maneli-car-inquiry');
+        _x('Greenland', 'country name', 'maneli-car-inquiry');
+        _x('Grenada', 'country name', 'maneli-car-inquiry');
+        _x('Guadeloupe', 'country name', 'maneli-car-inquiry');
+        _x('Guam', 'country name', 'maneli-car-inquiry');
+        _x('Guatemala', 'country name', 'maneli-car-inquiry');
+        _x('Guernsey', 'country name', 'maneli-car-inquiry');
+        _x('Guinea', 'country name', 'maneli-car-inquiry');
+        _x('Guinea-Bissau', 'country name', 'maneli-car-inquiry');
+        _x('Guyana', 'country name', 'maneli-car-inquiry');
+        _x('Haiti', 'country name', 'maneli-car-inquiry');
+        _x('Heard Island and McDonald Islands', 'country name', 'maneli-car-inquiry');
+        _x('Holy See', 'country name', 'maneli-car-inquiry');
+        _x('Honduras', 'country name', 'maneli-car-inquiry');
+        _x('Hong Kong', 'country name', 'maneli-car-inquiry');
+        _x('Hungary', 'country name', 'maneli-car-inquiry');
+        _x('Iceland', 'country name', 'maneli-car-inquiry');
+        _x('India', 'country name', 'maneli-car-inquiry');
+        _x('Indonesia', 'country name', 'maneli-car-inquiry');
+        _x('Iran', 'country name', 'maneli-car-inquiry');
+        _x('Iraq', 'country name', 'maneli-car-inquiry');
+        _x('Ireland', 'country name', 'maneli-car-inquiry');
+        _x('Isle of Man', 'country name', 'maneli-car-inquiry');
+        _x('Israel', 'country name', 'maneli-car-inquiry');
+        _x('Italy', 'country name', 'maneli-car-inquiry');
+        _x('Jamaica', 'country name', 'maneli-car-inquiry');
+        _x('Japan', 'country name', 'maneli-car-inquiry');
+        _x('Jersey', 'country name', 'maneli-car-inquiry');
+        _x('Jordan', 'country name', 'maneli-car-inquiry');
+        _x('Kazakhstan', 'country name', 'maneli-car-inquiry');
+        _x('Kenya', 'country name', 'maneli-car-inquiry');
+        _x('Kiribati', 'country name', 'maneli-car-inquiry');
+        _x('Korea (North)', 'country name', 'maneli-car-inquiry');
+        _x('Korea (South)', 'country name', 'maneli-car-inquiry');
+        _x('Kuwait', 'country name', 'maneli-car-inquiry');
+        _x('Kyrgyzstan', 'country name', 'maneli-car-inquiry');
+        _x('Lao People’s Democratic Republic', 'country name', 'maneli-car-inquiry');
+        _x('Latvia', 'country name', 'maneli-car-inquiry');
+        _x('Lebanon', 'country name', 'maneli-car-inquiry');
+        _x('Lesotho', 'country name', 'maneli-car-inquiry');
+        _x('Liberia', 'country name', 'maneli-car-inquiry');
+        _x('Libya', 'country name', 'maneli-car-inquiry');
+        _x('Liechtenstein', 'country name', 'maneli-car-inquiry');
+        _x('Lithuania', 'country name', 'maneli-car-inquiry');
+        _x('Luxembourg', 'country name', 'maneli-car-inquiry');
+        _x('Macao', 'country name', 'maneli-car-inquiry');
+        _x('Madagascar', 'country name', 'maneli-car-inquiry');
+        _x('Malawi', 'country name', 'maneli-car-inquiry');
+        _x('Malaysia', 'country name', 'maneli-car-inquiry');
+        _x('Maldives', 'country name', 'maneli-car-inquiry');
+        _x('Mali', 'country name', 'maneli-car-inquiry');
+        _x('Malta', 'country name', 'maneli-car-inquiry');
+        _x('Marshall Islands', 'country name', 'maneli-car-inquiry');
+        _x('Martinique', 'country name', 'maneli-car-inquiry');
+        _x('Mauritania', 'country name', 'maneli-car-inquiry');
+        _x('Mauritius', 'country name', 'maneli-car-inquiry');
+        _x('Mayotte', 'country name', 'maneli-car-inquiry');
+        _x('Mexico', 'country name', 'maneli-car-inquiry');
+        _x('Micronesia', 'country name', 'maneli-car-inquiry');
+        _x('Moldova', 'country name', 'maneli-car-inquiry');
+        _x('Monaco', 'country name', 'maneli-car-inquiry');
+        _x('Mongolia', 'country name', 'maneli-car-inquiry');
+        _x('Montenegro', 'country name', 'maneli-car-inquiry');
+        _x('Montserrat', 'country name', 'maneli-car-inquiry');
+        _x('Morocco', 'country name', 'maneli-car-inquiry');
+        _x('Mozambique', 'country name', 'maneli-car-inquiry');
+        _x('Myanmar', 'country name', 'maneli-car-inquiry');
+        _x('Namibia', 'country name', 'maneli-car-inquiry');
+        _x('Nauru', 'country name', 'maneli-car-inquiry');
+        _x('Nepal', 'country name', 'maneli-car-inquiry');
+        _x('Netherlands', 'country name', 'maneli-car-inquiry');
+        _x('New Caledonia', 'country name', 'maneli-car-inquiry');
+        _x('New Zealand', 'country name', 'maneli-car-inquiry');
+        _x('Nicaragua', 'country name', 'maneli-car-inquiry');
+        _x('Niger', 'country name', 'maneli-car-inquiry');
+        _x('Nigeria', 'country name', 'maneli-car-inquiry');
+        _x('Niue', 'country name', 'maneli-car-inquiry');
+        _x('Norfolk Island', 'country name', 'maneli-car-inquiry');
+        _x('Northern Mariana Islands', 'country name', 'maneli-car-inquiry');
+        _x('Norway', 'country name', 'maneli-car-inquiry');
+        _x('Oman', 'country name', 'maneli-car-inquiry');
+        _x('Pakistan', 'country name', 'maneli-car-inquiry');
+        _x('Palau', 'country name', 'maneli-car-inquiry');
+        _x('Palestine, State of', 'country name', 'maneli-car-inquiry');
+        _x('Panama', 'country name', 'maneli-car-inquiry');
+        _x('Papua New Guinea', 'country name', 'maneli-car-inquiry');
+        _x('Paraguay', 'country name', 'maneli-car-inquiry');
+        _x('Peru', 'country name', 'maneli-car-inquiry');
+        _x('Philippines', 'country name', 'maneli-car-inquiry');
+        _x('Pitcairn', 'country name', 'maneli-car-inquiry');
+        _x('Poland', 'country name', 'maneli-car-inquiry');
+        _x('Portugal', 'country name', 'maneli-car-inquiry');
+        _x('Puerto Rico', 'country name', 'maneli-car-inquiry');
+        _x('Qatar', 'country name', 'maneli-car-inquiry');
+        _x('Réunion', 'country name', 'maneli-car-inquiry');
+        _x('Romania', 'country name', 'maneli-car-inquiry');
+        _x('Russia', 'country name', 'maneli-car-inquiry');
+        _x('Rwanda', 'country name', 'maneli-car-inquiry');
+        _x('Saint Barthélemy', 'country name', 'maneli-car-inquiry');
+        _x('Saint Helena, Ascension and Tristan da Cunha', 'country name', 'maneli-car-inquiry');
+        _x('Saint Kitts and Nevis', 'country name', 'maneli-car-inquiry');
+        _x('Saint Lucia', 'country name', 'maneli-car-inquiry');
+        _x('Saint Martin (French part)', 'country name', 'maneli-car-inquiry');
+        _x('Saint Pierre and Miquelon', 'country name', 'maneli-car-inquiry');
+        _x('Saint Vincent and the Grenadines', 'country name', 'maneli-car-inquiry');
+        _x('Samoa', 'country name', 'maneli-car-inquiry');
+        _x('San Marino', 'country name', 'maneli-car-inquiry');
+        _x('Sao Tome and Principe', 'country name', 'maneli-car-inquiry');
+        _x('Saudi Arabia', 'country name', 'maneli-car-inquiry');
+        _x('Senegal', 'country name', 'maneli-car-inquiry');
+        _x('Serbia', 'country name', 'maneli-car-inquiry');
+        _x('Seychelles', 'country name', 'maneli-car-inquiry');
+        _x('Sierra Leone', 'country name', 'maneli-car-inquiry');
+        _x('Singapore', 'country name', 'maneli-car-inquiry');
+        _x('Sint Maarten (Dutch part)', 'country name', 'maneli-car-inquiry');
+        _x('Slovakia', 'country name', 'maneli-car-inquiry');
+        _x('Slovenia', 'country name', 'maneli-car-inquiry');
+        _x('Solomon Islands', 'country name', 'maneli-car-inquiry');
+        _x('Somalia', 'country name', 'maneli-car-inquiry');
+        _x('South Africa', 'country name', 'maneli-car-inquiry');
+        _x('South Georgia and the South Sandwich Islands', 'country name', 'maneli-car-inquiry');
+        _x('South Sudan', 'country name', 'maneli-car-inquiry');
+        _x('Spain', 'country name', 'maneli-car-inquiry');
+        _x('Sri Lanka', 'country name', 'maneli-car-inquiry');
+        _x('Sudan', 'country name', 'maneli-car-inquiry');
+        _x('Suriname', 'country name', 'maneli-car-inquiry');
+        _x('Svalbard and Jan Mayen', 'country name', 'maneli-car-inquiry');
+        _x('Sweden', 'country name', 'maneli-car-inquiry');
+        _x('Switzerland', 'country name', 'maneli-car-inquiry');
+        _x('Syrian Arab Republic', 'country name', 'maneli-car-inquiry');
+        _x('Taiwan', 'country name', 'maneli-car-inquiry');
+        _x('Tajikistan', 'country name', 'maneli-car-inquiry');
+        _x('Tanzania, United Republic of', 'country name', 'maneli-car-inquiry');
+        _x('Thailand', 'country name', 'maneli-car-inquiry');
+        _x('Timor-Leste', 'country name', 'maneli-car-inquiry');
+        _x('Togo', 'country name', 'maneli-car-inquiry');
+        _x('Tokelau', 'country name', 'maneli-car-inquiry');
+        _x('Tonga', 'country name', 'maneli-car-inquiry');
+        _x('Trinidad and Tobago', 'country name', 'maneli-car-inquiry');
+        _x('Tunisia', 'country name', 'maneli-car-inquiry');
+        _x('Turkey', 'country name', 'maneli-car-inquiry');
+        _x('Turkmenistan', 'country name', 'maneli-car-inquiry');
+        _x('Turks and Caicos Islands', 'country name', 'maneli-car-inquiry');
+        _x('Tuvalu', 'country name', 'maneli-car-inquiry');
+        _x('Uganda', 'country name', 'maneli-car-inquiry');
+        _x('Ukraine', 'country name', 'maneli-car-inquiry');
+        _x('United Arab Emirates', 'country name', 'maneli-car-inquiry');
+        _x('United Kingdom', 'country name', 'maneli-car-inquiry');
+        _x('United States', 'country name', 'maneli-car-inquiry');
+        _x('United States Minor Outlying Islands', 'country name', 'maneli-car-inquiry');
+        _x('Uruguay', 'country name', 'maneli-car-inquiry');
+        _x('Uzbekistan', 'country name', 'maneli-car-inquiry');
+        _x('Vanuatu', 'country name', 'maneli-car-inquiry');
+        _x('Venezuela', 'country name', 'maneli-car-inquiry');
+        _x('Viet Nam', 'country name', 'maneli-car-inquiry');
+        _x('Virgin Islands (British)', 'country name', 'maneli-car-inquiry');
+        _x('Virgin Islands (U.S.)', 'country name', 'maneli-car-inquiry');
+        _x('Wallis and Futuna', 'country name', 'maneli-car-inquiry');
+        _x('Western Sahara', 'country name', 'maneli-car-inquiry');
+        _x('Yemen', 'country name', 'maneli-car-inquiry');
+        _x('Zambia', 'country name', 'maneli-car-inquiry');
+        _x('Zimbabwe', 'country name', 'maneli-car-inquiry');
+        _x('Kosovo', 'country name', 'maneli-car-inquiry');
+    }
+    
+    /**
+     * Localize country label based on active locale (Persian vs English)
+     */
+    private static function localize_country_label(array $names) {
+        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        $english_base = $names['en'] ?? '';
+        $persian_base = $names['fa'] ?? $english_base;
+        
+        if ($use_persian_digits) {
+            $label = $persian_base !== '' ? $persian_base : $english_base;
+            if (function_exists('persian_numbers_no_separator')) {
+                $label = persian_numbers_no_separator($label);
+            }
+            return esc_html($label);
+        }
+        
+        $label = $english_base !== '' ? _x($english_base, 'country name', 'maneli-car-inquiry') : esc_html__('Unknown', 'maneli-car-inquiry');
+        if (function_exists('maneli_convert_to_english_digits')) {
+            $label = maneli_convert_to_english_digits($label);
+        }
+        return esc_html($label);
     }
     
     /**
      * Country definitions (ISO => [en, fa])
      */
     private static function get_country_definitions() {
+        self::register_country_translation_strings();
+
         return [
             'LOC' => ['en' => 'Local', 'fa' => 'محلی'],
             'AF' => ['en' => 'Afghanistan', 'fa' => 'افغانستان'],
@@ -1798,17 +2111,21 @@ class Maneli_Visitor_Statistics {
         ];
         
         foreach ($countries as $code => $names) {
-            $fa = $names['fa'];
+            $localized = self::localize_country_label($names);
             $en = $names['en'];
             $upper_code = strtoupper($code);
-            $map[$upper_code] = $fa;
-            $map[strtolower($upper_code)] = $fa;
-            $map[strtolower($en)] = $fa;
-            $map[$en] = $fa;
+            $map[$upper_code] = $localized;
+            $map[strtolower($upper_code)] = $localized;
+            $map[strtolower($en)] = $localized;
+            $map[$en] = $localized;
         }
         
-        $map['unknown'] = 'نامشخص';
-        $map['UNKNOWN'] = 'نامشخص';
+        $unknown_label = self::localize_country_label([
+            'en' => esc_html__('Unknown', 'maneli-car-inquiry'),
+            'fa' => esc_html__('نامشخص', 'maneli-car-inquiry'),
+        ]);
+        $map['unknown'] = $unknown_label;
+        $map['UNKNOWN'] = $unknown_label;
         
         return $map;
     }
@@ -1871,6 +2188,14 @@ class Maneli_Visitor_Statistics {
         }
         
         $diff_text = human_time_diff($timestamp, $current_timestamp);
+        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+
+        if (!$use_persian_digits) {
+            if (function_exists('maneli_convert_to_english_digits')) {
+                $diff_text = maneli_convert_to_english_digits($diff_text);
+            }
+            return trim($diff_text . ' ' . esc_html__('ago', 'maneli-car-inquiry'));
+        }
         
         $replacements = [
             ' mins'   => ' دقیقه',

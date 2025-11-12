@@ -197,3 +197,116 @@
     color: #ffffff !important;
     text-decoration: overline !important;    
 }
+
+/* === Dark Mode Overrides === */
+[data-theme-mode="dark"] .pdp-default {
+    background-color: #000000 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .pdp-header {
+    background-color: #050505 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .monthYear,
+[data-theme-mode="dark"] .pdp-default .nextArrow,
+[data-theme-mode="dark"] .pdp-default .prevArrow {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .nextArrow:hover,
+[data-theme-mode="dark"] .pdp-default .prevArrow:hover {
+    color: #49a8ff !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .yearSelect,
+[data-theme-mode="dark"] .pdp-default .monthSelect {
+    background: #050505 !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .yearSelect li,
+[data-theme-mode="dark"] .pdp-default .monthSelect li {
+    border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .yearSelect li:hover,
+[data-theme-mode="dark"] .pdp-default .monthSelect li:hover {
+    background: rgba(73, 168, 255, 0.18) !important;
+    border-color: rgba(73, 168, 255, 0.35) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .dows {
+    background: #0d0d0d !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .dow {
+    border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .days {
+    background-color: #050505 !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .day {
+    border-color: rgba(255, 255, 255, 0.04) !important;
+    background-color: transparent !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .nul {
+    border-color: rgba(255, 255, 255, 0.04) !important;
+    background-color: #050505 !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .day:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .selday,
+[data-theme-mode="dark"] .pdp-default .selday:hover {
+    background: #e0a543 !important;
+    border-color: #f0b34d !important;
+    color: #1f1f1f !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .selected,
+[data-theme-mode="dark"] .pdp-default .selected:hover {
+    background: #49a8ff !important;
+    color: #0b1e33 !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .today,
+[data-theme-mode="dark"] .pdp-default .today:hover {
+    background: #49a8ff !important;
+    color: #0b1e33 !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .friday {
+    color: #ff7bbd !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .disday,
+[data-theme-mode="dark"] .pdp-default .disday:hover {
+    color: rgba(255, 255, 255, 0.25) !important;
+    background: transparent !important;
+    border-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .pdp-footer {
+    background: #050505 !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .pdp-footer .goToday {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme-mode="dark"] .pdp-default .pdp-footer .goToday:hover {
+    color: rgba(255, 255, 255, 0.95) !important;
+}

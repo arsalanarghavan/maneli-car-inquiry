@@ -3734,3 +3734,12 @@ msgstr ""
 #: templates/dashboard.php
 msgid "User name"
 msgstr ""
+
+msgid "1403/01/01"
+msgstr ""
+
+msgid "2024-01-01"
+msgstr ""
+
+msgid "The persianDatepicker plugin was not loaded in time on the system logs page."
+msgstr ""
