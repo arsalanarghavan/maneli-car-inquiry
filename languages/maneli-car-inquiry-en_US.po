@@ -9635,3 +9635,6 @@ msgstr "Selected Range:"
 
 msgid "New Customers"
 msgstr "New Customers"
+
+msgid "Inquiry #%s"
+msgstr "Inquiry #%s"

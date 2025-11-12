@@ -1016,16 +1016,20 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                     <i class="la la-clock me-1"></i>
                                     <?php printf(esc_html__('Overdue Inquiries (%s)', 'maneli-car-inquiry'), maneli_number_format_persian(count($attention_required['overdue']))); ?>
                                 </h6>
-                                <div class="list-group">
-                                    <?php foreach (array_slice($attention_required['overdue'], 0, 5) as $inq): ?>
-                                        <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="list-group-item list-group-item-action">
-                                            <div class="d-flex justify-content-between">
-                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), maneli_number_format_persian($inq->ID)); ?></span>
+                                <ul class="list-group list-group-flush">
+                                    <?php foreach (array_slice($attention_required['overdue'], 0, 5) as $inq): 
+                                        $inquiry_number_display = maneli_should_use_persian_digits()
+                                            ? persian_numbers_no_separator($inq->ID)
+                                            : (string) absint($inq->ID);
+                                    ?>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="text-decoration-none">
+                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), $inquiry_number_display); ?></span>
+                                            </a>
                                                 <span class="badge bg-danger"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
-                                            </div>
-                                        </a>
+                                        </li>
                                     <?php endforeach; ?>
-                                </div>
+                                </ul>
                             </div>
                             <?php endif; ?>
                             
@@ -1035,16 +1039,20 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                     <i class="la la-user-times me-1"></i>
                                     <?php printf(esc_html__('Unassigned Inquiries (%s)', 'maneli-car-inquiry'), maneli_number_format_persian(count($attention_required['unassigned']))); ?>
                                 </h6>
-                                <div class="list-group">
-                                    <?php foreach (array_slice($attention_required['unassigned'], 0, 5) as $inq): ?>
-                                        <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="list-group-item list-group-item-action">
-                                            <div class="d-flex justify-content-between">
-                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), maneli_number_format_persian($inq->ID)); ?></span>
-                                                <span class="badge bg-warning"><?php esc_html_e('Not Assigned', 'maneli-car-inquiry'); ?></span>
-                                            </div>
-                                        </a>
+                                <ul class="list-group list-group-flush">
+                                    <?php foreach (array_slice($attention_required['unassigned'], 0, 5) as $inq): 
+                                        $inquiry_number_display = maneli_should_use_persian_digits()
+                                            ? persian_numbers_no_separator($inq->ID)
+                                            : (string) absint($inq->ID);
+                                    ?>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="text-decoration-none">
+                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), $inquiry_number_display); ?></span>
+                                            </a>
+                                            <span class="badge bg-warning"><?php esc_html_e('Not Assigned', 'maneli-car-inquiry'); ?></span>
+                                        </li>
                                     <?php endforeach; ?>
-                                </div>
+                                </ul>
                             </div>
                             <?php endif; ?>
                         </div>

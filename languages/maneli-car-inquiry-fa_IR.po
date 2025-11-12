@@ -10170,3 +10170,6 @@ msgstr "بازه انتخاب شده:"
 
 msgid "New Customers"
 msgstr "مشتریان جدید"
+
+msgid "Inquiry #%s"
+msgstr "استعلام شماره %s"

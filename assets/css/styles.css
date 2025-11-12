@@ -13531,7 +13531,7 @@ ul.analytics-activity li {
 [data-theme-mode=dark] .xrp-logo {
   filter: invert(1);
 }
-#balanceAnalysis .apexcharts-radialbar text, #monthly-target .apexcharts-radialbar text {
+#balance-analysis .apexcharts-radialbar text, #monthly-target .apexcharts-radialbar text {
   fill: var(--default-text-color) !important;
 }
 @media (max-width: 767.98px) {
