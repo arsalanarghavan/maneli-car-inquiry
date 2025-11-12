@@ -614,8 +614,8 @@ $total_meetings = count($meetings_data);
 </style>
 
         <!-- Statistics Cards -->
-        <div class="row mb-4">
-            <div class="col-12 mb-3">
+        <div class="row mb-4 maneli-mobile-card-scroll">
+            <div class="col-12 col-md-4 col-lg-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -651,7 +651,7 @@ $total_meetings = count($meetings_data);
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-4 mb-3">
+            <div class="col-12 col-md-4 col-lg-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">

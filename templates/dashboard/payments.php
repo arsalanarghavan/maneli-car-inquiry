@@ -305,7 +305,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
 }
 </style>
 
-<div class="row mb-4">
+<div class="row mb-4 maneli-mobile-card-scroll">
     <!-- کارت مجموع پرداخت‌ها -->
     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
         <div class="card custom-card crm-card overflow-hidden">

@@ -177,7 +177,7 @@ $active_users_count = $active_users_query->get_total();
                     color: rgba(255, 255, 255, 0.6) !important;
                 }
                 </style>
-                <div class="row mb-4">
+                <div class="row mb-4 maneli-mobile-card-scroll">
                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
                         <div class="card custom-card crm-card overflow-hidden">
                             <div class="card-body">

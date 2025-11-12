@@ -552,9 +552,9 @@ $product_categories = get_terms([
 <div class="row">
     <div class="col-xl-12">
         <!-- آمار محصولات -->
-        <div class="row mb-4 product-stats-cards">
+        <div class="row mb-4 product-stats-cards maneli-mobile-card-scroll">
             <!-- کارت مجموع محصولات -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -574,7 +574,7 @@ $product_categories = get_terms([
             </div>
             
             <!-- کارت محصولات فعال برای فروش -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -594,7 +594,7 @@ $product_categories = get_terms([
             </div>
             
             <!-- کارت نقدی ناموجود -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -614,7 +614,7 @@ $product_categories = get_terms([
             </div>
             
             <!-- کارت اقساطی ناموجود -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -634,7 +634,7 @@ $product_categories = get_terms([
             </div>
             
             <!-- کارت محصولات مخفی -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">

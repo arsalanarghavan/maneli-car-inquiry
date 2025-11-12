@@ -503,6 +503,29 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         margin-top: 0.75rem;
     }
 
+    .maneli-mobile-card-scroll {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        gap: 0.75rem;
+        margin-right: 0;
+        margin-left: 0;
+        padding-bottom: 0.75rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .maneli-mobile-card-scroll > [class^="col-"],
+    .maneli-mobile-card-scroll > [class*=" col-"] {
+        flex: 0 0 66% !important;
+        max-width: 66% !important;
+        min-width: 66% !important;
+    }
+
+    .maneli-mobile-card-scroll .maneli-mobile-card {
+        flex: 0 0 66% !important;
+        max-width: 66% !important;
+    }
+
     [data-maneli-mobile-filter][data-filter-open="true"] [data-maneli-filter-body] {
         display: block;
         animation: maneli-filter-slide-down 0.2s ease-out;
