@@ -1,3 +1,60 @@
+.header-view-site-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0 0.9rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--header-border-color, rgba(15, 23, 42, 0.08));
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--header-prime-color, var(--default-text-color));
+    min-height: 2.5rem;
+    line-height: 1;
+    font-weight: 600;
+    transition: all 0.15s ease;
+}
+
+.header-view-site-link:hover,
+.header-view-site-link:focus-visible {
+    text-decoration: none;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(var(--primary-rgb, 0, 102, 204), 0.08);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.header-view-site-link .header-link-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    border: none;
+    padding: 0.35rem;
+    background: rgba(15, 23, 42, 0.04);
+    color: inherit;
+}
+
+.header-view-site-text {
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+[data-theme-mode="dark"] .header-view-site-link {
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(148, 163, 184, 0.35);
+    color: rgba(248, 250, 252, 0.92);
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.45);
+}
+
+[data-theme-mode="dark"] .header-view-site-link:hover,
+[data-theme-mode="dark"] .header-view-site-link:focus-visible {
+    border-color: var(--primary-color);
+    color: #fff;
+    background: rgba(var(--primary-rgb, 59, 130, 246), 0.2);
+    box-shadow: 0 10px 24px rgba(var(--primary-rgb, 59, 130, 246), 0.35);
+}
+
+[data-theme-mode="dark"] .header-view-site-link .header-link-icon {
+    background: rgba(148, 163, 184, 0.18);
+}
 /* Sidebar Standard Width Fixes */
 /* Based on xintra template standards */
 

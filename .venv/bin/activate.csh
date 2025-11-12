@@ -1,0 +1,1 @@
+set _OLD_VIRTUAL_PATH="$PATH"

@@ -3735,10 +3735,10 @@ msgstr ""
 msgid "User name"
 msgstr ""
 
-msgid "1403/01/01"
+msgid "YYYY/MM/DD"
 msgstr ""
 
-msgid "2024-01-01"
+msgid "YYYY-MM-DD"
 msgstr ""
 
 msgid "The persianDatepicker plugin was not loaded in time on the system logs page."

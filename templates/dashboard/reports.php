@@ -343,7 +343,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- Start::row-1 - 8 Important Cards -->
         <div class="row mb-4">
             <!-- Card 1: Total Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -370,7 +370,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 2: New Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -392,7 +392,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 3: Referred -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -414,7 +414,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 4: In Progress -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -440,7 +440,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- Start::row-2 -->
         <div class="row mb-4">
             <!-- Card 5: Completed -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -469,7 +469,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 6: Rejected -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -491,7 +491,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 7: Cash Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -511,7 +511,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 8: Installment Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -650,7 +650,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- Start::row-1 - Expert Cards -->
         <div class="row mb-4">
             <!-- Card 1: Total Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -670,7 +670,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 2: New Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -692,7 +692,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 3: Referred -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -714,7 +714,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 4: In Progress -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -740,7 +740,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- Start::row-2 -->
         <div class="row mb-4">
             <!-- Card 5: Completed -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -769,7 +769,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 6: Rejected -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -791,7 +791,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 7: Cash Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -811,7 +811,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             </div>
             
             <!-- Card 8: Installment Inquiries -->
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">

@@ -307,7 +307,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
 
 <div class="row mb-4">
     <!-- کارت مجموع پرداخت‌ها -->
-    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
         <div class="card custom-card crm-card overflow-hidden">
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
@@ -327,7 +327,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
     </div>
     
     <!-- کارت مجموع مبلغ پرداخت‌ها -->
-    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
         <div class="card custom-card crm-card overflow-hidden">
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
@@ -347,7 +347,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
     </div>
     
     <!-- کارت پرداخت‌های هزینه استعلام -->
-    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
         <div class="card custom-card crm-card overflow-hidden">
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">
@@ -367,7 +367,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
     </div>
     
     <!-- کارت پیش پرداخت‌های نقدی -->
-    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+    <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
         <div class="card custom-card crm-card overflow-hidden">
             <div class="card-body">
                 <div class="d-flex justify-content-between mb-2">

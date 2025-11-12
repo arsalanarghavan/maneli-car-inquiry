@@ -245,10 +245,12 @@ $total_logs = $logger->get_system_logs_count($args);
 $total_pages = ceil($total_logs / $per_page);
 $total_logs_label = maneli_format_localized_digits(number_format($total_logs));
 $date_placeholder = $use_persian_digits
-    ? maneli_format_localized_digits(__('1403/01/01', 'maneli-car-inquiry'))
-    : maneli_format_localized_digits(__('2024-01-01', 'maneli-car-inquiry'));
+    ? maneli_format_localized_digits(__('YYYY/MM/DD', 'maneli-car-inquiry'))
+    : esc_html__('YYYY-MM-DD', 'maneli-car-inquiry');
 $date_from_display = maneli_format_localized_digits($date_from_raw);
 $date_to_display = maneli_format_localized_digits($date_to_raw);
+$date_input_type = $use_persian_digits ? 'text' : 'date';
+$date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
 ?>
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -278,8 +280,8 @@ $date_to_display = maneli_format_localized_digits($date_to_raw);
                         <h5 class="card-title mb-0"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></h5>
                     </div>
                     <div class="card-body">
-                        <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="row g-3">
-                            <div class="col-md-3">
+                        <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="filters-toolbar" novalidate>
+                            <div class="filters-field">
                                 <label class="form-label"><?php esc_html_e('Log Type', 'maneli-car-inquiry'); ?></label>
                                 <select name="log_type" class="form-select">
                                     <option value=""><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
@@ -289,7 +291,7 @@ $date_to_display = maneli_format_localized_digits($date_to_raw);
                                     <option value="button_error" <?php selected($log_type, 'button_error'); ?>><?php esc_html_e('Button Error', 'maneli-car-inquiry'); ?></option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="filters-field">
                                 <label class="form-label"><?php esc_html_e('Severity', 'maneli-car-inquiry'); ?></label>
                                 <select name="severity" class="form-select">
                                     <option value=""><?php esc_html_e('All Severities', 'maneli-car-inquiry'); ?></option>
@@ -299,19 +301,19 @@ $date_to_display = maneli_format_localized_digits($date_to_raw);
                                     <option value="critical" <?php selected($severity, 'critical'); ?>><?php esc_html_e('Critical', 'maneli-car-inquiry'); ?></option>
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="filters-field">
                                 <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
+                                <input type="<?php echo esc_attr($date_input_type); ?>" name="date_from" id="date-from-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_from_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
                             </div>
-                            <div class="col-md-2">
+                            <div class="filters-field">
                                 <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
-                                <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
+                                <input type="<?php echo esc_attr($date_input_type); ?>" name="date_to" id="date-to-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_to_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
                             </div>
-                            <div class="col-md-2">
+                            <div class="filters-field">
                                 <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
                                 <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
                             </div>
-                            <div class="col-12">
+                            <div class="filters-actions">
                                 <button type="submit" class="btn btn-primary"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
                                 <a href="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="btn btn-secondary"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
                             </div>
@@ -514,6 +516,8 @@ $date_to_display = maneli_format_localized_digits($date_to_raw);
         }
 
         jQuery(function($) {
+            var isPersianLocale = <?php echo $use_persian_digits ? 'true' : 'false'; ?>;
+
             $('.file-path').each(function() {
                 var $el = $(this);
                 if (!$el.attr('title')) {
@@ -561,61 +565,63 @@ $date_to_display = maneli_format_localized_digits($date_to_raw);
                 });
             });
 
-            var selectors = ['#date-from-picker', '#date-to-picker'];
-            var retryCount = 0;
-            var maxRetries = 20;
+            if (isPersianLocale) {
+                var selectors = ['#date-from-picker', '#date-to-picker'];
+                var retryCount = 0;
+                var maxRetries = 20;
 
-            function ensureDatepickerPlugin(callback) {
-                if (typeof $.fn.persianDatepicker === 'undefined') {
-                    if (retryCount < maxRetries) {
-                        retryCount++;
-                        setTimeout(function() {
-                            ensureDatepickerPlugin(callback);
-                        }, 150);
-                    } else {
-                        console.warn('<?php echo esc_js(__('The persianDatepicker plugin was not loaded in time on the system logs page.', 'maneli-car-inquiry')); ?>');
-                    }
-                    return;
-                }
-                callback();
-            }
-
-            function initializePicker($field) {
-                if (!$field.length || $field.data('pdp-init') === 'true') {
-                    return;
-                }
-
-                var hasInitialValue = $field.val() && $field.val().trim() !== '';
-
-                $field.persianDatepicker({
-                    formatDate: 'YYYY/MM/DD',
-                    persianNumbers: true,
-                    autoClose: true,
-                    observer: false,
-                    initialValue: hasInitialValue,
-                    timePicker: false
-                });
-
-                $field.attr('data-pdp-init', 'true');
-            }
-
-            ensureDatepickerPlugin(function() {
-                selectors.forEach(function(selector) {
-                    initializePicker($(selector));
-                });
-            });
-
-            $(document).on('focus', selectors.join(', '), function() {
-                var $field = $(this);
-                if (!$field.data('pdp-init') || $field.data('pdp-init') !== 'true') {
-                    ensureDatepickerPlugin(function() {
-                        initializePicker($field);
-                        if (typeof $field.data('persianDatepicker') === 'object' && typeof $field.data('persianDatepicker').show === 'function') {
-                            $field.data('persianDatepicker').show();
+                function ensureDatepickerPlugin(callback) {
+                    if (typeof $.fn.persianDatepicker === 'undefined') {
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            setTimeout(function() {
+                                ensureDatepickerPlugin(callback);
+                            }, 150);
+                        } else {
+                            console.warn('<?php echo esc_js(__('The persianDatepicker plugin was not loaded in time on the system logs page.', 'maneli-car-inquiry')); ?>');
                         }
-                    });
+                        return;
+                    }
+                    callback();
                 }
-            });
+
+                function initializePicker($field) {
+                    if (!$field.length || $field.data('pdp-init') === 'true') {
+                        return;
+                    }
+
+                    var hasInitialValue = $field.val() && $field.val().trim() !== '';
+
+                    $field.persianDatepicker({
+                        formatDate: 'YYYY/MM/DD',
+                        persianNumbers: true,
+                        autoClose: true,
+                        observer: false,
+                        initialValue: hasInitialValue,
+                        timePicker: false
+                    });
+
+                    $field.attr('data-pdp-init', 'true');
+                }
+
+                ensureDatepickerPlugin(function() {
+                    selectors.forEach(function(selector) {
+                        initializePicker($(selector));
+                    });
+                });
+
+                $(document).on('focus', selectors.join(', '), function() {
+                    var $field = $(this);
+                    if (!$field.data('pdp-init') || $field.data('pdp-init') !== 'true') {
+                        ensureDatepickerPlugin(function() {
+                            initializePicker($field);
+                            if (typeof $field.data('persianDatepicker') === 'object' && typeof $field.data('persianDatepicker').show === 'function') {
+                                $field.data('persianDatepicker').show();
+                            }
+                        });
+                    }
+                });
+            }
         });
     }
 
@@ -656,6 +662,28 @@ function showLogDetails(logId) {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.filters-toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    width: 100%;
+}
+.filters-toolbar .filters-field {
+    flex: 1 1 0;
+    min-width: 180px;
+}
+.filters-toolbar .filters-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.5rem;
+    padding-bottom: 0.45rem;
+}
+[dir="rtl"] .filters-toolbar {
+    flex-direction: row-reverse;
 }
 </style>
 

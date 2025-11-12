@@ -620,7 +620,7 @@ foreach ($followups as $inquiry) {
     <div class="col-xl-12">
         <!-- Statistics Cards -->
         <div class="row mb-4">
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -638,7 +638,7 @@ foreach ($followups as $inquiry) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -656,7 +656,7 @@ foreach ($followups as $inquiry) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -674,7 +674,7 @@ foreach ($followups as $inquiry) {
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">

@@ -53,26 +53,84 @@
         var osNames = maneliVisitorStats.osNames || {};
         var deviceNames = maneliVisitorStats.deviceNames || {};
         var dailyStatsData = maneliVisitorStats.dailyStats || [];
+        var globalConfig = window.maneliVisitorStatsConfig || {};
+        var usePersianDigits = typeof globalConfig.usePersianDigits === 'boolean'
+            ? globalConfig.usePersianDigits
+            : (window.maneliShouldUsePersianDates ? window.maneliShouldUsePersianDates() : true);
+        var digitsHelpers = window.maneliDigits || window.maneliLocale || null;
         
         /**
-         * Convert English digits to Persian digits
+         * Convert string digits to English digits.
          */
-        function toPersianDigits(str) {
-            if (!str) return '';
-            const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        function toEnglishDigits(str) {
+            if (!str) {
+                return '';
+            }
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
             let result = String(str);
             for (let i = 0; i < 10; i++) {
-                result = result.split(english[i]).join(persian[i]);
+                result = result.split(persianDigits[i]).join(englishDigits[i]);
+            }
+            for (let i = 0; i < 10; i++) {
+                result = result.split(arabicDigits[i]).join(englishDigits[i]);
             }
             return result;
         }
-    
+
         /**
-         * Format number with Persian digits
+         * Convert English digits to Persian digits.
          */
-        function formatPersianNumber(num) {
-            return toPersianDigits(num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+        function toPersianDigits(str) {
+            if (!str) {
+                return '';
+            }
+            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            let result = String(str);
+            for (let i = 0; i < 10; i++) {
+                result = result.split(englishDigits[i]).join(persianDigits[i]);
+            }
+            return result;
+        }
+
+        /**
+         * Normalize digits for the active locale.
+         */
+        function ensureLocalizedDigits(value) {
+            if (digitsHelpers && typeof digitsHelpers.ensureDigits === 'function') {
+                return digitsHelpers.ensureDigits(value, usePersianDigits ? 'fa' : 'en');
+            }
+            return usePersianDigits ? toPersianDigits(value) : toEnglishDigits(value);
+        }
+
+        /**
+         * Format number for display in the active locale.
+         */
+        function formatLocalizedNumber(num, fractionDigits) {
+            const numericValue = Number(num);
+            const requestedDigits = (typeof fractionDigits === 'number') ? fractionDigits : 0;
+
+            if (digitsHelpers && typeof digitsHelpers.formatNumber === 'function') {
+                return digitsHelpers.formatNumber(numericValue, {
+                    forceLocale: usePersianDigits ? 'fa' : 'en',
+                    minimumFractionDigits: requestedDigits,
+                    maximumFractionDigits: requestedDigits
+                });
+            }
+
+            if (!Number.isFinite(numericValue)) {
+                return ensureLocalizedDigits(num);
+            }
+
+            const locale = usePersianDigits ? 'fa-IR' : 'en-US';
+            const formatted = numericValue.toLocaleString(locale, {
+                minimumFractionDigits: requestedDigits,
+                maximumFractionDigits: requestedDigits
+            });
+
+            return ensureLocalizedDigits(formatted);
         }
         
         /**
@@ -91,7 +149,7 @@
                 var text = $el.text();
                 // Only convert if it's a number (avoid converting already Persian numbers)
                 if (/^\d+([,\d]*)?$/.test(text.trim())) {
-                    $el.text(toPersianDigits(text));
+                    $el.text(ensureLocalizedDigits(text));
                 }
             });
         }
@@ -121,7 +179,7 @@
                 }
                 // Replace hyphen with slash for better readability and convert digits
                 displayDate = displayDate.replace(/-/g, '/');
-                dates.push(toPersianDigits(displayDate));
+                dates.push(ensureLocalizedDigits(displayDate));
                 visits.push(parseInt(stat.visits) || 0);
                 uniqueVisitors.push(parseInt(stat.unique_visitors) || 0);
             });
@@ -183,7 +241,7 @@
                             fontFamily: 'IRANSans, Arial, sans-serif'
                         },
                         formatter: function(val) {
-                            return formatPersianNumber(Math.round(val));
+                            return formatLocalizedNumber(Math.round(val));
                         }
                     }
                 },
@@ -263,7 +321,7 @@
                             dataLabels: {
                                 enabled: true,
                                 formatter: function(val) {
-                                    return Math.round(val) + '%';
+                                    return ensureLocalizedDigits(Math.round(val)) + '%';
                                 }
                             }
                         };
@@ -334,7 +392,7 @@
                             dataLabels: {
                                 enabled: true,
                                 formatter: function(val) {
-                                    return Math.round(val) + '%';
+                                    return ensureLocalizedDigits(Math.round(val)) + '%';
                                 }
                             }
                         };
@@ -401,7 +459,7 @@
                             dataLabels: {
                                 enabled: true,
                                 formatter: function(val) {
-                                    return Math.round(val);
+                                    return ensureLocalizedDigits(Math.round(val));
                                 }
                             },
                             xaxis: {
@@ -490,7 +548,7 @@
                                 if (!timeAgo) {
                                     timeAgo = translations.momentsAgo || ('0 ' + (translations.unitSecond || 'second') + ' ' + (translations.ago || 'ago'));
                                 }
-                                timeAgo = toPersianDigits(timeAgo);
+                                timeAgo = ensureLocalizedDigits(timeAgo);
                                 
                                 var row = '<tr>' +
                                     '<td>' + escapeHtml(visitor.ip_address) + '</td>' +
@@ -507,11 +565,11 @@
                         }
                         
                         // Update online count with Persian digits
-                        $('#online-visitors').text(toPersianDigits(response.data.length));
+                        $('#online-visitors').text(ensureLocalizedDigits(response.data.length));
                     } else {
                         console.warn('Online visitors: No data or failed response', response);
                         $('#online-visitors-table').html('<tr><td colspan="7" class="text-center text-muted">' + (maneliVisitorStats.translations.noData || 'No data available') + '</td></tr>');
-                        $('#online-visitors').text(toPersianDigits(0));
+                        $('#online-visitors').text(ensureLocalizedDigits(0));
                     }
                 },
                 error: function(xhr, status, error) {

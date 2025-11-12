@@ -487,6 +487,7 @@ class Maneli_Database {
         $table = $wpdb->prefix . 'maneli_system_logs';
         
         $session_user_id = self::get_session_user_id();
+        $options = get_option('maneli_inquiry_all_options', []);
 
         $defaults = array(
             'log_type' => 'debug',
@@ -505,20 +506,134 @@ class Maneli_Database {
         if (is_array($data['context'])) {
             $data['context'] = json_encode($data['context'], JSON_UNESCAPED_UNICODE);
         }
+
+        $log_type = sanitize_text_field($data['log_type']);
+        $severity = sanitize_text_field($data['severity']);
+        $message = wp_kses_post($data['message']);
+        $file_value = !empty($data['file']) ? sanitize_text_field($data['file']) : null;
+        $line_value = !empty($data['line']) ? (int)$data['line'] : null;
+        $context_value = $data['context'];
+        $user_id_value = $data['user_id'] ? (int)$data['user_id'] : null;
+        $ip_value = $data['ip_address'];
+        $user_agent_value = $data['user_agent'];
+
+        $dedupe_window_minutes = isset($options['log_dedup_window_minutes']) ? max(0, intval($options['log_dedup_window_minutes'])) : 5;
+        if ($dedupe_window_minutes > 0) {
+            $dedupe_cutoff = gmdate('Y-m-d H:i:s', time() - ($dedupe_window_minutes * MINUTE_IN_SECONDS));
+            $duplicate_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM {$table} 
+                 WHERE log_type = %s 
+                   AND severity = %s 
+                   AND message = %s 
+                   AND COALESCE(file, '') = %s 
+                   AND COALESCE(line, 0) = %d 
+                   AND COALESCE(context, '') = %s
+                   AND created_at >= %s
+                 LIMIT 1",
+                $log_type,
+                $severity,
+                $message,
+                $file_value ? $file_value : '',
+                $line_value !== null ? $line_value : 0,
+                $context_value !== null ? $context_value : '',
+                $dedupe_cutoff
+            ));
+
+            if (!empty($duplicate_id)) {
+                return (int) $duplicate_id;
+            }
+        }
         
         $result = $wpdb->insert($table, array(
-            'log_type' => sanitize_text_field($data['log_type']),
-            'severity' => sanitize_text_field($data['severity']),
-            'message' => wp_kses_post($data['message']),
-            'context' => $data['context'],
-            'file' => !empty($data['file']) ? sanitize_text_field($data['file']) : null,
-            'line' => !empty($data['line']) ? (int)$data['line'] : null,
-            'user_id' => $data['user_id'] ? (int)$data['user_id'] : null,
-            'ip_address' => $data['ip_address'],
-            'user_agent' => $data['user_agent'],
+            'log_type' => $log_type,
+            'severity' => $severity,
+            'message' => $message,
+            'context' => $context_value,
+            'file' => $file_value,
+            'line' => $line_value,
+            'user_id' => $user_id_value,
+            'ip_address' => $ip_value,
+            'user_agent' => $user_agent_value,
         ), array('%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'));
         
-        return $result ? $wpdb->insert_id : false;
+        if ($result) {
+            self::maybe_prune_system_logs($options);
+            return $wpdb->insert_id;
+        }
+
+        return false;
+    }
+
+    private static function maybe_prune_system_logs($options) {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'maneli_system_logs';
+        $max_size_mb = isset($options['log_max_size_mb']) ? max(1, (int)$options['log_max_size_mb']) : 10;
+        $max_records = isset($options['log_max_records']) ? max(1000, (int)$options['log_max_records']) : 50000;
+
+        $current_size = self::get_table_size_mb($table);
+        if ($current_size > $max_size_mb) {
+            $iterations = 0;
+            $max_iterations = 10;
+            while ($iterations < $max_iterations && $current_size > $max_size_mb) {
+                $deleted = self::delete_old_system_logs($table, 500);
+                if (!$deleted) {
+                    break;
+                }
+                $current_size = self::get_table_size_mb($table);
+                $iterations++;
+            }
+        }
+
+        if ($max_records > 0) {
+            $total_records = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+            if ($total_records > $max_records) {
+                $to_remove = $total_records - $max_records;
+                self::delete_old_system_logs($table, $to_remove);
+            }
+        }
+    }
+
+    private static function get_table_size_mb($table) {
+        global $wpdb;
+
+        if (!defined('DB_NAME') || empty(DB_NAME)) {
+            return 0;
+        }
+
+        $size = $wpdb->get_var($wpdb->prepare(
+            "SELECT ROUND((data_length + index_length) / 1048576, 4) AS total_mb
+             FROM information_schema.TABLES
+             WHERE table_schema = %s AND table_name = %s",
+            DB_NAME,
+            $table
+        ));
+
+        return $size ? (float) $size : 0;
+    }
+
+    private static function delete_old_system_logs($table, $limit) {
+        global $wpdb;
+
+        $limit = (int) $limit;
+        if ($limit <= 0) {
+            return 0;
+        }
+
+        $ids = $wpdb->get_col($wpdb->prepare(
+            "SELECT id FROM {$table} ORDER BY created_at ASC LIMIT %d",
+            $limit
+        ));
+
+        if (empty($ids)) {
+            return 0;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+        return $wpdb->query($wpdb->prepare(
+            "DELETE FROM {$table} WHERE id IN ($placeholders)",
+            $ids
+        ));
     }
 
     /**

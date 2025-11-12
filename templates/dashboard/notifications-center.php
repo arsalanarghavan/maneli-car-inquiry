@@ -149,7 +149,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         
         <!-- Start::row-1 - Statistics Cards -->
         <div class="row">
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -169,7 +169,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -189,7 +189,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -209,7 +209,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -227,7 +227,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">

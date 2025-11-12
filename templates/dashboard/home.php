@@ -147,7 +147,7 @@ if ($is_customer) {
 
     <!-- Start::row-1 - Statistics Cards -->
         <div class="row">
-        <div class="col-md-6 col-lg-4 col-xl">
+        <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
             <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -165,7 +165,7 @@ if ($is_customer) {
                 </div>
             </div>
                             </div>
-        <div class="col-md-6 col-lg-4 col-xl">
+        <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
             <div class="card custom-card crm-card overflow-hidden">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -185,7 +185,7 @@ if ($is_customer) {
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-4 col-xl">
+        <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
             <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -205,7 +205,7 @@ if ($is_customer) {
                         </div>
                     </div>
                 </div>
-        <div class="col-md-6 col-lg-4 col-xl">
+        <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
             <div class="card custom-card crm-card overflow-hidden">
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -225,7 +225,7 @@ if ($is_customer) {
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-4 col-xl">
+        <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
             <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -642,7 +642,7 @@ if ($is_customer) {
             // Use same method as users page: count_users() for consistency
             $total_customers = isset($business_stats_data['total_customers']) ? $business_stats_data['total_customers'] : (count_users()['avail_roles']['customer'] ?? 0);
             ?>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -660,7 +660,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -678,7 +678,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -696,7 +696,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -714,7 +714,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -743,7 +743,7 @@ if ($is_customer) {
             $success_rate = $expert_detailed && isset($expert_detailed['success_rate']) ? $expert_detailed['success_rate'] : 0;
             $total_customers_expert = $expert_detailed && isset($expert_detailed['total_customers']) ? $expert_detailed['total_customers'] : 0;
             ?>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -761,7 +761,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -783,7 +783,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -801,7 +801,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -819,7 +819,7 @@ if ($is_customer) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-lg-4 col-xl">
+            <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">

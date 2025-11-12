@@ -324,7 +324,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
 
         <!-- Overall Statistics Cards -->
         <div class="row">
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
@@ -343,7 +343,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
@@ -362,7 +362,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
@@ -381,7 +381,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
                     </div>
                 </div>
             </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
                 <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
@@ -910,6 +910,7 @@ $most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, 
 <script type="text/javascript">
 window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
     'usePersianDatepicker' => $use_persian_digits,
+    'usePersianDigits' => $use_persian_digits,
 ]); ?>;
 </script>
 <script type="text/javascript">
