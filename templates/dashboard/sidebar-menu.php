@@ -22,7 +22,9 @@ $menu_items = $handler->get_menu_items();
  */
 function render_category_header($title) {
     echo '<li class="slide">';
-    echo '<div class="slide__category">' . esc_html($title) . '</div>';
+    echo '<div class="slide__category">';
+    echo '<span class="category-name">' . esc_html($title) . '</span>';
+    echo '</div>';
     echo '</li>';
 }
 

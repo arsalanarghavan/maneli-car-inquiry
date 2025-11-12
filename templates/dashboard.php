@@ -70,6 +70,30 @@ $dashboard_html = preg_replace($pattern, $replacement, $dashboard_html);
 // Replace asset paths to use WordPress URLs
 $dashboard_html = str_replace('./assets/', MANELI_PLUGIN_URL . 'assets/', $dashboard_html);
 
+// Ensure sidebar fixes stylesheet busts cache after updates
+$sidebar_fixes_paths = [];
+if (defined('MANELI_INQUIRY_PLUGIN_PATH')) {
+    $sidebar_fixes_paths[] = trailingslashit(MANELI_INQUIRY_PLUGIN_PATH) . 'assets/css/sidebar-fixes.css';
+}
+$sidebar_fixes_paths[] = MANELI_PLUGIN_DIR . 'assets/css/sidebar-fixes.css';
+
+$sidebar_fixes_version = null;
+foreach ($sidebar_fixes_paths as $sidebar_path) {
+    if (file_exists($sidebar_path)) {
+        $sidebar_fixes_version = (string) filemtime($sidebar_path);
+        break;
+    }
+}
+
+if ($sidebar_fixes_version) {
+    $dashboard_html = preg_replace(
+        '/(sidebar-fixes\.css)(\?[^"\']*)?/',
+        '$1?v=' . $sidebar_fixes_version,
+        $dashboard_html,
+        1
+    );
+}
+
 // Inject translated header text
 $header_replacements = [
     '%%MANELI_HEADER_SIDEBAR_TOGGLE_LABEL%%' => esc_attr__('Hide Sidebar', 'maneli-car-inquiry'),
