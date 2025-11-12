@@ -384,28 +384,6 @@
 [data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
 [data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
 [data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after {
-    content: "";
-    position: absolute;
-    inset-inline-start: 50%;
-    inset-block-end: 0.5rem;
-    width: 0.4rem;
-    height: 0.4rem;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.6;
-    transform: translateX(-50%);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    pointer-events: none;
-}
-
-[data-toggled="close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
-[data-toggled="open"][class*="sidenav-toggled"] .app-sidebar .main-menu > .slide > .side-menu__item::after,
-.sidenav-toggled:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
-[data-toggled="icon-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
-[data-toggled="menu-click-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
-[data-toggled="menu-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
-[data-toggled="icon-hover-closed"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after,
-[data-toggled="icon-text-close"]:not([data-nav-layout="horizontal"]) .app-sidebar .main-menu > .slide > .side-menu__item::after {
     display: none !important;
 }
 
@@ -578,6 +556,21 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@media (min-width: 992px) {
+    .maneli-desktop-filter-row {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        gap: 1rem !important;
+    }
+
+    .maneli-desktop-filter-row > [class^="col-"],
+    .maneli-desktop-filter-row > [class*=" col-"] {
+        max-width: none !important;
+        width: 100% !important;
+        flex: 0 0 auto !important;
     }
 }
 

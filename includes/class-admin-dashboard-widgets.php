@@ -156,31 +156,49 @@ class Maneli_Admin_Dashboard_Widgets {
         ob_start();
         ?>
         <style>
-        /* Inquiry Statistics Cards - Inline Styles for Immediate Effect */
-        .row.mb-4 {
+        /* Inquiry Statistics Cards */
+        .maneli-inquiry-stats {
             display: flex !important;
             flex-wrap: wrap !important;
+            margin-right: -0.5rem;
+            margin-left: -0.5rem;
         }
-        .row.mb-4 > .col-xl-2 {
+        .maneli-inquiry-stats__col {
+            padding-right: 0.5rem;
+            padding-left: 0.5rem;
             flex: 0 0 20% !important;
             max-width: 20% !important;
         }
         @media (max-width: 1399.98px) {
-            .row.mb-4 > .col-xl-2 {
+            .maneli-inquiry-stats__col {
                 flex: 0 0 25% !important;
                 max-width: 25% !important;
             }
         }
         @media (max-width: 991.98px) {
-            .row.mb-4 > .col-xl-2 {
+            .maneli-inquiry-stats__col {
                 flex: 0 0 33.333333% !important;
                 max-width: 33.333333% !important;
             }
         }
         @media (max-width: 767.98px) {
-            .row.mb-4 > .col-xl-2 {
-                flex: 0 0 50% !important;
-                max-width: 50% !important;
+            .maneli-inquiry-stats {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                padding-bottom: 0.75rem;
+                margin-right: 0;
+                margin-left: 0;
+                gap: 0.75rem;
+                -webkit-overflow-scrolling: touch;
+            }
+            .maneli-inquiry-stats__col {
+                flex: 0 0 66% !important;
+                max-width: 66% !important;
+                padding-right: 0;
+                padding-left: 0;
+            }
+            .maneli-inquiry-stats::-webkit-scrollbar {
+                display: none;
             }
         }
         .card.custom-card.crm-card {
@@ -254,11 +272,11 @@ class Maneli_Admin_Dashboard_Widgets {
         .card.custom-card.crm-card .border-warning, .card.custom-card.crm-card .bg-warning { background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important; }
         .card.custom-card.crm-card .border-danger, .card.custom-card.crm-card .bg-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; }
         </style>
-        <div class="row mb-4">
+        <div class="row mb-4 maneli-inquiry-stats">
             <?php foreach ($stats as $key => $stat) : 
                 $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
+                <div class="maneli-inquiry-stats__col col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
                     <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">
@@ -339,31 +357,49 @@ class Maneli_Admin_Dashboard_Widgets {
         ob_start();
         ?>
         <style>
-        /* Cash Inquiry Statistics Cards - Inline Styles for Immediate Effect */
-        .row.mb-4 {
+        /* Cash Inquiry Statistics Cards */
+        .maneli-inquiry-stats {
             display: flex !important;
             flex-wrap: wrap !important;
+            margin-right: -0.5rem;
+            margin-left: -0.5rem;
         }
-        .row.mb-4 > .col-xl-2 {
+        .maneli-inquiry-stats__col {
+            padding-right: 0.5rem;
+            padding-left: 0.5rem;
             flex: 0 0 20% !important;
             max-width: 20% !important;
         }
         @media (max-width: 1399.98px) {
-            .row.mb-4 > .col-xl-2 {
+            .maneli-inquiry-stats__col {
                 flex: 0 0 25% !important;
                 max-width: 25% !important;
             }
         }
         @media (max-width: 991.98px) {
-            .row.mb-4 > .col-xl-2 {
+            .maneli-inquiry-stats__col {
                 flex: 0 0 33.333333% !important;
                 max-width: 33.333333% !important;
             }
         }
         @media (max-width: 767.98px) {
-            .row.mb-4 > .col-xl-2 {
-                flex: 0 0 50% !important;
-                max-width: 50% !important;
+            .maneli-inquiry-stats {
+                flex-wrap: nowrap !important;
+                overflow-x: auto;
+                padding-bottom: 0.75rem;
+                margin-right: 0;
+                margin-left: 0;
+                gap: 0.75rem;
+                -webkit-overflow-scrolling: touch;
+            }
+            .maneli-inquiry-stats__col {
+                flex: 0 0 66% !important;
+                max-width: 66% !important;
+                padding-right: 0;
+                padding-left: 0;
+            }
+            .maneli-inquiry-stats::-webkit-scrollbar {
+                display: none;
             }
         }
         .card.custom-card.crm-card {
@@ -437,11 +473,11 @@ class Maneli_Admin_Dashboard_Widgets {
         .card.custom-card.crm-card .border-warning, .card.custom-card.crm-card .bg-warning { background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important; }
         .card.custom-card.crm-card .border-danger, .card.custom-card.crm-card .bg-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; }
         </style>
-        <div class="row mb-4">
+        <div class="row mb-4 maneli-inquiry-stats">
             <?php foreach ($stats as $key => $stat) :
                 $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
+                <div class="maneli-inquiry-stats__col col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
                     <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">

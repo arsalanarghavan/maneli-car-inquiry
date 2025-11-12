@@ -694,7 +694,7 @@ $product_categories = get_terms([
                             </div>
                             
                             <!-- Filters Row - Full Width in One Line -->
-                            <div class="row g-3 align-items-end">
+                            <div class="row g-3 align-items-end maneli-desktop-filter-row">
                                 <!-- Status Filter -->
                                 <div class="col-6 col-lg-2">
                                     <label for="filter_status" class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>

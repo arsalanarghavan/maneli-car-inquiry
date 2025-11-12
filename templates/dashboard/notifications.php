@@ -129,7 +129,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
     <div class="container-fluid">
 
         <!-- Page Header -->
-        <div class="d-flex align-items-center justify-content-between page-header-breadcrumb flex-wrap gap-2 mb-4">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-lg-between page-header-breadcrumb gap-3 mb-4">
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
@@ -141,21 +141,15 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                 </nav>
                 <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Notifications and Alerts', 'maneli-car-inquiry'); ?></h1>
             </div>
-            <div class="btn-list w-100 w-lg-auto">
-                <div class="row g-2 g-lg-0">
-                    <div class="col-6 col-lg-auto">
-                        <button type="button" class="btn btn-primary btn-wave w-100 w-lg-auto" id="mark-all-read-btn">
-                            <i class="la la-check-double me-1"></i>
-                            <?php esc_html_e('Mark All as Read', 'maneli-car-inquiry'); ?>
-                        </button>
-                    </div>
-                    <div class="col-6 col-lg-auto">
-                        <button type="button" class="btn btn-light btn-wave w-100 w-lg-auto" id="delete-read-btn">
-                            <i class="la la-trash me-1"></i>
-                            <?php esc_html_e('Delete Read', 'maneli-car-inquiry'); ?>
-                        </button>
-                    </div>
-                </div>
+            <div class="notification-actions d-flex flex-wrap gap-2 w-100 justify-content-lg-end">
+                <button type="button" class="btn btn-primary btn-wave" id="mark-all-read-btn">
+                    <i class="la la-check-double me-1"></i>
+                    <?php esc_html_e('Mark All as Read', 'maneli-car-inquiry'); ?>
+                </button>
+                <button type="button" class="btn btn-light btn-wave" id="delete-read-btn">
+                    <i class="la la-trash me-1"></i>
+                    <?php esc_html_e('Delete Read', 'maneli-car-inquiry'); ?>
+                </button>
             </div>
         </div>
         <!-- End::page-header -->
@@ -244,6 +238,20 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
 .card.custom-card.crm-card .border-danger,
 .card.custom-card.crm-card .bg-danger {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+.notification-actions .btn {
+    flex: 1 1 calc(50% - 0.5rem);
+}
+
+@media (min-width: 992px) {
+    .notification-actions {
+        gap: 0.5rem;
+    }
+
+    .notification-actions .btn {
+        flex: 0 0 auto;
+    }
 }
 
 .notification-tabs-scroll {

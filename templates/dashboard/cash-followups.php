@@ -720,7 +720,7 @@ foreach ($followups as $inquiry) {
                         </div>
                         
                         <!-- Filter Controls - All in one line -->
-                        <div class="row g-3 align-items-end mt-1">
+                        <div class="row g-3 align-items-end mt-1 maneli-desktop-filter-row">
                             <!-- Status Filter -->
                             <div class="col-6 col-lg-2">
                                 <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>

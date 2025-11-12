@@ -633,7 +633,7 @@ $total_meetings = count($meetings_data);
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 mb-3">
+            <div class="col-12 col-md-4 col-lg-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -651,7 +651,7 @@ $total_meetings = count($meetings_data);
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6 mb-3">
+            <div class="col-6 col-md-4 col-lg-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -1685,6 +1685,7 @@ $total_meetings = count($meetings_data);
 /* Monthly Calendar Styles */
 .monthly-calendar-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .monthly-calendar-grid {
@@ -1694,6 +1695,7 @@ $total_meetings = count($meetings_data);
     border-radius: 8px;
     overflow: hidden;
     min-height: 500px;
+    min-width: 700px;
 }
 
 .monthly-weekday-header {
@@ -2187,6 +2189,41 @@ $total_meetings = count($meetings_data);
     }
     50% {
         box-shadow: 0 4px 16px rgba(var(--danger-rgb), 0.6);
+    }
+}
+
+@media (max-width: 991.98px) {
+    .weekly-calendar-wrapper {
+        grid-template-columns: 120px 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .monthly-calendar-grid {
+        min-width: 600px;
+        min-height: 420px;
+    }
+
+    .monthly-weekday-header {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .monthly-day-cell {
+        min-height: 80px;
+        padding: 8px;
+    }
+
+    .monthly-day-cell .day-number {
+        font-size: 14px;
+    }
+
+    .monthly-day-cell .meeting-count {
+        font-size: 11px;
+    }
+
+    .monthly-day-cell .meeting-item {
+        font-size: 10px;
     }
 }
 </style>
