@@ -545,12 +545,16 @@ class Maneli_Dashboard_Handler {
                         unset($stat);
                     }
                     
+                    $preferred_locale_slug = $this->get_preferred_language_slug();
+
                     wp_localize_script('maneli-visitor-statistics-dashboard', 'maneliVisitorStats', [
                         'ajaxUrl' => admin_url('admin-ajax.php'),
                         'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
                         'startDate' => $start_date,
                         'endDate' => $end_date,
                         'dailyStats' => $daily_stats,
+                        'locale' => $preferred_locale_slug,
+                        'usePersianDigits' => ($preferred_locale_slug === 'fa'),
                         'countryNames' => Maneli_Visitor_Statistics::get_country_translation_map(),
                         'countryFlagIcons' => Maneli_Visitor_Statistics::get_country_flag_map(),
                         'browserNames' => Maneli_Visitor_Statistics::get_browser_translation_map(),

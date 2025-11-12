@@ -54,10 +54,35 @@
         var deviceNames = maneliVisitorStats.deviceNames || {};
         var dailyStatsData = maneliVisitorStats.dailyStats || [];
         var globalConfig = window.maneliVisitorStatsConfig || {};
-        var usePersianDigits = typeof globalConfig.usePersianDigits === 'boolean'
-            ? globalConfig.usePersianDigits
-            : (window.maneliShouldUsePersianDates ? window.maneliShouldUsePersianDates() : true);
         var digitsHelpers = window.maneliDigits || window.maneliLocale || null;
+
+        function normalizeLocale(value) {
+            return (value || '').toString().trim().toLowerCase();
+        }
+
+        var resolvedLocale = normalizeLocale(maneliVisitorStats.locale);
+        var usePersianDigits = (function resolveUsePersianDigits() {
+            if (resolvedLocale === 'en' || resolvedLocale === 'en-us' || resolvedLocale === 'en_us') {
+                return false;
+            }
+            if (resolvedLocale === 'fa' || resolvedLocale === 'fa-ir' || resolvedLocale === 'fa_ir') {
+                return true;
+            }
+
+            if (typeof maneliVisitorStats.usePersianDigits === 'boolean') {
+                return maneliVisitorStats.usePersianDigits;
+            }
+            if (typeof globalConfig.usePersianDigits === 'boolean') {
+                return globalConfig.usePersianDigits;
+            }
+            if (digitsHelpers && typeof digitsHelpers.shouldUsePersianDigits === 'function') {
+                return digitsHelpers.shouldUsePersianDigits();
+            }
+            if (typeof window.maneliShouldUsePersianDates === 'function') {
+                return window.maneliShouldUsePersianDates();
+            }
+            return true;
+        })();
         
         /**
          * Convert string digits to English digits.
