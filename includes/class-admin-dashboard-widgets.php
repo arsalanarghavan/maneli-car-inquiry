@@ -125,7 +125,7 @@ class Maneli_Admin_Dashboard_Widgets {
         
         // Build stats array with important statuses only
         $stats = [
-            'total' => ['label' => esc_html__('کل درخواست‌های اقساطی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+            'total' => ['label' => esc_html__('Total Installment Requests', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
         ];
         
         // Add only important tracking statuses
@@ -306,7 +306,7 @@ class Maneli_Admin_Dashboard_Widgets {
         
         // Build stats array with important statuses only
         $stats = [
-            'total' => ['label' => esc_html__('کل درخواست‌های نقدی', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+            'total' => ['label' => esc_html__('Total Cash Requests', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
         ];
         
         // Add only important cash inquiry statuses

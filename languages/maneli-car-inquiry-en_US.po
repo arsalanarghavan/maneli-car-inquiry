@@ -1224,6 +1224,9 @@ msgstr "Total Inquiries"
 msgid "Docs Req."
 msgstr "Docs Req."
 
+msgid "Total Installment Requests"
+msgstr "Total Installment Requests"
+
 msgid "Total Cash Requests"
 msgstr "Total Cash Requests"
 
@@ -3608,6 +3611,15 @@ msgstr "Reserved"
 
 msgid "Reset Changes"
 msgstr "Reset Changes"
+
+msgid "Undo Changes"
+msgstr "Undo Changes"
+
+msgid "Week"
+msgstr "Week"
+
+msgid "New User"
+msgstr "New User"
 
 msgid "Residency Status:"
 msgstr "Residency Status:"
@@ -6827,6 +6839,7 @@ msgstr "شماره موبایل برای دریافت اعلان‌های درخ
 
 msgid "الگو: «درخواست جدید برای مدیر»"
 msgstr "الگو: «درخواست جدید برای مدیر»"
+
 
 msgid "Pattern: \"Meeting Reminder\""
 msgstr "Pattern: \"Meeting Reminder\""

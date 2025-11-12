@@ -1607,6 +1607,10 @@ msgid "Docs Req."
 msgstr "نیاز به مدارک"
 
 
+msgid "Total Installment Requests"
+msgstr "کل درخواست‌های اقساطی"
+
+
 msgid "Total Cash Requests"
 msgstr "کل درخواست‌های نقدی"
 
@@ -4406,6 +4410,18 @@ msgstr "رزرو شده"
 
 msgid "Reset Changes"
 msgstr "بازنشانی تغییرات"
+
+msgid "Undo Changes"
+msgstr "بازگردانی تغییرات"
+
+msgid "Week"
+msgstr "هفته"
+
+msgid "User Management"
+msgstr "مدیریت کاربران"
+
+msgid "New User"
+msgstr "کاربر جدید"
 
 msgid "Residency Status:"
 msgstr "وضعیت سکونت:"

@@ -736,9 +736,13 @@ class Maneli_Dashboard_Handler {
                     $experts_list[] = ['id' => $expert->ID, 'name' => $expert->display_name ?: $expert->user_login];
                 }
                 
+                $preferred_language_slug = $this->get_preferred_language_slug();
+
                 $localize_data = [
                     'ajax_url' => admin_url('admin-ajax.php'),
                     'experts' => $experts_list,
+                    'locale' => $preferred_language_slug,
+                    'use_persian_digits' => ($preferred_language_slug === 'fa'),
                     'text' => [
                         'error' => esc_html__('Error', 'maneli-car-inquiry'),
                         'success' => esc_html__('Success', 'maneli-car-inquiry'),

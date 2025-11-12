@@ -2004,15 +2004,14 @@ if ($is_customer) {
                         const credit = response.data.credit || 0;
                         const formatted = response.data.formatted || credit;
                         
-                        // Convert to Persian digits
-                        const usePersianDigits = typeof window.maneliShouldUsePersianDates === 'function' ? window.maneliShouldUsePersianDates() : true;
-                        let displayCredit = String(formatted);
-                        if (usePersianDigits) {
-                        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                        const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-                        for (let i = 0; i < 10; i++) {
-                                displayCredit = displayCredit.split(englishDigits[i]).join(persianDigits[i]);
-                            }
+                        const digitsHelper = window.maneliLocale || window.maneliDigits || {};
+                        let displayCredit;
+                        if (digitsHelper && typeof digitsHelper.formatNumber === 'function') {
+                            displayCredit = digitsHelper.formatNumber(formatted, { useGrouping: true });
+                        } else if (digitsHelper && typeof digitsHelper.ensureDigits === 'function') {
+                            displayCredit = digitsHelper.ensureDigits(formatted);
+                        } else {
+                            displayCredit = String(formatted);
                         }
                         
                         // Determine color based on credit amount

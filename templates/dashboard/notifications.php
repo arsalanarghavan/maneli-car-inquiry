@@ -391,6 +391,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
         };
 
         const shouldUsePersianDigits = <?php echo $use_persian_digits ? 'true' : 'false'; ?>;
+        const digitsHelper = window.maneliLocale || window.maneliDigits || {};
         
         // Load notifications
     function loadNotifications(filter) {
@@ -550,9 +551,15 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     var $headerBadge = $('.header-icon-pulse');
                     if ($headerBadge.length) {
                         if (unread > 0) {
-                            $headerBadge.text(formatNotificationNumber(unread)).show();
+                            $headerBadge
+                                .text('')
+                                .removeClass('maneli-initially-hidden')
+                                .show();
                         } else {
-                            $headerBadge.hide();
+                            $headerBadge
+                                .text('')
+                                .addClass('maneli-initially-hidden')
+                                .hide();
                         }
                     }
                     
@@ -570,12 +577,15 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
     
     // Format localized number
     function formatNotificationNumber(num) {
+        if (digitsHelper && typeof digitsHelper.ensureDigits === 'function') {
+            return digitsHelper.ensureDigits(num, shouldUsePersianDigits ? 'fa' : 'en');
+        }
         if (!shouldUsePersianDigits) {
             return String(num);
         }
-        var persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        var persianDigitsFallback = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return String(num).replace(/\d/g, function(w) {
-            return persianDigits[parseInt(w, 10)];
+            return persianDigitsFallback[parseInt(w, 10)];
         });
     }
     

@@ -1179,10 +1179,18 @@ function initCharts() {
         console.log('Initializing reports charts...');
         console.log('Chart.js available:', typeof Chart !== 'undefined');
         
-        // Helper function to convert numbers to Persian digits
-        const toPersianNumber = (num) => {
-            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-            return num.toString().replace(/\d/g, d => persianDigits[d]);
+        const digitsHelper = window.maneliLocale || window.maneliDigits || {};
+
+        const toPersianNumber = (num, options = {}) => {
+            if (digitsHelper && typeof digitsHelper.formatNumber === 'function') {
+                return digitsHelper.formatNumber(num, options);
+            }
+            if (digitsHelper && typeof digitsHelper.ensureDigits === 'function') {
+                const target = options.forceLocale ? options.forceLocale : undefined;
+                return digitsHelper.ensureDigits(num, target);
+            }
+            const persianDigitsFallback = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return num.toString().replace(/\d/g, d => persianDigitsFallback[d]);
         };
         
         // Translation object for charts
@@ -1293,7 +1301,7 @@ function initCharts() {
                                     ticks: {
                                         stepSize: 1,
                                         callback: function(value) {
-                                            return toPersianNumber(value);
+                                            return toPersianNumber(value, { useGrouping: false });
                                         }
                                     }
                                 }
@@ -1358,7 +1366,7 @@ function initCharts() {
                                         const percent = total > 0 ? Math.round((context.parsed / total) * 100) : 0;
                                         // Convert to Persian digits
                                         const parsedStr = toPersianNumber(context.parsed);
-                                        const percentStr = toPersianNumber(percent);
+                                        const percentStr = toPersianNumber(percent, { useGrouping: false });
                                         label += parsedStr + ' (' + percentStr + '%)';
                                         return label;
                                     }
@@ -1417,7 +1425,7 @@ function initCharts() {
                                 ticks: {
                                     stepSize: 1,
                                     callback: function(value) {
-                                        return toPersianNumber(value);
+                                        return toPersianNumber(value, { useGrouping: false });
                                     }
                                 }
                             }
@@ -1499,7 +1507,7 @@ function initCharts() {
                                 beginAtZero: true,
                                 ticks: {
                                     callback: function(value) {
-                                        return toPersianNumber(value);
+                                        return toPersianNumber(value, { useGrouping: false });
                                     }
                                 }
                             }

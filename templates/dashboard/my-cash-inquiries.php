@@ -203,13 +203,29 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
         // Direct initialization check for cash inquiries
         console.log('🔴 TEMPLATE: cash-inquiries.php script loaded (Customer View)');
 
-        // Helper function to convert numbers to Persian
-        function toPersianNumber(num) {
-            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-            return String(num).replace(/\d/g, function(digit) {
-                return persianDigits[englishDigits.indexOf(digit)];
-            });
+        const maneliDigitsHelper = window.maneliLocale || window.maneliDigits || {};
+
+// Helper function to format numbers based on active locale
+function formatNumberForLocale(num) {
+    const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+    const htmlDir = (document.documentElement.getAttribute('dir') || '').toLowerCase();
+    const shouldUsePersian = (maneliDigitsHelper && typeof maneliDigitsHelper.shouldUsePersianDigits === 'function')
+        ? maneliDigitsHelper.shouldUsePersianDigits()
+        : (htmlLang.indexOf('fa') === 0 || htmlDir === 'rtl');
+
+    if (maneliDigitsHelper && typeof maneliDigitsHelper.ensureDigits === 'function') {
+        return maneliDigitsHelper.ensureDigits(num, shouldUsePersian ? 'fa' : 'en');
+    }
+
+    if (!shouldUsePersian) {
+        return String(num);
+    }
+
+    const persianDigitsFallback = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const englishDigitsFallback = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    return String(num).replace(/\d/g, function(digit) {
+        return persianDigitsFallback[englishDigitsFallback.indexOf(digit)];
+    });
         }
 
         // CRITICAL: Initialize maneliInquiryLists immediately if not already set
@@ -239,6 +255,19 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
             };
         }
 
+const htmlLangAttr = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+const htmlDirAttr = (document.documentElement.getAttribute('dir') || '').toLowerCase();
+const fallbackLocale = htmlLangAttr || (htmlDirAttr === 'rtl' ? 'fa' : (htmlDirAttr === 'ltr' ? 'en' : ''));
+
+if (typeof maneliInquiryLists.locale === 'undefined' && fallbackLocale) {
+    maneliInquiryLists.locale = fallbackLocale;
+}
+
+if (typeof maneliInquiryLists.use_persian_digits === 'undefined') {
+    const localeSource = maneliInquiryLists.locale || fallbackLocale || '';
+    maneliInquiryLists.use_persian_digits = localeSource.toLowerCase().indexOf('fa') === 0;
+}
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🔴 TEMPLATE: DOM ready for customer cash inquiries');
             // Auto-load list after 500ms
@@ -262,7 +291,7 @@ $payment_status = isset($_GET['payment_status']) ? sanitize_text_field($_GET['pa
                             if (response && response.success && response.data && response.data.html) {
                                 jQuery('#maneli-cash-inquiry-list-tbody').html(response.data.html);
                                 var rowCount = jQuery('#maneli-cash-inquiry-list-tbody tr.crm-contact').length;
-                                jQuery('#cash-inquiry-count-badge').text(toPersianNumber(rowCount));
+                                jQuery('#cash-inquiry-count-badge').text(formatNumberForLocale(rowCount));
                                 if (response.data.pagination_html) {
                                     jQuery('#cash-inquiry-pagination').html(response.data.pagination_html);
                                 }

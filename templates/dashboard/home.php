@@ -1670,14 +1670,14 @@ if ($is_customer) {
                             const credit = response.data.credit || 0;
                             const formatted = response.data.formatted || credit;
                             
-                            const usePersianDigits = typeof window.maneliShouldUsePersianDates === 'function' ? window.maneliShouldUsePersianDates() : true;
-                            let displayCredit = String(formatted);
-                            if (usePersianDigits) {
-                            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                            const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-                            for (let i = 0; i < 10; i++) {
-                                    displayCredit = displayCredit.split(englishDigits[i]).join(persianDigits[i]);
-                                }
+                            const digitsHelper = window.maneliLocale || window.maneliDigits || {};
+                            let displayCredit;
+                            if (digitsHelper && typeof digitsHelper.formatNumber === 'function') {
+                                displayCredit = digitsHelper.formatNumber(formatted, { useGrouping: true });
+                            } else if (digitsHelper && typeof digitsHelper.ensureDigits === 'function') {
+                                displayCredit = digitsHelper.ensureDigits(formatted);
+                            } else {
+                                displayCredit = String(formatted);
                             }
                             
                             // Determine color based on credit amount
@@ -1722,6 +1722,177 @@ if ($is_customer) {
                 setTimeout(initChart, 100);
                 return;
             }
+
+            const localeHelpers = (function() {
+                if (typeof window !== 'undefined' && window.maneliLocale && typeof window.maneliLocale === 'object') {
+                    return window.maneliLocale;
+                }
+
+                const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+                const ENGLISH_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+                const toEnglish = (input) => {
+                    if (input === null || input === undefined) {
+                        return '';
+                    }
+                    let str = String(input);
+                    for (let i = 0; i < PERSIAN_DIGITS.length; i++) {
+                        str = str.split(PERSIAN_DIGITS[i]).join(ENGLISH_DIGITS[i]);
+                    }
+                    for (let i = 0; i < ARABIC_DIGITS.length; i++) {
+                        str = str.split(ARABIC_DIGITS[i]).join(ENGLISH_DIGITS[i]);
+                    }
+                    return str.replace(/[٬،]/g, ',');
+                };
+
+                const toPersian = (input) => {
+                    if (input === null || input === undefined) {
+                        return '';
+                    }
+                    const str = String(input);
+                    return str
+                        .replace(/\d/g, (digit) => PERSIAN_DIGITS[Number(digit)])
+                        .replace(/[٠-٩]/g, (digit) => {
+                            const index = ARABIC_DIGITS.indexOf(digit);
+                            return index >= 0 ? PERSIAN_DIGITS[index] : digit;
+                        });
+                };
+
+                const fallbackShouldUsePersian = () => {
+                    if (typeof window !== 'undefined' && typeof window.maneliShouldUsePersianDates === 'function') {
+                        try {
+                            return !!window.maneliShouldUsePersianDates();
+                        } catch (error) {
+                            console.warn('Fallback Persian digit check failed', error);
+                        }
+                    }
+                    if (typeof document !== 'undefined') {
+                        const langAttr = (document.documentElement.lang || '').toLowerCase();
+                        if (langAttr && !langAttr.startsWith('fa')) {
+                            return false;
+                        }
+                    }
+                    return true;
+                };
+
+                const ensureDigits = (value, target = 'auto') => {
+                    if (target === 'en' || target === 'en-us' || target === 'en_US') {
+                        return toEnglish(value);
+                    }
+                    if (target === 'fa' || target === 'fa-ir' || target === 'fa_IR') {
+                        return toPersian(value);
+                    }
+                    return fallbackShouldUsePersian() ? toPersian(value) : toEnglish(value);
+                };
+
+                const formatNumber = (value, options = {}) => {
+                    const {
+                        forceLocale,
+                        useGrouping = true,
+                        minimumFractionDigits,
+                        maximumFractionDigits
+                    } = options;
+                    const target = forceLocale
+                        ? (String(forceLocale).toLowerCase().startsWith('fa') ? 'fa' : 'en')
+                        : (fallbackShouldUsePersian() ? 'fa' : 'en');
+
+                    const english = toEnglish(value);
+                    const numeric = Number(english.replace(/,/g, ''));
+                    if (!Number.isFinite(numeric)) {
+                        return ensureDigits(value, target);
+                    }
+
+                    const locale = target === 'fa' ? 'fa-IR' : 'en-US';
+                    const formatted = numeric.toLocaleString(locale, {
+                        useGrouping,
+                        minimumFractionDigits,
+                        maximumFractionDigits
+                    });
+                    return target === 'fa' ? toPersian(formatted) : toEnglish(formatted);
+                };
+
+                const parseNumber = (value) => {
+                    const normalized = toEnglish(value).replace(/,/g, '').trim();
+                    if (normalized === '') {
+                        return NaN;
+                    }
+                    return Number(normalized);
+                };
+
+                return {
+                    shouldUsePersianDigits: fallbackShouldUsePersian,
+                    ensureDigits,
+                    toEnglishDigits: toEnglish,
+                    toPersianDigits: toPersian,
+                    formatNumber,
+                    parseNumber
+                };
+            })();
+
+            const usePersianDigits = typeof localeHelpers.shouldUsePersianDigits === 'function'
+                ? !!localeHelpers.shouldUsePersianDigits()
+                : true;
+
+            if (Chart && Chart.defaults) {
+                Chart.defaults.locale = usePersianDigits ? 'fa-IR' : 'en-US';
+            }
+
+            const ensureEnglishDigits = (value) => {
+                if (usePersianDigits) {
+                    return value;
+                }
+                if (typeof localeHelpers.ensureDigits === 'function') {
+                    return localeHelpers.ensureDigits(value, 'en');
+                }
+                return String(value ?? '');
+            };
+
+            const formatLabelForLocale = (value) => {
+                if (usePersianDigits) {
+                    if (typeof localeHelpers.ensureDigits === 'function') {
+                        return localeHelpers.ensureDigits(value, 'fa');
+                    }
+                    return value;
+                }
+                return ensureEnglishDigits(value);
+            };
+
+            const formatNumberForTooltip = (value) => {
+                if (usePersianDigits) {
+                    if (typeof localeHelpers.ensureDigits === 'function') {
+                        return localeHelpers.ensureDigits(value, 'fa');
+                    }
+                    return value;
+                }
+                if (typeof localeHelpers.formatNumber === 'function') {
+                    return localeHelpers.formatNumber(value, { forceLocale: 'en', useGrouping: true });
+                }
+                const english = ensureEnglishDigits(value);
+                const numeric = Number(String(english).replace(/,/g, ''));
+                if (Number.isFinite(numeric)) {
+                    return numeric.toLocaleString('en-US');
+                }
+                return english;
+            };
+
+            const formatNumberForAxis = (value) => {
+                if (usePersianDigits) {
+                    if (typeof localeHelpers.ensureDigits === 'function') {
+                        return localeHelpers.ensureDigits(value, 'fa');
+                    }
+                    return value;
+                }
+                if (typeof localeHelpers.formatNumber === 'function') {
+                    return localeHelpers.formatNumber(value, { forceLocale: 'en', useGrouping: false });
+                }
+                const english = ensureEnglishDigits(value);
+                const numeric = Number(String(english).replace(/,/g, ''));
+                if (Number.isFinite(numeric)) {
+                    return numeric.toLocaleString('en-US', { useGrouping: false });
+                }
+                return english;
+            };
             
             const ctx = document.getElementById('dailyTrendChart');
             if (!ctx) {
@@ -1757,14 +1928,23 @@ if ($is_customer) {
                 if (dailyData && dailyData.length > 0) {
                     // تاریخ‌ها قبلاً در PHP به شمسی تبدیل شده‌اند
                     labels = dailyData.map(item => {
-                        return String(item.date || '');
+                        const rawDate = item && Object.prototype.hasOwnProperty.call(item, 'date') ? item.date : '';
+                        return formatLabelForLocale(rawDate);
                     });
                     totalData = dailyData.map(item => parseInt(item.total) || 0);
                     cashData = dailyData.map(item => parseInt(item.cash) || 0);
                     installmentData = dailyData.map(item => parseInt(item.installment) || 0);
                 } else {
                     // داده‌های پیش‌فرض
-                    labels = [<?php echo json_encode(esc_html__('Today', 'maneli-car-inquiry')); ?>, <?php echo json_encode(esc_html__('Yesterday', 'maneli-car-inquiry')); ?>, '<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 2)); ?>', '<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 3)); ?>', '<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 4)); ?>', '<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 5)); ?>', '<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 6)); ?>'];
+                    labels = [
+                        formatLabelForLocale(<?php echo json_encode(esc_html__('Today', 'maneli-car-inquiry')); ?>),
+                        formatLabelForLocale(<?php echo json_encode(esc_html__('Yesterday', 'maneli-car-inquiry')); ?>),
+                        formatLabelForLocale('<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 2)); ?>'),
+                        formatLabelForLocale('<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 3)); ?>'),
+                        formatLabelForLocale('<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 4)); ?>'),
+                        formatLabelForLocale('<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 5)); ?>'),
+                        formatLabelForLocale('<?php echo esc_js(sprintf(esc_html__('%d days ago', 'maneli-car-inquiry'), 6)); ?>')
+                    ];
                     totalData = [0, 0, 0, 0, 0, 0, 0];
                     cashData = [0, 0, 0, 0, 0, 0, 0];
                     installmentData = [0, 0, 0, 0, 0, 0, 0];
@@ -1831,6 +2011,20 @@ if ($is_customer) {
                                 mode: 'index',
                                 intersect: false,
                                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                callbacks: {
+                                    title: function(context) {
+                                        if (!context || !context.length) {
+                                            return '';
+                                        }
+                                        const label = context[0].label ?? '';
+                                        return formatLabelForLocale(label);
+                                    },
+                                    label: function(context) {
+                                        const datasetLabel = context.dataset.label ? context.dataset.label + ': ' : '';
+                                        const rawValue = context.raw ?? context.parsed?.y ?? context.formattedValue ?? '';
+                                        return datasetLabel + formatNumberForTooltip(rawValue);
+                                    }
+                                },
                                 titleFont: {
                                     family: 'IRANSans, Arial, sans-serif'
                                 },
@@ -1849,6 +2043,9 @@ if ($is_customer) {
                                 beginAtZero: true,
                                 ticks: {
                                     stepSize: 1,
+                                    callback: function(value) {
+                                        return formatNumberForAxis(value);
+                                    },
                                     font: {
                                         family: 'IRANSans, Arial, sans-serif'
                                     }
@@ -1863,6 +2060,10 @@ if ($is_customer) {
                                     display: false
                                 },
                                 ticks: {
+                                    callback: function(value, index) {
+                                        const label = this.getLabelForValue(index);
+                                        return formatLabelForLocale(label);
+                                    },
                                     font: {
                                         family: 'IRANSans, Arial, sans-serif'
                                     }

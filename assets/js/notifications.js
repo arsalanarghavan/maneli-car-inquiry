@@ -48,13 +48,21 @@
                         var $badgeLabel = $('#header-unread-label');
                         
                         if (count > 0) {
-                            $badge.text(count).show();
+                            $badge
+                                .text('')
+                                .removeAttr('data-count')
+                                .removeClass('maneli-initially-hidden')
+                                .show();
                             if ($badgeLabel.length) {
                                 var template = $badgeLabel.data('template') || '%s unread';
                                 $badgeLabel.text(template.replace('%s', count));
                             }
                         } else {
-                            $badge.hide();
+                            $badge
+                                .text('')
+                                .removeAttr('data-count')
+                                .addClass('maneli-initially-hidden')
+                                .hide();
                             if ($badgeLabel.length) {
                                 var emptyText = $badgeLabel.data('empty') || '';
                                 $badgeLabel.text(emptyText);

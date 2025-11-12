@@ -582,7 +582,7 @@ class Maneli_Render_Helpers {
                         <span class="assigned-expert-name"><?php echo esc_html($expert_name); ?></span>
                     <?php else : ?>
                         <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment" title="<?php esc_attr_e('Assign Expert', 'maneli-car-inquiry'); ?>">
-                            <i class="la la-user-plus me-1"></i><?php esc_html_e('تخصیص', 'maneli-car-inquiry'); ?>
+                            <i class="la la-user-plus me-1"></i><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?>
                         </button>
                     <?php endif; ?>
                 </td>
@@ -734,7 +734,7 @@ class Maneli_Render_Helpers {
                         <span class="assigned-expert-name"><?php echo esc_html($expert_name); ?></span>
                     <?php else : ?>
                         <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" title="<?php esc_attr_e('Assign Expert', 'maneli-car-inquiry'); ?>">
-                            <i class="la la-user-plus me-1"></i><?php esc_html_e('تخصیص', 'maneli-car-inquiry'); ?>
+                            <i class="la la-user-plus me-1"></i><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?>
                         </button>
                     <?php endif; ?>
                 </td>

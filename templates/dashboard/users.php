@@ -260,12 +260,12 @@ $active_users_count = $active_users_query->get_total();
                     <div class="card-header d-flex justify-content-between align-items-center border-block-end">
                         <div class="card-title">
                             <i class="la la-users me-2"></i>
-                            مدیریت کاربران
+                            <?php esc_html_e('User Management', 'maneli-car-inquiry'); ?>
                         </div>
                         <div class="btn-list">
                             <button class="btn btn-primary btn-wave" data-bs-toggle="modal" data-bs-target="#addUserModal">
                                 <i class="la la-plus me-1"></i>
-                                کاربر جدید
+                                <?php esc_html_e('New User', 'maneli-car-inquiry'); ?>
                             </button>
                         </div>
                     </div>

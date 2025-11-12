@@ -139,7 +139,7 @@ $tab_persian_names = [
                                         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
                                             <div class="fw-semibold d-block fs-15"><?php echo esc_html($persian_title); ?>:</div>
                                             <button type="reset" class="btn btn-primary btn-sm">
-                                                <i class="la la-undo me-1"></i>بازگردانی تغییرات
+                                                <i class="la la-undo me-1"></i><?php esc_html_e('Undo Changes', 'maneli-car-inquiry'); ?>
                                             </button>
                                         </div>
                                         
@@ -315,11 +315,11 @@ $tab_persian_names = [
                             <div class="btn-list float-end">
                                 <button type="reset" class="btn btn-light btn-wave">
                                     <i class="la la-undo me-1"></i>
-                                    بازنشانی تغییرات
+                                    <?php esc_html_e('Reset Changes', 'maneli-car-inquiry'); ?>
                                 </button>
                                 <button type="submit" class="btn btn-primary btn-wave">
                                     <i class="la la-save me-1"></i>
-                                    ذخیره تغییرات
+                                    <?php esc_html_e('Save Changes', 'maneli-car-inquiry'); ?>
                                 </button>
                             </div>
                         </div>

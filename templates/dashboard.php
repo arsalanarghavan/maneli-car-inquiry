@@ -294,36 +294,36 @@ $dashboard_html = str_replace('استعلام خودرو منلی', 'Maneli Khod
 
 // Fix: Replace the problematic language switching script that causes infinite refresh
 $pattern = '/(<!-- Language Switching Function -->)(.*?)(Load saved language preference on page load)(.*?)(<\/script>)/s';
-$fixed_script = '
+$fixed_script = <<<'HTML'
 <!-- Language Switching Function -->
 <script>
     (function() {
-        const COOKIE_NAME = \'maneli_language\';
+        const COOKIE_NAME = 'maneli_language';
         const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
         function shouldUsePersianDates() {
-            return document.documentElement && document.documentElement.lang === \'fa\';
+            return document.documentElement && document.documentElement.lang === 'fa';
         }
 
         window.maneliShouldUsePersianDates = shouldUsePersianDates;
 
         function normalizeLanguage(lang) {
             if (!lang) {
-                return \'fa\';
+                return 'fa';
             }
             const value = String(lang).toLowerCase();
-            if (value === \'en_us\' || value === \'en-us\' || value === \'english\') {
-                return \'en\';
+            if (value === 'en_us' || value === 'en-us' || value === 'english') {
+                return 'en';
             }
-            return value === \'en\' ? \'en\' : \'fa\';
+            return value === 'en' ? 'en' : 'fa';
         }
 
         function setLanguageCookie(lang) {
             try {
                 const normalized = normalizeLanguage(lang);
-                document.cookie = COOKIE_NAME + \'=\' + normalized + \'; path=/; max-age=\' + COOKIE_MAX_AGE + \'; SameSite=Lax\';
+                document.cookie = COOKIE_NAME + '=' + normalized + '; path=/; max-age=' + COOKIE_MAX_AGE + '; SameSite=Lax';
             } catch (error) {
-                console.warn(\'[Maneli] Unable to persist language cookie\', error);
+                console.warn('[Maneli] Unable to persist language cookie', error);
             }
         }
 
@@ -333,29 +333,29 @@ $fixed_script = '
             const body = document.body;
 
             if (html) {
-                html.lang = normalized === \'fa\' ? \'fa\' : \'en\';
-                html.dir = normalized === \'fa\' ? \'rtl\' : \'ltr\';
-                html.classList.toggle(\'rtl\', normalized === \'fa\');
-                html.classList.toggle(\'ltr\', normalized !== \'fa\');
+                html.lang = normalized === 'fa' ? 'fa' : 'en';
+                html.dir = normalized === 'fa' ? 'rtl' : 'ltr';
+                html.classList.toggle('rtl', normalized === 'fa');
+                html.classList.toggle('ltr', normalized !== 'fa');
             }
 
             if (body) {
-                body.classList.toggle(\'rtl\', normalized === \'fa\');
-                body.classList.toggle(\'ltr\', normalized !== \'fa\');
+                body.classList.toggle('rtl', normalized === 'fa');
+                body.classList.toggle('ltr', normalized !== 'fa');
             }
 
-            const styleLink = document.getElementById(\'style\');
+            const styleLink = document.getElementById('style');
             if (styleLink) {
-                const currentHref = styleLink.getAttribute(\'href\') || \'\';
-                const storedRtl = styleLink.dataset.rtlHref || styleLink.getAttribute(\'data-rtl-href\');
-                const storedLtr = styleLink.dataset.ltrHref || styleLink.getAttribute(\'data-ltr-href\');
-                const rtlHref = storedRtl || (currentHref.includes(\'bootstrap.min.css\') ? currentHref.replace(\'bootstrap.min.css\', \'bootstrap.rtl.min.css\') : currentHref);
-                const ltrHref = storedLtr || (currentHref.includes(\'bootstrap.rtl.min.css\') ? currentHref.replace(\'bootstrap.rtl.min.css\', \'bootstrap.min.css\') : currentHref);
+                const currentHref = styleLink.getAttribute('href') || '';
+                const storedRtl = styleLink.dataset.rtlHref || styleLink.getAttribute('data-rtl-href');
+                const storedLtr = styleLink.dataset.ltrHref || styleLink.getAttribute('data-ltr-href');
+                const rtlHref = storedRtl || (currentHref.includes('bootstrap.min.css') ? currentHref.replace('bootstrap.min.css', 'bootstrap.rtl.min.css') : currentHref);
+                const ltrHref = storedLtr || (currentHref.includes('bootstrap.rtl.min.css') ? currentHref.replace('bootstrap.rtl.min.css', 'bootstrap.min.css') : currentHref);
 
                 styleLink.dataset.rtlHref = rtlHref;
                 styleLink.dataset.ltrHref = ltrHref;
 
-                styleLink.setAttribute(\'href\', normalized === \'fa\' ? rtlHref : ltrHref);
+                styleLink.setAttribute('href', normalized === 'fa' ? rtlHref : ltrHref);
             }
 
             return normalized;
@@ -364,48 +364,261 @@ $fixed_script = '
         window.changeLanguage = function(lang) {
             const normalized = normalizeLanguage(lang);
             const currentLang = normalizeLanguage(document.documentElement.lang);
-            const currentDir = (document.documentElement.dir || \'rtl\').toLowerCase();
+            const currentDir = (document.documentElement.dir || 'rtl').toLowerCase();
 
-            localStorage.setItem(\'maneli_language\', normalized);
+            localStorage.setItem('maneli_language', normalized);
             setLanguageCookie(normalized);
 
             // Apply immediately for visual feedback
             applyLanguage(normalized);
 
             const requiresReload = normalized !== currentLang ||
-                (normalized === \'fa\' && currentDir !== \'rtl\') ||
-                (normalized !== \'fa\' && currentDir !== \'ltr\');
+                (normalized === 'fa' && currentDir !== 'rtl') ||
+                (normalized !== 'fa' && currentDir !== 'ltr');
 
             if (requiresReload) {
-                localStorage.setItem(\'maneli_language_changing\', \'true\');
+                localStorage.setItem('maneli_language_changing', 'true');
                 window.location.reload();
             }
         };
 
-        document.addEventListener(\'DOMContentLoaded\', function() {
-            const savedLang = normalizeLanguage(localStorage.getItem(\'maneli_language\'));
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = normalizeLanguage(localStorage.getItem('maneli_language'));
             const appliedLang = applyLanguage(savedLang);
             setLanguageCookie(appliedLang);
 
-            if (localStorage.getItem(\'maneli_language_changing\') === \'true\') {
-                localStorage.removeItem(\'maneli_language_changing\');
+            if (localStorage.getItem('maneli_language_changing') === 'true') {
+                localStorage.removeItem('maneli_language_changing');
                 return;
             }
 
             const currentLang = normalizeLanguage(document.documentElement.lang);
-            const currentDir = (document.documentElement.dir || \'rtl\').toLowerCase();
+            const currentDir = (document.documentElement.dir || 'rtl').toLowerCase();
 
             const needsReload = appliedLang !== currentLang ||
-                (appliedLang === \'fa\' && currentDir !== \'rtl\') ||
-                (appliedLang !== \'fa\' && currentDir !== \'ltr\');
+                (appliedLang === 'fa' && currentDir !== 'rtl') ||
+                (appliedLang !== 'fa' && currentDir !== 'ltr');
 
             if (needsReload) {
-                localStorage.setItem(\'maneli_language_changing\', \'true\');
+                localStorage.setItem('maneli_language_changing', 'true');
                 window.location.reload();
             }
         });
     })();
-</script>';
+</script>
+<!-- Digit & Locale Utilities -->
+<script>
+    (function(window, document) {
+        const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        const ENGLISH_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        const PERSIAN_COMMA_REGEX = /[٬،]/g;
+
+        function normalizeLanguage(value) {
+            if (!value) {
+                return '';
+            }
+            const lower = String(value).toLowerCase();
+            if (lower === 'en_us' || lower === 'en-us' || lower === 'english') {
+                return 'en';
+            }
+            if (lower === 'fa_ir' || lower === 'fa-ir' || lower === 'persian') {
+                return 'fa';
+            }
+            if (lower.startsWith('en')) {
+                return 'en';
+            }
+            if (lower.startsWith('fa')) {
+                return 'fa';
+            }
+            return '';
+        }
+
+        function toStringSafe(input) {
+            if (input === null || input === undefined) {
+                return '';
+            }
+            if (typeof input === 'string') {
+                return input;
+            }
+            if (typeof input === 'number' || typeof input === 'boolean') {
+                return String(input);
+            }
+            if (typeof input === 'object') {
+                try {
+                    const valueOf = input.valueOf();
+                    if (valueOf !== input) {
+                        return toStringSafe(valueOf);
+                    }
+                } catch (error) {
+                    // ignore
+                }
+                if (typeof input.toString === 'function') {
+                    try {
+                        return input.toString();
+                    } catch (error) {
+                        return '';
+                    }
+                }
+            }
+            try {
+                return JSON.stringify(input);
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function toEnglishDigits(input) {
+            let str = toStringSafe(input);
+            if (!str) {
+                return '';
+            }
+            for (let i = 0; i < PERSIAN_DIGITS.length; i++) {
+                str = str.split(PERSIAN_DIGITS[i]).join(ENGLISH_DIGITS[i]);
+            }
+            for (let i = 0; i < ARABIC_DIGITS.length; i++) {
+                str = str.split(ARABIC_DIGITS[i]).join(ENGLISH_DIGITS[i]);
+            }
+            return str.replace(PERSIAN_COMMA_REGEX, ',');
+        }
+
+        function toPersianDigits(input) {
+            let str = toStringSafe(input);
+            if (!str) {
+                return '';
+            }
+            str = str.replace(/\d/g, function(digit) {
+                return PERSIAN_DIGITS[Number(digit)];
+            });
+            for (let i = 0; i < ARABIC_DIGITS.length; i++) {
+                str = str.split(ARABIC_DIGITS[i]).join(PERSIAN_DIGITS[i]);
+            }
+            return str;
+        }
+
+        function parseNumber(input) {
+            const normalized = toEnglishDigits(input).replace(/,/g, '').trim();
+            if (normalized === '') {
+                return NaN;
+            }
+            return Number(normalized);
+        }
+
+        function detectLanguage() {
+            const fromLocalStorage = function() {
+                if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+                    return '';
+                }
+                try {
+                    return normalizeLanguage(window.localStorage.getItem('maneli_language'));
+                } catch (error) {
+                    console.warn('[Maneli] Unable to read language from localStorage', error);
+                    return '';
+                }
+            };
+
+            const fromCookie = function() {
+                if (typeof document === 'undefined') {
+                    return '';
+                }
+                try {
+                    const match = document.cookie.match(/(?:^|;\s*)maneli_language=([^;]+)/);
+                    if (match && match[1]) {
+                        return normalizeLanguage(decodeURIComponent(match[1]));
+                    }
+                } catch (error) {
+                    console.warn('[Maneli] Unable to read language cookie', error);
+                }
+                return '';
+            };
+
+            const fromHtml = function() {
+                if (typeof document === 'undefined') {
+                    return '';
+                }
+                const langAttr = normalizeLanguage(document.documentElement.lang);
+                if (langAttr) {
+                    return langAttr;
+                }
+                const dirAttr = (document.documentElement.dir || '').toLowerCase();
+                if (dirAttr === 'ltr') {
+                    return 'en';
+                }
+                if (dirAttr === 'rtl') {
+                    return 'fa';
+                }
+                return '';
+            };
+
+            const fromNavigator = function() {
+                if (typeof navigator === 'undefined') {
+                    return '';
+                }
+                return normalizeLanguage(navigator.language || navigator.userLanguage);
+            };
+
+            const sources = [fromLocalStorage(), fromCookie(), fromHtml(), fromNavigator()];
+            for (let i = 0; i < sources.length; i++) {
+                const candidate = sources[i];
+                if (candidate === 'fa' || candidate === 'en') {
+                    return candidate;
+                }
+            }
+            return 'fa';
+        }
+
+        function shouldUsePersianDigits() {
+            return detectLanguage() === 'fa';
+        }
+
+        function ensureDigits(input, target) {
+            const normalizedTarget = normalizeLanguage(target);
+            if (normalizedTarget === 'fa') {
+                return toPersianDigits(input);
+            }
+            if (normalizedTarget === 'en') {
+                return toEnglishDigits(input);
+            }
+            return shouldUsePersianDigits() ? toPersianDigits(input) : toEnglishDigits(input);
+        }
+
+        function formatNumber(input, options) {
+            const opts = options || {};
+            const targetLocale = normalizeLanguage(opts.forceLocale) || (shouldUsePersianDigits() ? 'fa' : 'en');
+            const numericValue = parseNumber(input);
+            if (!Number.isFinite(numericValue)) {
+                return ensureDigits(input, targetLocale);
+            }
+            const locale = targetLocale === 'fa' ? 'fa-IR' : 'en-US';
+            const formatterOptions = {
+                useGrouping: opts.useGrouping !== false
+            };
+            if (typeof opts.minimumFractionDigits === 'number') {
+                formatterOptions.minimumFractionDigits = opts.minimumFractionDigits;
+            }
+            if (typeof opts.maximumFractionDigits === 'number') {
+                formatterOptions.maximumFractionDigits = opts.maximumFractionDigits;
+            }
+            const formatted = numericValue.toLocaleString(locale, formatterOptions);
+            return targetLocale === 'fa' ? toPersianDigits(formatted) : toEnglishDigits(formatted);
+        }
+
+        window.maneliLocale = Object.assign({}, window.maneliLocale || {}, {
+            normalizeLanguage,
+            detectLanguage,
+            shouldUsePersianDigits,
+            ensureDigits,
+            toEnglishDigits,
+            toPersianDigits,
+            parseNumber,
+            formatNumber
+        });
+
+        window.maneliDigits = window.maneliLocale;
+        window.maneliShouldUsePersianDates = shouldUsePersianDigits;
+    })(window, document);
+</script>
+HTML;
 $dashboard_html = preg_replace($pattern, $fixed_script, $dashboard_html);
 
 $dashboard_html = str_replace('جهت:', 'Direction:', $dashboard_html);

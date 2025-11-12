@@ -20,6 +20,61 @@ function toPersianNumber(num) {
     });
 }
 
+function detectActiveLocaleForDigits() {
+    if (typeof window !== 'undefined' && window.maneliInquiryLists) {
+        if (typeof window.maneliInquiryLists.use_persian_digits !== 'undefined') {
+            return window.maneliInquiryLists.use_persian_digits ? 'fa' : 'en';
+        }
+        if (typeof window.maneliInquiryLists.locale === 'string') {
+            const normalized = window.maneliInquiryLists.locale.toLowerCase();
+            if (normalized.indexOf('fa') === 0) {
+                return 'fa';
+            }
+            if (normalized.indexOf('en') === 0) {
+                return 'en';
+            }
+        }
+    }
+
+    if (typeof document !== 'undefined' && document.documentElement) {
+        const langAttr = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+        if (langAttr.indexOf('fa') === 0) {
+            return 'fa';
+        }
+        if (langAttr.indexOf('en') === 0) {
+            return 'en';
+        }
+
+        const dirAttr = (document.documentElement.getAttribute('dir') || '').toLowerCase();
+        if (dirAttr === 'rtl') {
+            return 'fa';
+        }
+        if (dirAttr === 'ltr') {
+            return 'en';
+        }
+    }
+
+    if (typeof window !== 'undefined' && window.maneliLocale && typeof window.maneliLocale.detectLanguage === 'function') {
+        const detected = window.maneliLocale.detectLanguage();
+        if (detected === 'fa' || detected === 'en') {
+            return detected;
+        }
+    }
+
+    return 'en';
+}
+
+function formatNumberForActiveLocale(num) {
+    const locale = detectActiveLocaleForDigits();
+    if (locale === 'fa') {
+        return toPersianNumber(num);
+    }
+    if (typeof window !== 'undefined' && window.maneliLocale && typeof window.maneliLocale.ensureDigits === 'function') {
+        return window.maneliLocale.ensureDigits(num, 'en');
+    }
+    return String(num);
+}
+
 // Wait for jQuery to be available
 (function() {
     console.log('🔵 inquiry-lists.js IIFE STARTED');
@@ -632,12 +687,12 @@ function toPersianNumber(num) {
                             // Update count badge
                             if (listType === 'installment') {
                                 const rowCount = listBody.find('tr.crm-contact').length;
-                                $('#inquiry-count-badge').text(toPersianNumber(rowCount));
+                                $('#inquiry-count-badge').text(formatNumberForActiveLocale(rowCount));
                             }
                         } else {
                             listBody.html(`<tr><td colspan="${colspan}" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
                             if (listType === 'installment') {
-                                $('#inquiry-count-badge').text('۰');
+                                $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                             }
                         }
                         if (response.data.pagination_html) {
@@ -647,7 +702,7 @@ function toPersianNumber(num) {
                         listBody.html(`<tr><td colspan="${colspan}" style="text-align:center;">${getText('error')}: ${response.data.message || getText('unknown_error')}</td></tr>`);
                         paginationWrapper.html('');
                         if (listType === 'installment') {
-                            $('#inquiry-count-badge').text('۰');
+                            $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                         }
                     }
                 },
@@ -1080,12 +1135,12 @@ function toPersianNumber(num) {
                         $('#maneli-cash-inquiry-list-tbody').html(response.data.html);
                         // Update count badge
                         const rowCount = $('#maneli-cash-inquiry-list-tbody tr.crm-contact').length;
-                        $('#cash-inquiry-count-badge').text(toPersianNumber(rowCount));
+                        $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(rowCount));
                         console.log('✓ Table rows inserted:', rowCount);
                     } else {
                         console.log('⚠ No HTML content - showing empty message');
                         $('#maneli-cash-inquiry-list-tbody').html(`<tr><td colspan="8" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
-                        $('#cash-inquiry-count-badge').text('۰');
+                        $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(0));
                     }
                     if (response.data.pagination_html) {
                         $('#cash-inquiry-pagination').html(response.data.pagination_html);
@@ -1100,7 +1155,7 @@ function toPersianNumber(num) {
                     console.error('Response.data:', response.data);
                     const errorMsg = (response.data && response.data.message) ? response.data.message : getText('loading_inquiries_error', 'Error loading list');
                     $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + errorMsg + '</td></tr>');
-                    $('#cash-inquiry-count-badge').text('0');
+                    $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(0));
                 }
             },
             error: function(xhr, status, error) {
@@ -1268,13 +1323,13 @@ function toPersianNumber(num) {
                                 $listBody.html(response.data.html);
                                 // Update count badge
                                 const rowCount = $listBody.find('tr.crm-contact').length;
-                                $('#cash-inquiry-count-badge').text(toPersianNumber(rowCount));
+                                $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(rowCount));
                             }
                         } else {
                             if ($listBody.length) {
                                 $listBody.html(`<tr><td colspan="8" class="text-center text-muted">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
                             }
-                            $('#cash-inquiry-count-badge').text('۰');
+                            $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(0));
                         }
                         if ($paginationWrapper.length) {
                             $paginationWrapper.html(response.data.pagination_html || '');
@@ -1283,7 +1338,7 @@ function toPersianNumber(num) {
                         if ($listBody.length) {
                             $listBody.html('<tr><td colspan="8" class="text-center text-danger">' + (response.data?.message || getText('loading_inquiries_error', 'Error loading list')) + '</td></tr>');
                         }
-                        $('#cash-inquiry-count-badge').text('۰');
+                        $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(0));
                     }
                     console.log('=== fetchCashInquiries END (success) ===');
                 },
@@ -1607,18 +1662,18 @@ function toPersianNumber(num) {
                         console.log('✓ HTML preview:', response.data.html.substring(0, 500));
                         
                         if (hasContent) {
-                            $('#inquiry-count-badge').text(toPersianNumber(rowCount));
+                            $('#inquiry-count-badge').text(formatNumberForActiveLocale(rowCount));
                             console.log('✓ Table rows inserted:', rowCount);
-                            console.log('✓ Badge updated to:', toPersianNumber(rowCount));
+                            console.log('✓ Badge updated to:', formatNumberForActiveLocale(rowCount));
                         } else {
-                            $('#inquiry-count-badge').text('۰');
+                            $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                             console.log('⚠ No inquiry rows found in HTML');
                             console.log('⚠ Full HTML content:', response.data.html);
                         }
                     } else {
                         console.log('⚠ No HTML content - showing empty message');
                         $('#maneli-inquiry-list-tbody').html(`<tr><td colspan="7" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
-                        $('#inquiry-count-badge').text('۰');
+                        $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                     }
                     if (response.data.pagination_html) {
                         $('#inquiry-pagination').html(response.data.pagination_html);
@@ -1635,7 +1690,7 @@ function toPersianNumber(num) {
                     console.error('Response.data:', response.data);
                     const errorMsg = (response.data && response.data.message) ? response.data.message : getText('loading_inquiries_error', 'Error loading list');
                     $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + errorMsg + '</td></tr>');
-                    $('#inquiry-count-badge').text('0');
+                    $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                 }
             },
             error: function(xhr, status, error) {
@@ -1674,7 +1729,7 @@ function toPersianNumber(num) {
                 }
                 
                 $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + errorMessage + '<br><small>' + getText('please_refresh', 'Please refresh the page.') + '</small></td></tr>');
-                $('#inquiry-count-badge').text('0');
+                $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
             }
             });
         }
@@ -1827,13 +1882,13 @@ function toPersianNumber(num) {
                                 $listBody.html(response.data.html);
                                 // Update count badge
                                 const rowCount = $listBody.find('tr.crm-contact').length;
-                                $('#inquiry-count-badge').text(toPersianNumber(rowCount));
+                                $('#inquiry-count-badge').text(formatNumberForActiveLocale(rowCount));
                             }
                         } else {
                             if ($listBody.length) {
                                 $listBody.html(`<tr><td colspan="7" class="text-center text-muted">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
                             }
-                            $('#inquiry-count-badge').text('۰');
+                            $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                         }
                         if ($paginationWrapper.length) {
                             $paginationWrapper.html(response.data.pagination_html || '');
@@ -1842,7 +1897,7 @@ function toPersianNumber(num) {
                         if ($listBody.length) {
                             $listBody.html('<tr><td colspan="7" class="text-center text-danger">' + (response.data?.message || getText('loading_inquiries_error', 'Error loading list')) + '</td></tr>');
                         }
-                        $('#inquiry-count-badge').text('۰');
+                        $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                     }
                     console.log('=== fetchInstallmentInquiries END (success) ===');
                 },

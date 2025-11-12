@@ -322,12 +322,28 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
 // Direct initialization check for installment inquiries
 console.log('🟢 TEMPLATE: installment-inquiries.php script loaded');
 
-// Helper function to convert numbers to Persian
-function toPersianNumber(num) {
-    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const maneliDigitsHelper = window.maneliLocale || window.maneliDigits || {};
+
+// Helper function to format numbers based on active locale
+function formatNumberForLocale(num) {
+    const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+    const htmlDir = (document.documentElement.getAttribute('dir') || '').toLowerCase();
+    const shouldUsePersian = (maneliDigitsHelper && typeof maneliDigitsHelper.shouldUsePersianDigits === 'function')
+        ? maneliDigitsHelper.shouldUsePersianDigits()
+        : (htmlLang.indexOf('fa') === 0 || htmlDir === 'rtl');
+
+    if (maneliDigitsHelper && typeof maneliDigitsHelper.ensureDigits === 'function') {
+        return maneliDigitsHelper.ensureDigits(num, shouldUsePersian ? 'fa' : 'en');
+    }
+
+    if (!shouldUsePersian) {
+        return String(num);
+    }
+
+    const persianDigitsFallback = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const englishDigitsFallback = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     return String(num).replace(/\d/g, function(digit) {
-        return persianDigits[englishDigits.indexOf(digit)];
+        return persianDigitsFallback[englishDigitsFallback.indexOf(digit)];
     });
 }
 
@@ -453,6 +469,19 @@ if (typeof maneliInquiryLists === 'undefined') {
     }
 }
 
+const htmlLangAttr = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+const htmlDirAttr = (document.documentElement.getAttribute('dir') || '').toLowerCase();
+const fallbackLocale = htmlLangAttr || (htmlDirAttr === 'rtl' ? 'fa' : (htmlDirAttr === 'ltr' ? 'en' : ''));
+
+if (typeof maneliInquiryLists.locale === 'undefined' && fallbackLocale) {
+    maneliInquiryLists.locale = fallbackLocale;
+}
+
+if (typeof maneliInquiryLists.use_persian_digits === 'undefined') {
+    const localeSource = maneliInquiryLists.locale || fallbackLocale || '';
+    maneliInquiryLists.use_persian_digits = localeSource.toLowerCase().indexOf('fa') === 0;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🟢 TEMPLATE: DOM ready for installment inquiries');
     console.log('Table exists:', document.getElementById('maneli-inquiry-list-tbody') !== null);
@@ -490,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (response && response.success && response.data && response.data.html) {
                                 jQuery('#maneli-inquiry-list-tbody').html(response.data.html);
                                 var rowCount = jQuery('#maneli-inquiry-list-tbody tr.crm-contact').length;
-                                jQuery('#inquiry-count-badge').text(toPersianNumber(rowCount));
+                                jQuery('#inquiry-count-badge').text(formatNumberForLocale(rowCount));
                                 if (response.data.pagination_html) {
                                     jQuery('#inquiry-pagination').html(response.data.pagination_html);
                                 }
