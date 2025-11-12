@@ -3052,11 +3052,19 @@
                 }
 
                 prevButton.addEventListener('click', function() {
-                    goTo(currentIndex - 1);
+                    if (direction === 'rtl') {
+                        goTo(currentIndex + 1);
+                    } else {
+                        goTo(currentIndex - 1);
+                    }
                 });
 
                 nextButton.addEventListener('click', function() {
-                    goTo(currentIndex + 1);
+                    if (direction === 'rtl') {
+                        goTo(currentIndex - 1);
+                    } else {
+                        goTo(currentIndex + 1);
+                    }
                 });
 
                 stage.addEventListener('click', function(event) {
@@ -3137,6 +3145,7 @@
 
                 applyActiveState(cards, currentIndex, direction);
                 updateNavState(currentIndex);
+                container.setAttribute('data-active-index', String(currentIndex));
 
                 mobileQuery.addEventListener('change', function(event) {
                     if (event.matches) {

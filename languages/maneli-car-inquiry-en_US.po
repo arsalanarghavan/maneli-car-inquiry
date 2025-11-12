@@ -244,6 +244,21 @@ msgstr "%s completed"
 msgid "%s total"
 msgstr "%s total"
 
+msgid "Previous status"
+msgstr "Previous status"
+
+msgid "Next status"
+msgstr "Next status"
+
+msgid "Completed Stage"
+msgstr "Completed Stage"
+
+msgid "Upcoming Stage"
+msgstr "Upcoming Stage"
+
+msgid "Final Stage"
+msgstr "Final Stage"
+
 # Inquiry Types
 msgid "Installment Inquiries"
 msgstr "Installment Inquiries"

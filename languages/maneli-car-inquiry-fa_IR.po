@@ -330,6 +330,21 @@ msgstr "%s تکمیل شده"
 msgid "%s total"
 msgstr "%s کل"
 
+msgid "Previous status"
+msgstr "وضعیت قبلی"
+
+msgid "Next status"
+msgstr "وضعیت بعدی"
+
+msgid "Completed Stage"
+msgstr "مرحله تکمیل‌شده"
+
+msgid "Upcoming Stage"
+msgstr "مرحله پیشِ‌رو"
+
+msgid "Final Stage"
+msgstr "مرحله نهایی"
+
 
 # Inquiry Types
 
