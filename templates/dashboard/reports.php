@@ -176,7 +176,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             
                             <!-- Custom Date Range (shown when custom is selected) -->
                             <div class="col-md-2 maneli-initially-hidden" id="custom-date-start" <?php echo $period === 'custom' ? '' : 'style="display: none;"'; ?>>
-                                <label class="form-label">از تاریخ:</label>
+                                <label class="form-label"><?php esc_html_e('From Date:', 'maneli-car-inquiry'); ?></label>
                                 <?php 
                                 // Convert Gregorian to Jalali for display
                                 $start_jalali = '';
@@ -196,7 +196,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 <input type="hidden" name="start_date" id="start-date-filter" value="<?php echo esc_attr($custom_start ?: $start_date); ?>">
                             </div>
                             <div class="col-md-2 maneli-initially-hidden" id="custom-date-end"<?php echo $period === 'custom' ? '' : ' style="display: none;"'; ?>>
-                                <label class="form-label">تا تاریخ:</label>
+                                <label class="form-label"><?php esc_html_e('To Date:', 'maneli-car-inquiry'); ?></label>
                                 <?php 
                                 // Convert Gregorian to Jalali for display
                                 $end_jalali = '';
@@ -236,9 +236,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             
                             <!-- Status Filter -->
                             <div class="col-md-2">
-                                <label class="form-label">وضعیت:</label>
+                                <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
                                 <select name="filter_status" id="status-filter" class="form-select">
-                                    <option value="">همه وضعیت‌ها</option>
+                                    <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
                                     <?php
                                     if (class_exists('Maneli_CPT_Handler')) {
                                         $cash_statuses = Maneli_CPT_Handler::get_all_cash_inquiry_statuses();
@@ -266,9 +266,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             
                             <!-- Product Filter -->
                             <div class="col-md-2">
-                                <label class="form-label">محصول:</label>
+                                <label class="form-label"><?php esc_html_e('Product', 'maneli-car-inquiry'); ?>:</label>
                                 <select name="filter_product" id="product-filter" class="form-select">
-                                    <option value="">همه محصولات</option>
+                                    <option value=""><?php esc_html_e('All Products', 'maneli-car-inquiry'); ?></option>
                                     <?php
                                     $products = get_posts(['post_type' => 'product', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC']);
                                     foreach ($products as $product):
@@ -281,21 +281,23 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         </div>
 
                             <!-- Apply Button -->
+                            <?php
+                            $selected_range_text = '';
+                            if (function_exists('maneli_gregorian_to_jalali')) {
+                                $start_display = maneli_gregorian_to_jalali(date('Y', strtotime($start_date)), date('m', strtotime($start_date)), date('d', strtotime($start_date)), 'Y/m/d');
+                                $end_display = maneli_gregorian_to_jalali(date('Y', strtotime($end_date)), date('m', strtotime($end_date)), date('d', strtotime($end_date)), 'Y/m/d');
+                                $selected_range_text = sprintf(esc_html__('%1$s to %2$s', 'maneli-car-inquiry'), $start_display, $end_display);
+                            } else {
+                                $selected_range_text = sprintf(esc_html__('%1$s to %2$s', 'maneli-car-inquiry'), $start_date, $end_date);
+                            }
+                            ?>
                             <div class="col-md-12">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="la la-filter me-1"></i>اعمال فیلترها
+                                    <i class="la la-filter me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
                                 </button>
                                 <span class="text-muted ms-3">
-                                    بازه انتخاب شده: <strong><?php echo esc_html($period_label); ?></strong>
-                                    (<?php 
-                                    if (function_exists('maneli_gregorian_to_jalali')) {
-                                        $start_jalali = maneli_gregorian_to_jalali(date('Y', strtotime($start_date)), date('m', strtotime($start_date)), date('d', strtotime($start_date)), 'Y/m/d');
-                                        $end_jalali = maneli_gregorian_to_jalali(date('Y', strtotime($end_date)), date('m', strtotime($end_date)), date('d', strtotime($end_date)), 'Y/m/d');
-                                        echo esc_html($start_jalali . ' تا ' . $end_jalali);
-                                    } else {
-                                        echo esc_html($start_date . ' تا ' . $end_date);
-                                    }
-                                    ?>)
+                                    <?php esc_html_e('Selected Range:', 'maneli-car-inquiry'); ?> <strong><?php echo esc_html($period_label); ?></strong>
+                                    (<?php echo esc_html($selected_range_text); ?>)
                                 </span>
                             </div>
                         </form>
@@ -351,7 +353,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1">مجموع استعلام‌ها</p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries']); ?></h4>
                             <?php if (isset($growth_stats['total_inquiries_growth'])): ?>
@@ -591,8 +593,8 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                             </td>
                                             <td>
                                                 <span class="badge bg-info-transparent">
-                                                    کل: <?php echo maneli_number_format_persian($expert['total_customers']); ?><br>
-                                                    جدید: <?php echo maneli_number_format_persian($expert['new_customers']); ?>
+                                                    <?php esc_html_e('Total Customers', 'maneli-car-inquiry'); ?>: <?php echo maneli_number_format_persian($expert['total_customers']); ?><br>
+                                                    <?php esc_html_e('New Customers', 'maneli-car-inquiry'); ?>: <?php echo maneli_number_format_persian($expert['new_customers']); ?>
                                                 </span>
                                             </td>
                                             <td>

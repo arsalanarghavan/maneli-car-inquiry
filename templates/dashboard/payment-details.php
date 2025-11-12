@@ -29,7 +29,7 @@ if (empty($payment_id)) {
                 <div class="col-xl-12">
                     <div class="alert alert-danger alert-dismissible fade show">
                         <i class="la la-exclamation-triangle me-2"></i>
-                        <strong>خطا!</strong> شناسه پرداخت مشخص نشده است.
+                        <strong><?php esc_html_e('Error!', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('Payment ID is not specified.', 'maneli-car-inquiry'); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </div>
@@ -56,7 +56,7 @@ if (!$inquiry) {
                 <div class="col-xl-12">
                     <div class="alert alert-danger alert-dismissible fade show">
                         <i class="la la-exclamation-triangle me-2"></i>
-                        <strong>خطا!</strong> استعلام یافت نشد.
+                        <strong><?php esc_html_e('Error!', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('Inquiry not found.', 'maneli-car-inquiry'); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </div>
@@ -198,9 +198,9 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                         <div class="fw-semibold mb-2"><?php esc_html_e('Payment Amount:', 'maneli-car-inquiry'); ?></div>
                         <div class="fs-15 fw-semibold">
                             <?php if ($payment_amount > 0): ?>
-                                <?php echo persian_numbers(number_format_i18n($payment_amount)); ?> تومان
+                                <?php echo persian_numbers(number_format_i18n($payment_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?>
                             <?php else: ?>
-                                <span class="text-success">رایگان!</span>
+                                <span class="text-success"><?php esc_html_e('Free!', 'maneli-car-inquiry'); ?></span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -216,7 +216,7 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                     <div class="row">
                         <?php if (!empty($tracking_code)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2">کد رهگیری:</div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Tracking Code:', 'maneli-car-inquiry'); ?></div>
                             <div class="text-primary fw-medium">
                                 <?php if ($payment_gateway === 'zarinpal'): ?>
                                     <a href="javascript:void(0);" class="text-primary"><?php echo persian_numbers(esc_html($tracking_code)); ?></a>
@@ -228,7 +228,7 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                         <?php endif; ?>
                         <?php if (!empty($transaction_id)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2">شماره تراکنش:</div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Transaction ID:', 'maneli-car-inquiry'); ?></div>
                             <div class="text-primary fw-medium">
                                 <?php echo persian_numbers(esc_html($transaction_id)); ?>
                             </div>
@@ -236,13 +236,13 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                         <?php endif; ?>
                         <?php if ($payment_gateway === 'zarinpal' && !empty($payment_authority)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2">Authority Code:</div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Authority Code:', 'maneli-car-inquiry'); ?></div>
                             <div class="text-muted"><?php echo esc_html($payment_authority); ?></div>
                         </div>
                         <?php endif; ?>
                         <?php if ($payment_gateway === 'sadad' && !empty($payment_order_id)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2">Order ID:</div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Order ID:', 'maneli-car-inquiry'); ?></div>
                             <div class="text-muted"><?php echo esc_html($payment_order_id); ?></div>
                         </div>
                         <?php endif; ?>
@@ -254,11 +254,11 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                     <h5 class="mb-3"><?php esc_html_e('Inquiry Information', 'maneli-car-inquiry'); ?></h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2">شناسه استعلام:</div>
-                            <div class="text-muted">#<?php echo persian_numbers($payment_id); ?></div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Inquiry ID:', 'maneli-car-inquiry'); ?></div>
+                    <div class="text-muted">#<?php echo persian_numbers($payment_id); ?></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2">خودرو:</div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Car:', 'maneli-car-inquiry'); ?></div>
                             <div class="text-muted">
                                 <?php if ($product): ?>
                                     <?php echo persian_numbers(esc_html($product->get_name())); ?>
@@ -272,15 +272,15 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
             </div>
             <div class="card-footer border-top-0 d-flex align-items-center justify-content-between gap-2">
                 <a href="<?php echo esc_url(home_url('/dashboard/payments')); ?>" class="btn btn-primary-light btn-wave">
-                    <i class="ri-arrow-right-line me-1 align-middle d-inline-block"></i>بازگشت به لیست پرداخت‌ها
+                    <i class="ri-arrow-right-line me-1 align-middle d-inline-block"></i><?php esc_html_e('Back to Payments', 'maneli-car-inquiry'); ?>
                 </a>
                 <?php if ($is_installment): ?>
                     <a href="<?php echo esc_url(home_url('/dashboard/installment-inquiries?view_inquiry=' . $payment_id)); ?>" class="btn btn-primary btn-wave">
-                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i>مشاهده استعلام
+                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i><?php esc_html_e('View Inquiry', 'maneli-car-inquiry'); ?>
                     </a>
                 <?php elseif ($is_cash): ?>
                     <a href="<?php echo esc_url(home_url('/dashboard/cash-inquiries?view_inquiry=' . $payment_id)); ?>" class="btn btn-primary btn-wave">
-                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i>مشاهده استعلام
+                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i><?php esc_html_e('View Inquiry', 'maneli-car-inquiry'); ?>
                     </a>
                 <?php endif; ?>
             </div>
@@ -289,18 +289,18 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
 
     <div class="col-xl-4">
         <div class="card custom-card">
-            <div class="card-header justify-content-between">
+                <div class="card-header justify-content-between">
                 <div class="card-title">
-                    اطلاعات مشتری
+                    <?php esc_html_e('Customer Information', 'maneli-car-inquiry'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <div class="fw-semibold mb-2">نام و نام خانوادگی:</div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Full Name:', 'maneli-car-inquiry'); ?></div>
                     <div class="text-muted"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($user_display_name)) : esc_html($user_display_name); ?></div>
                 </div>
                 <div class="mb-3">
-                    <div class="fw-semibold mb-2">شماره موبایل:</div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Mobile Number:', 'maneli-car-inquiry'); ?></div>
                     <div class="text-muted">
                         <a href="tel:<?php echo esc_attr($user_mobile); ?>" class="text-primary">
                             <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($user_mobile)) : esc_html($user_mobile); ?>
@@ -308,16 +308,16 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                     </div>
                 </div>
                 <div class="mb-3">
-                    <div class="fw-semibold mb-2">شناسه کاربر:</div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('User ID:', 'maneli-car-inquiry'); ?></div>
                     <div class="text-muted">#<?php echo persian_numbers($user_id); ?></div>
                 </div>
             </div>
         </div>
 
         <div class="card custom-card">
-            <div class="card-header justify-content-between">
+                <div class="card-header justify-content-between">
                 <div class="card-title">
-                    خلاصه پرداخت
+                    <?php esc_html_e('Payment Summary', 'maneli-car-inquiry'); ?>
                 </div>
             </div>
             <div class="card-body p-0 table-responsive">
@@ -325,22 +325,22 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                     <tbody>
                         <tr>
                             <td>
-                                <div class="fw-semibold">مبلغ کل:</div>
+                                <div class="fw-semibold"><?php esc_html_e('Total Amount:', 'maneli-car-inquiry'); ?></div>
                             </td>
                             <td>
                                 <?php if ($payment_amount > 0): ?>
-                                    <span class="fs-15 fw-medium"><?php echo persian_numbers(number_format_i18n($payment_amount)); ?> تومان</span>
+                                    <span class="fs-15 fw-medium"><?php echo persian_numbers(number_format_i18n($payment_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
                                 <?php else: ?>
-                                    <span class="text-success">رایگان!</span>
+                                    <span class="text-success"><?php esc_html_e('Free!', 'maneli-car-inquiry'); ?></span>
                                 <?php endif; ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <div class="fw-semibold">وضعیت:</div>
+                                <div class="fw-semibold"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></div>
                             </td>
                             <td>
-                                <span class="badge bg-success-transparent">پرداخت موفق</span>
+                                <span class="badge bg-success-transparent"><?php esc_html_e('Payment Successful', 'maneli-car-inquiry'); ?></span>
                             </td>
                         </tr>
                     </tbody>

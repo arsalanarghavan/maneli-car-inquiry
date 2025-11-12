@@ -2927,7 +2927,6 @@ msgstr "نوع پرداخت"
 msgid "Payment Method"
 msgstr "روش پرداخت"
 
-
 msgid "Amount"
 msgstr "مبلغ"
 
@@ -10120,3 +10119,54 @@ msgstr "هشداری وجود ندارد"
 #: templates/dashboard.php
 msgid "User name"
 msgstr "نام کاربر"
+
+msgid "Payment ID is not specified."
+msgstr "شناسه پرداخت مشخص نشده است."
+
+msgid "Inquiry not found."
+msgstr "استعلام یافت نشد."
+
+msgid "Tracking Code:"
+msgstr "کد رهگیری:"
+
+msgid "Transaction ID:"
+msgstr "شماره تراکنش:"
+
+msgid "Authority Code:"
+msgstr "کد مجوز:"
+
+msgid "Order ID:"
+msgstr "شناسه سفارش:"
+
+msgid "Inquiry ID:"
+msgstr "شناسه استعلام:"
+
+msgid "Back to Payments"
+msgstr "بازگشت به پرداخت‌ها"
+
+msgid "View Inquiry"
+msgstr "مشاهده استعلام"
+
+msgid "Customer Information"
+msgstr "اطلاعات مشتری"
+
+msgid "Full Name:"
+msgstr "نام و نام خانوادگی:"
+
+msgid "Payment Summary"
+msgstr "خلاصه پرداخت"
+
+msgid "Total Amount:"
+msgstr "مبلغ کل:"
+
+msgid "Payment Successful"
+msgstr "پرداخت موفق"
+
+msgid "All Time"
+msgstr "کل زمان"
+
+msgid "Selected Range:"
+msgstr "بازه انتخاب شده:"
+
+msgid "New Customers"
+msgstr "مشتریان جدید"

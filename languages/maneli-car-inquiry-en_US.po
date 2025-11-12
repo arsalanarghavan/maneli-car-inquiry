@@ -9584,3 +9584,54 @@ msgstr "No alerts available"
 #: templates/dashboard.php
 msgid "User name"
 msgstr "User name"
+
+msgid "Payment ID is not specified."
+msgstr "Payment ID is not specified."
+
+msgid "Inquiry not found."
+msgstr "Inquiry not found."
+
+msgid "Tracking Code:"
+msgstr "Tracking Code:"
+
+msgid "Transaction ID:"
+msgstr "Transaction ID:"
+
+msgid "Authority Code:"
+msgstr "Authority Code:"
+
+msgid "Order ID:"
+msgstr "Order ID:"
+
+msgid "Inquiry ID:"
+msgstr "Inquiry ID:"
+
+msgid "Back to Payments"
+msgstr "Back to Payments"
+
+msgid "View Inquiry"
+msgstr "View Inquiry"
+
+msgid "Customer Information"
+msgstr "Customer Information"
+
+msgid "Full Name:"
+msgstr "Full Name:"
+
+msgid "Payment Summary"
+msgstr "Payment Summary"
+
+msgid "Total Amount:"
+msgstr "Total Amount:"
+
+msgid "Payment Successful"
+msgstr "Payment Successful"
+
+msgid "All Time"
+msgstr "All Time"
+
+msgid "Selected Range:"
+msgstr "Selected Range:"
+
+msgid "New Customers"
+msgstr "New Customers"

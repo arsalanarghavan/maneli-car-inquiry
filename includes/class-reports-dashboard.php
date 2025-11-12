@@ -779,21 +779,21 @@ class Maneli_Reports_Dashboard {
                 return [
                     'start_date' => date('Y-m-d', strtotime('-7 days')),
                     'end_date' => $today,
-                    'label' => 'هفته گذشته'
+                    'label' => esc_html__('Last Week', 'maneli-car-inquiry')
                 ];
                 
             case 'monthly':
                 return [
                     'start_date' => date('Y-m-d', strtotime('-30 days')),
                     'end_date' => $today,
-                    'label' => 'ماه گذشته'
+                    'label' => esc_html__('Last Month', 'maneli-car-inquiry')
                 ];
                 
             case 'yearly':
                 return [
                     'start_date' => date('Y-m-d', strtotime('-365 days')),
                     'end_date' => $today,
-                    'label' => 'سال گذشته'
+                    'label' => esc_html__('Last Year', 'maneli-car-inquiry')
                 ];
                 
             case 'all':
@@ -810,28 +810,28 @@ class Maneli_Reports_Dashboard {
                     return [
                         'start_date' => date('Y-m-d', strtotime($first_date)),
                         'end_date' => $today,
-                        'label' => 'کل'
+                        'label' => esc_html__('All Time', 'maneli-car-inquiry')
                     ];
                 }
                 // Fallback
                 return [
                     'start_date' => date('Y-m-d', strtotime('-1 year')),
                     'end_date' => $today,
-                    'label' => 'کل'
+                    'label' => esc_html__('All Time', 'maneli-car-inquiry')
                 ];
                 
             case 'custom':
                 return [
                     'start_date' => $custom_start_date ?: date('Y-m-d', strtotime('-30 days')),
                     'end_date' => $custom_end_date ?: $today,
-                    'label' => 'بازه دلخواه'
+                    'label' => esc_html__('Custom Range', 'maneli-car-inquiry')
                 ];
                 
             default:
                 return [
                     'start_date' => date('Y-m-d', strtotime('-30 days')),
                     'end_date' => $today,
-                    'label' => 'ماه گذشته'
+                    'label' => esc_html__('Last Month', 'maneli-car-inquiry')
                 ];
         }
     }
