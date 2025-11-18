@@ -15,6 +15,15 @@ if (!defined('ABSPATH')) {
 class Maneli_Shortcode_Handler {
 
     public function __construct() {
+        // Check license before loading shortcodes
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // License not active - don't load shortcodes
+                return;
+            }
+        }
+        
         $this->load_shortcode_classes();
         add_action('wp_enqueue_scripts', [$this, 'enqueue_global_assets']);
     }
@@ -99,6 +108,38 @@ class Maneli_Shortcode_Handler {
              // Note: Select2 is not available locally, keep CDN
              wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
              wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+        }
+        
+        // Logging tracker - Load on all frontend pages to track user actions
+        $options = get_option('maneli_inquiry_all_options', []);
+        $enable_user_logging = !empty($options['enable_user_logging']) && $options['enable_user_logging'] == '1';
+        
+        if ($enable_user_logging) {
+            $logging_tracker_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/logging-tracker.js';
+            if (file_exists($logging_tracker_path)) {
+                wp_enqueue_script(
+                    'maneli-logging-tracker',
+                    MANELI_INQUIRY_PLUGIN_URL . 'assets/js/logging-tracker.js',
+                    ['jquery'],
+                    filemtime($logging_tracker_path),
+                    true
+                );
+                
+                wp_localize_script('maneli-logging-tracker', 'maneliAjax', array(
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('maneli_ajax_nonce'),
+                ));
+                
+                wp_localize_script('maneli-logging-tracker', 'maneliLoggingSettings', array(
+                    'enable_logging_system' => !empty($options['enable_logging_system']) && $options['enable_logging_system'] == '1',
+                    'log_console_messages' => !empty($options['log_console_messages']) && $options['log_console_messages'] == '1',
+                    'enable_user_logging' => $enable_user_logging,
+                    'log_button_clicks' => !empty($options['log_button_clicks']) && $options['log_button_clicks'] == '1',
+                    'log_form_submissions' => !empty($options['log_form_submissions']) && $options['log_form_submissions'] == '1',
+                    'log_ajax_calls' => !empty($options['log_ajax_calls']) && $options['log_ajax_calls'] == '1',
+                    'log_page_views' => !empty($options['log_page_views']) && $options['log_page_views'] == '1',
+                ));
+            }
         }
     }
 

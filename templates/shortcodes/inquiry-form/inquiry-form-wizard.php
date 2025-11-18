@@ -48,6 +48,41 @@ if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js')) {
     wp_enqueue_script('form-wizard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/form-wizard.js', ['jquery', 'vanilla-wizard'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js'), true);
 }
 
+// Enqueue CAPTCHA scripts if enabled
+if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+    $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+    $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+    
+    if (!empty($captcha_type) && !empty($site_key)) {
+        Maneli_Captcha_Helper::enqueue_script($captcha_type, $site_key);
+        
+        // Enqueue our CAPTCHA handler script
+        wp_enqueue_script(
+            'maneli-captcha',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/captcha.js',
+            ['jquery'],
+            file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') ? filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') : '1.0.0',
+            true
+        );
+        
+        // Localize script with CAPTCHA config and error messages
+        wp_localize_script('maneli-captcha', 'maneliCaptchaConfig', [
+            'enabled' => true,
+            'type' => $captcha_type,
+            'siteKey' => $site_key,
+            'strings' => [
+                'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'maneli-car-inquiry'),
+                'error_title' => esc_html__('Verification Failed', 'maneli-car-inquiry'),
+                'try_again' => esc_html__('Try Again', 'maneli-car-inquiry'),
+                'loading' => esc_html__('Verifying...', 'maneli-car-inquiry'),
+                'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'maneli-car-inquiry'),
+                'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'maneli-car-inquiry'),
+                'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'maneli-car-inquiry')
+            ]
+        ]);
+    }
+}
+
 // Enqueue SweetAlert2 for confirmation dialogs
 if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js')) {
     wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
@@ -264,6 +299,22 @@ if (is_user_logged_in()) {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- CAPTCHA Widget (for v2 and hCaptcha, before finish button) -->
+                    <?php if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()): 
+                        $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+                        $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+                        if (!empty($captcha_type) && !empty($site_key)):
+                            if ($captcha_type === 'recaptcha_v2' || $captcha_type === 'hcaptcha'): ?>
+                                <div class="wizard-captcha-container d-flex justify-content-center p-3" style="display: none !important;" data-show-on-finish="true">
+                                    <?php echo Maneli_Captcha_Helper::render_widget($captcha_type, $site_key, 'maneli-captcha-widget-inquiry'); ?>
+                                </div>
+                            <?php elseif ($captcha_type === 'recaptcha_v3'): ?>
+                                <!-- reCAPTCHA v3 badge will be automatically displayed by Google -->
+                                <div class="maneli-recaptcha-v3-badge" style="display:none;"></div>
+                            <?php endif;
+                        endif;
+                    endif; ?>
                     
                     <!-- Wizard Navigation Buttons -->
                     <div class="wizard-buttons d-flex justify-content-end gap-2 p-3">

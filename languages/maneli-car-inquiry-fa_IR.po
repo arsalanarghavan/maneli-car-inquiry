@@ -2238,8 +2238,6 @@ msgid "I agree, I choose this car."
 msgstr "موافقم، این خودرو را انتخاب می‌کنم."
 
 
-msgid "Previous"
-msgstr "قبلی"
 
 
 msgid "Next"
@@ -5007,6 +5005,9 @@ msgstr "مک‌اواس"
 msgid "Linux"
 msgstr "لینوکس"
 
+msgid "GNU/Linux"
+msgstr "گنو/لینوکس"
+
 msgid "Android"
 msgstr "اندروید"
 
@@ -7215,6 +7216,9 @@ msgstr "ایمیل با موفقیت مجدداً ارسال شد!"
 msgid "Telegram retried successfully!"
 msgstr "تلگرام با موفقیت مجدداً ارسال شد!"
 
+msgid "Retry"
+msgstr "تلاش مجدد"
+
 msgid "Retry sending this SMS?"
 msgstr "آیا می‌خواهید این پیامک را مجدداً ارسال کنید؟"
 
@@ -7532,6 +7536,9 @@ msgstr "فعال‌ترین بازدیدکنندگان"
 
 msgid "Recent Visitors"
 msgstr "بازدیدکنندگان اخیر"
+
+msgid "Online Visitors"
+msgstr "بازدیدکنندگان آنلاین"
 
 msgid "Online Visitors (Last 15 Minutes)"
 msgstr "بازدیدکنندگان آنلاین (۱۵ دقیقه گذشته)"
@@ -11197,3 +11204,329 @@ msgstr "زیمبابوه"
 msgctxt "country name"
 msgid "Kosovo"
 msgstr "کوزوو"
+
+# CAPTCHA Settings
+msgid "CAPTCHA & Security"
+msgstr "کپچا و امنیت"
+
+msgid "CAPTCHA Settings"
+msgstr "تنظیمات کپچا"
+
+msgid "Enable CAPTCHA"
+msgstr "فعال‌سازی کپچا"
+
+msgid "Enable CAPTCHA protection for public forms (inquiry forms, login)."
+msgstr "فعال‌سازی حفاظت کپچا برای فرم‌های عمومی (فرم‌های استعلام، ورود)."
+
+msgid "CAPTCHA Type"
+msgstr "نوع کپچا"
+
+msgid "Google reCAPTCHA v2"
+msgstr "Google reCAPTCHA v2"
+
+msgid "Google reCAPTCHA v3"
+msgstr "Google reCAPTCHA v3"
+
+msgid "hCaptcha"
+msgstr "hCaptcha"
+
+msgid "Select the CAPTCHA service to use. reCAPTCHA v3 works invisibly, v2 shows a checkbox challenge, hCaptcha is privacy-focused."
+msgstr "سرویس کپچا را انتخاب کنید. reCAPTCHA v3 به صورت نامرئی کار می‌کند، v2 چالش checkbox نمایش می‌دهد، hCaptcha بر حریم خصوصی متمرکز است."
+
+msgid "Google reCAPTCHA v2 Configuration"
+msgstr "پیکربندی Google reCAPTCHA v2"
+
+msgid "Get your keys from https://www.google.com/recaptcha/admin"
+msgstr "کلیدهای خود را از https://www.google.com/recaptcha/admin دریافت کنید"
+
+msgid "Site Key (reCAPTCHA v2)"
+msgstr "کلید سایت (reCAPTCHA v2)"
+
+msgid "Your reCAPTCHA v2 site key."
+msgstr "کلید سایت reCAPTCHA v2 شما."
+
+msgid "Secret Key (reCAPTCHA v2)"
+msgstr "کلید مخفی (reCAPTCHA v2)"
+
+msgid "Your reCAPTCHA v2 secret key (will be encrypted)."
+msgstr "کلید مخفی reCAPTCHA v2 شما (رمزنگاری خواهد شد)."
+
+msgid "Google reCAPTCHA v3 Configuration"
+msgstr "پیکربندی Google reCAPTCHA v3"
+
+msgid "Site Key (reCAPTCHA v3)"
+msgstr "کلید سایت (reCAPTCHA v3)"
+
+msgid "Your reCAPTCHA v3 site key."
+msgstr "کلید سایت reCAPTCHA v3 شما."
+
+msgid "Secret Key (reCAPTCHA v3)"
+msgstr "کلید مخفی (reCAPTCHA v3)"
+
+msgid "Your reCAPTCHA v3 secret key (will be encrypted)."
+msgstr "کلید مخفی reCAPTCHA v3 شما (رمزنگاری خواهد شد)."
+
+msgid "Score Threshold (reCAPTCHA v3)"
+msgstr "آستانه نمره (reCAPTCHA v3)"
+
+msgid "Minimum score required (0.0 to 1.0). Higher values are more strict. Recommended: 0.5"
+msgstr "حداقل نمره مورد نیاز (0.0 تا 1.0). مقادیر بالاتر سخت‌گیرانه‌تر است. توصیه شده: 0.5"
+
+msgid "hCaptcha Configuration"
+msgstr "پیکربندی hCaptcha"
+
+msgid "Get your keys from https://www.hcaptcha.com/"
+msgstr "کلیدهای خود را از https://www.hcaptcha.com/ دریافت کنید"
+
+msgid "Site Key (hCaptcha)"
+msgstr "کلید سایت (hCaptcha)"
+
+msgid "Your hCaptcha site key."
+msgstr "کلید سایت hCaptcha شما."
+
+msgid "Secret Key (hCaptcha)"
+msgstr "کلید مخفی (hCaptcha)"
+
+msgid "Your hCaptcha secret key (will be encrypted)."
+msgstr "کلید مخفی hCaptcha شما (رمزنگاری خواهد شد)."
+
+msgid "CAPTCHA token is missing."
+msgstr "توکن کپچا موجود نیست."
+
+msgid "CAPTCHA type is not configured."
+msgstr "نوع کپچا تنظیم نشده است."
+
+msgid "CAPTCHA secret key is not configured."
+msgstr "کلید مخفی کپچا تنظیم نشده است."
+
+msgid "Invalid CAPTCHA type."
+msgstr "نوع کپچا نامعتبر است."
+
+msgid "Failed to verify reCAPTCHA. Please try again."
+msgstr "تایید reCAPTCHA ناموفق بود. لطفا دوباره تلاش کنید."
+
+msgid "Invalid response from reCAPTCHA service."
+msgstr "پاسخ نامعتبر از سرویس reCAPTCHA."
+
+msgid "reCAPTCHA verification failed."
+msgstr "تایید reCAPTCHA ناموفق بود."
+
+msgid "reCAPTCHA token expired or already used. Please refresh and try again."
+msgstr "توکن reCAPTCHA منقضی شده یا قبلا استفاده شده است. لطفا صفحه را رفرش کنید و دوباره تلاش کنید."
+
+msgid "reCAPTCHA configuration error. Please contact the administrator."
+msgstr "خطای پیکربندی reCAPTCHA. لطفا با مدیر تماس بگیرید."
+
+msgid "reCAPTCHA verification failed. Your request appears to be suspicious."
+msgstr "تایید reCAPTCHA ناموفق بود. درخواست شما مشکوک به نظر می‌رسد."
+
+msgid "CAPTCHA verified successfully."
+msgstr "کپچا با موفقیت تایید شد."
+
+msgid "Failed to verify hCaptcha. Please try again."
+msgstr "تایید hCaptcha ناموفق بود. لطفا دوباره تلاش کنید."
+
+msgid "Invalid response from hCaptcha service."
+msgstr "پاسخ نامعتبر از سرویس hCaptcha."
+
+msgid "hCaptcha verification failed."
+msgstr "تایید hCaptcha ناموفق بود."
+
+msgid "hCaptcha configuration error. Please contact the administrator."
+msgstr "خطای پیکربندی hCaptcha. لطفا با مدیر تماس بگیرید."
+
+msgid "CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again."
+msgstr "تایید CAPTCHA ناموفق بود. لطفاً چالش CAPTCHA را کامل کنید و دوباره تلاش کنید."
+
+msgid "Verification Failed"
+msgstr "تایید ناموفق بود"
+
+msgid "Try Again"
+msgstr "تلاش مجدد"
+
+msgid "Network error occurred. Please check your internet connection and try again."
+msgstr "خطای شبکه رخ داد. لطفاً اتصال اینترنت خود را بررسی کنید و دوباره تلاش کنید."
+
+msgid "CAPTCHA script could not be loaded. Please refresh the page and try again."
+msgstr "اسکریپت CAPTCHA بارگذاری نشد. لطفاً صفحه را رفرش کنید و دوباره تلاش کنید."
+
+msgid "CAPTCHA token has expired. Please complete the challenge again."
+msgstr "توکن CAPTCHA منقضی شده است. لطفاً چالش را دوباره کامل کنید."
+
+# License Management Strings
+msgid "License Activation"
+msgstr "فعال‌سازی لایسنس"
+
+msgid "License is active"
+msgstr "لایسنس فعال است"
+
+msgid "License is inactive"
+msgstr "لایسنس غیرفعال است"
+
+msgid "Expiry date:"
+msgstr "تاریخ انقضا:"
+
+msgid "Activate License"
+msgstr "فعال‌سازی لایسنس"
+
+msgid "Check License"
+msgstr "بررسی لایسنس"
+
+msgid "License Information"
+msgstr "اطلاعات لایسنس"
+
+msgid "Expiry Date:"
+msgstr "تاریخ انقضا:"
+
+msgid "Current Domain:"
+msgstr "دامنه فعلی:"
+
+msgid "Mode:"
+msgstr "حالت:"
+
+msgid "Demo"
+msgstr "دمو"
+
+msgid "Activating..."
+msgstr "در حال فعال‌سازی..."
+
+msgid "Deactivating..."
+msgstr "در حال غیرفعال‌سازی..."
+
+msgid "Error activating license"
+msgstr "خطا در فعال‌سازی لایسنس"
+
+msgid "License is not valid"
+msgstr "لایسنس معتبر نیست"
+
+msgid "Are you sure you want to deactivate the license?"
+msgstr "آیا از غیرفعال‌سازی لایسنس مطمئن هستید؟"
+
+msgid "Error deactivating license"
+msgstr "خطا در غیرفعال‌سازی لایسنس"
+
+msgid "License activated successfully"
+msgstr "لایسنس با موفقیت فعال شد"
+
+msgid "License deactivated successfully"
+msgstr "لایسنس با موفقیت غیرفعال شد"
+
+msgid "Domain not found"
+msgstr "دامنه یافت نشد"
+
+msgid "Error connecting to license server. Please try again."
+msgstr "خطا در اتصال به سرور لایسنس. لطفاً دوباره تلاش کنید."
+
+msgid "The license is automatically checked based on the current domain. Click the \"Activate License\" button."
+msgstr "لایسنس به صورت خودکار بر اساس دامنه فعلی بررسی می‌شود. روی دکمه \"فعال‌سازی لایسنس\" کلیک کنید."
+
+msgid "The license is automatically activated based on the current domain."
+msgstr "لایسنس به صورت خودکار بر اساس دامنه فعلی فعال می‌شود."
+
+msgid "Current domain:"
+msgstr "دامنه فعلی:"
+
+msgid "Please activate your license to use all plugin features."
+msgstr "لطفاً لایسنس خود را فعال کنید تا از تمام امکانات پلاگین استفاده کنید."
+
+msgid "Every 12 hours"
+msgstr "هر 12 ساعت"
+
+msgid "Last 7 Days"
+msgstr "۷ روز اخیر"
+
+msgid "Last 30 Days"
+msgstr "۳۰ روز اخیر"
+
+msgid "Last 90 Days"
+msgstr "۹۰ روز اخیر"
+
+msgid "This Year (January to Today)"
+msgstr "امسال (ژانویه تا امروز)"
+
+msgid "Visitors"
+msgstr "بازدیدکنندگان"
+
+msgid "This Month"
+msgstr "این ماه"
+
+msgid "Traffic Trend Report"
+msgstr "گزارش روند ترافیک"
+
+msgid "Current Period"
+msgstr "دوره فعلی"
+
+
+msgid "Daily Breakdown of Visits and Page Views Chart for Selected Period"
+msgstr "تفکیک روزانه بازدیدها و نمودار بازدید صفحات در دوره انتخاب شده"
+
+msgid "View Browser Usage"
+msgstr "مشاهده استفاده از مرورگر"
+
+msgid "Others"
+msgstr "دیگر"
+
+msgid "(Not Set)"
+msgstr "(تنظیم نشده)"
+
+msgid "Operating System"
+msgstr "سیستم عامل"
+
+msgid "Device Type"
+msgstr "نوع دستگاه"
+
+msgid "Smartphone"
+msgstr "گوشی هوشمند"
+
+msgid "Phablet"
+msgstr "فبلت"
+
+msgid "View Content"
+msgstr "مشاهده محتوا"
+
+msgid "Home Page"
+msgstr "صفحه اصلی"
+
+msgid "Visitor Information"
+msgstr "اطلاعات بازدیدکننده"
+
+msgid "Entry Page"
+msgstr "صفحه ورودی"
+
+msgid "Exit Page"
+msgstr "صفحه خروج"
+
+msgid "Last Visit"
+msgstr "آخرین بازدید"
+
+msgid "Direct Traffic"
+msgstr "ترافیک مستقیم"
+
+msgid "Organic Search"
+msgstr "جستجوی ارگانیک"
+
+msgid "Organic Social Networks"
+msgstr "شبکه‌های اجتماعی ارگانیک"
+
+msgid "Last Page"
+msgstr "آخرین صفحه"
+
+msgid "Global Visitor Distribution"
+msgstr "توزیع جهانی بازدیدکنندگان"
+
+msgid "Selected Period (%d Days)"
+msgstr "دوره انتخاب شده (%d روز)"
+
+msgid "Last %d Days"
+msgstr "%d روز اخیر"
+
+
+
+msgid "Previous Period"
+msgstr "دوره قبلی"
+
+msgid "Previous"
+msgstr "قبلی"
+
+msgid "Summary"
+msgstr "خلاصه کلی"

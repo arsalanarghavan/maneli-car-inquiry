@@ -15,19 +15,19 @@ if (!function_exists('persian_numbers')) {
     }
 }
 
-// Permission check
+// Permission check - must have capability to view user details
 if (!current_user_can('manage_maneli_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
 
-// Get user ID from query vars or GET parameters
-$view_user_id = isset($_GET['view_user']) ? intval($_GET['view_user']) : (get_query_var('view_user') ? intval(get_query_var('view_user')) : 0);
-$edit_user_id = isset($_GET['edit_user']) ? intval($_GET['edit_user']) : (get_query_var('edit_user') ? intval(get_query_var('edit_user')) : 0);
+// Get user ID from query vars or GET parameters - sanitize to prevent IDOR
+$view_user_id = isset($_GET['view_user']) ? absint($_GET['view_user']) : (get_query_var('view_user') ? absint(get_query_var('view_user')) : 0);
+$edit_user_id = isset($_GET['edit_user']) ? absint($_GET['edit_user']) : (get_query_var('edit_user') ? absint(get_query_var('edit_user')) : 0);
 $user_id = $view_user_id ?: $edit_user_id;
 $is_edit_mode = $edit_user_id > 0;
 
-if (!$user_id) {
+if (!$user_id || $user_id <= 0) {
     ?>
     <div class="row">
         <div class="col-xl-12">
@@ -41,6 +41,7 @@ if (!$user_id) {
     return;
 }
 
+// Additional authorization check: Verify user exists and current user has permission to view
 $user = get_userdata($user_id);
 if (!$user) {
     ?>
@@ -54,6 +55,13 @@ if (!$user) {
     </div>
     <?php
     return;
+}
+
+// Additional security: Users can only view their own profile unless they have manage_maneli_inquiries capability
+// (This is already enforced by the capability check above, but adding explicit check for clarity)
+if (!current_user_can('manage_maneli_inquiries') && get_current_user_id() !== $user_id) {
+    wp_redirect(home_url('/dashboard'));
+    exit;
 }
 
 // Get user meta data

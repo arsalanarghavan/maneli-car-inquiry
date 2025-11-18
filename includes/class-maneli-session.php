@@ -16,6 +16,21 @@ class Maneli_Session {
      */
     public function start_session() {
         if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+            // Configure secure session cookie parameters
+            $is_https = is_ssl() || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
+            $secure = $is_https; // Only send cookies over HTTPS if available
+            $httponly = true; // Prevent JavaScript access to cookies
+            $samesite = 'Lax'; // CSRF protection
+            
+            session_set_cookie_params([
+                'lifetime' => 0, // Session cookie (expires when browser closes)
+                'path' => '/',
+                'domain' => '',
+                'secure' => $secure,
+                'httponly' => $httponly,
+                'samesite' => $samesite
+            ]);
+            
             session_start();
         }
     }
@@ -64,6 +79,11 @@ class Maneli_Session {
         $this->set('login_time', time());
         foreach ($data as $key => $value) {
             $this->set($key, $value);
+        }
+        
+        // Regenerate session ID to prevent session fixation attacks
+        if (function_exists('session_regenerate_id')) {
+            session_regenerate_id(true);
         }
     }
 

@@ -47,6 +47,8 @@ final class Maneli_Car_Inquiry_Plugin {
         // Translations should be loaded at init action or later
         add_action('init', [$this, 'load_plugin_textdomain'], 1);
         add_action('plugins_loaded', [$this, 'initialize'], 5);
+        // Add security headers for plugin pages
+        add_action('send_headers', [$this, 'add_security_headers'], 1);
     }
 
     /**
@@ -82,8 +84,10 @@ final class Maneli_Car_Inquiry_Plugin {
     private function includes() {
         // Core Functionality & Helpers
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-encryption-helper.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-captcha-helper.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-activator.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-roles-caps.php';
@@ -122,6 +126,9 @@ final class Maneli_Car_Inquiry_Plugin {
         // Logger
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-logger.php';
         
+        // License Management
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-license.php';
+        
         // Frontend Features
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
@@ -132,6 +139,15 @@ final class Maneli_Car_Inquiry_Plugin {
      * Initializes all the necessary classes by creating instances of them.
      */
     private function init_classes() {
+        // Initialize License first to check status
+        $license = Maneli_License::instance();
+        
+        // Check license before initializing other classes
+        if (!$license->is_license_active() && !$license->is_demo_mode()) {
+            // License is not active and not in demo mode
+            // Still initialize classes but they will check license in their methods
+        }
+        
         new Maneli_Roles_Caps();
         new Maneli_Hooks();
         new Maneli_CPT_Handler();
@@ -186,6 +202,68 @@ final class Maneli_Car_Inquiry_Plugin {
             </p>
         </div>
         <?php
+    }
+
+    /**
+     * Add security headers to HTTP responses for plugin pages.
+     * These headers help protect against XSS, clickjacking, and other attacks.
+     */
+    public function add_security_headers() {
+        // Only add headers for plugin-related pages
+        $is_plugin_page = false;
+        
+        // Check if it's a dashboard page
+        $dashboard_page = get_query_var('maneli_dashboard_page');
+        if (!empty($dashboard_page)) {
+            $is_plugin_page = true;
+        }
+        
+        // Check if it's a shortcode page (you can extend this check based on your needs)
+        global $post;
+        if ($post && has_shortcode($post->post_content, 'maneli_')) {
+            $is_plugin_page = true;
+        }
+        
+        // Check if it's a login/create-password page
+        $request_uri = isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+        if (strpos($request_uri, '/login') !== false || strpos($request_uri, '/create-password') !== false || strpos($request_uri, '/verify-otp') !== false) {
+            $is_plugin_page = true;
+        }
+        
+        if (!$is_plugin_page) {
+            return;
+        }
+        
+        // Prevent headers from being sent twice
+        if (headers_sent()) {
+            return;
+        }
+        
+        // X-Frame-Options: Prevent clickjacking attacks
+        header('X-Frame-Options: SAMEORIGIN', true);
+        
+        // X-Content-Type-Options: Prevent MIME type sniffing
+        header('X-Content-Type-Options: nosniff', true);
+        
+        // X-XSS-Protection: Enable browser XSS filter (legacy support)
+        header('X-XSS-Protection: 1; mode=block', true);
+        
+        // Referrer-Policy: Control referrer information
+        header('Referrer-Policy: strict-origin-when-cross-origin', true);
+        
+        // Content-Security-Policy: Restrict resources (adjust based on your needs)
+        // This is a basic CSP - you may need to customize it based on your assets
+        $csp = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://code.jquery.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'self';";
+        
+        // Allow filtering of CSP header
+        $csp = apply_filters('maneli_security_csp_policy', $csp);
+        
+        header("Content-Security-Policy: {$csp}", true);
+        
+        // Permissions-Policy: Control browser features
+        $permissions_policy = "geolocation=(), microphone=(), camera=()";
+        $permissions_policy = apply_filters('maneli_security_permissions_policy', $permissions_policy);
+        header("Permissions-Policy: {$permissions_policy}", true);
     }
 
     /**

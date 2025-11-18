@@ -371,6 +371,41 @@ class Maneli_Dashboard_Handler {
             // maneli_enqueue_persian_datepicker() handles Persian datepicker assets when needed.
             // Real-time notifications
             wp_enqueue_script('maneli-notifications', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/notifications.js', ['jquery'], '1.0.0', true);
+            
+            // Enqueue CAPTCHA scripts if enabled
+            if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+                $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+                $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+                
+                if (!empty($captcha_type) && !empty($site_key)) {
+                    Maneli_Captcha_Helper::enqueue_script($captcha_type, $site_key);
+                    
+                    // Enqueue our CAPTCHA handler script
+                    wp_enqueue_script(
+                        'maneli-captcha',
+                        MANELI_INQUIRY_PLUGIN_URL . 'assets/js/captcha.js',
+                        ['jquery'],
+                        filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js'),
+                        true
+                    );
+                    
+                // Localize script with CAPTCHA config and error messages
+                wp_localize_script('maneli-captcha', 'maneliCaptchaConfig', [
+                    'enabled' => true,
+                    'type' => $captcha_type,
+                    'siteKey' => $site_key,
+                    'strings' => [
+                        'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'maneli-car-inquiry'),
+                        'error_title' => esc_html__('Verification Failed', 'maneli-car-inquiry'),
+                        'try_again' => esc_html__('Try Again', 'maneli-car-inquiry'),
+                        'loading' => esc_html__('Verifying...', 'maneli-car-inquiry'),
+                        'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'maneli-car-inquiry'),
+                        'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'maneli-car-inquiry'),
+                        'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'maneli-car-inquiry')
+                    ]
+                ]);
+                }
+            }
             // Localize script for notifications
             wp_localize_script('maneli-notifications', 'maneli_ajax', array(
                 'url' => admin_url('admin-ajax.php'),
@@ -542,6 +577,13 @@ class Maneli_Dashboard_Handler {
                         $preferred_locale_slug = 'en';
                     }
 
+                    // Get previous period daily stats
+                    $days_diff = (strtotime($end_date) - strtotime($start_date)) / (60 * 60 * 24);
+                    $prev_start_date = date('Y-m-d', strtotime($start_date . ' -' . ($days_diff + 1) . ' days'));
+                    $prev_end_date = date('Y-m-d', strtotime($start_date . ' -1 day'));
+                    $prev_daily_stats = Maneli_Visitor_Statistics::get_daily_visits($prev_start_date, $prev_end_date);
+                    $prev_stats = Maneli_Visitor_Statistics::get_overall_stats($prev_start_date, $prev_end_date);
+                    
                     if ($preferred_locale_slug === 'fa' && function_exists('maneli_gregorian_to_jalali')) {
                         foreach ($daily_stats as &$stat) {
                             if (isset($stat->date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
@@ -550,6 +592,14 @@ class Maneli_Dashboard_Handler {
                             }
                         }
                         unset($stat);
+                        
+                        foreach ($prev_daily_stats as &$prev_stat) {
+                            if (isset($prev_stat->date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $prev_stat->date)) {
+                                $date_parts = explode('-', $prev_stat->date);
+                                $prev_stat->date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
+                            }
+                        }
+                        unset($prev_stat);
                     }
                     
                     wp_localize_script('maneli-visitor-statistics-dashboard', 'maneliVisitorStats', [
@@ -558,6 +608,8 @@ class Maneli_Dashboard_Handler {
                         'startDate' => $start_date,
                         'endDate' => $end_date,
                         'dailyStats' => $daily_stats,
+                        'prevDailyStats' => $prev_daily_stats,
+                        'prevStats' => $prev_stats,
                         'locale' => $preferred_locale_slug,
                         'wpLocale' => $wp_locale,
                         'usePersianDigits' => ($preferred_locale_slug === 'fa'),
@@ -584,6 +636,8 @@ class Maneli_Dashboard_Handler {
                             'unitMinute' => esc_html__('minute', 'maneli-car-inquiry'),
                             'unitHour' => esc_html__('hour', 'maneli-car-inquiry'),
                             'unitDay' => esc_html__('day', 'maneli-car-inquiry'),
+                            'previousPeriod' => esc_html__('Previous Period', 'maneli-car-inquiry'),
+                            'previous' => esc_html__('Previous', 'maneli-car-inquiry'),
                         ]
                     ]);
                 }
@@ -1264,6 +1318,20 @@ class Maneli_Dashboard_Handler {
             exit;
         }
         
+        // Check license status - if not active and not demo, only allow license activation page
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // Check if current page is license activation
+                $get_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';
+                if ($get_page !== 'license-activation' && $page !== 'license-activation') {
+                    // Redirect to license activation page
+                    wp_redirect(home_url('/dashboard?page=license-activation'));
+                    exit;
+                }
+            }
+        }
+        
         // User is logged in - verify user data is valid
         $temp_user_check = $this->get_current_user();
         
@@ -1750,6 +1818,21 @@ class Maneli_Dashboard_Handler {
             return [];
         }
         
+        // Check license status - if not active and not demo, return only license activation menu
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // Only show license activation menu
+                return [
+                    [
+                        'title' => esc_html__('License Activation', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard?page=license-activation'),
+                        'icon' => 'ri-key-line'
+                    ]
+                ];
+            }
+        }
+        
         // Try to get WordPress user first (if WordPress login exists)
         $wp_user = null;
         if (is_user_logged_in()) {
@@ -2096,6 +2179,18 @@ class Maneli_Dashboard_Handler {
                 'icon' => 'ri-settings-3-line',
                 'capability' => 'manage_maneli_inquiries'
             ];
+            // Only show License Activation menu if license is not active
+            if (class_exists('Maneli_License')) {
+                $license = Maneli_License::instance();
+                if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                    $menu_items[] = [
+                        'title' => esc_html__('License Activation', 'maneli-car-inquiry'),
+                        'url' => home_url('/dashboard?page=license-activation'),
+                        'icon' => 'ri-key-line',
+                        'capability' => 'manage_maneli_inquiries'
+                    ];
+                }
+            }
             $menu_items[] = [
                 'title' => esc_html__('Logout', 'maneli-car-inquiry'),
                 'url' => home_url('/logout'),
@@ -2147,6 +2242,27 @@ class Maneli_Dashboard_Handler {
         $phone = sanitize_text_field($_POST['phone'] ?? '');
         $password = sanitize_text_field($_POST['password'] ?? '');
         $sms_code = sanitize_text_field($_POST['sms_code'] ?? '');
+        
+        // Verify CAPTCHA if enabled (only for public access, not for logged-in users)
+        if (!is_user_logged_in() && class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+            $captcha_token = '';
+            $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+            
+            // Get token based on CAPTCHA type
+            if ($captcha_type === 'hcaptcha') {
+                $captcha_token = isset($_POST['h-captcha-response']) ? sanitize_text_field($_POST['h-captcha-response']) : '';
+            } elseif ($captcha_type === 'recaptcha_v2') {
+                $captcha_token = isset($_POST['g-recaptcha-response']) ? sanitize_text_field($_POST['g-recaptcha-response']) : '';
+            } elseif ($captcha_type === 'recaptcha_v3') {
+                $captcha_token = isset($_POST['captcha_token']) ? sanitize_text_field($_POST['captcha_token']) : '';
+            }
+            
+            $captcha_result = Maneli_Captcha_Helper::verify_token($captcha_token, $captcha_type);
+            if (!$captcha_result['success']) {
+                wp_send_json_error(['message' => $captcha_result['message']]);
+                return;
+            }
+        }
         
         // Get client IP for rate limiting
         $client_ip = $this->get_client_ip();
@@ -2775,7 +2891,7 @@ class Maneli_Dashboard_Handler {
         // Get phone from session (secure)
         $this->maybe_start_session();
         $phone = isset($_SESSION['maneli_create_password_phone']) ? sanitize_text_field($_SESSION['maneli_create_password_phone']) : '';
-        $password = $_POST['password'] ?? '';
+        $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         
         // Check if phone exists in session
         if (empty($phone)) {
@@ -2846,7 +2962,7 @@ class Maneli_Dashboard_Handler {
         check_ajax_referer('maneli-ajax-nonce', 'nonce');
         
         $phone = sanitize_text_field($_POST['phone'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         
         if (empty($phone) || empty($password)) {
             wp_send_json_error(['message' => esc_html__('Phone number and password are required.', 'maneli-car-inquiry')]);

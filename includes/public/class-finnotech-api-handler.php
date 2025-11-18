@@ -14,41 +14,14 @@ if (!defined('ABSPATH')) {
 class Maneli_Finnotech_API_Handler {
 
     /**
-     * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
-     * @return string The encryption key.
-     */
-    private function get_encryption_key() {
-        $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
-        return hash('sha256', $key, true); 
-    }
-
-    /**
      * Decrypts data using AES-256-CBC.
+     * Wrapper method for backward compatibility - uses Maneli_Encryption_Helper.
+     * 
      * @param string $encrypted_data The encrypted data (Base64 encoded).
      * @return string The decrypted data or empty string on failure.
      */
     private function decrypt_data($encrypted_data) {
-        if (empty($encrypted_data)) {
-            return '';
-        }
-        $key = $this->get_encryption_key();
-        $cipher = 'aes-256-cbc';
-        
-        $parts = explode('::', base64_decode($encrypted_data), 2);
-        
-        if (count($parts) !== 2) {
-            return '';
-        }
-        $encrypted = $parts[0];
-        $iv = $parts[1];
-        
-        if (strlen($iv) !== openssl_cipher_iv_length($cipher)) {
-            return '';
-        }
-
-        $decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
-        
-        return $decrypted === false ? '' : $decrypted;
+        return Maneli_Encryption_Helper::decrypt($encrypted_data);
     }
 
     /**
@@ -71,7 +44,69 @@ class Maneli_Finnotech_API_Handler {
     }
 
     /**
-     * Makes a generic API request to Finnotech.
+     * Makes an API request with retry logic for network failures.
+     * 
+     * @param string $url The API URL
+     * @param array $request_args Request arguments for wp_remote_request
+     * @param int $max_retries Maximum number of retry attempts (default: 3)
+     * @return WP_Error|array Response from wp_remote_request or WP_Error
+     */
+    private function make_request_with_retry($url, $request_args, $max_retries = 3) {
+        $attempt = 0;
+        $last_error = null;
+        
+        while ($attempt < $max_retries) {
+            $attempt++;
+            
+            $response = wp_remote_request($url, $request_args);
+            
+            // If successful (not WP_Error and status 200-299), return immediately
+            if (!is_wp_error($response)) {
+                $response_code = wp_remote_retrieve_response_code($response);
+                // Success status codes (200-299) - don't retry
+                if ($response_code >= 200 && $response_code < 300) {
+                    return $response;
+                }
+                // 4xx errors (client errors) - don't retry
+                if ($response_code >= 400 && $response_code < 500) {
+                    return $response;
+                }
+                // 5xx errors (server errors) - retry
+                if ($response_code >= 500 && $response_code < 600) {
+                    $last_error = new WP_Error(
+                        'http_error',
+                        sprintf('HTTP %d error from server (attempt %d/%d)', $response_code, $attempt, $max_retries)
+                    );
+                    
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log('Maneli Finnotech API: Retrying after ' . $response_code . ' error. Attempt ' . $attempt . '/' . $max_retries);
+                    }
+                } else {
+                    // Other status codes - don't retry
+                    return $response;
+                }
+            } else {
+                // Network error - retry
+                $last_error = $response;
+                
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Finnotech API: Network error: ' . $response->get_error_message() . ' (attempt ' . $attempt . '/' . $max_retries . ')');
+                }
+            }
+            
+            // Wait before retry (exponential backoff: 2s, 4s, 8s)
+            if ($attempt < $max_retries) {
+                $wait_time = pow(2, $attempt); // 2, 4, 8 seconds
+                sleep($wait_time);
+            }
+        }
+        
+        // All retries exhausted - return last error or response
+        return $last_error ? $last_error : $response;
+    }
+
+    /**
+     * Makes a generic API request to Finnotech with retry logic.
      * @param string $url The API URL (with %s placeholders for client_id and user_id if needed)
      * @param array $params Query parameters
      * @param string $api_key The API key
@@ -106,7 +141,8 @@ class Maneli_Finnotech_API_Handler {
             $request_args['method'] = 'POST';
         }
 
-        $response = wp_remote_request($url, $request_args);
+        // Use retry logic
+        $response = $this->make_request_with_retry($url, $request_args, 3);
 
         if (is_wp_error($response)) {
             $result['raw_response'] = 'WordPress Connection Error: ' . $response->get_error_message();

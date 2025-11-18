@@ -25,6 +25,173 @@ class Maneli_Ajax_Handler {
         $logger = Maneli_Logger::instance();
         $logger->log_user_action($action_type, $description, $target_type, $target_id, $metadata);
     }
+
+    /**
+     * Validate uploaded file for security
+     * 
+     * @param array $file $_FILES array element
+     * @param array $allowed_types Allowed MIME types
+     * @param array $allowed_extensions Allowed file extensions (lowercase, without dot)
+     * @param int $max_size Maximum file size in bytes (default 5MB)
+     * @return array|WP_Error Array with 'valid' => true on success, WP_Error on failure
+     */
+    private function validate_uploaded_file($file, $allowed_types = [], $allowed_extensions = [], $max_size = 5242880) {
+        // Check if file was uploaded
+        if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            return new WP_Error('invalid_upload', esc_html__('Invalid file upload.', 'maneli-car-inquiry'));
+        }
+
+        // Check for upload errors
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $error_messages = array(
+                UPLOAD_ERR_INI_SIZE => esc_html__('File exceeds upload_max_filesize directive in php.ini.', 'maneli-car-inquiry'),
+                UPLOAD_ERR_FORM_SIZE => esc_html__('File exceeds MAX_FILE_SIZE directive in HTML form.', 'maneli-car-inquiry'),
+                UPLOAD_ERR_PARTIAL => esc_html__('File was only partially uploaded.', 'maneli-car-inquiry'),
+                UPLOAD_ERR_NO_FILE => esc_html__('No file was uploaded.', 'maneli-car-inquiry'),
+                UPLOAD_ERR_NO_TMP_DIR => esc_html__('Missing temporary folder.', 'maneli-car-inquiry'),
+                UPLOAD_ERR_CANT_WRITE => esc_html__('Failed to write file to disk.', 'maneli-car-inquiry'),
+                UPLOAD_ERR_EXTENSION => esc_html__('File upload stopped by extension.', 'maneli-car-inquiry'),
+            );
+            $error_message = isset($error_messages[$file['error']]) ? $error_messages[$file['error']] : esc_html__('Unknown upload error.', 'maneli-car-inquiry');
+            return new WP_Error('upload_error', $error_message);
+        }
+
+        // Check file size
+        if ($file['size'] > $max_size) {
+            return new WP_Error('file_too_large', sprintf(esc_html__('File size exceeds maximum allowed size of %s.', 'maneli-car-inquiry'), size_format($max_size)));
+        }
+
+        // Get file extension
+        $file_name = $file['name'];
+        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+
+        // Validate extension
+        if (!empty($allowed_extensions) && !in_array($file_ext, $allowed_extensions)) {
+            return new WP_Error('invalid_extension', esc_html__('File type not allowed.', 'maneli-car-inquiry'));
+        }
+
+        // Validate MIME type
+        $file_type = $file['type'];
+        if (!empty($allowed_types) && !in_array($file_type, $allowed_types)) {
+            return new WP_Error('invalid_mime', esc_html__('File type not allowed.', 'maneli-car-inquiry'));
+        }
+
+        // Additional security: Check actual file content using finfo if available
+        $detected_mime = null;
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo !== false) {
+                $detected_mime = finfo_file($finfo, $file['tmp_name']);
+                finfo_close($finfo);
+                
+                if ($detected_mime === false) {
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log('Maneli Warning: finfo_file failed to detect MIME type for file: ' . $file_name);
+                    }
+                } else {
+                    // Compare declared MIME type with detected MIME type
+                    if (!empty($file_type) && $file_type !== $detected_mime) {
+                        if (defined('WP_DEBUG') && WP_DEBUG) {
+                            error_log('Maneli Warning: MIME type mismatch for file: ' . $file_name . ' - Declared: ' . $file_type . ', Detected: ' . $detected_mime);
+                        }
+                        // Still check if detected type is in allowed list
+                        if (!empty($allowed_types) && !in_array($detected_mime, $allowed_types)) {
+                            return new WP_Error('mime_mismatch', esc_html__('File type verification failed. Declared type does not match file content.', 'maneli-car-inquiry'));
+                        }
+                    }
+                    
+                    // Verify detected MIME is in allowed types list
+                    if (!empty($allowed_types) && !in_array($detected_mime, $allowed_types)) {
+                        return new WP_Error('mime_mismatch', esc_html__('File type verification failed.', 'maneli-car-inquiry'));
+                    }
+                }
+            }
+        }
+
+        // Allow extensibility through filter hook (e.g., virus scanning, additional validation)
+        $validation_result = apply_filters('maneli_file_upload_validation', true, $file, $detected_mime);
+        if (is_wp_error($validation_result)) {
+            return $validation_result;
+        }
+        if ($validation_result === false) {
+            return new WP_Error('validation_failed', esc_html__('File validation failed.', 'maneli-car-inquiry'));
+        }
+
+        // Sanitize filename
+        $sanitized_filename = sanitize_file_name($file_name);
+        if (empty($sanitized_filename)) {
+            return new WP_Error('invalid_filename', esc_html__('Invalid filename.', 'maneli-car-inquiry'));
+        }
+
+        return array('valid' => true, 'sanitized_filename' => $sanitized_filename);
+    }
+    
+    /**
+     * Check rate limiting for AJAX requests
+     * 
+     * @param string $identifier Unique identifier for rate limiting (e.g., IP address, user ID, action)
+     * @param int $max_attempts Maximum number of attempts allowed
+     * @param int $time_window Time window in seconds
+     * @return bool True if within rate limit, false if exceeded
+     */
+    private function check_rate_limit($identifier, $max_attempts = 10, $time_window = 60) {
+        $transient_key = 'maneli_rate_limit_' . md5($identifier);
+        $attempts = get_transient($transient_key);
+        
+        if ($attempts === false) {
+            // First attempt, set transient
+            set_transient($transient_key, 1, $time_window);
+            return true;
+        }
+        
+        if ($attempts >= $max_attempts) {
+            return false; // Rate limit exceeded
+        }
+        
+        // Increment attempts
+        set_transient($transient_key, $attempts + 1, $time_window);
+        return true;
+    }
+
+    /**
+     * Clear rate limit for an identifier
+     * 
+     * @param string $identifier Unique identifier for rate limiting
+     */
+    private function clear_rate_limit($identifier) {
+        $transient_key = 'maneli_rate_limit_' . md5($identifier);
+        delete_transient($transient_key);
+    }
+
+    /**
+     * Get client IP address for rate limiting
+     * 
+     * @return string Client IP address
+     */
+    private function get_client_ip() {
+        $ip_keys = array(
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR'
+        );
+        
+        foreach ($ip_keys as $key) {
+            if (array_key_exists($key, $_SERVER) === true) {
+                foreach (explode(',', sanitize_text_field($_SERVER[$key])) as $ip) {
+                    $ip = trim($ip);
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+                        return $ip;
+                    }
+                }
+            }
+        }
+        
+        return isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']) : '0.0.0.0';
+    }
     
     /**
      * Resolve a WordPress user ID from a phone number stored in session.
@@ -409,14 +576,23 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_request_customer_document', [$this, 'ajax_request_customer_document']);
         add_action('wp_ajax_maneli_request_customer_documents_bulk', [$this, 'ajax_request_customer_documents_bulk']);
         
+        // License handlers
+        add_action('wp_ajax_maneli_activate_license', [$this, 'ajax_activate_license']);
+        add_action('wp_ajax_maneli_check_license', [$this, 'ajax_check_license']);
+        add_action('wp_ajax_maneli_deactivate_license', [$this, 'ajax_deactivate_license']);
+        
         // SMS Credit
         add_action('wp_ajax_maneli_get_sms_credit', [$this, 'ajax_get_sms_credit']);
         
         // Notification Center AJAX Handlers
         add_action('wp_ajax_maneli_send_bulk_notification', [$this, 'ajax_send_bulk_notification']);
         add_action('wp_ajax_maneli_schedule_notification', [$this, 'ajax_schedule_notification']);
+        add_action('wp_ajax_maneli_schedule_notification_by_type', [$this, 'ajax_schedule_notification_by_type']);
+        add_action('wp_ajax_maneli_send_single_notification', [$this, 'ajax_send_single_notification']);
+        add_action('wp_ajax_maneli_send_bulk_notification_by_type', [$this, 'ajax_send_bulk_notification_by_type']);
         add_action('wp_ajax_maneli_get_notification_logs', [$this, 'ajax_get_notification_logs']);
         add_action('wp_ajax_maneli_get_notification_stats', [$this, 'ajax_get_notification_stats']);
+        add_action('wp_ajax_maneli_get_notification_timeline', [$this, 'ajax_get_notification_timeline']);
         add_action('wp_ajax_maneli_retry_notification', [$this, 'ajax_retry_notification']);
         add_action('wp_ajax_maneli_send_single_sms', [$this, 'ajax_send_single_sms']);
         add_action('wp_ajax_maneli_get_sms_history', [$this, 'ajax_get_sms_history']);
@@ -448,6 +624,15 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
+        
+        // Rate limiting for sensitive AJAX endpoints
+        $client_ip = $this->get_client_ip();
+        $rate_limit_key = 'inquiry_details_' . get_current_user_id() . '_' . $client_ip;
+        if (!$this->check_rate_limit($rate_limit_key, 30, 60)) {
+            wp_send_json_error(['message' => esc_html__('Too many requests. Please try again later.', 'maneli-car-inquiry')], 429);
+            return;
+        }
+        
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
@@ -567,12 +752,12 @@ class Maneli_Ajax_Handler {
         // Check if tracking_status filter is provided
         $tracking_status_query = isset($_POST['tracking_status']) ? sanitize_text_field($_POST['tracking_status']) : '';
         
-        // Debug logging for tracking_status and expert
-        if (!empty($tracking_status_query)) {
+        // Debug logging for tracking_status and expert (only in debug mode)
+        if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
             error_log('Maneli Debug: tracking_status_query = ' . $tracking_status_query);
         }
         $expert_filter_value = isset($_POST['expert']) ? $_POST['expert'] : '';
-        if ($expert_filter_value !== '') {
+        if (defined('WP_DEBUG') && WP_DEBUG && $expert_filter_value !== '') {
             error_log('Maneli Debug: expert filter = ' . $expert_filter_value);
         }
         
@@ -613,7 +798,9 @@ class Maneli_Ajax_Handler {
                         'type' => 'NUMERIC'
                     ]
                 ];
-                error_log('Maneli Debug: Added unassigned expert filter for referred status');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Debug: Added unassigned expert filter for referred status');
+                }
             }
         }
         
@@ -675,8 +862,8 @@ class Maneli_Ajax_Handler {
         $meta_query_count = count($meta_query);
         if ($meta_query_count > 1) {
             $args['meta_query'] = $meta_query;
-            // Debug logging
-            if (!empty($tracking_status_query)) {
+            // Debug logging (only in debug mode)
+            if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                 error_log('Maneli Debug: meta_query count = ' . $meta_query_count);
                 error_log('Maneli Debug: meta_query structure = ' . print_r($meta_query, true));
             }
@@ -685,15 +872,15 @@ class Maneli_Ajax_Handler {
             // This should not happen, but handle it gracefully
         }
     
-        // Debug logging for final query args
-        if (!empty($tracking_status_query)) {
+        // Debug logging for final query args (only in debug mode)
+        if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
             error_log('Maneli Debug: Final query args = ' . print_r($args, true));
         }
     
         $inquiry_query = new WP_Query($args);
         
-        // Debug logging for query results
-        if (!empty($tracking_status_query)) {
+        // Debug logging for query results (only in debug mode)
+        if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
             error_log('Maneli Debug: Query found ' . $inquiry_query->found_posts . ' posts');
             error_log('Maneli Debug: Query post_count = ' . $inquiry_query->post_count);
         }
@@ -713,11 +900,11 @@ class Maneli_Ajax_Handler {
                 
                 if ($is_unassigned) {
                     $posts_to_render[] = $post_id;
-                    if (!empty($tracking_status_query)) {
+                    if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                         error_log('Maneli Debug: Post #' . $post_id . ' passed filter - expert_id: ' . var_export($expert_id, true));
                     }
                 } else {
-                    if (!empty($tracking_status_query)) {
+                    if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                         error_log('Maneli Debug: Post #' . $post_id . ' filtered out - has expert_id: ' . var_export($expert_id, true) . ' (type: ' . gettype($expert_id) . ')');
                     }
                 }
@@ -734,12 +921,12 @@ class Maneli_Ajax_Handler {
                     Maneli_Render_Helpers::render_inquiry_row($post_id, $base_url);
                     $rendered_count++;
                 }
-                if (!empty($tracking_status_query)) {
+                if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                     error_log('Maneli Debug: Rendered ' . $rendered_count . ' inquiry rows (after filtering)');
                 }
             } else {
                 // No posts passed the filter - this could mean all have experts assigned or query found nothing
-                if (!empty($tracking_status_query)) {
+                if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                     error_log('Maneli Debug: Query found ' . $inquiry_query->found_posts . ' posts but none passed unassigned filter');
                     error_log('Maneli Debug: This might indicate all referred inquiries have experts assigned, or meta_query did not work correctly');
                 }
@@ -750,8 +937,8 @@ class Maneli_Ajax_Handler {
             while ($inquiry_query->have_posts()) {
                 $inquiry_query->the_post();
                 $post_id = get_the_ID();
-                // Debug: log each post being rendered
-                if (!empty($tracking_status_query)) {
+                // Debug: log each post being rendered (only in debug mode)
+                if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                     $tracking_status_debug = get_post_meta($post_id, 'tracking_status', true);
                     $expert_id_debug = get_post_meta($post_id, 'assigned_expert_id', true);
                     error_log('Maneli Debug: Rendering post #' . $post_id . ' - tracking_status: ' . $tracking_status_debug . ', expert_id: ' . var_export($expert_id_debug, true));
@@ -759,7 +946,7 @@ class Maneli_Ajax_Handler {
                 Maneli_Render_Helpers::render_inquiry_row($post_id, $base_url);
                 $rendered_count++;
             }
-            if (!empty($tracking_status_query)) {
+            if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                 error_log('Maneli Debug: Rendered ' . $rendered_count . ' inquiry rows');
             }
         } elseif ($is_referred_status && $inquiry_query->found_posts > 0 && empty($posts_to_render)) {
@@ -794,8 +981,8 @@ class Maneli_Ajax_Handler {
             ]);
         }
         
-        // Debug logging for final HTML
-        if (!empty($tracking_status_query)) {
+        // Debug logging for final HTML (only in debug mode)
+        if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
             error_log('Maneli Debug: Final HTML length = ' . strlen($html));
             error_log('Maneli Debug: HTML preview (first 500 chars) = ' . substr($html, 0, 500));
         }
@@ -813,16 +1000,63 @@ class Maneli_Ajax_Handler {
             return;
         }
 
+        // Check license and demo mode
+        if (class_exists('Maneli_Permission_Helpers')) {
+            $user_id = get_current_user_id();
+            if (!Maneli_Permission_Helpers::can_user_delete($user_id, 'inquiry')) {
+                if (Maneli_Permission_Helpers::is_demo_mode()) {
+                    wp_send_json_error(['message' => esc_html__('در حالت دمو امکان حذف وجود ندارد.', 'maneli-car-inquiry')], 403);
+                } else {
+                    wp_send_json_error(['message' => esc_html__('لایسنس فعال نیست.', 'maneli-car-inquiry')], 403);
+                }
+                return;
+            }
+        }
+
+        // Rate limiting for delete operations (stricter limits)
+        $client_ip = $this->get_client_ip();
+        $rate_limit_key = 'delete_inquiry_' . get_current_user_id() . '_' . $client_ip;
+        if (!$this->check_rate_limit($rate_limit_key, 5, 300)) {
+            wp_send_json_error(['message' => esc_html__('Too many delete requests. Please try again later.', 'maneli-car-inquiry')], 429);
+            return;
+        }
+
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
             wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
             return;
         }
 
-        if (wp_delete_post($inquiry_id, true)) {
-            wp_send_json_success(['message' => esc_html__('Inquiry deleted successfully.', 'maneli-car-inquiry')]);
-        } else {
-            wp_send_json_error(['message' => esc_html__('Error deleting inquiry.', 'maneli-car-inquiry')]);
+        try {
+            // Get inquiry details for audit log before deletion
+            $inquiry_title = get_the_title($inquiry_id);
+            $inquiry_author_id = get_post_field('post_author', $inquiry_id);
+            
+            $result = wp_delete_post($inquiry_id, true);
+            
+            if ($result && !is_wp_error($result)) {
+                // Audit log: Record deletion
+                $this->log_user_action(
+                    'delete_inquiry',
+                    sprintf(esc_html__('Deleted installment inquiry: %s (ID: %d)', 'maneli-car-inquiry'), $inquiry_title, $inquiry_id),
+                    'inquiry',
+                    $inquiry_id,
+                    ['author_id' => $inquiry_author_id, 'title' => $inquiry_title]
+                );
+                
+                wp_send_json_success(['message' => esc_html__('Inquiry deleted successfully.', 'maneli-car-inquiry')]);
+            } else {
+                $error_message = is_wp_error($result) ? $result->get_error_message() : esc_html__('Unknown error', 'maneli-car-inquiry');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Error: Failed to delete inquiry. Error: ' . $error_message);
+                }
+                wp_send_json_error(['message' => esc_html__('Error deleting inquiry. Please try again.', 'maneli-car-inquiry')]);
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Exception while deleting inquiry. Error: ' . $e->getMessage());
+            }
+            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the inquiry. Please try again.', 'maneli-car-inquiry')]);
         }
     }
 
@@ -898,6 +1132,19 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
             return;
         }
+
+        // Check license and demo mode
+        if (class_exists('Maneli_Permission_Helpers')) {
+            $user_id = get_current_user_id();
+            if (!Maneli_Permission_Helpers::can_user_delete($user_id, 'cash_inquiry')) {
+                if (Maneli_Permission_Helpers::is_demo_mode()) {
+                    wp_send_json_error(['message' => esc_html__('در حالت دمو امکان حذف وجود ندارد.', 'maneli-car-inquiry')], 403);
+                } else {
+                    wp_send_json_error(['message' => esc_html__('لایسنس فعال نیست.', 'maneli-car-inquiry')], 403);
+                }
+                return;
+            }
+        }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
@@ -905,10 +1152,36 @@ class Maneli_Ajax_Handler {
             return;
         }
     
-        if (wp_delete_post($inquiry_id, true)) {
-            wp_send_json_success(['message' => esc_html__('Request deleted successfully.', 'maneli-car-inquiry')]);
-        } else {
-            wp_send_json_error(['message' => esc_html__('Error deleting request.', 'maneli-car-inquiry')]);
+        try {
+            // Get inquiry details for audit log before deletion
+            $inquiry_title = get_the_title($inquiry_id);
+            $inquiry_author_id = get_post_field('post_author', $inquiry_id);
+            
+            $result = wp_delete_post($inquiry_id, true);
+            
+            if ($result && !is_wp_error($result)) {
+                // Audit log: Record deletion
+                $this->log_user_action(
+                    'delete_cash_inquiry',
+                    sprintf(esc_html__('Deleted cash inquiry: %s (ID: %d)', 'maneli-car-inquiry'), $inquiry_title, $inquiry_id),
+                    'cash_inquiry',
+                    $inquiry_id,
+                    ['author_id' => $inquiry_author_id, 'title' => $inquiry_title]
+                );
+                
+                wp_send_json_success(['message' => esc_html__('Request deleted successfully.', 'maneli-car-inquiry')]);
+            } else {
+                $error_message = is_wp_error($result) ? $result->get_error_message() : esc_html__('Unknown error', 'maneli-car-inquiry');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Error: Failed to delete cash inquiry. Error: ' . $error_message);
+                }
+                wp_send_json_error(['message' => esc_html__('Error deleting request. Please try again.', 'maneli-car-inquiry')]);
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Exception while deleting cash inquiry. Error: ' . $e->getMessage());
+            }
+            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the request. Please try again.', 'maneli-car-inquiry')]);
         }
     }
     
@@ -945,6 +1218,15 @@ class Maneli_Ajax_Handler {
             update_post_meta($inquiry_id, 'cash_down_payment', $amount);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'awaiting_payment');
             
+            // Audit log: Record status change
+            $this->log_user_action(
+                'change_status',
+                sprintf(esc_html__('Changed cash inquiry status from %s to awaiting_payment', 'maneli-car-inquiry'), $old_status),
+                'cash_inquiry',
+                $inquiry_id,
+                ['old_status' => $old_status, 'new_status' => 'awaiting_payment', 'amount' => $amount]
+            );
+            
             // Send notification
             require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
             Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'awaiting_payment');
@@ -961,12 +1243,30 @@ class Maneli_Ajax_Handler {
                 wp_send_json_error(['message' => esc_html__('A reason for rejection is required.', 'maneli-car-inquiry')]);
                 return;
             }
+            
+            // Validate rejection reason length
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            $reason_validation = Maneli_Render_Helpers::validate_description_field($reason);
+            if (!$reason_validation['valid']) {
+                wp_send_json_error(['message' => $reason_validation['error']]);
+                return;
+            }
+            
             $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
             if (empty($old_status)) {
                 $old_status = 'new';
             }
             update_post_meta($inquiry_id, 'cash_rejection_reason', $reason);
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
+            
+            // Audit log: Record status change
+            $this->log_user_action(
+                'change_status',
+                sprintf(esc_html__('Changed cash inquiry status from %s to rejected', 'maneli-car-inquiry'), $old_status),
+                'cash_inquiry',
+                $inquiry_id,
+                ['old_status' => $old_status, 'new_status' => 'rejected', 'reason_length' => strlen($reason)]
+            );
             
             // Send notification
             require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
@@ -1350,10 +1650,38 @@ class Maneli_Ajax_Handler {
             return;
         }
         require_once(ABSPATH . 'wp-admin/includes/user.php');
-        if (wp_delete_user($user_id_to_delete)) {
-            wp_send_json_success();
-        } else {
-            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the user.', 'maneli-car-inquiry')]);
+        
+        // Get user details for audit log before deletion
+        $user_to_delete = get_userdata($user_id_to_delete);
+        $user_email = $user_to_delete ? $user_to_delete->user_email : '';
+        $user_display_name = $user_to_delete ? $user_to_delete->display_name : '';
+        $user_roles = $user_to_delete ? $user_to_delete->roles : [];
+        
+        try {
+            $result = wp_delete_user($user_id_to_delete);
+            
+            if ($result) {
+                // Audit log: Record user deletion
+                $this->log_user_action(
+                    'delete_user',
+                    sprintf(esc_html__('Deleted user: %s (ID: %d, Email: %s)', 'maneli-car-inquiry'), $user_display_name, $user_id_to_delete, $user_email),
+                    'user',
+                    $user_id_to_delete,
+                    ['email' => $user_email, 'display_name' => $user_display_name, 'roles' => $user_roles]
+                );
+                
+                wp_send_json_success();
+            } else {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Error: Failed to delete user. User ID: ' . $user_id_to_delete);
+                }
+                wp_send_json_error(['message' => esc_html__('An error occurred while deleting the user.', 'maneli-car-inquiry')]);
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Exception while deleting user. Error: ' . $e->getMessage());
+            }
+            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the user. Please try again.', 'maneli-car-inquiry')]);
         }
     }
 
@@ -1757,18 +2085,31 @@ class Maneli_Ajax_Handler {
         
         $file = $_FILES['image'];
         
-        // Validate file type
+        // Validate file upload with comprehensive security checks
         $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-        if (!in_array($file['type'], $allowed_types)) {
-            wp_send_json_error(['message' => esc_html__('Invalid file type. Only images are allowed.', 'maneli-car-inquiry')]);
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $max_size = 5242880; // 5MB
+        
+        $validation = $this->validate_uploaded_file($file, $allowed_types, $allowed_extensions, $max_size);
+        if (is_wp_error($validation)) {
+            wp_send_json_error(['message' => $validation->get_error_message()]);
             return;
         }
         
-        // Upload file
-        $upload = wp_handle_upload($file, ['test_form' => false]);
+        // Upload file with WordPress security checks enabled
+        $upload_overrides = array(
+            'test_form' => true,
+            'mimes' => array(
+                'jpg|jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp'
+            )
+        );
+        $upload = wp_handle_upload($file, $upload_overrides);
         
         if (isset($upload['error'])) {
-            wp_send_json_error(['message' => $upload['error']]);
+            wp_send_json_error(['message' => esc_html($upload['error'])]);
             return;
         }
         
@@ -2861,13 +3202,17 @@ class Maneli_Ajax_Handler {
             $manual_verify = wp_verify_nonce($nonce_received, 'maneli_installment_status');
             if ($manual_verify === 1 || $manual_verify === 2) {
                 $nonce_check_result = true; // Manual verification succeeded
-                error_log('Maneli AJAX: Nonce verified manually with wp_verify_nonce (result: ' . $manual_verify . ')');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli AJAX: Nonce verified manually with wp_verify_nonce (result: ' . $manual_verify . ')');
+                }
             } else {
                 // Try with alternative action name (in case nonce was created with different name)
                 $alt_verify = wp_verify_nonce($nonce_received, 'maneli_tracking_status_nonce');
                 if ($alt_verify === 1 || $alt_verify === 2) {
                     $nonce_check_result = true;
-                    error_log('Maneli AJAX: Nonce verified with alternative name maneli_tracking_status_nonce');
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log('Maneli AJAX: Nonce verified with alternative name maneli_tracking_status_nonce');
+                    }
                 }
             }
         }
@@ -2885,19 +3230,23 @@ class Maneli_Ajax_Handler {
             }
             
             if (is_user_logged_in() && ($is_admin || $is_assigned_expert)) {
-                // Accept nonce if user is logged in and has permission - log for security audit
-                error_log('Maneli AJAX: Nonce verification bypassed for user ' . $current_user_id . ' (has permission)');
+                // Accept nonce if user is logged in and has permission - log for security audit (only in debug mode)
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli AJAX: Nonce verification bypassed for user ' . $current_user_id . ' (has permission)');
+                }
                 $nonce_check_result = true;
             }
         }
         
         if (!$nonce_check_result) {
-            // Log more details for debugging
-            error_log('Maneli AJAX: Nonce verification failed for update_installment_status');
-            error_log('Maneli AJAX: Received nonce: ' . (empty($nonce_received) ? 'EMPTY' : substr($nonce_received, 0, 10) . '...'));
-            error_log('Maneli AJAX: Expected action: maneli_installment_status');
-            error_log('Maneli AJAX: User ID: ' . get_current_user_id());
-            error_log('Maneli AJAX: User logged in: ' . (is_user_logged_in() ? 'YES' : 'NO'));
+            // Log more details for debugging (only in debug mode to prevent information disclosure)
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli AJAX: Nonce verification failed for update_installment_status');
+                error_log('Maneli AJAX: Received nonce: ' . (empty($nonce_received) ? 'EMPTY' : substr($nonce_received, 0, 10) . '...'));
+                error_log('Maneli AJAX: Expected action: maneli_installment_status');
+                error_log('Maneli AJAX: User ID: ' . get_current_user_id());
+                error_log('Maneli AJAX: User logged in: ' . (is_user_logged_in() ? 'YES' : 'NO'));
+            }
             
             wp_send_json_error([
                 'message' => esc_html__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry'),
@@ -3074,7 +3423,10 @@ class Maneli_Ajax_Handler {
                     
                     wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
                 } catch (Exception $e) {
-                    error_log('Maneli: Error in schedule_followup: ' . $e->getMessage());
+                    // Log error only in debug mode to prevent information disclosure
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log('Maneli: Error in schedule_followup: ' . $e->getMessage());
+                    }
                     wp_send_json_error(['message' => esc_html__('An error occurred while scheduling the follow-up. Please try again.', 'maneli-car-inquiry')]);
                 }
                 break;
@@ -3087,10 +3439,26 @@ class Maneli_Ajax_Handler {
                     wp_send_json_error(['message' => esc_html__('Cancellation reason is required.', 'maneli-car-inquiry')]);
                 }
                 
+                // Validate cancellation reason length
+                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+                $cancel_reason_validation = Maneli_Render_Helpers::validate_description_field($cancel_reason);
+                if (!$cancel_reason_validation['valid']) {
+                    wp_send_json_error(['message' => $cancel_reason_validation['error']]);
+                }
+                
                 update_post_meta($inquiry_id, 'tracking_status', 'cancelled');
                 update_post_meta($inquiry_id, 'cancel_reason', $cancel_reason);
                 update_post_meta($inquiry_id, 'cancelled_at', current_time('mysql'));
                 Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'cancelled', 'tracking_status');
+                
+                // Audit log: Record status change
+                $this->log_user_action(
+                    'change_status',
+                    sprintf(esc_html__('Changed inquiry status from %s to cancelled', 'maneli-car-inquiry'), $current_status),
+                    'inquiry',
+                    $inquiry_id,
+                    ['old_status' => $current_status, 'new_status' => 'cancelled', 'action' => 'cancel', 'reason_length' => strlen($cancel_reason)]
+                );
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry cancelled successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -3104,6 +3472,15 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'tracking_status', 'completed');
                 update_post_meta($inquiry_id, 'completed_at', current_time('mysql'));
                 Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
+                
+                // Audit log: Record status change
+                $this->log_user_action(
+                    'change_status',
+                    sprintf(esc_html__('Changed inquiry status from %s to completed', 'maneli-car-inquiry'), $current_status),
+                    'inquiry',
+                    $inquiry_id,
+                    ['old_status' => $current_status, 'new_status' => 'completed', 'action' => 'complete']
+                );
                 
                 wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'maneli-car-inquiry')]);
                 break;
@@ -3119,6 +3496,15 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'approved_by', $current_user_id);
                 Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
                 
+                // Audit log: Record status change
+                $this->log_user_action(
+                    'change_status',
+                    sprintf(esc_html__('Changed inquiry status from %s to completed (approved)', 'maneli-car-inquiry'), $current_status),
+                    'inquiry',
+                    $inquiry_id,
+                    ['old_status' => $current_status, 'new_status' => 'completed', 'action' => 'approve']
+                );
+                
                 wp_send_json_success(['message' => esc_html__('Inquiry approved successfully.', 'maneli-car-inquiry')]);
                 break;
                 
@@ -3128,6 +3514,13 @@ class Maneli_Ajax_Handler {
                 
                 if (empty($rejection_reason)) {
                     wp_send_json_error(['message' => esc_html__('Rejection reason is required.', 'maneli-car-inquiry')]);
+                }
+                
+                // Validate rejection reason length
+                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+                $rejection_reason_validation = Maneli_Render_Helpers::validate_description_field($rejection_reason);
+                if (!$rejection_reason_validation['valid']) {
+                    wp_send_json_error(['message' => $rejection_reason_validation['error']]);
                 }
                 
                 // Allow reject from in_progress or meeting_scheduled
@@ -3156,6 +3549,15 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'rejected_by', $current_user_id);
                 Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'rejected', 'tracking_status');
                 
+                // Audit log: Record status change
+                $this->log_user_action(
+                    'change_status',
+                    sprintf(esc_html__('Changed inquiry status from %s to rejected', 'maneli-car-inquiry'), $current_status),
+                    'inquiry',
+                    $inquiry_id,
+                    ['old_status' => $current_status, 'new_status' => 'rejected', 'action' => 'reject', 'reason_length' => strlen($rejection_reason)]
+                );
+                
                 wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'maneli-car-inquiry')]);
                 break;
                 
@@ -3179,7 +3581,9 @@ class Maneli_Ajax_Handler {
             $manual_verify = wp_verify_nonce($nonce_received, 'maneli_installment_note');
             if ($manual_verify === 1 || $manual_verify === 2) {
                 $nonce_check_result = true;
-                error_log('Maneli AJAX: Save note nonce verified manually (result: ' . $manual_verify . ')');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli AJAX: Save note nonce verified manually (result: ' . $manual_verify . ')');
+                }
             }
         }
         
@@ -3189,13 +3593,17 @@ class Maneli_Ajax_Handler {
             $is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
             
             if (is_user_logged_in() && ($is_admin || $is_expert)) {
-                error_log('Maneli AJAX: Save note nonce verification bypassed for user ' . get_current_user_id() . ' (has permission)');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli AJAX: Save note nonce verification bypassed for user ' . get_current_user_id() . ' (has permission)');
+                }
                 $nonce_check_result = true;
             }
         }
         
         if (!$nonce_check_result) {
-            error_log('Maneli AJAX: Save note nonce verification failed');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli AJAX: Save note nonce verification failed');
+            }
             wp_send_json_error(['message' => esc_html__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry')]);
         }
         
@@ -3638,20 +4046,27 @@ class Maneli_Ajax_Handler {
         
         $uploadedfile = $_FILES['profile_image'];
         
-        // Check file size (2 MB max)
-        if ($uploadedfile['size'] > 2 * 1024 * 1024) {
-            wp_send_json_error(['message' => esc_html__('File size exceeds 2 MB limit.', 'maneli-car-inquiry')]);
+        // Validate file upload with comprehensive security checks
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $max_size = 2 * 1024 * 1024; // 2MB
+        
+        $validation = $this->validate_uploaded_file($uploadedfile, $allowed_types, $allowed_extensions, $max_size);
+        if (is_wp_error($validation)) {
+            wp_send_json_error(['message' => $validation->get_error_message()]);
             return;
         }
         
-        // Check file type
-        $allowed_types = array('image/jpeg', 'image/jpg', 'image/png', 'image/gif');
-        if (!in_array($uploadedfile['type'], $allowed_types)) {
-            wp_send_json_error(['message' => esc_html__('Invalid file type. Only JPEG, PNG and GIF are allowed.', 'maneli-car-inquiry')]);
-            return;
-        }
-        
-        $upload_overrides = array('test_form' => false);
+        // Use test_form => true to enable WordPress security checks
+        $upload_overrides = array(
+            'test_form' => true,
+            'mimes' => array(
+                'jpg|jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp'
+            )
+        );
         $movefile = wp_handle_upload($uploadedfile, $upload_overrides);
         
         if ($movefile && !isset($movefile['error'])) {
@@ -3746,8 +4161,14 @@ class Maneli_Ajax_Handler {
             $user_data['display_name'] = sanitize_text_field($_POST['display_name']);
         }
         
-        if (isset($_POST['user_email'])) {
+        if (isset($_POST['user_email']) && !empty($_POST['user_email'])) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
             $email = sanitize_email($_POST['user_email']);
+            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            if (!$email_validation['valid']) {
+                wp_send_json_error(['message' => $email_validation['error']]);
+                return;
+            }
             if (!email_exists($email) || $email === get_userdata($user_id)->user_email) {
                 $user_data['user_email'] = $email;
             }
@@ -3888,14 +4309,33 @@ class Maneli_Ajax_Handler {
             return;
         }
         
+        // Validate file upload
+        $allowed_types = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        $allowed_extensions = ['pdf', 'jpg', 'jpeg', 'png'];
+        $max_size = 5242880; // 5MB
+        
+        $validation = $this->validate_uploaded_file($uploaded_file, $allowed_types, $allowed_extensions, $max_size);
+        if (is_wp_error($validation)) {
+            wp_send_json_error(['message' => $validation->get_error_message()]);
+            return;
+        }
+        
         // Handle file upload
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         
-        $upload_overrides = array('test_form' => false);
+        // Use test_form => true to enable WordPress security checks
+        $upload_overrides = array(
+            'test_form' => true,
+            'mimes' => array(
+                'pdf' => 'application/pdf',
+                'jpg|jpeg' => 'image/jpeg',
+                'png' => 'image/png'
+            )
+        );
         $uploaded_file_array = wp_handle_upload($uploaded_file, $upload_overrides);
         
         if (isset($uploaded_file_array['error'])) {
-            wp_send_json_error(['message' => $uploaded_file_array['error']]);
+            wp_send_json_error(['message' => esc_html($uploaded_file_array['error'])]);
             return;
         }
         
@@ -4368,6 +4808,12 @@ class Maneli_Ajax_Handler {
         
         // Update email if provided
         if (!empty($email)) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            if (!$email_validation['valid']) {
+                wp_send_json_error(['message' => $email_validation['error']]);
+                return;
+            }
             wp_update_user(['ID' => $user_id, 'user_email' => $email]);
         }
         
@@ -4508,7 +4954,7 @@ class Maneli_Ajax_Handler {
         $display_name = isset($_POST['display_name']) ? sanitize_text_field($_POST['display_name']) : '';
         $mobile = isset($_POST['mobile_number']) ? sanitize_text_field($_POST['mobile_number']) : '';
         $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
-        $password = isset($_POST['password']) ? $_POST['password'] : '';
+        $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         $permissions = [];
         if (isset($_POST['permissions']) && is_array($_POST['permissions'])) {
             $permissions = $_POST['permissions'];
@@ -4524,10 +4970,24 @@ class Maneli_Ajax_Handler {
             wp_send_json_error(['message' => esc_html__('All required fields must be filled.', 'maneli-car-inquiry')]);
             return;
         }
+
+        // Validate password length (minimum 8 characters recommended)
+        if (strlen($password) < 8) {
+            wp_send_json_error(['message' => esc_html__('Password must be at least 8 characters long.', 'maneli-car-inquiry')]);
+            return;
+        }
         
         // Generate email from mobile if not provided
         if (empty($email)) {
             $email = $mobile . '@manelikhodro.com';
+        } else {
+            // Validate email if provided
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            if (!$email_validation['valid']) {
+                wp_send_json_error(['message' => $email_validation['error']]);
+                return;
+            }
         }
         
         // Check if user already exists
@@ -4718,6 +5178,12 @@ class Maneli_Ajax_Handler {
         
         // Update email if provided
         if (!empty($email)) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            if (!$email_validation['valid']) {
+                wp_send_json_error(['message' => $email_validation['error']]);
+                return;
+            }
             $user_data['user_email'] = $email;
         }
         
@@ -4792,6 +5258,12 @@ class Maneli_Ajax_Handler {
         
         // Update email if provided
         if (!empty($email)) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            if (!$email_validation['valid']) {
+                wp_send_json_error(['message' => $email_validation['error']]);
+                return;
+            }
             $user_data['user_email'] = $email;
         }
         
@@ -4844,7 +5316,7 @@ class Maneli_Ajax_Handler {
         $mobile = isset($_POST['mobile_number']) ? sanitize_text_field($_POST['mobile_number']) : '';
         $role = isset($_POST['role']) ? sanitize_text_field($_POST['role']) : 'customer';
         $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
-        $password = isset($_POST['password']) ? $_POST['password'] : '';
+        $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         
         // Validation
         if (empty($first_name) || empty($last_name) || empty($mobile) || empty($password)) {
@@ -4852,9 +5324,23 @@ class Maneli_Ajax_Handler {
             return;
         }
         
+        // Validate password length (minimum 8 characters recommended)
+        if (strlen($password) < 8) {
+            wp_send_json_error(['message' => esc_html__('Password must be at least 8 characters long.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
         // Generate email from mobile if not provided
         if (empty($email)) {
             $email = $mobile . '@manelikhodro.com';
+        } else {
+            // Validate email if provided
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            if (!$email_validation['valid']) {
+                wp_send_json_error(['message' => $email_validation['error']]);
+                return;
+            }
         }
         
         // Check if user already exists
@@ -4925,22 +5411,28 @@ class Maneli_Ajax_Handler {
                     $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
                     if ($is_assigned) {
                         $nonce_valid = true;
-                        error_log('⚠️ AJAX Cancel Meeting: Nonce verification bypassed for assigned expert (User ID: ' . get_current_user_id() . ', Inquiry ID: ' . $inquiry_id . ')');
+                        if (defined('WP_DEBUG') && WP_DEBUG) {
+                            error_log('⚠️ AJAX Cancel Meeting: Nonce verification bypassed for assigned expert (User ID: ' . get_current_user_id() . ', Inquiry ID: ' . $inquiry_id . ')');
+                        }
                     }
                 } else {
                     $nonce_valid = true;
-                    error_log('⚠️ AJAX Cancel Meeting: Nonce verification bypassed for admin (User ID: ' . get_current_user_id() . ', Inquiry ID: ' . $inquiry_id . ')');
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log('⚠️ AJAX Cancel Meeting: Nonce verification bypassed for admin (User ID: ' . get_current_user_id() . ', Inquiry ID: ' . $inquiry_id . ')');
+                    }
                 }
             }
         }
         
         if (!$nonce_valid) {
-            error_log('❌ AJAX Cancel Meeting: Nonce verification failed', [
-                'nonce_received' => $nonce ? substr($nonce, 0, 20) : 'MISSING',
-                'nonce_length' => $nonce ? strlen($nonce) : 0,
-                'user_logged_in' => is_user_logged_in(),
-                'user_id' => is_user_logged_in() ? get_current_user_id() : 0
-            ]);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('❌ AJAX Cancel Meeting: Nonce verification failed', [
+                    'nonce_received' => $nonce ? substr($nonce, 0, 20) : 'MISSING',
+                    'nonce_length' => $nonce ? strlen($nonce) : 0,
+                    'user_logged_in' => is_user_logged_in(),
+                    'user_id' => is_user_logged_in() ? get_current_user_id() : 0
+                ]);
+            }
             wp_send_json_error(['message' => esc_html__('Security verification failed. Please refresh the page.', 'maneli-car-inquiry')]);
             return;
         }
@@ -5111,14 +5603,33 @@ class Maneli_Ajax_Handler {
             return;
         }
         
+        // Validate file upload
+        $allowed_types = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+        $allowed_extensions = ['pdf', 'jpg', 'jpeg', 'png'];
+        $max_size = 5242880; // 5MB
+        
+        $validation = $this->validate_uploaded_file($uploaded_file, $allowed_types, $allowed_extensions, $max_size);
+        if (is_wp_error($validation)) {
+            wp_send_json_error(['message' => $validation->get_error_message()]);
+            return;
+        }
+        
         // Handle file upload
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         
-        $upload_overrides = array('test_form' => false);
+        // Use test_form => true to enable WordPress security checks
+        $upload_overrides = array(
+            'test_form' => true,
+            'mimes' => array(
+                'pdf' => 'application/pdf',
+                'jpg|jpeg' => 'image/jpeg',
+                'png' => 'image/png'
+            )
+        );
         $uploaded_file_array = wp_handle_upload($uploaded_file, $upload_overrides);
         
         if (isset($uploaded_file_array['error'])) {
-            wp_send_json_error(['message' => $uploaded_file_array['error']]);
+            wp_send_json_error(['message' => esc_html($uploaded_file_array['error'])]);
             return;
         }
         
@@ -5319,6 +5830,23 @@ class Maneli_Ajax_Handler {
             return;
         }
         
+        // Convert Jalali date to Gregorian if needed
+        $is_jalali = isset($_POST['is_jalali']) && $_POST['is_jalali'] === '1';
+        if ($is_jalali && function_exists('maneli_jalali_to_gregorian')) {
+            // Parse date and time from scheduled_at (format: YYYY/MM/DD HH:mm)
+            if (preg_match('/^(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})/', $scheduled_at, $matches)) {
+                $j_y = (int)$matches[1];
+                $j_m = (int)$matches[2];
+                $j_d = (int)$matches[3];
+                $time = $matches[4] . ':' . $matches[5] . ':00';
+                
+                $gregorian = maneli_jalali_to_gregorian($j_y, $j_m, $j_d);
+                if ($gregorian) {
+                    $scheduled_at = $gregorian . ' ' . $time;
+                }
+            }
+        }
+        
         // Validate scheduled time
         $scheduled_timestamp = strtotime($scheduled_at);
         if ($scheduled_timestamp === false || $scheduled_timestamp <= current_time('timestamp')) {
@@ -5341,6 +5869,32 @@ class Maneli_Ajax_Handler {
         } else {
             wp_send_json_error(['message' => esc_html__('Failed to schedule notification.', 'maneli-car-inquiry')]);
         }
+    }
+    
+    /**
+     * Schedule notification by type (for SMS notifications page)
+     */
+    public function ajax_schedule_notification_by_type() {
+        $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : 'sms';
+        $_POST['channel'] = $type;
+        $this->ajax_schedule_notification();
+    }
+    
+    /**
+     * Send single notification (for SMS notifications page)
+     */
+    public function ajax_send_single_notification() {
+        $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : 'sms';
+        $this->ajax_send_single_sms();
+    }
+    
+    /**
+     * Send bulk notification by type (for SMS notifications page)
+     */
+    public function ajax_send_bulk_notification_by_type() {
+        $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : 'sms';
+        $_POST['channel'] = $type;
+        $this->ajax_send_bulk_notification();
     }
     
     /**
@@ -5397,6 +5951,30 @@ class Maneli_Ajax_Handler {
         $stats = Maneli_Database::get_notification_stats($args);
         
         wp_send_json_success(['stats' => $stats]);
+    }
+    
+    /**
+     * Get notification timeline data for charts
+     */
+    public function ajax_get_notification_timeline() {
+        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            return;
+        }
+        
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        
+        $args = [
+            'type' => isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '',
+            'date_from' => isset($_POST['date_from']) ? sanitize_text_field($_POST['date_from']) : date('Y-m-d', strtotime('-30 days')),
+            'date_to' => isset($_POST['date_to']) ? sanitize_text_field($_POST['date_to']) : date('Y-m-d'),
+        ];
+        
+        $timeline = Maneli_Database::get_notification_timeline($args);
+        
+        wp_send_json_success($timeline);
     }
     
     /**
@@ -6481,8 +7059,34 @@ class Maneli_Ajax_Handler {
      * Log user action (from JavaScript)
      */
     public function ajax_log_user_action() {
-        // Light nonce check - this is called from frontend
-        if (!$this->is_plugin_user_logged_in()) {
+        // Light nonce check - verify nonce if provided
+        if (isset($_POST['security'])) {
+            if (!wp_verify_nonce($_POST['security'], 'maneli_ajax_nonce')) {
+                // Nonce verification failed, but don't block - just log and continue
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli: User log action nonce verification failed');
+                }
+            }
+        }
+        
+        // Check if user is logged in (WordPress or plugin session)
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            // Try plugin session
+            if (class_exists('Maneli_Session')) {
+                $session = new Maneli_Session();
+                if (session_status() === PHP_SESSION_NONE) {
+                    $session->start_session();
+                }
+                $user_id = $session->get_user_id();
+            } elseif (isset($_SESSION['maneli']['user_id'])) {
+                $user_id = (int) $_SESSION['maneli']['user_id'];
+            }
+        }
+        
+        // If still no user ID, we can't log (user logging requires a user)
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'User not logged in']);
             return;
         }
 
@@ -6493,9 +7097,14 @@ class Maneli_Ajax_Handler {
         $target_id = isset($_POST['target_id']) ? intval($_POST['target_id']) : null;
         $metadata = isset($_POST['metadata']) ? json_decode(stripslashes($_POST['metadata']), true) : null;
 
-        $logger->log_user_action($action_type, $action_description, $target_type, $target_id, $metadata);
+        $result = $logger->log_user_action($action_type, $action_description, $target_type, $target_id, $metadata);
         
-        wp_send_json_success();
+        if ($result === false) {
+            wp_send_json_error(['message' => 'Failed to log user action']);
+            return;
+        }
+        
+        wp_send_json_success(['message' => 'User action logged successfully']);
     }
 
     /**
@@ -6522,6 +7131,78 @@ class Maneli_Ajax_Handler {
         wp_send_json_success([
             'deleted' => (int) $deleted,
             'message' => esc_html__('System logs deleted successfully.', 'maneli-car-inquiry')
+        ]);
+    }
+
+    /**
+     * Activate license
+     */
+    public function ajax_activate_license() {
+        check_ajax_referer('maneli_license_nonce', 'nonce');
+
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized', 'maneli-car-inquiry')]);
+        }
+
+        $license = Maneli_License::instance();
+
+        // Domain is the license - no license key needed
+        $result = $license->activate_license();
+
+        if ($result['success']) {
+            wp_send_json_success([
+                'message' => $result['message'],
+                'expiry_date' => $result['expiry_date'] ?? null
+            ]);
+        } else {
+            wp_send_json_error([
+                'message' => $result['message']
+            ]);
+        }
+    }
+
+    /**
+     * Check license status
+     */
+    public function ajax_check_license() {
+        check_ajax_referer('maneli_license_nonce', 'nonce');
+
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => 'Unauthorized']);
+        }
+
+        $license = Maneli_License::instance();
+        $license->check_license_status();
+        $status = $license->get_license_status();
+
+        if ($status['is_active']) {
+            wp_send_json_success([
+                'message' => esc_html__('License is active', 'maneli-car-inquiry'),
+                'status' => $status
+            ]);
+        } else {
+            wp_send_json_error([
+                'message' => esc_html__('License is inactive', 'maneli-car-inquiry'),
+                'status' => $status
+            ]);
+        }
+    }
+
+    /**
+     * Deactivate license
+     */
+    public function ajax_deactivate_license() {
+        check_ajax_referer('maneli_license_nonce', 'nonce');
+
+        if (!current_user_can('manage_maneli_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized', 'maneli-car-inquiry')]);
+        }
+
+        $license = Maneli_License::instance();
+        $license->deactivate_license();
+
+        wp_send_json_success([
+            'message' => esc_html__('License deactivated successfully', 'maneli-car-inquiry')
         ]);
     }
     

@@ -214,12 +214,31 @@
             var dates = [];
             var visits = [];
             var uniqueVisitors = [];
+            var prevVisits = [];
+            var prevUniqueVisitors = [];
+            var prevDailyStats = maneliVisitorStats.prevDailyStats || [];
+            var prevStats = maneliVisitorStats.prevStats || {};
             
             if (!dailyStatsData || dailyStatsData.length === 0) {
                 console.warn('No daily stats data available');
                 $('#traffic-trend-chart').html('<div class="text-center text-muted p-4">' + (maneliVisitorStats.translations.noData || 'No data available') + '</div>');
                 return;
             }
+            
+            // Create a map of dates to previous period stats
+            var prevStatsMap = {};
+            prevDailyStats.forEach(function(stat) {
+                var dateKey = stat.date;
+                if (dateKey && dateKey.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                    dateKey = dateKey.replace(/-/g, '/');
+                } else {
+                    dateKey = dateKey.replace(/-/g, '/');
+                }
+                prevStatsMap[dateKey] = {
+                    visits: parseInt(stat.visits) || 0,
+                    uniqueVisitors: parseInt(stat.unique_visitors) || 0
+                };
+            });
             
             dailyStatsData.forEach(function(stat) {
                 // Convert date to Jalali format if needed (assuming dates come in YYYY-MM-DD format)
@@ -234,6 +253,11 @@
                 dates.push(ensureLocalizedDigits(displayDate));
                 visits.push(parseInt(stat.visits) || 0);
                 uniqueVisitors.push(parseInt(stat.unique_visitors) || 0);
+                
+                // Get previous period data for same date
+                var prevData = prevStatsMap[displayDate] || { visits: 0, uniqueVisitors: 0 };
+                prevVisits.push(prevData.visits);
+                prevUniqueVisitors.push(prevData.uniqueVisitors);
             });
             
             var options = {
@@ -243,6 +267,12 @@
                 }, {
                     name: maneliVisitorStats.translations.uniqueVisitors,
                     data: uniqueVisitors
+                }, {
+                    name: (maneliVisitorStats.translations.visits || 'Visits') + ' (' + (maneliVisitorStats.translations.previousPeriod || 'Previous Period') + ')',
+                    data: prevVisits
+                }, {
+                    name: (maneliVisitorStats.translations.uniqueVisitors || 'Unique Visitors') + ' (' + (maneliVisitorStats.translations.previousPeriod || 'Previous Period') + ')',
+                    data: prevUniqueVisitors
                 }],
                 chart: {
                     type: 'line',
@@ -261,11 +291,12 @@
                     },
                     fontFamily: 'IRANSans, Arial, sans-serif'
                 },
-                colors: ['#589bff', '#af6ded'],
+                colors: ['#589bff', '#af6ded', '#c0c0c0', '#d0d0d0'],
                 stroke: {
                     curve: 'smooth',
-                    width: 3
+                    width: [3, 3, 2, 2]
                 },
+                strokeDashArray: [0, 0, 5, 5],
                 dataLabels: {
                     enabled: false
                 },
@@ -309,15 +340,51 @@
                 tooltip: {
                     theme: 'light',
                     fontFamily: 'IRANSans, Arial, sans-serif',
+                    shared: true,
+                    intersect: false,
                     x: {
                         formatter: function(value) {
                             return ensureLocalizedDigits(value);
                         }
                     },
                     y: {
-                        formatter: function(value) {
-                            return formatLocalizedNumber(value);
+                        formatter: function(value, { seriesIndex, dataPointIndex, w }) {
+                            var result = formatLocalizedNumber(value);
+                            if (seriesIndex < 2) {
+                                // Current period
+                                return result;
+                            } else {
+                                // Previous period - add comparison
+                                var currentValue = seriesIndex === 2 ? w.globals.series[0][dataPointIndex] : w.globals.series[1][dataPointIndex];
+                                var diff = value > 0 ? ((currentValue - value) / value * 100).toFixed(1) : 0;
+                                var diffText = diff > 0 ? '+' + diff : diff;
+                                return result + ' (' + diffText + '%)';
+                            }
                         }
+                    },
+                    custom: function({series, seriesIndex, dataPointIndex, w}) {
+                        var currentVisits = series[0][dataPointIndex];
+                        var currentVisitors = series[1][dataPointIndex];
+                        var prevVisits = series[2][dataPointIndex] || 0;
+                        var prevVisitors = series[3][dataPointIndex] || 0;
+                        var date = w.globals.categoryLabels[dataPointIndex];
+                        
+                        var visitsDiff = prevVisits > 0 ? ((currentVisits - prevVisits) / prevVisits * 100).toFixed(1) : 0;
+                        var visitorsDiff = prevVisitors > 0 ? ((currentVisitors - prevVisitors) / prevVisitors * 100).toFixed(1) : 0;
+                        var visitsDiffText = visitsDiff > 0 ? '+' + visitsDiff : visitsDiff;
+                        var visitorsDiffText = visitorsDiff > 0 ? '+' + visitorsDiff : visitorsDiff;
+                        
+                        return '<div style="padding: 10px;">' +
+                            '<div style="font-weight: bold; margin-bottom: 8px;">' + ensureLocalizedDigits(date) + '</div>' +
+                            '<div style="margin-bottom: 4px;">' +
+                            '<span style="color: #589bff;">●</span> ' + (maneliVisitorStats.translations.visits || 'Visits') + ': <strong>' + formatLocalizedNumber(currentVisits) + '</strong> ' +
+                            '(' + (maneliVisitorStats.translations.previous || 'Previous') + ': ' + formatLocalizedNumber(prevVisits) + ', ' + visitsDiffText + '%)' +
+                            '</div>' +
+                            '<div style="margin-bottom: 4px;">' +
+                            '<span style="color: #af6ded;">●</span> ' + (maneliVisitorStats.translations.uniqueVisitors || 'Unique Visitors') + ': <strong>' + formatLocalizedNumber(currentVisitors) + '</strong> ' +
+                            '(' + (maneliVisitorStats.translations.previous || 'Previous') + ': ' + formatLocalizedNumber(prevVisitors) + ', ' + visitorsDiffText + '%)' +
+                            '</div>' +
+                            '</div>';
                     }
                 }
             };
@@ -517,43 +584,17 @@
                         var options = {
                             series: series,
                             chart: {
-                                type: 'bar',
+                                type: 'donut',
                                 height: 300,
+                                fontFamily: 'IRANSans, Arial, sans-serif'
+                            },
+                            labels: labels,
+                            colors: ['#589bff', '#af6ded', '#f76565', '#ffc107', '#51d28c'],
+                            legend: {
+                                position: 'bottom',
                                 fontFamily: 'IRANSans, Arial, sans-serif',
-                                horizontal: true
+                                fontSize: '12px'
                             },
-                            plotOptions: {
-                                bar: {
-                                    borderRadius: 4,
-                                    horizontal: true
-                                }
-                            },
-                            dataLabels: {
-                                enabled: true,
-                                formatter: function(val) {
-                                    return ensureLocalizedDigits(Math.round(val));
-                                }
-                            },
-                            xaxis: {
-                                categories: labels,
-                                labels: {
-                                    style: {
-                                        colors: '#8c9097',
-                                        fontSize: '11px',
-                                        fontFamily: 'IRANSans, Arial, sans-serif'
-                                    }
-                                }
-                            },
-                            yaxis: {
-                                labels: {
-                                    style: {
-                                        colors: '#8c9097',
-                                        fontSize: '11px',
-                                        fontFamily: 'IRANSans, Arial, sans-serif'
-                                    }
-                                }
-                            },
-                            colors: ['#589bff', '#af6ded', '#f76565'],
                             tooltip: {
                                 theme: 'light',
                                 fontFamily: 'IRANSans, Arial, sans-serif',
@@ -561,6 +602,12 @@
                                     formatter: function(value) {
                                         return formatLocalizedNumber(value);
                                     }
+                                }
+                            },
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function(val) {
+                                    return ensureLocalizedDigits(Math.round(val)) + '%';
                                 }
                             }
                         };
@@ -627,14 +674,27 @@
                                 }
                                 timeAgo = ensureLocalizedDigits(timeAgo);
                                 
+                                var pageUrl = visitor.page_url || '';
+                                var pageTitle = visitor.page_title || visitor.page_url || '';
+                                var pageCell = '';
+                                if (pageUrl) {
+                                    pageCell = '<td><a href="' + escapeHtml(pageUrl) + '" target="_blank" class="text-decoration-none" title="' + escapeHtml(pageUrl) + '">' +
+                                        '<div class="text-truncate" style="max-width: 200px;">' +
+                                        escapeHtml(pageTitle) +
+                                        ' <i class="ri-external-link-line ms-1 fs-12"></i>' +
+                                        '</div></a></td>';
+                                } else {
+                                    pageCell = '<td><div class="text-truncate" style="max-width: 200px;" title="' + escapeHtml(pageUrl) + '">' + 
+                                        escapeHtml(pageTitle) + '</div></td>';
+                                }
+                                
                                 var row = '<tr>' +
                                     '<td>' + escapeHtml(visitor.ip_address) + '</td>' +
                                     '<td><span class="maneli-emoji-flag me-2">' + escapeHtml(flagIcon) + '</span>' + escapeHtml(countryName) + '</td>' +
                                     '<td>' + escapeHtml(browserName) + '</td>' +
                                     '<td>' + escapeHtml(osName) + '</td>' +
                                     '<td>' + escapeHtml(deviceTypeLabel) + '</td>' +
-                                    '<td><div class="text-truncate" style="max-width: 200px;" title="' + escapeHtml(visitor.page_url || '') + '">' + 
-                                        escapeHtml(visitor.page_title || visitor.page_url || '') + '</div></td>' +
+                                    pageCell +
                                     '<td>' + timeAgo + '</td>' +
                                     '</tr>';
                                 tbody.append(row);

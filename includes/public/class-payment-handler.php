@@ -16,6 +16,15 @@ if (!defined('ABSPATH')) {
 class Maneli_Payment_Handler {
 
     public function __construct() {
+        // Check license before registering handlers
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // License not active - don't register handlers
+                return;
+            }
+        }
+        
         add_action('template_redirect', [$this, 'handle_payment_verification']);
         
         // Hooks for starting payment processes.
@@ -27,50 +36,18 @@ class Maneli_Payment_Handler {
     }
     
     // =======================================================
-    //  DECRYPTION HELPERS (COPIED FROM SETTINGS HANDLER)
+    //  DECRYPTION HELPER (uses centralized Maneli_Encryption_Helper)
     // =======================================================
     
     /**
-     * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
-     * @return string The encryption key.
-     */
-    private function get_encryption_key() {
-        // Use a unique, secure key from wp-config.php
-        $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
-        // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
-        return hash('sha256', $key, true); 
-    }
-
-    /**
      * Decrypts data using AES-256-CBC.
+     * Wrapper method for backward compatibility - uses Maneli_Encryption_Helper.
+     * 
      * @param string $encrypted_data The encrypted data (Base64 encoded).
      * @return string The decrypted data or empty string on failure.
      */
     private function decrypt_data($encrypted_data) {
-        if (empty($encrypted_data)) {
-            return '';
-        }
-        $key = $this->get_encryption_key();
-        $cipher = 'aes-256-cbc';
-        
-        // Decode and separate IV and encrypted data
-        $parts = explode('::', base64_decode($encrypted_data), 2);
-        
-        if (count($parts) !== 2) {
-            return ''; // Invalid format or decryption failed
-        }
-        $encrypted = $parts[0];
-        $iv = $parts[1];
-        
-        // Basic check for IV length
-        if (strlen($iv) !== openssl_cipher_iv_length($cipher)) {
-            return '';
-        }
-
-        // Decrypt
-        $decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
-        
-        return $decrypted === false ? '' : $decrypted;
+        return Maneli_Encryption_Helper::decrypt($encrypted_data);
     }
     
     // =======================================================

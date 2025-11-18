@@ -683,3 +683,126 @@
 [data-theme-mode=dark] .text-secondary {
     color: rgb(var(--secondary-rgb)) !important;
 }
+
+/* Hide search box in Select2 dropdown for expert filter */
+/* Aggressive CSS rules to completely hide search box */
+
+/* Universal rule: Hide ALL search boxes when expert-filter Select2 is active */
+body:has(#expert-filter.select2-hidden-accessible) .select2-container--open .select2-search--dropdown,
+body:has(#expert-filter.select2-hidden-accessible) .select2-dropdown .select2-search--dropdown {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    opacity: 0 !important;
+}
+
+/* Method 1: Target search box when expert-filter Select2 container is open */
+.select2-container--open[id*="expert-filter"] .select2-search--dropdown,
+.select2-container--open[aria-labelledby*="expert-filter"] .select2-search--dropdown {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Method 2: Target search box in dropdown that appears after expert-filter */
+#expert-filter.select2-hidden-accessible ~ .select2-container .select2-search--dropdown,
+#expert-filter.select2-hidden-accessible + .select2-container .select2-search--dropdown {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Method 3: Hide search box in dropdowns marked by JavaScript */
+.maneli-expert-filter-dropdown .select2-search--dropdown {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Method 4: Hide search input field directly */
+.select2-search__field[aria-controls*="expert-filter"],
+.select2-container--open .select2-search__field[aria-controls*="expert-filter"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+}
+
+/* Method 5: Hide search box in any dropdown when expert-filter is the active select */
+.select2-container--open:has(+ #expert-filter) ~ .select2-dropdown .select2-search--dropdown,
+.select2-dropdown:has(~ #expert-filter.select2-hidden-accessible) .select2-search--dropdown {
+    display: none !important;
+}
+
+/* Method 6: Nuclear option - hide ALL search boxes when expert-filter exists and Select2 is open */
+/* This is a fallback if other methods fail */
+#expert-filter.select2-hidden-accessible ~ * .select2-search--dropdown,
+#expert-filter.select2-hidden-accessible + * .select2-search--dropdown {
+    display: none !important;
+}
+
+/* Method 7: Ultimate fallback - hide search box whenever expert-filter Select2 container is open */
+/* This targets the dropdown that appears when expert-filter is opened */
+.select2-container--open:has(+ #expert-filter) ~ .select2-dropdown .select2-search--dropdown,
+.select2-dropdown.select2-dropdown--below:has(~ #expert-filter.select2-hidden-accessible) .select2-search--dropdown,
+body:has(#expert-filter.select2-hidden-accessible) .select2-container--open ~ .select2-dropdown .select2-search--dropdown {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Method 8: Hide search box by targeting the results container when expert-filter is active */
+.select2-results__options:has(~ #expert-filter) ~ .select2-search--dropdown,
+.select2-results:has(~ #expert-filter) ~ .select2-search--dropdown {
+    display: none !important;
+}
+
+/* Method 9: Universal hide - if expert-filter exists, hide any search box in open dropdowns */
+/* This is the most aggressive approach */
+body:has(#expert-filter) .select2-container--open ~ .select2-dropdown .select2-search--dropdown,
+body:has(#expert-filter.select2-hidden-accessible) .select2-dropdown .select2-search--dropdown {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+}

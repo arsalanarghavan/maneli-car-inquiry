@@ -44,7 +44,17 @@ class Maneli_Expert_Panel {
             $datepicker_loaded = maneli_enqueue_persian_datepicker();
         }
         
-        // Enqueue the expert panel JavaScript file
+        // Don't load on product pages - only on dashboard/inquiry pages
+        if (function_exists('is_product') && is_product()) {
+            return;
+        }
+        
+        // Enqueue the expert panel JavaScript file - check if file exists first
+        $expert_panel_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/expert-panel.js';
+        if (!file_exists($expert_panel_js_path)) {
+            return; // File doesn't exist, skip enqueue
+        }
+        
         $expert_panel_deps = ['jquery', 'select2'];
         if ($datepicker_loaded) {
             $expert_panel_deps[] = 'maneli-persian-datepicker';
@@ -54,7 +64,7 @@ class Maneli_Expert_Panel {
             'maneli-expert-panel-js',
             MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js',
             $expert_panel_deps,
-            '1.0.2',
+            filemtime($expert_panel_js_path),
             true
         );
         

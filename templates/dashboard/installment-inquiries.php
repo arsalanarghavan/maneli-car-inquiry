@@ -211,7 +211,7 @@ $experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'displ
                                 <!-- Expert Filter -->
                                 <div class="col-6 col-lg-2">
                                     <label class="form-label"><?php esc_html_e('Assigned Expert:', 'maneli-car-inquiry'); ?></label>
-                                    <select id="expert-filter" class="form-select form-select-sm maneli-select2">
+                                    <select id="expert-filter" class="form-select form-select-sm">
                                         <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
                                         <option value="0" <?php selected(isset($_GET['assigned_expert']) ? $_GET['assigned_expert'] : '', '0'); ?>><?php esc_html_e('Unassigned', 'maneli-car-inquiry'); ?></option>
                                         <?php foreach ($experts as $expert) : ?>

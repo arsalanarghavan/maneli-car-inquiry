@@ -82,6 +82,8 @@ class Maneli_Admin_Actions_Handler {
         
         // Send notification for status change
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        // This function handles installment inquiries only (based on redirect URL)
+        $inquiry_type = 'installment';
         if ($inquiry_type === 'installment') {
             Maneli_Notification_Handler::notify_installment_status_change($post_id, $old_status, $final_status, 'inquiry_status');
         }
@@ -164,6 +166,19 @@ class Maneli_Admin_Actions_Handler {
             }
         }
         
+        // Validate National Code format and checksum
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        $national_code = sanitize_text_field($_POST['national_code']);
+        if (!Maneli_Render_Helpers::validate_national_code($national_code)) {
+            wp_die(esc_html__('Error: Invalid national code format or checksum.', 'maneli-car-inquiry'));
+        }
+        
+        // Validate Mobile Number format
+        $mobile_number = sanitize_text_field($_POST['mobile_number']);
+        if (!Maneli_Render_Helpers::validate_mobile_number($mobile_number)) {
+            wp_die(esc_html__('Error: Invalid mobile number format. Must be 11 digits starting with 09.', 'maneli-car-inquiry'));
+        }
+        
         // 2. Validate Issuer Fields (if issuer_type is 'other')
         $issuer_type = sanitize_key($_POST['issuer_type'] ?? 'self');
         if ($issuer_type === 'other') {
@@ -173,9 +188,12 @@ class Maneli_Admin_Actions_Handler {
                      wp_die(sprintf(esc_html__('Error: The field "%s" for the cheque issuer is required.', 'maneli-car-inquiry'), $field));
                 }
             }
+            // Validate Issuer National Code
+            $issuer_national_code = sanitize_text_field($_POST['issuer_national_code']);
+            if (!Maneli_Render_Helpers::validate_national_code($issuer_national_code)) {
+                wp_die(esc_html__('Error: Invalid issuer national code format or checksum.', 'maneli-car-inquiry'));
+            }
         }
-
-        $mobile_number = sanitize_text_field($_POST['mobile_number']);
         $customer_id = username_exists($mobile_number);
         $dummy_email = $mobile_number . '@manelikhodro.com';
 
@@ -198,10 +216,26 @@ class Maneli_Admin_Actions_Handler {
             $current_user_roles = $current_user ? $current_user->roles : [];
         }
 
+        // Validate name fields length
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        
+        $first_name = sanitize_text_field($_POST['first_name']);
+        $last_name = sanitize_text_field($_POST['last_name']);
+        
+        $first_name_validation = Maneli_Render_Helpers::validate_name_field($first_name);
+        if (!$first_name_validation['valid']) {
+            wp_die($first_name_validation['error']);
+        }
+        
+        $last_name_validation = Maneli_Render_Helpers::validate_name_field($last_name);
+        if (!$last_name_validation['valid']) {
+            wp_die($last_name_validation['error']);
+        }
+
         $user_update_data = [
             'ID'         => $customer_id,
-            'first_name' => sanitize_text_field($_POST['first_name']),
-            'last_name'  => sanitize_text_field($_POST['last_name']),
+            'first_name' => $first_name,
+            'last_name'  => $last_name,
         ];
 
         // Only set the role to 'customer' if the user is new or currently has no role/is only a customer.
@@ -210,7 +244,17 @@ class Maneli_Admin_Actions_Handler {
         }
 
         // Update user data regardless of whether they are new or existing
-        wp_update_user($user_update_data);
+        try {
+            $update_result = wp_update_user($user_update_data);
+            if (is_wp_error($update_result)) {
+                wp_die(esc_html__('Error updating user data: ', 'maneli-car-inquiry') . $update_result->get_error_message());
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Failed to update user. Error: ' . $e->getMessage());
+            }
+            wp_die(esc_html__('An error occurred while updating user information. Please try again.', 'maneli-car-inquiry'));
+        }
         // --- END FIX ---
 
         // Update customer meta with the provided data
@@ -218,7 +262,15 @@ class Maneli_Admin_Actions_Handler {
         if (!empty($_POST['job_title'])) {
             $_POST['occupation'] = $_POST['job_title'];
         }
-        $this->update_customer_meta($customer_id, $_POST);
+        
+        try {
+            $this->update_customer_meta($customer_id, $_POST);
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Failed to update customer meta. Error: ' . $e->getMessage());
+            }
+            // Continue execution - meta update failure is not critical
+        }
         
         // --- Inquiry Creation Logic START ---
         $inquiry_handler = new Maneli_Installment_Inquiry_Handler();
@@ -228,14 +280,55 @@ class Maneli_Admin_Actions_Handler {
             : sanitize_text_field($_POST['national_code']);
 
         // 1. Execute Finotex Inquiry (Handler manages decryption internally)
-        $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
+        try {
+            $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
+            if (empty($finotex_result) || !is_array($finotex_result)) {
+                $finotex_result = ['status' => 'FAILED', 'data' => null, 'raw_response' => esc_html__('Unknown error', 'maneli-car-inquiry')];
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Finotex inquiry failed. Error: ' . $e->getMessage());
+            }
+            $finotex_result = ['status' => 'FAILED', 'data' => null, 'raw_response' => esc_html__('API error occurred', 'maneli-car-inquiry')];
+        }
         
         // Execute additional Finnotech APIs if enabled
         $finnotech_handler = new Maneli_Finnotech_API_Handler();
-        $credit_risk_result = $finnotech_handler->execute_credit_risk_inquiry($national_code_for_api);
-        $credit_score_result = $finnotech_handler->execute_credit_score_inquiry($national_code_for_api);
-        $collaterals_result = $finnotech_handler->execute_collaterals_inquiry($national_code_for_api);
-        $cheque_color_result = $finnotech_handler->execute_cheque_color_inquiry($national_code_for_api);
+        try {
+            $credit_risk_result = $finnotech_handler->execute_credit_risk_inquiry($national_code_for_api);
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Credit risk inquiry failed. Error: ' . $e->getMessage());
+            }
+            $credit_risk_result = ['status' => 'FAILED', 'data' => null];
+        }
+        
+        try {
+            $credit_score_result = $finnotech_handler->execute_credit_score_inquiry($national_code_for_api);
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Credit score inquiry failed. Error: ' . $e->getMessage());
+            }
+            $credit_score_result = ['status' => 'FAILED', 'data' => null];
+        }
+        
+        try {
+            $collaterals_result = $finnotech_handler->execute_collaterals_inquiry($national_code_for_api);
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Collaterals inquiry failed. Error: ' . $e->getMessage());
+            }
+            $collaterals_result = ['status' => 'FAILED', 'data' => null];
+        }
+        
+        try {
+            $cheque_color_result = $finnotech_handler->execute_cheque_color_inquiry($national_code_for_api);
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Cheque color inquiry failed. Error: ' . $e->getMessage());
+            }
+            $cheque_color_result = ['status' => 'FAILED', 'data' => null];
+        }
         
         // 2. Calculate Loan Details (Replicating JS calculator logic)
         $product = wc_get_product($product_id);
@@ -261,16 +354,27 @@ class Maneli_Admin_Actions_Handler {
         );
         
         // 4. Create Inquiry Post
-        $post_id = wp_insert_post([
-            'post_title'   => $post_title,
-            'post_content' => "Finotex API raw response:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>",
-            'post_status'  => 'publish',
-            'post_author'  => $customer_id,
-            'post_type'    => 'inquiry'
-        ], true);
+        try {
+            $post_id = wp_insert_post([
+                'post_title'   => $post_title,
+                'post_content' => "Finotex API raw response:\n<pre>" . esc_textarea($finotex_result['raw_response']) . "</pre>",
+                'post_status'  => 'publish',
+                'post_author'  => $customer_id,
+                'post_type'    => 'inquiry'
+            ], true);
 
-        if (is_wp_error($post_id)) {
-             wp_die(esc_html__('Error creating inquiry post.', 'maneli-car-inquiry') . $post_id->get_error_message());
+            if (is_wp_error($post_id)) {
+                throw new Exception($post_id->get_error_message());
+            }
+            
+            if (!$post_id || $post_id <= 0) {
+                throw new Exception(esc_html__('Post creation returned invalid ID.', 'maneli-car-inquiry'));
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Failed to create inquiry post. Error: ' . $e->getMessage());
+            }
+            wp_die(esc_html__('Error creating inquiry post. Please try again.', 'maneli-car-inquiry'));
         }
 
         // 5. Save All Meta Data
@@ -361,10 +465,35 @@ class Maneli_Admin_Actions_Handler {
             }
         }
         
+        // Validate name fields length
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        
         $user_data = [ 'ID' => $user_id ];
-        if (isset($_POST['first_name'])) $user_data['first_name'] = sanitize_text_field($_POST['first_name']);
-        if (isset($_POST['last_name'])) $user_data['last_name'] = sanitize_text_field($_POST['last_name']);
-        if (isset($_POST['email']) && is_email($_POST['email'])) $user_data['user_email'] = sanitize_email($_POST['email']);
+        if (isset($_POST['first_name'])) {
+            $first_name = sanitize_text_field($_POST['first_name']);
+            $first_name_validation = Maneli_Render_Helpers::validate_name_field($first_name);
+            if (!$first_name_validation['valid']) {
+                wp_die($first_name_validation['error']);
+            }
+            $user_data['first_name'] = $first_name;
+        }
+        if (isset($_POST['last_name'])) {
+            $last_name = sanitize_text_field($_POST['last_name']);
+            $last_name_validation = Maneli_Render_Helpers::validate_name_field($last_name);
+            if (!$last_name_validation['valid']) {
+                wp_die($last_name_validation['error']);
+            }
+            $user_data['last_name'] = $last_name;
+        }
+        if (isset($_POST['email']) && !empty($_POST['email'])) {
+            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            $email = sanitize_email($_POST['email']);
+            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            if (!$email_validation['valid']) {
+                wp_die($email_validation['error']);
+            }
+            $user_data['user_email'] = $email;
+        }
         
         // Update display name based on first/last name
         if (isset($user_data['first_name']) || isset($user_data['last_name'])) {
@@ -377,10 +506,38 @@ class Maneli_Admin_Actions_Handler {
         if (isset($_POST['user_role'])) {
             $new_role = sanitize_key($_POST['user_role']);
             if (in_array($new_role, ['customer', 'maneli_expert', 'maneli_admin', 'administrator'], true)) {
-                $user_data['role'] = $new_role;
+                $current_user_obj = get_userdata($user_id);
+                $old_role = $current_user_obj ? (is_array($current_user_obj->roles) ? $current_user_obj->roles[0] : '') : '';
+                
+                if ($old_role !== $new_role) {
+                    $user_data['role'] = $new_role;
+                    
+                    // Audit log: Record role change
+                    if (class_exists('Maneli_Logger')) {
+                        $logger = Maneli_Logger::instance();
+                        $logger->log_user_action(
+                            'change_role',
+                            sprintf(esc_html__('Changed user role from %s to %s', 'maneli-car-inquiry'), $old_role, $new_role),
+                            'user',
+                            $user_id,
+                            ['old_role' => $old_role, 'new_role' => $new_role, 'target_user_id' => $user_id]
+                        );
+                    }
+                }
             }
         }
-        wp_update_user($user_data);
+        
+        try {
+            $update_result = wp_update_user($user_data);
+            if (is_wp_error($update_result)) {
+                wp_die(esc_html__('Error updating user: ', 'maneli-car-inquiry') . $update_result->get_error_message());
+            }
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Failed to update user. Error: ' . $e->getMessage());
+            }
+            wp_die(esc_html__('An error occurred while updating user. Please try again.', 'maneli-car-inquiry'));
+        }
 
         $meta_fields = ['national_code', 'father_name', 'birth_date', 'mobile_number', 'first_name', 'last_name'];
         foreach ($meta_fields as $field) {
@@ -407,12 +564,21 @@ class Maneli_Admin_Actions_Handler {
         $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
 
         $mobile = sanitize_text_field($_POST['mobile_number']);
-        $password = $_POST['password'];
+        $password = isset($_POST['password']) ? trim($_POST['password']) : '';
 
         if (empty($mobile) || empty($password)) {
             wp_redirect(add_query_arg('error', urlencode(esc_html__('Mobile number and password are required.', 'maneli-car-inquiry')), $redirect_url));
             exit;
         }
+
+        // Validate password length (minimum 8 characters recommended)
+        if (strlen($password) < 8) {
+            wp_redirect(add_query_arg('error', urlencode(esc_html__('Password must be at least 8 characters long.', 'maneli-car-inquiry')), $redirect_url));
+            exit;
+        }
+
+        // Additional validation: check for common weak passwords (optional but recommended)
+        // WordPress will hash the password securely in wp_create_user()
 
         $user_login = $mobile;
         $email = $mobile . '@manelikhodro.com';

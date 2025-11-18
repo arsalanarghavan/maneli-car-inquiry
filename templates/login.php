@@ -158,6 +158,23 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['maneli_create_pa
                                                 <input type="tel" class="form-control" id="otp-phone" placeholder="<?php echo esc_attr(__('e.g., 09123456789', 'maneli-car-inquiry')); ?>" maxlength="11" value="<?php echo esc_attr($phone_from_session); ?>">
                                             </div>
                                         </div>
+                                        
+                                        <!-- CAPTCHA Widget (for v2 and hCaptcha) -->
+                                        <?php if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()): 
+                                            $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+                                            $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+                                            if (!empty($captcha_type) && !empty($site_key)):
+                                                if ($captcha_type === 'recaptcha_v2' || $captcha_type === 'hcaptcha'): ?>
+                                                    <div class="mt-3 mb-3">
+                                                        <?php echo Maneli_Captcha_Helper::render_widget($captcha_type, $site_key, 'maneli-captcha-widget-login-otp'); ?>
+                                                    </div>
+                                                <?php elseif ($captcha_type === 'recaptcha_v3'): ?>
+                                                    <!-- reCAPTCHA v3 badge will be automatically displayed by Google -->
+                                                    <div class="maneli-recaptcha-v3-badge" style="display:none;"></div>
+                                                <?php endif;
+                                            endif;
+                                        endif; ?>
+                                        
                                         <div class="d-grid mt-4">
                                             <button id="send-otp-btn" class="btn btn-primary" onclick="maneli_send_otp()"><?php echo esc_html(__('Send Code', 'maneli-car-inquiry')); ?></button>
                                         </div>
@@ -180,6 +197,23 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['maneli_create_pa
                                                 </div>
                                             </div>
                                         </div>
+                                        
+                                        <!-- CAPTCHA Widget (for v2 and hCaptcha) -->
+                                        <?php if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()): 
+                                            $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+                                            $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+                                            if (!empty($captcha_type) && !empty($site_key)):
+                                                if ($captcha_type === 'recaptcha_v2' || $captcha_type === 'hcaptcha'): ?>
+                                                    <div class="mt-3 mb-3">
+                                                        <?php echo Maneli_Captcha_Helper::render_widget($captcha_type, $site_key, 'maneli-captcha-widget-login-password'); ?>
+                                                    </div>
+                                                <?php elseif ($captcha_type === 'recaptcha_v3'): ?>
+                                                    <!-- reCAPTCHA v3 badge will be automatically displayed by Google -->
+                                                    <div class="maneli-recaptcha-v3-badge" style="display:none;"></div>
+                                                <?php endif;
+                                            endif;
+                                        endif; ?>
+                                        
                                         <div class="d-grid mt-4">
                                             <button id="password-login-btn" class="btn btn-primary" onclick="maneli_password_login()"><?php echo esc_html(__('Login', 'maneli-car-inquiry')); ?></button>
                                         </div>
@@ -201,6 +235,23 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['maneli_create_pa
                                             <span id="resend-countdown"></span>
                                         </div>
                                     </div>
+                                    
+                                    <!-- CAPTCHA Widget (for v2 and hCaptcha) -->
+                                    <?php if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()): 
+                                        $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+                                        $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+                                        if (!empty($captcha_type) && !empty($site_key)):
+                                            if ($captcha_type === 'recaptcha_v2' || $captcha_type === 'hcaptcha'): ?>
+                                                <div class="mt-3 mb-3">
+                                                    <?php echo Maneli_Captcha_Helper::render_widget($captcha_type, $site_key, 'maneli-captcha-widget-otp-verify'); ?>
+                                                </div>
+                                            <?php elseif ($captcha_type === 'recaptcha_v3'): ?>
+                                                <!-- reCAPTCHA v3 badge will be automatically displayed by Google -->
+                                                <div class="maneli-recaptcha-v3-badge" style="display:none;"></div>
+                                            <?php endif;
+                                        endif;
+                                    endif; ?>
+                                    
                                 </div>
                                 <div class="d-grid mt-4">
                                     <button id="verify-otp-btn" class="btn btn-primary" onclick="maneli_verify_otp()"><?php echo esc_html(__('Verify and Continue', 'maneli-car-inquiry')); ?></button>

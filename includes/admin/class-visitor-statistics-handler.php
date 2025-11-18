@@ -276,8 +276,10 @@ class Maneli_Visitor_Statistics_Handler {
         check_ajax_referer('maneli_visitor_stats_nonce', 'nonce');
         
         $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 50;
+        $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
+        $end_date = isset($_POST['end_date']) ? sanitize_text_field($_POST['end_date']) : null;
         
-        $stats = Maneli_Visitor_Statistics::get_recent_visitors($limit);
+        $stats = Maneli_Visitor_Statistics::get_recent_visitors($limit, $start_date, $end_date);
         
         wp_send_json_success($stats);
     }

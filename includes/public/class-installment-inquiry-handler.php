@@ -15,6 +15,15 @@ if (!defined('ABSPATH')) {
 class Maneli_Installment_Inquiry_Handler {
 
     public function __construct() {
+        // Check license before registering handlers
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // License not active - don't register handlers
+                return;
+            }
+        }
+        
         // Step 1: Handle car selection from the product page calculator.
         add_action('wp_ajax_maneli_select_car_ajax', [$this, 'handle_car_selection_ajax']);
         add_action('wp_ajax_nopriv_maneli_select_car_ajax', '__return_false'); // Must be logged in
@@ -46,18 +55,18 @@ class Maneli_Installment_Inquiry_Handler {
     }
     
     // =======================================================
-    //  DECRYPTION HELPERS
+    //  DECRYPTION HELPER (uses centralized Maneli_Encryption_Helper)
     // =======================================================
     
     /**
-     * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
-     * @return string The encryption key.
+     * Decrypts data using AES-256-CBC.
+     * Wrapper method for backward compatibility - uses Maneli_Encryption_Helper.
+     * 
+     * @param string $encrypted_data The encrypted data (Base64 encoded).
+     * @return string The decrypted data or empty string on failure.
      */
-    private function get_encryption_key() {
-        // Use a unique, secure key from wp-config.php
-        $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
-        // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
-        return hash('sha256', $key, true); 
+    private function decrypt_data($encrypted_data) {
+        return Maneli_Encryption_Helper::decrypt($encrypted_data);
     }
 
     /**
@@ -289,7 +298,22 @@ class Maneli_Installment_Inquiry_Handler {
                 $pid = get_the_ID();
                 $img = get_the_post_thumbnail($pid, 'medium');
                 $product = wc_get_product($pid);
-                $price = $product ? $product->get_price() : 0;
+                
+                // Get installment_price (not cash price) for the product card
+                $installment_price_raw = get_post_meta($pid, 'installment_price', true);
+                if (is_string($installment_price_raw) && !empty($installment_price_raw)) {
+                    // Convert Persian digits to English
+                    $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                    $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                    $installment_price_raw = str_replace($persian_digits, $english_digits, $installment_price_raw);
+                    // Remove all non-numeric characters
+                    $installment_price_raw = preg_replace('/[^\d]/', '', $installment_price_raw);
+                }
+                $installment_price = !empty($installment_price_raw) && $installment_price_raw !== '0' ? (int)$installment_price_raw : 0;
+                
+                // Use installment_price only - if not set, product is not available for installment
+                $price = $installment_price;
+                
                 // Wrap in col for Bootstrap grid system
                 echo '<div class="col">';
                 echo '<div class="product-card selectable-car border rounded p-3 h-100" data-product-id="' . esc_attr($pid) . '" data-product-price="' . esc_attr($price) . '" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform=\'scale(1.02)\'; this.style.boxShadow=\'0 4px 8px rgba(0,0,0,0.1)\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'none\';">';
@@ -316,37 +340,6 @@ class Maneli_Installment_Inquiry_Handler {
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 
-    /**
-     * Decrypts data using AES-256-CBC.
-     * @param string $encrypted_data The encrypted data (Base64 encoded).
-     * @return string The decrypted data or empty string on failure.
-     */
-    private function decrypt_data($encrypted_data) {
-        if (empty($encrypted_data)) {
-            return '';
-        }
-        $key = $this->get_encryption_key();
-        $cipher = 'aes-256-cbc';
-        
-        // Decode and separate IV and encrypted data
-        $parts = explode('::', base64_decode($encrypted_data), 2);
-        
-        if (count($parts) !== 2) {
-            return ''; // Invalid format or decryption failed
-        }
-        $encrypted = $parts[0];
-        $iv = $parts[1];
-        
-        // Basic check for IV length
-        if (strlen($iv) !== openssl_cipher_iv_length($cipher)) {
-            return '';
-        }
-
-        // Decrypt
-        $decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
-        
-        return $decrypted === false ? '' : $decrypted;
-    }
 
     /**
      * AJAX handler for Step 1: Saving the selected car and calculator data to user meta.
@@ -381,6 +374,27 @@ class Maneli_Installment_Inquiry_Handler {
                 error_log('Maneli Debug: User not logged in');
                 wp_send_json_error(['message' => esc_html__('Please log in to continue.', 'maneli-car-inquiry')]);
                 return;
+            }
+            
+            // Verify CAPTCHA if enabled
+            if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+                $captcha_token = '';
+                $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+                
+                // Get token based on CAPTCHA type
+                if ($captcha_type === 'hcaptcha') {
+                    $captcha_token = isset($_POST['h-captcha-response']) ? sanitize_text_field($_POST['h-captcha-response']) : '';
+                } elseif ($captcha_type === 'recaptcha_v2') {
+                    $captcha_token = isset($_POST['g-recaptcha-response']) ? sanitize_text_field($_POST['g-recaptcha-response']) : '';
+                } elseif ($captcha_type === 'recaptcha_v3') {
+                    $captcha_token = isset($_POST['captcha_token']) ? sanitize_text_field($_POST['captcha_token']) : '';
+                }
+                
+                $captcha_result = Maneli_Captcha_Helper::verify_token($captcha_token, $captcha_type);
+                if (!$captcha_result['success']) {
+                    wp_send_json_error(['message' => $captcha_result['message']]);
+                    return;
+                }
             }
             
             if (empty($_POST['product_id'])) {
@@ -952,25 +966,73 @@ class Maneli_Installment_Inquiry_Handler {
             update_post_meta($post_id, '_finnotech_cheque_color_fetched_at', current_time('mysql'));
         }
         
-        // Ensure the installment amount is calculated with the current server-side rate and is saved to the post meta.
+        // Get current product prices at the time of inquiry finalization
+        $product = wc_get_product($car_id);
+        if (!$product) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Product not found for car_id: ' . $car_id);
+            }
+            return false;
+        }
+        
+        // Get installment_price from product meta (current price at inquiry time)
+        $installment_price_raw = get_post_meta($car_id, 'installment_price', true);
+        if (is_string($installment_price_raw) && !empty($installment_price_raw)) {
+            // Convert Persian digits to English
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $installment_price_raw = str_replace($persian_digits, $english_digits, $installment_price_raw);
+            // Remove all non-numeric characters
+            $installment_price_raw = preg_replace('/[^\d]/', '', $installment_price_raw);
+        }
+        $total_price = !empty($installment_price_raw) && $installment_price_raw !== '0' ? (int)$installment_price_raw : 0;
+        
+        // If installment_price is not set, the product is not available for installment purchase
+        // This should not happen if product selection is validated, but handle gracefully
+        if ($total_price <= 0) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Warning: Installment price not set for product ID: ' . $car_id . '. Inquiry may have invalid pricing.');
+            }
+            // Try to get from user meta as fallback (for backward compatibility with old inquiries)
+            $total_price = get_user_meta($user_id, 'maneli_inquiry_total_price', true);
+            if ($total_price <= 0) {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Error: Could not determine total price for inquiry. Product ID: ' . $car_id);
+                }
+                return false;
+            }
+        }
+        
+        // Get down payment and term months from user meta (these are user selections)
         $down_payment = get_user_meta($user_id, 'maneli_inquiry_down_payment', true);
-        $total_price = get_user_meta($user_id, 'maneli_inquiry_total_price', true);
         $term_months = get_user_meta($user_id, 'maneli_inquiry_term_months', true);
         
+        // Validate down payment and term months
+        if (empty($down_payment) || $down_payment <= 0) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Invalid down payment for inquiry. User ID: ' . $user_id);
+            }
+            return false;
+        }
+        if (empty($term_months) || $term_months <= 0) {
+            $term_months = 12; // Default to 12 months
+        }
+        
         $loan_amount = (int)$total_price - (int)$down_payment;
-        // USE CENTRALIZED HELPER
+        if ($loan_amount <= 0) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Error: Invalid loan amount calculated. Total price: ' . $total_price . ', Down payment: ' . $down_payment);
+            }
+            return false;
+        }
+        
+        // USE CENTRALIZED HELPER to recalculate installment
         $recalculated_installment = Maneli_Render_Helpers::calculate_installment_amount($loan_amount, (int)$term_months);
         
-        $calculator_meta_keys = [
-            'maneli_inquiry_down_payment', 
-            'maneli_inquiry_term_months', 
-            'maneli_inquiry_total_price'
-        ];
-        
-        foreach($calculator_meta_keys as $key) {
-            $value = get_user_meta($user_id, $key, true);
-            if ($value) { update_post_meta($post_id, $key, $value); }
-        }
+        // Save the current prices and user selections to post meta
+        update_post_meta($post_id, 'maneli_inquiry_down_payment', (int)$down_payment);
+        update_post_meta($post_id, 'maneli_inquiry_term_months', (int)$term_months);
+        update_post_meta($post_id, 'maneli_inquiry_total_price', (int)$total_price);
         
         // IMPORTANT: Overwrite/Save the final, server-calculated installment amount
         update_post_meta($post_id, 'maneli_inquiry_installment', $recalculated_installment); 

@@ -53,6 +53,41 @@ if (!wp_script_is('sweetalert2', 'enqueued')) {
     }
 }
 
+// Enqueue CAPTCHA scripts if enabled
+if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+    $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+    $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+    
+    if (!empty($captcha_type) && !empty($site_key)) {
+        Maneli_Captcha_Helper::enqueue_script($captcha_type, $site_key);
+        
+        // Enqueue our CAPTCHA handler script
+        wp_enqueue_script(
+            'maneli-captcha',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/captcha.js',
+            ['jquery'],
+            file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') ? filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') : '1.0.0',
+            true
+        );
+        
+        // Localize script with CAPTCHA config and error messages
+        wp_localize_script('maneli-captcha', 'maneliCaptchaConfig', [
+            'enabled' => true,
+            'type' => $captcha_type,
+            'siteKey' => $site_key,
+            'strings' => [
+                'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'maneli-car-inquiry'),
+                'error_title' => esc_html__('Verification Failed', 'maneli-car-inquiry'),
+                'try_again' => esc_html__('Try Again', 'maneli-car-inquiry'),
+                'loading' => esc_html__('Verifying...', 'maneli-car-inquiry'),
+                'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'maneli-car-inquiry'),
+                'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'maneli-car-inquiry'),
+                'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'maneli-car-inquiry')
+            ]
+        ]);
+    }
+}
+
 // Pre-fill customer data
 $customer_first_name = get_user_meta($current_user->ID, 'first_name', true) ?: $current_user->first_name;
 $customer_last_name = get_user_meta($current_user->ID, 'last_name', true) ?: $current_user->last_name;
@@ -86,7 +121,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                 </div>
             </div>
             <div class="card-body">
-                <form id="customer-cash-inquiry-form" method="post">
+                <form id="customer-cash-inquiry-form" method="post"<?php echo (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) ? ' data-captcha-required="true"' : ''; ?>>
                     
                     <!-- Step 1: Car Selection -->
                     <div class="mb-4 pb-3 border-bottom">
@@ -211,6 +246,22 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                 </div>
                             </div>
                         </div>
+
+                        <!-- CAPTCHA Widget -->
+                        <?php if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()): 
+                            $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+                            $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+                            if (!empty($captcha_type) && !empty($site_key)):
+                                if ($captcha_type === 'recaptcha_v2' || $captcha_type === 'hcaptcha'): ?>
+                                    <div class="mt-3 mb-3">
+                                        <?php echo Maneli_Captcha_Helper::render_widget($captcha_type, $site_key, 'maneli-captcha-widget-cash-inquiry'); ?>
+                                    </div>
+                                <?php elseif ($captcha_type === 'recaptcha_v3'): ?>
+                                    <!-- reCAPTCHA v3 badge will be automatically displayed by Google -->
+                                    <div class="maneli-recaptcha-v3-badge" style="display:none;"></div>
+                                <?php endif;
+                            endif;
+                        endif; ?>
 
                         <!-- Submit Button -->
                         <div class="mt-4">
@@ -348,17 +399,38 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                     formData.append('action', 'maneli_create_customer_cash_inquiry');
                     formData.append('nonce', '<?php echo wp_create_nonce('maneli_customer_cash_inquiry'); ?>');
                     
-                    // Show loading
-                    const submitBtn = $('#submit-cash-inquiry');
-                    const originalText = submitBtn.html();
-                    submitBtn.prop('disabled', true).html('<i class="la la-spinner la-spin me-2"></i>در حال ارسال...');
+                    // Get CAPTCHA token if enabled
+                    if (typeof maneliCaptcha !== 'undefined' && maneliCaptchaConfig && maneliCaptchaConfig.enabled) {
+                        maneliCaptcha.getToken().then(function(token) {
+                            if (token) {
+                                if (maneliCaptchaConfig.type === 'hcaptcha') {
+                                    formData.append('h-captcha-response', token);
+                                } else if (maneliCaptchaConfig.type === 'recaptcha_v2') {
+                                    formData.append('g-recaptcha-response', token);
+                                } else if (maneliCaptchaConfig.type === 'recaptcha_v3') {
+                                    formData.append('captcha_token', token);
+                                }
+                            }
+                            submitForm(formData);
+                        }).catch(function() {
+                            submitForm(formData);
+                        });
+                    } else {
+                        submitForm(formData);
+                    }
                     
-                    $.ajax({
-                        url: <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>,
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
+                    function submitForm(formDataToSubmit) {
+                        // Show loading
+                        const submitBtn = $('#submit-cash-inquiry');
+                        const originalText = submitBtn.html();
+                        submitBtn.prop('disabled', true).html('<i class="la la-spinner la-spin me-2"></i>در حال ارسال...');
+                        
+                        $.ajax({
+                            url: <?php echo wp_json_encode(admin_url('admin-ajax.php')); ?>,
+                            type: 'POST',
+                            data: formDataToSubmit,
+                            processData: false,
+                            contentType: false,
                         success: function(response) {
                             if (response.success) {
                                 Swal.fire({

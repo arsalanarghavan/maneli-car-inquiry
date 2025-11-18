@@ -60,6 +60,187 @@ class Maneli_Render_Helpers {
         }
         return number_format_i18n((int)$amount);
     }
+
+    /**
+     * Validates Iranian National Code (کد ملی)
+     * Implements the Luhn-like algorithm for Iranian National Code validation
+     * 
+     * @param string $national_code The national code to validate
+     * @return bool True if valid, false otherwise
+     */
+    public static function validate_national_code($national_code) {
+        // Remove whitespace and convert to string
+        $national_code = trim((string)$national_code);
+        
+        // Must be exactly 10 digits
+        if (!preg_match('/^\d{10}$/', $national_code)) {
+            return false;
+        }
+        
+        // Check for all same digits (invalid codes like 0000000000, 1111111111)
+        if (preg_match('/^(\d)\1{9}$/', $national_code)) {
+            return false;
+        }
+        
+        // Extract check digit (last digit)
+        $check_digit = (int)$national_code[9];
+        
+        // Calculate checksum using Iranian National Code algorithm
+        $sum = 0;
+        for ($i = 0; $i < 9; $i++) {
+            $sum += (int)$national_code[$i] * (10 - $i);
+        }
+        
+        $remainder = $sum % 11;
+        
+        // Check digit should be either remainder or 11 - remainder
+        // If remainder < 2, check digit should equal remainder
+        // If remainder >= 2, check digit should equal 11 - remainder
+        if ($remainder < 2) {
+            return $check_digit === $remainder;
+        } else {
+            return $check_digit === (11 - $remainder);
+        }
+    }
+    
+    /**
+     * Validates Iranian mobile number
+     * 
+     * @param string $mobile Mobile number to validate
+     * @return bool True if valid, false otherwise
+     */
+    public static function validate_mobile_number($mobile) {
+        // Remove whitespace, dashes, and other characters
+        $mobile = preg_replace('/[^0-9]/', '', $mobile);
+        
+        // Must start with 09 and be 11 digits total, or start with 9 and be 10 digits
+        if (preg_match('/^09\d{9}$/', $mobile)) {
+            return true;
+        }
+        if (preg_match('/^9\d{9}$/', $mobile)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Validates input field length
+     * 
+     * @param string $value The value to validate
+     * @param int $max_length Maximum allowed length
+     * @param int $min_length Minimum allowed length (default 0)
+     * @return array ['valid' => bool, 'error' => string|null] Validation result
+     */
+    public static function validate_input_length($value, $max_length, $min_length = 0) {
+        $length = mb_strlen($value, 'UTF-8');
+        
+        if ($length < $min_length) {
+            return [
+                'valid' => false,
+                'error' => sprintf(esc_html__('This field must be at least %d characters long.', 'maneli-car-inquiry'), $min_length)
+            ];
+        }
+        
+        if ($length > $max_length) {
+            return [
+                'valid' => false,
+                'error' => sprintf(esc_html__('This field must not exceed %d characters.', 'maneli-car-inquiry'), $max_length)
+            ];
+        }
+        
+        return ['valid' => true, 'error' => null];
+    }
+    
+    /**
+     * Validates name field (first name, last name)
+     * 
+     * @param string $name The name to validate
+     * @return array ['valid' => bool, 'error' => string|null] Validation result
+     */
+    public static function validate_name_field($name) {
+        // Name must be between 2 and 100 characters
+        return self::validate_input_length($name, 100, 2);
+    }
+    
+    /**
+     * Validates address field
+     * 
+     * @param string $address The address to validate
+     * @return array ['valid' => bool, 'error' => string|null] Validation result
+     */
+    public static function validate_address_field($address) {
+        // Address must be between 10 and 500 characters
+        return self::validate_input_length($address, 500, 10);
+    }
+    
+    /**
+     * Validates description/notes field
+     * 
+     * @param string $description The description to validate
+     * @return array ['valid' => bool, 'error' => string|null] Validation result
+     */
+    public static function validate_description_field($description) {
+        // Description must not exceed 2000 characters (no minimum)
+        return self::validate_input_length($description, 2000, 0);
+    }
+    
+    /**
+     * Validates email field
+     * 
+     * @param string $email The email to validate
+     * @return array ['valid' => bool, 'error' => string|null] Validation result
+     */
+    public static function validate_email_field($email) {
+        // Check if empty
+        if (empty($email)) {
+            return [
+                'valid' => false,
+                'error' => esc_html__('Email is required.', 'maneli-car-inquiry')
+            ];
+        }
+        
+        // Check length (RFC 5321: max 254 characters for email address)
+        $length = mb_strlen($email, 'UTF-8');
+        if ($length > 254) {
+            return [
+                'valid' => false,
+                'error' => esc_html__('Email address must not exceed 254 characters.', 'maneli-car-inquiry')
+            ];
+        }
+        
+        // Use WordPress built-in email validation
+        if (!is_email($email)) {
+            return [
+                'valid' => false,
+                'error' => esc_html__('Invalid email format.', 'maneli-car-inquiry')
+            ];
+        }
+        
+        // Additional regex validation for stricter format checking
+        $email_pattern = '/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/';
+        if (!preg_match($email_pattern, $email)) {
+            return [
+                'valid' => false,
+                'error' => esc_html__('Invalid email format.', 'maneli-car-inquiry')
+            ];
+        }
+        
+        // Check domain validity using DNS lookup (if available)
+        $domain = substr(strrchr($email, "@"), 1);
+        if (!empty($domain) && function_exists('checkdnsrr')) {
+            // Check MX record (preferred) or A record as fallback
+            if (!checkdnsrr($domain, 'MX') && !checkdnsrr($domain, 'A')) {
+                // DNS check failed - but don't block, just log in debug mode
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Warning: Email domain DNS check failed for: ' . $domain);
+                }
+                // We don't fail validation for DNS issues, as DNS might be temporarily unavailable
+            }
+        }
+        
+        return ['valid' => true, 'error' => null];
+    }
     
     /**
      * Converts Gregorian date to Jalali date. (Wrapper for global function)

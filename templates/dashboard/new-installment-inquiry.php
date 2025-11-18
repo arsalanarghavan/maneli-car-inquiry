@@ -90,8 +90,11 @@ add_action('wp_footer', function() {
         }
     };
     </script>
-    <script src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/js/expert-panel.js?ver=<?php echo filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/expert-panel.js'); ?>"></script>
     <?php
+    $expert_panel_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/expert-panel.js';
+    if (file_exists($expert_panel_js_path)) {
+        echo '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js?ver=' . filemtime($expert_panel_js_path)) . '"></script>';
+    }
 }, 999);
 
 // Get experts list for dropdown (only for admins)
@@ -100,7 +103,7 @@ if (current_user_can('manage_maneli_inquiries')) {
     $experts = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
 }
 ?>
-?><div class="main-content app-content">
+<div class="main-content app-content">
     <div class="container-fluid">
 
 <!-- Start::row -->
@@ -264,7 +267,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-id-card me-1 text-muted"></i>
                                                 کد ملی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="national_code" class="form-control" placeholder="0123456789" maxlength="10" pattern="\d{10}">
+                                            <input type="text" name="national_code" class="form-control" placeholder="0123456789" maxlength="10" pattern="\d{10}" required>
                                             <div class="invalid-feedback">لطفاً کد ملی 10 رقمی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -282,38 +285,54 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-12">
                                             <h6 class="text-muted mb-2">
                                                 <i class="la la-briefcase me-1"></i>
-                                                اطلاعات شغلی
+                                                اطلاعات شغلی <span class="text-danger">*</span>
                                             </h6>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label">نوع شغل</label>
-                                            <select name="job_type" id="buyer_job_type" class="form-select">
+                                            <label class="form-label">نوع شغل <span class="text-danger">*</span></label>
+                                            <select name="job_type" id="buyer_job_type" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
                                                 <option value="self"><?php esc_html_e('Self-employed', 'maneli-car-inquiry'); ?></option>
                                                 <option value="employee"><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
                                             </select>
+                                            <div class="invalid-feedback">لطفاً نوع شغل را انتخاب کنید.</div>
                                         </div>
                                         <div class="col-md-4 buyer-job-title-wrapper" style="display:none;">
-                                            <label class="form-label">عنوان شغلی</label>
-                                            <input type="text" name="job_title" id="buyer_job_title" class="form-control" placeholder="<?php esc_attr_e('Example: Engineer', 'maneli-car-inquiry'); ?>">
+                                            <label class="form-label">عنوان شغلی <span class="text-danger">*</span></label>
+                                            <input type="text" name="job_title" id="buyer_job_title" class="form-control" placeholder="<?php esc_attr_e('Example: Engineer', 'maneli-car-inquiry'); ?>" required>
+                                            <div class="invalid-feedback">لطفاً عنوان شغلی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-money-bill me-1 text-success"></i>
-                                                <?php echo esc_html__('Income Amount (Toman)', 'maneli-car-inquiry'); ?>
+                                                <?php echo esc_html__('Income Amount (Toman)', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number" name="income_level" class="form-control" placeholder="0">
+                                            <input type="number" name="income_level" class="form-control" placeholder="0" required min="0">
+                                            <div class="invalid-feedback">لطفاً سطح درآمد را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4 buyer-property-wrapper" style="display:none;">
                                             <label class="form-label">
                                                 <i class="la la-home me-1"></i>
-                                                وضعیت مسکن
+                                                وضعیت مسکن <span class="text-danger">*</span>
                                             </label>
-                                            <select name="residency_status" id="buyer_residency_status" class="form-select">
+                                            <select name="residency_status" id="buyer_residency_status" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
                                                 <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
                                                 <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
                                             </select>
+                                            <div class="invalid-feedback">لطفاً وضعیت مسکن را انتخاب کنید.</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">
+                                                <i class="la la-building me-1"></i>
+                                                وضعیت محل کار <span class="text-danger">*</span>
+                                            </label>
+                                            <select name="work_location_status" id="buyer_work_location_status" class="form-select" required>
+                                                <option value="">-- انتخاب کنید --</option>
+                                                <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
+                                                <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                            </select>
+                                            <div class="invalid-feedback">لطفاً وضعیت محل کار را انتخاب کنید.</div>
                                         </div>
                                     </div>
                                     
@@ -322,22 +341,24 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-12">
                                             <h6 class="text-muted mb-2">
                                                 <i class="la la-address-book me-1"></i>
-                                                اطلاعات تماس
+                                                اطلاعات تماس <span class="text-danger">*</span>
                                             </h6>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">
                                                 <i class="la la-phone me-1"></i>
-                                                تلفن ثابت
+                                                تلفن ثابت <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" name="phone_number" class="form-control" placeholder="02112345678">
+                                            <input type="tel" name="phone_number" class="form-control" placeholder="02112345678" required>
+                                            <div class="invalid-feedback">لطفاً شماره تلفن ثابت را وارد کنید.</div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <label class="form-label">
                                                 <i class="la la-map-marker me-1"></i>
-                                                آدرس
+                                                آدرس <span class="text-danger">*</span>
                                             </label>
-                                            <textarea name="address" class="form-control" rows="1" placeholder="<?php esc_attr_e('Full Address', 'maneli-car-inquiry'); ?>"></textarea>
+                                            <textarea name="address" class="form-control" rows="2" placeholder="<?php esc_attr_e('Full Address', 'maneli-car-inquiry'); ?>" required></textarea>
+                                            <div class="invalid-feedback">لطفاً آدرس را وارد کنید.</div>
                                         </div>
                                     </div>
                                     
@@ -346,24 +367,28 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-12">
                                             <h6 class="text-muted mb-2">
                                                 <i class="la la-university me-1"></i>
-                                                اطلاعات بانکی
+                                                اطلاعات بانکی <span class="text-danger">*</span>
                                             </h6>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">نام بانک</label>
-                                            <input type="text" name="bank_name" class="form-control" placeholder="<?php esc_attr_e('Example: National', 'maneli-car-inquiry'); ?>">
+                                            <label class="form-label">نام بانک <span class="text-danger">*</span></label>
+                                            <input type="text" name="bank_name" class="form-control" placeholder="<?php esc_attr_e('Example: National', 'maneli-car-inquiry'); ?>" required>
+                                            <div class="invalid-feedback">لطفاً نام بانک را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">شماره حساب</label>
-                                            <input type="text" name="account_number" class="form-control" placeholder="1234567890">
+                                            <label class="form-label">شماره حساب <span class="text-danger">*</span></label>
+                                            <input type="text" name="account_number" class="form-control" placeholder="1234567890" required>
+                                            <div class="invalid-feedback">لطفاً شماره حساب را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">کد شعبه</label>
-                                            <input type="text" name="branch_code" class="form-control" placeholder="1234">
+                                            <label class="form-label">کد شعبه <span class="text-danger">*</span></label>
+                                            <input type="text" name="branch_code" class="form-control" placeholder="1234" required>
+                                            <div class="invalid-feedback">لطفاً کد شعبه را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">نام شعبه</label>
-                                            <input type="text" name="branch_name" class="form-control" placeholder="<?php esc_attr_e('Example: Central', 'maneli-car-inquiry'); ?>">
+                                            <label class="form-label">نام شعبه <span class="text-danger">*</span></label>
+                                            <input type="text" name="branch_name" class="form-control" placeholder="<?php esc_attr_e('Example: Central', 'maneli-car-inquiry'); ?>" required>
+                                            <div class="invalid-feedback">لطفاً نام شعبه را وارد کنید.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -384,23 +409,26 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-user me-1 text-muted"></i>
-                                                نام
+                                                نام <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="issuer_first_name" class="form-control" placeholder="<?php esc_attr_e('First Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" name="issuer_first_name" class="form-control" placeholder="<?php esc_attr_e('First Name', 'maneli-car-inquiry'); ?>" required>
+                                            <div class="invalid-feedback">لطفاً نام را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-user me-1 text-muted"></i>
-                                                نام خانوادگی
+                                                نام خانوادگی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="issuer_last_name" class="form-control" placeholder="<?php esc_attr_e('Last Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" name="issuer_last_name" class="form-control" placeholder="<?php esc_attr_e('Last Name', 'maneli-car-inquiry'); ?>" required>
+                                            <div class="invalid-feedback">لطفاً نام خانوادگی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-male me-1 text-muted"></i>
-                                                نام پدر
+                                                نام پدر <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="issuer_father_name" class="form-control" placeholder="<?php esc_attr_e('Father\'s Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" name="issuer_father_name" class="form-control" placeholder="<?php esc_attr_e('Father\'s Name', 'maneli-car-inquiry'); ?>" required>
+                                            <div class="invalid-feedback">لطفاً نام پدر را وارد کنید.</div>
                                         </div>
                                     </div>
                                     
@@ -408,23 +436,26 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-birthday-cake me-1 text-muted"></i>
-                                                تاریخ تولد
+                                                تاریخ تولد <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" id="expert_issuer_birth_date" name="issuer_birth_date" class="form-control maneli-datepicker" placeholder="1370/01/01">
+                                            <input type="text" id="expert_issuer_birth_date" name="issuer_birth_date" class="form-control maneli-datepicker" placeholder="1370/01/01" required>
+                                            <div class="invalid-feedback">لطفاً تاریخ تولد را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-id-card me-1 text-muted"></i>
-                                                کد ملی
+                                                کد ملی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="issuer_national_code" class="form-control" placeholder="0123456789" maxlength="10" pattern="\d{10}">
+                                            <input type="text" name="issuer_national_code" class="form-control" placeholder="0123456789" maxlength="10" pattern="\d{10}" required>
+                                            <div class="invalid-feedback">لطفاً کد ملی 10 رقمی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-mobile me-1 text-muted"></i>
-                                                شماره موبایل
+                                                شماره موبایل <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" name="issuer_mobile_number" class="form-control" placeholder="09123456789">
+                                            <input type="tel" name="issuer_mobile_number" class="form-control" placeholder="09123456789" required>
+                                            <div class="invalid-feedback">لطفاً شماره موبایل را وارد کنید.</div>
                                         </div>
                                     </div>
                                     
@@ -433,38 +464,54 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-12">
                                             <h6 class="text-muted mb-2">
                                                 <i class="la la-briefcase me-1"></i>
-                                                اطلاعات شغلی
+                                                اطلاعات شغلی <span class="text-danger">*</span>
                                             </h6>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label">نوع شغل</label>
-                                            <select name="issuer_job_type" id="issuer_job_type" class="form-select">
+                                            <label class="form-label">نوع شغل <span class="text-danger">*</span></label>
+                                            <select name="issuer_job_type" id="issuer_job_type" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
                                                 <option value="self"><?php esc_html_e('Self-employed', 'maneli-car-inquiry'); ?></option>
                                                 <option value="employee"><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
                                             </select>
+                                            <div class="invalid-feedback">لطفاً نوع شغل را انتخاب کنید.</div>
                                         </div>
                                         <div class="col-md-4 issuer-job-title-wrapper" style="display:none;">
-                                            <label class="form-label">عنوان شغلی</label>
-                                            <input type="text" name="issuer_job_title" id="issuer_job_title" class="form-control" placeholder="مثال: مهندس">
+                                            <label class="form-label">عنوان شغلی <span class="text-danger">*</span></label>
+                                            <input type="text" name="issuer_job_title" id="issuer_job_title" class="form-control" placeholder="مثال: مهندس" required>
+                                            <div class="invalid-feedback">لطفاً عنوان شغلی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-money-bill me-1 text-success"></i>
-                                                <?php echo esc_html__('Income Amount (Toman)', 'maneli-car-inquiry'); ?>
+                                                <?php echo esc_html__('Income Amount (Toman)', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span>
                                             </label>
-                                            <input type="number" name="issuer_income_level" class="form-control" placeholder="0">
+                                            <input type="number" name="issuer_income_level" class="form-control" placeholder="0" required min="0">
+                                            <div class="invalid-feedback">لطفاً سطح درآمد را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4 issuer-property-wrapper" style="display:none;">
                                             <label class="form-label">
                                                 <i class="la la-home me-1"></i>
-                                                وضعیت مسکن
+                                                وضعیت مسکن <span class="text-danger">*</span>
                                             </label>
-                                            <select name="issuer_residency_status" id="issuer_residency_status" class="form-select">
+                                            <select name="issuer_residency_status" id="issuer_residency_status" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
                                                 <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
                                                 <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
                                             </select>
+                                            <div class="invalid-feedback">لطفاً وضعیت مسکن را انتخاب کنید.</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">
+                                                <i class="la la-building me-1"></i>
+                                                وضعیت محل کار <span class="text-danger">*</span>
+                                            </label>
+                                            <select name="issuer_work_location_status" id="issuer_work_location_status" class="form-select" required>
+                                                <option value="">-- انتخاب کنید --</option>
+                                                <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
+                                                <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                            </select>
+                                            <div class="invalid-feedback">لطفاً وضعیت محل کار را انتخاب کنید.</div>
                                         </div>
                                     </div>
                                     
@@ -473,22 +520,24 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-12">
                                             <h6 class="text-muted mb-2">
                                                 <i class="la la-address-book me-1"></i>
-                                                اطلاعات تماس
+                                                اطلاعات تماس <span class="text-danger">*</span>
                                             </h6>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label">
                                                 <i class="la la-phone me-1"></i>
-                                                تلفن ثابت
+                                                تلفن ثابت <span class="text-danger">*</span>
                                             </label>
-                                            <input type="tel" name="issuer_phone_number" class="form-control" placeholder="02112345678">
+                                            <input type="tel" name="issuer_phone_number" class="form-control" placeholder="02112345678" required>
+                                            <div class="invalid-feedback">لطفاً شماره تلفن ثابت را وارد کنید.</div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-12">
                                             <label class="form-label">
                                                 <i class="la la-map-marker me-1"></i>
-                                                آدرس
+                                                آدرس <span class="text-danger">*</span>
                                             </label>
-                                            <textarea name="issuer_address" class="form-control" rows="1" placeholder="آدرس کامل"></textarea>
+                                            <textarea name="issuer_address" class="form-control" rows="2" placeholder="آدرس کامل" required></textarea>
+                                            <div class="invalid-feedback">لطفاً آدرس را وارد کنید.</div>
                                         </div>
                                     </div>
                                     
@@ -497,24 +546,28 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-12">
                                             <h6 class="text-muted mb-2">
                                                 <i class="la la-university me-1"></i>
-                                                اطلاعات بانکی
+                                                اطلاعات بانکی <span class="text-danger">*</span>
                                             </h6>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">نام بانک</label>
-                                            <input type="text" name="issuer_bank_name" class="form-control" placeholder="مثال: ملی">
+                                            <label class="form-label">نام بانک <span class="text-danger">*</span></label>
+                                            <input type="text" name="issuer_bank_name" class="form-control" placeholder="مثال: ملی" required>
+                                            <div class="invalid-feedback">لطفاً نام بانک را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">شماره حساب</label>
-                                            <input type="text" name="issuer_account_number" class="form-control" placeholder="1234567890">
+                                            <label class="form-label">شماره حساب <span class="text-danger">*</span></label>
+                                            <input type="text" name="issuer_account_number" class="form-control" placeholder="1234567890" required>
+                                            <div class="invalid-feedback">لطفاً شماره حساب را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">کد شعبه</label>
-                                            <input type="text" name="issuer_branch_code" class="form-control" placeholder="1234">
+                                            <label class="form-label">کد شعبه <span class="text-danger">*</span></label>
+                                            <input type="text" name="issuer_branch_code" class="form-control" placeholder="1234" required>
+                                            <div class="invalid-feedback">لطفاً کد شعبه را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label">نام شعبه</label>
-                                            <input type="text" name="issuer_branch_name" class="form-control" placeholder="مثال: مرکزی">
+                                            <label class="form-label">نام شعبه <span class="text-danger">*</span></label>
+                                            <input type="text" name="issuer_branch_name" class="form-control" placeholder="مثال: مرکزی" required>
+                                            <div class="invalid-feedback">لطفاً نام شعبه را وارد کنید.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -546,6 +599,32 @@ jQuery(document).ready(function($) {
     const $form = $('#expert-inquiry-form');
     if (!$form.length) return;
     
+    // Function to toggle required attribute for issuer fields
+    function toggleIssuerFieldsRequired(isRequired) {
+        const issuerFields = $('#issuer-form-wrapper').find('input, select, textarea');
+        issuerFields.each(function() {
+            if (isRequired) {
+                $(this).prop('required', true);
+            } else {
+                $(this).prop('required', false);
+            }
+        });
+    }
+    
+    // Function to toggle required attribute for conditional job fields
+    function toggleJobFieldsRequired(jobType, prefix) {
+        const $jobTitle = $('#' + prefix + '_job_title');
+        const $residencyStatus = $('#' + prefix + '_residency_status');
+        
+        if (jobType === 'self') {
+            $jobTitle.prop('required', true);
+            $residencyStatus.prop('required', true);
+        } else {
+            $jobTitle.prop('required', false);
+            $residencyStatus.prop('required', false);
+        }
+    }
+    
     // Handle issuer type radio buttons using event delegation
     $(document).on('change', 'input[name="issuer_type"]', function() {
         const issuerFormWrapper = $('#issuer-form-wrapper');
@@ -553,8 +632,10 @@ jQuery(document).ready(function($) {
         
         if (selectedValue === 'other') {
             issuerFormWrapper.slideDown(300);
+            toggleIssuerFieldsRequired(true);
         } else {
             issuerFormWrapper.slideUp(300);
+            toggleIssuerFieldsRequired(false);
         }
     });
     
@@ -568,14 +649,17 @@ jQuery(document).ready(function($) {
             // آزاد: نیاز به عنوان شغلی و وضعیت مسکن دارد
             $jobTitleWrapper.slideDown(200);
             $propertyWrapper.slideDown(200);
+            toggleJobFieldsRequired('self', 'buyer');
         } else if (jobValue === 'employee') {
             // کارمند: فقط درآمد لازم است، بقیه مخفی
             $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
+            toggleJobFieldsRequired('employee', 'buyer');
         } else {
             // هیچکدام انتخاب نشده
             $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
+            toggleJobFieldsRequired('', 'buyer');
         }
     });
     
@@ -589,16 +673,22 @@ jQuery(document).ready(function($) {
             // آزاد: نیاز به عنوان شغلی و وضعیت مسکن دارد
             $jobTitleWrapper.slideDown(200);
             $propertyWrapper.slideDown(200);
+            toggleJobFieldsRequired('self', 'issuer');
         } else if (jobValue === 'employee') {
             // کارمند: فقط درآمد لازم است، بقیه مخفی
             $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
+            toggleJobFieldsRequired('employee', 'issuer');
         } else {
             // هیچکدام انتخاب نشده
             $jobTitleWrapper.slideUp(200);
             $propertyWrapper.slideUp(200);
+            toggleJobFieldsRequired('', 'issuer');
         }
     });
+    
+    // Initialize: Set issuer fields as not required initially (since form is hidden)
+    toggleIssuerFieldsRequired(false);
     
     // Form validation
     $form.on('submit', function(e) {

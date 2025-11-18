@@ -28,71 +28,25 @@ class Maneli_Settings_Page {
     }
 
     /**
-     * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
-     * @return string The encryption key.
-     */
-    private function get_encryption_key() {
-        // Use a unique, secure key from wp-config.php
-        $key = defined('AUTH_KEY') ? AUTH_KEY : NONCE_KEY;
-        // Generate a 32-byte key from the security constant using SHA-256 for openssl_encrypt
-        return hash('sha256', $key, true); 
-    }
-
-    /**
      * Encrypts data using AES-256-CBC.
+     * Wrapper method for backward compatibility - uses Maneli_Encryption_Helper.
+     * 
      * @param string $data The data to encrypt.
      * @return string The Base64 encoded encrypted data with IV.
      */
     public function encrypt_data($data) {
-        if (empty($data)) {
-            return '';
-        }
-        $key = $this->get_encryption_key();
-        $cipher = 'aes-256-cbc';
-        $iv_length = openssl_cipher_iv_length($cipher);
-        
-        // Use a cryptographically secure IV
-        $iv = openssl_random_pseudo_bytes($iv_length);
-        $encrypted = openssl_encrypt($data, $cipher, $key, 0, $iv);
-        
-        if ($encrypted === false) {
-             return ''; // Encryption failed
-        }
-
-        // Return IV and encrypted data combined with a separator, then Base64 encode
-        return base64_encode($encrypted . '::' . $iv);
+        return Maneli_Encryption_Helper::encrypt($data);
     }
 
     /**
      * Decrypts data using AES-256-CBC.
+     * Wrapper method for backward compatibility - uses Maneli_Encryption_Helper.
+     * 
      * @param string $encrypted_data The encrypted data (Base64 encoded).
      * @return string The decrypted data or empty string on failure.
      */
     public function decrypt_data($encrypted_data) {
-        if (empty($encrypted_data)) {
-            return '';
-        }
-        $key = $this->get_encryption_key();
-        $cipher = 'aes-256-cbc';
-        
-        // Decode and separate IV and encrypted data
-        $parts = explode('::', base64_decode($encrypted_data), 2);
-        
-        if (count($parts) !== 2) {
-            return ''; // Invalid format or decryption failed
-        }
-        $encrypted = $parts[0];
-        $iv = $parts[1];
-        
-        // Basic check for IV length
-        if (strlen($iv) !== openssl_cipher_iv_length($cipher)) {
-            return '';
-        }
-
-        // Decrypt
-        $decrypted = openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
-        
-        return $decrypted === false ? '' : $decrypted;
+        return Maneli_Encryption_Helper::decrypt($encrypted_data);
     }
 
     /**
@@ -108,7 +62,7 @@ class Maneli_Settings_Page {
         $field_name = "{$this->options_name}[{$name}]";
         
         // بررسی کلیدهای حساس و رمزگشایی آنها قبل از نمایش در فیلد ورودی
-        $is_sensitive = in_array($name, ['finotex_username', 'finotex_password', 'sadad_key'], true);
+        $is_sensitive = in_array($name, ['finotex_username', 'finotex_password', 'sadad_key', 'recaptcha_v2_secret_key', 'recaptcha_v3_secret_key', 'hcaptcha_secret_key'], true);
 
         if ($is_sensitive && !empty($value)) {
             $value = $this->decrypt_data($value);
@@ -198,7 +152,7 @@ class Maneli_Settings_Page {
         $old_options = get_option($this->options_name, []);
         $sanitized_input = [];
         $all_fields = $this->get_all_settings_fields();
-        $sensitive_keys = ['finotex_username', 'finotex_password', 'sadad_key'];
+        $sensitive_keys = ['finotex_username', 'finotex_password', 'sadad_key', 'recaptcha_v2_secret_key', 'recaptcha_v3_secret_key', 'hcaptcha_secret_key'];
         
         foreach ($all_fields as $tab) {
             if(empty($tab['sections'])) continue;
@@ -1559,6 +1513,98 @@ class Maneli_Settings_Page {
                             ['name' => 'cash_completed_admin_telegram_enabled', 'label' => esc_html__('Enable Telegram: Completed (Cash - Admin)', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0'],
                             ['name' => 'cash_completed_admin_email_enabled', 'label' => esc_html__('Enable Email: Completed (Cash - Admin)', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '0'],
                             ['name' => 'cash_completed_admin_notification_enabled', 'label' => esc_html__('Enable In-App Notification: Completed (Cash - Admin)', 'maneli-car-inquiry'), 'type' => 'switch', 'default' => '1'],
+                        ]
+                    ],
+                ]
+            ],
+            // CAPTCHA/Security Tab
+            'captcha' => [
+                'title' => esc_html__('CAPTCHA & Security', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-shield-alt',
+                'sections' => [
+                    'maneli_captcha_general_section' => [
+                        'title' => esc_html__('CAPTCHA Settings', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'captcha_enabled',
+                                'label' => esc_html__('Enable CAPTCHA', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '0',
+                                'desc' => esc_html__('Enable CAPTCHA protection for public forms (inquiry forms, login).', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'captcha_type',
+                                'label' => esc_html__('CAPTCHA Type', 'maneli-car-inquiry'),
+                                'type' => 'select',
+                                'options' => [
+                                    'recaptcha_v2' => esc_html__('Google reCAPTCHA v2', 'maneli-car-inquiry'),
+                                    'recaptcha_v3' => esc_html__('Google reCAPTCHA v3', 'maneli-car-inquiry'),
+                                    'hcaptcha' => esc_html__('hCaptcha', 'maneli-car-inquiry')
+                                ],
+                                'default' => 'recaptcha_v3',
+                                'desc' => esc_html__('Select the CAPTCHA service to use. reCAPTCHA v3 works invisibly, v2 shows a checkbox challenge, hCaptcha is privacy-focused.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_recaptcha_v2_section' => [
+                        'title' => esc_html__('Google reCAPTCHA v2 Configuration', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Get your keys from https://www.google.com/recaptcha/admin', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'recaptcha_v2_site_key',
+                                'label' => esc_html__('Site Key (reCAPTCHA v2)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Your reCAPTCHA v2 site key.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'recaptcha_v2_secret_key',
+                                'label' => esc_html__('Secret Key (reCAPTCHA v2)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Your reCAPTCHA v2 secret key (will be encrypted).', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_recaptcha_v3_section' => [
+                        'title' => esc_html__('Google reCAPTCHA v3 Configuration', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Get your keys from https://www.google.com/recaptcha/admin', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'recaptcha_v3_site_key',
+                                'label' => esc_html__('Site Key (reCAPTCHA v3)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Your reCAPTCHA v3 site key.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'recaptcha_v3_secret_key',
+                                'label' => esc_html__('Secret Key (reCAPTCHA v3)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Your reCAPTCHA v3 secret key (will be encrypted).', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'recaptcha_v3_score_threshold',
+                                'label' => esc_html__('Score Threshold (reCAPTCHA v3)', 'maneli-car-inquiry'),
+                                'type' => 'number',
+                                'default' => '0.5',
+                                'desc' => esc_html__('Minimum score required (0.0 to 1.0). Higher values are more strict. Recommended: 0.5', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_hcaptcha_section' => [
+                        'title' => esc_html__('hCaptcha Configuration', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Get your keys from https://www.hcaptcha.com/', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'hcaptcha_site_key',
+                                'label' => esc_html__('Site Key (hCaptcha)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Your hCaptcha site key.', 'maneli-car-inquiry')
+                            ],
+                            [
+                                'name' => 'hcaptcha_secret_key',
+                                'label' => esc_html__('Secret Key (hCaptcha)', 'maneli-car-inquiry'),
+                                'type' => 'text',
+                                'desc' => esc_html__('Your hCaptcha secret key (will be encrypted).', 'maneli-car-inquiry')
+                            ],
                         ]
                     ],
                 ]

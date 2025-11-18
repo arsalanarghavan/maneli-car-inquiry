@@ -168,18 +168,42 @@ jQuery(document).ready(function($) {
             willOpen: () => Swal.showLoading()
         });
         
-        $.ajax({
-            url: maneliCashInquiryForm.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'maneli_create_cash_inquiry',
-                product_id: data.productId,
-                first_name: data.firstName,
-                last_name: data.lastName,
-                mobile: data.mobile,
-                car_color: data.carColor,
-                nonce: maneliCashInquiryForm.nonce
-            },
+        // Get CAPTCHA token if enabled
+        const ajaxData = {
+            action: 'maneli_create_cash_inquiry',
+            product_id: data.productId,
+            first_name: data.firstName,
+            last_name: data.lastName,
+            mobile: data.mobile,
+            car_color: data.carColor,
+            nonce: maneliCashInquiryForm.nonce
+        };
+        
+        // Add CAPTCHA token if available
+        if (typeof maneliCaptcha !== 'undefined' && maneliCaptchaConfig && maneliCaptchaConfig.enabled) {
+            maneliCaptcha.getToken().then(function(token) {
+                if (token) {
+                    if (maneliCaptchaConfig.type === 'hcaptcha') {
+                        ajaxData['h-captcha-response'] = token;
+                    } else if (maneliCaptchaConfig.type === 'recaptcha_v2') {
+                        ajaxData['g-recaptcha-response'] = token;
+                    } else if (maneliCaptchaConfig.type === 'recaptcha_v3') {
+                        ajaxData['captcha_token'] = token;
+                    }
+                }
+                performAjaxRequest(ajaxData);
+            }).catch(function() {
+                performAjaxRequest(ajaxData);
+            });
+        } else {
+            performAjaxRequest(ajaxData);
+        }
+        
+        function performAjaxRequest(requestData) {
+            $.ajax({
+                url: maneliCashInquiryForm.ajax_url,
+                type: 'POST',
+                data: requestData,
             success: function(response) {
                 if (response.success) {
                     Swal.fire({

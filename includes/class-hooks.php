@@ -718,8 +718,17 @@ class Maneli_Hooks {
      * This injects JavaScript code to track visits via AJAX
      */
     public function track_visitor_statistics() {
-        // Skip tracking on admin pages (except dashboard)
-        if (is_admin() && !get_query_var('maneli_dashboard')) {
+        // Skip tracking on admin pages and dashboard pages
+        if (is_admin() || get_query_var('maneli_dashboard')) {
+            return;
+        }
+        
+        // Skip dashboard pages by URL
+        $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        if (strpos($current_url, '/dashboard/') !== false || 
+            strpos($current_url, '/wp-admin/') !== false || 
+            strpos($current_url, '/wp-login.php') !== false ||
+            strpos($current_url, '/admin/') !== false) {
             return;
         }
         
@@ -779,13 +788,22 @@ class Maneli_Hooks {
      * This tracks visits directly via PHP (backup method)
      */
     public function track_visitor_statistics_server_side() {
-        // Skip tracking on admin pages (except dashboard)
-        if (is_admin() && !get_query_var('maneli_dashboard')) {
+        // Skip tracking on admin pages and dashboard pages
+        if (is_admin() || get_query_var('maneli_dashboard')) {
             return;
         }
         
         // Skip AJAX requests to avoid double tracking
         if (wp_doing_ajax() || wp_doing_cron()) {
+            return;
+        }
+        
+        // Skip dashboard pages by URL
+        $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        if (strpos($current_url, '/dashboard/') !== false || 
+            strpos($current_url, '/wp-admin/') !== false || 
+            strpos($current_url, '/wp-login.php') !== false ||
+            strpos($current_url, '/admin/') !== false) {
             return;
         }
         

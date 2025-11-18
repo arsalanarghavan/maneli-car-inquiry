@@ -69,4 +69,88 @@ class Maneli_Permission_Helpers {
 
         return $assigned_expert_id === $user_id;
     }
+
+    /**
+     * Checks if user can delete items (checks license and demo mode)
+     *
+     * @param int $user_id
+     * @param string $item_type
+     * @return bool
+     */
+    public static function can_user_delete($user_id, $item_type = 'inquiry') {
+        // Check demo mode
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if ($license->is_demo_mode()) {
+                return false; // No deletion in demo mode
+            }
+            
+            // Check license
+            if (!$license->is_license_active()) {
+                return false;
+            }
+        }
+        
+        // Check user capability
+        if (user_can($user_id, 'manage_maneli_inquiries')) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Checks if user can edit items (checks license and demo mode)
+     *
+     * @param int $user_id
+     * @param string $item_type
+     * @return bool
+     */
+    public static function can_user_edit($user_id, $item_type = 'inquiry') {
+        // Check demo mode
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if ($license->is_demo_mode()) {
+                return false; // No editing in demo mode
+            }
+            
+            // Check license
+            if (!$license->is_license_active()) {
+                return false;
+            }
+        }
+        
+        // Check user capability
+        if (user_can($user_id, 'manage_maneli_inquiries') || user_can($user_id, 'edit_posts')) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Checks if demo mode is active
+     *
+     * @return bool
+     */
+    public static function is_demo_mode() {
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            return $license->is_demo_mode();
+        }
+        return false;
+    }
+
+    /**
+     * Checks if license is active
+     *
+     * @return bool
+     */
+    public static function is_license_active() {
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            return $license->is_license_active();
+        }
+        return false;
+    }
 }

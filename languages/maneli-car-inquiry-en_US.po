@@ -1762,8 +1762,6 @@ msgstr "Confirm Car Alert"
 msgid "I agree, I choose this car."
 msgstr "I agree, I choose this car."
 
-msgid "Previous"
-msgstr "Previous"
 
 msgid "Next"
 msgstr "Next"
@@ -4251,6 +4249,9 @@ msgstr "macOS"
 msgid "Linux"
 msgstr "Linux"
 
+msgid "GNU/Linux"
+msgstr "GNU/Linux"
+
 msgid "Android"
 msgstr "Android"
 
@@ -6409,6 +6410,9 @@ msgstr "Email retried successfully!"
 msgid "Telegram retried successfully!"
 msgstr "Telegram retried successfully!"
 
+msgid "Retry"
+msgstr "Retry"
+
 msgid "Retry sending this SMS?"
 msgstr "Retry sending this SMS?"
 
@@ -6772,6 +6776,9 @@ msgstr "Most Active Visitors"
 
 msgid "Recent Visitors"
 msgstr "Recent Visitors"
+
+msgid "Online Visitors"
+msgstr "Online Visitors"
 
 msgid "Online Visitors (Last 15 Minutes)"
 msgstr "Online Visitors (Last 15 Minutes)"
@@ -10662,3 +10669,330 @@ msgstr "Zimbabwe"
 msgctxt "country name"
 msgid "Kosovo"
 msgstr "Kosovo"
+
+# CAPTCHA Settings
+msgid "CAPTCHA & Security"
+msgstr "CAPTCHA & Security"
+
+msgid "CAPTCHA Settings"
+msgstr "CAPTCHA Settings"
+
+msgid "Enable CAPTCHA"
+msgstr "Enable CAPTCHA"
+
+msgid "Enable CAPTCHA protection for public forms (inquiry forms, login)."
+msgstr "Enable CAPTCHA protection for public forms (inquiry forms, login)."
+
+msgid "CAPTCHA Type"
+msgstr "CAPTCHA Type"
+
+msgid "Google reCAPTCHA v2"
+msgstr "Google reCAPTCHA v2"
+
+msgid "Google reCAPTCHA v3"
+msgstr "Google reCAPTCHA v3"
+
+msgid "hCaptcha"
+msgstr "hCaptcha"
+
+msgid "Select the CAPTCHA service to use. reCAPTCHA v3 works invisibly, v2 shows a checkbox challenge, hCaptcha is privacy-focused."
+msgstr "Select the CAPTCHA service to use. reCAPTCHA v3 works invisibly, v2 shows a checkbox challenge, hCaptcha is privacy-focused."
+
+msgid "Google reCAPTCHA v2 Configuration"
+msgstr "Google reCAPTCHA v2 Configuration"
+
+msgid "Get your keys from https://www.google.com/recaptcha/admin"
+msgstr "Get your keys from https://www.google.com/recaptcha/admin"
+
+msgid "Site Key (reCAPTCHA v2)"
+msgstr "Site Key (reCAPTCHA v2)"
+
+msgid "Your reCAPTCHA v2 site key."
+msgstr "Your reCAPTCHA v2 site key."
+
+msgid "Secret Key (reCAPTCHA v2)"
+msgstr "Secret Key (reCAPTCHA v2)"
+
+msgid "Your reCAPTCHA v2 secret key (will be encrypted)."
+msgstr "Your reCAPTCHA v2 secret key (will be encrypted)."
+
+msgid "Google reCAPTCHA v3 Configuration"
+msgstr "Google reCAPTCHA v3 Configuration"
+
+msgid "Site Key (reCAPTCHA v3)"
+msgstr "Site Key (reCAPTCHA v3)"
+
+msgid "Your reCAPTCHA v3 site key."
+msgstr "Your reCAPTCHA v3 site key."
+
+msgid "Secret Key (reCAPTCHA v3)"
+msgstr "Secret Key (reCAPTCHA v3)"
+
+msgid "Your reCAPTCHA v3 secret key (will be encrypted)."
+msgstr "Your reCAPTCHA v3 secret key (will be encrypted)."
+
+msgid "Score Threshold (reCAPTCHA v3)"
+msgstr "Score Threshold (reCAPTCHA v3)"
+
+msgid "Minimum score required (0.0 to 1.0). Higher values are more strict. Recommended: 0.5"
+msgstr "Minimum score required (0.0 to 1.0). Higher values are more strict. Recommended: 0.5"
+
+msgid "hCaptcha Configuration"
+msgstr "hCaptcha Configuration"
+
+msgid "Get your keys from https://www.hcaptcha.com/"
+msgstr "Get your keys from https://www.hcaptcha.com/"
+
+msgid "Site Key (hCaptcha)"
+msgstr "Site Key (hCaptcha)"
+
+msgid "Your hCaptcha site key."
+msgstr "Your hCaptcha site key."
+
+msgid "Secret Key (hCaptcha)"
+msgstr "Secret Key (hCaptcha)"
+
+msgid "Your hCaptcha secret key (will be encrypted)."
+msgstr "Your hCaptcha secret key (will be encrypted)."
+
+msgid "CAPTCHA token is missing."
+msgstr "CAPTCHA token is missing."
+
+msgid "CAPTCHA type is not configured."
+msgstr "CAPTCHA type is not configured."
+
+msgid "CAPTCHA secret key is not configured."
+msgstr "CAPTCHA secret key is not configured."
+
+msgid "Invalid CAPTCHA type."
+msgstr "Invalid CAPTCHA type."
+
+msgid "Failed to verify reCAPTCHA. Please try again."
+msgstr "Failed to verify reCAPTCHA. Please try again."
+
+msgid "Invalid response from reCAPTCHA service."
+msgstr "Invalid response from reCAPTCHA service."
+
+msgid "reCAPTCHA verification failed."
+msgstr "reCAPTCHA verification failed."
+
+msgid "reCAPTCHA token expired or already used. Please refresh and try again."
+msgstr "reCAPTCHA token expired or already used. Please refresh and try again."
+
+msgid "reCAPTCHA configuration error. Please contact the administrator."
+msgstr "reCAPTCHA configuration error. Please contact the administrator."
+
+msgid "reCAPTCHA verification failed. Your request appears to be suspicious."
+msgstr "reCAPTCHA verification failed. Your request appears to be suspicious."
+
+msgid "CAPTCHA verified successfully."
+msgstr "CAPTCHA verified successfully."
+
+msgid "Failed to verify hCaptcha. Please try again."
+msgstr "Failed to verify hCaptcha. Please try again."
+
+msgid "Invalid response from hCaptcha service."
+msgstr "Invalid response from hCaptcha service."
+
+msgid "hCaptcha verification failed."
+msgstr "hCaptcha verification failed."
+
+msgid "hCaptcha configuration error. Please contact the administrator."
+msgstr "hCaptcha configuration error. Please contact the administrator."
+
+msgid "CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again."
+msgstr "CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again."
+
+msgid "Verification Failed"
+msgstr "Verification Failed"
+
+msgid "Try Again"
+msgstr "Try Again"
+
+msgid "Network error occurred. Please check your internet connection and try again."
+msgstr "Network error occurred. Please check your internet connection and try again."
+
+msgid "CAPTCHA script could not be loaded. Please refresh the page and try again."
+msgstr "CAPTCHA script could not be loaded. Please refresh the page and try again."
+
+msgid "CAPTCHA token has expired. Please complete the challenge again."
+msgstr "CAPTCHA token has expired. Please complete the challenge again."
+
+# License Management Strings
+msgid "License Activation"
+msgstr "License Activation"
+
+msgid "License is active"
+msgstr "License is active"
+
+msgid "License is inactive"
+msgstr "License is inactive"
+
+msgid "Expiry date:"
+msgstr "Expiry date:"
+
+msgid "Activate License"
+msgstr "Activate License"
+
+msgid "Check License"
+msgstr "Check License"
+
+msgid "License Information"
+msgstr "License Information"
+
+msgid "Expiry Date:"
+msgstr "Expiry Date:"
+
+msgid "Current Domain:"
+msgstr "Current Domain:"
+
+msgid "Mode:"
+msgstr "Mode:"
+
+msgid "Demo"
+msgstr "Demo"
+
+msgid "Activating..."
+msgstr "Activating..."
+
+msgid "Deactivating..."
+msgstr "Deactivating..."
+
+msgid "Error activating license"
+msgstr "Error activating license"
+
+msgid "License is not valid"
+msgstr "License is not valid"
+
+msgid "Are you sure you want to deactivate the license?"
+msgstr "Are you sure you want to deactivate the license?"
+
+msgid "Error deactivating license"
+msgstr "Error deactivating license"
+
+msgid "License activated successfully"
+msgstr "License activated successfully"
+
+msgid "License deactivated successfully"
+msgstr "License deactivated successfully"
+
+msgid "Domain not found"
+msgstr "Domain not found"
+
+msgid "Error connecting to license server. Please try again."
+msgstr "Error connecting to license server. Please try again."
+
+msgid "The license is automatically checked based on the current domain. Click the \"Activate License\" button."
+msgstr "The license is automatically checked based on the current domain. Click the \"Activate License\" button."
+
+msgid "The license is automatically activated based on the current domain."
+msgstr "The license is automatically activated based on the current domain."
+
+msgid "Current domain:"
+msgstr "Current domain:"
+
+msgid "Please activate your license to use all plugin features."
+msgstr "Please activate your license to use all plugin features."
+
+msgid "Every 12 hours"
+msgstr "Every 12 hours"
+
+msgid "Last 7 Days"
+msgstr "Last 7 Days"
+
+msgid "Last 30 Days"
+msgstr "Last 30 Days"
+
+msgid "Last 90 Days"
+msgstr "Last 90 Days"
+
+msgid "This Year (January to Today)"
+msgstr "This Year (January to Today)"
+
+msgid "Visitors"
+msgstr "Visitors"
+
+msgid "This Month"
+msgstr "This Month"
+
+msgid "Traffic Trend Report"
+msgstr "Traffic Trend Report"
+
+msgid "Current Period"
+msgstr "Current Period"
+
+
+msgid "Daily Breakdown of Visits and Page Views Chart for Selected Period"
+msgstr "Daily Breakdown of Visits and Page Views Chart for Selected Period"
+
+
+msgid "Others"
+msgstr "Others"
+
+msgid "View Browser Usage"
+msgstr "View Browser Usage"
+
+msgid "(Not Set)"
+msgstr "(Not Set)"
+
+msgid "Operating System"
+msgstr "Operating System"
+
+msgid "Device Type"
+msgstr "Device Type"
+
+msgid "Smartphone"
+msgstr "Smartphone"
+
+msgid "Phablet"
+msgstr "Phablet"
+
+msgid "View Content"
+msgstr "View Content"
+
+msgid "Home Page"
+msgstr "Home Page"
+
+msgid "Visitor Information"
+msgstr "Visitor Information"
+
+msgid "Entry Page"
+msgstr "Entry Page"
+
+msgid "Exit Page"
+msgstr "Exit Page"
+
+msgid "Last Visit"
+msgstr "Last Visit"
+
+msgid "Direct Traffic"
+msgstr "Direct Traffic"
+
+msgid "Organic Search"
+msgstr "Organic Search"
+
+msgid "Organic Social Networks"
+msgstr "Organic Social Networks"
+
+msgid "Last Page"
+msgstr "Last Page"
+
+msgid "Global Visitor Distribution"
+msgstr "Global Visitor Distribution"
+
+msgid "Selected Period (%d Days)"
+msgstr "Selected Period (%d Days)"
+
+msgid "Last %d Days"
+msgstr "Last %d Days"
+
+
+
+msgid "Previous Period"
+msgstr "Previous Period"
+
+msgid "Previous"
+msgstr "Previous"
+
+msgid "Summary"
+msgstr "Summary"

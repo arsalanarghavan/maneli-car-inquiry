@@ -68,6 +68,41 @@ if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js')) {
     wp_enqueue_script('form-wizard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/form-wizard.js', ['jquery', 'vanilla-wizard'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js'), true);
 }
 
+// Enqueue CAPTCHA scripts if enabled
+if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+    $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+    $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+    
+    if (!empty($captcha_type) && !empty($site_key)) {
+        Maneli_Captcha_Helper::enqueue_script($captcha_type, $site_key);
+        
+        // Enqueue our CAPTCHA handler script
+        wp_enqueue_script(
+            'maneli-captcha',
+            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/captcha.js',
+            ['jquery'],
+            file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') ? filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') : '1.0.0',
+            true
+        );
+        
+        // Localize script with CAPTCHA config and error messages
+        wp_localize_script('maneli-captcha', 'maneliCaptchaConfig', [
+            'enabled' => true,
+            'type' => $captcha_type,
+            'siteKey' => $site_key,
+            'strings' => [
+                'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'maneli-car-inquiry'),
+                'error_title' => esc_html__('Verification Failed', 'maneli-car-inquiry'),
+                'try_again' => esc_html__('Try Again', 'maneli-car-inquiry'),
+                'loading' => esc_html__('Verifying...', 'maneli-car-inquiry'),
+                'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'maneli-car-inquiry'),
+                'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'maneli-car-inquiry'),
+                'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'maneli-car-inquiry')
+            ]
+        ]);
+    }
+}
+
 // Check for pending calculator data in localStorage (for users who logged in after selecting a car)
 ?>
 <script>

@@ -155,7 +155,17 @@
 
         // Function to log user actions
         function logUserAction(actionType, description, targetType, targetId, metadata) {
-            if (!ajaxUrl) return;
+            if (!ajaxUrl) {
+                if (typeof console !== 'undefined' && console.warn) {
+                    console.warn('Maneli Logging: AJAX URL not available');
+                }
+                return;
+            }
+
+            // Only log if user logging is enabled
+            if (!loggingSettings.enable_user_logging) {
+                return;
+            }
 
             $.ajax({
                 url: ajaxUrl,
@@ -169,8 +179,23 @@
                     metadata: metadata ? JSON.stringify(metadata) : null,
                     security: nonce
                 },
-                error: function() {
-                    // Silently fail
+                success: function(response) {
+                    // Optional: Log success in debug mode
+                    if (typeof window !== 'undefined' && window.maneliDebugLogging === true) {
+                        console.log('Maneli Logging: User action logged', actionType, description);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Log errors only in debug mode to avoid console spam
+                    if (typeof window !== 'undefined' && window.maneliDebugLogging === true) {
+                        console.warn('Maneli Logging: Failed to log user action', {
+                            actionType: actionType,
+                            description: description,
+                            status: status,
+                            error: error,
+                            response: xhr.responseText
+                        });
+                    }
                 }
             });
         }

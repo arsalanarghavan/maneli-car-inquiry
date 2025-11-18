@@ -21,61 +21,160 @@ class Maneli_Reports_Dashboard {
         global $wpdb;
         
         // تنظیم تاریخ پیش‌فرض (30 روز گذشته)
+        // اگر false باشد، محدودیت تاریخ حذف می‌شود (همه استعلام‌ها)
+        $use_date_filter = true;
+        if ($start_date === false) {
+            $use_date_filter = false;
+            $start_date = null;
+        }
         if (!$start_date) {
             $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if ($end_date === false) {
+            $use_date_filter = false;
+            $end_date = null;
         }
         if (!$end_date) {
             $end_date = date('Y-m-d');
         }
         
-        $date_query = "AND post_date >= %s AND post_date <= %s";
-        $params = [$start_date . ' 00:00:00', $end_date . ' 23:59:59'];
-        
-        // فیلتر بر اساس کارشناس (assigned_expert_id)
+        // فیلتر بر اساس کارشناس (assigned_expert_id) - برای استفاده در بخش‌های دیگر
         $expert_join = '';
         $expert_where = '';
         if ($expert_id) {
             $expert_join = "INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
             $expert_where = "AND pm_expert.meta_value = %d";
-            $params[] = $expert_id;
         }
         
-        // آمار استعلام‌های نقدی
-        $cash_params = $params;
-        $cash_stats = $wpdb->get_results($wpdb->prepare(
-            "SELECT 
-                pm.meta_value as status,
-                COUNT(*) as count
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'cash_inquiry_status'
-            $expert_join
-            WHERE p.post_type = 'cash_inquiry'
-            AND p.post_status = 'publish'
-            $date_query
-            $expert_where
-            GROUP BY pm.meta_value",
-            $cash_params
-        ));
+        // آمار استعلام‌های نقدی - استفاده از روش ساده و مستقیم
+        $cash_query_parts = [];
+        $cash_query_parts[] = "SELECT COALESCE(pm.meta_value, 'new') as status, COUNT(p.ID) as count";
+        $cash_query_parts[] = "FROM {$wpdb->posts} p";
+        $cash_query_parts[] = "LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'cash_inquiry_status'";
+        
+        $cash_where_parts = ["p.post_type = 'cash_inquiry'", "p.post_status = 'publish'"];
+        $cash_params = [];
+        
+        if ($expert_id) {
+            $cash_query_parts[] = "INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
+            $cash_where_parts[] = "pm_expert.meta_value = %d";
+            $cash_params[] = $expert_id;
+        }
+        
+        if ($use_date_filter) {
+            $cash_where_parts[] = "p.post_date >= %s";
+            $cash_where_parts[] = "p.post_date <= %s";
+            $cash_params[] = $start_date . ' 00:00:00';
+            $cash_params[] = $end_date . ' 23:59:59';
+        }
+        
+        $cash_query_parts[] = "WHERE " . implode(' AND ', $cash_where_parts);
+        $cash_query_parts[] = "GROUP BY COALESCE(pm.meta_value, 'new')";
+        
+        $cash_query = implode(' ', $cash_query_parts);
+        
+        if (!empty($cash_params)) {
+            $cash_stats = $wpdb->get_results($wpdb->prepare($cash_query, $cash_params));
+        } else {
+            $cash_stats = $wpdb->get_results($cash_query);
+        }
+        
+        // اگر نتیجه خالی است، مستقیماً تعداد را بشمار
+        if (empty($cash_stats) || (is_array($cash_stats) && count($cash_stats) === 0)) {
+            $cash_count_query = "SELECT COUNT(*) FROM {$wpdb->posts} p";
+            $cash_count_where = ["p.post_type = 'cash_inquiry'", "p.post_status = 'publish'"];
+            $cash_count_params = [];
+            
+            if ($expert_id) {
+                $cash_count_query .= " INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
+                $cash_count_where[] = "pm_expert.meta_value = %d";
+                $cash_count_params[] = $expert_id;
+            }
+            
+            if ($use_date_filter) {
+                $cash_count_where[] = "p.post_date >= %s";
+                $cash_count_where[] = "p.post_date <= %s";
+                $cash_count_params[] = $start_date . ' 00:00:00';
+                $cash_count_params[] = $end_date . ' 23:59:59';
+            }
+            
+            $cash_count_query .= " WHERE " . implode(' AND ', $cash_count_where);
+            
+            if (!empty($cash_count_params)) {
+                $cash_total = (int) $wpdb->get_var($wpdb->prepare($cash_count_query, $cash_count_params));
+            } else {
+                $cash_total = (int) $wpdb->get_var($cash_count_query);
+            }
+            
+            if ($cash_total > 0) {
+                $cash_stats = [(object)['status' => 'new', 'count' => $cash_total]];
+            }
+        }
         
         // آمار استعلام‌های اقساطی (با tracking_status)
-        $installment_params = [$start_date . ' 00:00:00', $end_date . ' 23:59:59'];
+        $installment_query_parts = [];
+        $installment_query_parts[] = "SELECT COALESCE(pm.meta_value, 'new') as status, COUNT(p.ID) as count";
+        $installment_query_parts[] = "FROM {$wpdb->posts} p";
+        $installment_query_parts[] = "LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'tracking_status'";
+        
+        $installment_where_parts = ["p.post_type = 'inquiry'", "p.post_status = 'publish'"];
+        $installment_params = [];
+        
         if ($expert_id) {
+            $installment_query_parts[] = "INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
+            $installment_where_parts[] = "pm_expert.meta_value = %d";
             $installment_params[] = $expert_id;
         }
-        $installment_stats = $wpdb->get_results($wpdb->prepare(
-            "SELECT 
-                pm.meta_value as status,
-                COUNT(*) as count
-            FROM {$wpdb->posts} p
-            LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'tracking_status'
-            $expert_join
-            WHERE p.post_type = 'inquiry'
-            AND p.post_status = 'publish'
-            $date_query
-            $expert_where
-            GROUP BY pm.meta_value",
-            $installment_params
-        ));
+        
+        if ($use_date_filter) {
+            $installment_where_parts[] = "p.post_date >= %s";
+            $installment_where_parts[] = "p.post_date <= %s";
+            $installment_params[] = $start_date . ' 00:00:00';
+            $installment_params[] = $end_date . ' 23:59:59';
+        }
+        
+        $installment_query_parts[] = "WHERE " . implode(' AND ', $installment_where_parts);
+        $installment_query_parts[] = "GROUP BY COALESCE(pm.meta_value, 'new')";
+        
+        $installment_query = implode(' ', $installment_query_parts);
+        
+        if (!empty($installment_params)) {
+            $installment_stats = $wpdb->get_results($wpdb->prepare($installment_query, $installment_params));
+        } else {
+            $installment_stats = $wpdb->get_results($installment_query);
+        }
+        
+        // اگر نتیجه خالی است، مستقیماً تعداد را بشمار
+        if (empty($installment_stats) || (is_array($installment_stats) && count($installment_stats) === 0)) {
+            $installment_count_query = "SELECT COUNT(*) FROM {$wpdb->posts} p";
+            $installment_count_where = ["p.post_type = 'inquiry'", "p.post_status = 'publish'"];
+            $installment_count_params = [];
+            
+            if ($expert_id) {
+                $installment_count_query .= " INNER JOIN {$wpdb->postmeta} pm_expert ON p.ID = pm_expert.post_id AND pm_expert.meta_key = 'assigned_expert_id'";
+                $installment_count_where[] = "pm_expert.meta_value = %d";
+                $installment_count_params[] = $expert_id;
+            }
+            
+            if ($use_date_filter) {
+                $installment_count_where[] = "p.post_date >= %s";
+                $installment_count_where[] = "p.post_date <= %s";
+                $installment_count_params[] = $start_date . ' 00:00:00';
+                $installment_count_params[] = $end_date . ' 23:59:59';
+            }
+            
+            $installment_count_query .= " WHERE " . implode(' AND ', $installment_count_where);
+            
+            if (!empty($installment_count_params)) {
+                $installment_total = (int) $wpdb->get_var($wpdb->prepare($installment_count_query, $installment_count_params));
+            } else {
+                $installment_total = (int) $wpdb->get_var($installment_count_query);
+            }
+            
+            if ($installment_total > 0) {
+                $installment_stats = [(object)['status' => 'new', 'count' => $installment_total]];
+            }
+        }
         
         // پردازش آمار با وضعیت‌های جدید
         $statistics = [
@@ -92,9 +191,20 @@ class Maneli_Reports_Dashboard {
             'revenue' => 0,
         ];
         
+        // اطمینان از اینکه $cash_stats و $installment_stats آرایه هستند
+        if (!is_array($cash_stats)) {
+            $cash_stats = [];
+        }
+        if (!is_array($installment_stats)) {
+            $installment_stats = [];
+        }
+        
         foreach ($cash_stats as $stat) {
-            $statistics['cash_inquiries'] += $stat->count;
-            $statistics['total_inquiries'] += $stat->count;
+            if (!isset($stat->count) || !isset($stat->status)) {
+                continue;
+            }
+            $statistics['cash_inquiries'] += (int) $stat->count;
+            $statistics['total_inquiries'] += (int) $stat->count;
             
             switch ($stat->status) {
                 case 'new':
@@ -120,8 +230,11 @@ class Maneli_Reports_Dashboard {
         }
         
         foreach ($installment_stats as $stat) {
-            $statistics['installment_inquiries'] += $stat->count;
-            $statistics['total_inquiries'] += $stat->count;
+            if (!isset($stat->count) || !isset($stat->status)) {
+                continue;
+            }
+            $statistics['installment_inquiries'] += (int) $stat->count;
+            $statistics['total_inquiries'] += (int) $stat->count;
             
             switch ($stat->status) {
                 case 'new':
@@ -847,10 +960,12 @@ class Maneli_Reports_Dashboard {
      * @return array
      */
     public static function get_business_statistics($start_date = null, $end_date = null) {
-        if (!$start_date) {
+        // اگر false باشد، محدودیت تاریخ حذف می‌شود (همه استعلام‌ها)
+        // در غیر این صورت، تاریخ پیش‌فرض (30 روز گذشته) استفاده می‌شود
+        if ($start_date !== false && !$start_date) {
             $start_date = date('Y-m-d', strtotime('-30 days'));
         }
-        if (!$end_date) {
+        if ($end_date !== false && !$end_date) {
             $end_date = date('Y-m-d');
         }
         

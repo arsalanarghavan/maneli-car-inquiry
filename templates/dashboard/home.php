@@ -145,6 +145,69 @@ if ($is_customer) {
         </div>
         <!-- End::page-header -->
 
+    <?php
+    // License Alert
+    $license = Maneli_License::instance();
+    if (!$license->is_license_active() && !$license->is_demo_mode()):
+        $license_activation_url = home_url('/dashboard?page=license-activation');
+        $license_nonce = wp_create_nonce('maneli_license_nonce');
+    ?>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert" id="license-alert">
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <i class="ri-alert-line me-2 fs-4"></i>
+                <div class="flex-grow-1">
+                    <strong><?php echo esc_html__('License is inactive', 'maneli-car-inquiry'); ?></strong>
+                    <p class="mb-0"><?php echo esc_html__('Please activate your license to use all plugin features.', 'maneli-car-inquiry'); ?></p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-warning btn-sm" id="check-license-alert-btn">
+                        <i class="ri-refresh-line me-1"></i><?php echo esc_html__('Check License', 'maneli-car-inquiry'); ?>
+                    </button>
+                    <a href="<?php echo esc_url($license_activation_url); ?>" class="btn btn-warning btn-sm">
+                        <i class="ri-key-line me-1"></i><?php echo esc_html__('Activate License', 'maneli-car-inquiry'); ?>
+                    </a>
+                </div>
+            </div>
+            <div id="license-check-message" class="mt-2"></div>
+        </div>
+        <script>
+        jQuery(document).ready(function($) {
+            $('#check-license-alert-btn').on('click', function() {
+                var $btn = $(this);
+                var $message = $('#license-check-message');
+                var originalText = $btn.html();
+                
+                    $btn.prop('disabled', true).html('<i class="ri-loader-4-line me-1 ri-spin"></i><?php echo esc_js(__('Checking...', 'maneli-car-inquiry')); ?>');
+                    $message.html('');
+                    
+                    $.ajax({
+                        url: maneli_ajax.url,
+                        type: 'POST',
+                        data: {
+                            action: 'maneli_check_license',
+                            nonce: '<?php echo esc_js($license_nonce); ?>'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                $message.html('<div class="alert alert-success mb-0"><i class="ri-checkbox-circle-line me-2"></i>' + response.data.message + '</div>');
+                                setTimeout(function() {
+                                    location.reload();
+                                }, 2000);
+                            } else {
+                                $message.html('<div class="alert alert-danger mb-0"><i class="ri-error-warning-line me-2"></i>' + (response.data.message || '<?php echo esc_js(__('License is not valid', 'maneli-car-inquiry')); ?>') + '</div>');
+                            }
+                            $btn.prop('disabled', false).html(originalText);
+                        },
+                        error: function() {
+                            $message.html('<div class="alert alert-danger mb-0"><i class="ri-error-warning-line me-2"></i><?php echo esc_js(__('Server connection error', 'maneli-car-inquiry')); ?></div>');
+                            $btn.prop('disabled', false).html(originalText);
+                        }
+                    });
+            });
+        });
+        </script>
+    <?php endif; ?>
+
     <!-- Start::row-1 - Statistics Cards -->
         <div class="row">
         <div class="col-xl col-lg-4 col-md-6 col-sm-6 col-6">
@@ -462,12 +525,45 @@ if ($is_customer) {
     
     // Get comprehensive statistics
     if ($is_admin && !$expert_id) {
-        // Full business statistics for admin
-        $business_stats = Maneli_Reports_Dashboard::get_business_statistics($start_date, $end_date);
-        $stats = $business_stats['overall'] ?? [];
+        // Full business statistics for admin - Get ALL inquiries (no date limit for main dashboard)
+        // Use direct database query for reliability - this is the most reliable method
+        global $wpdb;
+        
+        // Direct SQL queries - most reliable
+        $cash_total = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
+            'cash_inquiry',
+            'publish'
+        ));
+        
+        $installment_total = (int) $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
+            'inquiry',
+            'publish'
+        ));
+        
+        // Build stats array manually
+        $stats = [
+            'total_inquiries' => $cash_total + $installment_total,
+            'cash_inquiries' => $cash_total,
+            'installment_inquiries' => $installment_total,
+            'new' => 0,
+            'referred' => 0,
+            'in_progress' => 0,
+            'completed' => 0,
+            'rejected' => 0,
+            'followup_scheduled' => 0,
+            'new_today' => 0,
+            'revenue' => 0,
+        ];
+        
+        // Also get business stats for monthly data (use a very old date to get all)
+        $admin_start_date = '2000-01-01'; // Very old date to get all inquiries
+        $admin_end_date = date('Y-m-d');
+        $business_stats = Maneli_Reports_Dashboard::get_business_statistics($admin_start_date, $admin_end_date);
         $monthly_stats = $business_stats['monthly'] ?? [];
     } else {
-        // Expert or filtered statistics
+        // Expert or filtered statistics - Use date range for experts
         $stats = Maneli_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
     }
     
@@ -654,7 +750,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo esc_html($maneli_format_number($total_customer_inquiries)); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries'] ?? 0); ?></h4>
                             <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -672,7 +768,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo esc_html($maneli_format_number($cash_count)); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo maneli_number_format_persian($stats['cash_inquiries'] ?? 0); ?></h4>
                             <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>
@@ -690,7 +786,7 @@ if ($is_customer) {
                         </div>
                         <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo esc_html($maneli_format_number($installment_count)); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo maneli_number_format_persian($stats['installment_inquiries'] ?? 0); ?></h4>
                             <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></span>
                         </div>
                     </div>

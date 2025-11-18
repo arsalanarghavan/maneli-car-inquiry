@@ -1919,7 +1919,23 @@ function formatNumberForActiveLocale(num) {
                     if ($paginationWrapper.length) $paginationWrapper.css('opacity', 1);
                     const $expertFilter = $('#expert-filter');
                     if ($expertFilter.length && $expertFilter.is(':visible') && typeof $.fn.select2 !== 'undefined') {
-                        $expertFilter.select2({ width: '100%' });
+                        // Destroy existing Select2 instance if it exists to avoid duplicates
+                        if ($expertFilter.hasClass('select2-hidden-accessible')) {
+                            $expertFilter.select2('destroy');
+                        }
+                        $expertFilter.select2({ 
+                            width: '100%',
+                            minimumResultsForSearch: Infinity // Disable search box in Select2 dropdown
+                        });
+                        
+                        // Immediately remove any search box that might have been created
+                        setTimeout(function() {
+                            const $searchBox = $expertFilter.next('.select2-container').find('.select2-search--dropdown');
+                            if ($searchBox.length > 0) {
+                                console.log('🟢 AJAX complete: Removing search box...');
+                                $searchBox.remove();
+                            }
+                        }, 50);
                     }
                 }
             });
@@ -1983,6 +1999,275 @@ function formatNumberForActiveLocale(num) {
                 console.error('fetchInstallmentInquiries function not available!');
             }
         });
+        
+        // Prevent automatic Select2 initialization for expert-filter
+        // Use aggressive approach to completely prevent search box from appearing
+        const $expertFilter = $('#expert-filter');
+        
+        if ($expertFilter.length) {
+            let expertFilterInitialized = false;
+            let initializationAttempts = 0;
+            const maxAttempts = 50; // Stop after 50 attempts (15 seconds)
+            
+            // Strategy 1: Override Select2 initialization to prevent automatic init
+            // Store original select2 function
+            const originalSelect2 = $.fn.select2;
+            
+            // Wrap select2 to intercept calls for expert-filter
+            $.fn.select2 = function(options) {
+                const $this = $(this);
+                
+                // If this is expert-filter and options don't include minimumResultsForSearch
+                if ($this.attr('id') === 'expert-filter' || $this.is('#expert-filter')) {
+                    // Force our settings
+                    if (typeof options === 'object' && options !== null) {
+                        options.minimumResultsForSearch = Infinity;
+                    } else if (typeof options === 'undefined' || options === null) {
+                        options = {
+                            width: '100%',
+                            minimumResultsForSearch: Infinity
+                        };
+                    }
+                    
+                    // Mark as initialized by us
+                    expertFilterInitialized = true;
+                    console.log('🟢 Intercepted Select2 init for expert-filter, applying settings');
+                }
+                
+                // Call original select2
+                return originalSelect2.apply(this, arguments);
+            };
+            
+            // Strategy 2: Aggressive monitoring and removal of search box
+            const expertFilterProtection = setInterval(function() {
+                initializationAttempts++;
+                const $filter = $('#expert-filter');
+                
+                if ($filter.length && $filter.is(':visible')) {
+                    if ($filter.hasClass('select2-hidden-accessible')) {
+                        const select2Data = $filter.data('select2');
+                        
+                        // Check if Select2 was initialized without our settings
+                        if (select2Data) {
+                            // Force update options if needed
+                            if (!select2Data.options || select2Data.options.minimumResultsForSearch !== Infinity) {
+                                console.log('🟢 Fixing Select2 options for expert-filter...');
+                                // Update options directly
+                                if (select2Data.options) {
+                                    select2Data.options.minimumResultsForSearch = Infinity;
+                                }
+                            }
+                        }
+                        
+                        // Aggressively remove search box from all possible locations
+                        const searchBoxes = $('.select2-search--dropdown');
+                        searchBoxes.each(function() {
+                            const $searchBox = $(this);
+                            // Check if this search box belongs to expert-filter
+                            const $container = $searchBox.closest('.select2-container');
+                            const $relatedSelect = $container.prev('select.select2-hidden-accessible');
+                            
+                            if ($relatedSelect.length && $relatedSelect.attr('id') === 'expert-filter') {
+                                console.log('🟢 Removing search box from expert-filter...');
+                                $searchBox.remove();
+                            }
+                        });
+                        
+                        // Also check in dropdown
+                        const $dropdown = $('.select2-dropdown.select2-dropdown--below');
+                        if ($dropdown.length) {
+                            const $dropdownSearch = $dropdown.find('.select2-search--dropdown');
+                            if ($dropdownSearch.length > 0) {
+                                // Check if dropdown is related to expert-filter
+                                const $openContainer = $('.select2-container--open');
+                                if ($openContainer.length) {
+                                    const $relatedSelect = $openContainer.prev('select.select2-hidden-accessible');
+                                    if ($relatedSelect.length && $relatedSelect.attr('id') === 'expert-filter') {
+                                        console.log('🟢 Removing search box from dropdown...');
+                                        $dropdownSearch.remove();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Stop after max attempts
+                if (initializationAttempts >= maxAttempts) {
+                    clearInterval(expertFilterProtection);
+                    console.log('🟢 Stopped expert-filter protection monitoring');
+                }
+            }, 300); // Check every 300ms
+            
+            // Strategy 3: Use MutationObserver to detect and remove search box immediately
+            if (typeof MutationObserver !== 'undefined') {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) { // Element node
+                                const $node = $(node);
+                                
+                                // Check if this is a search box
+                                if ($node.hasClass('select2-search--dropdown') || $node.find('.select2-search--dropdown').length > 0) {
+                                    // Check if it's related to expert-filter
+                                    const $searchBox = $node.hasClass('select2-search--dropdown') ? $node : $node.find('.select2-search--dropdown');
+                                    
+                                    // Find the related select element
+                                    const $container = $searchBox.closest('.select2-container');
+                                    if ($container.length) {
+                                        const $relatedSelect = $container.prev('select.select2-hidden-accessible');
+                                        if ($relatedSelect.length && $relatedSelect.attr('id') === 'expert-filter') {
+                                            console.log('🟢 MutationObserver: Removing search box immediately...');
+                                            $searchBox.remove();
+                                        }
+                                    }
+                                    
+                                    // Also check in dropdown
+                                    const $dropdown = $searchBox.closest('.select2-dropdown');
+                                    if ($dropdown.length) {
+                                        const $openContainer = $('.select2-container--open');
+                                        if ($openContainer.length) {
+                                            const $relatedSelect = $openContainer.prev('select.select2-hidden-accessible');
+                                            if ($relatedSelect.length && $relatedSelect.attr('id') === 'expert-filter') {
+                                                console.log('🟢 MutationObserver: Removing search box from dropdown...');
+                                                $searchBox.remove();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                // Observe the entire document for changes
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+            
+            // Strategy 4: Remove search box on Select2 events - AGGRESSIVE APPROACH
+            $(document).on('select2:open select2:opening select2:selecting', '#expert-filter', function() {
+                function removeSearchBox() {
+                    // Remove from ALL possible locations
+                    $('.select2-search--dropdown').each(function() {
+                        const $searchBox = $(this);
+                        // Check if this belongs to expert-filter by checking nearby elements
+                        const $container = $searchBox.closest('.select2-container');
+                        const $dropdown = $searchBox.closest('.select2-dropdown');
+                        
+                        let shouldRemove = false;
+                        
+                        // Check if container is related to expert-filter
+                        if ($container.length) {
+                            const $relatedSelect = $container.prev('select.select2-hidden-accessible');
+                            if ($relatedSelect.length && $relatedSelect.attr('id') === 'expert-filter') {
+                                shouldRemove = true;
+                            }
+                        }
+                        
+                        // Check if dropdown is open and expert-filter is the active one
+                        if ($dropdown.length && $('.select2-container--open').length) {
+                            const $openContainer = $('.select2-container--open');
+                            const $relatedSelect = $openContainer.prev('select.select2-hidden-accessible');
+                            if ($relatedSelect.length && $relatedSelect.attr('id') === 'expert-filter') {
+                                shouldRemove = true;
+                            }
+                        }
+                        
+                        // Also check by looking for expert-filter in the page
+                        if ($('#expert-filter.select2-hidden-accessible').length && $('.select2-container--open').length) {
+                            shouldRemove = true;
+                        }
+                        
+                        if (shouldRemove) {
+                            console.log('🟢 Event handler: Removing search box...');
+                            $searchBox.remove();
+                            // Also remove the input field inside
+                            $searchBox.find('input').remove();
+                        }
+                    });
+                    
+                    // Also remove from dropdown directly
+                    const $dropdown = $('.select2-dropdown.select2-dropdown--below');
+                    if ($dropdown.length && $('#expert-filter.select2-hidden-accessible').length) {
+                        const $searchBox = $dropdown.find('.select2-search--dropdown');
+                        if ($searchBox.length > 0) {
+                            console.log('🟢 Event handler: Removing search box from dropdown...');
+                            $searchBox.remove();
+                            $searchBox.find('input').remove();
+                        }
+                    }
+                }
+                
+                // Remove immediately and with multiple delays to catch all cases
+                removeSearchBox();
+                setTimeout(removeSearchBox, 5);
+                setTimeout(removeSearchBox, 10);
+                setTimeout(removeSearchBox, 25);
+                setTimeout(removeSearchBox, 50);
+                setTimeout(removeSearchBox, 100);
+                setTimeout(removeSearchBox, 200);
+            });
+            
+            // Strategy 5: Continuous monitoring - remove search box every 100ms when dropdown is open
+            let continuousRemovalInterval = null;
+            
+            $(document).on('select2:open', '#expert-filter', function() {
+                // Start continuous removal
+                if (continuousRemovalInterval) {
+                    clearInterval(continuousRemovalInterval);
+                }
+                
+                continuousRemovalInterval = setInterval(function() {
+                    if (!$('#expert-filter').hasClass('select2-hidden-accessible')) {
+                        // Select2 is closed, stop monitoring
+                        if (continuousRemovalInterval) {
+                            clearInterval(continuousRemovalInterval);
+                            continuousRemovalInterval = null;
+                        }
+                        return;
+                    }
+                    
+                    // Remove all search boxes related to expert-filter
+                    $('.select2-search--dropdown').each(function() {
+                        const $searchBox = $(this);
+                        let shouldRemove = false;
+                        
+                        // Check if dropdown is open
+                        if ($('.select2-container--open').length) {
+                            const $openContainer = $('.select2-container--open');
+                            const $relatedSelect = $openContainer.prev('select.select2-hidden-accessible');
+                            
+                            if ($relatedSelect.length && $relatedSelect.attr('id') === 'expert-filter') {
+                                shouldRemove = true;
+                            }
+                            
+                            // Also check in dropdown
+                            const $dropdown = $searchBox.closest('.select2-dropdown');
+                            if ($dropdown.length && $('#expert-filter.select2-hidden-accessible').length) {
+                                shouldRemove = true;
+                            }
+                        }
+                        
+                        if (shouldRemove) {
+                            console.log('🟢 Continuous removal: Removing search box...');
+                            $searchBox.remove();
+                            $searchBox.find('input, .select2-search__field').remove();
+                        }
+                    });
+                }, 100); // Check every 100ms
+            });
+            
+            $(document).on('select2:close', '#expert-filter', function() {
+                // Stop continuous removal when dropdown closes
+                if (continuousRemovalInterval) {
+                    clearInterval(continuousRemovalInterval);
+                    continuousRemovalInterval = null;
+                }
+            });
+        }
         
         console.log('Installment inquiry filter setup complete!');
     } else {

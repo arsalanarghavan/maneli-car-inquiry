@@ -32,8 +32,20 @@ ob_start();
 include MANELI_PLUGIN_DIR . 'templates/dashboard/sidebar-menu.php';
 $sidebar_menu = ob_get_clean();
 
-// Get the dashboard HTML content
-$dashboard_html = file_get_contents(MANELI_PLUGIN_DIR . 'templates/dashboard-base.html');
+// Get the dashboard HTML content - validate file path to prevent path traversal
+$dashboard_html_file = MANELI_PLUGIN_DIR . 'templates/dashboard-base.html';
+$dashboard_html_realpath = realpath($dashboard_html_file);
+$plugin_dir_realpath = realpath(MANELI_PLUGIN_DIR);
+
+// Verify the file is within the plugin directory
+if ($dashboard_html_realpath === false || strpos($dashboard_html_realpath, $plugin_dir_realpath) !== 0) {
+    wp_die(esc_html__('Invalid file path detected.', 'maneli-car-inquiry'));
+}
+
+$dashboard_html = file_get_contents($dashboard_html_file);
+if ($dashboard_html === false) {
+    wp_die(esc_html__('Failed to load dashboard template.', 'maneli-car-inquiry'));
+}
 
 $preferred_language = method_exists($handler, 'get_preferred_language_slug')
     ? $handler->get_preferred_language_slug()
@@ -859,12 +871,23 @@ if (!empty($view_payment)) {
                 exit;
             }
         } else {
-            // Try to load page-specific content
-            $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/' . $page_slug . '.php';
-            if (file_exists($page_template)) {
-                ob_start();
-                include $page_template;
-                $page_content = ob_get_clean();
+            // Check for license-activation page via GET parameter
+            $get_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';
+            if ($get_page === 'license-activation') {
+                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/license-activation.php';
+                if (file_exists($page_template)) {
+                    ob_start();
+                    include $page_template;
+                    $page_content = ob_get_clean();
+                }
+            } else {
+                // Try to load page-specific content
+                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/' . $page_slug . '.php';
+                if (file_exists($page_template)) {
+                    ob_start();
+                    include $page_template;
+                    $page_content = ob_get_clean();
+                }
             }
         }
     }

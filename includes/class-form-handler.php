@@ -15,6 +15,15 @@ if (!defined('ABSPATH')) {
 class Maneli_Form_Handler {
 
     public function __construct() {
+        // Check license before loading form handlers
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // License not active - don't load form handlers
+                return;
+            }
+        }
+        
         $this->load_handlers();
     }
 

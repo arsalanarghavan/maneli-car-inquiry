@@ -15,11 +15,28 @@ if (!defined('ABSPATH')) {
 class Maneli_Loan_Calculator_Shortcode {
 
     public function __construct() {
+        // Check license before registering shortcode
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // License not active - register shortcode that shows message
+                add_shortcode('loan_calculator', [$this, 'render_license_required_message']);
+                return;
+            }
+        }
+        
         add_shortcode('loan_calculator', [$this, 'render_shortcode']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_calculator_assets']);
         
         // Automatically add calculator to single product pages
         add_action('woocommerce_after_single_product_summary', [$this, 'render_shortcode'], 15);
+    }
+
+    /**
+     * Render license required message
+     */
+    public function render_license_required_message() {
+        return '<div class="alert alert-warning"><i class="ri-alert-line me-2"></i>این قابلیت نیازمند لایسنس فعال است.</div>';
     }
 
     /**

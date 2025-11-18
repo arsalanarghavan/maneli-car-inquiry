@@ -2575,6 +2575,9 @@ msgstr ""
 msgid "Resend"
 msgstr ""
 
+msgid "Retry"
+msgstr ""
+
 msgid "Resend Delay (seconds)"
 msgstr ""
 

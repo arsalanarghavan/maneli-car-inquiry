@@ -85,7 +85,14 @@ class Maneli_Database {
         $data = wp_parse_args($data, $defaults);
         $data['meta'] = maybe_serialize($data['meta']);
         
-        $wpdb->insert($table, $data);
+        $result = $wpdb->insert($table, $data);
+        
+        if ($result === false) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Database Error (create_inquiry): ' . $wpdb->last_error);
+            }
+            return false;
+        }
         
         return $wpdb->insert_id;
     }
@@ -101,7 +108,16 @@ class Maneli_Database {
             $data['meta'] = maybe_serialize($data['meta']);
         }
         
-        return $wpdb->update($table, $data, array('id' => $id));
+        $result = $wpdb->update($table, $data, array('id' => $id));
+        
+        if ($result === false) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Database Error (update_inquiry): ' . $wpdb->last_error);
+            }
+            return false;
+        }
+        
+        return $result;
     }
 
     /**
@@ -137,7 +153,14 @@ class Maneli_Database {
             'user_id' => $data['user_id'] ? (int)$data['user_id'] : null,
         ), array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'));
         
-        return $result ? $wpdb->insert_id : false;
+        if ($result === false) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Database Error (log_notification): ' . $wpdb->last_error);
+            }
+            return false;
+        }
+        
+        return $wpdb->insert_id;
     }
 
     /**
@@ -151,11 +174,20 @@ class Maneli_Database {
             $data['sent_at'] = date('Y-m-d H:i:s', strtotime($data['sent_at']));
         }
         
-        return $wpdb->update($table, $data, array('id' => $id));
+        $result = $wpdb->update($table, $data, array('id' => $id));
+        
+        if ($result === false) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Database Error (update_notification_log): ' . $wpdb->last_error);
+            }
+            return false;
+        }
+        
+        return $result;
     }
 
     /**
-     * Get notification logs
+     * Get notification logs (includes migration from sms_history if needed)
      */
     public static function get_notification_logs($args = array()) {
         global $wpdb;
@@ -174,6 +206,7 @@ class Maneli_Database {
             'offset' => 0,
             'order_by' => 'created_at',
             'order' => 'DESC',
+            'include_sms_history' => true, // Include SMS history from post_meta
         );
         
         $args = wp_parse_args($args, $defaults);
@@ -221,11 +254,144 @@ class Maneli_Database {
         $query = "SELECT * FROM $table WHERE $where_clause ORDER BY $order_by LIMIT %d OFFSET %d";
         $query = $wpdb->prepare($query, $args['limit'], $args['offset']);
         
-        return $wpdb->get_results($query);
+        $logs = $wpdb->get_results($query);
+        
+        // If type is SMS and include_sms_history is true, merge with SMS history from post_meta
+        if ($args['include_sms_history'] && ($args['type'] === 'sms' || empty($args['type']))) {
+            $logs = self::merge_sms_history_with_logs($logs, $args);
+        }
+        
+        return $logs;
+    }
+    
+    /**
+     * Merge SMS history from post_meta with notification logs
+     */
+    private static function merge_sms_history_with_logs($logs, $args) {
+        global $wpdb;
+        
+        // Get all inquiries with SMS history
+        $post_types = ['cash_inquiry', 'inquiry'];
+        $meta_query = [
+            'key' => 'sms_history',
+            'compare' => 'EXISTS'
+        ];
+        
+        $inquiry_args = [
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => [$meta_query],
+        ];
+        
+        // Apply date filters if provided
+        if (!empty($args['date_from']) || !empty($args['date_to'])) {
+            $inquiry_args['date_query'] = [];
+            if (!empty($args['date_from'])) {
+                $inquiry_args['date_query']['after'] = $args['date_from'];
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+            if (!empty($args['date_to'])) {
+                $inquiry_args['date_query']['before'] = $args['date_to'] . ' 23:59:59';
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+        }
+        
+        $inquiries = get_posts($inquiry_args);
+        
+        $history_logs = [];
+        foreach ($inquiries as $inquiry) {
+            $sms_history = get_post_meta($inquiry->ID, 'sms_history', true);
+            if (!is_array($sms_history)) {
+                continue;
+            }
+            
+            foreach ($sms_history as $sms) {
+                // Skip if already in logs (check by recipient and message and date)
+                $skip = false;
+                if (!empty($logs)) {
+                    foreach ($logs as $log) {
+                        if ($log->recipient === ($sms['recipient'] ?? '') &&
+                            $log->message === ($sms['message'] ?? '') &&
+                            strtotime($log->created_at) === strtotime($sms['sent_at'] ?? '')) {
+                            $skip = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if ($skip) {
+                    continue;
+                }
+                
+                // Apply filters
+                if ($args['status'] !== '') {
+                    $sms_status = ($sms['success'] ?? false) ? 'sent' : 'failed';
+                    if ($sms_status !== $args['status']) {
+                        continue;
+                    }
+                }
+                
+                if (!empty($args['search'])) {
+                    $search_lower = strtolower($args['search']);
+                    if (stripos($sms['message'] ?? '', $args['search']) === false &&
+                        stripos($sms['recipient'] ?? '', $args['search']) === false) {
+                        continue;
+                    }
+                }
+                
+                if (!empty($args['date_from']) && isset($sms['sent_at'])) {
+                    if (strtotime($sms['sent_at']) < strtotime($args['date_from'])) {
+                        continue;
+                    }
+                }
+                
+                if (!empty($args['date_to']) && isset($sms['sent_at'])) {
+                    if (strtotime($sms['sent_at']) > strtotime($args['date_to'] . ' 23:59:59')) {
+                        continue;
+                    }
+                }
+                
+                // Convert SMS history entry to log format
+                $log_obj = (object)[
+                    'id' => 'history_' . $inquiry->ID . '_' . md5($sms['sent_at'] . $sms['recipient']),
+                    'type' => 'sms',
+                    'recipient' => $sms['recipient'] ?? '',
+                    'message' => $sms['message'] ?? '',
+                    'status' => ($sms['success'] ?? false) ? 'sent' : 'failed',
+                    'error_message' => $sms['error'] ?? null,
+                    'scheduled_at' => null,
+                    'sent_at' => $sms['sent_at'] ?? null,
+                    'created_at' => $sms['sent_at'] ?? current_time('mysql'),
+                    'related_id' => $inquiry->ID,
+                    'user_id' => $sms['user_id'] ?? 0,
+                ];
+                
+                $history_logs[] = $log_obj;
+            }
+        }
+        
+        // Merge and sort
+        $all_logs = array_merge($logs, $history_logs);
+        
+        // Sort by created_at
+        usort($all_logs, function($a, $b) use ($args) {
+            $a_time = strtotime($a->created_at);
+            $b_time = strtotime($b->created_at);
+            if ($args['order'] === 'ASC') {
+                return $a_time <=> $b_time;
+            }
+            return $b_time <=> $a_time;
+        });
+        
+        // Apply limit and offset
+        $all_logs = array_slice($all_logs, $args['offset'], $args['limit']);
+        
+        return $all_logs;
     }
 
     /**
-     * Get notification logs count
+     * Get notification logs count (includes SMS history if needed)
      */
     public static function get_notification_logs_count($args = array()) {
         global $wpdb;
@@ -240,6 +406,7 @@ class Maneli_Database {
             'date_from' => '',
             'date_to' => '',
             'search' => '',
+            'include_sms_history' => true,
         );
         
         $args = wp_parse_args($args, $defaults);
@@ -281,11 +448,94 @@ class Maneli_Database {
         $where_clause = implode(' AND ', $where);
         $query = "SELECT COUNT(*) FROM $table WHERE $where_clause";
         
-        return (int)$wpdb->get_var($query);
+        $count = (int)$wpdb->get_var($query);
+        
+        // If type is SMS and include_sms_history is true, add count from SMS history
+        if ($args['include_sms_history'] && ($args['type'] === 'sms' || empty($args['type']))) {
+            $history_count = self::count_sms_history($args);
+            $count += $history_count;
+        }
+        
+        return $count;
+    }
+    
+    /**
+     * Count SMS history entries from post_meta
+     */
+    private static function count_sms_history($args) {
+        $post_types = ['cash_inquiry', 'inquiry'];
+        $meta_query = [
+            'key' => 'sms_history',
+            'compare' => 'EXISTS'
+        ];
+        
+        $inquiry_args = [
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => [$meta_query],
+            'fields' => 'ids',
+        ];
+        
+        // Apply date filters if provided
+        if (!empty($args['date_from']) || !empty($args['date_to'])) {
+            $inquiry_args['date_query'] = [];
+            if (!empty($args['date_from'])) {
+                $inquiry_args['date_query']['after'] = $args['date_from'];
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+            if (!empty($args['date_to'])) {
+                $inquiry_args['date_query']['before'] = $args['date_to'] . ' 23:59:59';
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+        }
+        
+        $inquiry_ids = get_posts($inquiry_args);
+        
+        $count = 0;
+        foreach ($inquiry_ids as $inquiry_id) {
+            $sms_history = get_post_meta($inquiry_id, 'sms_history', true);
+            if (!is_array($sms_history)) {
+                continue;
+            }
+            
+            foreach ($sms_history as $sms) {
+                // Apply filters
+                if ($args['status'] !== '') {
+                    $sms_status = ($sms['success'] ?? false) ? 'sent' : 'failed';
+                    if ($sms_status !== $args['status']) {
+                        continue;
+                    }
+                }
+                
+                if (!empty($args['search'])) {
+                    if (stripos($sms['message'] ?? '', $args['search']) === false &&
+                        stripos($sms['recipient'] ?? '', $args['search']) === false) {
+                        continue;
+                    }
+                }
+                
+                if (!empty($args['date_from']) && isset($sms['sent_at'])) {
+                    if (strtotime($sms['sent_at']) < strtotime($args['date_from'])) {
+                        continue;
+                    }
+                }
+                
+                if (!empty($args['date_to']) && isset($sms['sent_at'])) {
+                    if (strtotime($sms['sent_at']) > strtotime($args['date_to'] . ' 23:59:59')) {
+                        continue;
+                    }
+                }
+                
+                $count++;
+            }
+        }
+        
+        return $count;
     }
 
     /**
-     * Get notification statistics
+     * Get notification statistics (includes SMS history if needed)
      */
     public static function get_notification_stats($args = array()) {
         global $wpdb;
@@ -295,6 +545,7 @@ class Maneli_Database {
             'date_from' => '',
             'date_to' => '',
             'type' => '',
+            'include_sms_history' => true,
         );
         
         $args = wp_parse_args($args, $defaults);
@@ -314,7 +565,7 @@ class Maneli_Database {
         
         $where_clause = implode(' AND ', $where);
         
-        $stats = $wpdb->get_row($wpdb->prepare("
+        $stats = $wpdb->get_row("
             SELECT 
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent,
@@ -326,9 +577,305 @@ class Maneli_Database {
                 SUM(CASE WHEN type = 'notification' AND status = 'sent' THEN 1 ELSE 0 END) as notification_sent
             FROM $table 
             WHERE $where_clause
-        "));
+        ");
+        
+        // If type is SMS and include_sms_history is true, add stats from SMS history
+        if ($args['include_sms_history'] && ($args['type'] === 'sms' || empty($args['type']))) {
+            $history_stats = self::get_sms_history_stats($args);
+            
+            // Merge stats
+            $stats->total = (int)($stats->total ?? 0) + (int)($history_stats['total'] ?? 0);
+            $stats->sent = (int)($stats->sent ?? 0) + (int)($history_stats['sent'] ?? 0);
+            $stats->failed = (int)($stats->failed ?? 0) + (int)($history_stats['failed'] ?? 0);
+            $stats->pending = (int)($stats->pending ?? 0) + (int)($history_stats['pending'] ?? 0);
+            
+            if ($args['type'] === 'sms' || empty($args['type'])) {
+                $stats->sms_sent = (int)($stats->sms_sent ?? 0) + (int)($history_stats['sent'] ?? 0);
+            }
+        }
         
         return $stats;
+    }
+    
+    /**
+     * Get SMS history statistics from post_meta
+     */
+    private static function get_sms_history_stats($args) {
+        $post_types = ['cash_inquiry', 'inquiry'];
+        $meta_query = [
+            'key' => 'sms_history',
+            'compare' => 'EXISTS'
+        ];
+        
+        $inquiry_args = [
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => [$meta_query],
+            'fields' => 'ids',
+        ];
+        
+        // Apply date filters if provided
+        if (!empty($args['date_from']) || !empty($args['date_to'])) {
+            $inquiry_args['date_query'] = [];
+            if (!empty($args['date_from'])) {
+                $inquiry_args['date_query']['after'] = $args['date_from'];
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+            if (!empty($args['date_to'])) {
+                $inquiry_args['date_query']['before'] = $args['date_to'] . ' 23:59:59';
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+        }
+        
+        $inquiry_ids = get_posts($inquiry_args);
+        
+        $stats = [
+            'total' => 0,
+            'sent' => 0,
+            'failed' => 0,
+            'pending' => 0,
+        ];
+        
+        foreach ($inquiry_ids as $inquiry_id) {
+            $sms_history = get_post_meta($inquiry_id, 'sms_history', true);
+            if (!is_array($sms_history)) {
+                continue;
+            }
+            
+            foreach ($sms_history as $sms) {
+                // Apply date filters
+                if (!empty($args['date_from']) && isset($sms['sent_at'])) {
+                    if (strtotime($sms['sent_at']) < strtotime($args['date_from'])) {
+                        continue;
+                    }
+                }
+                
+                if (!empty($args['date_to']) && isset($sms['sent_at'])) {
+                    if (strtotime($sms['sent_at']) > strtotime($args['date_to'] . ' 23:59:59')) {
+                        continue;
+                    }
+                }
+                
+                $stats['total']++;
+                if ($sms['success'] ?? false) {
+                    $stats['sent']++;
+                } else {
+                    $stats['failed']++;
+                }
+            }
+        }
+        
+        return $stats;
+    }
+
+    /**
+     * Get notification timeline data for charts (includes SMS history if needed)
+     */
+    public static function get_notification_timeline($args = array()) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'maneli_notification_logs';
+        
+        $defaults = array(
+            'date_from' => date('Y-m-d', strtotime('-30 days')),
+            'date_to' => date('Y-m-d'),
+            'type' => '',
+            'include_sms_history' => true,
+        );
+        
+        $args = wp_parse_args($args, $defaults);
+        $where = array('1=1');
+        
+        if (!empty($args['type'])) {
+            $where[] = $wpdb->prepare("type = %s", $args['type']);
+        }
+        
+        if (!empty($args['date_from'])) {
+            $where[] = $wpdb->prepare("DATE(created_at) >= %s", $args['date_from']);
+        }
+        
+        if (!empty($args['date_to'])) {
+            $where[] = $wpdb->prepare("DATE(created_at) <= %s", $args['date_to']);
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        
+        // Get daily counts grouped by date
+        $query = "
+            SELECT 
+                DATE(created_at) as date,
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) as sent,
+                SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+            FROM $table 
+            WHERE $where_clause
+            GROUP BY DATE(created_at)
+            ORDER BY DATE(created_at) ASC
+        ";
+        
+        $results = $wpdb->get_results($query);
+        
+        // If type is SMS and include_sms_history is true, add SMS history data
+        if ($args['include_sms_history'] && ($args['type'] === 'sms' || empty($args['type']))) {
+            $history_results = self::get_sms_history_timeline($args);
+            
+            // Merge results by date
+            $merged_results = [];
+            foreach ($results as $row) {
+                $merged_results[$row->date] = $row;
+            }
+            
+            foreach ($history_results as $row) {
+                if (isset($merged_results[$row->date])) {
+                    // Merge with existing data
+                    $merged_results[$row->date]->total += (int)$row->total;
+                    $merged_results[$row->date]->sent += (int)$row->sent;
+                    $merged_results[$row->date]->failed += (int)$row->failed;
+                    $merged_results[$row->date]->pending += (int)$row->pending;
+                } else {
+                    // Add new date
+                    $merged_results[$row->date] = $row;
+                }
+            }
+            
+            $results = array_values($merged_results);
+            // Sort by date
+            usort($results, function($a, $b) {
+                return strcmp($a->date, $b->date);
+            });
+        }
+        
+        // Generate date range
+        $start = new DateTime($args['date_from']);
+        $end = new DateTime($args['date_to']);
+        $interval = new DateInterval('P1D');
+        $date_range = new DatePeriod($start, $interval, $end->modify('+1 day'));
+        
+        // Create labels and data arrays
+        $labels = [];
+        $data = [];
+        $data_failed = [];
+        $data_pending = [];
+        
+        // Build a map of existing data
+        $data_map = [];
+        foreach ($results as $row) {
+            $data_map[$row->date] = [
+                'sent' => (int)$row->sent,
+                'failed' => (int)$row->failed,
+                'pending' => (int)$row->pending,
+                'total' => (int)$row->total
+            ];
+        }
+        
+        // Fill in dates (even if no data)
+        foreach ($date_range as $date) {
+            $date_str = $date->format('Y-m-d');
+            $labels[] = $date->format('Y/m/d');
+            
+            if (isset($data_map[$date_str])) {
+                $data[] = $data_map[$date_str]['sent'];
+                $data_failed[] = $data_map[$date_str]['failed'];
+                $data_pending[] = $data_map[$date_str]['pending'];
+            } else {
+                $data[] = 0;
+                $data_failed[] = 0;
+                $data_pending[] = 0;
+            }
+        }
+        
+        return [
+            'labels' => $labels,
+            'data' => $data,
+            'data_failed' => $data_failed,
+            'data_pending' => $data_pending
+        ];
+    }
+    
+    /**
+     * Get SMS history timeline data from post_meta
+     */
+    private static function get_sms_history_timeline($args) {
+        $post_types = ['cash_inquiry', 'inquiry'];
+        $meta_query = [
+            'key' => 'sms_history',
+            'compare' => 'EXISTS'
+        ];
+        
+        $inquiry_args = [
+            'post_type' => $post_types,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => [$meta_query],
+            'fields' => 'ids',
+        ];
+        
+        // Apply date filters if provided
+        if (!empty($args['date_from']) || !empty($args['date_to'])) {
+            $inquiry_args['date_query'] = [];
+            if (!empty($args['date_from'])) {
+                $inquiry_args['date_query']['after'] = $args['date_from'];
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+            if (!empty($args['date_to'])) {
+                $inquiry_args['date_query']['before'] = $args['date_to'] . ' 23:59:59';
+                $inquiry_args['date_query']['inclusive'] = true;
+            }
+        }
+        
+        $inquiry_ids = get_posts($inquiry_args);
+        
+        $daily_counts = [];
+        
+        foreach ($inquiry_ids as $inquiry_id) {
+            $sms_history = get_post_meta($inquiry_id, 'sms_history', true);
+            if (!is_array($sms_history)) {
+                continue;
+            }
+            
+            foreach ($sms_history as $sms) {
+                if (empty($sms['sent_at'])) {
+                    continue;
+                }
+                
+                $date = date('Y-m-d', strtotime($sms['sent_at']));
+                
+                // Apply date filters
+                if (!empty($args['date_from']) && strtotime($date) < strtotime($args['date_from'])) {
+                    continue;
+                }
+                
+                if (!empty($args['date_to']) && strtotime($date) > strtotime($args['date_to'])) {
+                    continue;
+                }
+                
+                if (!isset($daily_counts[$date])) {
+                    $daily_counts[$date] = [
+                        'date' => $date,
+                        'total' => 0,
+                        'sent' => 0,
+                        'failed' => 0,
+                        'pending' => 0,
+                    ];
+                }
+                
+                $daily_counts[$date]['total']++;
+                if ($sms['success'] ?? false) {
+                    $daily_counts[$date]['sent']++;
+                } else {
+                    $daily_counts[$date]['failed']++;
+                }
+            }
+        }
+        
+        // Convert to objects
+        $results = [];
+        foreach ($daily_counts as $count) {
+            $results[] = (object)$count;
+        }
+        
+        return $results;
     }
 
     /**
@@ -404,7 +951,23 @@ class Maneli_Database {
         $data = wp_parse_args($data, $defaults);
         
         if (is_array($data['variables'])) {
-            $data['variables'] = json_encode($data['variables']);
+            // Validate JSON encoding and limit size
+            $json_variables = json_encode($data['variables'], JSON_UNESCAPED_UNICODE);
+            if ($json_variables === false) {
+                // Log JSON encoding error
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Error: JSON encoding failed for variables. JSON error: ' . json_last_error_msg());
+                }
+                $data['variables'] = json_encode([]); // Fallback to empty array
+            } elseif (strlen($json_variables) > 5000) {
+                // Limit JSON size to 5KB for notification templates
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Warning: Variables JSON too large (' . strlen($json_variables) . ' bytes), truncating.');
+                }
+                $data['variables'] = substr($json_variables, 0, 5000);
+            } else {
+                $data['variables'] = $json_variables;
+            }
         }
         
         $result = $wpdb->insert($table, array(
@@ -427,7 +990,23 @@ class Maneli_Database {
         $table = $wpdb->prefix . 'maneli_notification_templates';
         
         if (isset($data['variables']) && is_array($data['variables'])) {
-            $data['variables'] = json_encode($data['variables']);
+            // Validate JSON encoding and limit size
+            $json_variables = json_encode($data['variables'], JSON_UNESCAPED_UNICODE);
+            if ($json_variables === false) {
+                // Log JSON encoding error
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Error: JSON encoding failed for variables. JSON error: ' . json_last_error_msg());
+                }
+                $data['variables'] = json_encode([]); // Fallback to empty array
+            } elseif (strlen($json_variables) > 5000) {
+                // Limit JSON size to 5KB for notification templates
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Warning: Variables JSON too large (' . strlen($json_variables) . ' bytes), truncating.');
+                }
+                $data['variables'] = substr($json_variables, 0, 5000);
+            } else {
+                $data['variables'] = $json_variables;
+            }
         }
         
         $update_data = array();
@@ -498,13 +1077,29 @@ class Maneli_Database {
             'line' => null,
             'user_id' => get_current_user_id() ?: ($session_user_id ?: null),
             'ip_address' => self::get_client_ip(),
-            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null,
+            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field($_SERVER['HTTP_USER_AGENT']) : null,
         );
         
         $data = wp_parse_args($data, $defaults);
         
         if (is_array($data['context'])) {
-            $data['context'] = json_encode($data['context'], JSON_UNESCAPED_UNICODE);
+            // Validate JSON encoding and limit size
+            $json_context = json_encode($data['context'], JSON_UNESCAPED_UNICODE);
+            if ($json_context === false) {
+                // Log JSON encoding error
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Error: JSON encoding failed for context. JSON error: ' . json_last_error_msg());
+                }
+                $data['context'] = json_encode([]); // Fallback to empty array
+            } elseif (strlen($json_context) > 10000) {
+                // Limit JSON size to 10KB to prevent database issues
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Warning: Context JSON too large (' . strlen($json_context) . ' bytes), truncating.');
+                }
+                $data['context'] = substr($json_context, 0, 10000);
+            } else {
+                $data['context'] = $json_context;
+            }
         }
 
         $log_type = sanitize_text_field($data['log_type']);
@@ -653,7 +1248,7 @@ class Maneli_Database {
             'target_id' => null,
             'metadata' => null,
             'ip_address' => self::get_client_ip(),
-            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null,
+            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? sanitize_text_field($_SERVER['HTTP_USER_AGENT']) : null,
         );
         
         $data = wp_parse_args($data, $defaults);
@@ -663,7 +1258,23 @@ class Maneli_Database {
         }
         
         if (is_array($data['metadata'])) {
-            $data['metadata'] = json_encode($data['metadata'], JSON_UNESCAPED_UNICODE);
+            // Validate JSON encoding and limit size
+            $json_metadata = json_encode($data['metadata'], JSON_UNESCAPED_UNICODE);
+            if ($json_metadata === false) {
+                // Log JSON encoding error
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Error: JSON encoding failed for metadata. JSON error: ' . json_last_error_msg());
+                }
+                $data['metadata'] = json_encode([]); // Fallback to empty array
+            } elseif (strlen($json_metadata) > 10000) {
+                // Limit JSON size to 10KB to prevent database issues
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Maneli Database Warning: Metadata JSON too large (' . strlen($json_metadata) . ' bytes), truncating.');
+                }
+                $data['metadata'] = substr($json_metadata, 0, 10000);
+            } else {
+                $data['metadata'] = $json_metadata;
+            }
         }
         
         $result = $wpdb->insert($table, array(
@@ -677,7 +1288,14 @@ class Maneli_Database {
             'user_agent' => $data['user_agent'],
         ), array('%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s'));
         
-        return $result ? $wpdb->insert_id : false;
+        if ($result === false) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli Database Error (log_user_log): ' . $wpdb->last_error);
+            }
+            return false;
+        }
+        
+        return $wpdb->insert_id;
     }
 
     /**

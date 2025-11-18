@@ -608,7 +608,7 @@
                 
                 // Recalculate
                 calculateInstallment();
-优先            });
+            });
         });
 
         // AJAX submission button - always attach listener, check login state inside
@@ -718,11 +718,31 @@
                 formData.append('installment_amount', installmentAmount);
                 formData.append('total_price', productPrice);
 
-                // Send AJAX request
-                fetch(maneli_ajax_object.ajax_url, {
-                    method: 'POST',
-                    body: formData
-                })
+                // Get CAPTCHA token if enabled
+                if (typeof maneliCaptcha !== 'undefined' && maneliCaptchaConfig && maneliCaptchaConfig.enabled) {
+                    maneliCaptcha.getToken().then(function(token) {
+                        if (token) {
+                            if (maneliCaptchaConfig.type === 'hcaptcha') {
+                                formData.append('h-captcha-response', token);
+                            } else if (maneliCaptchaConfig.type === 'recaptcha_v2') {
+                                formData.append('g-recaptcha-response', token);
+                            } else if (maneliCaptchaConfig.type === 'recaptcha_v3') {
+                                formData.append('captcha_token', token);
+                            }
+                        }
+                        sendAjaxRequest();
+                    }).catch(function() {
+                        sendAjaxRequest();
+                    });
+                } else {
+                    sendAjaxRequest();
+                }
+                
+                function sendAjaxRequest() {
+                    fetch(maneli_ajax_object.ajax_url, {
+                        method: 'POST',
+                        body: formData
+                    })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok: ' + response.status);
@@ -757,6 +777,7 @@
                     this.disabled = false;
                     this.textContent = originalText;
                 });
+                }
             });
         } else {
             console.warn('Maneli Calculator: Action button not found');

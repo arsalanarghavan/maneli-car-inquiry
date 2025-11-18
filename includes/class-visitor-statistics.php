@@ -74,7 +74,8 @@ class Maneli_Visitor_Statistics {
     }
     
     /**
-     * Parse user agent to get browser, OS, and device info
+     * Parse user agent using accurate detection service
+     * Falls back to local parsing if API fails
      */
     private static function parse_user_agent($user_agent) {
         $result = [
@@ -91,44 +92,246 @@ class Maneli_Visitor_Statistics {
             return $result;
         }
         
-        // Detect OS
-        if (preg_match('/windows nt 10/i', $user_agent)) {
-            $result['os'] = 'Windows';
-            $result['os_version'] = '10';
-            $result['normalized_device_model'] = 'Desktop';
-        } elseif (preg_match('/windows nt 6\.3/i', $user_agent)) {
-            $result['os'] = 'Windows';
-            $result['os_version'] = '8.1';
-            $result['normalized_device_model'] = 'Desktop';
-        } elseif (preg_match('/windows nt 6\.2/i', $user_agent)) {
-            $result['os'] = 'Windows';
-            $result['os_version'] = '8';
-            $result['normalized_device_model'] = 'Desktop';
-        } elseif (preg_match('/windows nt 6\.1/i', $user_agent)) {
-            $result['os'] = 'Windows';
-            $result['os_version'] = '7';
-            $result['normalized_device_model'] = 'Desktop';
-        } elseif (preg_match('/macintosh|mac os x/i', $user_agent)) {
-            $result['os'] = 'macOS';
-            if (preg_match('/mac os x (\d+)[._](\d+)/i', $user_agent, $matches)) {
-                $result['os_version'] = $matches[1] . '.' . $matches[2];
+        // Try to use accurate detection service first
+        $accurate_result = self::parse_user_agent_accurate($user_agent);
+        if ($accurate_result && $accurate_result['browser'] !== 'Unknown') {
+            return $accurate_result;
+        }
+        
+        // Fallback to local parsing
+        return self::parse_user_agent_local($user_agent);
+    }
+    
+    /**
+     * Parse user agent using accurate detection (API or library)
+     */
+    private static function parse_user_agent_accurate($user_agent) {
+        // Use UserAgentAPI.com for accurate detection (free and accurate)
+        $api_url = 'http://useragentapi.com/api/v3/json/' . urlencode($user_agent);
+        
+        // Try to get cached result first
+        $cache_key = 'maneli_ua_' . md5($user_agent);
+        $cached = get_transient($cache_key);
+        if ($cached !== false) {
+            return $cached;
+        }
+        
+        // Make API request with timeout
+        $response = wp_remote_get($api_url, [
+            'timeout' => 3,
+            'sslverify' => false // HTTP not HTTPS
+        ]);
+        
+        if (is_wp_error($response)) {
+            // API failed, return null to use local parsing
+            return null;
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+        
+        if (!$data || !isset($data['data'])) {
+            return null;
+        }
+        
+        $data = $data['data']; // UserAgentAPI wraps data in 'data' key
+        
+        // Parse API response
+        $result = [
+            'browser' => 'Unknown',
+            'browser_version' => '',
+            'os' => 'Unknown',
+            'os_version' => '',
+            'device_type' => 'desktop',
+            'device_model' => '',
+            'normalized_device_model' => ''
+        ];
+        
+        // Browser detection - UserAgentAPI format
+        if (isset($data['browser_name']) && !empty($data['browser_name'])) {
+            $browser_name = trim($data['browser_name']);
+            // Map to our browser names
+            $browser_map = [
+                'Chrome' => 'Chrome',
+                'Chrome Mobile' => 'Chrome Mobile',
+                'Safari' => 'Safari',
+                'Mobile Safari' => 'Mobile Safari',
+                'Firefox' => 'Firefox',
+                'Edge' => 'Edge',
+                'Opera' => 'Opera',
+                'Internet Explorer' => 'IE',
+                'Instagram' => 'Instagram'
+            ];
+            
+            foreach ($browser_map as $api_name => $our_name) {
+                if (stripos($browser_name, $api_name) !== false) {
+                    $result['browser'] = $our_name;
+                    break;
+                }
             }
-            $result['normalized_device_model'] = 'Desktop';
-        } elseif (preg_match('/linux/i', $user_agent)) {
-            $result['os'] = 'Linux';
-            $result['normalized_device_model'] = 'Desktop';
-        } elseif (preg_match('/android/i', $user_agent)) {
+            
+            if ($result['browser'] === 'Unknown') {
+                $result['browser'] = $browser_name;
+            }
+        }
+        
+        if (isset($data['browser_version']) && !empty($data['browser_version'])) {
+            $result['browser_version'] = trim($data['browser_version']);
+        }
+        
+        // OS detection - UserAgentAPI format
+        if (isset($data['platform_name']) && !empty($data['platform_name'])) {
+            $os_name = trim($data['platform_name']);
+            // Map to our OS names
+            $os_map = [
+                'Windows' => 'Windows',
+                'macOS' => 'macOS',
+                'Mac OS X' => 'macOS',
+                'Linux' => 'Linux',
+                'GNU/Linux' => 'GNU/Linux',
+                'Android' => 'Android',
+                'iOS' => 'iOS',
+                'iPadOS' => 'iOS'
+            ];
+            
+            foreach ($os_map as $api_name => $our_name) {
+                if (stripos($os_name, $api_name) !== false) {
+                    $result['os'] = $our_name;
+                    break;
+                }
+            }
+            
+            if ($result['os'] === 'Unknown') {
+                $result['os'] = $os_name;
+            }
+        }
+        
+        if (isset($data['platform_version']) && !empty($data['platform_version'])) {
+            $result['os_version'] = trim($data['platform_version']);
+        }
+        
+        // Device type detection - UserAgentAPI format
+        if (isset($data['device_type']) && !empty($data['device_type'])) {
+            $device_type = strtolower(trim($data['device_type']));
+            if (in_array($device_type, ['mobile', 'smartphone', 'phone'])) {
+                $result['device_type'] = 'mobile';
+            } elseif (in_array($device_type, ['tablet', 'ipad'])) {
+                $result['device_type'] = 'tablet';
+            } elseif (in_array($device_type, ['desktop', 'computer', 'pc'])) {
+                $result['device_type'] = 'desktop';
+            }
+        }
+        
+        // Device model detection - UserAgentAPI format
+        if (isset($data['device_name']) && !empty($data['device_name'])) {
+            $device_name = trim($data['device_name']);
+            if (!empty($device_name) && $device_name !== 'Unknown' && $device_name !== 'Generic') {
+                $result['device_model'] = $device_name;
+                $result['normalized_device_model'] = $device_name;
+            }
+        }
+        
+        // Cache result for 24 hours
+        set_transient($cache_key, $result, DAY_IN_SECONDS);
+        
+        return $result;
+    }
+    
+    /**
+     * Parse user agent locally (fallback method)
+     */
+    private static function parse_user_agent_local($user_agent) {
+        $result = [
+            'browser' => 'Unknown',
+            'browser_version' => '',
+            'os' => 'Unknown',
+            'os_version' => '',
+            'device_type' => 'desktop',
+            'device_model' => ''
+        ];
+        $result['normalized_device_model'] = '';
+        
+        // Detect OS - Check mobile OS first (Android/iOS) before desktop OS
+        // This prevents false detection of Linux when it's actually Android
+        if (preg_match('/android/i', $user_agent)) {
             $result['os'] = 'Android';
             $result['device_type'] = 'mobile';
             if (preg_match('/android ([\d.]+)/i', $user_agent, $matches)) {
                 $result['os_version'] = $matches[1];
             }
-            // Detect device model
-            if (preg_match('/(samsung|huawei|xiaomi|oneplus|oppo|vivo|realme|motorola|lg|sony|htc|nokia|asus|lenovo|zte|honor|google pixel|iphone)/i', $user_agent, $matches)) {
-                $result['device_model'] = ucfirst(strtolower($matches[1]));
-                $result['normalized_device_model'] = $result['device_model'];
+            // Try to extract specific device model from user agent
+            $device_model = '';
+            
+            // Samsung Galaxy models
+            if (preg_match('/samsung[-\s]?(?:galaxy[-\s])?([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 2) {
+                    $device_model = 'Samsung Galaxy ' . $model;
+                }
+            }
+            // Xiaomi/Redmi models
+            elseif (preg_match('/(?:xiaomi|redmi)[-\s]+([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 2) {
+                    $device_model = 'Xiaomi ' . $model;
+                }
+            }
+            // Huawei models
+            elseif (preg_match('/huawei[-\s]+([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 2) {
+                    $device_model = 'Huawei ' . $model;
+                }
+            }
+            // OnePlus models
+            elseif (preg_match('/oneplus[-\s]+([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 2) {
+                    $device_model = 'OnePlus ' . $model;
+                }
+            }
+            // OPPO models
+            elseif (preg_match('/oppo[-\s]+([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 2) {
+                    $device_model = 'OPPO ' . $model;
+                }
+            }
+            // Vivo models
+            elseif (preg_match('/vivo[-\s]+([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 2) {
+                    $device_model = 'Vivo ' . $model;
+                }
+            }
+            // Realme models
+            elseif (preg_match('/realme[-\s]+([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 2) {
+                    $device_model = 'Realme ' . $model;
+                }
+            }
+            // Google Pixel models
+            elseif (preg_match('/pixel[-\s]*([a-z0-9\s]+)/i', $user_agent, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model) && strlen($model) > 1) {
+                    $device_model = 'Google Pixel ' . $model;
+                } else {
+                    $device_model = 'Google Pixel';
+                }
+            }
+            // Generic brand detection (fallback - but we'll filter this out in display)
+            elseif (preg_match('/(samsung|huawei|xiaomi|oneplus|oppo|vivo|realme|motorola|lg|sony|htc|nokia|asus|lenovo|zte|honor)/i', $user_agent, $matches)) {
+                $brand = ucfirst(strtolower($matches[1]));
+                $device_model = $brand; // At least we have the brand
+            }
+            
+            if (!empty($device_model)) {
+                $result['device_model'] = $device_model;
+                $result['normalized_device_model'] = $device_model;
             } else {
-                $result['normalized_device_model'] = 'Android Device';
+                // Don't set to "Android Device" - leave empty so it can be filtered out
+                $result['normalized_device_model'] = '';
             }
         } elseif (preg_match('/iphone|ipod/i', $user_agent)) {
             $result['os'] = 'iOS';
@@ -147,68 +350,248 @@ class Maneli_Visitor_Statistics {
                 $result['os_version'] = str_replace('_', '.', $matches[1]);
             }
         }
+        // Desktop OS detection (after mobile OS)
+        elseif (preg_match('/windows nt 10/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '10';
+            $result['normalized_device_model'] = 'Desktop';
+        } elseif (preg_match('/windows nt 6\.3/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '8.1';
+            $result['normalized_device_model'] = 'Desktop';
+        } elseif (preg_match('/windows nt 6\.2/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '8';
+            $result['normalized_device_model'] = 'Desktop';
+        } elseif (preg_match('/windows nt 6\.1/i', $user_agent)) {
+            $result['os'] = 'Windows';
+            $result['os_version'] = '7';
+            $result['normalized_device_model'] = 'Desktop';
+        } elseif (preg_match('/macintosh|mac os x/i', $user_agent)) {
+            // Only set macOS if it's not a mobile device
+            // Mobile Safari on iOS devices should not be detected as macOS
+            if (!preg_match('/mobile|iphone|ipad|ipod/i', $user_agent)) {
+                $result['os'] = 'macOS';
+                if (preg_match('/mac os x (\d+)[._](\d+)/i', $user_agent, $matches)) {
+                    $result['os_version'] = $matches[1] . '.' . $matches[2];
+                }
+                $result['normalized_device_model'] = 'Desktop';
+            } else {
+                // If mobile keywords found, it's likely iOS (even if macOS is mentioned)
+                $result['os'] = 'iOS';
+                $result['device_type'] = preg_match('/ipad/i', $user_agent) ? 'tablet' : 'mobile';
+                if (preg_match('/iphone|ipod/i', $user_agent)) {
+                    $result['device_model'] = 'iPhone';
+                    $result['normalized_device_model'] = 'iPhone';
+                } elseif (preg_match('/ipad/i', $user_agent)) {
+                    $result['device_model'] = 'iPad';
+                    $result['normalized_device_model'] = 'iPad';
+                }
+                if (preg_match('/os ([\d_]+)/i', $user_agent, $matches)) {
+                    $result['os_version'] = str_replace('_', '.', $matches[1]);
+                }
+            }
+        } elseif (preg_match('/linux/i', $user_agent)) {
+            // Only set Linux if it's not a mobile device
+            // Mobile browsers often include "Linux" in user agent but are actually Android
+            if (!preg_match('/mobile|android|iphone|ipad|ipod/i', $user_agent)) {
+                $result['os'] = 'Linux';
+                $result['normalized_device_model'] = 'Desktop';
+            } else {
+                // If mobile keywords found, it's likely Android (even if Linux is mentioned)
+                $result['os'] = 'Android';
+                $result['device_type'] = 'mobile';
+            }
+        }
         
         // Detect Browser
-        if (preg_match('/edg\/([\d.]+)/i', $user_agent, $matches)) {
+        // Instagram in-app browser
+        if (preg_match('/instagram/i', $user_agent)) {
+            $result['browser'] = 'Instagram';
+        }
+        // Edge
+        elseif (preg_match('/edg\/([\d.]+)/i', $user_agent, $matches)) {
             $result['browser'] = 'Edge';
             $result['browser_version'] = $matches[1];
-        } elseif (preg_match('/chrome\/([\d.]+)/i', $user_agent, $matches)) {
+        }
+        // Chrome Mobile - can be on Android or iOS
+        elseif (preg_match('/chrome\/([\d.]+)/i', $user_agent, $matches) && preg_match('/mobile/i', $user_agent)) {
+            $result['browser'] = 'Chrome Mobile';
+            $result['browser_version'] = $matches[1];
+            // Ensure OS is correct: iOS if iPhone/iPad detected, Android otherwise
+            if (!in_array($result['os'], ['Android', 'iOS'])) {
+                // Check for iOS first (iPhone/iPad/iPod)
+                if (preg_match('/iphone|ipad|ipod/i', $user_agent)) {
+                    $result['os'] = 'iOS';
+                    $result['device_type'] = preg_match('/ipad/i', $user_agent) ? 'tablet' : 'mobile';
+                    if (preg_match('/iphone|ipod/i', $user_agent)) {
+                        $result['device_model'] = 'iPhone';
+                        $result['normalized_device_model'] = 'iPhone';
+                    } elseif (preg_match('/ipad/i', $user_agent)) {
+                        $result['device_model'] = 'iPad';
+                        $result['normalized_device_model'] = 'iPad';
+                    }
+                    if (preg_match('/os ([\d_]+)/i', $user_agent, $os_matches)) {
+                        $result['os_version'] = str_replace('_', '.', $os_matches[1]);
+                    }
+                } elseif (stripos($user_agent, 'android') !== false || (stripos($user_agent, 'linux') !== false && stripos($user_agent, 'mobile') !== false)) {
+                    // Android detected
+                    $result['os'] = 'Android';
+                    $result['device_type'] = 'mobile';
+                    if (preg_match('/android ([\d.]+)/i', $user_agent, $os_matches)) {
+                        $result['os_version'] = $os_matches[1];
+                    }
+                }
+            } else {
+                // OS already detected, but make sure it's correct
+                // If iOS was detected but user agent has Android, keep iOS (iOS takes priority)
+                // If Android was detected but user agent has iPhone/iPad, change to iOS
+                if ($result['os'] === 'Android' && preg_match('/iphone|ipad|ipod/i', $user_agent)) {
+                    $result['os'] = 'iOS';
+                    $result['device_type'] = preg_match('/ipad/i', $user_agent) ? 'tablet' : 'mobile';
+                    if (preg_match('/iphone|ipod/i', $user_agent)) {
+                        $result['device_model'] = 'iPhone';
+                        $result['normalized_device_model'] = 'iPhone';
+                    } elseif (preg_match('/ipad/i', $user_agent)) {
+                        $result['device_model'] = 'iPad';
+                        $result['normalized_device_model'] = 'iPad';
+                    }
+                    if (preg_match('/os ([\d_]+)/i', $user_agent, $os_matches)) {
+                        $result['os_version'] = str_replace('_', '.', $os_matches[1]);
+                    }
+                }
+            }
+        }
+        // Chrome
+        elseif (preg_match('/chrome\/([\d.]+)/i', $user_agent, $matches)) {
             $result['browser'] = 'Chrome';
             $result['browser_version'] = $matches[1];
-        } elseif (preg_match('/safari\/([\d.]+)/i', $user_agent, $matches) && !preg_match('/chrome/i', $user_agent)) {
+        }
+        // Mobile Safari - must be on iOS device (iPhone/iPad/iPod)
+        elseif (preg_match('/safari\/([\d.]+)/i', $user_agent, $matches) && !preg_match('/chrome/i', $user_agent) && preg_match('/iphone|ipod|ipad/i', $user_agent)) {
+            $result['browser'] = 'Mobile Safari';
+            $result['browser_version'] = $matches[1];
+            // Ensure OS is iOS if Mobile Safari is detected
+            if (!in_array($result['os'], ['iOS'])) {
+                $result['os'] = 'iOS';
+                $result['device_type'] = preg_match('/ipad/i', $user_agent) ? 'tablet' : 'mobile';
+                if (preg_match('/iphone|ipod/i', $user_agent)) {
+                    $result['device_model'] = 'iPhone';
+                    $result['normalized_device_model'] = 'iPhone';
+                } elseif (preg_match('/ipad/i', $user_agent)) {
+                    $result['device_model'] = 'iPad';
+                    $result['normalized_device_model'] = 'iPad';
+                }
+                if (preg_match('/os ([\d_]+)/i', $user_agent, $matches)) {
+                    $result['os_version'] = str_replace('_', '.', $matches[1]);
+                }
+            }
+        }
+        // Safari
+        elseif (preg_match('/safari\/([\d.]+)/i', $user_agent, $matches) && !preg_match('/chrome/i', $user_agent)) {
             $result['browser'] = 'Safari';
             $result['browser_version'] = $matches[1];
-        } elseif (preg_match('/firefox\/([\d.]+)/i', $user_agent, $matches)) {
+        }
+        // Firefox
+        elseif (preg_match('/firefox\/([\d.]+)/i', $user_agent, $matches)) {
             $result['browser'] = 'Firefox';
             $result['browser_version'] = $matches[1];
-        } elseif (preg_match('/msie|trident/i', $user_agent)) {
+        }
+        // IE
+        elseif (preg_match('/msie|trident/i', $user_agent)) {
             $result['browser'] = 'IE';
             if (preg_match('/msie ([\d.]+)/i', $user_agent, $matches)) {
                 $result['browser_version'] = $matches[1];
             }
-        } elseif (preg_match('/opera|opr\//i', $user_agent, $matches)) {
+        }
+        // Opera
+        elseif (preg_match('/opera|opr\//i', $user_agent, $matches)) {
             $result['browser'] = 'Opera';
             if (preg_match('/(?:opera|opr)\/([\d.]+)/i', $user_agent, $matches)) {
                 $result['browser_version'] = $matches[1];
             }
         }
         
-        // Fallback OS detection
+        // Fallback OS detection - Check mobile first
         if ($result['os'] === 'Unknown') {
-            if (stripos($user_agent, 'windows') !== false) {
+            if (stripos($user_agent, 'android') !== false) {
+                $result['os'] = 'Android';
+                $result['device_type'] = 'mobile';
+                $result['normalized_device_model'] = '';
+            } elseif (stripos($user_agent, 'iphone') !== false || stripos($user_agent, 'ipod') !== false) {
+                $result['os'] = 'iOS';
+                $result['device_type'] = 'mobile';
+                $result['normalized_device_model'] = 'iPhone';
+            } elseif (stripos($user_agent, 'ipad') !== false) {
+                $result['os'] = 'iOS';
+                $result['device_type'] = 'tablet';
+                $result['normalized_device_model'] = 'iPad';
+            } elseif (stripos($user_agent, 'windows') !== false) {
                 $result['os'] = 'Windows';
                 $result['normalized_device_model'] = 'Desktop';
             } elseif (stripos($user_agent, 'macintosh') !== false || stripos($user_agent, 'mac os') !== false) {
                 $result['os'] = 'macOS';
                 $result['normalized_device_model'] = 'Desktop';
             } elseif (stripos($user_agent, 'linux') !== false || stripos($user_agent, 'x11') !== false) {
-                $result['os'] = 'Linux';
-                $result['normalized_device_model'] = 'Desktop';
-            } elseif (stripos($user_agent, 'android') !== false) {
+                // Only set Linux if no mobile indicators
+                if (stripos($user_agent, 'mobile') === false && stripos($user_agent, 'android') === false) {
+                    $result['os'] = 'Linux';
+                    $result['normalized_device_model'] = 'Desktop';
+                } else {
+                    // Likely Android
+                    $result['os'] = 'Android';
+                    $result['device_type'] = 'mobile';
+                }
+            }
+        }
+        
+        // Post-process: If browser is mobile but OS is desktop, correct it
+        if (in_array($result['browser'], ['Chrome Mobile', 'Mobile Safari', 'Instagram']) && 
+            in_array($result['os'], ['Linux', 'Windows', 'macOS'])) {
+            // Mobile browser detected but desktop OS - likely Android or iOS
+            // Check for iOS first (takes priority)
+            if (stripos($user_agent, 'iphone') !== false || stripos($user_agent, 'ipad') !== false || stripos($user_agent, 'ipod') !== false) {
+                $result['os'] = 'iOS';
+                $result['device_type'] = stripos($user_agent, 'ipad') !== false ? 'tablet' : 'mobile';
+                if (stripos($user_agent, 'iphone') !== false || stripos($user_agent, 'ipod') !== false) {
+                    $result['device_model'] = 'iPhone';
+                    $result['normalized_device_model'] = 'iPhone';
+                } elseif (stripos($user_agent, 'ipad') !== false) {
+                    $result['device_model'] = 'iPad';
+                    $result['normalized_device_model'] = 'iPad';
+                }
+                if (preg_match('/os ([\d_]+)/i', $user_agent, $os_matches)) {
+                    $result['os_version'] = str_replace('_', '.', $os_matches[1]);
+                }
+            } elseif (stripos($user_agent, 'android') !== false || (stripos($user_agent, 'linux') !== false && stripos($user_agent, 'mobile') !== false)) {
                 $result['os'] = 'Android';
                 $result['device_type'] = 'mobile';
-                $result['normalized_device_model'] = 'Android Device';
-            } elseif (stripos($user_agent, 'iphone') !== false || stripos($user_agent, 'ipod') !== false) {
-                $result['os'] = 'iOS';
-                $result['device_type'] = 'mobile';
-                $result['normalized_device_model'] = 'iPhone';
-            } elseif (stripos($user_agent, 'ipad') !== false) {
-                $result['os'] = 'iPadOS';
-                $result['device_type'] = 'tablet';
-                $result['normalized_device_model'] = 'iPad';
+                if (preg_match('/android ([\d.]+)/i', $user_agent, $os_matches)) {
+                    $result['os_version'] = $os_matches[1];
+                }
             }
         }
 
         // Fallback browser detection
         if ($result['browser'] === 'Unknown') {
-            if (stripos($user_agent, 'edg') !== false || stripos($user_agent, 'edge') !== false) {
+            if (stripos($user_agent, 'instagram') !== false) {
+                $result['browser'] = 'Instagram';
+            } elseif (stripos($user_agent, 'edg') !== false || stripos($user_agent, 'edge') !== false) {
                 $result['browser'] = 'Edge';
             } elseif (stripos($user_agent, 'opr') !== false || stripos($user_agent, 'opera') !== false) {
                 $result['browser'] = 'Opera';
-            } elseif (stripos($user_agent, 'chrome') !== false && stripos($user_agent, 'chromium') === false) {
-                $result['browser'] = 'Chrome';
+            } elseif ((stripos($user_agent, 'chrome') !== false || stripos($user_agent, 'crios') !== false) && stripos($user_agent, 'chromium') === false) {
+                if (stripos($user_agent, 'mobile') !== false || stripos($user_agent, 'android') !== false) {
+                    $result['browser'] = 'Chrome Mobile';
+                } else {
+                    $result['browser'] = 'Chrome';
+                }
             } elseif (stripos($user_agent, 'safari') !== false && stripos($user_agent, 'chrome') === false) {
-                $result['browser'] = 'Safari';
+                if (stripos($user_agent, 'mobile') !== false || stripos($user_agent, 'iphone') !== false || stripos($user_agent, 'ipod') !== false || stripos($user_agent, 'ipad') !== false) {
+                    $result['browser'] = 'Mobile Safari';
+                } else {
+                    $result['browser'] = 'Safari';
+                }
             } elseif (stripos($user_agent, 'firefox') !== false) {
                 $result['browser'] = 'Firefox';
             } elseif (stripos($user_agent, 'chromium') !== false) {
@@ -415,6 +798,51 @@ class Maneli_Visitor_Statistics {
     public static function track_visit($page_url = null, $page_title = null, $referrer = null, $product_id = null) {
         global $wpdb;
         
+        // Get current page if not provided
+        if ($page_url === null) {
+            $page_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        }
+        
+        // Skip dashboard and admin pages
+        if (strpos($page_url, '/dashboard/') !== false || 
+            strpos($page_url, '/wp-admin/') !== false || 
+            strpos($page_url, '/wp-login.php') !== false ||
+            strpos($page_url, '/admin/') !== false) {
+            return false;
+        }
+        
+        // Skip static files (JS, CSS, images, fonts, maps, etc.)
+        $static_extensions = ['.js', '.css', '.jpg', '.jpeg', '.png', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map', '.json', '.xml', '.pdf', '.zip', '.rar'];
+        $page_url_lower = strtolower($page_url);
+        foreach ($static_extensions as $ext) {
+            if (strpos($page_url_lower, $ext) !== false) {
+                return false;
+            }
+        }
+        
+        // Skip WordPress content directories
+        if (strpos($page_url, '/wp-content/') !== false || 
+            strpos($page_url, '/wp-includes/') !== false) {
+            return false;
+        }
+        
+        // Skip 404 pages
+        if (strpos($page_url, '404') !== false || 
+            strpos($page_title, '404') !== false ||
+            strpos($page_title, 'برگه پیدا نشد') !== false ||
+            strpos($page_title, 'صفحه پیدا نشد') !== false) {
+            return false;
+        }
+        
+        // Skip internal/dashboard pages by title
+        if ($page_title && (
+            strpos($page_title, 'داشبورد') !== false ||
+            strpos($page_title, 'Dashboard') !== false ||
+            strpos($page_title, 'مدیریتی') !== false
+        )) {
+            return false;
+        }
+        
         // Get visitor info
         $ip = self::get_client_ip();
         $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
@@ -430,10 +858,13 @@ class Maneli_Visitor_Statistics {
             return false;
         }
         
-        // Get current page if not provided
-        if ($page_url === null) {
-            $page_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        // Rate limiting: Check if this page was already tracked in this session (within last 30 seconds)
+        $session_id = self::get_session_id();
+        $rate_limit_key = 'maneli_track_' . md5($session_id . $page_url);
+        if (get_transient($rate_limit_key)) {
+            return false; // Already tracked this page in this session recently
         }
+        set_transient($rate_limit_key, true, 30); // 30 seconds rate limit per page per session
         
         // Parse user agent
         $ua_info = self::parse_user_agent($user_agent);
@@ -512,8 +943,25 @@ class Maneli_Visitor_Statistics {
             $referrer_domain = isset($parsed['host']) ? $parsed['host'] : null;
         }
         
-        // Record visit
+        // Check if this exact visit was already recorded in the last 30 seconds (duplicate prevention)
         $visits_table = $wpdb->prefix . 'maneli_visits';
+        $recent_visit = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $visits_table 
+            WHERE visitor_id = %d 
+            AND page_url = %s 
+            AND session_id = %s 
+            AND visit_date > DATE_SUB(NOW(), INTERVAL 30 SECOND)
+            LIMIT 1",
+            $visitor_id,
+            $page_url,
+            $session_id
+        ));
+        
+        if ($recent_visit) {
+            return false; // Duplicate visit within 30 seconds - skip
+        }
+        
+        // Record visit
         $wpdb->insert(
             $visits_table,
             [
@@ -775,11 +1223,19 @@ class Maneli_Visitor_Statistics {
             WHERE DATE(v.visit_date) >= %s 
             AND DATE(v.visit_date) <= %s
             AND vis.is_bot = 0
+            AND v.page_url NOT LIKE %s
+            AND v.page_url NOT LIKE %s
+            AND v.page_url NOT LIKE %s
+            AND v.page_url NOT LIKE %s
             GROUP BY v.page_url, v.page_title
             ORDER BY visit_count DESC
             LIMIT %d",
             $start_date,
             $end_date,
+            '%/dashboard/%',
+            '%/wp-admin/%',
+            '%/wp-login.php%',
+            '%/admin/%',
             $limit
         ));
         
@@ -815,6 +1271,7 @@ class Maneli_Visitor_Statistics {
             AND DATE(v.visit_date) <= %s
             AND vis.is_bot = 0
             AND v.product_id IS NOT NULL
+            AND v.product_id > 0
             GROUP BY v.product_id
             ORDER BY visit_count DESC
             LIMIT %d",
@@ -1014,6 +1471,93 @@ class Maneli_Visitor_Statistics {
     }
     
     /**
+     * Get combined device models and operating systems statistics
+     * Returns both device models and OS stats combined
+     */
+    public static function get_combined_device_and_os_stats($limit = 20, $start_date = null, $end_date = null) {
+        global $wpdb;
+        
+        if (!$start_date) {
+            $start_date = date('Y-m-d', strtotime('-30 days'));
+        }
+        if (!$end_date) {
+            $end_date = date('Y-m-d');
+        }
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        // Get device models
+        $device_models = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.device_model as model_name,
+                'device' as type,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND vis.device_model IS NOT NULL
+            AND vis.device_model != ''
+            GROUP BY vis.device_model",
+            $start_date,
+            $end_date
+        ));
+        
+        // Get operating systems
+        $operating_systems = $wpdb->get_results($wpdb->prepare(
+            "SELECT 
+                vis.os as model_name,
+                'os' as type,
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE DATE(v.visit_date) >= %s 
+            AND DATE(v.visit_date) <= %s
+            AND vis.is_bot = 0
+            AND vis.os IS NOT NULL
+            AND vis.os != ''
+            GROUP BY vis.os",
+            $start_date,
+            $end_date
+        ));
+        
+        // Combine results
+        $combined = [];
+        
+        // Add device models
+        foreach ($device_models as $model) {
+            $combined[] = (object) [
+                'model_name' => $model->model_name,
+                'type' => 'device',
+                'visit_count' => (int) $model->visit_count,
+                'unique_visitors' => (int) $model->unique_visitors,
+            ];
+        }
+        
+        // Add operating systems
+        foreach ($operating_systems as $os) {
+            $combined[] = (object) [
+                'model_name' => $os->model_name,
+                'type' => 'os',
+                'visit_count' => (int) $os->visit_count,
+                'unique_visitors' => (int) $os->unique_visitors,
+            ];
+        }
+        
+        // Sort by visit_count descending
+        usort($combined, function($a, $b) {
+            return $b->visit_count - $a->visit_count;
+        });
+        
+        // Limit results
+        return array_slice($combined, 0, $limit);
+    }
+    
+    /**
      * Get country statistics
      */
     public static function get_country_stats($start_date = null, $end_date = null) {
@@ -1122,16 +1666,68 @@ class Maneli_Visitor_Statistics {
     }
     
     /**
-     * Get recent visitors
+     * Get recent visitors with complete information
      */
-    public static function get_recent_visitors($limit = 50) {
+    public static function get_recent_visitors($limit = 50, $start_date = null, $end_date = null) {
         global $wpdb;
         
         $visits_table = $wpdb->prefix . 'maneli_visits';
         $visitors_table = $wpdb->prefix . 'maneli_visitors';
         
-        $results = $wpdb->get_results($wpdb->prepare(
-            "SELECT 
+        $where_clause = "WHERE vis.is_bot = 0";
+        $params = [];
+        
+        // Filter out static files, dashboard, admin, and 404 pages
+        $where_clause .= " AND v.page_url NOT LIKE %s"; // Dashboard
+        $params[] = '%/dashboard/%';
+        $where_clause .= " AND v.page_url NOT LIKE %s"; // WP Admin
+        $params[] = '%/wp-admin/%';
+        $where_clause .= " AND v.page_url NOT LIKE %s"; // WP Login
+        $params[] = '%/wp-login.php%';
+        $where_clause .= " AND v.page_url NOT LIKE %s"; // Admin
+        $params[] = '%/admin/%';
+        $where_clause .= " AND v.page_url NOT LIKE %s"; // WP Content
+        $params[] = '%/wp-content/%';
+        $where_clause .= " AND v.page_url NOT LIKE %s"; // WP Includes
+        $params[] = '%/wp-includes/%';
+        $where_clause .= " AND v.page_url NOT LIKE %s"; // Static files
+        $params[] = '%.js%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.css%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.map%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.jpg%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.png%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.gif%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.svg%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.woff%';
+        $where_clause .= " AND v.page_url NOT LIKE %s";
+        $params[] = '%.ttf%';
+        $where_clause .= " AND (v.page_title IS NULL OR (v.page_title NOT LIKE %s AND v.page_title NOT LIKE %s AND v.page_title NOT LIKE %s))";
+        $params[] = '%404%';
+        $params[] = '%برگه پیدا نشد%';
+        $params[] = '%صفحه پیدا نشد%';
+        $where_clause .= " AND (v.page_title IS NULL OR (v.page_title NOT LIKE %s AND v.page_title NOT LIKE %s AND v.page_title NOT LIKE %s))";
+        $params[] = '%داشبورد%';
+        $params[] = '%Dashboard%';
+        $params[] = '%مدیریتی%';
+        
+        if ($start_date && $end_date) {
+            $where_clause .= " AND DATE(v.visit_date) >= %s AND DATE(v.visit_date) <= %s";
+            $params[] = $start_date;
+            $params[] = $end_date;
+        }
+        
+        $params[] = $limit;
+        
+        // Get unique visitors - only the most recent visit per visitor
+        // Use a simpler approach: get all visits, then filter and deduplicate in PHP
+        $query = "SELECT 
                 v.*,
                 vis.ip_address,
                 vis.country,
@@ -1139,16 +1735,131 @@ class Maneli_Visitor_Statistics {
                 vis.browser,
                 vis.os,
                 vis.device_type,
-                vis.device_model
+                vis.device_model,
+                (SELECT COUNT(DISTINCT v2.id)
+                 FROM $visits_table v2
+                 WHERE v2.visitor_id = vis.id" . 
+                 ($start_date && $end_date ? " AND DATE(v2.visit_date) >= %s AND DATE(v2.visit_date) <= %s" : "") . 
+                 " AND v2.page_url NOT LIKE '%/dashboard/%'
+                 AND v2.page_url NOT LIKE '%/wp-admin/%'
+                 AND v2.page_url NOT LIKE '%/wp-content/%'
+                 AND v2.page_url NOT LIKE '%.js%'
+                 AND v2.page_url NOT LIKE '%.css%'
+                 AND v2.page_url NOT LIKE '%.map%'
+                 AND (v2.page_title IS NULL OR (v2.page_title NOT LIKE '%404%' AND v2.page_title NOT LIKE '%برگه پیدا نشد%' AND v2.page_title NOT LIKE '%داشبورد%'))
+                 ) as total_visits,
+                (SELECT v3.referrer
+                 FROM $visits_table v3
+                 WHERE v3.visitor_id = vis.id
+                 AND v3.referrer IS NOT NULL
+                 AND v3.referrer != ''" . 
+                 ($start_date && $end_date ? " AND DATE(v3.visit_date) >= %s AND DATE(v3.visit_date) <= %s" : "") . 
+                 ($start_date && $end_date ? " AND v3.referrer NOT LIKE %s" : "") . 
+                 " ORDER BY v3.visit_date DESC
+                 LIMIT 1) as referrer_url,
+                (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(v4.referrer, '://', -1), '/', 1)
+                 FROM $visits_table v4
+                 WHERE v4.visitor_id = vis.id
+                 AND v4.referrer IS NOT NULL
+                 AND v4.referrer != ''" . 
+                 ($start_date && $end_date ? " AND DATE(v4.visit_date) >= %s AND DATE(v4.visit_date) <= %s" : "") . 
+                 ($start_date && $end_date ? " AND v4.referrer NOT LIKE %s" : "") . 
+                 " ORDER BY v4.visit_date DESC
+                 LIMIT 1) as referrer_domain
             FROM $visits_table v
             INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
-            WHERE vis.is_bot = 0
+            $where_clause
             ORDER BY v.visit_date DESC
-            LIMIT %d",
-            $limit
-        ));
+            LIMIT %d";
         
-        return $results;
+        // Get site domain for filtering self-referrals
+        $site_domain = parse_url(home_url(), PHP_URL_HOST);
+        $site_domain_clean = preg_replace('/^www\./', '', $site_domain);
+        
+        // Add date parameters for subqueries
+        $subquery_params = [];
+        if ($start_date && $end_date) {
+            // For total_visits subquery
+            $subquery_params[] = $start_date;
+            $subquery_params[] = $end_date;
+            // For referrer_url subquery - filter self-referrals
+            $subquery_params[] = $start_date;
+            $subquery_params[] = $end_date;
+            $subquery_params[] = '%' . $wpdb->esc_like($site_domain_clean) . '%';
+            // For referrer_domain subquery - filter self-referrals
+            $subquery_params[] = $start_date;
+            $subquery_params[] = $end_date;
+            $subquery_params[] = '%' . $wpdb->esc_like($site_domain_clean) . '%';
+        } else {
+            // Even without date filter, filter self-referrals
+            $subquery_params[] = '%' . $wpdb->esc_like($site_domain_clean) . '%';
+            $subquery_params[] = '%' . $wpdb->esc_like($site_domain_clean) . '%';
+        }
+        
+        // Merge subquery params, then main params
+        $all_params = array_merge($subquery_params, $params);
+        
+        $results = $wpdb->get_results($wpdb->prepare($query, $all_params));
+        
+        // Filter results in PHP - be less strict, only filter obvious invalid entries
+        $filtered_results = [];
+        $seen_visitors = []; // Track unique visitors
+        
+        foreach ($results as $result) {
+            // Skip if we've already seen this visitor (ensure uniqueness)
+            $visitor_key = $result->visitor_id ?? '';
+            if (isset($seen_visitors[$visitor_key])) {
+                continue;
+            }
+            $seen_visitors[$visitor_key] = true;
+            
+            // Only skip obvious invalid entries
+            $page_url_lower = strtolower($result->page_url ?? '');
+            $page_title_lower = strtolower($result->page_title ?? '');
+            
+            $skip = false;
+            
+            // Only check for obvious static files (not all extensions)
+            if ((strpos($page_url_lower, '.js') !== false && strpos($page_url_lower, '.min.js') !== false) ||
+                (strpos($page_url_lower, '.css') !== false && strpos($page_url_lower, '.min.css') !== false) ||
+                strpos($page_url_lower, '.map') !== false) {
+                $skip = true;
+            }
+            
+            // Only check for obvious internal paths
+            if (!$skip && (
+                strpos($page_url_lower, '/wp-admin/') !== false ||
+                strpos($page_url_lower, '/wp-content/plugins/') !== false ||
+                strpos($page_url_lower, '/wp-content/themes/') !== false ||
+                strpos($page_url_lower, '/wp-includes/') !== false
+            )) {
+                $skip = true;
+            }
+            
+            // Only check for obvious 404 pages
+            if (!$skip && (
+                strpos($page_title_lower, '404') !== false && strpos($page_title_lower, 'error') !== false ||
+                strpos($page_title_lower, 'برگه پیدا نشد') !== false
+            )) {
+                $skip = true;
+            }
+            
+            // Clear self-referrals
+            if (!empty($result->referrer_domain)) {
+                $referrer_domain_lower = strtolower($result->referrer_domain);
+                if ($referrer_domain_lower === $site_domain_clean || 
+                    strpos($referrer_domain_lower, $site_domain_clean) !== false) {
+                    $result->referrer_domain = '';
+                    $result->referrer_url = '';
+                }
+            }
+            
+            if (!$skip) {
+                $filtered_results[] = $result;
+            }
+        }
+        
+        return array_slice($filtered_results, 0, $limit);
     }
     
     /**
@@ -1193,7 +1904,7 @@ class Maneli_Visitor_Statistics {
     }
     
     /**
-     * Get most active visitors
+     * Get most active visitors with complete information
      */
     public static function get_most_active_visitors($limit = 10, $start_date = null, $end_date = null) {
         global $wpdb;
@@ -1208,24 +1919,164 @@ class Maneli_Visitor_Statistics {
         $visits_table = $wpdb->prefix . 'maneli_visits';
         $visitors_table = $wpdb->prefix . 'maneli_visitors';
         
+        // Get site domain for filtering self-referrals
+        $site_domain = parse_url(home_url(), PHP_URL_HOST);
+        $site_domain_clean = preg_replace('/^www\./', '', $site_domain);
+        
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
                 vis.*,
-                COUNT(DISTINCT v.id) as visit_count
+                COUNT(DISTINCT v.id) as visit_count,
+                MAX(v.visit_date) as last_visit_date,
+                (SELECT v2.page_url 
+                 FROM $visits_table v2 
+                 WHERE v2.visitor_id = vis.id 
+                 AND DATE(v2.visit_date) >= %s 
+                 AND DATE(v2.visit_date) <= %s
+                 ORDER BY v2.visit_date ASC 
+                 LIMIT 1) as entry_page_url,
+                (SELECT v2.page_title 
+                 FROM $visits_table v2 
+                 WHERE v2.visitor_id = vis.id 
+                 AND DATE(v2.visit_date) >= %s 
+                 AND DATE(v2.visit_date) <= %s
+                 ORDER BY v2.visit_date ASC 
+                 LIMIT 1) as entry_page_title,
+                (SELECT v3.page_url 
+                 FROM $visits_table v3 
+                 WHERE v3.visitor_id = vis.id 
+                 AND DATE(v3.visit_date) >= %s 
+                 AND DATE(v3.visit_date) <= %s
+                 ORDER BY v3.visit_date DESC 
+                 LIMIT 1) as exit_page_url,
+                (SELECT v3.page_title 
+                 FROM $visits_table v3 
+                 WHERE v3.visitor_id = vis.id 
+                 AND DATE(v3.visit_date) >= %s 
+                 AND DATE(v3.visit_date) <= %s
+                 ORDER BY v3.visit_date DESC 
+                 LIMIT 1) as exit_page_title,
+                (SELECT v4.referrer 
+                 FROM $visits_table v4 
+                 WHERE v4.visitor_id = vis.id 
+                 AND DATE(v4.visit_date) >= %s 
+                 AND DATE(v4.visit_date) <= %s
+                 AND v4.referrer IS NOT NULL 
+                 AND v4.referrer != ''
+                 AND v4.referrer NOT LIKE %s
+                 ORDER BY v4.visit_date ASC 
+                 LIMIT 1) as referrer_url,
+                (SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(v5.referrer, '://', -1), '/', 1)
+                 FROM $visits_table v5 
+                 WHERE v5.visitor_id = vis.id 
+                 AND DATE(v5.visit_date) >= %s 
+                 AND DATE(v5.visit_date) <= %s
+                 AND v5.referrer IS NOT NULL 
+                 AND v5.referrer != ''
+                 AND v5.referrer NOT LIKE %s
+                 ORDER BY v5.visit_date ASC 
+                 LIMIT 1) as referrer_domain
             FROM $visits_table v
             INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
             WHERE DATE(v.visit_date) >= %s 
             AND DATE(v.visit_date) <= %s
             AND vis.is_bot = 0
+            AND v.page_url NOT LIKE %s
+            AND v.page_url NOT LIKE %s
+            AND v.page_url NOT LIKE %s
             GROUP BY vis.id
+            HAVING visit_count > 0
             ORDER BY visit_count DESC
             LIMIT %d",
-            $start_date,
-            $end_date,
+            // Entry page URL params
+            $start_date, $end_date,
+            // Entry page title params
+            $start_date, $end_date,
+            // Exit page URL params
+            $start_date, $end_date,
+            // Exit page title params
+            $start_date, $end_date,
+            // Referrer URL params
+            $start_date, $end_date, '%' . $wpdb->esc_like($site_domain_clean) . '%',
+            // Referrer domain params
+            $start_date, $end_date, '%' . $wpdb->esc_like($site_domain_clean) . '%',
+            // Main query params - only filter obvious admin/static files
+            $start_date, $end_date, '%/wp-admin/%', '%/wp-content/plugins/%', '%/wp-content/themes/%',
             $limit
         ));
         
-        return $results;
+        // Filter results in PHP - accept ALL results, only set defaults for empty values
+        $filtered_results = [];
+        foreach ($results as $result) {
+            // Skip only if visit_count is 0 or null
+            if (empty($result->visit_count) || $result->visit_count == 0) {
+                continue;
+            }
+            
+            // If both entry and exit pages are empty/null, set default values
+            if (empty($result->entry_page_url) && empty($result->exit_page_url)) {
+                $result->entry_page_url = home_url('/');
+                $result->entry_page_title = esc_html__('Home Page', 'maneli-car-inquiry');
+                $result->exit_page_url = home_url('/');
+                $result->exit_page_title = esc_html__('Home Page', 'maneli-car-inquiry');
+            } elseif (empty($result->entry_page_url)) {
+                $result->entry_page_url = $result->exit_page_url ?? home_url('/');
+                $result->entry_page_title = $result->exit_page_title ?? esc_html__('Home Page', 'maneli-car-inquiry');
+            } elseif (empty($result->exit_page_url)) {
+                $result->exit_page_url = $result->entry_page_url ?? home_url('/');
+                $result->exit_page_title = $result->entry_page_title ?? esc_html__('Home Page', 'maneli-car-inquiry');
+            }
+            
+            // Clear self-referrals
+            if (!empty($result->referrer_domain)) {
+                $referrer_domain_lower = strtolower($result->referrer_domain);
+                if ($referrer_domain_lower === $site_domain_clean || 
+                    strpos($referrer_domain_lower, $site_domain_clean) !== false) {
+                    $result->referrer_domain = '';
+                    $result->referrer_url = '';
+                }
+            }
+            
+            // Accept ALL results - don't filter anything else
+            $filtered_results[] = $result;
+        }
+        
+        return $filtered_results;
+    }
+    
+    /**
+     * Get referrer type label (Direct, Search, Social)
+     */
+    public static function get_referrer_type_label($referrer_url, $referrer_domain) {
+        if (empty($referrer_url) && empty($referrer_domain)) {
+            return esc_html__('Direct Traffic', 'maneli-car-inquiry');
+        }
+        
+        $domain = strtolower($referrer_domain ?? '');
+        $url = strtolower($referrer_url ?? '');
+        
+        // Check for search engines
+        $search_engines = ['google', 'bing', 'yahoo', 'yandex', 'duckduckgo', 'baidu'];
+        foreach ($search_engines as $engine) {
+            if (strpos($domain, $engine) !== false || strpos($url, $engine) !== false) {
+                return esc_html__('Organic Search', 'maneli-car-inquiry');
+            }
+        }
+        
+        // Check for social networks
+        $social_networks = ['instagram', 'facebook', 'twitter', 'linkedin', 'telegram', 'whatsapp', 'youtube', 'tiktok', 'pinterest', 'snapchat'];
+        foreach ($social_networks as $social) {
+            if (strpos($domain, $social) !== false || strpos($url, $social) !== false) {
+                return esc_html__('Organic Social Networks', 'maneli-car-inquiry');
+            }
+        }
+        
+        // If referrer exists but not search or social, show domain
+        if (!empty($referrer_domain)) {
+            return $referrer_domain;
+        }
+        
+        return esc_html__('Direct Traffic', 'maneli-car-inquiry');
     }
     
     /**
@@ -1243,7 +2094,9 @@ class Maneli_Visitor_Statistics {
     public static function get_device_type_translation_map() {
         return [
             'desktop' => esc_html__('Desktop', 'maneli-car-inquiry'),
-            'mobile' => esc_html__('Mobile', 'maneli-car-inquiry'),
+            'mobile' => esc_html__('Smartphone', 'maneli-car-inquiry'),
+            'smartphone' => esc_html__('Smartphone', 'maneli-car-inquiry'),
+            'phablet' => esc_html__('Phablet', 'maneli-car-inquiry'),
             'tablet' => esc_html__('Tablet', 'maneli-car-inquiry'),
             'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
         ];
@@ -1254,21 +2107,89 @@ class Maneli_Visitor_Statistics {
      */
     public static function translate_device_model($device_model) {
         $device_model = trim((string) $device_model);
-        if ($device_model === '') {
-            return esc_html__('Unknown', 'maneli-car-inquiry');
+        if ($device_model === '' || strtolower($device_model) === 'desktop') {
+            return esc_html__('(Not Set)', 'maneli-car-inquiry');
         }
         
         $lookup = strtolower($device_model);
-        $map = [
+        
+        // Check for iPhone (must be first to catch iPhone models)
+        if (strpos($lookup, 'iphone') !== false) {
+            // Extract iPhone model if available (e.g., "iPhone 13", "iPhone 14 Pro")
+            if (preg_match('/iphone\s*(\d+|xr|xs|se|pro|max|plus)/i', $device_model, $matches)) {
+                $model_num = ucwords($matches[1]);
+                return esc_html__('Apple iPhone', 'maneli-car-inquiry') . ' ' . $model_num;
+            }
+            return esc_html__('Apple iPhone', 'maneli-car-inquiry');
+        }
+        
+        // Check for iPad
+        if (strpos($lookup, 'ipad') !== false) {
+            return esc_html__('iPad', 'maneli-car-inquiry');
+        }
+        
+        // Check for Samsung
+        if (strpos($lookup, 'samsung') !== false) {
+            // Try to extract Galaxy model
+            if (preg_match('/galaxy\s*([a-z0-9\s]+)/i', $device_model, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model)) {
+                    return esc_html__('Samsung Galaxy', 'maneli-car-inquiry') . ' ' . ucwords($model);
+                }
+            }
+            return esc_html__('Samsung Galaxy', 'maneli-car-inquiry');
+        }
+        
+        // Check for Xiaomi/Redmi
+        if (strpos($lookup, 'xiaomi') !== false || strpos($lookup, 'redmi') !== false) {
+            // Try to extract Redmi model
+            if (preg_match('/redmi\s*([a-z0-9\s]+)/i', $device_model, $matches)) {
+                $model = trim($matches[1]);
+                if (!empty($model)) {
+                    return esc_html__('Xiaomi Redmi', 'maneli-car-inquiry') . ' ' . ucwords($model);
+                }
+            }
+            return esc_html__('Xiaomi Redmi', 'maneli-car-inquiry');
+        }
+        
+        // Check for other common brands
+        if (strpos($lookup, 'huawei') !== false || strpos($lookup, 'honor') !== false) {
+            return esc_html__('Huawei', 'maneli-car-inquiry');
+        }
+        
+        if (strpos($lookup, 'oppo') !== false) {
+            return esc_html__('OPPO', 'maneli-car-inquiry');
+        }
+        
+        if (strpos($lookup, 'vivo') !== false) {
+            return esc_html__('Vivo', 'maneli-car-inquiry');
+        }
+        
+        if (strpos($lookup, 'oneplus') !== false) {
+            return esc_html__('OnePlus', 'maneli-car-inquiry');
+        }
+        
+        if (strpos($lookup, 'realme') !== false) {
+            return esc_html__('Realme', 'maneli-car-inquiry');
+        }
+        
+        // Generic device types - keep them as is, don't convert to "(Not Set)"
+        // This way we can see all device models, even generic ones
+        $generic_map = [
             'desktop' => esc_html__('Desktop', 'maneli-car-inquiry'),
             'android device' => esc_html__('Android Device', 'maneli-car-inquiry'),
             'mobile device' => esc_html__('Mobile Device', 'maneli-car-inquiry'),
             'tablet device' => esc_html__('Tablet Device', 'maneli-car-inquiry'),
-            'iphone' => esc_html__('iPhone', 'maneli-car-inquiry'),
-            'ipad' => esc_html__('iPad', 'maneli-car-inquiry'),
+            'unknown' => esc_html__('Unknown Device', 'maneli-car-inquiry'),
         ];
         
-        return $map[$lookup] ?? $device_model;
+        if (isset($generic_map[$lookup])) {
+            return $generic_map[$lookup];
+        }
+        
+        // Return original if it looks like a valid model name
+        // This preserves the original model name from database
+        return $device_model;
     }
     
     /**
@@ -1290,14 +2211,79 @@ class Maneli_Visitor_Statistics {
     public static function get_browser_translation_map() {
         return [
             'chrome' => esc_html__('Chrome', 'maneli-car-inquiry'),
+            'chrome mobile' => esc_html__('Chrome Mobile', 'maneli-car-inquiry'),
             'firefox' => esc_html__('Firefox', 'maneli-car-inquiry'),
             'safari' => esc_html__('Safari', 'maneli-car-inquiry'),
+            'mobile safari' => esc_html__('Mobile Safari', 'maneli-car-inquiry'),
             'edge' => esc_html__('Edge', 'maneli-car-inquiry'),
             'ie' => esc_html__('Internet Explorer', 'maneli-car-inquiry'),
             'opera' => esc_html__('Opera', 'maneli-car-inquiry'),
             'chromium' => esc_html__('Chromium', 'maneli-car-inquiry'),
+            'instagram' => esc_html__('Instagram', 'maneli-car-inquiry'),
             'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
         ];
+    }
+    
+    /**
+     * Get browser icon HTML
+     */
+    public static function get_browser_icon($browser) {
+        $browser_lower = strtolower(trim((string) $browser));
+        
+        // Map browsers to icons
+        $icon_map = [
+            'chrome' => '<i class="ri-chrome-line fs-18 text-primary"></i>',
+            'chrome mobile' => '<i class="ri-chrome-line fs-18 text-primary"></i>',
+            'firefox' => '<i class="ri-firefox-line fs-18 text-warning"></i>',
+            'safari' => '<i class="ri-safari-line fs-18 text-info"></i>',
+            'mobile safari' => '<i class="ri-safari-line fs-18 text-info"></i>',
+            'edge' => '<i class="ri-edge-line fs-18 text-primary"></i>',
+            'ie' => '<i class="ri-internet-explorer-line fs-18 text-info"></i>',
+            'opera' => '<i class="ri-opera-line fs-18 text-danger"></i>',
+            'chromium' => '<i class="ri-chrome-line fs-18 text-primary"></i>',
+            'instagram' => '<i class="ri-instagram-line fs-18 text-danger"></i>',
+        ];
+        
+        // Check for exact match first
+        if (isset($icon_map[$browser_lower])) {
+            return $icon_map[$browser_lower];
+        }
+        
+        // Check for partial matches
+        foreach ($icon_map as $key => $icon) {
+            if (strpos($browser_lower, $key) !== false || strpos($key, $browser_lower) !== false) {
+                return $icon;
+            }
+        }
+        
+        // Check for specific patterns
+        if (strpos($browser_lower, 'instagram') !== false) {
+            return $icon_map['instagram'];
+        }
+        if (strpos($browser_lower, 'chrome') !== false && strpos($browser_lower, 'mobile') !== false) {
+            return $icon_map['chrome mobile'];
+        }
+        if (strpos($browser_lower, 'chrome') !== false) {
+            return $icon_map['chrome'];
+        }
+        if (strpos($browser_lower, 'safari') !== false && strpos($browser_lower, 'mobile') !== false) {
+            return $icon_map['mobile safari'];
+        }
+        if (strpos($browser_lower, 'safari') !== false) {
+            return $icon_map['safari'];
+        }
+        if (strpos($browser_lower, 'firefox') !== false) {
+            return $icon_map['firefox'];
+        }
+        if (strpos($browser_lower, 'edge') !== false) {
+            return $icon_map['edge'];
+        }
+        if (strpos($browser_lower, 'opera') !== false) {
+            return $icon_map['opera'];
+        }
+        
+        // Default icon
+        return '<i class="ri-global-line fs-18 text-secondary"></i>';
     }
     
     /**
@@ -1320,12 +2306,211 @@ class Maneli_Visitor_Statistics {
         return [
             'windows' => esc_html__('Windows', 'maneli-car-inquiry'),
             'macos' => esc_html__('macOS', 'maneli-car-inquiry'),
-            'linux' => esc_html__('Linux', 'maneli-car-inquiry'),
+            'linux' => esc_html__('GNU/Linux', 'maneli-car-inquiry'),
             'android' => esc_html__('Android', 'maneli-car-inquiry'),
             'ios' => esc_html__('iOS', 'maneli-car-inquiry'),
             'ipados' => esc_html__('iPadOS', 'maneli-car-inquiry'),
             'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
         ];
+    }
+    
+    /**
+     * Get OS icon HTML
+     */
+    public static function get_os_icon($os) {
+        $os_lower = strtolower(trim((string) $os));
+        
+        // Map OS to icons
+        $icon_map = [
+            'android' => '<i class="ri-android-line fs-18 text-success"></i>',
+            'ios' => '<i class="ri-apple-line fs-18 text-secondary"></i>',
+            'ipados' => '<i class="ri-apple-line fs-18 text-secondary"></i>',
+            'windows' => '<i class="ri-windows-line fs-18 text-primary"></i>',
+            'macos' => '<i class="ri-apple-line fs-18 text-secondary"></i>',
+            'linux' => '<i class="ri-ubuntu-line fs-18 text-warning"></i>',
+        ];
+        
+        // Check for exact match first
+        if (isset($icon_map[$os_lower])) {
+            return $icon_map[$os_lower];
+        }
+        
+        // Check for partial matches
+        if (strpos($os_lower, 'android') !== false) {
+            return $icon_map['android'];
+        }
+        if (strpos($os_lower, 'ios') !== false || strpos($os_lower, 'iphone') !== false || strpos($os_lower, 'ipad') !== false) {
+            return $icon_map['ios'];
+        }
+        if (strpos($os_lower, 'windows') !== false) {
+            return $icon_map['windows'];
+        }
+        if (strpos($os_lower, 'mac') !== false || strpos($os_lower, 'darwin') !== false) {
+            return $icon_map['macos'];
+        }
+        if (strpos($os_lower, 'linux') !== false || strpos($os_lower, 'ubuntu') !== false || strpos($os_lower, 'debian') !== false) {
+            return $icon_map['linux'];
+        }
+        
+        // Default icon
+        return '<i class="ri-computer-line fs-18 text-secondary"></i>';
+    }
+    
+    /**
+     * Get device type icon HTML
+     */
+    public static function get_device_type_icon($device_type) {
+        $device_type_lower = strtolower(trim((string) $device_type));
+        
+        // Map device types to icons
+        $icon_map = [
+            'mobile' => '<i class="ri-smartphone-line fs-18 text-primary"></i>',
+            'smartphone' => '<i class="ri-smartphone-line fs-18 text-primary"></i>',
+            'phablet' => '<i class="ri-smartphone-2-line fs-18 text-info"></i>',
+            'tablet' => '<i class="ri-tablet-line fs-18 text-warning"></i>',
+            'desktop' => '<i class="ri-computer-line fs-18 text-success"></i>',
+        ];
+        
+        // Check for exact match first
+        if (isset($icon_map[$device_type_lower])) {
+            return $icon_map[$device_type_lower];
+        }
+        
+        // Check for partial matches
+        if (strpos($device_type_lower, 'mobile') !== false || strpos($device_type_lower, 'smartphone') !== false) {
+            return $icon_map['smartphone'];
+        }
+        if (strpos($device_type_lower, 'phablet') !== false) {
+            return $icon_map['phablet'];
+        }
+        if (strpos($device_type_lower, 'tablet') !== false || strpos($device_type_lower, 'ipad') !== false) {
+            return $icon_map['tablet'];
+        }
+        if (strpos($device_type_lower, 'desktop') !== false) {
+            return $icon_map['desktop'];
+        }
+        
+        // Default icon
+        return '<i class="ri-device-line fs-18 text-secondary"></i>';
+    }
+    
+    /**
+     * Get search engine icon HTML
+     */
+    public static function get_search_engine_icon($search_engine) {
+        $engine_lower = strtolower(trim((string) $search_engine));
+        
+        // Map search engines to icons
+        $icon_map = [
+            'google' => '<i class="ri-google-line fs-18" style="color: #4285F4;"></i>',
+            'bing' => '<i class="ri-search-line fs-18" style="color: #008373;"></i>',
+            'yahoo' => '<i class="ri-search-line fs-18" style="color: #6001D2;"></i>',
+            'yandex' => '<i class="ri-search-line fs-18" style="color: #FC3F1D;"></i>',
+            'duckduckgo' => '<i class="ri-search-line fs-18" style="color: #DE5833;"></i>',
+            'baidu' => '<i class="ri-search-line fs-18" style="color: #2932E1;"></i>',
+        ];
+        
+        // Check for exact match first
+        if (isset($icon_map[$engine_lower])) {
+            return $icon_map[$engine_lower];
+        }
+        
+        // Check for partial matches
+        foreach ($icon_map as $key => $icon) {
+            if (strpos($engine_lower, $key) !== false || strpos($key, $engine_lower) !== false) {
+                return $icon;
+            }
+        }
+        
+        // Default icon
+        return '<i class="ri-search-line fs-18 text-secondary"></i>';
+    }
+    
+    /**
+     * Get referrer icon HTML based on domain
+     */
+    public static function get_referrer_icon($referrer_domain) {
+        if (empty($referrer_domain)) {
+            return '<i class="ri-links-line fs-18 text-secondary"></i>';
+        }
+        
+        $domain_lower = strtolower(trim((string) $referrer_domain));
+        // Remove www. prefix for matching
+        $domain_lower = preg_replace('/^www\./', '', $domain_lower);
+        
+        // Map referrers to icons
+        $icon_map = [
+            'google.com' => '<i class="ri-google-line fs-18" style="color: #4285F4;"></i>',
+            'google.com.au' => '<i class="ri-google-line fs-18" style="color: #4285F4;"></i>',
+            'google.co.uk' => '<i class="ri-google-line fs-18" style="color: #4285F4;"></i>',
+            'bing.com' => '<i class="ri-search-line fs-18" style="color: #008373;"></i>',
+            'yahoo.com' => '<i class="ri-search-line fs-18" style="color: #6001D2;"></i>',
+            'yandex.com' => '<i class="ri-search-line fs-18" style="color: #FC3F1D;"></i>',
+            'duckduckgo.com' => '<i class="ri-search-line fs-18" style="color: #DE5833;"></i>',
+            'facebook.com' => '<i class="ri-facebook-line fs-18" style="color: #1877F2;"></i>',
+            'm.facebook.com' => '<i class="ri-facebook-line fs-18" style="color: #1877F2;"></i>',
+            'instagram.com' => '<i class="ri-instagram-line fs-18" style="color: #E4405F;"></i>',
+            'l.instagram.com' => '<i class="ri-instagram-line fs-18" style="color: #E4405F;"></i>',
+            'twitter.com' => '<i class="ri-twitter-x-line fs-18" style="color: #1DA1F2;"></i>',
+            'x.com' => '<i class="ri-twitter-x-line fs-18" style="color: #000000;"></i>',
+            'linkedin.com' => '<i class="ri-linkedin-box-line fs-18" style="color: #0A66C2;"></i>',
+            'reddit.com' => '<i class="ri-reddit-line fs-18" style="color: #FF4500;"></i>',
+            'youtube.com' => '<i class="ri-youtube-line fs-18" style="color: #FF0000;"></i>',
+            'tiktok.com' => '<i class="ri-tiktok-line fs-18" style="color: #000000;"></i>',
+            'telegram.org' => '<i class="ri-telegram-line fs-18" style="color: #0088CC;"></i>',
+            'whatsapp.com' => '<i class="ri-whatsapp-line fs-18" style="color: #25D366;"></i>',
+        ];
+        
+        // Check for exact match first
+        if (isset($icon_map[$domain_lower])) {
+            return $icon_map[$domain_lower];
+        }
+        
+        // Check for partial matches (domain contains key)
+        foreach ($icon_map as $key => $icon) {
+            if (strpos($domain_lower, $key) !== false) {
+                return $icon;
+            }
+        }
+        
+        // Check for common patterns
+        if (strpos($domain_lower, 'google') !== false) {
+            return $icon_map['google.com'];
+        }
+        if (strpos($domain_lower, 'facebook') !== false) {
+            return $icon_map['facebook.com'];
+        }
+        if (strpos($domain_lower, 'instagram') !== false) {
+            return $icon_map['instagram.com'];
+        }
+        if (strpos($domain_lower, 'twitter') !== false || strpos($domain_lower, 'x.com') !== false) {
+            return $icon_map['twitter.com'];
+        }
+        if (strpos($domain_lower, 'reddit') !== false) {
+            return $icon_map['reddit.com'];
+        }
+        if (strpos($domain_lower, 'youtube') !== false) {
+            return $icon_map['youtube.com'];
+        }
+        if (strpos($domain_lower, 'linkedin') !== false) {
+            return $icon_map['linkedin.com'];
+        }
+        if (strpos($domain_lower, 'telegram') !== false) {
+            return $icon_map['telegram.org'];
+        }
+        if (strpos($domain_lower, 'whatsapp') !== false) {
+            return $icon_map['whatsapp.com'];
+        }
+        
+        // Check if it's the same site (self-referral)
+        $site_domain = strtolower(parse_url(home_url(), PHP_URL_HOST));
+        $site_domain_clean = preg_replace('/^www\./', '', $site_domain);
+        if ($domain_lower === $site_domain_clean || strpos($domain_lower, $site_domain_clean) !== false) {
+            return '<i class="ri-home-line fs-18 text-primary"></i>';
+        }
+        
+        // Default icon for unknown referrers
+        return '<i class="ri-links-line fs-18 text-secondary"></i>';
     }
     
     /**
@@ -2227,6 +3412,104 @@ class Maneli_Visitor_Statistics {
         
         return trim($translated . ' ' . esc_html__('ago', 'maneli-car-inquiry'));
     }
+    
+    /**
+     * Get statistics for different time periods
+     * Returns stats for: today, yesterday, this week, last week, this month, last month, etc.
+     */
+    public static function get_period_statistics() {
+        global $wpdb;
+        
+        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        
+        $today = date('Y-m-d');
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        $this_week_start = date('Y-m-d', strtotime('monday this week'));
+        $last_week_start = date('Y-m-d', strtotime('monday last week'));
+        $last_week_end = date('Y-m-d', strtotime('sunday last week'));
+        $this_month_start = date('Y-m-01');
+        $last_month_start = date('Y-m-01', strtotime('first day of last month'));
+        $last_month_end = date('Y-m-t', strtotime('last month'));
+        $seven_days_ago = date('Y-m-d', strtotime('-7 days'));
+        $thirty_days_ago = date('Y-m-d', strtotime('-30 days'));
+        $ninety_days_ago = date('Y-m-d', strtotime('-90 days'));
+        $six_months_ago = date('Y-m-d', strtotime('-6 months'));
+        $this_year_start = date('Y-01-01');
+        
+        $periods = [];
+        
+        // Helper function to get stats for a date range
+        $get_stats = function($start_date, $end_date) use ($wpdb, $visits_table, $visitors_table) {
+            $stats = $wpdb->get_row($wpdb->prepare(
+                "SELECT 
+                    COUNT(DISTINCT v.id) as visit_count,
+                    COUNT(DISTINCT v.visitor_id) as unique_visitors
+                FROM $visits_table v
+                INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+                WHERE DATE(v.visit_date) >= %s 
+                AND DATE(v.visit_date) <= %s
+                AND vis.is_bot = 0",
+                $start_date,
+                $end_date
+            ));
+            
+            return [
+                'visits' => (int)($stats->visit_count ?? 0),
+                'visitors' => (int)($stats->unique_visitors ?? 0)
+            ];
+        };
+        
+        // Today
+        $periods['today'] = $get_stats($today, $today);
+        
+        // Yesterday
+        $periods['yesterday'] = $get_stats($yesterday, $yesterday);
+        
+        // This week (Monday to today)
+        $periods['this_week'] = $get_stats($this_week_start, $today);
+        
+        // Last week (Monday to Sunday)
+        $periods['last_week'] = $get_stats($last_week_start, $last_week_end);
+        
+        // This month
+        $periods['this_month'] = $get_stats($this_month_start, $today);
+        
+        // Last month
+        $periods['last_month'] = $get_stats($last_month_start, $last_month_end);
+        
+        // Last 7 days
+        $periods['last_7_days'] = $get_stats($seven_days_ago, $today);
+        
+        // Last 30 days
+        $periods['last_30_days'] = $get_stats($thirty_days_ago, $today);
+        
+        // Last 90 days
+        $periods['last_90_days'] = $get_stats($ninety_days_ago, $today);
+        
+        // Last 6 months
+        $periods['last_6_months'] = $get_stats($six_months_ago, $today);
+        
+        // This year (January 1 to today)
+        $periods['this_year'] = $get_stats($this_year_start, $today);
+        
+        // All time
+        $periods['all_time'] = $wpdb->get_row(
+            "SELECT 
+                COUNT(DISTINCT v.id) as visit_count,
+                COUNT(DISTINCT v.visitor_id) as unique_visitors
+            FROM $visits_table v
+            INNER JOIN $visitors_table vis ON v.visitor_id = vis.id
+            WHERE vis.is_bot = 0"
+        );
+        $periods['all_time'] = [
+            'visits' => (int)($periods['all_time']->visit_count ?? 0),
+            'visitors' => (int)($periods['all_time']->unique_visitors ?? 0)
+        ];
+        
+        return $periods;
+    }
 }
+
 
 

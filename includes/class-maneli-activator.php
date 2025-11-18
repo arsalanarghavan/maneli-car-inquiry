@@ -289,6 +289,30 @@ class Maneli_Activator {
         dbDelta($sql_system_logs);
         dbDelta($sql_user_logs);
         
+        // License table
+        $table_license = $wpdb->prefix . 'maneli_license';
+        $sql_license = "CREATE TABLE IF NOT EXISTS $table_license (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            license_key varchar(255) NOT NULL,
+            domain varchar(255) NOT NULL,
+            status varchar(20) DEFAULT 'inactive',
+            expiry_date datetime DEFAULT NULL,
+            activated_at datetime DEFAULT NULL,
+            last_check datetime DEFAULT NULL,
+            is_demo_mode tinyint(1) DEFAULT 0,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY license_key (license_key),
+            KEY domain (domain),
+            KEY status (status),
+            KEY expiry_date (expiry_date)
+        ) $charset_collate;";
+        dbDelta($sql_license);
+        
+        // Add composite indexes for query optimization
+        self::add_composite_indexes();
+        
         // Schedule cron jobs
         if (!wp_next_scheduled('maneli_send_meeting_reminders')) {
             wp_schedule_event(time(), 'hourly', 'maneli_send_meeting_reminders');
@@ -336,6 +360,61 @@ class Maneli_Activator {
         if ($missing_tables || empty($stored_version) || version_compare($stored_version, $current_version, '<')) {
             self::create_tables();
             update_option('maneli_db_version', $current_version);
+        }
+    }
+
+    /**
+     * Add composite indexes for query optimization
+     */
+    private static function add_composite_indexes() {
+        global $wpdb;
+        
+        // Add composite index for notification_logs: (related_id, type, created_at)
+        $notification_logs_table = $wpdb->prefix . 'maneli_notification_logs';
+        $index_name_notification = 'idx_notification_logs_related_type_created';
+        
+        // Check if index already exists
+        $index_exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM information_schema.statistics 
+            WHERE table_schema = %s 
+            AND table_name = %s 
+            AND index_name = %s",
+            DB_NAME,
+            $notification_logs_table,
+            $index_name_notification
+        ));
+        
+        if (!$index_exists) {
+            $wpdb->query("ALTER TABLE {$notification_logs_table} 
+                ADD INDEX {$index_name_notification} (related_id, type, created_at)");
+            
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli: Added composite index ' . $index_name_notification . ' to ' . $notification_logs_table);
+            }
+        }
+        
+        // Add composite index for user_logs: (user_id, action_type, created_at)
+        $user_logs_table = $wpdb->prefix . 'maneli_user_logs';
+        $index_name_user = 'idx_user_logs_user_action_created';
+        
+        // Check if index already exists
+        $index_exists = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM information_schema.statistics 
+            WHERE table_schema = %s 
+            AND table_name = %s 
+            AND index_name = %s",
+            DB_NAME,
+            $user_logs_table,
+            $index_name_user
+        ));
+        
+        if (!$index_exists) {
+            $wpdb->query("ALTER TABLE {$user_logs_table} 
+                ADD INDEX {$index_name_user} (user_id, action_type, created_at)");
+            
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Maneli: Added composite index ' . $index_name_user . ' to ' . $user_logs_table);
+            }
         }
     }
 

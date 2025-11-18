@@ -14,6 +14,15 @@ if (!defined('ABSPATH')) {
 class Maneli_Cash_Inquiry_Handler {
 
     public function __construct() {
+        // Check license before registering handlers
+        if (class_exists('Maneli_License')) {
+            $license = Maneli_License::instance();
+            if (!$license->is_license_active() && !$license->is_demo_mode()) {
+                // License not active - don't register handlers
+                return;
+            }
+        }
+        
         // Hooks for handling the cash inquiry form submission.
         add_action('admin_post_nopriv_maneli_submit_cash_inquiry', '__return_false');
         add_action('admin_post_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
@@ -68,6 +77,27 @@ class Maneli_Cash_Inquiry_Handler {
         if (!$user_id) {
             wp_send_json_error(['message' => esc_html__('You must be logged in to submit a request.', 'maneli-car-inquiry')]);
             return;
+        }
+        
+        // Verify CAPTCHA if enabled
+        if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+            $captcha_token = '';
+            $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+            
+            // Get token based on CAPTCHA type
+            if ($captcha_type === 'hcaptcha') {
+                $captcha_token = isset($_POST['h-captcha-response']) ? sanitize_text_field($_POST['h-captcha-response']) : '';
+            } elseif ($captcha_type === 'recaptcha_v2') {
+                $captcha_token = isset($_POST['g-recaptcha-response']) ? sanitize_text_field($_POST['g-recaptcha-response']) : '';
+            } elseif ($captcha_type === 'recaptcha_v3') {
+                $captcha_token = isset($_POST['captcha_token']) ? sanitize_text_field($_POST['captcha_token']) : '';
+            }
+            
+            $captcha_result = Maneli_Captcha_Helper::verify_token($captcha_token, $captcha_type);
+            if (!$captcha_result['success']) {
+                wp_send_json_error(['message' => $captcha_result['message']]);
+                return;
+            }
         }
         
         // Validate required fields
@@ -200,16 +230,16 @@ class Maneli_Cash_Inquiry_Handler {
             return false;
         }
         
-        // Get original product price at the time of request
+        // Get current cash price from product at the time of inquiry creation
         $product = wc_get_product($product_id);
-        $original_price = 0;
+        $cash_price = 0;
         if ($product) {
-            $original_price = $product->get_regular_price();
+            $cash_price = $product->get_regular_price();
             // Convert to integer if it's a valid price
-            if (!empty($original_price) && $original_price !== '' && is_numeric($original_price)) {
-                $original_price = (int) $original_price;
+            if (!empty($cash_price) && $cash_price !== '' && is_numeric($cash_price)) {
+                $cash_price = (int) $cash_price;
             } else {
-                $original_price = 0;
+                $cash_price = 0;
             }
         }
         
@@ -221,7 +251,8 @@ class Maneli_Cash_Inquiry_Handler {
             'mobile_number'       => $mobile,
             'cash_car_color'      => $inquiry_data['cash_car_color'],
             'cash_inquiry_status' => 'new', // Initial status: جدید
-            'original_product_price' => $original_price, // Save original price at request time
+            'cash_total_price'    => $cash_price, // Save current cash price at inquiry time (for reports)
+            'original_product_price' => $cash_price, // Backward compatibility - same as cash_total_price
         ];
         foreach ($meta_data as $key => $value) {
             update_post_meta($post_id, $key, $value);
