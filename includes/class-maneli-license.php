@@ -20,6 +20,12 @@ class Maneli_License {
     private $is_demo = false;
     
     /**
+     * Cache flag to prevent multiple license checks in same request
+     */
+    private $license_checked = false;
+    private $license_check_result = null;
+    
+    /**
      * Static license server URLs - try both
      */
     private static $license_server_urls = [
@@ -41,8 +47,11 @@ class Maneli_License {
      * Constructor
      */
     private function __construct() {
+        // Load license data (with table check and error handling)
         $this->load_license_data();
-        $this->check_license_status();
+        
+        // Don't check license status immediately - use lazy loading
+        // This prevents multiple remote API calls on every page load
         
         // Register custom cron schedule for every 12 hours
         add_filter('cron_schedules', [$this, 'add_custom_cron_schedule']);
@@ -108,6 +117,37 @@ class Maneli_License {
     }
     
     /**
+     * Check if license table exists
+     * 
+     * @return bool True if table exists, false otherwise
+     */
+    private function table_exists() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'maneli_license';
+        $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
+        return $result === $table_name;
+    }
+    
+    /**
+     * Ensure license table exists, create if needed
+     * 
+     * @return bool True if table exists or was created, false on error
+     */
+    private function ensure_table_exists() {
+        if ($this->table_exists()) {
+            return true;
+        }
+        
+        // Try to create table if it doesn't exist
+        if (class_exists('Maneli_Activator')) {
+            Maneli_Activator::ensure_tables();
+            return $this->table_exists();
+        }
+        
+        return false;
+    }
+    
+    /**
      * Get working license server URL (try both URLs)
      */
     private function get_license_server_url() {
@@ -135,8 +175,29 @@ class Maneli_License {
     private function load_license_data() {
         global $wpdb;
         
+        // Ensure table exists before querying
+        if (!$this->ensure_table_exists()) {
+            // Table doesn't exist and couldn't be created
+            // Use default values
+            $this->license_key = null;
+            $this->license_status = 'inactive';
+            $this->expiry_date = null;
+            $this->is_demo = false;
+            return;
+        }
+        
         $table_name = $wpdb->prefix . 'maneli_license';
         $license = $wpdb->get_row("SELECT * FROM $table_name ORDER BY id DESC LIMIT 1", ARRAY_A);
+        
+        // Check for database errors
+        if (!empty($wpdb->last_error)) {
+            // Database error occurred, use default values
+            $this->license_key = null;
+            $this->license_status = 'inactive';
+            $this->expiry_date = null;
+            $this->is_demo = false;
+            return;
+        }
         
         if ($license) {
             $this->license_key = $license['license_key'];
@@ -148,12 +209,20 @@ class Maneli_License {
 
     /**
      * Check license status
+     * Uses caching to prevent multiple checks in same request
      */
     public function check_license_status() {
+        // Return cached result if already checked in this request
+        if ($this->license_checked && $this->license_check_result !== null) {
+            return $this->license_check_result;
+        }
+        
         // Domain is the license - check if domain exists
         $domain = $this->get_current_domain();
         if (empty($domain)) {
             $this->license_status = 'inactive';
+            $this->license_checked = true;
+            $this->license_check_result = false;
             return false;
         }
 
@@ -162,6 +231,8 @@ class Maneli_License {
             $this->license_status = 'expired';
             $this->update_license_status('expired');
             $this->deactivate_plugin();
+            $this->license_checked = true;
+            $this->license_check_result = false;
             return false;
         }
 
@@ -169,8 +240,14 @@ class Maneli_License {
         $remote_check = $this->remote_license_check();
         if ($remote_check === false) {
             // If connection failed, use local status
-            return $this->license_status === 'active';
+            $result = $this->license_status === 'active';
+            $this->license_checked = true;
+            $this->license_check_result = $result;
+            return $result;
         }
+        
+        $this->license_checked = true;
+        $this->license_check_result = $remote_check;
         return $remote_check;
     }
 
@@ -324,14 +401,25 @@ class Maneli_License {
     private function save_license_data($data) {
         global $wpdb;
         
+        // Ensure table exists before saving
+        if (!$this->ensure_table_exists()) {
+            // Table doesn't exist and couldn't be created
+            return false;
+        }
+        
         $table_name = $wpdb->prefix . 'maneli_license';
         
         // Check if license exists
         $existing = $wpdb->get_row("SELECT id FROM $table_name LIMIT 1", ARRAY_A);
         
+        // Check for database errors
+        if (!empty($wpdb->last_error)) {
+            return false;
+        }
+        
         if ($existing) {
             // Update
-            $wpdb->update(
+            $result = $wpdb->update(
                 $table_name,
                 [
                     'license_key' => sanitize_text_field($data['license_key']),
@@ -346,9 +434,14 @@ class Maneli_License {
                 ['%s', '%s', '%s', '%s', '%s', '%d', '%s'],
                 ['%d']
             );
+            
+            // Check for database errors
+            if (!empty($wpdb->last_error)) {
+                return false;
+            }
         } else {
             // Insert
-            $wpdb->insert(
+            $result = $wpdb->insert(
                 $table_name,
                 [
                     'license_key' => sanitize_text_field($data['license_key']),
@@ -361,7 +454,14 @@ class Maneli_License {
                 ],
                 ['%s', '%s', '%s', '%s', '%s', '%d', '%s']
             );
+            
+            // Check for database errors
+            if (!empty($wpdb->last_error)) {
+                return false;
+            }
         }
+        
+        return $result !== false;
     }
 
     /**
@@ -370,12 +470,36 @@ class Maneli_License {
     private function update_license_status($status) {
         global $wpdb;
         
+        // Ensure table exists before updating
+        if (!$this->ensure_table_exists()) {
+            // Table doesn't exist, just update in-memory status
+            $this->license_status = $status;
+            return;
+        }
+        
         $table_name = $wpdb->prefix . 'maneli_license';
-        $wpdb->query($wpdb->prepare(
+        
+        // Check if any record exists before updating
+        $existing = $wpdb->get_var("SELECT COUNT(*) FROM $table_name LIMIT 1");
+        
+        if (empty($existing) || $existing == 0) {
+            // No record exists, just update in-memory status
+            $this->license_status = $status;
+            return;
+        }
+        
+        $result = $wpdb->query($wpdb->prepare(
             "UPDATE $table_name SET status = %s, last_check = %s",
             $status,
             current_time('mysql')
         ));
+        
+        // Check for database errors
+        if (!empty($wpdb->last_error)) {
+            // Error occurred, but still update in-memory status
+            $this->license_status = $status;
+            return;
+        }
         
         $this->license_status = $status;
     }
@@ -385,6 +509,18 @@ class Maneli_License {
      */
     private function update_license_data($data) {
         global $wpdb;
+        
+        // Ensure table exists before updating
+        if (!$this->ensure_table_exists()) {
+            // Table doesn't exist, just update in-memory values
+            if (isset($data['expiry_date'])) {
+                $this->expiry_date = $data['expiry_date'];
+            }
+            if (isset($data['status'])) {
+                $this->license_status = $data['status'];
+            }
+            return;
+        }
         
         $table_name = $wpdb->prefix . 'maneli_license';
         $update_data = [];
@@ -404,13 +540,47 @@ class Maneli_License {
             $update_data['last_check'] = current_time('mysql');
             $format[] = '%s';
             
-            $wpdb->update(
+            // Check if any record exists before updating
+            $existing = $wpdb->get_var("SELECT COUNT(*) FROM $table_name LIMIT 1");
+            
+            if (empty($existing) || $existing == 0) {
+                // No record exists, just update in-memory values
+                if (isset($data['expiry_date'])) {
+                    $this->expiry_date = $data['expiry_date'];
+                }
+                if (isset($data['status'])) {
+                    $this->license_status = $data['status'];
+                }
+                return;
+            }
+            
+            $result = $wpdb->update(
                 $table_name,
                 $update_data,
                 [],
                 $format,
                 []
             );
+            
+            // Check for database errors
+            if (!empty($wpdb->last_error)) {
+                // Error occurred, but still update in-memory values
+                if (isset($data['expiry_date'])) {
+                    $this->expiry_date = $data['expiry_date'];
+                }
+                if (isset($data['status'])) {
+                    $this->license_status = $data['status'];
+                }
+                return;
+            }
+            
+            // Update in-memory values on success
+            if (isset($data['expiry_date'])) {
+                $this->expiry_date = $data['expiry_date'];
+            }
+            if (isset($data['status'])) {
+                $this->license_status = $data['status'];
+            }
         }
     }
 
@@ -446,9 +616,17 @@ class Maneli_License {
 
     /**
      * Check if license is active
+     * Uses cached status to avoid multiple checks
      */
     public function is_license_active() {
-        return $this->license_status === 'active' && $this->check_license_status();
+        // If already checked in this request, use cached result
+        if ($this->license_checked) {
+            return $this->license_status === 'active' && ($this->license_check_result === true);
+        }
+        
+        // Otherwise check once and cache the result
+        $check_result = $this->check_license_status();
+        return $this->license_status === 'active' && $check_result;
     }
 
     /**
