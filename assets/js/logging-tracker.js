@@ -54,11 +54,18 @@
             }
         };
 
+        // Store originalAjax reference for use in logToSystem
+        // This will be set after originalAjax is defined
+        var originalAjaxForLogging = null;
+
         // Function to log to system
         function logToSystem(logType, severity, message, context) {
             if (!ajaxUrl) return;
 
-            $.ajax({
+            // Use originalAjax if available, otherwise use $.ajax (fallback for initialization)
+            var ajaxFn = originalAjaxForLogging || $.ajax;
+            
+            ajaxFn({
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
@@ -131,11 +138,37 @@
 
         // Track AJAX calls
         var originalAjax = $.ajax;
+        originalAjaxForLogging = originalAjax; // Make available for logToSystem
         $.ajax = function(options) {
             // Only track if it's our plugin's AJAX calls
-            if (loggingSettings.enable_user_logging && loggingSettings.log_ajax_calls && 
+            // Skip tracking for logging actions to prevent infinite recursion
+            var isLoggingAction = false;
+            if (options.data) {
+                if (options.data instanceof FormData) {
+                    isLoggingAction = options.data.get('action') === 'maneli_log_user_action' || 
+                                     options.data.get('action') === 'maneli_log_console';
+                } else if (typeof options.data === 'object') {
+                    isLoggingAction = options.data.action === 'maneli_log_user_action' || 
+                                     options.data.action === 'maneli_log_console';
+                } else if (typeof options.data === 'string') {
+                    isLoggingAction = options.data.indexOf('action=maneli_log_user_action') !== -1 || 
+                                     options.data.indexOf('action=maneli_log_console') !== -1;
+                }
+            }
+            
+            if (!isLoggingAction && loggingSettings.enable_user_logging && loggingSettings.log_ajax_calls && 
                 options.url && (options.url.indexOf('admin-ajax.php') !== -1 || options.url.indexOf('maneli') !== -1)) {
-                var action = options.data && options.data.action ? options.data.action : '';
+                var action = '';
+                if (options.data) {
+                    if (options.data instanceof FormData) {
+                        action = options.data.get('action') || '';
+                    } else if (typeof options.data === 'object') {
+                        action = options.data.action || '';
+                    } else if (typeof options.data === 'string') {
+                        var match = options.data.match(/action=([^&]+)/);
+                        action = match ? match[1] : '';
+                    }
+                }
                 
                 logUserAction('ajax_call',
                     'AJAX call: ' + action,
@@ -167,7 +200,8 @@
                 return;
             }
 
-            $.ajax({
+            // Use originalAjax to prevent infinite recursion
+            originalAjax({
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
