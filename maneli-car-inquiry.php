@@ -35,7 +35,19 @@ if (!defined('MANELI_PLUGIN_DIR')) {
 if (!defined('MANELI_PLUGIN_URL')) {
     define('MANELI_PLUGIN_URL', MANELI_INQUIRY_PLUGIN_URL);
 }
+
+// Additional aliases for class-product-editor-page.php and other files
+if (!defined('MANELI_INQUIRY_URL')) {
+    define('MANELI_INQUIRY_URL', MANELI_INQUIRY_PLUGIN_URL);
+}
+if (!defined('MANELI_INQUIRY_DIR')) {
+    define('MANELI_INQUIRY_DIR', MANELI_INQUIRY_PLUGIN_DIR);
+}
+
 define('MANELI_VERSION', '0.2.20');
+if (!defined('MANELI_INQUIRY_VERSION')) {
+    define('MANELI_INQUIRY_VERSION', MANELI_VERSION);
+}
 define('MANELI_DB_VERSION', '1.1.0');
 
 /**

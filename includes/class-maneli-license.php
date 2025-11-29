@@ -26,6 +26,11 @@ class Maneli_License {
     private $license_check_result = null;
     
     /**
+     * Cache for table_exists() to prevent duplicate SHOW TABLES queries
+     */
+    private $table_exists_cache = null;
+    
+    /**
      * Static license server URLs - try both
      */
     private static $license_server_urls = [
@@ -71,9 +76,11 @@ class Maneli_License {
      * Add custom cron schedule for every 12 hours
      */
     public function add_custom_cron_schedule($schedules) {
+        // Use simple string to avoid translation loading before init hook
+        // This prevents WordPress 6.7+ warning about early translation loading
         $schedules['maneli_every_12_hours'] = [
             'interval' => 12 * 60 * 60, // 12 hours in seconds
-            'display' => __('Every 12 hours', 'maneli-car-inquiry')
+            'display' => 'Every 12 hours'
         ];
         return $schedules;
     }
@@ -118,14 +125,21 @@ class Maneli_License {
     
     /**
      * Check if license table exists
+     * Uses caching to prevent duplicate SHOW TABLES queries in same request
      * 
      * @return bool True if table exists, false otherwise
      */
     private function table_exists() {
+        // Return cached result if available
+        if ($this->table_exists_cache !== null) {
+            return $this->table_exists_cache;
+        }
+        
         global $wpdb;
         $table_name = $wpdb->prefix . 'maneli_license';
         $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
-        return $result === $table_name;
+        $this->table_exists_cache = ($result === $table_name);
+        return $this->table_exists_cache;
     }
     
     /**
@@ -141,6 +155,8 @@ class Maneli_License {
         // Try to create table if it doesn't exist
         if (class_exists('Maneli_Activator')) {
             Maneli_Activator::ensure_tables();
+            // Clear cache and check again after table creation attempt
+            $this->table_exists_cache = null;
             return $this->table_exists();
         }
         
