@@ -17,6 +17,29 @@ if (!defined('ABSPATH')) {
 class Maneli_Permission_Helpers {
 
     /**
+     * Cache for license status checks in same request
+     *
+     * @var array
+     */
+    private static $license_cache = [
+        'is_active' => null,
+        'is_demo' => null,
+        'checked' => false
+    ];
+
+    /**
+     * Get license instance with caching
+     *
+     * @return Maneli_License|null
+     */
+    private static function get_license() {
+        if (!class_exists('Maneli_License')) {
+            return null;
+        }
+        return Maneli_License::instance();
+    }
+
+    /**
      * Checks if a given user has permission to view a specific inquiry (either installment or cash).
      *
      * A user can view an inquiry if they are:
@@ -79,16 +102,13 @@ class Maneli_Permission_Helpers {
      */
     public static function can_user_delete($user_id, $item_type = 'inquiry') {
         // Check demo mode
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            if ($license->is_demo_mode()) {
-                return false; // No deletion in demo mode
-            }
-            
-            // Check license
-            if (!$license->is_license_active()) {
-                return false;
-            }
+        if (self::is_demo_mode()) {
+            return false; // No deletion in demo mode
+        }
+        
+        // Check license
+        if (!self::is_license_active()) {
+            return false;
         }
         
         // Check user capability
@@ -108,16 +128,13 @@ class Maneli_Permission_Helpers {
      */
     public static function can_user_edit($user_id, $item_type = 'inquiry') {
         // Check demo mode
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            if ($license->is_demo_mode()) {
-                return false; // No editing in demo mode
-            }
-            
-            // Check license
-            if (!$license->is_license_active()) {
-                return false;
-            }
+        if (self::is_demo_mode()) {
+            return false; // No editing in demo mode
+        }
+        
+        // Check license
+        if (!self::is_license_active()) {
+            return false;
         }
         
         // Check user capability
@@ -129,28 +146,61 @@ class Maneli_Permission_Helpers {
     }
 
     /**
-     * Checks if demo mode is active
+     * Checks if demo mode is active (with caching)
      *
      * @return bool
      */
     public static function is_demo_mode() {
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            return $license->is_demo_mode();
+        // Return cached value if already checked
+        if (self::$license_cache['checked'] && self::$license_cache['is_demo'] !== null) {
+            return self::$license_cache['is_demo'];
         }
-        return false;
+
+        $license = self::get_license();
+        if (!$license) {
+            self::$license_cache['is_demo'] = false;
+            self::$license_cache['checked'] = true;
+            return false;
+        }
+
+        $is_demo = $license->is_demo_mode();
+        self::$license_cache['is_demo'] = $is_demo;
+        self::$license_cache['checked'] = true;
+        return $is_demo;
     }
 
     /**
-     * Checks if license is active
+     * Checks if license is active (with caching)
      *
      * @return bool
      */
     public static function is_license_active() {
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            return $license->is_license_active();
+        // Return cached value if already checked
+        if (self::$license_cache['checked'] && self::$license_cache['is_active'] !== null) {
+            return self::$license_cache['is_active'];
         }
-        return false;
+
+        $license = self::get_license();
+        if (!$license) {
+            self::$license_cache['is_active'] = false;
+            self::$license_cache['checked'] = true;
+            return false;
+        }
+
+        $is_active = $license->is_license_active();
+        self::$license_cache['is_active'] = $is_active;
+        self::$license_cache['checked'] = true;
+        return $is_active;
+    }
+
+    /**
+     * Clear license cache (useful for testing or after license changes)
+     */
+    public static function clear_license_cache() {
+        self::$license_cache = [
+            'is_active' => null,
+            'is_demo' => null,
+            'checked' => false
+        ];
     }
 }

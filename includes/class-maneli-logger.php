@@ -85,11 +85,11 @@ class Maneli_Logger {
     }
 
     /**
-     * Retrieve plugin logging options with simple caching
+     * Retrieve plugin logging options with simple caching (using optimized helper)
      */
     private function get_logging_options() {
         if ($this->options_cache === null) {
-            $this->options_cache = get_option('maneli_inquiry_all_options', []);
+            $this->options_cache = Maneli_Options_Helper::get_all_options();
         }
 
         return $this->options_cache;
@@ -350,10 +350,8 @@ class Maneli_Logger {
      * Cleanup old logs based on retention settings
      */
     public function cleanup_old_logs() {
-        $options = get_option('maneli_inquiry_all_options', []);
-        
-        // Check if auto cleanup is enabled
-        if (empty($options['enable_auto_log_cleanup']) || $options['enable_auto_log_cleanup'] != '1') {
+        // Check if auto cleanup is enabled (using optimized helper)
+        if (!Maneli_Options_Helper::is_option_enabled('enable_auto_log_cleanup', false)) {
             return 0;
         }
         

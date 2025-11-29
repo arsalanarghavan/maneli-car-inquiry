@@ -60,7 +60,7 @@ class Maneli_Frontend_Theme_Handler {
      * Get logo URL
      */
     public function get_logo($type = 'desktop') {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $logo_key = 'theme_logo_' . str_replace('-', '_', $type);
         
         if (isset($options[$logo_key]) && !empty($options[$logo_key])) {
@@ -114,7 +114,7 @@ class Maneli_Frontend_Theme_Handler {
      * Get site title
      */
     public function get_site_title() {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         
         if (isset($options['theme_site_title']) && !empty($options['theme_site_title'])) {
             return esc_html($options['theme_site_title']);
@@ -127,7 +127,7 @@ class Maneli_Frontend_Theme_Handler {
      * Get footer text
      */
     public function get_footer_text() {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         
         if (isset($options['theme_footer_text']) && !empty($options['theme_footer_text'])) {
             return wp_kses_post($options['theme_footer_text']);
@@ -149,7 +149,7 @@ class Maneli_Frontend_Theme_Handler {
      * Output custom CSS variables
      */
     public function output_custom_css() {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         
         $primary_color = isset($options['theme_primary_color']) ? $options['theme_primary_color'] : '';
         $secondary_color = isset($options['theme_secondary_color']) ? $options['theme_secondary_color'] : '';

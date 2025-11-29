@@ -20,7 +20,7 @@ class Maneli_SMS_Handler {
     private $options;
 
     public function __construct() {
-        $this->options = get_option('maneli_inquiry_all_options', []);
+        $this->options = Maneli_Options_Helper::get_all_options();
     }
 
     /**

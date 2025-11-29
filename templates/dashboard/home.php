@@ -523,57 +523,94 @@ if ($is_customer) {
         $expert_id = get_current_user_id();
     }
     
-    // Get comprehensive statistics
+    // Get comprehensive statistics (with caching)
     if ($is_admin && !$expert_id) {
         // Full business statistics for admin - Get ALL inquiries (no date limit for main dashboard)
-        // Use direct database query for reliability - this is the most reliable method
-        global $wpdb;
+        // Use cache key based on user role and date
+        $cache_key = 'maneli_dashboard_stats_admin_' . date('Y-m-d-H');
+        $cached_stats = wp_cache_get($cache_key, 'maneli_dashboard');
         
-        // Direct SQL queries - most reliable
-        $cash_total = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
-            'cash_inquiry',
-            'publish'
-        ));
-        
-        $installment_total = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
-            'inquiry',
-            'publish'
-        ));
-        
-        // Build stats array manually
-        $stats = [
-            'total_inquiries' => $cash_total + $installment_total,
-            'cash_inquiries' => $cash_total,
-            'installment_inquiries' => $installment_total,
-            'new' => 0,
-            'referred' => 0,
-            'in_progress' => 0,
-            'completed' => 0,
-            'rejected' => 0,
-            'followup_scheduled' => 0,
-            'new_today' => 0,
-            'revenue' => 0,
-        ];
-        
-        // Also get business stats for monthly data (use a very old date to get all)
-        $admin_start_date = '2000-01-01'; // Very old date to get all inquiries
-        $admin_end_date = date('Y-m-d');
-        $business_stats = Maneli_Reports_Dashboard::get_business_statistics($admin_start_date, $admin_end_date);
-        $monthly_stats = $business_stats['monthly'] ?? [];
+        if ($cached_stats === false) {
+            global $wpdb;
+            
+            // Direct SQL queries - most reliable
+            $cash_total = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
+                'cash_inquiry',
+                'publish'
+            ));
+            
+            $installment_total = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
+                'inquiry',
+                'publish'
+            ));
+            
+            // Build stats array manually
+            $stats = [
+                'total_inquiries' => $cash_total + $installment_total,
+                'cash_inquiries' => $cash_total,
+                'installment_inquiries' => $installment_total,
+                'new' => 0,
+                'referred' => 0,
+                'in_progress' => 0,
+                'completed' => 0,
+                'rejected' => 0,
+                'followup_scheduled' => 0,
+                'new_today' => 0,
+                'revenue' => 0,
+            ];
+            
+            // Also get business stats for monthly data (use a very old date to get all)
+            $admin_start_date = '2000-01-01'; // Very old date to get all inquiries
+            $admin_end_date = date('Y-m-d');
+            $business_stats = Maneli_Reports_Dashboard::get_business_statistics($admin_start_date, $admin_end_date);
+            $monthly_stats = $business_stats['monthly'] ?? [];
+            
+            // Cache for 15 minutes
+            wp_cache_set($cache_key, ['stats' => $stats, 'monthly_stats' => $monthly_stats], 'maneli_dashboard', 15 * MINUTE_IN_SECONDS);
+        } else {
+            $stats = $cached_stats['stats'];
+            $monthly_stats = $cached_stats['monthly_stats'];
+        }
     } else {
         // Expert or filtered statistics - Use date range for experts
-        $stats = Maneli_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
+        $cache_key = 'maneli_dashboard_stats_' . ($expert_id ? 'expert_' . $expert_id : 'user') . '_' . $start_date . '_' . $end_date;
+        $cached_stats = wp_cache_get($cache_key, 'maneli_dashboard');
+        
+        if ($cached_stats === false) {
+            $stats = Maneli_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
+            // Cache for 15 minutes
+            wp_cache_set($cache_key, $stats, 'maneli_dashboard', 15 * MINUTE_IN_SECONDS);
+        } else {
+            $stats = $cached_stats;
+        }
     }
     
-    // Get daily statistics for last 7 days specifically
+    // Get daily statistics for last 7 days specifically (with caching)
     $daily_start_date = date('Y-m-d', strtotime('-6 days')); // 7 days including today
     $daily_end_date = date('Y-m-d');
-    $daily_stats_raw = Maneli_Reports_Dashboard::get_daily_statistics($daily_start_date, $daily_end_date, $expert_id);
+    $daily_cache_key = 'maneli_daily_stats_' . ($expert_id ? 'expert_' . $expert_id : 'all') . '_' . $daily_start_date . '_' . $daily_end_date;
+    $daily_stats_raw = wp_cache_get($daily_cache_key, 'maneli_dashboard');
+    
+    if ($daily_stats_raw === false) {
+        $daily_stats_raw = Maneli_Reports_Dashboard::get_daily_statistics($daily_start_date, $daily_end_date, $expert_id);
+        // Cache for 15 minutes
+        wp_cache_set($daily_cache_key, $daily_stats_raw, 'maneli_dashboard', 15 * MINUTE_IN_SECONDS);
+    }
+    
     // Convert associative array to indexed array for JavaScript
     $daily_stats = array_values($daily_stats_raw);
-    $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
+    
+    // Get popular products (with caching)
+    $popular_cache_key = 'maneli_popular_products_' . ($expert_id ? 'expert_' . $expert_id : 'all') . '_' . $start_date . '_' . $end_date;
+    $popular_products = wp_cache_get($popular_cache_key, 'maneli_dashboard');
+    
+    if ($popular_products === false) {
+        $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
+        // Cache for 15 minutes
+        wp_cache_set($popular_cache_key, $popular_products, 'maneli_dashboard', 15 * MINUTE_IN_SECONDS);
+    }
     
     // Get separate statistics for cash and installment inquiries
     $cash_stats = get_separate_cash_statistics($start_date, $end_date, $expert_id);

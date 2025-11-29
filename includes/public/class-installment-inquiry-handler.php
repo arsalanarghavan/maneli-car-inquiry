@@ -15,13 +15,10 @@ if (!defined('ABSPATH')) {
 class Maneli_Installment_Inquiry_Handler {
 
     public function __construct() {
-        // Check license before registering handlers
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            if (!$license->is_license_active() && !$license->is_demo_mode()) {
-                // License not active - don't register handlers
-                return;
-            }
+        // Check license before registering handlers (using optimized helper)
+        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+            // License not active - don't register handlers
+            return;
         }
         
         // Step 1: Handle car selection from the product page calculator.
@@ -81,7 +78,7 @@ class Maneli_Installment_Inquiry_Handler {
         if (!$date) {
             wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'maneli-car-inquiry')]);
         }
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $start = $options['meetings_start_hour'] ?? '10:00';
         $end   = $options['meetings_end_hour'] ?? '20:00';
         $slot  = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -151,7 +148,7 @@ class Maneli_Installment_Inquiry_Handler {
         }
         
         // Validate time against settings
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $settings_start = $options['meetings_start_hour'] ?? '10:00';
         $settings_end = $options['meetings_end_hour'] ?? '20:00';
         $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -752,9 +749,8 @@ class Maneli_Installment_Inquiry_Handler {
         }
 
         // Check if payment is required
-        $options = get_option('maneli_inquiry_all_options', []);
-        $payment_enabled = !empty($options['payment_enabled']) && $options['payment_enabled'] == '1';
-        $inquiry_fee = !empty($options['inquiry_fee']) ? (int)$options['inquiry_fee'] : 0;
+        $payment_enabled = Maneli_Options_Helper::is_option_enabled('payment_enabled', false);
+        $inquiry_fee = (int)Maneli_Options_Helper::get_option('inquiry_fee', 0);
 
         if ($payment_enabled && $inquiry_fee > 0) {
             // Payment is required - move to payment step
@@ -914,8 +910,7 @@ class Maneli_Installment_Inquiry_Handler {
         update_post_meta($post_id, 'inquiry_payment_date', current_time('mysql'));
         
         // Also store the actual amount paid (0 if discount or free)
-        $options = get_option('maneli_inquiry_all_options', []);
-        $inquiry_fee_amount = (int)($options['inquiry_fee'] ?? 0);
+        $inquiry_fee_amount = (int)Maneli_Options_Helper::get_option('inquiry_fee', 0);
         $discount_applied = get_user_meta($user_id, 'maneli_discount_applied', true) === 'yes';
         $paid_amount = ($discount_applied || $inquiry_fee_amount == 0) ? 0 : $inquiry_fee_amount;
         update_post_meta($post_id, 'inquiry_paid_amount', $paid_amount);
@@ -1052,12 +1047,12 @@ class Maneli_Installment_Inquiry_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_finotex_inquiry($national_code) {
-        $options = get_option('maneli_inquiry_all_options', []);
-        
-        if (empty($options['finotex_enabled']) || $options['finotex_enabled'] !== '1' || !defined('MANELI_FINOTEX_API_URL')) {
+        if (!Maneli_Options_Helper::is_option_enabled('finotex_enabled', false) || !defined('MANELI_FINOTEX_API_URL')) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Finotex inquiry is disabled in settings or API constant is missing.'];
         }
 
+        $options = Maneli_Options_Helper::get_all_options();
+        
         // === START: SECURITY IMPROVEMENT - Check for constants first, then decrypt ===
         $client_id_raw = $options['finotex_username'] ?? '';
         $api_key_raw = $options['finotex_password'] ?? '';
@@ -1135,7 +1130,7 @@ class Maneli_Installment_Inquiry_Handler {
         $sms_handler = new Maneli_SMS_Handler();
         $customer_name = ($buyer_data['first_name'] ?? '') . ' ' . ($buyer_data['last_name'] ?? '');
         $car_name = get_the_title($car_id) ?? '';
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
 
         // Notify Admin
         $admin_mobile = $options['admin_notification_mobile'] ?? '';

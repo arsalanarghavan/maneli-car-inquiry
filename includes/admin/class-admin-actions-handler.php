@@ -53,7 +53,7 @@ class Maneli_Admin_Actions_Handler {
         
         $final_status = $new_status_request; // Initialize $final_status for robustness
         $sms_params = [];
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         
         if ($new_status_request === 'approved') {
             $final_status = 'user_confirmed';
@@ -717,7 +717,7 @@ class Maneli_Admin_Actions_Handler {
      * Helper method to send SMS notification to an expert.
      */
     private function notify_expert_of_assignment($post_id, $expert_id, $inquiry_type) {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $expert_phone = get_user_meta($expert_id, 'mobile_number', true);
         
         if ($inquiry_type === 'cash') {

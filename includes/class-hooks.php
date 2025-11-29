@@ -395,8 +395,7 @@ class Maneli_Hooks {
      * This effectively hides prices from non-admin users if the setting is enabled.
      */
     public function conditionally_hide_prices() {
-        $options = get_option('maneli_inquiry_all_options', []);
-        $is_price_hidden = !empty($options['hide_prices_for_customers']) && $options['hide_prices_for_customers'] == '1';
+        $is_price_hidden = Maneli_Options_Helper::is_option_enabled('hide_prices_for_customers', false);
 
         if ($is_price_hidden && !current_user_can('manage_maneli_inquiries')) {
             // Remove prices from shop loop and single product pages
@@ -459,7 +458,7 @@ class Maneli_Hooks {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
         
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         
         // Get reminder settings - parse comma-separated values
         $hours_before_raw = $options['meeting_reminder_hours'] ?? '2,6,24';
@@ -732,9 +731,8 @@ class Maneli_Hooks {
             return;
         }
         
-        // Check if visitor statistics is enabled
-        $options = get_option('maneli_inquiry_all_options', []);
-        if (isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] != '1') {
+        // Check if visitor statistics is enabled (using optimized helper)
+        if (!Maneli_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
             return;
         }
         
@@ -807,9 +805,8 @@ class Maneli_Hooks {
             return;
         }
         
-        // Check if visitor statistics is enabled
-        $options = get_option('maneli_inquiry_all_options', []);
-        if (isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] != '1') {
+        // Check if visitor statistics is enabled (using optimized helper)
+        if (!Maneli_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
             return;
         }
         
@@ -853,9 +850,8 @@ class Maneli_Hooks {
      * Enqueue visitor tracking scripts
      */
     public function enqueue_visitor_tracking_scripts() {
-        // Check if visitor statistics is enabled
-        $options = get_option('maneli_inquiry_all_options', []);
-        if (isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] != '1') {
+        // Check if visitor statistics is enabled (using optimized helper)
+        if (!Maneli_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
             return;
         }
         
@@ -889,10 +885,8 @@ class Maneli_Hooks {
      * Schedule log cleanup cron job
      */
     public function schedule_log_cleanup_cron() {
-        $options = get_option('maneli_inquiry_all_options', []);
-        
-        // Check if auto cleanup is enabled
-        if (empty($options['enable_auto_log_cleanup']) || $options['enable_auto_log_cleanup'] != '1') {
+        // Check if auto cleanup is enabled (using optimized helper)
+        if (!Maneli_Options_Helper::is_option_enabled('enable_auto_log_cleanup', false)) {
             // Unschedule if disabled
             $timestamp = wp_next_scheduled('maneli_cleanup_old_logs');
             if ($timestamp) {

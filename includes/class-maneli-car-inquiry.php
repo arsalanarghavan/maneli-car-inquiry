@@ -84,6 +84,7 @@ final class Maneli_Car_Inquiry_Plugin {
     private function includes() {
         // Core Functionality & Helpers
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-options-helper.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-encryption-helper.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
@@ -159,8 +160,8 @@ final class Maneli_Car_Inquiry_Plugin {
         new Maneli_Product_Editor_Page();
         new Maneli_Credit_Report_Page();
 
-        $options = get_option('maneli_inquiry_all_options', []);
-        if (!empty($options['enable_grouped_attributes']) && $options['enable_grouped_attributes'] == '1') {
+        // Check if grouped attributes is enabled (using optimized helper)
+        if (Maneli_Options_Helper::is_option_enabled('enable_grouped_attributes', false)) {
             new Maneli_Grouped_Attributes();
         }
         

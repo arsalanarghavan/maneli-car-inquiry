@@ -14,13 +14,10 @@ if (!defined('ABSPATH')) {
 class Maneli_Cash_Inquiry_Handler {
 
     public function __construct() {
-        // Check license before registering handlers
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            if (!$license->is_license_active() && !$license->is_demo_mode()) {
-                // License not active - don't register handlers
-                return;
-            }
+        // Check license before registering handlers (using optimized helper)
+        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+            // License not active - don't register handlers
+            return;
         }
         
         // Hooks for handling the cash inquiry form submission.
@@ -309,7 +306,7 @@ class Maneli_Cash_Inquiry_Handler {
      * @param string $car_name      The name of the requested car.
      */
     private static function send_admin_notification($customer_name, $car_name) {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $admin_mobile = $options['admin_notification_mobile'] ?? '';
         $pattern_admin = $options['sms_pattern_new_inquiry'] ?? 0;
         

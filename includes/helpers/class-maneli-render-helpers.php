@@ -36,9 +36,8 @@ class Maneli_Render_Helpers {
             return 0;
         }
 
-        $options = get_option('maneli_inquiry_all_options', []);
         // نرخ سود ماهانه را از تنظیمات می‌خواند
-        $monthly_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
+        $monthly_rate = floatval(Maneli_Options_Helper::get_option('loan_interest_rate', 0.035)); 
         
         // منطق محاسبه ساده شده (مطابق با JS و منطق بک‌اند)
         $total_interest = $loan_amount * $monthly_rate * ($term_months + 1);
@@ -683,7 +682,7 @@ class Maneli_Render_Helpers {
         $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
         
         // Check Finnotech API data availability
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $credit_risk_data = get_post_meta($inquiry_id, '_finnotech_credit_risk_data', true);
         $credit_score_data = get_post_meta($inquiry_id, '_finnotech_credit_score_data', true);
         $collaterals_data = get_post_meta($inquiry_id, '_finnotech_collaterals_data', true);
@@ -982,8 +981,7 @@ class Maneli_Render_Helpers {
             return null;
         }
         
-        $options = get_option('maneli_inquiry_all_options', []);
-        $raw = $options['expert_statuses'] ?? '';
+        $raw = Maneli_Options_Helper::get_option('expert_statuses', '');
         $lines = array_filter(array_map('trim', explode("\n", (string)$raw)));
         
         foreach ($lines as $line) {

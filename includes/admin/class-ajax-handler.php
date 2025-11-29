@@ -289,7 +289,7 @@ class Maneli_Ajax_Handler {
             return;
         }
         
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $start_hour = $options['meetings_start_hour'] ?? '10:00';
         $end_hour = $options['meetings_end_hour'] ?? '20:00';
         $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -1200,7 +1200,7 @@ class Maneli_Ajax_Handler {
         
         $new_status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
         $sms_handler = new Maneli_SMS_Handler();
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
         $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
         $car_name = get_the_title(get_post_meta($inquiry_id, 'product_id', true));
@@ -2469,7 +2469,7 @@ class Maneli_Ajax_Handler {
         $date_only = date('Y-m-d', strtotime($meeting_datetime));
         
         // Get settings and validate meeting time
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         $start_hour = $options['meetings_start_hour'] ?? '10:00';
         $end_hour = $options['meetings_end_hour'] ?? '20:00';
         $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -2822,7 +2822,7 @@ class Maneli_Ajax_Handler {
                 }
                 
                 // Validate time against settings
-                $options = get_option('maneli_inquiry_all_options', []);
+                $options = Maneli_Options_Helper::get_all_options();
                 $settings_start = $options['meetings_start_hour'] ?? '10:00';
                 $settings_end = $options['meetings_end_hour'] ?? '20:00';
                 $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -3306,7 +3306,7 @@ class Maneli_Ajax_Handler {
                 }
                 
                 // Validate time against settings
-                $options = get_option('maneli_inquiry_all_options', []);
+                $options = Maneli_Options_Helper::get_all_options();
                 $settings_start = $options['meetings_start_hour'] ?? '10:00';
                 $settings_end = $options['meetings_end_hour'] ?? '20:00';
                 $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -5674,7 +5674,7 @@ class Maneli_Ajax_Handler {
         
         if ($credit === false) {
             // Check if credentials are configured
-            $options = get_option('maneli_inquiry_all_options', []);
+            $options = Maneli_Options_Helper::get_all_options();
             $sms_username = $options['sms_username'] ?? '';
             $sms_password = $options['sms_password'] ?? '';
             
@@ -5774,8 +5774,7 @@ class Maneli_Ajax_Handler {
         $recipients = array_unique($recipients);
         
         // Check bulk limit
-        $options = get_option('maneli_inquiry_all_options', []);
-        $bulk_limit = isset($options['bulk_sms_limit']) ? (int)$options['bulk_sms_limit'] : 100;
+        $bulk_limit = (int)Maneli_Options_Helper::get_option('bulk_sms_limit', 100);
         
         if (count($recipients) > $bulk_limit) {
             wp_send_json_error([

@@ -24,6 +24,10 @@ class Maneli_Captcha_Helper {
      * @return bool True if CAPTCHA is enabled, false otherwise
      */
     public static function is_enabled() {
+        // Use optimized helper if available, fallback to direct get_option
+        if (class_exists('Maneli_Options_Helper')) {
+            return Maneli_Options_Helper::is_option_enabled('captcha_enabled', false);
+        }
         $options = get_option('maneli_inquiry_all_options', []);
         return !empty($options['captcha_enabled']) && $options['captcha_enabled'] === '1';
     }
@@ -38,8 +42,14 @@ class Maneli_Captcha_Helper {
             return '';
         }
         
-        $options = get_option('maneli_inquiry_all_options', []);
-        $type = isset($options['captcha_type']) ? sanitize_text_field($options['captcha_type']) : '';
+        // Use optimized helper if available, fallback to direct get_option
+        if (class_exists('Maneli_Options_Helper')) {
+            $type = Maneli_Options_Helper::get_option('captcha_type', '');
+        } else {
+            $options = get_option('maneli_inquiry_all_options', []);
+            $type = isset($options['captcha_type']) ? $options['captcha_type'] : '';
+        }
+        $type = sanitize_text_field($type);
         
         // Validate type
         $valid_types = ['recaptcha_v2', 'recaptcha_v3', 'hcaptcha'];
@@ -65,7 +75,12 @@ class Maneli_Captcha_Helper {
             return '';
         }
         
-        $options = get_option('maneli_inquiry_all_options', []);
+        // Use optimized helper if available, fallback to direct get_option
+        if (class_exists('Maneli_Options_Helper')) {
+            $options = Maneli_Options_Helper::get_all_options();
+        } else {
+            $options = get_option('maneli_inquiry_all_options', []);
+        }
         
         switch ($type) {
             case 'recaptcha_v2':
@@ -94,7 +109,12 @@ class Maneli_Captcha_Helper {
             return '';
         }
         
-        $options = get_option('maneli_inquiry_all_options', []);
+        // Use optimized helper if available, fallback to direct get_option
+        if (class_exists('Maneli_Options_Helper')) {
+            $options = Maneli_Options_Helper::get_all_options();
+        } else {
+            $options = get_option('maneli_inquiry_all_options', []);
+        }
         $encrypted_key = '';
         
         switch ($type) {
@@ -126,8 +146,13 @@ class Maneli_Captcha_Helper {
      * @return float Score threshold (default: 0.5)
      */
     public static function get_score_threshold() {
-        $options = get_option('maneli_inquiry_all_options', []);
-        $threshold = isset($options['recaptcha_v3_score_threshold']) ? floatval($options['recaptcha_v3_score_threshold']) : 0.5;
+        // Use optimized helper if available, fallback to direct get_option
+        if (class_exists('Maneli_Options_Helper')) {
+            $threshold = floatval(Maneli_Options_Helper::get_option('recaptcha_v3_score_threshold', 0.5));
+        } else {
+            $options = get_option('maneli_inquiry_all_options', []);
+            $threshold = isset($options['recaptcha_v3_score_threshold']) ? floatval($options['recaptcha_v3_score_threshold']) : 0.5;
+        }
         
         // Ensure threshold is between 0 and 1
         return max(0.0, min(1.0, $threshold));

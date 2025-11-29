@@ -69,8 +69,7 @@ class Maneli_Expert_Panel {
         );
         
         // Fetch configurable interest rate
-        $options = get_option('maneli_inquiry_all_options', []);
-        $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035); 
+        $interest_rate = floatval(Maneli_Options_Helper::get_option('loan_interest_rate', 0.035)); 
         
         // Localize the script with necessary data
         wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [

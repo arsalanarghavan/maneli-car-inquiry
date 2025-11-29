@@ -15,14 +15,11 @@ if (!defined('ABSPATH')) {
 class Maneli_Loan_Calculator_Shortcode {
 
     public function __construct() {
-        // Check license before registering shortcode
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            if (!$license->is_license_active() && !$license->is_demo_mode()) {
-                // License not active - register shortcode that shows message
-                add_shortcode('loan_calculator', [$this, 'render_license_required_message']);
-                return;
-            }
+        // Check license before registering shortcode (using optimized helper)
+        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+            // License not active - register shortcode that shows message
+            add_shortcode('loan_calculator', [$this, 'render_license_required_message']);
+            return;
         }
         
         add_shortcode('loan_calculator', [$this, 'render_shortcode']);
@@ -50,7 +47,7 @@ class Maneli_Loan_Calculator_Shortcode {
             return;
         }
 
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         
         // Fetch configurable interest rate 
         $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
@@ -139,8 +136,7 @@ class Maneli_Loan_Calculator_Shortcode {
 
         // آماده‌سازی داده‌ها برای ارسال به تمپلیت
         // Check if prices should be hidden
-        $options = get_option('maneli_inquiry_all_options', []);
-        $hide_prices = !empty($options['hide_prices_for_customers']) && $options['hide_prices_for_customers'] == '1';
+        $hide_prices = Maneli_Options_Helper::is_option_enabled('hide_prices_for_customers', false);
         $can_see_prices = current_user_can('manage_maneli_inquiries') || !$hide_prices;
         
         // Get cash_price - handle empty/null values properly

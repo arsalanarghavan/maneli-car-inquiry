@@ -16,13 +16,10 @@ if (!defined('ABSPATH')) {
 class Maneli_Payment_Handler {
 
     public function __construct() {
-        // Check license before registering handlers
-        if (class_exists('Maneli_License')) {
-            $license = Maneli_License::instance();
-            if (!$license->is_license_active() && !$license->is_demo_mode()) {
-                // License not active - don't register handlers
-                return;
-            }
+        // Check license before registering handlers (using optimized helper)
+        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+            // License not active - don't register handlers
+            return;
         }
         
         add_action('template_redirect', [$this, 'handle_payment_verification']);
@@ -86,9 +83,8 @@ class Maneli_Payment_Handler {
         }
 
         $user_id = get_current_user_id();
-        $options = get_option('maneli_inquiry_all_options', []);
-        $amount_toman = (int)($options['inquiry_fee'] ?? 0);
-        $discount_code = $options['discount_code'] ?? '';
+        $amount_toman = (int)Maneli_Options_Helper::get_option('inquiry_fee', 0);
+        $discount_code = Maneli_Options_Helper::get_option('discount_code', '');
         $submitted_code = isset($_POST['discount_code_input']) ? trim(sanitize_text_field($_POST['discount_code_input'])) : '';
 
         // Apply discount if applicable
@@ -147,8 +143,7 @@ class Maneli_Payment_Handler {
      * @param int $amount_toman Amount in Toman.
      */
     private function initiate_payment_gateway($user_id, $amount_toman) {
-        $options = get_option('maneli_inquiry_all_options', []);
-        $active_gateway = $options['active_gateway'] ?? 'zarinpal';
+        $active_gateway = Maneli_Options_Helper::get_option('active_gateway', 'zarinpal');
         $order_id = time() . '-' . $user_id;
         $payment_token = $this->generate_and_save_token($user_id); // Generate the secure token
         
@@ -293,8 +288,7 @@ class Maneli_Payment_Handler {
         }
         
         $current_user_id = get_current_user_id();
-        $options = get_option('maneli_inquiry_all_options', []);
-        $merchant_id = $options['zarinpal_merchant_code'] ?? '';
+        $merchant_id = Maneli_Options_Helper::get_option('zarinpal_merchant_code', '');
         $amount_toman = (int)$payment_data['amount'];
         $saved_authority = $payment_data['authority'] ?? '';
         $payment_type = $payment_data['payment_type'] ?? '';
@@ -463,7 +457,6 @@ class Maneli_Payment_Handler {
         $current_user_id = get_current_user_id();
         $payment_type = $payment_data['payment_type'] ?? '';
         $expected_order_id = $payment_data['order_id'] ?? '';
-        $options = get_option('maneli_inquiry_all_options', []);
 
         $redirect_url = ($payment_type === 'cash_down_payment')
             ? home_url('/dashboard/cash-inquiries')

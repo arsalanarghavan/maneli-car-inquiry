@@ -1066,7 +1066,7 @@ class Maneli_Database {
         $table = $wpdb->prefix . 'maneli_system_logs';
         
         $session_user_id = self::get_session_user_id();
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
 
         $defaults = array(
             'log_type' => 'debug',

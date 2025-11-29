@@ -415,20 +415,19 @@ class Maneli_Dashboard_Handler {
             ));
             
             // Logging tracker - intercept console logs and track user actions
-            $options = get_option('maneli_inquiry_all_options', []);
             wp_enqueue_script('maneli-logging-tracker', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/logging-tracker.js', ['jquery'], '1.0.0', true);
             wp_localize_script('maneli-logging-tracker', 'maneliAjax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('maneli_ajax_nonce'),
             ));
             wp_localize_script('maneli-logging-tracker', 'maneliLoggingSettings', array(
-                'enable_logging_system' => !empty($options['enable_logging_system']) && $options['enable_logging_system'] == '1',
-                'log_console_messages' => !empty($options['log_console_messages']) && $options['log_console_messages'] == '1',
-                'enable_user_logging' => !empty($options['enable_user_logging']) && $options['enable_user_logging'] == '1',
-                'log_button_clicks' => !empty($options['log_button_clicks']) && $options['log_button_clicks'] == '1',
-                'log_form_submissions' => !empty($options['log_form_submissions']) && $options['log_form_submissions'] == '1',
-                'log_ajax_calls' => !empty($options['log_ajax_calls']) && $options['log_ajax_calls'] == '1',
-                'log_page_views' => !empty($options['log_page_views']) && $options['log_page_views'] == '1',
+                'enable_logging_system' => Maneli_Options_Helper::is_option_enabled('enable_logging_system', false),
+                'log_console_messages' => Maneli_Options_Helper::is_option_enabled('log_console_messages', false),
+                'enable_user_logging' => Maneli_Options_Helper::is_option_enabled('enable_user_logging', false),
+                'log_button_clicks' => Maneli_Options_Helper::is_option_enabled('log_button_clicks', false),
+                'log_form_submissions' => Maneli_Options_Helper::is_option_enabled('log_form_submissions', false),
+                'log_ajax_calls' => Maneli_Options_Helper::is_option_enabled('log_ajax_calls', false),
+                'log_page_views' => Maneli_Options_Helper::is_option_enabled('log_page_views', false),
             ));
             // wp_enqueue_script('maneli-dashboard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/dashboard.js', ['jquery'], '1.0.0', true);
             // Dashboard.js file does not exist - commented out
@@ -793,7 +792,7 @@ class Maneli_Dashboard_Handler {
             // Inquiry Lists localization - only for inquiry pages (including followups)
             if ($load_inquiry_scripts) {
                 // Localize script with data for cash or installment
-                $options = get_option('maneli_inquiry_all_options', []);
+                $options = Maneli_Options_Helper::get_all_options();
                 $experts_query = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
                 $experts_list = [];
                 foreach ($experts_query as $expert) {
@@ -2337,8 +2336,7 @@ class Maneli_Dashboard_Handler {
         $this->maybe_start_session();
         
         // Check resend delay
-        $options = get_option('maneli_inquiry_all_options', []);
-        $resend_delay = intval($options['otp_resend_delay'] ?? 60);
+        $resend_delay = (int)Maneli_Options_Helper::get_option('otp_resend_delay', 60);
         
         if (isset($_SESSION['maneli_sms_time'])) {
             $time_elapsed = time() - $_SESSION['maneli_sms_time'];
@@ -2444,8 +2442,7 @@ class Maneli_Dashboard_Handler {
         }
         
         // Get OTP expiry time from settings
-        $options = get_option('maneli_inquiry_all_options', []);
-        $expiry_minutes = intval($options['otp_expiry_minutes'] ?? 5);
+        $expiry_minutes = (int)Maneli_Options_Helper::get_option('otp_expiry_minutes', 5);
         $expiry_seconds = $expiry_minutes * 60;
         
         // Check if code is expired
@@ -2461,8 +2458,7 @@ class Maneli_Dashboard_Handler {
      * Verify password using WordPress password hashing
      */
     private function verify_password($phone, $password) {
-        $options = get_option('maneli_inquiry_all_options', []);
-        $saved_password = $options['dashboard_password'] ?? '';
+        $saved_password = Maneli_Options_Helper::get_option('dashboard_password', '');
         
         // Check if no password is set - require admin to set password first
         if (empty($saved_password)) {
@@ -2688,8 +2684,7 @@ class Maneli_Dashboard_Handler {
         $this->maybe_start_session();
         
         // Check resend delay
-        $options = get_option('maneli_inquiry_all_options', []);
-        $resend_delay = intval($options['otp_resend_delay'] ?? 60);
+        $resend_delay = (int)Maneli_Options_Helper::get_option('otp_resend_delay', 60);
         
         if (isset($_SESSION['maneli_sms_time'])) {
             $time_elapsed = time() - $_SESSION['maneli_sms_time'];

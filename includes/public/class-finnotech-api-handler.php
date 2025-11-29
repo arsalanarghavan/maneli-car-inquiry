@@ -29,7 +29,7 @@ class Maneli_Finnotech_API_Handler {
      * @return array ['client_id' => string, 'api_key' => string] or ['client_id' => '', 'api_key' => '']
      */
     private function get_decrypted_credentials() {
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = Maneli_Options_Helper::get_all_options();
         
         $client_id_raw = $options['finotex_username'] ?? '';
         $api_key_raw = $options['finotex_password'] ?? '';
@@ -169,9 +169,7 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_credit_risk_inquiry($national_code) {
-        $options = get_option('maneli_inquiry_all_options', []);
-        
-        if (empty($options['finnotech_credit_risk_enabled']) || $options['finnotech_credit_risk_enabled'] !== '1') {
+        if (!Maneli_Options_Helper::is_option_enabled('finnotech_credit_risk_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Credit Risk API is disabled in settings.'];
         }
 
@@ -196,9 +194,7 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_credit_score_inquiry($national_code) {
-        $options = get_option('maneli_inquiry_all_options', []);
-        
-        if (empty($options['finnotech_credit_score_enabled']) || $options['finnotech_credit_score_enabled'] !== '1') {
+        if (!Maneli_Options_Helper::is_option_enabled('finnotech_credit_score_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Credit Score API is disabled in settings.'];
         }
 
@@ -223,9 +219,7 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_collaterals_inquiry($national_code) {
-        $options = get_option('maneli_inquiry_all_options', []);
-        
-        if (empty($options['finnotech_collaterals_enabled']) || $options['finnotech_collaterals_enabled'] !== '1') {
+        if (!Maneli_Options_Helper::is_option_enabled('finnotech_collaterals_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Collaterals API is disabled in settings.'];
         }
 
@@ -250,9 +244,7 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_cheque_color_inquiry($national_code) {
-        $options = get_option('maneli_inquiry_all_options', []);
-        
-        if (empty($options['finnotech_cheque_color_enabled']) || $options['finnotech_cheque_color_enabled'] !== '1') {
+        if (!Maneli_Options_Helper::is_option_enabled('finnotech_cheque_color_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Cheque Color API is disabled in settings.'];
         }
 
