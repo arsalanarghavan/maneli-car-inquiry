@@ -115,9 +115,17 @@ if (!defined('ABSPATH')) {
                     <button type="submit" class="loan-action-btn"><?php esc_html_e('Submit Price Inquiry Request', 'maneli-car-inquiry'); ?></button>
                 </div>
                 <?php else: // User is not logged in ?>
+                    <?php
+                    // Get current product page URL for redirect after login
+                    $current_url = get_permalink($product->get_id());
+                    if (empty($current_url)) {
+                        $current_url = home_url($_SERVER['REQUEST_URI']);
+                    }
+                    $login_url = add_query_arg('redirect_to', urlencode($current_url), home_url('/dashboard/login'));
+                    ?>
                     <div class="loan-section" style="text-align: center;">
                         <p><?php esc_html_e('To submit a cash purchase request, please log in to your account first.', 'maneli-car-inquiry'); ?></p>
-                        <a href="<?php echo esc_url(home_url('/dashboard/')); ?>" class="loan-action-btn"><?php esc_html_e('Login and Submit Request', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn"><?php esc_html_e('Login and Submit Request', 'maneli-car-inquiry'); ?></a>
                     </div>
                 <?php endif; ?>
             </form>
@@ -210,7 +218,15 @@ if (!defined('ABSPATH')) {
                         <?php if (is_user_logged_in()): ?>
                             <button type="button" class="loan-action-btn"><?php esc_html_e('Bank Credit Check for Car Purchase', 'maneli-car-inquiry'); ?></button>
                         <?php else: ?>
-                            <a href="<?php echo esc_url(home_url('/dashboard/')); ?>" class="loan-action-btn"><?php esc_html_e('Log in to Start Inquiry', 'maneli-car-inquiry'); ?></a>
+                            <?php
+                            // Get current product page URL for redirect after login
+                            $current_url = get_permalink($product->get_id());
+                            if (empty($current_url)) {
+                                $current_url = home_url($_SERVER['REQUEST_URI']);
+                            }
+                            $login_url = add_query_arg('redirect_to', urlencode($current_url), home_url('/dashboard/login'));
+                            ?>
+                            <a href="<?php echo esc_url($login_url); ?>" class="loan-action-btn"><?php esc_html_e('Log in to Start Inquiry', 'maneli-car-inquiry'); ?></a>
                         <?php endif; ?>
                     </div>
                 </div>

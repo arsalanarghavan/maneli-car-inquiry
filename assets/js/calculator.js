@@ -203,8 +203,10 @@
                         localStorage.setItem('maneli_pending_cash_inquiry', JSON.stringify(formData));
                         console.log('Maneli Cash Form: Saved form data to localStorage');
                         
-                        // Redirect to login
-                        window.location.href = '/dashboard/';
+                        // Redirect to login with redirect_to parameter pointing to current product page
+                        const currentUrl = window.location.href;
+                        const loginUrl = '/dashboard/login?redirect_to=' + encodeURIComponent(currentUrl);
+                        window.location.href = loginUrl;
                         return;
                     }
                     
