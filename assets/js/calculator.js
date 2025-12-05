@@ -142,7 +142,7 @@
                     overlayMessage.innerHTML = `
                         <div class="unavailable-message-content">
                             <i class="la la-exclamation-circle"></i>
-                            <p>این محصول در حال حاضر برای خرید نقدی در دسترس نیست.</p>
+                            <p><?php echo esc_html($unavailable_message); ?></p>
                         </div>
                     `;
                     cashTab.style.position = 'relative';
@@ -185,7 +185,7 @@
                     const isUnavailable = cashForm.getAttribute('data-is-unavailable') === 'true';
                     if (isUnavailable) {
                         console.log('Maneli Cash Form: Cannot submit - cash tab unavailable');
-                        alert('این محصول در حال حاضر برای خرید نقدی در دسترس نیست.');
+                        alert(maneli_ajax_object.text.unavailable_cash_message || 'این محصول در حال حاضر برای خرید نقدی در دسترس نیست.');
                         return;
                     }
                     
@@ -254,7 +254,7 @@
                         console.error('Maneli Cash Form: AJAX Error:', error);
                         const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
                                        ? maneli_ajax_object.text.server_error_connection 
-                                       : "An error occurred while communicating with the server.";
+                                       : "An unknown error occurred while communicating with the server.";
                         alert(errorMsg);
                         submitBtn.disabled = false;
                         submitBtn.textContent = originalText;
@@ -774,7 +774,7 @@
                     console.error('Maneli Calculator: AJAX Error:', error);
                     const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
                                    ? maneli_ajax_object.text.server_error_connection 
-                                   : "An unknown error occurred while communicating with the server.";
+                                   : maneli_ajax_object.text.unknown_server_error || "An unknown error occurred while communicating with the server.";
                     alert(errorMsg);
                     this.disabled = false;
                     this.textContent = originalText;

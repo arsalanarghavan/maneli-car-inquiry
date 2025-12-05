@@ -84,6 +84,18 @@ class Maneli_Loan_Calculator_Shortcode {
             'nonce' => ''
         ];
         
+        // Additional texts for calculator.js
+        $localize_data['text']['unavailable_cash_message'] = Maneli_Options_Helper::get_option('unavailable_cash_message', esc_html__('This product is currently unavailable for cash purchase.', 'maneli-car-inquiry'));
+        $localize_data['text']['unknown_server_error'] = esc_html__('An unknown error occurred while communicating with the server.', 'maneli-car-inquiry');
+        $localize_data['text']['please_fill_all_fields'] = esc_html__('Please fill all required fields.', 'maneli-car-inquiry');
+        $localize_data['text']['invalid_mobile_number'] = esc_html__('Please enter a valid mobile number.', 'maneli-car-inquiry');
+        $localize_data['text']['select_car_color'] = esc_html__('Please select a car color.', 'maneli-car-inquiry');
+        $localize_data['text']['enter_car_color'] = esc_html__('Please enter a car color.', 'maneli-car-inquiry');
+        $localize_data['text']['minimum_downpayment'] = esc_html__('Minimum down payment is %s Toman.', 'maneli-car-inquiry');
+        $localize_data['text']['maximum_downpayment'] = esc_html__('Maximum down payment is %s Toman.', 'maneli-car-inquiry');
+        $localize_data['text']['inquiry_sent_success'] = esc_html__('Your inquiry has been sent successfully!', 'maneli-car-inquiry');
+        $localize_data['text']['error_sending_inquiry'] = esc_html__('Error sending inquiry. Please try again.', 'maneli-car-inquiry');
+
         if (is_user_logged_in()) {
             $localize_data['ajax_url'] = admin_url('admin-ajax.php');
             $localize_data['inquiry_page_url'] = home_url('/dashboard/installment-inquiries');

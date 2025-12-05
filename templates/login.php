@@ -267,7 +267,7 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['maneli_create_pa
                                     <div class="col-xl-12">
                                         <label class="form-label text-default" for="create-password"><?php echo esc_html(__('Password', 'maneli-car-inquiry')); ?><sup class="fs-12 text-danger">*</sup></label>
                                         <div class="position-relative">
-                                            <input class="form-control create-password-input" id="create-password" placeholder="<?php echo esc_attr(__('Password', 'maneli-car-inquiry')); ?>" type="password"> 
+                                            <input class="form-control create-password-input" id="create-password" placeholder="<?php echo esc_attr__('Password', 'maneli-car-inquiry'); ?>" type="password"> 
                                             <a class="show-password-button text-muted" href="javascript:void(0);" onclick="createpassword('create-password',this)">
                                                 <i class="ri-eye-off-line align-middle"></i>
                                             </a>
@@ -276,7 +276,7 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['maneli_create_pa
                                     <div class="col-xl-12 mb-2">
                                         <label class="form-label text-default" for="create-confirmpassword"><?php echo esc_html(__('Confirm Password', 'maneli-car-inquiry')); ?><sup class="fs-12 text-danger">*</sup></label>
                                         <div class="position-relative">
-                                            <input class="form-control create-password-input" id="create-confirmpassword" placeholder="<?php echo esc_attr(__('Confirm Password', 'maneli-car-inquiry')); ?>" type="password"> 
+                                            <input class="form-control create-password-input" id="create-confirmpassword" placeholder="<?php echo esc_attr__('Confirm Password', 'maneli-car-inquiry'); ?>" type="password"> 
                                             <a class="show-password-button text-muted" href="javascript:void(0);" onclick="createpassword('create-confirmpassword',this)">
                                                 <i class="ri-eye-off-line align-middle"></i>
                                             </a>
@@ -433,6 +433,7 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['maneli_create_pa
                 passwordTooShort: '<?php echo esc_js(__('Password must be at least 6 characters.', 'maneli-car-inquiry')); ?>',
                 saving: '<?php echo esc_js(__('Saving...', 'maneli-car-inquiry')); ?>',
                 savePassword: '<?php echo esc_js(__('Save Password', 'maneli-car-inquiry')); ?>',
+                errorCreatingPassword: '<?php echo esc_js(__('An error occurred. Please try again.', 'maneli-car-inquiry')); ?>',
                 success: '<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>',
                 error: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
                 ok: '<?php echo esc_js(__('OK', 'maneli-car-inquiry')); ?>'
@@ -672,7 +673,7 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['maneli_create_pa
             })
             .catch(error => {
                 console.error('Error:', error);
-                maneli_show_alert('<?php echo esc_js(__('An error occurred. Please try again.', 'maneli-car-inquiry')); ?>', 'error');
+                maneli_show_alert(maneli_ajax.strings.errorCreatingPassword, 'error');
                 btn.disabled = false;
                 btn.innerHTML = maneli_ajax.strings.savePassword;
             });
