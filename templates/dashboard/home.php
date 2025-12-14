@@ -231,7 +231,7 @@ if ($is_customer) {
                         </div>
                     <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
                     <div class="d-flex align-items-center justify-content-between mt-1">
-                        <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_count); ?></h4>
+                        <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($total_customer_inquiries); ?></h4>
                         <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo maneli_number_format_persian(count($cash_inquiries)); ?> <?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
                     </div>
                 </div>
@@ -310,7 +310,7 @@ if ($is_customer) {
                     <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></p>
                     <div class="d-flex align-items-center justify-content-between mt-1">
                         <h4 class="mb-0 d-flex align-items-center text-info"><?php echo maneli_number_format_persian(count($installment_inquiries)); ?></h4>
-                        <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $total_count > 0 ? maneli_number_format_persian(round((count($installment_inquiries) / $total_count) * 100), 1) : '۰'; ?>%</span>
+                        <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $total_customer_inquiries > 0 ? maneli_number_format_persian(round((count($installment_inquiries) / $total_customer_inquiries) * 100), 1) : '۰'; ?>%</span>
                     </div>
                 </div>
             </div>

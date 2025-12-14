@@ -7,6 +7,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Suppress open_basedir warnings from WordPress core translation system
+// This is a WordPress core issue when resolving translation file paths
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    if (strpos($errstr, 'open_basedir restriction') !== false && strpos($errfile, 'wp-translation-controller.php') !== false) {
+        return true; // Suppress this specific warning
+    }
+    return false; // Let other errors through
+}, E_WARNING);
+
 // Load theme settings
 require_once get_template_directory() . '/includes/class-theme-settings-enhanced.php';
 

@@ -104,9 +104,9 @@ if (!defined('ABSPATH')) {
                     <strong><?php esc_html_e('Approximate Price:', 'maneli-car-inquiry'); ?></strong>
                     <?php if (isset($cash_unavailable) && $cash_unavailable): ?>
                         <span class="unavailable-text"><?php esc_html_e('ناموجود', 'maneli-car-inquiry'); ?></span>
-                    <?php elseif (empty($cash_price) || $cash_price <= 0): ?>
-                        <span class="price-hidden"><?php esc_html_e('-', 'maneli-car-inquiry'); ?></span>
                     <?php elseif (isset($can_see_prices) && !$can_see_prices): ?>
+                        <span class="price-hidden"><?php esc_html_e('-', 'maneli-car-inquiry'); ?></span>
+                    <?php elseif (empty($cash_price) || $cash_price <= 0): ?>
                         <span class="price-hidden"><?php esc_html_e('-', 'maneli-car-inquiry'); ?></span>
                     <?php else: ?>
                         <span id="cashPriceAmount"><?php echo esc_html(function_exists('maneli_number_format_persian') ? maneli_number_format_persian($cash_price) : number_format_i18n($cash_price)); ?></span>

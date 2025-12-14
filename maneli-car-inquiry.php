@@ -18,6 +18,21 @@ if (!defined('ABSPATH')) {
 }
 
 /**
+ * Suppress open_basedir warnings from WordPress core translation system
+ * This prevents warnings when WordPress tries to resolve translation paths
+ * outside the allowed open_basedir restriction
+ */
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    if ($errno === E_WARNING && 
+        strpos($errstr, 'open_basedir restriction') !== false && 
+        (strpos($errfile, 'wp-translation-controller.php') !== false || 
+         strpos($errfile, 'l10n') !== false)) {
+        return true; // Suppress this specific warning
+    }
+    return false; // Let other errors through
+}, E_WARNING);
+
+/**
  * Define constants for the plugin.
  */
 define('MANELI_INQUIRY_PLUGIN_FILE', __FILE__);

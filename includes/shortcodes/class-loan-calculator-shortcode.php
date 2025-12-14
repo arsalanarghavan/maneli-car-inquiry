@@ -47,6 +47,28 @@ class Maneli_Loan_Calculator_Shortcode {
             return;
         }
 
+        // First, ensure frontend styles are registered/enqueued as dependencies
+        // This is handled by Maneli_Shortcode_Handler, but we need to ensure they're available
+        $frontend_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css';
+        if (!wp_style_is('maneli-frontend-styles', 'registered')) {
+            if (file_exists($frontend_css_path)) {
+                $css_version = filemtime($frontend_css_path);
+                wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
+            } else {
+                // Use maneli-shortcode-assets.css as fallback if frontend.css doesn't exist
+                $fallback_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-shortcode-assets.css';
+                if (file_exists($fallback_css_path)) {
+                    $css_version = filemtime($fallback_css_path);
+                    wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-shortcode-assets.css', [], $css_version);
+                }
+            }
+        }
+
+        // Ensure Bootstrap is registered/enqueued as dependency
+        if (!wp_style_is('maneli-bootstrap-shortcode', 'registered')) {
+            wp_register_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        }
+
         $options = Maneli_Options_Helper::get_all_options();
         
         // Fetch configurable interest rate 
@@ -148,12 +170,24 @@ class Maneli_Loan_Calculator_Shortcode {
 
         // آماده‌سازی داده‌ها برای ارسال به تمپلیت
         // Check if prices should be hidden
+        // NOTE: In calculator form, prices are ALWAYS shown regardless of hide_prices_for_customers setting
+        // The hide_prices_for_customers setting only affects catalog and product pages
         $hide_prices = Maneli_Options_Helper::is_option_enabled('hide_prices_for_customers', false);
-        $can_see_prices = current_user_can('manage_maneli_inquiries') || !$hide_prices;
+        
+        // In calculator form: ALWAYS show prices to everyone
+        // In other places (catalog, etc): respect the hide_prices_for_customers setting
+        $can_see_prices = true; // Always show prices in calculator
         
         // Get cash_price - handle empty/null values properly
         // get_regular_price() can return empty string, null, false, 0, float, int, or formatted string
         $cash_price_raw = $product->get_regular_price();
+        
+        // Log for debugging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log("Maneli Calculator Cash Price DEBUG:");
+            error_log("  - get_regular_price() returned: " . var_export($cash_price_raw, true));
+            error_log("  - cash_price_raw type: " . gettype($cash_price_raw));
+        }
         
         // Always treat as string first to handle formatting, then convert
         if ($cash_price_raw === '' || $cash_price_raw === null || $cash_price_raw === false || $cash_price_raw === 0 || $cash_price_raw === '0') {
