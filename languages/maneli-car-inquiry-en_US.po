@@ -415,6 +415,12 @@ msgstr ""
 msgid "Your Selected Car"
 msgstr "Your Selected Car"
 
+msgid "Selected Car Summary:"
+msgstr "Selected Car Summary:"
+
+msgid "Please proceed to the next step to complete your information."
+msgstr "Please proceed to the next step to complete your information."
+
 msgid "Search…"
 msgstr "Search…"
 
@@ -5032,11 +5038,53 @@ msgstr "%s inquiry has been assigned to you"
 msgid "A %s inquiry has been assigned to you. Please review it."
 msgstr "A %s inquiry has been assigned to you. Please review it."
 
+msgid "A %s request from %s for %s has been assigned to you"
+msgstr "A %s request from %s for %s has been assigned to you"
+
 msgid "Your request status has changed"
 msgstr "Your request status has changed"
 
 msgid "Your request status has changed from \"%s\" to \"%s\"."
 msgstr "Your request status has changed from \"%s\" to \"%s\"."
+
+msgid "Your cash request status has changed"
+msgstr "Your cash request status has changed"
+
+msgid "Your cash request for %s status changed from \"%s\" to \"%s\""
+msgstr "Your cash request for %s status changed from \"%s\" to \"%s\""
+
+msgid "Cash request status changed"
+msgstr "Cash request status changed"
+
+msgid "Cash request from %s for %s status changed from \"%s\" to \"%s\""
+msgstr "Cash request from %s for %s status changed from \"%s\" to \"%s\""
+
+msgid "Cash request from %s for %s status changed to \"%s\""
+msgstr "Cash request from %s for %s status changed to \"%s\""
+
+msgid "Your installment request status has changed"
+msgstr "Your installment request status has changed"
+
+msgid "Your installment request for %s status changed from \"%s\" to \"%s\""
+msgstr "Your installment request for %s status changed from \"%s\" to \"%s\""
+
+msgid "Installment request status changed"
+msgstr "Installment request status changed"
+
+msgid "Installment request from %s for %s status changed from \"%s\" to \"%s\""
+msgstr "Installment request from %s for %s status changed from \"%s\" to \"%s\""
+
+msgid "Installment request from %s for %s status changed to \"%s\""
+msgstr "Installment request from %s for %s status changed to \"%s\""
+
+msgid "%s request assigned to you"
+msgstr "%s request assigned to you"
+
+msgid "Expert assigned to your request"
+msgstr "Expert assigned to your request"
+
+msgid "Expert %s has been assigned to your %s request for %s"
+msgstr "Expert %s has been assigned to your %s request for %s"
 
 msgid "A new installment inquiry from %s for %s has been registered"
 msgstr "A new installment inquiry from %s for %s has been registered"

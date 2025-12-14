@@ -77,11 +77,6 @@ class Maneli_Shortcode_Handler {
             wp_enqueue_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
         }
         
-        // Separate CSS files for shortcodes - Load AFTER Bootstrap to override
-        wp_enqueue_style('maneli-loan-calculator', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css', ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css'));
-        wp_enqueue_style('maneli-installment-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/installment-inquiry.css', ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/installment-inquiry.css'));
-        wp_enqueue_style('maneli-cash-inquiry', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/cash-inquiry.css', ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'], '1.0.0');
-        
         // Enqueue jQuery (required for all scripts)
         wp_enqueue_script('jquery');
         
@@ -94,7 +89,7 @@ class Maneli_Shortcode_Handler {
             // Fallback to CDN if local file doesn't exist
             wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
         }
-        
+
         // NOTE: calculator.js is enqueued conditionally by Maneli_Loan_Calculator_Shortcode
         // Only on product pages to ensure proper localization and avoid duplicate loading
 

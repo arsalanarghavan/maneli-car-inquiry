@@ -56,9 +56,9 @@ class Maneli_Loan_Calculator_Shortcode {
         $calculator_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css';
         if (file_exists($calculator_css_path)) {
             wp_enqueue_style(
-                'maneli-calculator-css', 
+                'maneli-loan-calculator', 
                 MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css', 
-                [], 
+                ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'],
                 filemtime($calculator_css_path)
             );
         }

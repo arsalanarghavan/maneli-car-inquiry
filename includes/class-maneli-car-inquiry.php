@@ -58,9 +58,15 @@ final class Maneli_Car_Inquiry_Plugin {
         $locale = apply_filters('plugin_locale', determine_locale(), 'maneli-car-inquiry');
         $mofile = 'maneli-car-inquiry-' . $locale . '.mo';
         
-        // Try plugin's languages directory first
+        // Only try to load from WP_LANG_DIR if it's within allowed paths
+        // This prevents realpath() errors with open_basedir restrictions
+        $wp_lang_file = WP_LANG_DIR . '/plugins/' . $mofile;
+        if (@file_exists($wp_lang_file)) {
+            load_textdomain('maneli-car-inquiry', $wp_lang_file);
+        }
+        
+        // Load from plugin's languages directory
         $plugin_rel_path = dirname(plugin_basename(MANELI_INQUIRY_PLUGIN_PATH)) . '/languages/';
-        load_textdomain('maneli-car-inquiry', WP_LANG_DIR . '/plugins/' . $mofile);
         load_plugin_textdomain('maneli-car-inquiry', false, $plugin_rel_path);
     }
 
@@ -196,11 +202,11 @@ final class Maneli_Car_Inquiry_Plugin {
      * Displays a notice in the admin area if WooCommerce is not active.
      */
     public function woocommerce_not_active_notice() {
+        // Use non-translated string since translations may not be loaded yet
+        $message = 'Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue.';
         ?>
         <div class="notice notice-error is-dismissible">
-            <p>
-                <?php esc_html_e('Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue.', 'maneli-car-inquiry'); ?>
-            </p>
+            <p><?php echo esc_html($message); ?></p>
         </div>
         <?php
     }

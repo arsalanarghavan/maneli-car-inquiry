@@ -105,6 +105,68 @@ msgstr ""
 msgid "A new cash inquiry from %s for %s has been registered"
 msgstr ""
 
+#, php-format
+msgid "A %s inquiry has been assigned to you. Please review it."
+msgstr ""
+
+#, php-format
+msgid "A %s request from %s for %s has been assigned to you"
+msgstr ""
+
+msgid "Your request status has changed"
+msgstr ""
+
+#, php-format
+msgid "Your request status has changed from \"%s\" to \"%s\"."
+msgstr ""
+
+msgid "Your cash request status has changed"
+msgstr ""
+
+#, php-format
+msgid "Your cash request for %s status changed from \"%s\" to \"%s\""
+msgstr ""
+
+msgid "Cash request status changed"
+msgstr ""
+
+#, php-format
+msgid "Cash request from %s for %s status changed from \"%s\" to \"%s\""
+msgstr ""
+
+#, php-format
+msgid "Cash request from %s for %s status changed to \"%s\""
+msgstr ""
+
+msgid "Your installment request status has changed"
+msgstr ""
+
+#, php-format
+msgid "Your installment request for %s status changed from \"%s\" to \"%s\""
+msgstr ""
+
+msgid "Installment request status changed"
+msgstr ""
+
+#, php-format
+msgid "Installment request from %s for %s status changed from \"%s\" to \"%s\""
+msgstr ""
+
+#, php-format
+msgid "Installment request from %s for %s status changed to \"%s\""
+msgstr ""
+
+#, php-format
+msgid "%s request assigned to you"
+msgstr ""
+
+msgid "Expert assigned to your request"
+msgstr ""
+
+#, php-format
+msgid "Expert %s has been assigned to your %s request for %s"
+msgstr ""
+
 msgid "A reason for rejection is required."
 msgstr ""
 
@@ -3435,6 +3497,12 @@ msgid "Your Request Summary"
 msgstr ""
 
 msgid "Your Selected Car"
+msgstr ""
+
+msgid "Selected Car Summary:"
+msgstr ""
+
+msgid "Please proceed to the next step to complete your information."
 msgstr ""
 
 msgid ""

@@ -559,6 +559,14 @@ msgid "Your Selected Car"
 msgstr "خودرو انتخاب شده شما"
 
 
+msgid "Selected Car Summary:"
+msgstr "خلاصه خودرو انتخاب شده:"
+
+
+msgid "Please proceed to the next step to complete your information."
+msgstr "لطفاً برای تکمیل اطلاعات خود به مرحله بعد بروید."
+
+
 msgid "Search…"
 msgstr "جستجو…"
 
@@ -5788,11 +5796,53 @@ msgstr "%s استعلام به شما اختصاص داده شده است"
 msgid "A %s inquiry has been assigned to you. Please review it."
 msgstr "یک استعلام %s به شما اختصاص داده شده است. لطفاً آن را بررسی کنید."
 
+msgid "A %s request from %s for %s has been assigned to you"
+msgstr "یک درخواست %s از %s برای %s به شما اختصاص داده شده است"
+
 msgid "Your request status has changed"
 msgstr "وضعیت درخواست شما تغییر کرده است"
 
 msgid "Your request status has changed from \"%s\" to \"%s\"."
-msgstr ""
+msgstr "وضعیت درخواست شما از \"%s\" به \"%s\" تغییر کرده است."
+
+msgid "Your cash request status has changed"
+msgstr "وضعیت درخواست نقدی شما تغییر کرده است"
+
+msgid "Your cash request for %s status changed from \"%s\" to \"%s\""
+msgstr "وضعیت درخواست نقدی شما برای %s از \"%s\" به \"%s\" تغییر کرد"
+
+msgid "Cash request status changed"
+msgstr "وضعیت درخواست نقدی تغییر کرد"
+
+msgid "Cash request from %s for %s status changed from \"%s\" to \"%s\""
+msgstr "وضعیت درخواست نقدی از %s برای %s از \"%s\" به \"%s\" تغییر کرد"
+
+msgid "Cash request from %s for %s status changed to \"%s\""
+msgstr "وضعیت درخواست نقدی از %s برای %s به \"%s\" تغییر کرد"
+
+msgid "Your installment request status has changed"
+msgstr "وضعیت درخواست قسطی شما تغییر کرده است"
+
+msgid "Your installment request for %s status changed from \"%s\" to \"%s\""
+msgstr "وضعیت درخواست قسطی شما برای %s از \"%s\" به \"%s\" تغییر کرد"
+
+msgid "Installment request status changed"
+msgstr "وضعیت درخواست قسطی تغییر کرد"
+
+msgid "Installment request from %s for %s status changed from \"%s\" to \"%s\""
+msgstr "وضعیت درخواست قسطی از %s برای %s از \"%s\" به \"%s\" تغییر کرد"
+
+msgid "Installment request from %s for %s status changed to \"%s\""
+msgstr "وضعیت درخواست قسطی از %s برای %s به \"%s\" تغییر کرد"
+
+msgid "%s request assigned to you"
+msgstr "درخواست %s به شما اختصاص داده شد"
+
+msgid "Expert assigned to your request"
+msgstr "کارشناس به درخواست شما اختصاص داده شد"
+
+msgid "Expert %s has been assigned to your %s request for %s"
+msgstr "کارشناس %s به درخواست %s شما برای %s اختصاص داده شده است"
 
 msgid "A new installment inquiry from %s for %s has been registered"
 msgstr "یک استعلام قسطی جدید از %s برای %s ثبت شده است"
@@ -11530,3 +11580,47 @@ msgstr "قبلی"
 
 msgid "Summary"
 msgstr "خلاصه کلی"
+
+# Create Password Page
+msgid "Create Password - Maneli Car Inquiry"
+msgstr "ایجاد رمز عبور - استعلام خودرو مانلی"
+
+msgid "Create Password"
+msgstr "ایجاد رمز عبور"
+
+msgid "Hello! Please create a password for your account."
+msgstr "سلام! لطفاً برای حساب کاربری خود یک رمز عبور ایجاد کنید."
+
+msgid "Confirm Password"
+msgstr "تکرار رمز عبور"
+
+msgid "Remember password?"
+msgstr "رمز عبور را به خاطر بسپارید؟"
+
+msgid "Save Password"
+msgstr "ذخیره رمز عبور"
+
+msgid "Back to home?"
+msgstr "بازگشت به صفحه اصلی؟"
+
+msgid "Click here"
+msgstr "اینجا کلیک کنید"
+
+msgid "Create Your Account"
+msgstr "حساب کاربری خود را بسازید"
+
+msgid "Please create a secure password for your account to protect your information."
+msgstr "لطفاً یک رمز عبور امن برای حساب کاربری خود ایجاد کنید تا از اطلاعات خود محافظت کنید."
+
+msgid "Please enter a password."
+msgstr "لطفاً رمز عبور را وارد کنید."
+
+msgid "Passwords do not match."
+msgstr "رمزهای عبور مطابقت ندارند."
+
+msgid "Password must be at least 6 characters."
+msgstr "رمز عبور باید حداقل ۶ کاراکتر باشد."
+
+msgid "An error occurred. Please try again."
+msgstr "خطایی رخ داد. لطفاً دوباره تلاش کنید."
+
