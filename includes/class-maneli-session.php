@@ -110,4 +110,40 @@ class Maneli_Session {
         }
         return true;
     }
+
+    /**
+     * OPTIMIZED: Cleanup old session files to prevent memory bloat
+     * Called on init hook with low frequency to avoid performance impact
+     */
+    public static function cleanup_old_sessions() {
+        // Run cleanup every 24 hours only
+        $last_cleanup = get_transient('maneli_session_cleanup_last_run');
+        if ($last_cleanup !== false) {
+            return; // Already cleaned up recently
+        }
+        
+        // Mark cleanup as done for next 24 hours
+        set_transient('maneli_session_cleanup_last_run', true, 24 * HOUR_IN_SECONDS);
+        
+        // Get session save path
+        $session_path = ini_get('session.save_path');
+        if (empty($session_path)) {
+            $session_path = sys_get_temp_dir();
+        }
+        
+        // Remove session files older than 48 hours
+        $max_age = 48 * HOUR_IN_SECONDS;
+        $now = time();
+        
+        if (is_dir($session_path)) {
+            $files = glob($session_path . '/sess_*');
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    if (is_file($file) && ($now - filemtime($file)) > $max_age) {
+                        @unlink($file);  // Suppress errors if file can't be deleted
+                    }
+                }
+            }
+        }
+    }
 }

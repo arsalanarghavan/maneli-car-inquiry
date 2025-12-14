@@ -59,14 +59,14 @@ if ($is_customer) {
     $cash_inquiries = get_posts([
         'post_type' => 'cash_inquiry',
         'author' => $user_id,
-        'posts_per_page' => -1,
+        'posts_per_page' => 50, // OPTIMIZED: Limit for memory
         'post_status' => 'publish'
     ]);
     
     $installment_inquiries = get_posts([
         'post_type' => 'inquiry',
         'author' => $user_id,
-        'posts_per_page' => -1,
+        'posts_per_page' => 50, // OPTIMIZED: Limit for memory
         'post_status' => 'publish'
     ]);
     
@@ -212,7 +212,7 @@ if ($is_customer) {
                     <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></p>
                     <div class="d-flex align-items-center justify-content-between mt-1">
                         <h4 class="mb-0 d-flex align-items-center text-info"><?php echo esc_html($maneli_format_number(count($installment_inquiries))); ?></h4>
-                        <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo esc_html($maneli_format_number($total_count > 0 ? round((count($installment_inquiries) / $total_count) * 100, 1), 1)); ?>%</span>
+                        <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo esc_html($maneli_format_number($total_count > 0 ? round((count($installment_inquiries) / $total_count) * 100, 1) : 0, 1)); ?>%</span>
                     </div>
                 </div>
             </div>
@@ -473,7 +473,7 @@ if ($is_customer) {
     if ($is_expert && $expert_id) {
         $today_followups = count(get_posts([
             'post_type' => 'inquiry',
-            'posts_per_page' => -1,
+            'posts_per_page' => 50, // OPTIMIZED: Limit for memory
             'post_status' => 'publish',
             'meta_query' => [
                 'relation' => 'AND',
@@ -1284,7 +1284,7 @@ if ($is_customer) {
                 $pending_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         'relation' => 'AND',
                         [
@@ -1315,7 +1315,7 @@ if ($is_customer) {
                 $pending_cash = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         'relation' => 'AND',
                         [
@@ -1343,7 +1343,7 @@ if ($is_customer) {
                 $today_meetings_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'tracking_status',
@@ -1362,7 +1362,7 @@ if ($is_customer) {
                 $today_meetings_cash = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'cash_inquiry_status',
@@ -1385,7 +1385,7 @@ if ($is_customer) {
                 $overdue_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'tracking_status',
@@ -1413,7 +1413,7 @@ if ($is_customer) {
                 $overdue_cash = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'cash_inquiry_status',
@@ -1444,7 +1444,7 @@ if ($is_customer) {
                 $awaiting_payment = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'cash_inquiry_status',

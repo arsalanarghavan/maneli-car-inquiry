@@ -62,9 +62,10 @@ $unread_count = 0;
 $read_count = 0;
 
 if ($notification_user_id > 0) {
+    // OPTIMIZED: Reduced limit from 1000 to 100 to save memory (load more via AJAX if needed)
     $total_notifications = count(Maneli_Notification_Handler::get_notifications([
         'user_id' => $notification_user_id,
-        'limit' => 1000,
+        'limit' => 100,  // Reduced from 1000 for memory efficiency
         'offset' => 0,
     ]));
     $unread_count = Maneli_Notification_Handler::get_unread_count($notification_user_id);

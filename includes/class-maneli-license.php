@@ -49,6 +49,21 @@ class Maneli_License {
     }
 
     /**
+     * Determine if SSL verification should be enabled
+     * In production, always verify SSL. In development, allow bypass if needed.
+     */
+    private function get_ssl_verify_setting() {
+        // In production environment, always verify SSL
+        if (defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'production') {
+            return true;
+        }
+        
+        // For development/local, check for explicit setting
+        // Default to true for security, but allow override via filter
+        return apply_filters('maneli_license_verify_ssl', defined('WP_DEBUG') ? false : true);
+    }
+
+    /**
      * Constructor
      */
     private function __construct() {
@@ -173,7 +188,7 @@ class Maneli_License {
             $test_url = trailingslashit($url) . 'wp-json/puzzlingcrm/v1/license/check';
             $response = wp_remote_get($test_url, [
                 'timeout' => 3,
-                'sslverify' => false,
+                'sslverify' => $this->get_ssl_verify_setting(),
             ]);
             
             if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) < 500) {
@@ -290,7 +305,7 @@ class Maneli_License {
                     'domain' => $domain,
                 ],
                 'timeout' => 10,
-                'sslverify' => false, // Set to true in production
+                'sslverify' => $this->get_ssl_verify_setting(),
             ]);
 
             // If connection error, try next URL
@@ -348,7 +363,7 @@ class Maneli_License {
                     'domain' => $domain,
                 ],
                 'timeout' => 15,
-                'sslverify' => false,
+                'sslverify' => $this->get_ssl_verify_setting(),
             ]);
 
             // If connection error, try next URL

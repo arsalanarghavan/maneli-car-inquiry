@@ -52,7 +52,7 @@ $payments_list = [];
 // Only show inquiries where payment was actually completed (has inquiry_payment_completed meta)
 $installment_inquiries = get_posts([
     'post_type' => 'inquiry',
-    'posts_per_page' => -1,
+    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'post_status' => 'publish',
     'orderby' => 'date',
     'order' => 'DESC',
@@ -111,7 +111,7 @@ foreach ($installment_inquiries as $inquiry) {
 // 2. Cash inquiries with downpayment (payment type: cash_down_payment)
 $cash_inquiries = get_posts([
     'post_type' => 'cash_inquiry',
-    'posts_per_page' => -1,
+    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'post_status' => 'publish',
     'orderby' => 'date',
     'order' => 'DESC',

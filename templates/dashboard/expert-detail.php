@@ -78,7 +78,7 @@ $installment_inquiries = get_posts([
             'compare' => '='
         ]
     ],
-    'posts_per_page' => -1,
+    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'orderby' => 'date',
     'order' => 'DESC'
 ]);
@@ -93,7 +93,7 @@ $cash_inquiries = get_posts([
             'compare' => '='
         ]
     ],
-    'posts_per_page' => -1,
+    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'orderby' => 'date',
     'order' => 'DESC'
 ]);

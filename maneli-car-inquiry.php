@@ -20,6 +20,7 @@ if (!defined('ABSPATH')) {
 /**
  * Define constants for the plugin.
  */
+define('MANELI_INQUIRY_PLUGIN_FILE', __FILE__);
 define('MANELI_INQUIRY_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('MANELI_INQUIRY_PLUGIN_DIR', plugin_dir_path(__FILE__)); // Alias for compatibility
 define('MANELI_INQUIRY_PLUGIN_URL', plugin_dir_url(__FILE__));

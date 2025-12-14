@@ -8,12 +8,14 @@
 
 if (!defined('ABSPATH')) {
     exit;
-}
+}?>
 
+<?php
 // بارگذاری Dashicons - CRITICAL برای نمایش آیکون‌ها
 if (!wp_style_is('dashicons', 'enqueued')) {
     wp_enqueue_style('dashicons');
 }
+?>
 
 <div class="maneli-system-report-shortcode">
     <!-- هدر و فیلترها -->

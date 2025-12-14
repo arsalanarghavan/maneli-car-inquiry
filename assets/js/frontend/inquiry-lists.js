@@ -8,8 +8,18 @@
  * @version 1.0.3 (Added list and report deletion logic for both inquiry types)
  */
 
-// Immediate console log to verify script is loaded
-console.log('🔵 inquiry-lists.js FILE LOADED');
+// OPTIMIZED: Disable debug logs in production (only log if WP_DEBUG is true)
+const MANELI_DEBUG = typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.debug === true;
+const debugLog = function(...args) {
+    if (MANELI_DEBUG) {
+        console.log(...args);
+    }
+};
+const debugError = function(...args) {
+    if (MANELI_DEBUG) {
+        console.error(...args);
+    }
+};
 
 // Helper function to convert numbers to Persian
 function toPersianNumber(num) {

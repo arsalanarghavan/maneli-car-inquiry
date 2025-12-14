@@ -31,13 +31,13 @@ function maneli_inject_inquiry_scripts($dashboard_html, $page, $inquiry_id, $cas
     $experts_query = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
     $experts_list = [];
     foreach ($experts_query as $expert) {
-        $experts_list[] = ['id' Spanish => $expert->ID, 'name' => $expert->display_name ?: $expert->user_login];
+        $experts_list[] = ['id' => $expert->ID, 'name' => $expert->display_name ?: $expert->user_login];
     }
     
     $options = get_option('maneli_inquiry_all_options', []);
     $localize_data = [
         'ajax_url' => admin_url('admin-ajax.php'),
-        'experts' => $experts这些都,
+        'experts' => $experts_list,
         'nonces' => [
             'cash_filter' => wp_create_nonce('maneli_cash_inquiry_filter_nonce'),
             'inquiry_filter' => wp_create_nonce('maneli_inquiry_filter_nonce'),

@@ -29,7 +29,7 @@ $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
 // Get all meetings (admin sees all, expert sees all but limited customer info)
 $meetings_args = [
     'post_type' => 'maneli_meeting',
-    'posts_per_page' => -1,
+    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'post_status' => 'publish',
     'orderby' => 'meta_value',
     'meta_key' => 'meeting_start',
@@ -41,7 +41,7 @@ $meetings = get_posts($meetings_args);
 // Get scheduled sessions from cash inquiries
 $cash_inquiries = get_posts([
     'post_type' => 'cash_inquiry',
-    'posts_per_page' => -1,
+    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'post_status' => 'publish',
     'meta_query' => [
         'relation' => 'AND',
@@ -64,7 +64,7 @@ $cash_inquiries = get_posts([
 // Get scheduled sessions from installment inquiries
 $installment_inquiries = get_posts([
     'post_type' => 'inquiry',
-    'posts_per_page' => -1,
+    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'post_status' => 'publish',
     'meta_query' => [
         'relation' => 'AND',

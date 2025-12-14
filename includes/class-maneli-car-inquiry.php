@@ -46,6 +46,7 @@ final class Maneli_Car_Inquiry_Plugin {
         // Load textdomain on init hook (WordPress 6.7+ requirement)
         // Translations should be loaded at init action or later
         add_action('init', [$this, 'load_plugin_textdomain'], 1);
+        add_action('init', ['Maneli_Session', 'cleanup_old_sessions'], 99);  // OPTIMIZED: Cleanup sessions
         add_action('plugins_loaded', [$this, 'initialize'], 5);
         // Add security headers for plugin pages
         add_action('send_headers', [$this, 'add_security_headers'], 1);
@@ -140,6 +141,14 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
+        
+        // Elementor Integration
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-home.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-ajax-handler.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-auto-setup.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-theme-builder.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-admin-notices.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-import-manager.php';
     }
 
     /**
@@ -179,6 +188,13 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Initialize Dashboard Handler
         Maneli_Dashboard_Handler::instance();
+        
+        // Initialize Elementor Integration
+        Maneli_Elementor_Home::init();
+        Maneli_Elementor_Auto_Setup::init();
+        Maneli_Elementor_Theme_Builder::init();
+        Maneli_Admin_Notices::init();
+        Maneli_Elementor_Import_Manager::init();
     }
 
     /**

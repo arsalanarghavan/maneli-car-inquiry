@@ -106,7 +106,7 @@ foreach ($experts as $expert) {
                 'compare' => '='
             ]
         ],
-        'posts_per_page' => -1
+        'posts_per_page' => 50  // OPTIMIZED: Limit for memory
     ]));
     
     // Count cash inquiries
@@ -120,7 +120,7 @@ foreach ($experts as $expert) {
                 'compare' => '='
             ]
         ],
-        'posts_per_page' => -1
+        'posts_per_page' => 50  // OPTIMIZED: Limit for memory
     ]));
 }
 

@@ -48,33 +48,48 @@ class Maneli_Shortcode_Handler {
             return;
         }
 
-        // Line Awesome Complete - فایل CSS کامل و مستقل - check if file exists
+        // OPTIMIZED: Check if page actually has shortcodes before loading heavy CSS libraries
+        global $post;
+        $has_shortcodes = is_a($post, 'WP_Post') && $this->post_has_shortcodes($post);
+        
+        // Register Line Awesome Complete (but only enqueue if page has shortcodes)
         $line_awesome_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-line-awesome-complete.css';
         if (file_exists($line_awesome_path)) {
-            wp_enqueue_style('maneli-line-awesome-complete', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css', [], '1.0.0');
+            wp_register_style('maneli-line-awesome-complete', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css', [], '1.0.0');
+            // Only enqueue if needed - saves ~100KB per page
+            if ($has_shortcodes) {
+                wp_enqueue_style('maneli-line-awesome-complete');
+            }
         }
         
-        // Global styles and libraries - Check if frontend.css exists before enqueuing
+        // Register and enqueue frontend styles - Check if frontend.css exists before enqueuing
         $frontend_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css';
         if (file_exists($frontend_css_path)) {
             $css_version = filemtime($frontend_css_path);
-            wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', ['maneli-line-awesome-complete'], $css_version);
+            wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', ['maneli-line-awesome-complete'], $css_version);
+            // Only enqueue if page has shortcodes
+            if ($has_shortcodes) {
+                wp_enqueue_style('maneli-frontend-styles');
+            }
         } else {
             // Use maneli-shortcode-assets.css as fallback if frontend.css doesn't exist
             $fallback_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-shortcode-assets.css';
             if (file_exists($fallback_css_path)) {
                 $css_version = filemtime($fallback_css_path);
-                wp_enqueue_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-shortcode-assets.css', ['maneli-line-awesome-complete'], $css_version);
+                wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-shortcode-assets.css', ['maneli-line-awesome-complete'], $css_version);
+                wp_enqueue_style('maneli-frontend-styles');
             }
         }
         
-        // Bootstrap RTL - Load early to avoid conflicts
-        wp_enqueue_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        // Register and enqueue Bootstrap RTL
+        wp_register_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        wp_enqueue_style('maneli-bootstrap-shortcode');
         
         // Shortcode Xintra compat - check if file exists
         $xintra_compat_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
         if (file_exists($xintra_compat_path)) {
-            wp_enqueue_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
+            wp_register_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
+            wp_enqueue_style('maneli-shortcode-xintra-compat');
         }
         
         // Enqueue jQuery (required for all scripts)
@@ -91,9 +106,7 @@ class Maneli_Shortcode_Handler {
         }
 
         // NOTE: calculator.js is enqueued conditionally by Maneli_Loan_Calculator_Shortcode
-        // Only on product pages to ensure proper localization and avoid duplicate loading
-
-        
+        // Only on product pages to ensure proper localization and avoid duplicate loading        
         // Conditionally load assets for pages containing specific shortcodes that need Select2
         global $post;
         if (is_a($post, 'WP_Post') && $this->post_has_shortcodes($post)) {

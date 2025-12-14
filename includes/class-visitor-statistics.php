@@ -106,6 +106,12 @@ class Maneli_Visitor_Statistics {
      * Parse user agent using accurate detection (API or library)
      */
     private static function parse_user_agent_accurate($user_agent) {
+        // NOTE: UserAgentAPI.com API is unreliable and may return 404
+        // Skipping external API calls for reliability and privacy
+        // Using local parsing instead which is sufficiently accurate
+        return null; // Force local parsing
+        
+        /* Disabled external API due to reliability issues
         // Use UserAgentAPI.com for accurate detection (free and accurate)
         $api_url = 'http://useragentapi.com/api/v3/json/' . urlencode($user_agent);
         
@@ -126,115 +132,7 @@ class Maneli_Visitor_Statistics {
             // API failed, return null to use local parsing
             return null;
         }
-        
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-        
-        if (!$data || !isset($data['data'])) {
-            return null;
-        }
-        
-        $data = $data['data']; // UserAgentAPI wraps data in 'data' key
-        
-        // Parse API response
-        $result = [
-            'browser' => 'Unknown',
-            'browser_version' => '',
-            'os' => 'Unknown',
-            'os_version' => '',
-            'device_type' => 'desktop',
-            'device_model' => '',
-            'normalized_device_model' => ''
-        ];
-        
-        // Browser detection - UserAgentAPI format
-        if (isset($data['browser_name']) && !empty($data['browser_name'])) {
-            $browser_name = trim($data['browser_name']);
-            // Map to our browser names
-            $browser_map = [
-                'Chrome' => 'Chrome',
-                'Chrome Mobile' => 'Chrome Mobile',
-                'Safari' => 'Safari',
-                'Mobile Safari' => 'Mobile Safari',
-                'Firefox' => 'Firefox',
-                'Edge' => 'Edge',
-                'Opera' => 'Opera',
-                'Internet Explorer' => 'IE',
-                'Instagram' => 'Instagram'
-            ];
-            
-            foreach ($browser_map as $api_name => $our_name) {
-                if (stripos($browser_name, $api_name) !== false) {
-                    $result['browser'] = $our_name;
-                    break;
-                }
-            }
-            
-            if ($result['browser'] === 'Unknown') {
-                $result['browser'] = $browser_name;
-            }
-        }
-        
-        if (isset($data['browser_version']) && !empty($data['browser_version'])) {
-            $result['browser_version'] = trim($data['browser_version']);
-        }
-        
-        // OS detection - UserAgentAPI format
-        if (isset($data['platform_name']) && !empty($data['platform_name'])) {
-            $os_name = trim($data['platform_name']);
-            // Map to our OS names
-            $os_map = [
-                'Windows' => 'Windows',
-                'macOS' => 'macOS',
-                'Mac OS X' => 'macOS',
-                'Linux' => 'Linux',
-                'GNU/Linux' => 'GNU/Linux',
-                'Android' => 'Android',
-                'iOS' => 'iOS',
-                'iPadOS' => 'iOS'
-            ];
-            
-            foreach ($os_map as $api_name => $our_name) {
-                if (stripos($os_name, $api_name) !== false) {
-                    $result['os'] = $our_name;
-                    break;
-                }
-            }
-            
-            if ($result['os'] === 'Unknown') {
-                $result['os'] = $os_name;
-            }
-        }
-        
-        if (isset($data['platform_version']) && !empty($data['platform_version'])) {
-            $result['os_version'] = trim($data['platform_version']);
-        }
-        
-        // Device type detection - UserAgentAPI format
-        if (isset($data['device_type']) && !empty($data['device_type'])) {
-            $device_type = strtolower(trim($data['device_type']));
-            if (in_array($device_type, ['mobile', 'smartphone', 'phone'])) {
-                $result['device_type'] = 'mobile';
-            } elseif (in_array($device_type, ['tablet', 'ipad'])) {
-                $result['device_type'] = 'tablet';
-            } elseif (in_array($device_type, ['desktop', 'computer', 'pc'])) {
-                $result['device_type'] = 'desktop';
-            }
-        }
-        
-        // Device model detection - UserAgentAPI format
-        if (isset($data['device_name']) && !empty($data['device_name'])) {
-            $device_name = trim($data['device_name']);
-            if (!empty($device_name) && $device_name !== 'Unknown' && $device_name !== 'Generic') {
-                $result['device_model'] = $device_name;
-                $result['normalized_device_model'] = $device_name;
-            }
-        }
-        
-        // Cache result for 24 hours
-        set_transient($cache_key, $result, DAY_IN_SECONDS);
-        
-        return $result;
+        */
     }
     
     /**

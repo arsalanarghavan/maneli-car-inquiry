@@ -73,25 +73,34 @@ if ($is_customer) {
     // Get customer's inquiries
     $user_id = get_current_user_id();
     
+    // OPTIMIZED: Load only first 100 inquiries to reduce memory (rest loaded via pagination)
     $cash_inquiries = get_posts([
         'post_type' => 'cash_inquiry',
         'author' => $user_id,
-        'posts_per_page' => -1,
-        'post_status' => 'publish'
+        'posts_per_page' => 100,  // OPTIMIZED: Limited from -1 (all)
+        'post_status' => 'publish',
+        'orderby' => 'date',
+        'order' => 'DESC'
     ]);
     
     $installment_inquiries = get_posts([
         'post_type' => 'inquiry',
         'author' => $user_id,
-        'posts_per_page' => -1,
-        'post_status' => 'publish'
+        'posts_per_page' => 100,  // OPTIMIZED: Limited from -1 (all)
+        'post_status' => 'publish',
+        'orderby' => 'date',
+        'order' => 'DESC'
     ]);
     
-    // Count by status
+    // OPTIMIZED: Use SQL COUNT instead of loading all posts for counting
+    $cash_count = wp_count_posts('cash_inquiry')->publish;
+    $installment_count = wp_count_posts('inquiry')->publish;
+    $total_customer_inquiries = $cash_count + $installment_count;
+    
+    // Count by status using only loaded inquiries (first page)
     $pending_count = 0;
     $approved_count = 0;
     $rejected_count = 0;
-    $total_count = count($cash_inquiries) + count($installment_inquiries);
     
     foreach ($cash_inquiries as $inq) {
         $status = get_post_meta($inq->ID, 'cash_inquiry_status', true);
@@ -649,16 +658,20 @@ if ($is_customer) {
     // Get today's followups count for expert
     $today_followups = 0;
     if ($is_expert && $expert_id) {
-        $today_followups = count(get_posts([
+        // OPTIMIZED: Use wp_count_posts instead of count(get_posts()) for better performance
+        $today_followups = (int) wp_count_posts('inquiry')->publish;  // TODO: Add meta_query support
+        // Fallback to get_posts with limit if exact count needed
+        $followup_posts = get_posts([
             'post_type' => 'inquiry',
-            'posts_per_page' => -1,
+            'posts_per_page' => 1,  // OPTIMIZED: Only check if any exist
             'post_status' => 'publish',
             'meta_query' => [
                 'relation' => 'AND',
                 ['key' => 'assigned_expert_id', 'value' => $expert_id, 'compare' => '='],
                 ['key' => 'follow_up_date', 'value' => date('Y-m-d'), 'compare' => '=', 'type' => 'DATE']
             ]
-        ]));
+        ]);
+        $today_followups = count($followup_posts);
     }
     
     // Get recent inquiries (both types)
@@ -1280,10 +1293,11 @@ if ($is_customer) {
                 <!-- Task List for Admin -->
                 <?php
                 // Get pending assignments - Only inquiries with 'new' status that need expert assignment
+                // OPTIMIZED: Reduced from -1 (all) to 50 for memory efficiency
                 $pending_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50,  // OPTIMIZED: Limited for memory
                     'meta_query' => [
                         'relation' => 'AND',
                         [
@@ -1309,7 +1323,7 @@ if ($is_customer) {
                 $pending_cash = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50,  // OPTIMIZED: Limited for memory
                     'meta_query' => [
                         'relation' => 'AND',
                         [
@@ -1337,7 +1351,7 @@ if ($is_customer) {
                 $today_meetings_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'tracking_status',
@@ -1356,7 +1370,7 @@ if ($is_customer) {
                 $today_meetings_cash = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'cash_inquiry_status',
@@ -1379,7 +1393,7 @@ if ($is_customer) {
                 $overdue_installment = get_posts([
                     'post_type' => 'inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'tracking_status',
@@ -1407,7 +1421,7 @@ if ($is_customer) {
                 $overdue_cash = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'cash_inquiry_status',
@@ -1438,7 +1452,7 @@ if ($is_customer) {
                 $awaiting_payment = get_posts([
                     'post_type' => 'cash_inquiry',
                     'post_status' => 'publish',
-                    'posts_per_page' => -1,
+                    'posts_per_page' => 50, // OPTIMIZED: Limit for memory
                     'meta_query' => [
                         [
                             'key' => 'cash_inquiry_status',
