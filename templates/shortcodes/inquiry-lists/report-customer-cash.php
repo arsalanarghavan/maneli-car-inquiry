@@ -156,21 +156,21 @@ $product_image = $product ? wp_get_attachment_url($product->get_image_id()) : ''
                                             ?></strong>
                                         </div>
                                     </div>
+                                    <div class="col-md-12 mt-3">
+                                        <div class="alert alert-warning border-warning mb-0">
+                                            <div class="d-flex align-items-start">
+                                                <i class="la la-exclamation-triangle fs-20 me-2 mt-1 text-warning"></i>
+                                                <div>
+                                                    <strong style="font-size: 1rem;">توجه:</strong>
+                                                    <p class="mb-0 mt-1" style="font-size: 0.95rem; line-height: 1.7;">
+                                                        قیمت‌های اعلام شده تقریبی هستند. قیمت نهایی خودرو بر اساس نرخ روزانه بازار در زمان پرداخت پیش پرداخت تعیین خواهد شد.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Important Note Below Price -->
-                <div class="alert alert-warning border-warning mb-4" style="font-size: 1.1rem; padding: 1.25rem;">
-                    <div class="d-flex align-items-start">
-                        <i class="la la-exclamation-triangle fs-24 me-3 mt-1"></i>
-                        <div>
-                            <strong style="font-size: 1.15rem;"><?php esc_html_e('Note:', 'maneli-car-inquiry'); ?></strong>
-                            <p class="mb-0 mt-1" style="font-size: 1.05rem; line-height: 1.8;">
-                                <?php esc_html_e('The announced prices are approximate. The final price of the car will be determined based on the daily market rate at the time of down payment.', 'maneli-car-inquiry'); ?>
-                            </p>
                         </div>
                     </div>
                 </div>

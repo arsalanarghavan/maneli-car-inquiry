@@ -2704,6 +2704,7 @@ class Maneli_Dashboard_Handler {
         $_SESSION['maneli_sms_time'] = time();
         
         // Get OTP pattern code from settings and send SMS
+        $options = Maneli_Options_Helper::get_all_options();
         $otp_pattern = $options['otp_pattern_code'] ?? '';
         $sms_handler = new Maneli_SMS_Handler();
         

@@ -1036,6 +1036,15 @@ class Maneli_Installment_Inquiry_Handler {
             $this->send_new_inquiry_notifications($buyer_data, $car_id);
         }
         
+        // Define calculator meta keys that were used during inquiry process
+        $calculator_meta_keys = [
+            'maneli_inquiry_down_payment',
+            'maneli_inquiry_term_months',
+            'maneli_inquiry_total_price',
+            'maneli_discount_applied',
+            'maneli_last_payment_transaction'
+        ];
+        
         $this->cleanup_user_meta($user_id, $calculator_meta_keys);
         
         return true;
@@ -1151,6 +1160,10 @@ class Maneli_Installment_Inquiry_Handler {
      * Cleans up all temporary meta fields from the user's profile after inquiry creation.
      */
     private function cleanup_user_meta($user_id, $calculator_meta_keys) {
+        if (!is_array($calculator_meta_keys)) {
+            $calculator_meta_keys = [];
+        }
+        
         $keys_to_delete = array_merge(
             $calculator_meta_keys,
             ['maneli_inquiry_step', 'maneli_selected_car_id', 'maneli_temp_inquiry_data']
