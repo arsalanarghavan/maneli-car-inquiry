@@ -36,6 +36,8 @@ final class Maneli_Car_Inquiry_Plugin {
      * Constructor. Private to prevent direct object creation.
      */
     private function __construct() {
+        // Load Maneli_Session class early before any hooks that might use it
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-session.php';
         $this->define_hooks();
     }
 
@@ -46,8 +48,8 @@ final class Maneli_Car_Inquiry_Plugin {
         // Load textdomain on init hook (WordPress 6.7+ requirement)
         // Translations should be loaded at init action or later
         add_action('init', [$this, 'load_plugin_textdomain'], 1);
-        add_action('init', ['Maneli_Session', 'cleanup_old_sessions'], 99);  // OPTIMIZED: Cleanup sessions
         add_action('plugins_loaded', [$this, 'initialize'], 5);
+        add_action('plugins_loaded', ['Maneli_Session', 'cleanup_old_sessions'], 10);  // OPTIMIZED: Cleanup sessions after classes loaded
         // Add security headers for plugin pages
         add_action('send_headers', [$this, 'add_security_headers'], 1);
     }
@@ -128,10 +130,7 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-visitor-statistics-handler.php';
         
-        // Dashboard session handler must load before logger to support session-based authentication in logging
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-session.php';
-        
-        // Logger
+        // Logger (Maneli_Session already loaded in __construct)
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-logger.php';
         
         // License Management
@@ -143,12 +142,8 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
         
         // Elementor Integration
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-home.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-ajax-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-auto-setup.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-theme-builder.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-admin-notices.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/elementor/class-elementor-import-manager.php';
+        // Elementor Integration - Temporarily disabled for custom theme design
+        // Will be re-enabled in next phase with custom theme builder
     }
 
     /**
@@ -188,13 +183,6 @@ final class Maneli_Car_Inquiry_Plugin {
         
         // Initialize Dashboard Handler
         Maneli_Dashboard_Handler::instance();
-        
-        // Initialize Elementor Integration
-        Maneli_Elementor_Home::init();
-        Maneli_Elementor_Auto_Setup::init();
-        Maneli_Elementor_Theme_Builder::init();
-        Maneli_Admin_Notices::init();
-        Maneli_Elementor_Import_Manager::init();
     }
 
     /**

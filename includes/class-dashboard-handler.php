@@ -51,7 +51,7 @@ class Maneli_Dashboard_Handler {
         add_action('init', [$this, 'configure_session_cookie'], 0);
         add_action('init', [$this, 'add_rewrite_rules']);
         add_filter('query_vars', [$this, 'add_query_vars']);
-        add_action('template_redirect', [$this, 'handle_dashboard_requests']);
+        add_action('wp', [$this, 'handle_dashboard_requests']);  // Changed from template_redirect to wp (runs after init)
         add_action('wp_enqueue_scripts', [$this, 'enqueue_dashboard_assets']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_global_fonts'], 1);
         add_action('wp_ajax_maneli_dashboard_login', [$this, 'handle_dashboard_login']);
