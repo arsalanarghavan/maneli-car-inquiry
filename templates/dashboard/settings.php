@@ -41,7 +41,8 @@ $tab_persian_names = [
     'documents' => esc_html__('Documents', 'maneli-car-inquiry'),
     'availability' => esc_html__('Availability', 'maneli-car-inquiry'),
     'notifications' => esc_html__('Notifications', 'maneli-car-inquiry'),
-    'visitor_statistics' => esc_html__('Visitor Statistics', 'maneli-car-inquiry')
+    'visitor_statistics' => esc_html__('Visitor Statistics', 'maneli-car-inquiry'),
+    'advanced' => esc_html__('Advanced', 'maneli-car-inquiry')
 ];
 ?>
 <div class="main-content app-content">
@@ -98,7 +99,8 @@ $tab_persian_names = [
                                 'documents' => 'la-file-alt',
                                 'availability' => 'la-box-open',
                                 'notifications' => 'la-bell',
-                                'visitor_statistics' => 'la-chart-line'
+                                'visitor_statistics' => 'la-chart-line',
+                                'advanced' => 'la-cogs'
                             ];
                             foreach ($all_settings as $tab_key => $tab_data) : 
                                 $icon = $tab_icons[$tab_key] ?? 'la-cog';
@@ -145,7 +147,7 @@ $tab_persian_names = [
                                         
                                         <?php if (!empty($tab_data['sections'])) : ?>
                                             <?php foreach ($tab_data['sections'] as $section_key => $section) : ?>
-                                                <?php if (!empty($section['fields']) || !empty($section['desc'])): ?>
+                                                <?php if (!empty($section['fields']) || !empty($section['desc']) || ($tab_key === 'advanced')): ?>
                                                     <div class="mb-4">
                                                         <?php if (!empty($section['title'])): ?>
                                                             <h6 class="fw-semibold mb-3 pb-2 border-bottom">
@@ -158,7 +160,72 @@ $tab_persian_names = [
                                                             <p class="text-muted fs-12 mb-3"><?php echo wp_kses_post($section['desc']); ?></p>
                                                         <?php endif; ?>
                                                         
-                                                        <?php if (!empty($section['fields'])) : ?>
+                                                        <!-- Special handling for Advanced tab sections -->
+                                                        <?php if ($tab_key === 'advanced' && $section_key === 'maneli_demo_mode_section'): ?>
+                                                            <!-- Demo Mode Settings -->
+                                                            <div class="row gy-3">
+                                                                <?php
+                                                                $demo_mode_enabled = $options['demo_mode_enabled'] ?? '0';
+                                                                $field_name = "maneli_inquiry_all_options[demo_mode_enabled]";
+                                                                $toggle_class = ($demo_mode_enabled == '1') ? 'toggle on toggle-success' : 'toggle toggle-success';
+                                                                ?>
+                                                                <div class="col-xl-12">
+                                                                    <div class="d-flex align-items-top justify-content-between mt-3">
+                                                                        <div class="mail-notification-settings">
+                                                                            <p class="fs-14 mb-1 fw-medium"><?php esc_html_e('Enable Demo Mode', 'maneli-car-inquiry'); ?></p>
+                                                                            <p class="fs-12 mb-0 text-muted"><?php esc_html_e('When enabled, you can import sample data including customers, experts, cars, and inquiries.', 'maneli-car-inquiry'); ?></p>
+                                                                        </div>
+                                                                        <div class="toggle-wrapper">
+                                                                            <input type="hidden" name="<?php echo esc_attr($field_name); ?>" value="0">
+                                                                            <input type="checkbox" 
+                                                                                   name="<?php echo esc_attr($field_name); ?>" 
+                                                                                   id="demo_mode_enabled_toggle" 
+                                                                                   value="1" 
+                                                                                   class="toggle-checkbox d-none" 
+                                                                                   <?php checked('1', $demo_mode_enabled); ?>>
+                                                                            <label for="demo_mode_enabled_toggle" 
+                                                                                   class="<?php echo esc_attr($toggle_class); ?> mb-0 float-sm-end" 
+                                                                                   style="cursor: pointer;">
+                                                                                <span></span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <?php elseif ($tab_key === 'advanced' && $section_key === 'maneli_demo_import_section'): ?>
+                                                            <!-- Demo Import Section -->
+                                                            <div id="demo-import-section" style="display: <?php echo ($demo_mode_enabled == '1') ? 'block' : 'none'; ?>">
+                                                                <div class="alert alert-info mb-4" role="alert">
+                                                                    <i class="la la-info-circle me-2"></i>
+                                                                    <strong><?php esc_html_e('Demo Data Information', 'maneli-car-inquiry'); ?>:</strong><br>
+                                                                    <?php esc_html_e('Clicking the button below will create:', 'maneli-car-inquiry'); ?>
+                                                                    <ul class="mb-0 mt-2" style="margin-left: 1.5rem;">
+                                                                        <li><?php esc_html_e('30 sample customers', 'maneli-car-inquiry'); ?></li>
+                                                                        <li><?php esc_html_e('30 sample experts', 'maneli-car-inquiry'); ?></li>
+                                                                        <li><?php esc_html_e('30 sample cars', 'maneli-car-inquiry'); ?></li>
+                                                                        <li><?php esc_html_e('30 cash inquiries with all possible statuses', 'maneli-car-inquiry'); ?></li>
+                                                                        <li><?php esc_html_e('30 installment inquiries with all possible statuses', 'maneli-car-inquiry'); ?></li>
+                                                                    </ul>
+                                                                </div>
+                                                                <div class="d-flex gap-2 flex-wrap">
+                                                                    <button type="button" class="btn btn-primary" id="import-demo-data-btn" data-nonce="<?php echo wp_create_nonce('maneli_import_demo_data'); ?>">
+                                                                        <i class="la la-download me-2"></i>
+                                                                        <?php esc_html_e('Import Sample Data', 'maneli-car-inquiry'); ?>
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-danger" id="delete-demo-data-btn" data-nonce="<?php echo wp_create_nonce('maneli_delete_demo_data'); ?>">
+                                                                        <i class="la la-trash me-2"></i>
+                                                                        <?php esc_html_e('Delete Demo Data', 'maneli-car-inquiry'); ?>
+                                                                    </button>
+                                                                </div>
+                                                                <div id="demo-import-progress" class="mt-3" style="display: none;">
+                                                                    <div class="progress">
+                                                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%" id="demo-import-progress-bar"></div>
+                                                                    </div>
+                                                                    <p class="text-muted small mt-2" id="demo-import-message">لطفاً صبر کنید...</p>
+                                                                </div>
+                                                            </div>
+                                                        <?php elseif (!empty($section['fields'])) : ?>
+                                                            <!-- Regular fields -->
                                                             <div class="row gy-3">
                                                                 <?php foreach ($section['fields'] as $field) : ?>
                                                                     <?php if ($field['type'] === 'switch'): ?>
@@ -436,7 +503,15 @@ textarea.form-control {
 </style>
 
 <script>
-jQuery(document).ready(function($) {
+function initializeManeliBtnHandlers() {
+    if (typeof jQuery === 'undefined') {
+        // jQuery not available yet, retry after a delay
+        setTimeout(initializeManeliBtnHandlers, 100);
+        return;
+    }
+    
+    var $ = jQuery;
+    
     // Handle toggle switches - sync checkbox with toggle label
     $('.toggle-wrapper label.toggle').on('click', function(e) {
         e.preventDefault();
@@ -450,7 +525,26 @@ jQuery(document).ready(function($) {
         } else {
             $(this).removeClass('on');
         }
+        
+        // If this is demo mode toggle, show/hide import section
+        if (checkbox.attr('id') === 'demo_mode_enabled_toggle') {
+            const importSection = $('#demo-import-section');
+            if (isChecked) {
+                importSection.show();
+            } else {
+                importSection.hide();
+            }
+        }
     });
+    
+    // Demo Mode: Show/hide import section based on toggle
+    const demoToggle = $('#demo_mode_enabled_toggle');
+    const importSection = $('#demo-import-section');
+    if (demoToggle.is(':checked')) {
+        importSection.show();
+    } else {
+        importSection.hide();
+    }
     
     // Handle form reset
     $('button[type="reset"]').on('click', function(e) {
@@ -461,5 +555,114 @@ jQuery(document).ready(function($) {
         // Reset form to original values by reloading
         location.reload();
     });
-});
+    
+    // Import Demo Data Button
+    $('#import-demo-data-btn').on('click', function(e) {
+        e.preventDefault();
+        
+        const btn = $(this);
+        const originalText = btn.html();
+        const nonce = btn.data('nonce');
+        
+        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to import demo data? This will create sample customers, experts, cars, and inquiries.', 'maneli-car-inquiry')); ?>)) {
+            return;
+        }
+        
+        btn.prop('disabled', true);
+        btn.html('<i class="la la-spinner la-spin me-2"></i><?php esc_html_e('Importing...', 'maneli-car-inquiry'); ?>');
+        
+        $('#demo-import-progress').show();
+        $('#demo-import-progress-bar').css('width', '0%');
+        $('#demo-import-message').text('<?php esc_html_e('Importing demo data...', 'maneli-car-inquiry'); ?>');
+        
+        $.ajax({
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            type: 'POST',
+            data: {
+                action: 'maneli_import_demo_data',
+                nonce: nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#demo-import-progress-bar').css('width', '100%');
+                    $('#demo-import-message').text('<?php esc_html_e('Demo data imported successfully!', 'maneli-car-inquiry'); ?>');
+                    
+                    setTimeout(function() {
+                        alert(response.data.message || '<?php esc_html_e('Demo data imported successfully!', 'maneli-car-inquiry'); ?>');
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert(response.data?.message || '<?php esc_html_e('Error importing demo data', 'maneli-car-inquiry'); ?>');
+                    btn.prop('disabled', false);
+                    btn.html(originalText);
+                    $('#demo-import-progress').hide();
+                }
+            },
+            error: function(xhr) {
+                alert('<?php esc_html_e('Error importing demo data', 'maneli-car-inquiry'); ?>');
+                btn.prop('disabled', false);
+                btn.html(originalText);
+                $('#demo-import-progress').hide();
+            }
+        });
+    });
+    
+    // Delete Demo Data Button
+    $('#delete-demo-data-btn').on('click', function(e) {
+        e.preventDefault();
+        
+        const btn = $(this);
+        const originalText = btn.html();
+        const nonce = btn.data('nonce');
+        
+        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to delete all demo data? This action cannot be undone.', 'maneli-car-inquiry')); ?>)) {
+            return;
+        }
+        
+        btn.prop('disabled', true);
+        btn.html('<i class="la la-spinner la-spin me-2"></i><?php esc_html_e('Deleting...', 'maneli-car-inquiry'); ?>');
+        
+        $('#demo-import-progress').show();
+        $('#demo-import-progress-bar').css('width', '0%');
+        $('#demo-import-message').text('<?php esc_html_e('Deleting demo data...', 'maneli-car-inquiry'); ?>');
+        
+        $.ajax({
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            type: 'POST',
+            data: {
+                action: 'maneli_delete_demo_data',
+                nonce: nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#demo-import-progress-bar').css('width', '100%');
+                    $('#demo-import-message').text('<?php esc_html_e('Demo data deleted successfully!', 'maneli-car-inquiry'); ?>');
+                    
+                    setTimeout(function() {
+                        alert(response.data.message || '<?php esc_html_e('Demo data deleted successfully!', 'maneli-car-inquiry'); ?>');
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert(response.data?.message || '<?php esc_html_e('Error deleting demo data', 'maneli-car-inquiry'); ?>');
+                    btn.prop('disabled', false);
+                    btn.html(originalText);
+                    $('#demo-import-progress').hide();
+                }
+            },
+            error: function(xhr) {
+                alert('<?php esc_html_e('Error deleting demo data', 'maneli-car-inquiry'); ?>');
+                btn.prop('disabled', false);
+                btn.html(originalText);
+                $('#demo-import-progress').hide();
+            }
+        });
+    });
+}
+
+// Initialize on document ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeManeliBtnHandlers);
+} else {
+    initializeManeliBtnHandlers();
+}
 </script>

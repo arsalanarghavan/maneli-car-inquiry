@@ -1609,6 +1609,31 @@ class Maneli_Settings_Page {
                     ],
                 ]
             ],
+            // Advanced Tab
+            'advanced' => [
+                'title' => esc_html__('Advanced', 'maneli-car-inquiry'),
+                'icon' => 'fas fa-cogs',
+                'sections' => [
+                    'maneli_demo_mode_section' => [
+                        'title' => esc_html__('Demo Mode', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Enable demo mode to generate sample data for testing and demonstration purposes.', 'maneli-car-inquiry'),
+                        'fields' => [
+                            [
+                                'name' => 'demo_mode_enabled',
+                                'label' => esc_html__('Enable Demo Mode', 'maneli-car-inquiry'),
+                                'type' => 'switch',
+                                'default' => '0',
+                                'desc' => esc_html__('When enabled, you can import sample data including customers, experts, cars, and inquiries.', 'maneli-car-inquiry')
+                            ],
+                        ]
+                    ],
+                    'maneli_demo_import_section' => [
+                        'title' => esc_html__('Import Demo Content', 'maneli-car-inquiry'),
+                        'desc' => esc_html__('Click the button below to import sample data. This will create 30 sample customers, 30 experts, 30 cars, and 30 inquiries of each type (cash and installment).', 'maneli-car-inquiry'),
+                        'fields' => [] // Custom rendering will be done in template
+                    ],
+                ]
+            ],
         ];
     }
 }

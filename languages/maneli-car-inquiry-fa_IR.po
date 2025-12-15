@@ -11624,3 +11624,88 @@ msgstr "رمز عبور باید حداقل ۶ کاراکتر باشد."
 msgid "An error occurred. Please try again."
 msgstr "خطایی رخ داد. لطفاً دوباره تلاش کنید."
 
+# Demo Mode & Advanced Settings
+msgid "Advanced"
+msgstr "پیشرفته"
+
+msgid "Demo Mode"
+msgstr "حالت دمو"
+
+msgid "Enable Demo Mode"
+msgstr "فعال‌سازی حالت دمو برای تولید داده‌های نمونه برای تست و نمایش"
+
+msgid "When enabled, you can import sample data for testing and demonstration purposes."
+msgstr "هنگام فعال‌سازی، می‌توانید داده‌های نمونه شامل مشتریان، کارشناسان، خودروها و استعلام‌ها را وارد کنید."
+
+msgid "Click the button below to import sample data. This will create 30 sample customers, 30 experts, 30 cars, and 30 inquiries of each type (cash and installment)."
+msgstr "برای ایمپورت داده‌های نمونه روی دکمه زیر کلیک کنید. این کار 30 مشتری نمونه، 30 کارشناس، 30 خودرو و 30 استعلام از هر نوع (نقدی و اقساطی) را ایجاد خواهد کرد."
+
+msgid "Import Demo Content"
+msgstr "ایمپورت داده‌های نمونه"
+
+msgid "Delete Demo Data"
+msgstr "حذف داده‌های دمو"
+
+msgid "Demo Data Information:"
+msgstr "اطلاعات داده‌های دمو:"
+
+msgid "Clicking the button below will create:"
+msgstr "کلیک بر روی دکمه زیر این موارد را ایجاد خواهد کرد:"
+
+msgid "30 sample customers"
+msgstr "۳۰ مشتری نمونه"
+
+msgid "30 sample experts"
+msgstr "۳۰ کارشناس نمونه"
+
+msgid "30 sample cars"
+msgstr "۳۰ خودروی نمونه"
+
+msgid "30 cash inquiries with all possible statuses"
+msgstr "۳۰ استعلام نقدی با تمامی وضعیت‌های ممکن"
+
+msgid "30 installment inquiries with all possible statuses"
+msgstr "۳۰ استعلام اقساطی با تمامی وضعیت‌های ممکن"
+
+msgid "Importing demo data..."
+msgstr "در حال ایمپورت داده‌های دمو..."
+
+msgid "Demo data imported successfully!"
+msgstr "داده‌های دمو با موفقیت وارد شدند!"
+
+msgid "Error importing demo data"
+msgstr "خطا در وارد کردن داده‌های دمو"
+
+msgid "Are you sure you want to import demo data? This will create sample customers, experts, cars, and inquiries."
+msgstr "آیا از ایمپورت داده‌های دمو اطمینان دارید؟ این کار مشتری‌های نمونه، کارشناسان، خودروها و استعلام‌های نمونه را ایجاد خواهد کرد."
+
+msgid "Deleting demo data..."
+msgstr "در حال حذف داده‌های دمو..."
+
+msgid "Demo data deleted successfully!"
+msgstr "داده‌های دمو با موفقیت حذف شدند!"
+
+msgid "Error deleting demo data"
+msgstr "خطا در حذف داده‌های دمو"
+
+msgid "Are you sure you want to delete all demo data? This action cannot be undone."
+msgstr "آیا از حذف تمام داده‌های دمو اطمینان دارید؟ این عمل قابل برگشت نیست."
+
+msgid "Demo data imported successfully! Created: %d customers, %d experts, %d cars, %d cash inquiries, %d installment inquiries"
+msgstr "داده‌های دمو با موفقیت وارد شدند! ایجاد شده: %d مشتری، %d کارشناس، %d خودرو، %d استعلام نقدی، %d استعلام اقساطی"
+
+msgid "Error importing demo data: %s"
+msgstr "خطا در وارد کردن داده‌های دمو: %s"
+
+msgid "Demo data deleted successfully! Deleted: %d customers, %d experts, %d cars, %d inquiries"
+msgstr "داده‌های دمو با موفقیت حذف شدند! حذف شده: %d مشتری، %d کارشناس، %d خودرو، %d استعلام"
+
+msgid "Error deleting demo data: %s"
+msgstr "خطا در حذف داده‌های دمو: %s"
+
+msgid "Security check failed"
+msgstr "بررسی امنیتی ناموفق بود"
+
+msgid "You do not have permission to perform this action"
+msgstr "شما مجوز انجام این عمل را ندارید"
+

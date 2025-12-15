@@ -104,6 +104,10 @@ final class Maneli_Car_Inquiry_Plugin {
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-roles-caps.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-hooks.php';
         
+        // Demo Data Generator
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-demo-data-generator.php';
+        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-demo-data-handler.php';
+        
         // Handlers
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
         require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-telegram-handler.php';

@@ -11044,3 +11044,89 @@ msgstr "Previous"
 
 msgid "Summary"
 msgstr "Summary"
+
+# Demo Mode & Advanced Settings
+msgid "Advanced"
+msgstr "Advanced"
+
+msgid "Demo Mode"
+msgstr "Demo Mode"
+
+msgid "Enable Demo Mode"
+msgstr "Enable Demo Mode to generate sample data for testing and demonstration purposes."
+
+msgid "When enabled, you can import sample data for testing and demonstration purposes."
+msgstr "When enabled, you can import sample data including customers, experts, cars, and inquiries."
+
+msgid "Click the button below to import sample data. This will create 30 sample customers, 30 experts, 30 cars, and 30 inquiries of each type (cash and installment)."
+msgstr "Click the button below to import sample data. This will create 30 sample customers, 30 experts, 30 cars, and 30 inquiries of each type (cash and installment)."
+
+msgid "Import Demo Content"
+msgstr "Import Sample Data"
+
+msgid "Delete Demo Data"
+msgstr "Delete Demo Data"
+
+msgid "Demo Data Information:"
+msgstr "Demo Data Information:"
+
+msgid "Clicking the button below will create:"
+msgstr "Clicking the button below will create:"
+
+msgid "30 sample customers"
+msgstr "30 sample customers"
+
+msgid "30 sample experts"
+msgstr "30 sample experts"
+
+msgid "30 sample cars"
+msgstr "30 sample cars"
+
+msgid "30 cash inquiries with all possible statuses"
+msgstr "30 cash inquiries with all possible statuses"
+
+msgid "30 installment inquiries with all possible statuses"
+msgstr "30 installment inquiries with all possible statuses"
+
+msgid "Importing demo data..."
+msgstr "Importing demo data..."
+
+msgid "Demo data imported successfully!"
+msgstr "Demo data imported successfully!"
+
+msgid "Error importing demo data"
+msgstr "Error importing demo data"
+
+msgid "Are you sure you want to import demo data? This will create sample customers, experts, cars, and inquiries."
+msgstr "Are you sure you want to import demo data? This will create sample customers, experts, cars, and inquiries."
+
+msgid "Deleting demo data..."
+msgstr "Deleting demo data..."
+
+msgid "Demo data deleted successfully!"
+msgstr "Demo data deleted successfully!"
+
+msgid "Error deleting demo data"
+msgstr "Error deleting demo data"
+
+msgid "Are you sure you want to delete all demo data? This action cannot be undone."
+msgstr "Are you sure you want to delete all demo data? This action cannot be undone."
+
+msgid "Demo data imported successfully! Created: %d customers, %d experts, %d cars, %d cash inquiries, %d installment inquiries"
+msgstr "Demo data imported successfully! Created: %d customers, %d experts, %d cars, %d cash inquiries, %d installment inquiries"
+
+msgid "Error importing demo data: %s"
+msgstr "Error importing demo data: %s"
+
+msgid "Demo data deleted successfully! Deleted: %d customers, %d experts, %d cars, %d inquiries"
+msgstr "Demo data deleted successfully! Deleted: %d customers, %d experts, %d cars, %d inquiries"
+
+msgid "Error deleting demo data: %s"
+msgstr "Error deleting demo data: %s"
+
+msgid "Security check failed"
+msgstr "Security check failed"
+
+msgid "You do not have permission to perform this action"
+msgstr "You do not have permission to perform this action"
+
