@@ -45,9 +45,10 @@ final class Maneli_Car_Inquiry_Plugin {
      * Register all hooks related to the core functionality of the plugin.
      */
     private function define_hooks() {
-        // Load textdomain on init hook (WordPress 6.7+ requirement)
-        // Translations should be loaded at init action or later
-        add_action('init', [$this, 'load_plugin_textdomain'], 1);
+        // Load textdomain early on init hook (WordPress 6.7+ requirement)
+        // This ensures translations are available before any class initialization
+        add_action('init', [$this, 'load_plugin_textdomain'], 0);
+        // Initialize plugin classes on plugins_loaded hook
         add_action('plugins_loaded', [$this, 'initialize'], 5);
         add_action('plugins_loaded', ['Maneli_Session', 'cleanup_old_sessions'], 10);  // OPTIMIZED: Cleanup sessions after classes loaded
         // Add security headers for plugin pages
