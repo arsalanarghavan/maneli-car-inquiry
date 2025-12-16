@@ -9,18 +9,18 @@ if (!defined('ABSPATH')) {
 }
 
 // Permission check - Only Admin can access
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
 
-require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
 
 $notification_type = 'notification';
 
 // Handle CSV Export
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
-    $export_logs = Maneli_Database::get_notification_logs([
+    $export_logs = Autopuzzle_Database::get_notification_logs([
         'type' => $notification_type,
         'status' => isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '',
         'date_from' => isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '',
@@ -37,13 +37,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
     
     fputcsv($output, [
-        esc_html__('ID', 'maneli-car-inquiry'),
-        esc_html__('Recipient', 'maneli-car-inquiry'),
-        esc_html__('Message', 'maneli-car-inquiry'),
-        esc_html__('Status', 'maneli-car-inquiry'),
-        esc_html__('Created At', 'maneli-car-inquiry'),
-        esc_html__('Sent At', 'maneli-car-inquiry'),
-        esc_html__('Error Message', 'maneli-car-inquiry'),
+        esc_html__('ID', 'autopuzzle'),
+        esc_html__('Recipient', 'autopuzzle'),
+        esc_html__('Message', 'autopuzzle'),
+        esc_html__('Status', 'autopuzzle'),
+        esc_html__('Created At', 'autopuzzle'),
+        esc_html__('Sent At', 'autopuzzle'),
+        esc_html__('Error Message', 'autopuzzle'),
     ]);
     
     foreach ($export_logs as $log) {
@@ -71,7 +71,7 @@ $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
 $per_page = 50;
 
 // Get In-App notification logs
-$logs = Maneli_Database::get_notification_logs([
+$logs = Autopuzzle_Database::get_notification_logs([
     'type' => $notification_type,
     'status' => $status_filter,
     'date_from' => $date_from,
@@ -81,7 +81,7 @@ $logs = Maneli_Database::get_notification_logs([
     'offset' => ($paged - 1) * $per_page,
 ]);
 
-$total_logs = Maneli_Database::get_notification_logs_count([
+$total_logs = Autopuzzle_Database::get_notification_logs_count([
     'type' => $notification_type,
     'status' => $status_filter,
     'date_from' => $date_from,
@@ -92,14 +92,14 @@ $total_logs = Maneli_Database::get_notification_logs_count([
 $total_pages = ceil($total_logs / $per_page);
 
 // Get In-App statistics
-$stats = Maneli_Database::get_notification_stats([
+$stats = Autopuzzle_Database::get_notification_stats([
     'type' => $notification_type,
     'date_from' => $date_from ?: date('Y-m-d', strtotime('-30 days')),
     'date_to' => $date_to ?: date('Y-m-d'),
 ]);
 
 // Get today's stats
-$today_stats = Maneli_Database::get_notification_stats([
+$today_stats = Autopuzzle_Database::get_notification_stats([
     'type' => $notification_type,
     'date_from' => date('Y-m-d'),
     'date_to' => date('Y-m-d'),
@@ -107,7 +107,7 @@ $today_stats = Maneli_Database::get_notification_stats([
 
 // Get this week's stats
 $week_start = date('Y-m-d', strtotime('monday this week'));
-$week_stats = Maneli_Database::get_notification_stats([
+$week_stats = Autopuzzle_Database::get_notification_stats([
     'type' => $notification_type,
     'date_from' => $week_start,
     'date_to' => date('Y-m-d'),
@@ -115,14 +115,14 @@ $week_stats = Maneli_Database::get_notification_stats([
 
 // Get this month's stats
 $month_start = date('Y-m-01');
-$month_stats = Maneli_Database::get_notification_stats([
+$month_stats = Autopuzzle_Database::get_notification_stats([
     'type' => $notification_type,
     'date_from' => $month_start,
     'date_to' => date('Y-m-d'),
 ]);
 
 // Get templates
-$templates = Maneli_Database::get_notification_templates([
+$templates = Autopuzzle_Database::get_notification_templates([
     'type' => $notification_type,
     'limit' => 100,
 ]);
@@ -137,17 +137,17 @@ if (!function_exists('persian_numbers')) {
 }
 
 // Enqueue Persian Datepicker
-if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
-    if (function_exists('maneli_enqueue_persian_datepicker')) {
-        maneli_enqueue_persian_datepicker();
+if (!wp_script_is('autopuzzle-persian-datepicker', 'enqueued')) {
+    if (function_exists('autopuzzle_enqueue_persian_datepicker')) {
+        autopuzzle_enqueue_persian_datepicker();
     }
 }
 
 // Enqueue Chart.js
 if (!wp_script_is('chartjs', 'enqueued')) {
-    $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
+    $chartjs_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
     if (file_exists($chartjs_path)) {
-        wp_enqueue_script('chartjs', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', ['jquery'], '4.4.0', false);
+        wp_enqueue_script('chartjs', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', ['jquery'], '4.4.0', false);
     } else {
         wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', ['jquery'], '4.4.0', false);
     }
@@ -163,15 +163,15 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                 <nav>
                     <ol class="breadcrumb mb-1">
                         <li class="breadcrumb-item">
-                            <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                            <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="<?php echo esc_url(home_url('/dashboard/notifications-center')); ?>"><?php esc_html_e('Notification Center', 'maneli-car-inquiry'); ?></a>
+                            <a href="<?php echo esc_url(home_url('/dashboard/notifications-center')); ?>"><?php esc_html_e('Notification Center', 'autopuzzle'); ?></a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('In-App Notifications', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('In-App Notifications', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title mb-0"><?php esc_html_e('In-App Notifications', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title mb-0"><?php esc_html_e('In-App Notifications', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- End::page-header -->
@@ -188,9 +188,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Sent', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Sent', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->sent ?? 0) : number_format($stats->sent ?? 0); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($stats->sent ?? 0) : number_format($stats->sent ?? 0); ?></h4>
                             <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-check-double fs-11"></i>
                             </span>
@@ -208,9 +208,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Failed', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->failed ?? 0) : number_format($stats->failed ?? 0); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($stats->failed ?? 0) : number_format($stats->failed ?? 0); ?></h4>
                             <span class="text-danger badge bg-danger-transparent rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-ban fs-11"></i>
                             </span>
@@ -228,9 +228,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Pending', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->pending ?? 0) : number_format($stats->pending ?? 0); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($stats->pending ?? 0) : number_format($stats->pending ?? 0); ?></h4>
                             <span class="text-warning badge bg-warning-transparent rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-hourglass-half fs-11"></i>
                             </span>
@@ -248,10 +248,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Notifications', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Notifications', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($stats->total ?? 0) : number_format($stats->total ?? 0); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo $stats->total > 0 && function_exists('maneli_number_format_persian') ? maneli_number_format_persian(round((($stats->sent ?? 0) / $stats->total) * 100), 1) : '۰'; ?>% <?php esc_html_e('Success', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($stats->total ?? 0) : number_format($stats->total ?? 0); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo $stats->total > 0 && function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian(round((($stats->sent ?? 0) / $stats->total) * 100), 1) : '۰'; ?>% <?php esc_html_e('Success', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -266,10 +266,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Today', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($today_stats->sent ?? 0) : number_format($today_stats->sent ?? 0); ?></h4>
-                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Notifications', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($today_stats->sent ?? 0) : number_format($today_stats->sent ?? 0); ?></h4>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Notifications', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -284,10 +284,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('This Week', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($week_stats->sent ?? 0) : number_format($week_stats->sent ?? 0); ?></h4>
-                            <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Notifications', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($week_stats->sent ?? 0) : number_format($week_stats->sent ?? 0); ?></h4>
+                            <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Notifications', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -296,61 +296,61 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- End::row-1 -->
         
         <!-- Filters and Actions -->
-        <div class="card custom-card mb-4 maneli-mobile-filter-card" data-maneli-mobile-filter>
+        <div class="card custom-card mb-4 autopuzzle-mobile-filter-card" data-autopuzzle-mobile-filter>
             <div class="card-header">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <h5
-                        class="mb-0 maneli-mobile-filter-toggle d-flex align-items-center gap-2"
-                        data-maneli-filter-toggle
+                        class="mb-0 autopuzzle-mobile-filter-toggle d-flex align-items-center gap-2"
+                        data-autopuzzle-filter-toggle
                         role="button"
                         tabindex="0"
                         aria-expanded="false"
                     >
-                        <?php esc_html_e('Filters', 'maneli-car-inquiry'); ?>
-                        <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                        <?php esc_html_e('Filters', 'autopuzzle'); ?>
+                        <i class="ri-arrow-down-s-line ms-auto autopuzzle-mobile-filter-arrow d-md-none"></i>
                     </h5>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-success btn-wave" data-bs-toggle="modal" data-bs-target="#sendSingleModal">
                             <i class="ri-notification-line me-1"></i>
-                            <?php esc_html_e('Send Single', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Send Single', 'autopuzzle'); ?>
                         </button>
                         <button type="button" class="btn btn-primary btn-wave" data-bs-toggle="modal" data-bs-target="#sendBulkModal">
                             <i class="ri-send-plane-line me-1"></i>
-                            <?php esc_html_e('Send Bulk', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Send Bulk', 'autopuzzle'); ?>
                         </button>
                         <button type="button" class="btn btn-info btn-wave" data-bs-toggle="modal" data-bs-target="#scheduleModal">
                             <i class="ri-time-line me-1"></i>
-                            <?php esc_html_e('Schedule', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Schedule', 'autopuzzle'); ?>
                         </button>
                     </div>
                 </div>
             </div>
-            <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
+            <div class="card-body autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                 <form method="get" action="<?php echo esc_url(home_url('/dashboard/notifications/app')); ?>">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
-                            <input type="text" name="search" class="form-control" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
+                            <label class="form-label"><?php esc_html_e('Search', 'autopuzzle'); ?></label>
+                            <input type="text" name="search" class="form-control" placeholder="<?php esc_attr_e('Search...', 'autopuzzle'); ?>" value="<?php echo esc_attr($search); ?>">
                         </div>
                     </div>
 
                     <div class="row g-3 align-items-end mt-1">
                         <div class="col-6 col-lg-3">
-                            <label class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
+                            <label class="form-label"><?php esc_html_e('Status', 'autopuzzle'); ?></label>
                             <select name="status" class="form-control form-select">
-                                <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                                <option value="sent" <?php selected($status_filter, 'sent'); ?>><?php esc_html_e('Sent', 'maneli-car-inquiry'); ?></option>
-                                <option value="failed" <?php selected($status_filter, 'failed'); ?>><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></option>
-                                <option value="pending" <?php selected($status_filter, 'pending'); ?>><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></option>
+                                <option value=""><?php esc_html_e('All Statuses', 'autopuzzle'); ?></option>
+                                <option value="sent" <?php selected($status_filter, 'sent'); ?>><?php esc_html_e('Sent', 'autopuzzle'); ?></option>
+                                <option value="failed" <?php selected($status_filter, 'failed'); ?>><?php esc_html_e('Failed', 'autopuzzle'); ?></option>
+                                <option value="pending" <?php selected($status_filter, 'pending'); ?>><?php esc_html_e('Pending', 'autopuzzle'); ?></option>
                             </select>
                         </div>
                         <div class="col-6 col-lg-3">
-                            <label class="form-label"><?php esc_html_e('Date From', 'maneli-car-inquiry'); ?></label>
-                            <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
+                            <label class="form-label"><?php esc_html_e('Date From', 'autopuzzle'); ?></label>
+                            <input type="text" name="date_from" id="date-from-picker" class="form-control autopuzzle-datepicker" value="<?php echo esc_attr($date_from); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'autopuzzle'); ?>" readonly>
                         </div>
                         <div class="col-6 col-lg-3">
-                            <label class="form-label"><?php esc_html_e('Date To', 'maneli-car-inquiry'); ?></label>
-                            <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" readonly>
+                            <label class="form-label"><?php esc_html_e('Date To', 'autopuzzle'); ?></label>
+                            <input type="text" name="date_to" id="date-to-picker" class="form-control autopuzzle-datepicker" value="<?php echo esc_attr($date_to); ?>" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'autopuzzle'); ?>" readonly>
                         </div>
                     </div>
 
@@ -358,18 +358,18 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                         <div class="col-6 col-lg-auto">
                             <button type="submit" class="btn btn-primary btn-wave w-100">
                                 <i class="ri-search-line me-1"></i>
-                                <?php esc_html_e('Filter', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Filter', 'autopuzzle'); ?>
                             </button>
                         </div>
                         <div class="col-6 col-lg-auto">
                             <a href="<?php echo esc_url(home_url('/dashboard/notifications/app')); ?>" class="btn btn-secondary btn-wave w-100">
-                                <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Reset', 'autopuzzle'); ?>
                             </a>
                         </div>
                         <div class="col-6 col-lg-auto">
                             <button type="button" class="btn btn-success btn-wave w-100" id="exportBtn">
                                 <i class="ri-download-line me-1"></i>
-                                <?php esc_html_e('Export', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Export', 'autopuzzle'); ?>
                             </button>
                         </div>
                         <div class="col-6 d-lg-none"></div>
@@ -383,7 +383,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             <div class="col-xl-6">
                 <div class="card custom-card">
                     <div class="card-header">
-                        <h5 class="mb-0"><?php esc_html_e('Notification Timeline', 'maneli-car-inquiry'); ?></h5>
+                        <h5 class="mb-0"><?php esc_html_e('Notification Timeline', 'autopuzzle'); ?></h5>
                     </div>
                     <div class="card-body">
                         <canvas id="timelineChart" height="300"></canvas>
@@ -393,7 +393,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             <div class="col-xl-6">
                 <div class="card custom-card">
                     <div class="card-header">
-                        <h5 class="mb-0"><?php esc_html_e('Status Distribution', 'maneli-car-inquiry'); ?></h5>
+                        <h5 class="mb-0"><?php esc_html_e('Status Distribution', 'autopuzzle'); ?></h5>
                     </div>
                     <div class="card-body">
                         <canvas id="statusChart" height="300"></canvas>
@@ -407,8 +407,8 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <div class="card custom-card mb-4">
             <div class="card-header">
                 <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0"><?php esc_html_e('Notification Logs', 'maneli-car-inquiry'); ?></h5>
-                    <span class="badge bg-primary-transparent"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($total_logs) : number_format($total_logs); ?> <?php esc_html_e('Total', 'maneli-car-inquiry'); ?></span>
+                    <h5 class="mb-0"><?php esc_html_e('Notification Logs', 'autopuzzle'); ?></h5>
+                    <span class="badge bg-primary-transparent"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($total_logs) : number_format($total_logs); ?> <?php esc_html_e('Total', 'autopuzzle'); ?></span>
                 </div>
             </div>
             <div class="card-body">
@@ -416,20 +416,20 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <table class="table table-hover text-nowrap">
                         <thead>
                             <tr>
-                                <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Recipient', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Created', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Sent', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Recipient', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Message', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Created', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Sent', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($logs)): ?>
                                 <tr>
                                     <td colspan="7" class="text-center py-4">
-                                        <p class="text-muted mb-0"><?php esc_html_e('No in-app notifications found.', 'maneli-car-inquiry'); ?></p>
+                                        <p class="text-muted mb-0"><?php esc_html_e('No in-app notifications found.', 'autopuzzle'); ?></p>
                                     </td>
                                 </tr>
                             <?php else: ?>
@@ -467,7 +467,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                             <?php if ($log->status === 'failed'): ?>
                                                 <button type="button" class="btn btn-sm btn-primary btn-wave retry-notification" data-log-id="<?php echo esc_attr($log->id); ?>">
                                                     <i class="ri-refresh-line"></i>
-                                                    <?php esc_html_e('Retry', 'maneli-car-inquiry'); ?>
+                                                    <?php esc_html_e('Retry', 'autopuzzle'); ?>
                                                 </button>
                                             <?php endif; ?>
                                             <?php if (!empty($log->error_message)): ?>
@@ -501,7 +501,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             if ($paged > 1): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $paged - 1, $base_url)); ?>">
-                                        <?php esc_html_e('Previous', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('Previous', 'autopuzzle'); ?>
                                     </a>
                                 </li>
                             <?php endif;
@@ -523,7 +523,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             if ($paged < $total_pages): ?>
                                 <li class="page-item">
                                     <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $paged + 1, $base_url)); ?>">
-                                        <?php esc_html_e('Next', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('Next', 'autopuzzle'); ?>
                                     </a>
                                 </li>
                             <?php endif; ?>
@@ -537,10 +537,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <div class="card custom-card">
             <div class="card-header">
                 <div class="d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0"><?php esc_html_e('Message Templates', 'maneli-car-inquiry'); ?></h5>
+                    <h5 class="mb-0"><?php esc_html_e('Message Templates', 'autopuzzle'); ?></h5>
                     <button type="button" class="btn btn-primary btn-wave" data-bs-toggle="modal" data-bs-target="#templateModal" id="addTemplateBtn">
                         <i class="ri-add-line me-1"></i>
-                        <?php esc_html_e('Add Template', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('Add Template', 'autopuzzle'); ?>
                     </button>
                 </div>
             </div>
@@ -549,18 +549,18 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th><?php esc_html_e('Name', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Created', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Name', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Message', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Created', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($templates)): ?>
                                 <tr>
                                     <td colspan="5" class="text-center py-4">
-                                        <p class="text-muted mb-0"><?php esc_html_e('No templates found.', 'maneli-car-inquiry'); ?></p>
+                                        <p class="text-muted mb-0"><?php esc_html_e('No templates found.', 'autopuzzle'); ?></p>
                                     </td>
                                 </tr>
                             <?php else: ?>
@@ -574,7 +574,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                         </td>
                                         <td>
                                             <span class="badge bg-<?php echo $template->is_active ? 'success' : 'secondary'; ?>-transparent">
-                                                <?php echo $template->is_active ? esc_html__('Active', 'maneli-car-inquiry') : esc_html__('Inactive', 'maneli-car-inquiry'); ?>
+                                                <?php echo $template->is_active ? esc_html__('Active', 'autopuzzle') : esc_html__('Inactive', 'autopuzzle'); ?>
                                             </span>
                                         </td>
                                         <td><?php echo esc_html(date_i18n('Y/m/d', strtotime($template->created_at))); ?></td>
@@ -609,15 +609,15 @@ if (!wp_script_is('chartjs', 'enqueued')) {
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Send Single Notification', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title"><?php esc_html_e('Send Single Notification', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="sendSingleForm">
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Template', 'maneli-car-inquiry'); ?></label>
+                        <label class="form-label"><?php esc_html_e('Template', 'autopuzzle'); ?></label>
                         <select name="template_id" id="singleTemplateSelect" class="form-select">
-                            <option value=""><?php esc_html_e('Select Template (Optional)', 'maneli-car-inquiry'); ?></option>
+                            <option value=""><?php esc_html_e('Select Template (Optional)', 'autopuzzle'); ?></option>
                             <?php foreach ($templates as $template): ?>
                                 <?php if ($template->is_active): ?>
                                     <option value="<?php echo esc_attr($template->id); ?>" data-message="<?php echo esc_attr($template->message); ?>">
@@ -628,28 +628,28 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Recipient', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
-                        <input type="text" name="recipient" id="singleRecipient" class="form-control" required placeholder="<?php esc_attr_e('User ID', 'maneli-car-inquiry'); ?>">
-                        <small class="form-text text-muted"><?php esc_html_e('Enter user ID', 'maneli-car-inquiry'); ?></small>
+                        <label class="form-label"><?php esc_html_e('Recipient', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
+                        <input type="text" name="recipient" id="singleRecipient" class="form-control" required placeholder="<?php esc_attr_e('User ID', 'autopuzzle'); ?>">
+                        <small class="form-text text-muted"><?php esc_html_e('Enter user ID', 'autopuzzle'); ?></small>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Message', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
-                        <textarea name="message" id="singleMessage" class="form-control" rows="5" required placeholder="<?php esc_attr_e('Enter your message...', 'maneli-car-inquiry'); ?>"></textarea>
-                        <small class="form-text text-muted"><?php esc_html_e('Available variables: {customer_name}, {car_name}, {date}', 'maneli-car-inquiry'); ?></small>
+                        <label class="form-label"><?php esc_html_e('Message', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
+                        <textarea name="message" id="singleMessage" class="form-control" rows="5" required placeholder="<?php esc_attr_e('Enter your message...', 'autopuzzle'); ?>"></textarea>
+                        <small class="form-text text-muted"><?php esc_html_e('Available variables: {customer_name}, {car_name}, {date}', 'autopuzzle'); ?></small>
                     </div>
                     <div class="mb-3">
                         <button type="button" class="btn btn-info btn-wave" id="previewSingleBtn">
                             <i class="ri-eye-line me-1"></i>
-                            <?php esc_html_e('Preview', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Preview', 'autopuzzle'); ?>
                         </button>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'autopuzzle'); ?></button>
                 <button type="button" class="btn btn-success" id="sendSingleBtn">
                     <i class="ri-send-plane-line me-1"></i>
-                    <?php esc_html_e('Send Notification', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Send Notification', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -661,15 +661,15 @@ if (!wp_script_is('chartjs', 'enqueued')) {
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Send Bulk Notification', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title"><?php esc_html_e('Send Bulk Notification', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="bulkNotificationForm">
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Template', 'maneli-car-inquiry'); ?></label>
+                        <label class="form-label"><?php esc_html_e('Template', 'autopuzzle'); ?></label>
                         <select name="template_id" id="bulkTemplateSelect" class="form-select">
-                            <option value=""><?php esc_html_e('Select Template (Optional)', 'maneli-car-inquiry'); ?></option>
+                            <option value=""><?php esc_html_e('Select Template (Optional)', 'autopuzzle'); ?></option>
                             <?php foreach ($templates as $template): ?>
                                 <?php if ($template->is_active): ?>
                                     <option value="<?php echo esc_attr($template->id); ?>" data-message="<?php echo esc_attr($template->message); ?>">
@@ -680,20 +680,20 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Recipients', 'maneli-car-inquiry'); ?></label>
+                        <label class="form-label"><?php esc_html_e('Recipients', 'autopuzzle'); ?></label>
                         <select name="recipient_type" id="bulkRecipientType" class="form-select mb-2">
-                            <option value="all"><?php esc_html_e('All Users', 'maneli-car-inquiry'); ?></option>
-                            <option value="customers"><?php esc_html_e('Customers Only', 'maneli-car-inquiry'); ?></option>
-                            <option value="experts"><?php esc_html_e('Experts Only', 'maneli-car-inquiry'); ?></option>
-                            <option value="admins"><?php esc_html_e('Admins Only', 'maneli-car-inquiry'); ?></option>
+                            <option value="all"><?php esc_html_e('All Users', 'autopuzzle'); ?></option>
+                            <option value="customers"><?php esc_html_e('Customers Only', 'autopuzzle'); ?></option>
+                            <option value="experts"><?php esc_html_e('Experts Only', 'autopuzzle'); ?></option>
+                            <option value="admins"><?php esc_html_e('Admins Only', 'autopuzzle'); ?></option>
                         </select>
-                        <textarea name="custom_recipients" id="bulkCustomRecipients" class="form-control" rows="3" placeholder="<?php esc_attr_e('Or enter custom user IDs (one per line)', 'maneli-car-inquiry'); ?>"></textarea>
-                        <small class="form-text text-muted" id="recipientCount"><?php esc_html_e('Select recipients type or enter custom user IDs', 'maneli-car-inquiry'); ?></small>
+                        <textarea name="custom_recipients" id="bulkCustomRecipients" class="form-control" rows="3" placeholder="<?php esc_attr_e('Or enter custom user IDs (one per line)', 'autopuzzle'); ?>"></textarea>
+                        <small class="form-text text-muted" id="recipientCount"><?php esc_html_e('Select recipients type or enter custom user IDs', 'autopuzzle'); ?></small>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Message', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
+                        <label class="form-label"><?php esc_html_e('Message', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
                         <textarea name="message" id="bulkMessage" class="form-control" rows="5" required></textarea>
-                        <small class="form-text text-muted"><?php esc_html_e('Available variables: {customer_name}, {car_name}, {date}', 'maneli-car-inquiry'); ?></small>
+                        <small class="form-text text-muted"><?php esc_html_e('Available variables: {customer_name}, {car_name}, {date}', 'autopuzzle'); ?></small>
                     </div>
                 </form>
                 <div id="bulkProgress" class="progress mb-3" style="display: none;">
@@ -701,10 +701,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'autopuzzle'); ?></button>
                 <button type="button" class="btn btn-primary" id="sendBulkBtn">
                     <i class="ri-send-plane-line me-1"></i>
-                    <?php esc_html_e('Send Bulk', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Send Bulk', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -716,15 +716,15 @@ if (!wp_script_is('chartjs', 'enqueued')) {
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Schedule Notification', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title"><?php esc_html_e('Schedule Notification', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="scheduleNotificationForm">
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Template', 'maneli-car-inquiry'); ?></label>
+                        <label class="form-label"><?php esc_html_e('Template', 'autopuzzle'); ?></label>
                         <select name="template_id" id="scheduleTemplateSelect" class="form-select">
-                            <option value=""><?php esc_html_e('Select Template (Optional)', 'maneli-car-inquiry'); ?></option>
+                            <option value=""><?php esc_html_e('Select Template (Optional)', 'autopuzzle'); ?></option>
                             <?php foreach ($templates as $template): ?>
                                 <?php if ($template->is_active): ?>
                                     <option value="<?php echo esc_attr($template->id); ?>" data-message="<?php echo esc_attr($template->message); ?>">
@@ -735,28 +735,28 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Recipient', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
-                        <input type="text" name="recipient" id="scheduleRecipient" class="form-control" required placeholder="<?php esc_attr_e('User ID', 'maneli-car-inquiry'); ?>">
+                        <label class="form-label"><?php esc_html_e('Recipient', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
+                        <input type="text" name="recipient" id="scheduleRecipient" class="form-control" required placeholder="<?php esc_attr_e('User ID', 'autopuzzle'); ?>">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Message', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
+                        <label class="form-label"><?php esc_html_e('Message', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
                         <textarea name="message" id="scheduleMessage" class="form-control" rows="5" required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Scheduled Date', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
-                        <input type="text" name="scheduled_date" id="schedule-date-picker" class="form-control maneli-datepicker mb-2" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'maneli-car-inquiry'); ?>" required readonly>
+                        <label class="form-label"><?php esc_html_e('Scheduled Date', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
+                        <input type="text" name="scheduled_date" id="schedule-date-picker" class="form-control autopuzzle-datepicker mb-2" placeholder="<?php esc_attr_e('YYYY/MM/DD', 'autopuzzle'); ?>" required readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Scheduled Time', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
+                        <label class="form-label"><?php esc_html_e('Scheduled Time', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
                         <input type="time" name="scheduled_time" id="scheduleTime" class="form-control" required>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'autopuzzle'); ?></button>
                 <button type="button" class="btn btn-primary" id="scheduleBtn">
                     <i class="ri-time-line me-1"></i>
-                    <?php esc_html_e('Schedule', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Schedule', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -768,7 +768,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="templateModalTitle"><?php esc_html_e('Add Template', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title" id="templateModalTitle"><?php esc_html_e('Add Template', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -776,36 +776,36 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <input type="hidden" name="template_id" id="templateId">
                     <input type="hidden" name="type" value="notification">
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Name', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
+                        <label class="form-label"><?php esc_html_e('Name', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
                         <input type="text" name="name" id="templateName" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Message', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
+                        <label class="form-label"><?php esc_html_e('Message', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
                         <textarea name="message" id="templateMessage" class="form-control" rows="5" required></textarea>
-                        <small class="form-text text-muted"><?php esc_html_e('Available variables: {customer_name}, {car_name}, {date}, {phone}, {inquiry_id}', 'maneli-car-inquiry'); ?></small>
+                        <small class="form-text text-muted"><?php esc_html_e('Available variables: {customer_name}, {car_name}, {date}, {phone}, {inquiry_id}', 'autopuzzle'); ?></small>
                     </div>
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="is_active" id="templateActive" value="1" checked>
                             <label class="form-check-label" for="templateActive">
-                                <?php esc_html_e('Active', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Active', 'autopuzzle'); ?>
                             </label>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label"><?php esc_html_e('Preview', 'maneli-car-inquiry'); ?></label>
+                        <label class="form-label"><?php esc_html_e('Preview', 'autopuzzle'); ?></label>
                         <div class="card bg-light">
                             <div class="card-body">
-                                <p id="templatePreview" class="mb-0 text-muted"><?php esc_html_e('Preview will appear here...', 'maneli-car-inquiry'); ?></p>
+                                <p id="templatePreview" class="mb-0 text-muted"><?php esc_html_e('Preview will appear here...', 'autopuzzle'); ?></p>
                             </div>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'autopuzzle'); ?></button>
                 <button type="button" class="btn btn-primary" id="saveTemplateBtn">
-                    <?php esc_html_e('Save Template', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Save Template', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -817,29 +817,29 @@ if (!wp_script_is('chartjs', 'enqueued')) {
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Notification Details', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title"><?php esc_html_e('Notification Details', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <strong><?php esc_html_e('Recipient:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Recipient:', 'autopuzzle'); ?></strong>
                     <p id="detailRecipient" class="mb-0"></p>
                 </div>
                 <div class="mb-3">
-                    <strong><?php esc_html_e('Message:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Message:', 'autopuzzle'); ?></strong>
                     <p id="detailMessage" class="mb-0"></p>
                 </div>
                 <div class="mb-3">
-                    <strong><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Status:', 'autopuzzle'); ?></strong>
                     <p id="detailStatus" class="mb-0"></p>
                 </div>
                 <div class="mb-3" id="detailErrorSection" style="display: none;">
-                    <strong><?php esc_html_e('Error:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Error:', 'autopuzzle'); ?></strong>
                     <p id="detailError" class="mb-0 text-danger"></p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Close', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php esc_html_e('Close', 'autopuzzle'); ?></button>
             </div>
         </div>
     </div>
@@ -883,11 +883,11 @@ jQuery(document).ready(function($) {
         var timelineCtx = document.getElementById('timelineChart');
         if (timelineCtx) {
             $.ajax({
-                url: maneli_ajax.url,
+                url: autopuzzle_ajax.url,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_notification_timeline',
-                    nonce: maneli_ajax.nonce,
+                    action: 'autopuzzle_get_notification_timeline',
+                    nonce: autopuzzle_ajax.nonce,
                     type: 'notification',
                     date_from: '<?php echo esc_js($date_from ?: date('Y-m-d', strtotime('-30 days'))); ?>',
                     date_to: '<?php echo esc_js($date_to ?: date('Y-m-d')); ?>'
@@ -899,7 +899,7 @@ jQuery(document).ready(function($) {
                             data: {
                                 labels: response.data.labels || [],
                                 datasets: [{
-                                    label: '<?php echo esc_js(__('Sent Notifications', 'maneli-car-inquiry')); ?>',
+                                    label: '<?php echo esc_js(__('Sent Notifications', 'autopuzzle')); ?>',
                                     data: response.data.data || [],
                                     borderColor: 'rgba(54, 162, 235, 1)',
                                     backgroundColor: 'rgba(54, 162, 235, 0.1)',
@@ -934,9 +934,9 @@ jQuery(document).ready(function($) {
                 type: 'pie',
                 data: {
                     labels: [
-                        '<?php echo esc_js(__('Sent', 'maneli-car-inquiry')); ?>',
-                        '<?php echo esc_js(__('Failed', 'maneli-car-inquiry')); ?>',
-                        '<?php echo esc_js(__('Pending', 'maneli-car-inquiry')); ?>'
+                        '<?php echo esc_js(__('Sent', 'autopuzzle')); ?>',
+                        '<?php echo esc_js(__('Failed', 'autopuzzle')); ?>',
+                        '<?php echo esc_js(__('Pending', 'autopuzzle')); ?>'
                     ],
                     datasets: [{
                         data: [
@@ -1006,37 +1006,37 @@ jQuery(document).ready(function($) {
         var message = $('#singleMessage').val();
         
         if (!recipient || !message) {
-            alert('<?php echo esc_js(__('Recipient and message are required.', 'maneli-car-inquiry')); ?>');
+            alert('<?php echo esc_js(__('Recipient and message are required.', 'autopuzzle')); ?>');
             return;
         }
         
         var btn = $(this);
-        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> <?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> <?php echo esc_js(__('Sending...', 'autopuzzle')); ?>');
         
         $.ajax({
-            url: maneli_ajax.url,
+            url: autopuzzle_ajax.url,
             type: 'POST',
             data: {
-                action: 'maneli_send_single_notification',
-                nonce: maneli_ajax.nonce,
+                action: 'autopuzzle_send_single_notification',
+                nonce: autopuzzle_ajax.nonce,
                 type: 'notification',
                 recipient: recipient,
                 message: message
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php echo esc_js(__('Notification sent successfully!', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Notification sent successfully!', 'autopuzzle')); ?>');
                     $('#sendSingleModal').modal('hide');
                     location.reload();
                 } else {
-                    alert('<?php echo esc_js(__('Error:', 'maneli-car-inquiry')); ?> ' + (response.data.message || 'Unknown error'));
+                    alert('<?php echo esc_js(__('Error:', 'autopuzzle')); ?> ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
             },
             complete: function() {
-                btn.prop('disabled', false).html('<i class="ri-send-plane-line me-1"></i> <?php echo esc_js(__('Send Notification', 'maneli-car-inquiry')); ?>');
+                btn.prop('disabled', false).html('<i class="ri-send-plane-line me-1"></i> <?php echo esc_js(__('Send Notification', 'autopuzzle')); ?>');
             }
         });
     });
@@ -1048,7 +1048,7 @@ jQuery(document).ready(function($) {
         var message = $('#bulkMessage').val();
         
         if (!message) {
-            alert('<?php echo esc_js(__('Message is required.', 'maneli-car-inquiry')); ?>');
+            alert('<?php echo esc_js(__('Message is required.', 'autopuzzle')); ?>');
             return;
         }
         
@@ -1057,11 +1057,11 @@ jQuery(document).ready(function($) {
         $('#bulkProgress').show();
         
         $.ajax({
-            url: maneli_ajax.url,
+            url: autopuzzle_ajax.url,
             type: 'POST',
             data: {
-                action: 'maneli_send_bulk_notification_by_type',
-                nonce: maneli_ajax.nonce,
+                action: 'autopuzzle_send_bulk_notification_by_type',
+                nonce: autopuzzle_ajax.nonce,
                 type: 'notification',
                 recipient_type: recipientType,
                 custom_recipients: customRecipients,
@@ -1069,18 +1069,18 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php echo esc_js(__('Bulk Notification sent successfully!', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Bulk Notification sent successfully!', 'autopuzzle')); ?>');
                     $('#sendBulkModal').modal('hide');
                     location.reload();
                 } else {
-                    alert('<?php echo esc_js(__('Error:', 'maneli-car-inquiry')); ?> ' + (response.data.message || 'Unknown error'));
+                    alert('<?php echo esc_js(__('Error:', 'autopuzzle')); ?> ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
             },
             complete: function() {
-                btn.prop('disabled', false).html('<i class="ri-send-plane-line me-1"></i> <?php echo esc_js(__('Send Bulk', 'maneli-car-inquiry')); ?>');
+                btn.prop('disabled', false).html('<i class="ri-send-plane-line me-1"></i> <?php echo esc_js(__('Send Bulk', 'autopuzzle')); ?>');
                 $('#bulkProgress').hide();
             }
         });
@@ -1094,7 +1094,7 @@ jQuery(document).ready(function($) {
         var scheduledTime = $('#scheduleTime').val();
         
         if (!recipient || !message || !scheduledDate || !scheduledTime) {
-            alert('<?php echo esc_js(__('All fields are required.', 'maneli-car-inquiry')); ?>');
+            alert('<?php echo esc_js(__('All fields are required.', 'autopuzzle')); ?>');
             return;
         }
         
@@ -1103,11 +1103,11 @@ jQuery(document).ready(function($) {
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
         
         $.ajax({
-            url: maneli_ajax.url,
+            url: autopuzzle_ajax.url,
             type: 'POST',
             data: {
-                action: 'maneli_schedule_notification_by_type',
-                nonce: maneli_ajax.nonce,
+                action: 'autopuzzle_schedule_notification_by_type',
+                nonce: autopuzzle_ajax.nonce,
                 type: 'notification',
                 recipient: recipient,
                 message: message,
@@ -1115,18 +1115,18 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php echo esc_js(__('Notification scheduled successfully!', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Notification scheduled successfully!', 'autopuzzle')); ?>');
                     $('#scheduleModal').modal('hide');
                     location.reload();
                 } else {
-                    alert('<?php echo esc_js(__('Error:', 'maneli-car-inquiry')); ?> ' + (response.data.message || 'Unknown error'));
+                    alert('<?php echo esc_js(__('Error:', 'autopuzzle')); ?> ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
             },
             complete: function() {
-                btn.prop('disabled', false).html('<i class="ri-time-line me-1"></i> <?php echo esc_js(__('Schedule', 'maneli-car-inquiry')); ?>');
+                btn.prop('disabled', false).html('<i class="ri-time-line me-1"></i> <?php echo esc_js(__('Schedule', 'autopuzzle')); ?>');
             }
         });
     });
@@ -1136,30 +1136,30 @@ jQuery(document).ready(function($) {
         var logId = $(this).data('log-id');
         var btn = $(this);
         
-        if (!confirm('<?php echo esc_js(__('Retry sending this notification?', 'maneli-car-inquiry')); ?>')) {
+        if (!confirm('<?php echo esc_js(__('Retry sending this notification?', 'autopuzzle')); ?>')) {
             return;
         }
         
         btn.prop('disabled', true);
         
         $.ajax({
-            url: maneli_ajax.url,
+            url: autopuzzle_ajax.url,
             type: 'POST',
             data: {
-                action: 'maneli_retry_notification',
-                nonce: maneli_ajax.nonce,
+                action: 'autopuzzle_retry_notification',
+                nonce: autopuzzle_ajax.nonce,
                 log_id: logId
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php echo esc_js(__('Notification retried successfully!', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Notification retried successfully!', 'autopuzzle')); ?>');
                     location.reload();
                 } else {
-                    alert('<?php echo esc_js(__('Error:', 'maneli-car-inquiry')); ?> ' + (response.data.message || 'Unknown error'));
+                    alert('<?php echo esc_js(__('Error:', 'autopuzzle')); ?> ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
             },
             complete: function() {
                 btn.prop('disabled', false);
@@ -1183,15 +1183,15 @@ jQuery(document).ready(function($) {
     
     // Template management
     $('#addTemplateBtn').on('click', function() {
-        $('#templateModalTitle').text('<?php echo esc_js(__('Add Template', 'maneli-car-inquiry')); ?>');
+        $('#templateModalTitle').text('<?php echo esc_js(__('Add Template', 'autopuzzle')); ?>');
         $('#templateForm')[0].reset();
         $('#templateId').val('');
         $('#templateActive').prop('checked', true);
-        $('#templatePreview').text('<?php echo esc_js(__('Preview will appear here...', 'maneli-car-inquiry')); ?>');
+        $('#templatePreview').text('<?php echo esc_js(__('Preview will appear here...', 'autopuzzle')); ?>');
     });
     
     $('.edit-template').on('click', function() {
-        $('#templateModalTitle').text('<?php echo esc_js(__('Edit Template', 'maneli-car-inquiry')); ?>');
+        $('#templateModalTitle').text('<?php echo esc_js(__('Edit Template', 'autopuzzle')); ?>');
         $('#templateId').val($(this).data('template-id'));
         $('#templateName').val($(this).data('name'));
         $('#templateMessage').val($(this).data('message'));
@@ -1205,7 +1205,7 @@ jQuery(document).ready(function($) {
         if (message) {
             $('#templatePreview').text(message);
         } else {
-            $('#templatePreview').text('<?php echo esc_js(__('Preview will appear here...', 'maneli-car-inquiry')); ?>');
+            $('#templatePreview').text('<?php echo esc_js(__('Preview will appear here...', 'autopuzzle')); ?>');
         }
     });
     
@@ -1219,84 +1219,84 @@ jQuery(document).ready(function($) {
         var btn = $(this);
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
         
-        var action = data.template_id ? 'maneli_update_notification_template' : 'maneli_create_notification_template';
+        var action = data.template_id ? 'autopuzzle_update_notification_template' : 'autopuzzle_create_notification_template';
         
         $.ajax({
-            url: maneli_ajax.url,
+            url: autopuzzle_ajax.url,
             type: 'POST',
             data: {
                 action: action,
-                nonce: maneli_ajax.nonce,
+                nonce: autopuzzle_ajax.nonce,
                 ...data
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php echo esc_js(__('Template saved successfully!', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Template saved successfully!', 'autopuzzle')); ?>');
                     $('#templateModal').modal('hide');
                     location.reload();
                 } else {
-                    alert('<?php echo esc_js(__('Error:', 'maneli-car-inquiry')); ?> ' + (response.data.message || 'Unknown error'));
+                    alert('<?php echo esc_js(__('Error:', 'autopuzzle')); ?> ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
             },
             complete: function() {
-                btn.prop('disabled', false).html('<?php echo esc_js(__('Save Template', 'maneli-car-inquiry')); ?>');
+                btn.prop('disabled', false).html('<?php echo esc_js(__('Save Template', 'autopuzzle')); ?>');
             }
         });
     });
     
     $('.duplicate-template').on('click', function() {
-        if (!confirm('<?php echo esc_js(__('Duplicate this template?', 'maneli-car-inquiry')); ?>')) {
+        if (!confirm('<?php echo esc_js(__('Duplicate this template?', 'autopuzzle')); ?>')) {
             return;
         }
         
         $.ajax({
-            url: maneli_ajax.url,
+            url: autopuzzle_ajax.url,
             type: 'POST',
             data: {
-                action: 'maneli_duplicate_notification_template',
-                nonce: maneli_ajax.nonce,
+                action: 'autopuzzle_duplicate_notification_template',
+                nonce: autopuzzle_ajax.nonce,
                 template_id: $(this).data('template-id')
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php echo esc_js(__('Template duplicated successfully!', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Template duplicated successfully!', 'autopuzzle')); ?>');
                     location.reload();
                 } else {
-                    alert('<?php echo esc_js(__('Error:', 'maneli-car-inquiry')); ?> ' + (response.data.message || 'Unknown error'));
+                    alert('<?php echo esc_js(__('Error:', 'autopuzzle')); ?> ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
             }
         });
     });
     
     $('.delete-template').on('click', function() {
-        if (!confirm('<?php echo esc_js(__('Delete this template?', 'maneli-car-inquiry')); ?>')) {
+        if (!confirm('<?php echo esc_js(__('Delete this template?', 'autopuzzle')); ?>')) {
             return;
         }
         
         $.ajax({
-            url: maneli_ajax.url,
+            url: autopuzzle_ajax.url,
             type: 'POST',
             data: {
-                action: 'maneli_delete_notification_template',
-                nonce: maneli_ajax.nonce,
+                action: 'autopuzzle_delete_notification_template',
+                nonce: autopuzzle_ajax.nonce,
                 template_id: $(this).data('template-id')
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php echo esc_js(__('Template deleted successfully!', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Template deleted successfully!', 'autopuzzle')); ?>');
                     location.reload();
                 } else {
-                    alert('<?php echo esc_js(__('Error:', 'maneli-car-inquiry')); ?> ' + (response.data.message || 'Unknown error'));
+                    alert('<?php echo esc_js(__('Error:', 'autopuzzle')); ?> ' + (response.data.message || 'Unknown error'));
                 }
             },
             error: function() {
-                alert('<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
             }
         });
     });

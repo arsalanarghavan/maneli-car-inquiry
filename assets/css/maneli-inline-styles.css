@@ -1,8 +1,8 @@
 /**
- * Maneli Car Inquiry - Inline Styles Replacement
+ * AutoPuzzle Car Inquiry - Inline Styles Replacement
  * This file contains CSS classes to replace inline styles found in PHP templates
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  * @version 1.0.0
  */
 
@@ -10,15 +10,15 @@
    Spacing & Layout
    ======================================== */
 
-.maneli-mt-20 {
+.autopuzzle-mt-20 {
     margin-top: 20px;
 }
 
-.maneli-mr-5 {
+.autopuzzle-mr-5 {
     margin-right: 5px;
 }
 
-.maneli-mt-5 {
+.autopuzzle-mt-5 {
     margin-top: 5px;
 }
 
@@ -26,20 +26,20 @@
    Display Utilities
    ======================================== */
 
-.maneli-hidden {
+.autopuzzle-hidden {
     display: none;
 }
 
-.maneli-visible {
+.autopuzzle-visible {
     display: block;
 }
 
-.maneli-flex {
+.autopuzzle-flex {
     display: flex;
 }
 
 /* For elements that need to be hidden initially but shown via JS */
-.maneli-initially-hidden {
+.autopuzzle-initially-hidden {
     display: none;
 }
 
@@ -47,13 +47,13 @@
    Save Status Icon (repeated pattern)
    ======================================== */
 
-.maneli-save-status-icon {
+.autopuzzle-save-status-icon {
     margin-right: 5px;
     display: none;
 }
 
 /* When visible (via JS) */
-.maneli-save-status-icon.maneli-visible {
+.autopuzzle-save-status-icon.autopuzzle-visible {
     display: inline-block;
 }
 
@@ -62,13 +62,13 @@
    ======================================== */
 
 /* Delete button with theme red */
-.maneli-btn-delete {
+.autopuzzle-btn-delete {
     background-color: var(--theme-red);
     border-color: var(--theme-red);
     margin-top: 5px;
 }
 
-.maneli-btn-delete:hover {
+.autopuzzle-btn-delete:hover {
     background-color: var(--theme-red);
     border-color: var(--theme-red);
     opacity: 0.9;
@@ -78,15 +78,15 @@
    Text & Colors
    ======================================== */
 
-.maneli-text-danger {
+.autopuzzle-text-danger {
     color: #d63638;
 }
 
-[data-theme-mode=dark] .maneli-text-danger {
+[data-theme-mode=dark] .autopuzzle-text-danger {
     color: #f87171;
 }
 
-.maneli-text-center {
+.autopuzzle-text-center {
     text-align: center;
 }
 
@@ -94,7 +94,7 @@
    Table Styles
    ======================================== */
 
-.maneli-summary-table {
+.autopuzzle-summary-table {
     margin-top: 20px;
 }
 
@@ -102,13 +102,13 @@
    Loader Styles
    ======================================== */
 
-.maneli-list-loader {
+.autopuzzle-list-loader {
     display: none;
     text-align: center;
     padding: 40px;
 }
 
-.maneli-list-loader.maneli-loading {
+.autopuzzle-list-loader.autopuzzle-loading {
     display: block;
 }
 
@@ -116,7 +116,7 @@
    Price Disclaimer Box
    ======================================== */
 
-.maneli-price-disclaimer {
+.autopuzzle-price-disclaimer {
     text-align: center;
     font-size: 14px;
     color: #777;
@@ -126,7 +126,7 @@
     margin-bottom: 20px;
 }
 
-[data-theme-mode=dark] .maneli-price-disclaimer {
+[data-theme-mode=dark] .autopuzzle-price-disclaimer {
     color: var(--text-muted);
     border-top-color: rgba(255, 255, 255, 0.1);
     border-bottom-color: rgba(255, 255, 255, 0.1);
@@ -136,7 +136,7 @@
    Rank Badge (from reports.php)
    ======================================== */
 
-.maneli-rank-badge {
+.autopuzzle-rank-badge {
     width: 35px;
     height: 35px;
     display: flex;
@@ -148,12 +148,12 @@
           Status Step (for progress indicators)
           ======================================== */
 
-.maneli-status-step {
+.autopuzzle-status-step {
     flex: 1;
     position: relative;
 }
 
-.maneli-status-arrow {
+.autopuzzle-status-arrow {
     /* Opacity is controlled inline for dynamic values */
 }
 
@@ -161,7 +161,7 @@
           Placeholder Image Container
           ======================================== */
 
-.maneli-placeholder-image {
+.autopuzzle-placeholder-image {
     height: 200px;
     border: 2px dashed #dee2e6;
     background-color: #f8f9fa;
@@ -172,13 +172,13 @@
     color: #6c757d;
 }
 
-[data-theme-mode=dark] .maneli-placeholder-image {
+[data-theme-mode=dark] .autopuzzle-placeholder-image {
     border-color: rgba(255, 255, 255, 0.1);
     background-color: rgba(255, 255, 255, 0.05);
     color: var(--text-muted);
 }
 
-.maneli-placeholder-image i {
+.autopuzzle-placeholder-image i {
     font-size: 40px;
 }
 
@@ -186,27 +186,27 @@
           Progress Bar Styles
           ======================================== */
 
-.maneli-progress {
+.autopuzzle-progress {
     height: 20px;
 }
 
 /* Additional progress bar heights for specific use cases */
-.maneli-progress-sm {
+.autopuzzle-progress-sm {
     height: 6px;
 }
 
-.maneli-progress-md {
+.autopuzzle-progress-md {
     height: 10px;
 }
 
 /* For charts/graphs containers */
-.maneli-chart-container {
+.autopuzzle-chart-container {
     height: 350px;
     position: relative;
 }
 
 /* Loading overlay */
-.maneli-loading-overlay {
+.autopuzzle-loading-overlay {
     display: none;
     position: fixed;
     top: 0;
@@ -217,41 +217,41 @@
     z-index: 9999;
 }
 
-[data-theme-mode=dark] .maneli-loading-overlay {
+[data-theme-mode=dark] .autopuzzle-loading-overlay {
     background-color: rgba(0, 0, 0, 0.8);
 }
 
-.maneli-loading-overlay.maneli-visible {
+.autopuzzle-loading-overlay.autopuzzle-visible {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 /* Unavailable product blur effect */
-.maneli-calculator-unavailable {
+.autopuzzle-calculator-unavailable {
     filter: blur(5px);
     pointer-events: none;
     user-select: none;
 }
 
 /* Table column widths (for consistent sizing) */
-.maneli-col-width-30 {
+.autopuzzle-col-width-30 {
     width: 30px;
 }
 
-.maneli-col-width-40 {
+.autopuzzle-col-width-40 {
     width: 40px;
 }
 
-.maneli-col-width-60 {
+.autopuzzle-col-width-60 {
     width: 60px;
 }
 
-.maneli-col-width-80 {
+.autopuzzle-col-width-80 {
     width: 80px;
 }
 
-.maneli-col-width-100 {
+.autopuzzle-col-width-100 {
     width: 100px;
 }
 
@@ -259,30 +259,30 @@
           Image Max Height
           ======================================== */
 
-.maneli-img-max-height-200 {
+.autopuzzle-img-max-height-200 {
     max-height: 200px;
 }
 
-.maneli-img-responsive {
+.autopuzzle-img-responsive {
     max-width: 200px;
     height: auto;
     border-radius: 4px;
     vertical-align: middle;
 }
 
-.maneli-img-responsive-sm {
+.autopuzzle-img-responsive-sm {
     max-width: 100px;
     height: auto;
     border-radius: 4px;
 }
 
-.maneli-notification-icon {
+.autopuzzle-notification-icon {
     width: 48px;
     height: 48px;
 }
 
 /* Remove button positioning */
-.maneli-remove-image-btn {
+.autopuzzle-remove-image-btn {
     position: absolute;
     top: -5px;
     right: -5px;
@@ -295,26 +295,26 @@
           ======================================== */
 
 @media (max-width: 768px) {
-    .maneli-mr-5 {
+    .autopuzzle-mr-5 {
         margin-right: 0;
         margin-bottom: 5px;
     }
 
-    .maneli-price-disclaimer {
+    .autopuzzle-price-disclaimer {
         font-size: 12px;
         padding: 8px 0;
     }
 
-    .maneli-rank-badge {
+    .autopuzzle-rank-badge {
         width: 30px;
         height: 30px;
     }
 
-    .maneli-placeholder-image {
+    .autopuzzle-placeholder-image {
         height: 150px;
     }
 
-    .maneli-placeholder-image i {
+    .autopuzzle-placeholder-image i {
         font-size: 32px;
     }
 }

@@ -128,8 +128,8 @@
         input.value = formatMoney(minDown);
 
         // Get interest rate
-        const interestRate = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.interestRate)
-                           ? parseFloat(maneli_ajax_object.interestRate) 
+        const interestRate = (typeof autopuzzle_ajax_object !== 'undefined' && autopuzzle_ajax_object.interestRate)
+                           ? parseFloat(autopuzzle_ajax_object.interestRate) 
                            : 0.035;
 
         // Calculate and display installment

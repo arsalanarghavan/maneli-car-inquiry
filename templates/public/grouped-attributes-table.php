@@ -3,9 +3,9 @@
  * Template for displaying the grouped product attributes table.
  *
  * This template replaces the default WooCommerce "Additional Information" table
- * and is called by the Maneli_Grouped_Attributes class.
+ * and is called by the Autopuzzle_Grouped_Attributes class.
  *
- * @package Maneli_Car_Inquiry/Templates/Public
+ * @package Autopuzzle_Car_Inquiry/Templates/Public
  * @author  Gemini
  * @version 1.0.0
  *
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 ?>
 
 <div class="sga-wrapper">
-    <h2 class="sga-main-title"><?php esc_html_e('Specifications', 'maneli-car-inquiry'); ?></h2>
+    <h2 class="sga-main-title"><?php esc_html_e('Specifications', 'autopuzzle'); ?></h2>
 
     <?php foreach ($grouped_attributes as $group_title => $attributes_in_group) : ?>
         <div class="sga-group-container">

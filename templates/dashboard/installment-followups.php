@@ -3,7 +3,7 @@
  * installment-followups.php Dashboard Page
  * Shows installment inquiries with tracking_status = 'follow_up_scheduled'
  *
- * @package Maneli_Car_Inquiry
+ * @package AutoPuzzle
  */
 
 if (!defined('ABSPATH')) {
@@ -18,11 +18,11 @@ if (!defined('ABSPATH')) {
             <div>
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item">
-                        <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Installment Follow-ups', 'maneli-car-inquiry'); ?></li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Installment Follow-ups', 'autopuzzle'); ?></li>
                 </ol>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Installment Follow-ups', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Installment Follow-ups', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- End::page-header -->
@@ -35,13 +35,13 @@ if (!defined('ABSPATH')) {
  */
 
 // Check permission
-if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
+if (!current_user_can('manage_autopuzzle_inquiries') && !in_array('autopuzzle_expert', wp_get_current_user()->roles, true)) {
     ?>
     <div class="row">
         <div class="col-xl-12">
             <div class="alert alert-danger alert-dismissible fade show">
                 <i class="ri-exclamation-triangle me-2"></i>
-                <strong><?php esc_html_e('Access Restricted!', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('You do not have access to this page.', 'maneli-car-inquiry'); ?>
+                <strong><?php esc_html_e('Access Restricted!', 'autopuzzle'); ?></strong> <?php esc_html_e('You do not have access to this page.', 'autopuzzle'); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
@@ -52,10 +52,10 @@ if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', w
 
 // Get current user
 $current_user_id = get_current_user_id();
-$is_admin = current_user_can('manage_maneli_inquiries');
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
 
 // Get experts for filter (admin only)
-$experts = $is_admin ? get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']) : [];
+$experts = $is_admin ? get_users(['role' => 'autopuzzle_expert', 'orderby' => 'display_name', 'order' => 'ASC']) : [];
 
 // Query followup inquiries
 $args = [
@@ -86,23 +86,23 @@ if (!$is_admin) {
 $followups_query = new WP_Query($args);
 $followups = $followups_query->posts;
 
-$use_persian_digits_for_dashboard = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+$use_persian_digits_for_dashboard = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 
-if (!function_exists('maneli_installment_followup_convert_jalali_to_gregorian')) {
+if (!function_exists('autopuzzle_installment_followup_convert_jalali_to_gregorian')) {
     /**
      * Convert a Jalali date (with possible Persian digits) to Gregorian (Y-m-d).
      *
      * @param string $jalali_date_string
      * @return string|null
      */
-    function maneli_installment_followup_convert_jalali_to_gregorian($jalali_date_string) {
+    function autopuzzle_installment_followup_convert_jalali_to_gregorian($jalali_date_string) {
         if (!is_string($jalali_date_string) || $jalali_date_string === '') {
             return null;
         }
 
         $value = $jalali_date_string;
-        if (function_exists('maneli_convert_to_english_digits')) {
-            $value = maneli_convert_to_english_digits($value);
+        if (function_exists('autopuzzle_convert_to_english_digits')) {
+            $value = autopuzzle_convert_to_english_digits($value);
         }
 
         $value = trim($value);
@@ -187,8 +187,8 @@ $convert_followup_to_gregorian = static function ($date_string) {
     }
 
     $value = $date_string;
-    if (function_exists('maneli_convert_to_english_digits')) {
-        $value = maneli_convert_to_english_digits($value);
+    if (function_exists('autopuzzle_convert_to_english_digits')) {
+        $value = autopuzzle_convert_to_english_digits($value);
     }
 
     $value = trim((string) $value);
@@ -203,7 +203,7 @@ $convert_followup_to_gregorian = static function ($date_string) {
         $day = (int) $matches[3];
 
         if ($year >= 1300 && $year <= 1500) {
-            return maneli_installment_followup_convert_jalali_to_gregorian(sprintf('%04d/%02d/%02d', $year, $month, $day));
+            return autopuzzle_installment_followup_convert_jalali_to_gregorian(sprintf('%04d/%02d/%02d', $year, $month, $day));
         }
 
         return sprintf('%04d-%02d-%02d', $year, $month, $day);
@@ -227,11 +227,11 @@ $format_created_date_for_display = static function ($date_string) use ($use_pers
         $value = (string) $date_string;
         return $use_persian_digits_for_dashboard && function_exists('persian_numbers_no_separator')
             ? persian_numbers_no_separator($value)
-            : (function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($value) : $value);
+            : (function_exists('autopuzzle_convert_to_english_digits') ? autopuzzle_convert_to_english_digits($value) : $value);
     }
 
     if ($use_persian_digits_for_dashboard) {
-        $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali(date('Y-m-d', $timestamp), 'Y/m/d');
+        $jalali_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali(date('Y-m-d', $timestamp), 'Y/m/d');
         return function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($jalali_date) : $jalali_date;
     }
 
@@ -247,7 +247,7 @@ $format_followup_date_for_display = static function ($raw_value) use ($use_persi
 
     if ($use_persian_digits_for_dashboard) {
         if ($greg_date) {
-            $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($greg_date, 'Y/m/d');
+            $jalali_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($greg_date, 'Y/m/d');
             return function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($jalali_date) : $jalali_date;
         }
         return function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($raw_value) : $raw_value;
@@ -261,7 +261,7 @@ $format_followup_date_for_display = static function ($raw_value) use ($use_persi
         return $greg_date;
     }
 
-    $english_digits = function_exists('maneli_convert_to_english_digits') ? maneli_convert_to_english_digits($raw_value) : $raw_value;
+    $english_digits = function_exists('autopuzzle_convert_to_english_digits') ? autopuzzle_convert_to_english_digits($raw_value) : $raw_value;
     $timestamp = strtotime(str_replace('/', '-', $english_digits));
     if ($timestamp !== false) {
         return function_exists('wp_date') ? wp_date('Y/m/d', $timestamp) : date('Y/m/d', $timestamp);
@@ -630,10 +630,10 @@ foreach ($followups as $inquiry) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e("Today's Followups", 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e("Today's Followups", 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($today_count)) : number_format_i18n($today_count); ?></h4>
-                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Today', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -648,10 +648,10 @@ foreach ($followups as $inquiry) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Overdue', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($overdue_count)) : number_format_i18n($overdue_count); ?></h4>
-                            <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Overdue', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -666,10 +666,10 @@ foreach ($followups as $inquiry) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('This Week', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($week_count)) : number_format_i18n($week_count); ?></h4>
-                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Week', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Week', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -684,10 +684,10 @@ foreach ($followups as $inquiry) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($total_count)) : number_format_i18n($total_count); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -698,42 +698,42 @@ foreach ($followups as $inquiry) {
         <div class="card custom-card">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div class="card-title">
-                    <?php esc_html_e('Installment Inquiry Follow-ups List', 'maneli-car-inquiry'); ?><span class="badge bg-primary rounded ms-2 fs-12 align-middle"><?php echo persian_numbers_no_separator($total_count); ?></span>
+                    <?php esc_html_e('Installment Inquiry Follow-ups List', 'autopuzzle'); ?><span class="badge bg-primary rounded ms-2 fs-12 align-middle"><?php echo persian_numbers_no_separator($total_count); ?></span>
                 </div>
             </div>
             <div class="card-body p-0">
                 <!-- Filter Section -->
-                <div class="p-3 border-bottom maneli-mobile-filter" data-maneli-mobile-filter>
+                <div class="p-3 border-bottom autopuzzle-mobile-filter" data-autopuzzle-mobile-filter>
                     <button
                         type="button"
-                        class="maneli-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
-                        data-maneli-filter-toggle
+                        class="autopuzzle-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
+                        data-autopuzzle-filter-toggle
                         aria-expanded="false"
                     >
-                        <span class="fw-semibold"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></span>
-                        <i class="ri-arrow-down-s-line maneli-mobile-filter-arrow"></i>
+                        <span class="fw-semibold"><?php esc_html_e('Filters', 'autopuzzle'); ?></span>
+                        <i class="ri-arrow-down-s-line autopuzzle-mobile-filter-arrow"></i>
                     </button>
-                    <div class="maneli-mobile-filter-body" data-maneli-filter-body>
-                    <form id="maneli-installment-followup-filter-form" onsubmit="return false;">
+                    <div class="autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
+                    <form id="autopuzzle-installment-followup-filter-form" onsubmit="return false;">
                         <div class="row g-3">
                             <div class="col-12">
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="la la-search"></i>
                                     </span>
-                                    <input type="search" id="installment-followup-search-input" class="form-control" placeholder="<?php esc_attr_e('Search by customer name, car name...', 'maneli-car-inquiry'); ?>">
+                                    <input type="search" id="installment-followup-search-input" class="form-control" placeholder="<?php esc_attr_e('Search by customer name, car name...', 'autopuzzle'); ?>">
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Filter Controls - All in one line -->
-                        <div class="row g-3 align-items-end mt-1 maneli-desktop-filter-row">
+                        <div class="row g-3 align-items-end mt-1 autopuzzle-desktop-filter-row">
                             <!-- Status Filter -->
                             <div class="col-6 col-lg-2">
-                                <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
+                                <label class="form-label"><?php esc_html_e('Status:', 'autopuzzle'); ?></label>
                                 <select id="installment-followup-status-filter" class="form-select form-select-sm">
-                                    <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                                    <?php foreach (Maneli_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
+                                    <option value=""><?php esc_html_e('All Statuses', 'autopuzzle'); ?></option>
+                                    <?php foreach (Autopuzzle_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
                                         <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
                                     <?php endforeach; ?>
                                 </select>
@@ -742,9 +742,9 @@ foreach ($followups as $inquiry) {
                             <?php if ($is_admin && !empty($experts)): ?>
                                 <!-- Expert Filter -->
                                 <div class="col-6 col-lg-2">
-                                    <label class="form-label"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
-                                    <select id="installment-followup-expert-filter" class="form-select form-select-sm maneli-select2">
-                                        <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
+                                    <label class="form-label"><?php esc_html_e('Expert:', 'autopuzzle'); ?></label>
+                                    <select id="installment-followup-expert-filter" class="form-select form-select-sm autopuzzle-select2">
+                                        <option value=""><?php esc_html_e('All Experts', 'autopuzzle'); ?></option>
                                         <?php foreach ($experts as $expert) : ?>
                                             <option value="<?php echo esc_attr($expert->ID); ?>"><?php echo esc_html($expert->display_name); ?></option>
                                         <?php endforeach; ?>
@@ -754,12 +754,12 @@ foreach ($followups as $inquiry) {
                             
                             <!-- Sort Filter -->
                             <div class="col-6 col-lg-2">
-                                <label class="form-label"><?php esc_html_e('Sort:', 'maneli-car-inquiry'); ?></label>
+                                <label class="form-label"><?php esc_html_e('Sort:', 'autopuzzle'); ?></label>
                                 <select id="installment-followup-sort-filter" class="form-select form-select-sm">
-                                    <option value="date_asc"><?php esc_html_e('Follow-up Date (Earliest)', 'maneli-car-inquiry'); ?></option>
-                                    <option value="date_desc"><?php esc_html_e('Follow-up Date (Latest)', 'maneli-car-inquiry'); ?></option>
-                                    <option value="created_desc"><?php esc_html_e('Newest First', 'maneli-car-inquiry'); ?></option>
-                                    <option value="created_asc"><?php esc_html_e('Oldest First', 'maneli-car-inquiry'); ?></option>
+                                    <option value="date_asc"><?php esc_html_e('Follow-up Date (Earliest)', 'autopuzzle'); ?></option>
+                                    <option value="date_desc"><?php esc_html_e('Follow-up Date (Latest)', 'autopuzzle'); ?></option>
+                                    <option value="created_desc"><?php esc_html_e('Newest First', 'autopuzzle'); ?></option>
+                                    <option value="created_asc"><?php esc_html_e('Oldest First', 'autopuzzle'); ?></option>
                                 </select>
                             </div>
                             
@@ -769,13 +769,13 @@ foreach ($followups as $inquiry) {
                                     <div class="col-6 col-lg-6">
                                         <button type="button" id="installment-followup-apply-filters" class="btn btn-primary btn-sm w-100">
                                             <i class="la la-filter me-1"></i>
-                                            <?php esc_html_e('Apply', 'maneli-car-inquiry'); ?>
+                                            <?php esc_html_e('Apply', 'autopuzzle'); ?>
                                         </button>
                                     </div>
                                     <div class="col-6 col-lg-6">
                                         <button type="button" id="installment-followup-reset-filters" class="btn btn-outline-secondary btn-sm w-100">
                                             <i class="la la-refresh me-1"></i>
-                                            <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
+                                            <?php esc_html_e('Clear', 'autopuzzle'); ?>
                                         </button>
                                     </div>
                                 </div>
@@ -790,16 +790,16 @@ foreach ($followups as $inquiry) {
                     <table class="table text-nowrap table-hover">
                         <thead>
                             <tr>
-                                <th scope="col"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Follow-up Date', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Customer', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Car', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Follow-up Date', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Status', 'autopuzzle'); ?></th>
                                 <?php if ($is_admin): ?>
-                                    <th scope="col"><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></th>
+                                    <th scope="col"><?php esc_html_e('Expert', 'autopuzzle'); ?></th>
                                 <?php endif; ?>
-                                <th scope="col"><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('Registration Date', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -807,7 +807,7 @@ foreach ($followups as $inquiry) {
                                 <tr>
                                     <td colspan="<?php echo $is_admin ? '8' : '7'; ?>" class="text-center py-4">
                                         <i class="la la-inbox fs-24 text-muted"></i>
-                                        <p class="text-muted mt-3"><?php esc_html_e('No follow-ups found.', 'maneli-car-inquiry'); ?></p>
+                                        <p class="text-muted mt-3"><?php esc_html_e('No follow-ups found.', 'autopuzzle'); ?></p>
                                     </td>
                                 </tr>
                             <?php else: ?>
@@ -819,7 +819,7 @@ foreach ($followups as $inquiry) {
                                     $follow_up_date_for_compare = $convert_followup_to_gregorian($follow_up_date);
                                     $follow_up_date_display = $format_followup_date_for_display($follow_up_date);
                                     $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true);
-                                    $tracking_status_label = Maneli_CPT_Handler::get_tracking_status_label($tracking_status);
+                                    $tracking_status_label = Autopuzzle_CPT_Handler::get_tracking_status_label($tracking_status);
                                     $expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
                                     $expert = $expert_id ? get_userdata($expert_id) : null;
                                     
@@ -847,52 +847,52 @@ foreach ($followups as $inquiry) {
                                     $row_class = $is_overdue ? 'table-danger' : '';
                                 ?>
                                     <tr class="crm-contact contacts-list <?php echo $row_class; ?>">
-                                        <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">
+                                        <td data-title="<?php esc_attr_e('ID', 'autopuzzle'); ?>">
                                             <span class="fw-medium">#<?php echo persian_numbers_no_separator($inquiry_id); ?></span>
                                         </td>
-                                        <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>">
+                                        <td data-title="<?php esc_attr_e('Customer', 'autopuzzle'); ?>">
                                             <div class="d-flex align-items-center gap-2">
                                                 <div>
-                                                    <span class="d-block fw-medium"><?php echo esc_html($customer ? $customer->display_name : esc_html__('Unknown', 'maneli-car-inquiry')); ?></span>
+                                                    <span class="d-block fw-medium"><?php echo esc_html($customer ? $customer->display_name : esc_html__('Unknown', 'autopuzzle')); ?></span>
                                                     <span class="d-block text-muted fs-11">
                                                         <i class="la la-user me-1 fs-13 align-middle"></i><?php echo esc_html($created_date_display); ?>
                                                     </span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
-                                        <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">
+                                        <td data-title="<?php esc_attr_e('Car', 'autopuzzle'); ?>"><?php echo esc_html(get_the_title($product_id)); ?></td>
+                                        <td data-title="<?php esc_attr_e('Follow-up Date', 'autopuzzle'); ?>">
                                             <?php if ($follow_up_date_display !== ''): ?>
                                                 <strong class="<?php echo $is_overdue ? 'text-danger' : 'text-success'; ?>">
                                                     <?php echo esc_html($follow_up_date_display); ?>
                                                 </strong>
                                                 <?php if ($is_overdue): ?>
-                                                    <br><span class="badge bg-danger-transparent"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
+                                                    <br><span class="badge bg-danger-transparent"><?php esc_html_e('Overdue', 'autopuzzle'); ?></span>
                                                 <?php endif; ?>
                                             <?php else: ?>
                                                 —
                                             <?php endif; ?>
                                         </td>
-                                        <td data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
+                                        <td data-title="<?php esc_attr_e('Status', 'autopuzzle'); ?>">
                                             <span class="badge bg-warning-transparent">
                                                 <?php echo esc_html($tracking_status_label); ?>
                                             </span>
                                             <?php if (!empty($followup_history)): ?>
                                                 <br><small class="text-muted fs-11">
-                                                    (<?php printf(esc_html__('%s previous follow-ups', 'maneli-car-inquiry'), persian_numbers_no_separator(count($followup_history))); ?>)
+                                                    (<?php printf(esc_html__('%s previous follow-ups', 'autopuzzle'), persian_numbers_no_separator(count($followup_history))); ?>)
                                                 </small>
                                             <?php endif; ?>
                                         </td>
                                         <?php if ($is_admin): ?>
-                                            <td data-title="<?php esc_attr_e('Expert', 'maneli-car-inquiry'); ?>">
+                                            <td data-title="<?php esc_attr_e('Expert', 'autopuzzle'); ?>">
                                                 <?php echo $expert ? esc_html($expert->display_name) : '<span class="text-muted">—</span>'; ?>
                                             </td>
                                         <?php endif; ?>
-                                        <td data-title="<?php esc_attr_e('Registration Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($created_date_display); ?></td>
-                                        <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
+                                        <td data-title="<?php esc_attr_e('Registration Date', 'autopuzzle'); ?>"><?php echo esc_html($created_date_display); ?></td>
+                                        <td data-title="<?php esc_attr_e('Actions', 'autopuzzle'); ?>">
                                             <div class="btn-list">
                                                 <a href="<?php echo add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries')); ?>" 
-                                                   class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                   class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View', 'autopuzzle'); ?>">
                                                     <i class="la la-eye"></i>
                                                 </a>
                                                 <?php if ($is_admin || ($expert_id == $current_user_id)): 
@@ -910,7 +910,7 @@ foreach ($followups as $inquiry) {
                                                                     data-phone="<?php echo esc_attr($customer_mobile); ?>"
                                                                     data-customer-name="<?php echo esc_attr($customer->display_name ?? ''); ?>"
                                                                     data-inquiry-type="installment"
-                                                                    title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                                                    title="<?php esc_attr_e('Send SMS', 'autopuzzle'); ?>">
                                                                 <i class="la la-sms"></i>
                                                             </button>
                                                         <?php endif; ?>
@@ -918,7 +918,7 @@ foreach ($followups as $inquiry) {
                                                     <button class="btn btn-sm btn-info-light btn-icon view-sms-history-btn" 
                                                             data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
                                                             data-inquiry-type="installment" 
-                                                            title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                                                            title="<?php esc_attr_e('SMS History', 'autopuzzle'); ?>">
                                                         <i class="la la-history"></i>
                                                     </button>
                                                 <?php endif; ?>
@@ -940,11 +940,11 @@ foreach ($followups as $inquiry) {
 
 <?php
 // Include SMS History Modal (shared template)
-maneli_get_template_part('partials/sms-history-modal');
+autopuzzle_get_template_part('partials/sms-history-modal');
 ?>
 
 <script>
 // Global AJAX variables for SMS sending (fallback for timing - main localization is in class-dashboard-handler.php)
-var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+var autopuzzleAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var autopuzzleAjaxNonce = '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>';
 </script>

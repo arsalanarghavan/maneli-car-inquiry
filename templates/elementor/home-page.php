@@ -1,7 +1,7 @@
 <?php
 /**
  * Elementor Home Page Template
- * Modern, fully customizable landing page for Maneli Khodro
+ * Modern, fully customizable landing page for AutoPuzzle
  * 
  * This template is designed to work seamlessly with Elementor and includes:
  * - Hero slider with vehicle showcase
@@ -13,7 +13,7 @@
  * - Blog/news section
  * - Contact CTA
  * 
- * @package Maneli_Car_Inquiry/Templates/Elementor
+ * @package AutoPuzzle/Templates/Elementor
  */
 
 // Exit if accessed directly
@@ -22,13 +22,13 @@ if (!defined('ABSPATH')) {
 }
 
 // Get theme option for page layout
-$layout_type = get_option('maneli_home_layout', 'elementor'); // elementor or classic
-$show_header = get_option('maneli_show_custom_header', true);
-$show_footer = get_option('maneli_show_custom_footer', true);
+$layout_type = get_option('autopuzzle_home_layout', 'elementor'); // elementor or classic
+$show_header = get_option('autopuzzle_show_custom_header', true);
+$show_footer = get_option('autopuzzle_show_custom_footer', true);
 
 // Enqueue custom styles for this template
-wp_enqueue_style('maneli-home-page', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/elementor-home.css', [], '1.0.0');
-wp_enqueue_script('maneli-home-page', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/elementor-home.js', ['jquery'], '1.0.0', true);
+wp_enqueue_style('autopuzzle-home-page', AUTOPUZZLE_PLUGIN_URL . 'assets/css/elementor-home.css', [], '1.0.0');
+wp_enqueue_script('autopuzzle-home-page', AUTOPUZZLE_PLUGIN_URL . 'assets/js/elementor-home.js', ['jquery'], '1.0.0', true);
 
 // Get Elementor content if available
 $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
@@ -41,13 +41,13 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php wp_head(); ?>
 </head>
-<body <?php body_class('maneli-home-page'); ?>>
+<body <?php body_class('autopuzzle-home-page'); ?>>
     
     <?php wp_body_open(); ?>
 
     <!-- HEADER SECTION -->
     <?php if ($show_header) : ?>
-        <header class="maneli-header-modern">
+        <header class="autopuzzle-header-modern">
             <div class="header-container">
                 <!-- Top Info Bar -->
                 <div class="header-info-bar">
@@ -74,12 +74,12 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
                     <!-- Center: Logo -->
                     <div class="logo-section">
                         <a href="<?php echo esc_url(home_url('/')); ?>" class="logo-link">
-                            <img src="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/images/logo.png'); ?>" 
+                            <img src="<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/images/logo.png'); ?>" 
                                  alt="<?php echo esc_attr(get_bloginfo('name')); ?>" 
                                  class="logo-img">
                             <div class="logo-text">
-                                <div class="logo-fa">مانلی خودرو</div>
-                                <div class="logo-en">MANELI AUTO</div>
+                                <div class="logo-fa"><?php echo esc_html(autopuzzle_brand_name('fa_IR')); ?></div>
+                                <div class="logo-en"><?php echo esc_html(autopuzzle_brand_name('en_US')); ?></div>
                             </div>
                         </a>
                     </div>
@@ -114,7 +114,7 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
     <?php endif; ?>
 
     <!-- MAIN CONTENT -->
-    <main class="maneli-main-content">
+    <main class="autopuzzle-main-content">
         
         <!-- HERO SLIDER SECTION -->
         <section class="hero-slider-section">
@@ -123,7 +123,7 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
                     <div class="swiper-wrapper">
                         <!-- Slide 1 -->
                         <div class="swiper-slide hero-slide">
-                            <div class="slide-bg" style="background-image: url('<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/images/hero-1.jpg'); ?>');">
+                            <div class="slide-bg" style="background-image: url('<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/images/hero-1.jpg'); ?>');">
                                 <div class="slide-overlay"></div>
                                 <div class="slide-content">
                                     <h1 class="slide-title">خرید خودرو با اقساط آسان</h1>
@@ -135,7 +135,7 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
 
                         <!-- Slide 2 -->
                         <div class="swiper-slide hero-slide">
-                            <div class="slide-bg" style="background-image: url('<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/images/hero-2.jpg'); ?>');">
+                            <div class="slide-bg" style="background-image: url('<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/images/hero-2.jpg'); ?>');">
                                 <div class="slide-overlay"></div>
                                 <div class="slide-content">
                                     <h1 class="slide-title">تحویل خودرو در کمتر از یک ساعت</h1>
@@ -147,7 +147,7 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
 
                         <!-- Slide 3 -->
                         <div class="swiper-slide hero-slide">
-                            <div class="slide-bg" style="background-image: url('<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/images/hero-3.jpg'); ?>');">
+                            <div class="slide-bg" style="background-image: url('<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/images/hero-3.jpg'); ?>');">
                                 <div class="slide-overlay"></div>
                                 <div class="slide-content">
                                     <h1 class="slide-title">سند به نام شما از اول</h1>
@@ -169,7 +169,7 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
         <!-- FEATURES SECTION -->
         <section id="features" class="features-section">
             <div class="container">
-                <h2 class="section-title">چرا باید از مانلی خودرو خرید کنیم؟</h2>
+                <h2 class="section-title"><?php echo sprintf(__('چرا باید از %s خرید کنیم؟', 'autopuzzle'), esc_html(autopuzzle_brand_name('fa_IR'))); ?></h2>
                 <p class="section-subtitle">مزایای انتخاب ما برای خرید خودروی دلخواه‌تان</p>
 
                 <div class="features-grid">
@@ -299,7 +299,7 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
         <!-- BUYING PROCESS SECTION -->
         <section class="buying-process-section">
             <div class="container">
-                <h2 class="section-title">فرایند خرید خودرو در مانلی</h2>
+                <h2 class="section-title"><?php echo sprintf(__('فرایند خرید خودرو در %s', 'autopuzzle'), esc_html(autopuzzle_brand_name('fa_IR'))); ?></h2>
                 <p class="section-subtitle">تنها 3 مرحله ساده برای صاحب شدن خودروی دلخواه‌تان</p>
 
                 <div class="process-steps">
@@ -385,7 +385,7 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
         <!-- TESTIMONIALS SECTION -->
         <section class="testimonials-section">
             <div class="container">
-                <h2 class="section-title">رضایت مشتریان مانلی خودرو</h2>
+                <h2 class="section-title"><?php echo sprintf(__('رضایت مشتریان %s', 'autopuzzle'), esc_html(autopuzzle_brand_name('fa_IR'))); ?></h2>
                 <p class="section-subtitle">نظرات و تجارب واقعی مشتریان ما</p>
 
                 <div class="testimonials-grid">
@@ -493,19 +493,19 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
             <div class="container">
                 <div class="about-content">
                     <div class="about-text">
-                        <h2 class="section-title">درباره مانلی خودرو</h2>
+                        <h2 class="section-title"><?php echo sprintf(__('درباره %s', 'autopuzzle'), esc_html(autopuzzle_brand_name('fa_IR'))); ?></h2>
                         <p>
-                            مانلی خودرو از سال ۱۳۹۵ فعالیت خود را در زمینه فروش اقساطی خودرو آغاز کرده و با دریافت مجوز رسمی از وزارت صنعت، معدن و تجارت، به یکی از برندهای قابل اعتماد در این حوزه تبدیل شده است.
+                            <?php echo sprintf(__('%s از سال ۱۳۹۵ فعالیت خود را در زمینه فروش اقساطی خودرو آغاز کرده و با دریافت مجوز رسمی از وزارت صنعت، معدن و تجارت، به یکی از برندهای قابل اعتماد در این حوزه تبدیل شده است.', 'autopuzzle'), esc_html(autopuzzle_brand_name('fa_IR'))); ?>
                         </p>
                         <p>
-                            ما با هدف ساده‌سازی فرآیند خرید خودرو، شرایطی را فراهم کرده‌ایم که مشتریان تنها در سه مرحله بتوانند صاحب خودروی دلخواه خود شوند.
+                            <?php echo __('ما با هدف ساده‌سازی فرآیند خرید خودرو، شرایطی را فراهم کرده‌ایم که مشتریان تنها در سه مرحله بتوانند صاحب خودروی دلخواه خود شوند.', 'autopuzzle'); ?>
                         </p>
                         <p>
-                            مانلی خودرو با بهره‌گیری از تیمی مجرب، خدمات شفاف، تحویل سریع و تنوع در انتخاب خودرو، تجربه‌ای آسان، امن و حرفه‌ای را برای خریداران فراهم می‌کند.
+                            <?php echo sprintf(__('%s با بهره‌گیری از تیمی مجرب، خدمات شفاف، تحویل سریع و تنوع در انتخاب خودرو، تجربه‌ای آسان، امن و حرفه‌ای را برای خریداران فراهم می‌کند.', 'autopuzzle'), esc_html(autopuzzle_brand_name('fa_IR'))); ?>
                         </p>
                     </div>
                     <div class="about-image">
-                        <img src="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/images/about.jpg'); ?>" alt="نمایشگاه مانلی خودرو">
+                        <img src="<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/images/about.jpg'); ?>" alt="<?php echo esc_attr(sprintf(__('نمایشگاه %s', 'autopuzzle'), autopuzzle_brand_name('fa_IR'))); ?>">
                     </div>
                 </div>
             </div>
@@ -515,12 +515,12 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
 
     <!-- FOOTER SECTION -->
     <?php if ($show_footer) : ?>
-        <footer class="maneli-footer-modern">
+        <footer class="autopuzzle-footer-modern">
             <div class="container">
                 <div class="footer-content">
                     <!-- Footer Column 1: Logo & Info -->
                     <div class="footer-col">
-                        <h4 class="footer-title">مانلی خودرو</h4>
+                        <h4 class="footer-title"><?php echo esc_html(autopuzzle_brand_name('fa_IR')); ?></h4>
                         <p class="footer-desc">
                             فروش خودروهای جدید و دست‌دوم با شرایط اقساطی و نقدی آسان
                         </p>
@@ -574,10 +574,10 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
                 <!-- Footer Bottom -->
                 <div class="footer-bottom">
                     <div class="footer-copyright">
-                        <p>&copy; <?php echo esc_html(date('Y')); ?> مانلی خودرو - تمام حقوق محفوظ است</p>
+                        <p>&copy; <?php echo esc_html(date('Y')); ?> <?php echo esc_html(autopuzzle_brand_name('fa_IR')); ?> - تمام حقوق محفوظ است</p>
                     </div>
                     <div class="footer-credits">
-                        <p>طراحی و توسعه توسط <a href="#">شرکت پازلینگ</a></p>
+                        <p><?php echo sprintf(__('طراحی و توسعه توسط <a href="%s">%s</a>', 'autopuzzle'), esc_url(home_url('/')), esc_html(Autopuzzle_Branding_Helper::get_company_name())); ?></p>
                     </div>
                 </div>
             </div>

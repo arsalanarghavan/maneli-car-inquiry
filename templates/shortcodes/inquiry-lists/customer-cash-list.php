@@ -3,7 +3,7 @@
  * Template for the Customer's view of their Cash Inquiry List.
  * Modern redesign with Bootstrap theme styling.
  *
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryLists
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/InquiryLists
  * @version 2.0.0 (Modern redesign)
  *
  * @var WP_Query $inquiries_query The WP_Query object for the user's cash inquiries.
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
             <div class="card-header bg-warning-transparent">
                 <div class="card-title">
                     <i class="la la-dollar-sign me-2 fs-20"></i>
-                    <?php esc_html_e('My Cash Purchase Inquiries', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('My Cash Purchase Inquiries', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
@@ -31,9 +31,9 @@ if (!defined('ABSPATH')) {
                 if (isset($payment_status)) {
                     $reason = isset($_GET['reason']) ? sanitize_text_field(urldecode($_GET['reason'])) : '';
                     if ($payment_status === 'success') {
-                        echo '<div class="alert alert-success border-success d-flex align-items-center"><i class="la la-check-circle fs-20 me-2"></i><div><strong>' . esc_html__('Success!', 'maneli-car-inquiry') . '</strong> ' . esc_html__('Payment completed successfully.', 'maneli-car-inquiry') . '</div></div>';
+                        echo '<div class="alert alert-success border-success d-flex align-items-center"><i class="la la-check-circle fs-20 me-2"></i><div><strong>' . esc_html__('Success!', 'autopuzzle') . '</strong> ' . esc_html__('Payment completed successfully.', 'autopuzzle') . '</div></div>';
                     } elseif ($payment_status === 'failed') {
-                        echo '<div class="alert alert-danger border-danger d-flex align-items-center"><i class="la la-times-circle fs-20 me-2"></i><div><strong>' . esc_html__('Failed!', 'maneli-car-inquiry') . '</strong> ' . esc_html__('Payment was not completed.', 'maneli-car-inquiry') . ' ' . esc_html($reason) . '</div></div>';
+                        echo '<div class="alert alert-danger border-danger d-flex align-items-center"><i class="la la-times-circle fs-20 me-2"></i><div><strong>' . esc_html__('Failed!', 'autopuzzle') . '</strong> ' . esc_html__('Payment was not completed.', 'autopuzzle') . ' ' . esc_html($reason) . '</div></div>';
                     }
                 }
                 ?>
@@ -41,8 +41,8 @@ if (!defined('ABSPATH')) {
                 <div class="alert alert-info border-info d-flex align-items-start" role="alert">
                     <i class="la la-info-circle fs-20 me-2 mt-1"></i>
                     <div>
-                        <strong><?php esc_html_e('Note:', 'maneli-car-inquiry'); ?></strong>
-                        <?php esc_html_e('The announced prices are approximate. The final price will be determined based on the daily market rate at the time of down payment.', 'maneli-car-inquiry'); ?>
+                        <strong><?php esc_html_e('Note:', 'autopuzzle'); ?></strong>
+                        <?php esc_html_e('The announced prices are approximate. The final price will be determined based on the daily market rate at the time of down payment.', 'autopuzzle'); ?>
                     </div>
                 </div>
 
@@ -52,11 +52,11 @@ if (!defined('ABSPATH')) {
                         <div class="mb-4">
                             <i class="la la-inbox" style="font-size: 80px; color: #dee2e6;"></i>
                         </div>
-                        <h5 class="text-muted mb-2"><?php esc_html_e('No Cash Inquiries Yet', 'maneli-car-inquiry'); ?></h5>
-                        <p class="text-muted mb-4"><?php esc_html_e('To purchase a car with cash, create your first inquiry.', 'maneli-car-inquiry'); ?></p>
+                        <h5 class="text-muted mb-2"><?php esc_html_e('No Cash Inquiries Yet', 'autopuzzle'); ?></h5>
+                        <p class="text-muted mb-4"><?php esc_html_e('To purchase a car with cash, create your first inquiry.', 'autopuzzle'); ?></p>
                         <a href="<?php echo esc_url(home_url('/cash-inquiry')); ?>" class="btn btn-primary btn-wave">
                             <i class="la la-plus me-1"></i>
-                            <?php esc_html_e('Create New Cash Request', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Create New Cash Request', 'autopuzzle'); ?>
                         </a>
                     </div>
                 <?php else: ?>
@@ -64,11 +64,11 @@ if (!defined('ABSPATH')) {
                         <table class="table table-bordered table-hover">
                             <thead class="table-warning">
                                 <tr>
-                                    <th><i class="la la-hashtag me-1"></i><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-car me-1"></i><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-info-circle me-1"></i><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-calendar me-1"></i><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-wrench me-1"></i><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-hashtag me-1"></i><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-car me-1"></i><?php esc_html_e('Car', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-info-circle me-1"></i><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-calendar me-1"></i><?php esc_html_e('Registration Date', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-wrench me-1"></i><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,27 +79,27 @@ if (!defined('ABSPATH')) {
                                     $status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
                                     $expert_status = get_post_meta($inquiry_id, 'expert_status', true);
                                     $report_url = add_query_arg('cash_inquiry_id', $inquiry_id, $current_url);
-                                    $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
+                                    $expert_status_info = Autopuzzle_Render_Helpers::get_expert_status_info($expert_status);
                                     
                                     $status_data = [
-                                        'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'primary'],
-                                        'pending' => ['label' => esc_html__('Pending Review', 'maneli-car-inquiry'), 'class' => 'warning'],
-                                        'referred' => ['label' => esc_html__('Referred', 'maneli-car-inquiry'), 'class' => 'info'],
-                                        'in_progress' => ['label' => esc_html__('In Progress', 'maneli-car-inquiry'), 'class' => 'warning'],
-                                        'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
-                                        'awaiting_downpayment' => ['label' => esc_html__('Awaiting Down Payment', 'maneli-car-inquiry'), 'class' => 'info'],
-                                        'downpayment_received' => ['label' => esc_html__('Down Payment Received', 'maneli-car-inquiry'), 'class' => 'success'],
-                                        'meeting_scheduled' => ['label' => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), 'class' => 'info'],
-                                        'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
-                                        'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                        'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'success'],
+                                        'new' => ['label' => esc_html__('New', 'autopuzzle'), 'class' => 'primary'],
+                                        'pending' => ['label' => esc_html__('Pending Review', 'autopuzzle'), 'class' => 'warning'],
+                                        'referred' => ['label' => esc_html__('Referred', 'autopuzzle'), 'class' => 'info'],
+                                        'in_progress' => ['label' => esc_html__('In Progress', 'autopuzzle'), 'class' => 'warning'],
+                                        'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'autopuzzle'), 'class' => 'info'],
+                                        'awaiting_downpayment' => ['label' => esc_html__('Awaiting Down Payment', 'autopuzzle'), 'class' => 'info'],
+                                        'downpayment_received' => ['label' => esc_html__('Down Payment Received', 'autopuzzle'), 'class' => 'success'],
+                                        'meeting_scheduled' => ['label' => esc_html__('Meeting Scheduled', 'autopuzzle'), 'class' => 'info'],
+                                        'approved' => ['label' => esc_html__('Approved', 'autopuzzle'), 'class' => 'success'],
+                                        'rejected' => ['label' => esc_html__('Rejected', 'autopuzzle'), 'class' => 'danger'],
+                                        'completed' => ['label' => esc_html__('Completed', 'autopuzzle'), 'class' => 'success'],
                                     ];
-                                    $badge = $status_data[$status] ?? ['label' => esc_html__('Unknown', 'maneli-car-inquiry'), 'class' => 'secondary'];
+                                    $badge = $status_data[$status] ?? ['label' => esc_html__('Unknown', 'autopuzzle'), 'class' => 'secondary'];
                                     
                                     // Convert to Jalali
                                     $timestamp = strtotime(get_the_date('Y-m-d', $inquiry_id));
-                                    if (function_exists('maneli_gregorian_to_jalali')) {
-                                        $date = maneli_gregorian_to_jalali(
+                                    if (function_exists('autopuzzle_gregorian_to_jalali')) {
+                                        $date = autopuzzle_gregorian_to_jalali(
                                             date('Y', $timestamp),
                                             date('m', $timestamp),
                                             date('d', $timestamp),
@@ -131,7 +131,7 @@ if (!defined('ABSPATH')) {
                                         <td>
                                             <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light">
                                                 <i class="la la-eye me-1"></i>
-                                                <?php esc_html_e('View Details', 'maneli-car-inquiry'); ?>
+                                                <?php esc_html_e('View Details', 'autopuzzle'); ?>
                                             </a>
                                         </td>
                                     </tr>
@@ -148,8 +148,8 @@ if (!defined('ABSPATH')) {
                                 echo paginate_links([
                                     'total' => $inquiries_query->max_num_pages,
                                     'current' => max(1, get_query_var('paged')),
-                                    'prev_text' => '<i class="la la-angle-right"></i> ' . esc_html__('Previous', 'maneli-car-inquiry'),
-                                    'next_text' => esc_html__('Next', 'maneli-car-inquiry') . ' <i class="la la-angle-left"></i>',
+                                    'prev_text' => '<i class="la la-angle-right"></i> ' . esc_html__('Previous', 'autopuzzle'),
+                                    'next_text' => esc_html__('Next', 'autopuzzle') . ' <i class="la la-angle-left"></i>',
                                     'type' => 'plain',
                                     'before_page_number' => '<span class="btn btn-sm btn-light mx-1">',
                                     'after_page_number' => '</span>',

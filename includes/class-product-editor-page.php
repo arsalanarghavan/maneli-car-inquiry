@@ -2,7 +2,7 @@
 /**
  * Handles custom meta boxes and script/style enqueues for the product editor page.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.2 (Added Localization for product-editor.js AJAX error string)
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Product_Editor_Page {
+class Autopuzzle_Product_Editor_Page {
 
     public function __construct() {
         // Enqueue scripts and styles on the product editor screen
@@ -43,31 +43,31 @@ class Maneli_Product_Editor_Page {
             
             // Enqueue custom admin styles
             wp_enqueue_style(
-                'maneli-admin-styles',
-                MANELI_INQUIRY_URL . 'assets/css/admin-styles.css',
+                'autopuzzle-admin-styles',
+                AUTOPUZZLE_INQUIRY_URL . 'assets/css/admin-styles.css',
                 [],
-                MANELI_INQUIRY_VERSION
+                AUTOPUZZLE_INQUIRY_VERSION
             );
 
             // Enqueue the main admin product editor logic script
             wp_enqueue_script(
-                'maneli-admin-product-editor-js',
-                MANELI_INQUIRY_URL . 'assets/js/admin/product-editor.js',
+                'autopuzzle-admin-product-editor-js',
+                AUTOPUZZLE_INQUIRY_URL . 'assets/js/admin/product-editor.js',
                 ['jquery', 'select2'], 
-                MANELI_INQUIRY_VERSION,
+                AUTOPUZZLE_INQUIRY_VERSION,
                 true // Load in footer
             );
 
             // FIX: Localize the hardcoded error message for product-editor.js
             wp_localize_script(
-                'maneli-admin-product-editor-js', 
+                'autopuzzle-admin-product-editor-js', 
                 'maneliAdminProductEditor', 
                 [
                     'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce'    => wp_create_nonce('maneli_product_editor_nonce'),
+                    'nonce'    => wp_create_nonce('autopuzzle_product_editor_nonce'),
                     'text'     => [
                         // The hardcoded string "An AJAX error occurred." is now localizable
-                        'ajax_error' => esc_html__('An AJAX error occurred.', 'maneli-car-inquiry'), 
+                        'ajax_error' => esc_html__('An AJAX error occurred.', 'autopuzzle'), 
                     ],
                 ]
             );
@@ -79,8 +79,8 @@ class Maneli_Product_Editor_Page {
      */
     public function add_product_meta_box() {
         add_meta_box(
-            'maneli_inquiry_meta_box',
-            esc_html__('Maneli Car Inquiry Settings', 'maneli-car-inquiry'),
+            'autopuzzle_inquiry_meta_box',
+            esc_html__('AutoPuzzle Car Inquiry Settings', 'autopuzzle'),
             [$this, 'render_product_meta_box'],
             'product',
             'normal',
@@ -93,7 +93,7 @@ class Maneli_Product_Editor_Page {
      */
     public function render_product_meta_box($post) {
         // Add a nonce field so we can check it later for security
-        wp_nonce_field('maneli_save_product_data', 'maneli_product_meta_nonce');
+        wp_nonce_field('autopuzzle_save_product_data', 'autopuzzle_product_meta_nonce');
 
         // Retrieve existing values
         $is_for_sale       = get_post_meta($post->ID, 'is_for_sale', true);
@@ -104,40 +104,40 @@ class Maneli_Product_Editor_Page {
 
         // Include the meta box template (if exists)
         // Note: Assumed existence of a template for the fields
-        $template_path = MANELI_INQUIRY_DIR . 'templates/admin/meta-box-inquiry-details.php';
+        $template_path = AUTOPUZZLE_INQUIRY_DIR . 'templates/admin/meta-box-inquiry-details.php';
         if (file_exists($template_path)) {
             include $template_path;
         } else {
             // Basic output if template is missing
-            echo '<p>' . esc_html__('Meta box template missing.', 'maneli-car-inquiry') . '</p>';
+            echo '<p>' . esc_html__('Meta box template missing.', 'autopuzzle') . '</p>';
         }
         
         // --- Custom Fields Rendering (Example) ---
         // Input for Is For Sale
         ?>
         <p>
-            <label for="maneli_is_for_sale"><strong><?php esc_html_e('Available for Installment Inquiry:', 'maneli-car-inquiry'); ?></strong></label>
-            <input type="checkbox" id="maneli_is_for_sale" name="is_for_sale" value="yes" <?php checked($is_for_sale, 'yes'); ?> />
-            <br><small><?php esc_html_e('Check this box if customers can submit installment inquiries for this product.', 'maneli-car-inquiry'); ?></small>
+            <label for="autopuzzle_is_for_sale"><strong><?php esc_html_e('Available for Installment Inquiry:', 'autopuzzle'); ?></strong></label>
+            <input type="checkbox" id="autopuzzle_is_for_sale" name="is_for_sale" value="yes" <?php checked($is_for_sale, 'yes'); ?> />
+            <br><small><?php esc_html_e('Check this box if customers can submit installment inquiries for this product.', 'autopuzzle'); ?></small>
         </p>
 
-        <p class="form-field maneli-field-min-downpayment">
-            <label for="maneli_min_downpayment"><?php esc_html_e('Minimum Down Payment Value:', 'maneli-car-inquiry'); ?></label>
-            <input type="text" id="maneli_min_downpayment" name="min_downpayment" value="<?php echo esc_attr($min_downpayment); ?>" placeholder="0" />
-            <br><small><?php esc_html_e('Enter the minimum down payment amount. This can be Toman (if product price is fixed) or a percentage (if price is variable).', 'maneli-car-inquiry'); ?></small>
+        <p class="form-field autopuzzle-field-min-downpayment">
+            <label for="autopuzzle_min_downpayment"><?php esc_html_e('Minimum Down Payment Value:', 'autopuzzle'); ?></label>
+            <input type="text" id="autopuzzle_min_downpayment" name="min_downpayment" value="<?php echo esc_attr($min_downpayment); ?>" placeholder="0" />
+            <br><small><?php esc_html_e('Enter the minimum down payment amount. This can be Toman (if product price is fixed) or a percentage (if price is variable).', 'autopuzzle'); ?></small>
         </p>
         
-        <p class="form-field maneli-field-downpayment-type">
-            <label for="maneli_downpayment_type"><?php esc_html_e('Down Payment Type:', 'maneli-car-inquiry'); ?></label>
-            <select id="maneli_downpayment_type" name="downpayment_type">
-                <option value="fixed" <?php selected($downpayment_type, 'fixed'); ?>><?php esc_html_e('Fixed Amount (Toman)', 'maneli-car-inquiry'); ?></option>
-                <option value="percent" <?php selected($downpayment_type, 'percent'); ?>><?php esc_html_e('Percentage of Price (%)', 'maneli-car-inquiry'); ?></option>
+        <p class="form-field autopuzzle-field-downpayment-type">
+            <label for="autopuzzle_downpayment_type"><?php esc_html_e('Down Payment Type:', 'autopuzzle'); ?></label>
+            <select id="autopuzzle_downpayment_type" name="downpayment_type">
+                <option value="fixed" <?php selected($downpayment_type, 'fixed'); ?>><?php esc_html_e('Fixed Amount (Toman)', 'autopuzzle'); ?></option>
+                <option value="percent" <?php selected($downpayment_type, 'percent'); ?>><?php esc_html_e('Percentage of Price (%)', 'autopuzzle'); ?></option>
             </select>
         </p>
         
-        <p class="form-field maneli-field-loan-max-term">
-            <label for="maneli_loan_max_term"><?php esc_html_e('Maximum Loan Term (Months):', 'maneli-car-inquiry'); ?></label>
-            <input type="number" id="maneli_loan_max_term" name="loan_max_term" value="<?php echo esc_attr($loan_max_term); ?>" min="12" max="36" step="6" placeholder="36" />
+        <p class="form-field autopuzzle-field-loan-max-term">
+            <label for="autopuzzle_loan_max_term"><?php esc_html_e('Maximum Loan Term (Months):', 'autopuzzle'); ?></label>
+            <input type="number" id="autopuzzle_loan_max_term" name="loan_max_term" value="<?php echo esc_attr($loan_max_term); ?>" min="12" max="36" step="6" placeholder="36" />
         </p>
         <?php
     }
@@ -149,7 +149,7 @@ class Maneli_Product_Editor_Page {
      */
     public function save_product_meta_data($post_id) {
         // Security checks
-        if (!isset($_POST['maneli_product_meta_nonce']) || !wp_verify_nonce(sanitize_key($_POST['maneli_product_meta_nonce']), 'maneli_save_product_data')) {
+        if (!isset($_POST['autopuzzle_product_meta_nonce']) || !wp_verify_nonce(sanitize_key($_POST['autopuzzle_product_meta_nonce']), 'autopuzzle_save_product_data')) {
             return;
         }
 

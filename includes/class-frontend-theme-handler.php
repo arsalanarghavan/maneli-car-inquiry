@@ -4,7 +4,7 @@
  * 
  * Manages theme customization options (logos, colors, etc.)
  * 
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan
  * @version 1.0.0
  */
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Frontend_Theme_Handler {
+class Autopuzzle_Frontend_Theme_Handler {
     
     /**
      * Instance of this class
@@ -60,7 +60,7 @@ class Maneli_Frontend_Theme_Handler {
      * Get logo URL
      */
     public function get_logo($type = 'desktop') {
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $logo_key = 'theme_logo_' . str_replace('-', '_', $type);
         
         if (isset($options[$logo_key]) && !empty($options[$logo_key])) {
@@ -84,12 +84,12 @@ class Maneli_Frontend_Theme_Handler {
         
         // Default logos as last resort
         $defaults = [
-            'desktop' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/desktop-logo.png',
-            'desktop_dark' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/desktop-dark.png',
-            'desktop_white' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/desktop-white.png',
-            'toggle' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/toggle-logo.png',
-            'toggle_dark' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/toggle-dark.png',
-            'toggle_white' => MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/toggle-white.png',
+            'desktop' => AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/desktop-logo.png',
+            'desktop_dark' => AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/desktop-dark.png',
+            'desktop_white' => AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/desktop-white.png',
+            'toggle' => AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/toggle-logo.png',
+            'toggle_dark' => AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/toggle-dark.png',
+            'toggle_white' => AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/toggle-white.png',
         ];
         
         $key = str_replace('-', '_', $type);
@@ -107,14 +107,14 @@ class Maneli_Frontend_Theme_Handler {
         }
         
         // Fallback to default favicon
-        return MANELI_INQUIRY_PLUGIN_URL . 'assets/images/brand-logos/favicon.ico';
+        return AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/favicon.ico';
     }
     
     /**
      * Get site title
      */
     public function get_site_title() {
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         
         if (isset($options['theme_site_title']) && !empty($options['theme_site_title'])) {
             return esc_html($options['theme_site_title']);
@@ -127,7 +127,7 @@ class Maneli_Frontend_Theme_Handler {
      * Get footer text
      */
     public function get_footer_text() {
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         
         if (isset($options['theme_footer_text']) && !empty($options['theme_footer_text'])) {
             return wp_kses_post($options['theme_footer_text']);
@@ -135,13 +135,24 @@ class Maneli_Frontend_Theme_Handler {
         
         // Get current Jalali year
         $current_year = '۱۴۰۴'; // یا می‌تونی از تابع تبدیل تاریخ استفاده کنی
-        if (function_exists('maneli_gregorian_to_jalali')) {
-            $current_year = maneli_gregorian_to_jalali(date('Y'), date('m'), date('d'), 'Y');
+        if (function_exists('autopuzzle_gregorian_to_jalali')) {
+            $current_year = autopuzzle_gregorian_to_jalali(date('Y'), date('m'), date('d'), 'Y');
         }
         
+        // Get branding info
+        $branding = Autopuzzle_Branding_Helper::get_branding_config();
+        $company_name = isset($branding['company_name']) && !empty($branding['company_name'])
+            ? $branding['company_name']
+            : __('AutoPuzzle Company', 'autopuzzle');
+        $company_website = isset($branding['company_website']) && !empty($branding['company_website'])
+            ? $branding['company_website']
+            : 'https://autopuzzle.com';
+        
         return sprintf(
-            '%s طراحی با <i class="la la-heart text-danger"></i> توسط <a href="https://pazling.ir" target="_blank" class="text-primary fw-medium">موسسه پازلینگ</a>',
-            $current_year
+            '%s طراحی با <i class="la la-heart text-danger"></i> توسط <a href="%s" target="_blank" class="text-primary fw-medium">%s</a>',
+            $current_year,
+            esc_url($company_website),
+            esc_html($company_name)
         );
     }
     
@@ -149,7 +160,7 @@ class Maneli_Frontend_Theme_Handler {
      * Output custom CSS variables
      */
     public function output_custom_css() {
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         
         $primary_color = isset($options['theme_primary_color']) ? $options['theme_primary_color'] : '';
         $secondary_color = isset($options['theme_secondary_color']) ? $options['theme_secondary_color'] : '';
@@ -160,7 +171,7 @@ class Maneli_Frontend_Theme_Handler {
             return;
         }
         
-        echo '<style id="maneli-custom-theme-colors">';
+        echo '<style id="autopuzzle-custom-theme-colors">';
         echo ':root {';
         
         if (!empty($primary_color)) {

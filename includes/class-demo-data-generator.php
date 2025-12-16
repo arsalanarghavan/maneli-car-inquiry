@@ -9,17 +9,17 @@
  * @subpackage Includes
  */
 
-class Maneli_Demo_Data_Generator {
+class Autopuzzle_Demo_Data_Generator {
     
     /**
      * The plugin's database handler
-     * @var Maneli_Database
+     * @var Autopuzzle_Database
      */
     private $database;
     
     /**
      * The plugin's CPT handler
-     * @var Maneli_CPT_Handler
+     * @var Autopuzzle_CPT_Handler
      */
     private $cpt_handler;
 
@@ -27,8 +27,8 @@ class Maneli_Demo_Data_Generator {
      * Constructor
      */
     public function __construct() {
-        $this->database = new Maneli_Database();
-        $this->cpt_handler = new Maneli_CPT_Handler();
+        $this->database = new Autopuzzle_Database();
+        $this->cpt_handler = new Autopuzzle_CPT_Handler();
     }
 
     /**
@@ -187,7 +187,7 @@ class Maneli_Demo_Data_Generator {
                 'user_pass'     => wp_generate_password(),
                 'first_name'    => $first_name,
                 'last_name'     => $last_name,
-                'role'          => 'maneli_expert'
+                'role'          => 'autopuzzle_expert'
             ];
 
             $user_id = wp_insert_user( $user_data );
@@ -618,11 +618,11 @@ class Maneli_Demo_Data_Generator {
                             ],
                             'status' => 'success'
                         ],
-                        // Special meta keys for installment inquiry display (Maneli Wizard format)
-                        'maneli_inquiry_total_price' => $requested_amount,
-                        'maneli_inquiry_down_payment' => intval( $requested_amount * 0.2 ),
-                        'maneli_inquiry_term_months'  => $requested_months,
-                        'maneli_inquiry_installment'  => $monthly_payment,
+                        // Special meta keys for installment inquiry display (AutoPuzzle Wizard format)
+                        'autopuzzle_inquiry_total_price' => $requested_amount,
+                        'autopuzzle_inquiry_down_payment' => intval( $requested_amount * 0.2 ),
+                        'autopuzzle_inquiry_term_months'  => $requested_months,
+                        'autopuzzle_inquiry_installment'  => $monthly_payment,
                         'issuer_type'          => 'self',
                     ]
                 ];
@@ -652,7 +652,7 @@ class Maneli_Demo_Data_Generator {
                     'compare' => '='
                 ]
             ],
-            'role' => $role === 'customer' ? 'customer' : 'maneli_expert',
+            'role' => $role === 'customer' ? 'customer' : 'autopuzzle_expert',
             'fields' => 'ID'
         ];
 

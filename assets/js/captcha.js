@@ -6,7 +6,7 @@
  * - Google reCAPTCHA v3
  * - hCaptcha
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  * @version 1.0.0
  */
 
@@ -56,14 +56,14 @@
             return;
         }
 
-        // Render widget in all containers (look for both .g-recaptcha and .maneli-recaptcha-v2-widget)
-        $('.g-recaptcha:not([data-widget-id]), .maneli-recaptcha-v2-widget').each(function() {
+        // Render widget in all containers (look for both .g-recaptcha and .autopuzzle-recaptcha-v2-widget)
+        $('.g-recaptcha:not([data-widget-id]), .autopuzzle-recaptcha-v2-widget').each(function() {
             const $container = $(this);
             let containerId = $container.attr('id');
             
             // If no ID, create one
             if (!containerId) {
-                containerId = 'maneli-recaptcha-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                containerId = 'autopuzzle-recaptcha-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 $container.attr('id', containerId);
             }
 
@@ -221,14 +221,14 @@
             return;
         }
 
-        // Render widget in all containers (look for both .h-captcha and .maneli-hcaptcha-widget)
-        $('.h-captcha:not([data-widget-id]), .maneli-hcaptcha-widget').each(function() {
+        // Render widget in all containers (look for both .h-captcha and .autopuzzle-hcaptcha-widget)
+        $('.h-captcha:not([data-widget-id]), .autopuzzle-hcaptcha-widget').each(function() {
             const $container = $(this);
             let containerId = $container.attr('id');
             
             // If no ID, create one
             if (!containerId) {
-                containerId = 'maneli-hcaptcha-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                containerId = 'autopuzzle-hcaptcha-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
                 $container.attr('id', containerId);
             }
 
@@ -464,7 +464,7 @@
 
         function attemptInit() {
             if (retries >= maxRetries) {
-                console.error('Maneli CAPTCHA: Failed to initialize after ' + maxRetries + ' attempts');
+                console.error('AutoPuzzle CAPTCHA: Failed to initialize after ' + maxRetries + ' attempts');
                 return;
             }
 
@@ -529,9 +529,9 @@
             if (settings.data && typeof settings.data === 'string') {
                 // Check for inquiry form actions
                 const requiresCaptcha = (
-                    settings.data.indexOf('maneli_create_customer_cash_inquiry') !== -1 ||
-                    settings.data.indexOf('maneli_select_car_ajax') !== -1 ||
-                    settings.data.indexOf('maneli_dashboard_login') !== -1
+                    settings.data.indexOf('autopuzzle_create_customer_cash_inquiry') !== -1 ||
+                    settings.data.indexOf('autopuzzle_select_car_ajax') !== -1 ||
+                    settings.data.indexOf('autopuzzle_dashboard_login') !== -1
                 );
 
                 if (requiresCaptcha && settings.data.indexOf('captcha_token') === -1) {

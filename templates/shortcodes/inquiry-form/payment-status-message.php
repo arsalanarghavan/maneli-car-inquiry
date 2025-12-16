@@ -5,7 +5,7 @@
  * This template is included in various shortcodes to provide feedback to the user
  * about the result of their payment attempt.
  *
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryForm
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/InquiryForm
  * @author  Gemini
  * @version 1.0.0
  *
@@ -26,20 +26,20 @@ switch ($status) {
     case 'success':
         $alert_class = 'alert-success';
         $icon = 'la la-check-circle';
-        $message = esc_html__('Your payment was successful. Your request has been submitted to our experts.', 'maneli-car-inquiry');
+        $message = esc_html__('Your payment was successful. Your request has been submitted to our experts.', 'autopuzzle');
         break;
     case 'failed':
         $alert_class = 'alert-danger';
         $icon = 'la la-times-circle';
-        $message = esc_html__('Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours.', 'maneli-car-inquiry');
+        $message = esc_html__('Unfortunately, your transaction was unsuccessful. If any amount was deducted, it will be returned to your account within 72 hours.', 'autopuzzle');
         if (!empty($reason)) {
-            $message .= '<br><strong>' . esc_html__('Reason:', 'maneli-car-inquiry') . '</strong> ' . esc_html($reason);
+            $message .= '<br><strong>' . esc_html__('Reason:', 'autopuzzle') . '</strong> ' . esc_html($reason);
         }
         break;
     case 'cancelled':
         $alert_class = 'alert-warning';
         $icon = 'ri-information-fill';
-        $message = esc_html__('You have cancelled the payment. Your request has not been finalized yet.', 'maneli-car-inquiry');
+        $message = esc_html__('You have cancelled the payment. Your request has not been finalized yet.', 'autopuzzle');
         break;
     default:
         return; // Do not render anything for unknown statuses

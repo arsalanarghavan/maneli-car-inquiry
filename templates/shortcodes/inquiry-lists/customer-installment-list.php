@@ -3,7 +3,7 @@
  * Template for the Customer's view of their Installment Inquiry List.
  * Modern redesign with Bootstrap theme styling.
  *
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryLists
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/InquiryLists
  * @version 2.0.0 (Modern redesign)
  *
  * @var WP_Query $inquiries_query The WP_Query object for the user's installment inquiries.
@@ -21,15 +21,15 @@ if (!defined('ABSPATH')) {
             <div class="card-header bg-info-transparent">
                 <div class="card-title">
                     <i class="la la-credit-card me-2 fs-20"></i>
-                    <?php esc_html_e('My Installment Purchase Inquiries', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('My Installment Purchase Inquiries', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <div class="alert alert-info border-info d-flex align-items-start" role="alert">
                     <i class="la la-lightbulb fs-20 me-2 mt-1"></i>
                     <div>
-                        <strong><?php esc_html_e('Guide:', 'maneli-car-inquiry'); ?></strong>
-                        <?php esc_html_e('After submitting your inquiry, our expert will contact you and guide you through the required documents.', 'maneli-car-inquiry'); ?>
+                        <strong><?php esc_html_e('Guide:', 'autopuzzle'); ?></strong>
+                        <?php esc_html_e('After submitting your inquiry, our expert will contact you and guide you through the required documents.', 'autopuzzle'); ?>
                     </div>
                 </div>
 
@@ -39,11 +39,11 @@ if (!defined('ABSPATH')) {
                         <div class="mb-4">
                             <i class="la la-file-invoice" style="font-size: 80px; color: #dee2e6;"></i>
                         </div>
-                        <h5 class="text-muted mb-2"><?php esc_html_e('No Installment Inquiries Yet', 'maneli-car-inquiry'); ?></h5>
-                        <p class="text-muted mb-4"><?php esc_html_e('To purchase a car with installments, use the loan calculator.', 'maneli-car-inquiry'); ?></p>
+                        <h5 class="text-muted mb-2"><?php esc_html_e('No Installment Inquiries Yet', 'autopuzzle'); ?></h5>
+                        <p class="text-muted mb-4"><?php esc_html_e('To purchase a car with installments, use the loan calculator.', 'autopuzzle'); ?></p>
                         <a href="<?php echo esc_url(home_url('/loan-calculator')); ?>" class="btn btn-info btn-wave">
                             <i class="la la-calculator me-1"></i>
-                            <?php esc_html_e('Loan Calculator', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Loan Calculator', 'autopuzzle'); ?>
                         </a>
                     </div>
                 <?php else: ?>
@@ -51,11 +51,11 @@ if (!defined('ABSPATH')) {
                         <table class="table table-bordered table-hover">
                             <thead class="table-info">
                                 <tr>
-                                    <th><i class="la la-hashtag me-1"></i><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-car me-1"></i><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-info-circle me-1"></i><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-calendar me-1"></i><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
-                                    <th><i class="la la-wrench me-1"></i><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                    <th><i class="la la-hashtag me-1"></i><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-car me-1"></i><?php esc_html_e('Car', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-info-circle me-1"></i><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-calendar me-1"></i><?php esc_html_e('Registration Date', 'autopuzzle'); ?></th>
+                                    <th><i class="la la-wrench me-1"></i><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -66,10 +66,10 @@ if (!defined('ABSPATH')) {
                                     $status = get_post_meta($inquiry_id, 'inquiry_status', true);
                                     $expert_status = get_post_meta($inquiry_id, 'expert_status', true);
                                     $report_url = add_query_arg('inquiry_id', $inquiry_id, $current_url);
-                                    $expert_status_info = Maneli_Render_Helpers::get_expert_status_info($expert_status);
+                                    $expert_status_info = Autopuzzle_Render_Helpers::get_expert_status_info($expert_status);
                                     
                                     // Check Finnotech API data availability for customer view
-                                    $options = get_option('maneli_inquiry_all_options', []);
+                                    $options = get_option('autopuzzle_inquiry_all_options', []);
                                     $credit_risk_data = get_post_meta($inquiry_id, '_finnotech_credit_risk_data', true);
                                     $credit_score_data = get_post_meta($inquiry_id, '_finnotech_credit_score_data', true);
                                     $collaterals_data = get_post_meta($inquiry_id, '_finnotech_collaterals_data', true);
@@ -86,18 +86,18 @@ if (!defined('ABSPATH')) {
                                                           ($cheque_color_enabled && !empty($cheque_color_data));
                                     
                                     $status_data = [
-                                        'pending' => ['label' => esc_html__('Pending Review', 'maneli-car-inquiry'), 'class' => 'warning'],
-                                        'user_confirmed' => ['label' => esc_html__('Confirmed and Referred', 'maneli-car-inquiry'), 'class' => 'success'],
-                                        'approved' => ['label' => esc_html__('Final Approval', 'maneli-car-inquiry'), 'class' => 'success'],
-                                        'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                        'more_docs' => ['label' => esc_html__('Documents Required', 'maneli-car-inquiry'), 'class' => 'warning'],
+                                        'pending' => ['label' => esc_html__('Pending Review', 'autopuzzle'), 'class' => 'warning'],
+                                        'user_confirmed' => ['label' => esc_html__('Confirmed and Referred', 'autopuzzle'), 'class' => 'success'],
+                                        'approved' => ['label' => esc_html__('Final Approval', 'autopuzzle'), 'class' => 'success'],
+                                        'rejected' => ['label' => esc_html__('Rejected', 'autopuzzle'), 'class' => 'danger'],
+                                        'more_docs' => ['label' => esc_html__('Documents Required', 'autopuzzle'), 'class' => 'warning'],
                                     ];
-                                    $badge = $status_data[$status] ?? ['label' => esc_html__('Unknown', 'maneli-car-inquiry'), 'class' => 'secondary'];
+                                    $badge = $status_data[$status] ?? ['label' => esc_html__('Unknown', 'autopuzzle'), 'class' => 'secondary'];
                                     
                                     // Convert to Jalali
                                     $timestamp = strtotime(get_the_date('Y-m-d', $inquiry_id));
-                                    if (function_exists('maneli_gregorian_to_jalali')) {
-                                        $date = maneli_gregorian_to_jalali(
+                                    if (function_exists('autopuzzle_gregorian_to_jalali')) {
+                                        $date = autopuzzle_gregorian_to_jalali(
                                             date('Y', $timestamp),
                                             date('m', $timestamp),
                                             date('d', $timestamp),
@@ -114,7 +114,7 @@ if (!defined('ABSPATH')) {
                                                 <i class="la la-car text-info me-2 fs-18"></i>
                                                 <span><?php echo esc_html(get_the_title($product_id)); ?></span>
                                                 <?php if ($has_finnotech_data): ?>
-                                                    <i class="la la-check-circle text-success ms-2" title="<?php esc_attr_e('Credit Information Available', 'maneli-car-inquiry'); ?>" style="font-size: 14px;"></i>
+                                                    <i class="la la-check-circle text-success ms-2" title="<?php esc_attr_e('Credit Information Available', 'autopuzzle'); ?>" style="font-size: 14px;"></i>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -132,7 +132,7 @@ if (!defined('ABSPATH')) {
                                         <td>
                                             <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light">
                                                 <i class="la la-eye me-1"></i>
-                                                <?php esc_html_e('View Details', 'maneli-car-inquiry'); ?>
+                                                <?php esc_html_e('View Details', 'autopuzzle'); ?>
                                             </a>
                                         </td>
                                     </tr>
@@ -151,8 +151,8 @@ if (!defined('ABSPATH')) {
                                     'format' => '?paged=%#%',
                                     'current' => max(1, get_query_var('paged')),
                                     'total' => $inquiries_query->max_num_pages,
-                                    'prev_text' => '<i class="la la-angle-right"></i> ' . esc_html__('Previous', 'maneli-car-inquiry'),
-                                    'next_text' => esc_html__('Next', 'maneli-car-inquiry') . ' <i class="la la-angle-left"></i>',
+                                    'prev_text' => '<i class="la la-angle-right"></i> ' . esc_html__('Previous', 'autopuzzle'),
+                                    'next_text' => esc_html__('Next', 'autopuzzle') . ' <i class="la la-angle-left"></i>',
                                     'type' => 'plain',
                                     'before_page_number' => '<span class="btn btn-sm btn-light mx-1">',
                                     'after_page_number' => '</span>',

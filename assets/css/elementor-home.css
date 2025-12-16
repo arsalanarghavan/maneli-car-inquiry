@@ -1,6 +1,6 @@
 /**
  * Elementor Home Page Styles
- * Modern, responsive design for Maneli Khodro landing page
+ * Modern, responsive design for AutoPuzzle Khodro landing page
  */
 
 :root {
@@ -24,7 +24,7 @@ html {
     scroll-behavior: smooth;
 }
 
-body.maneli-home-page {
+body.autopuzzle-home-page {
     font-family: 'Vazirmatn', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     direction: rtl;
     background: #fff;
@@ -50,7 +50,7 @@ body.maneli-home-page {
    HEADER SECTION
    =========================== */
 
-.maneli-header-modern {
+.autopuzzle-header-modern {
     background: linear-gradient(180deg, #0052CC 0%, #0052CC 100%);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     position: sticky;
@@ -1150,7 +1150,7 @@ body.maneli-home-page {
    FOOTER SECTION
    =========================== */
 
-.maneli-footer-modern {
+.autopuzzle-footer-modern {
     background: linear-gradient(135deg, var(--secondary-color) 0%, #1a202c 100%);
     color: white;
     padding: 60px 0 30px;

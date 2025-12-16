@@ -503,36 +503,36 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
 /* Tooltip support for collapsed sidebar */
 
 /* Status roadmap mobile slider */
-.maneli-status-mobile {
+.autopuzzle-status-mobile {
     display: none;
     position: relative;
 }
 
-.maneli-status-mobile-stage {
+.autopuzzle-status-mobile-stage {
     position: relative;
 }
 
-.maneli-status-mobile-card {
+.autopuzzle-status-mobile-card {
     position: relative;
 }
 
-.maneli-status-desktop {
+.autopuzzle-status-desktop {
     width: 100%;
 }
 
 /* Mobile filter collapse behaviour */
 @media (max-width: 767.98px) {
-    [data-maneli-mobile-filter] {
+    [data-autopuzzle-mobile-filter] {
         position: relative;
     }
 
-    [data-maneli-mobile-filter] [data-maneli-filter-body] {
+    [data-autopuzzle-mobile-filter] [data-autopuzzle-filter-body] {
         display: none;
         margin-top: 0.75rem;
     }
 
-    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn,
-    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle {
+    [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle-btn,
+    [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -553,53 +553,53 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         outline: none;
     }
 
-    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn:focus-visible,
-    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle:focus-visible {
+    [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle-btn:focus-visible,
+    [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle:focus-visible {
         border-color: rgba(37, 99, 235, 0.55);
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
     }
 
-    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn:hover,
-    [data-maneli-mobile-filter] .maneli-mobile-filter-toggle:hover {
+    [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle-btn:hover,
+    [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle:hover {
         background: linear-gradient(135deg, rgba(37, 99, 235, 0.16) 0%, rgba(37, 99, 235, 0.08) 100%);
     }
 
-    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle-btn,
-    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle {
+    [data-autopuzzle-mobile-filter][data-filter-open="true"] .autopuzzle-mobile-filter-toggle-btn,
+    [data-autopuzzle-mobile-filter][data-filter-open="true"] .autopuzzle-mobile-filter-toggle {
         border-color: rgba(37, 99, 235, 0.55);
         background: linear-gradient(135deg, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0.1) 100%);
         box-shadow: 0 10px 26px rgba(37, 99, 235, 0.18);
     }
 
-    [data-theme-mode="dark"] [data-maneli-mobile-filter] .maneli-mobile-filter-toggle-btn,
-    [data-theme-mode="dark"] [data-maneli-mobile-filter] .maneli-mobile-filter-toggle {
+    [data-theme-mode="dark"] [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle-btn,
+    [data-theme-mode="dark"] [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-toggle {
         border-color: rgba(96, 165, 250, 0.35);
         background: linear-gradient(135deg, rgba(96, 165, 250, 0.14) 0%, rgba(30, 64, 175, 0.08) 100%);
         box-shadow: 0 6px 18px rgba(30, 64, 175, 0.22);
         color: rgba(226, 232, 240, 0.92);
     }
 
-    [data-theme-mode="dark"] [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle-btn,
-    [data-theme-mode="dark"] [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-toggle {
+    [data-theme-mode="dark"] [data-autopuzzle-mobile-filter][data-filter-open="true"] .autopuzzle-mobile-filter-toggle-btn,
+    [data-theme-mode="dark"] [data-autopuzzle-mobile-filter][data-filter-open="true"] .autopuzzle-mobile-filter-toggle {
         border-color: rgba(147, 197, 253, 0.6);
         background: linear-gradient(135deg, rgba(96, 165, 250, 0.24) 0%, rgba(30, 64, 175, 0.12) 100%);
         box-shadow: 0 12px 32px rgba(30, 64, 175, 0.35);
     }
 
-    [data-maneli-mobile-filter] .maneli-mobile-filter-arrow {
+    [data-autopuzzle-mobile-filter] .autopuzzle-mobile-filter-arrow {
         transition: transform 0.3s ease;
     }
 
-    [data-maneli-mobile-filter][data-filter-open="true"] [data-maneli-filter-body] {
+    [data-autopuzzle-mobile-filter][data-filter-open="true"] [data-autopuzzle-filter-body] {
         display: block;
-        animation: maneli-filter-slide-down 0.2s ease-out;
+        animation: autopuzzle-filter-slide-down 0.2s ease-out;
     }
 
-    [data-maneli-mobile-filter][data-filter-open="true"] .maneli-mobile-filter-arrow {
+    [data-autopuzzle-mobile-filter][data-filter-open="true"] .autopuzzle-mobile-filter-arrow {
         transform: rotate(180deg);
     }
 
-    .maneli-mobile-card-scroll {
+    .autopuzzle-mobile-card-scroll {
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto;
@@ -610,14 +610,14 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         -webkit-overflow-scrolling: touch;
     }
 
-    .maneli-mobile-card-scroll > [class^="col-"],
-    .maneli-mobile-card-scroll > [class*=" col-"] {
+    .autopuzzle-mobile-card-scroll > [class^="col-"],
+    .autopuzzle-mobile-card-scroll > [class*=" col-"] {
         flex: 0 0 66% !important;
         max-width: 66% !important;
         min-width: 66% !important;
     }
 
-    .maneli-mobile-card-scroll .maneli-mobile-card {
+    .autopuzzle-mobile-card-scroll .autopuzzle-mobile-card {
         flex: 0 0 66% !important;
         max-width: 66% !important;
     }
@@ -641,19 +641,19 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         width: 100%;
     }
 
-    .status-roadmap .maneli-status-desktop {
+    .status-roadmap .autopuzzle-status-desktop {
         display: none !important;
     }
 
-    .status-roadmap .maneli-status-arrow {
+    .status-roadmap .autopuzzle-status-arrow {
         display: none !important;
     }
 
-    .status-roadmap .maneli-status-mobile {
+    .status-roadmap .autopuzzle-status-mobile {
         display: block !important;
     }
 
-    .maneli-status-mobile {
+    .autopuzzle-status-mobile {
         min-height: 232px;
         padding: 0.75rem 0 1rem;
         overflow: hidden;
@@ -661,8 +661,8 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         isolation: isolate;
     }
 
-    .maneli-status-mobile::before,
-    .maneli-status-mobile::after {
+    .autopuzzle-status-mobile::before,
+    .autopuzzle-status-mobile::after {
         content: "";
         position: absolute;
         inset-block: 12%;
@@ -672,21 +672,21 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         background: linear-gradient(to right, var(--bs-body-bg, #fff) 0%, transparent 100%);
     }
 
-    .maneli-status-mobile::before {
+    .autopuzzle-status-mobile::before {
         inset-inline-start: 0;
     }
 
-    .maneli-status-mobile::after {
+    .autopuzzle-status-mobile::after {
         inset-inline-end: 0;
         transform: scaleX(-1);
     }
 
-    [data-theme-mode="dark"] .maneli-status-mobile::before,
-    [data-theme-mode="dark"] .maneli-status-mobile::after {
+    [data-theme-mode="dark"] .autopuzzle-status-mobile::before,
+    [data-theme-mode="dark"] .autopuzzle-status-mobile::after {
         background: linear-gradient(to right, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0) 100%);
     }
 
-    .maneli-status-mobile-stage {
+    .autopuzzle-status-mobile-stage {
         position: relative;
         height: 210px;
         width: 100%;
@@ -694,7 +694,7 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         touch-action: pan-y;
     }
 
-    .maneli-status-mobile-card {
+    .autopuzzle-status-mobile-card {
         position: absolute;
         inset-block-start: 0;
         left: 50%;
@@ -707,7 +707,7 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         z-index: 1;
     }
 
-    .maneli-status-mobile-card.is-active {
+    .autopuzzle-status-mobile-card.is-active {
         opacity: 1;
         pointer-events: auto;
         transform: translateX(-50%) scale(1);
@@ -715,13 +715,13 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         filter: drop-shadow(0 18px 32px rgba(15, 23, 42, 0.22));
     }
 
-    .maneli-status-mobile-card.is-active .maneli-status-card-surface {
+    .autopuzzle-status-mobile-card.is-active .autopuzzle-status-card-surface {
         border-color: rgba(37, 99, 235, 0.55);
         box-shadow: 0 18px 36px rgba(37, 99, 235, 0.28);
     }
 
-    .maneli-status-mobile-card.is-prev,
-    .maneli-status-mobile-card.is-next {
+    .autopuzzle-status-mobile-card.is-prev,
+    .autopuzzle-status-mobile-card.is-next {
         opacity: 0.55;
         pointer-events: auto;
         z-index: 3;
@@ -729,42 +729,42 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         box-shadow: none;
     }
 
-    .maneli-status-mobile-card.is-prev {
+    .autopuzzle-status-mobile-card.is-prev {
         transform: translateX(calc(-50% - 56%)) scale(0.83);
     }
 
-    .maneli-status-mobile-card.is-next {
+    .autopuzzle-status-mobile-card.is-next {
         transform: translateX(calc(-50% + 56%)) scale(0.83);
     }
 
-    .maneli-status-mobile-card.is-before {
+    .autopuzzle-status-mobile-card.is-before {
         transform: translateX(calc(-50% - 132%)) scale(0.75);
         opacity: 0;
     }
 
-    .maneli-status-mobile-card.is-after {
+    .autopuzzle-status-mobile-card.is-after {
         transform: translateX(calc(-50% + 132%)) scale(0.75);
         opacity: 0;
     }
 
-    .maneli-status-mobile-card.is-prev .maneli-status-card-surface,
-    .maneli-status-mobile-card.is-next .maneli-status-card-surface {
+    .autopuzzle-status-mobile-card.is-prev .autopuzzle-status-card-surface,
+    .autopuzzle-status-mobile-card.is-next .autopuzzle-status-card-surface {
         border-color: rgba(148, 163, 184, 0.25);
         opacity: 0.6;
         box-shadow: none;
     }
 
-    .maneli-status-mobile-card.is-prev .avatar,
-    .maneli-status-mobile-card.is-next .avatar {
+    .autopuzzle-status-mobile-card.is-prev .avatar,
+    .autopuzzle-status-mobile-card.is-next .avatar {
         opacity: 0.65;
     }
 
-    .maneli-status-mobile-card.is-active .avatar {
+    .autopuzzle-status-mobile-card.is-active .avatar {
         transform: scale(1.05);
         box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
     }
 
-    .maneli-status-card-surface {
+    .autopuzzle-status-card-surface {
         border-radius: 1rem;
         background: var(--bs-body-bg, #ffffff);
         border: 1px solid rgba(15, 23, 42, 0.08);
@@ -772,12 +772,12 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
     }
 
-    [data-theme-mode="dark"] .maneli-status-card-surface {
+    [data-theme-mode="dark"] .autopuzzle-status-card-surface {
         background: rgba(30, 41, 59, 0.92);
         border-color: rgba(148, 163, 184, 0.24);
     }
 
-    .maneli-status-mobile-card .badge {
+    .autopuzzle-status-mobile-card .badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -787,11 +787,11 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         font-size: 0.7rem;
     }
 
-    .maneli-status-mobile-card .pulse-ring {
+    .autopuzzle-status-mobile-card .pulse-ring {
         display: none;
     }
 
-    .maneli-status-nav {
+    .autopuzzle-status-nav {
         position: absolute;
         inset-block-start: 50%;
         width: 2.5rem;
@@ -808,45 +808,45 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
         transition: background 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
     }
 
-    .maneli-status-nav:focus-visible {
+    .autopuzzle-status-nav:focus-visible {
         outline: 2px solid var(--primary-color, #2563eb);
         outline-offset: 2px;
     }
 
-    .maneli-status-nav:hover {
+    .autopuzzle-status-nav:hover {
         background: rgba(37, 99, 235, 0.18);
         color: var(--primary-color, #2563eb);
     }
 
-    .maneli-status-nav:disabled {
+    .autopuzzle-status-nav:disabled {
         opacity: 0.35;
         pointer-events: none;
     }
 
-    .maneli-status-nav-prev {
+    .autopuzzle-status-nav-prev {
         inset-inline-start: 0.35rem;
     }
 
-    .maneli-status-nav-next {
+    .autopuzzle-status-nav-next {
         inset-inline-end: 0.35rem;
     }
 }
 
 @media (min-width: 768px) {
-    [data-maneli-mobile-filter] [data-maneli-filter-body] {
+    [data-autopuzzle-mobile-filter] [data-autopuzzle-filter-body] {
         display: block !important;
     }
 
-    .maneli-mobile-filter-arrow {
+    .autopuzzle-mobile-filter-arrow {
         display: none !important;
     }
 
-    .status-roadmap .maneli-status-mobile {
+    .status-roadmap .autopuzzle-status-mobile {
         display: none !important;
     }
 }
 
-@keyframes maneli-filter-slide-down {
+@keyframes autopuzzle-filter-slide-down {
     from {
         opacity: 0;
         transform: translateY(-4px);
@@ -858,14 +858,14 @@ html[data-toggled*="closed"] .app-sidebar .simplebar-content .slide__category > 
 }
 
 @media (min-width: 992px) {
-    .maneli-desktop-filter-row {
+    .autopuzzle-desktop-filter-row {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
         gap: 1rem !important;
     }
 
-    .maneli-desktop-filter-row > [class^="col-"],
-    .maneli-desktop-filter-row > [class*=" col-"] {
+    .autopuzzle-desktop-filter-row > [class^="col-"],
+    .autopuzzle-desktop-filter-row > [class*=" col-"] {
         max-width: none !important;
         width: 100% !important;
         flex: 0 0 auto !important;

@@ -105,7 +105,7 @@
     }
 
     // Global functions
-    window.ManeliDashboard = {
+    window.AutoPuzzleDashboard = {
         showLoading: showLoading,
         hideLoading: hideLoading,
         showNotification: showNotification

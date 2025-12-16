@@ -5,7 +5,7 @@
  * All CPTs are registered with 'show_ui' set to false to prevent access via the WordPress Admin Dashboard,
  * ensuring a complete frontend-only administrative experience.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.1.0 (Removed all admin UI/Meta Box logic)
  */
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_CPT_Handler {
+class Autopuzzle_CPT_Handler {
 
     public function __construct() {
         // Only register the post types, removing all admin column/meta box hooks.
@@ -35,10 +35,10 @@ class Maneli_CPT_Handler {
      */
     private function register_inquiry_post_type() {
         $labels = [
-            'name'               => esc_html__('Installment Inquiries', 'maneli-car-inquiry'),
-            'singular_name'      => esc_html__('Installment Inquiry', 'maneli-car-inquiry'),
-            'menu_name'          => esc_html__('Bank Inquiries', 'maneli-car-inquiry'),
-            'all_items'          => esc_html__('All Inquiries', 'maneli-car-inquiry'),
+            'name'               => esc_html__('Installment Inquiries', 'autopuzzle'),
+            'singular_name'      => esc_html__('Installment Inquiry', 'autopuzzle'),
+            'menu_name'          => esc_html__('Bank Inquiries', 'autopuzzle'),
+            'all_items'          => esc_html__('All Inquiries', 'autopuzzle'),
         ];
         $args = [
             'labels'             => $labels,
@@ -62,10 +62,10 @@ class Maneli_CPT_Handler {
      */
     private function register_cash_inquiry_post_type() {
         $labels = [
-            'name'               => esc_html__('Cash Requests', 'maneli-car-inquiry'),
-            'singular_name'      => esc_html__('Cash Request', 'maneli-car-inquiry'),
-            'menu_name'          => esc_html__('Cash Requests', 'maneli-car-inquiry'),
-            'all_items'          => esc_html__('All Cash Requests', 'maneli-car-inquiry'),
+            'name'               => esc_html__('Cash Requests', 'autopuzzle'),
+            'singular_name'      => esc_html__('Cash Request', 'autopuzzle'),
+            'menu_name'          => esc_html__('Cash Requests', 'autopuzzle'),
+            'all_items'          => esc_html__('All Cash Requests', 'autopuzzle'),
         ];
         $args = [
             'labels'             => $labels,
@@ -82,12 +82,12 @@ class Maneli_CPT_Handler {
     }
 
     /**
-     * Registers the 'maneli_meeting' post type to store meeting slots booked for customers.
+     * Registers the 'autopuzzle_meeting' post type to store meeting slots booked for customers.
      */
     private function register_meeting_post_type() {
         $labels = [
-            'name'          => esc_html__('Meetings', 'maneli-car-inquiry'),
-            'singular_name' => esc_html__('Meeting', 'maneli-car-inquiry'),
+            'name'          => esc_html__('Meetings', 'autopuzzle'),
+            'singular_name' => esc_html__('Meeting', 'autopuzzle'),
         ];
         $args = [
             'labels'          => $labels,
@@ -100,7 +100,7 @@ class Maneli_CPT_Handler {
             'map_meta_cap'    => true,
             'rewrite'         => false,
         ];
-        register_post_type('maneli_meeting', $args);
+        register_post_type('autopuzzle_meeting', $args);
     }
 
     /**
@@ -109,11 +109,11 @@ class Maneli_CPT_Handler {
      */
     public static function get_all_statuses() {
         return [
-            'pending'        => esc_html__('Pending Review', 'maneli-car-inquiry'),
-            'user_confirmed' => esc_html__('Approved and Referred', 'maneli-car-inquiry'),
-            'more_docs'      => esc_html__('More Documents Required', 'maneli-car-inquiry'),
-            'rejected'       => esc_html__('Rejected', 'maneli-car-inquiry'),
-            'failed'         => esc_html__('Inquiry Failed', 'maneli-car-inquiry'),
+            'pending'        => esc_html__('Pending Review', 'autopuzzle'),
+            'user_confirmed' => esc_html__('Approved and Referred', 'autopuzzle'),
+            'more_docs'      => esc_html__('More Documents Required', 'autopuzzle'),
+            'rejected'       => esc_html__('Rejected', 'autopuzzle'),
+            'failed'         => esc_html__('Inquiry Failed', 'autopuzzle'),
         ];
     }
 
@@ -124,15 +124,15 @@ class Maneli_CPT_Handler {
      */
     public static function get_tracking_statuses() {
         return [
-            'new'                  => esc_html__('New', 'maneli-car-inquiry'), // جدید
-            'referred'             => esc_html__('Referred to Expert', 'maneli-car-inquiry'), // ارجاع داده شده
-            'in_progress'          => esc_html__('In Progress', 'maneli-car-inquiry'), // در حال پیگیری
-            'follow_up_scheduled'  => esc_html__('Follow Up Scheduled', 'maneli-car-inquiry'), // پیگیری بعدی
-            'meeting_scheduled'    => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), // مراجعه حضوری
-            'awaiting_documents'   => esc_html__('Awaiting Documents', 'maneli-car-inquiry'), // منتظر مدارک
-            'approved'             => esc_html__('Approved', 'maneli-car-inquiry'), // تایید شده
-            'rejected'             => esc_html__('Rejected', 'maneli-car-inquiry'), // رد شده
-            'completed'            => esc_html__('Completed', 'maneli-car-inquiry'), // تکمیل شده
+            'new'                  => esc_html__('New', 'autopuzzle'), // جدید
+            'referred'             => esc_html__('Referred to Expert', 'autopuzzle'), // ارجاع داده شده
+            'in_progress'          => esc_html__('In Progress', 'autopuzzle'), // در حال پیگیری
+            'follow_up_scheduled'  => esc_html__('Follow Up Scheduled', 'autopuzzle'), // پیگیری بعدی
+            'meeting_scheduled'    => esc_html__('Meeting Scheduled', 'autopuzzle'), // مراجعه حضوری
+            'awaiting_documents'   => esc_html__('Awaiting Documents', 'autopuzzle'), // منتظر مدارک
+            'approved'             => esc_html__('Approved', 'autopuzzle'), // تایید شده
+            'rejected'             => esc_html__('Rejected', 'autopuzzle'), // رد شده
+            'completed'            => esc_html__('Completed', 'autopuzzle'), // تکمیل شده
         ];
     }
     
@@ -143,7 +143,7 @@ class Maneli_CPT_Handler {
      */
     public static function get_tracking_status_label($status_key) {
         $statuses = self::get_tracking_statuses();
-        return $statuses[$status_key] ?? esc_html__('Unknown', 'maneli-car-inquiry');
+        return $statuses[$status_key] ?? esc_html__('Unknown', 'autopuzzle');
     }
     
     /**
@@ -153,7 +153,7 @@ class Maneli_CPT_Handler {
      */
     public static function get_status_label($status_key) {
         $statuses = self::get_all_statuses();
-        return $statuses[$status_key] ?? esc_html__('Unknown', 'maneli-car-inquiry');
+        return $statuses[$status_key] ?? esc_html__('Unknown', 'autopuzzle');
     }
 
     /**
@@ -162,17 +162,17 @@ class Maneli_CPT_Handler {
      */
     public static function get_all_cash_inquiry_statuses() {
         return [
-            'new'                    => esc_html__('New', 'maneli-car-inquiry'), // جدید
-            'referred'               => esc_html__('Referred to Expert', 'maneli-car-inquiry'), // ارجاع داده شده
-            'in_progress'            => esc_html__('In Progress', 'maneli-car-inquiry'), // در حال پیگیری
-            'follow_up_scheduled'    => esc_html__('Follow Up Scheduled', 'maneli-car-inquiry'), // پیگیری بعدی
-            'meeting_scheduled'      => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), // مراجعه حضوری
-            'awaiting_downpayment'   => esc_html__('Awaiting Down Payment', 'maneli-car-inquiry'), // در انتظار پیش پرداخت
-            'downpayment_received'   => esc_html__('Down Payment Received', 'maneli-car-inquiry'), // پیش پرداخت دریافت شد
-            'awaiting_documents'     => esc_html__('Awaiting Documents', 'maneli-car-inquiry'), // منتظر مدارک
-            'approved'               => esc_html__('Approved', 'maneli-car-inquiry'), // تایید شده
-            'rejected'               => esc_html__('Rejected', 'maneli-car-inquiry'), // رد شده
-            'completed'              => esc_html__('Completed', 'maneli-car-inquiry'), // تکمیل شده
+            'new'                    => esc_html__('New', 'autopuzzle'), // جدید
+            'referred'               => esc_html__('Referred to Expert', 'autopuzzle'), // ارجاع داده شده
+            'in_progress'            => esc_html__('In Progress', 'autopuzzle'), // در حال پیگیری
+            'follow_up_scheduled'    => esc_html__('Follow Up Scheduled', 'autopuzzle'), // پیگیری بعدی
+            'meeting_scheduled'      => esc_html__('Meeting Scheduled', 'autopuzzle'), // مراجعه حضوری
+            'awaiting_downpayment'   => esc_html__('Awaiting Down Payment', 'autopuzzle'), // در انتظار پیش پرداخت
+            'downpayment_received'   => esc_html__('Down Payment Received', 'autopuzzle'), // پیش پرداخت دریافت شد
+            'awaiting_documents'     => esc_html__('Awaiting Documents', 'autopuzzle'), // منتظر مدارک
+            'approved'               => esc_html__('Approved', 'autopuzzle'), // تایید شده
+            'rejected'               => esc_html__('Rejected', 'autopuzzle'), // رد شده
+            'completed'              => esc_html__('Completed', 'autopuzzle'), // تکمیل شده
         ];
     }
 
@@ -183,6 +183,6 @@ class Maneli_CPT_Handler {
      */
     public static function get_cash_inquiry_status_label($status_key) {
         $statuses = self::get_all_cash_inquiry_statuses();
-        return $statuses[$status_key] ?? esc_html__('Unknown', 'maneli-car-inquiry');
+        return $statuses[$status_key] ?? esc_html__('Unknown', 'autopuzzle');
     }
 }

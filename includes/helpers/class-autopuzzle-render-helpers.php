@@ -1,11 +1,11 @@
 <?php
 /**
- * Helper class for rendering various HTML elements and data in Maneli Car Inquiry plugin.
+ * Helper class for rendering various HTML elements and data in AutoPuzzle Car Inquiry plugin.
  *
  * This class centralizes all rendering, formatting, and loan calculation logic, 
  * ensuring consistency and fixing the missing function dependencies.
  *
- * @package Maneli_Car_Inquiry/Includes/Helpers
+ * @package Autopuzzle_Car_Inquiry/Includes/Helpers
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.1.0 (Comprehensive Frontend Helper)
  */
@@ -15,10 +15,10 @@ if (!defined('ABSPATH')) {
 }
 
 // توجه: فضای نام (Namespace) حذف شد تا با سایر کلاس‌های پلاگین که از فضای نام استفاده نمی‌کنند، سازگار باشد.
-// توابع maneli_get_template_part و maneli_gregorian_to_jalali از طریق includes/functions.php در دسترس هستند.
-// کلاس‌های Maneli_CPT_Handler، WP_User، WC_Product و غیره باید قبل از استفاده بارگذاری شده باشند.
+// توابع autopuzzle_get_template_part و autopuzzle_gregorian_to_jalali از طریق includes/functions.php در دسترس هستند.
+// کلاس‌های Autopuzzle_CPT_Handler، WP_User، WC_Product و غیره باید قبل از استفاده بارگذاری شده باشند.
 
-class Maneli_Render_Helpers {
+class Autopuzzle_Render_Helpers {
 
     /**
      * Calculates the monthly installment amount using the formula based on the configured monthly rate.
@@ -37,7 +37,7 @@ class Maneli_Render_Helpers {
         }
 
         // نرخ سود ماهانه را از تنظیمات می‌خواند
-        $monthly_rate = floatval(Maneli_Options_Helper::get_option('loan_interest_rate', 0.035)); 
+        $monthly_rate = floatval(Autopuzzle_Options_Helper::get_option('loan_interest_rate', 0.035)); 
         
         // منطق محاسبه ساده شده (مطابق با JS و منطق بک‌اند)
         $total_interest = $loan_amount * $monthly_rate * ($term_months + 1);
@@ -53,9 +53,9 @@ class Maneli_Render_Helpers {
      * @return string The formatted string.
      */
     public static function format_money($amount) {
-        // Use maneli_number_format_persian for proper Persian formatting with Persian comma
-        if (function_exists('maneli_number_format_persian')) {
-            return maneli_number_format_persian((int)$amount);
+        // Use autopuzzle_number_format_persian for proper Persian formatting with Persian comma
+        if (function_exists('autopuzzle_number_format_persian')) {
+            return autopuzzle_number_format_persian((int)$amount);
         }
         return number_format_i18n((int)$amount);
     }
@@ -137,14 +137,14 @@ class Maneli_Render_Helpers {
         if ($length < $min_length) {
             return [
                 'valid' => false,
-                'error' => sprintf(esc_html__('This field must be at least %d characters long.', 'maneli-car-inquiry'), $min_length)
+                'error' => sprintf(esc_html__('This field must be at least %d characters long.', 'autopuzzle'), $min_length)
             ];
         }
         
         if ($length > $max_length) {
             return [
                 'valid' => false,
-                'error' => sprintf(esc_html__('This field must not exceed %d characters.', 'maneli-car-inquiry'), $max_length)
+                'error' => sprintf(esc_html__('This field must not exceed %d characters.', 'autopuzzle'), $max_length)
             ];
         }
         
@@ -195,7 +195,7 @@ class Maneli_Render_Helpers {
         if (empty($email)) {
             return [
                 'valid' => false,
-                'error' => esc_html__('Email is required.', 'maneli-car-inquiry')
+                'error' => esc_html__('Email is required.', 'autopuzzle')
             ];
         }
         
@@ -204,7 +204,7 @@ class Maneli_Render_Helpers {
         if ($length > 254) {
             return [
                 'valid' => false,
-                'error' => esc_html__('Email address must not exceed 254 characters.', 'maneli-car-inquiry')
+                'error' => esc_html__('Email address must not exceed 254 characters.', 'autopuzzle')
             ];
         }
         
@@ -212,7 +212,7 @@ class Maneli_Render_Helpers {
         if (!is_email($email)) {
             return [
                 'valid' => false,
-                'error' => esc_html__('Invalid email format.', 'maneli-car-inquiry')
+                'error' => esc_html__('Invalid email format.', 'autopuzzle')
             ];
         }
         
@@ -221,7 +221,7 @@ class Maneli_Render_Helpers {
         if (!preg_match($email_pattern, $email)) {
             return [
                 'valid' => false,
-                'error' => esc_html__('Invalid email format.', 'maneli-car-inquiry')
+                'error' => esc_html__('Invalid email format.', 'autopuzzle')
             ];
         }
         
@@ -232,7 +232,7 @@ class Maneli_Render_Helpers {
             if (!checkdnsrr($domain, 'MX') && !checkdnsrr($domain, 'A')) {
                 // DNS check failed - but don't block, just log in debug mode
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Warning: Email domain DNS check failed for: ' . $domain);
+                    error_log('AutoPuzzle Warning: Email domain DNS check failed for: ' . $domain);
                 }
                 // We don't fail validation for DNS issues, as DNS might be temporarily unavailable
             }
@@ -248,16 +248,16 @@ class Maneli_Render_Helpers {
      * @param string $format The output format.
      * @return string The formatted Jalali date.
      */
-    public static function maneli_gregorian_to_jalali($gregorian_date_time, $format = 'Y/m/d H:i') {
+    public static function autopuzzle_gregorian_to_jalali($gregorian_date_time, $format = 'Y/m/d H:i') {
         $timestamp = strtotime($gregorian_date_time);
         if ($timestamp === false) {
             return (string) $gregorian_date_time;
         }
 
-        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        $use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 
-        if (function_exists('maneli_gregorian_to_jalali')) {
-            $base_date = maneli_gregorian_to_jalali(
+        if (function_exists('autopuzzle_gregorian_to_jalali')) {
+            $base_date = autopuzzle_gregorian_to_jalali(
                 date('Y', $timestamp),
                 date('m', $timestamp),
                 date('d', $timestamp),
@@ -291,16 +291,16 @@ class Maneli_Render_Helpers {
     public static function translate_field_value($field_name, $value) {
         $translations = [
             'job_type' => [
-                'self' => esc_html__('Freelance', 'maneli-car-inquiry'),
-                'employee' => esc_html__('Employee', 'maneli-car-inquiry'),
+                'self' => esc_html__('Freelance', 'autopuzzle'),
+                'employee' => esc_html__('Employee', 'autopuzzle'),
             ],
             'residency_status' => [
-                'owner' => esc_html__('Owner', 'maneli-car-inquiry'),
-                'tenant' => esc_html__('Tenant', 'maneli-car-inquiry'),
+                'owner' => esc_html__('Owner', 'autopuzzle'),
+                'tenant' => esc_html__('Tenant', 'autopuzzle'),
             ],
             'workplace_status' => [
-                'owned' => esc_html__('Owned', 'maneli-car-inquiry'),
-                'rented' => esc_html__('Rented', 'maneli-car-inquiry'),
+                'owned' => esc_html__('Owned', 'autopuzzle'),
+                'rented' => esc_html__('Rented', 'autopuzzle'),
             ],
         ];
         
@@ -318,21 +318,21 @@ class Maneli_Render_Helpers {
         static $styles_printed = false;
 
         $palette = [
-            1 => ['name' => esc_html__('White', 'maneli-car-inquiry'), 'class' => 'white'],
-            2 => ['name' => esc_html__('Yellow', 'maneli-car-inquiry'), 'class' => 'yellow'],
-            3 => ['name' => esc_html__('Orange', 'maneli-car-inquiry'), 'class' => 'orange'],
-            4 => ['name' => esc_html__('Brown', 'maneli-car-inquiry'), 'class' => 'brown'],
-            5 => ['name' => esc_html__('Red', 'maneli-car-inquiry'), 'class' => 'red'],
-            0 => ['name' => esc_html__('Undetermined', 'maneli-car-inquiry'), 'class' => 'undetermined'],
+            1 => ['name' => esc_html__('White', 'autopuzzle'), 'class' => 'white'],
+            2 => ['name' => esc_html__('Yellow', 'autopuzzle'), 'class' => 'yellow'],
+            3 => ['name' => esc_html__('Orange', 'autopuzzle'), 'class' => 'orange'],
+            4 => ['name' => esc_html__('Brown', 'autopuzzle'), 'class' => 'brown'],
+            5 => ['name' => esc_html__('Red', 'autopuzzle'), 'class' => 'red'],
+            0 => ['name' => esc_html__('Undetermined', 'autopuzzle'), 'class' => 'undetermined'],
         ];
 
         $cheque_color_map = [
-            '1' => ['text' => esc_html__('White', 'maneli-car-inquiry'), 'desc' => esc_html__('No history of bounced cheques.', 'maneli-car-inquiry')],
-            '2' => ['text' => esc_html__('Yellow', 'maneli-car-inquiry'), 'desc' => esc_html__('One bounced cheque or a maximum of 50 million Rials in returned commitments.', 'maneli-car-inquiry')],
-            '3' => ['text' => esc_html__('Orange', 'maneli-car-inquiry'), 'desc' => esc_html__('Two to four bounced cheques or a maximum of 200 million Rials in returned commitments.', 'maneli-car-inquiry')],
-            '4' => ['text' => esc_html__('Brown', 'maneli-car-inquiry'), 'desc' => esc_html__('Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
-            '5' => ['text' => esc_html__('Red', 'maneli-car-inquiry'), 'desc' => esc_html__('More than ten bounced cheques or more than 500 million Rials in returned commitments.', 'maneli-car-inquiry')],
-            '0' => ['text' => esc_html__('Undetermined', 'maneli-car-inquiry'), 'desc' => esc_html__('Information was not received from Finotex or the inquiry was unsuccessful.', 'maneli-car-inquiry')],
+            '1' => ['text' => esc_html__('White', 'autopuzzle'), 'desc' => esc_html__('No history of bounced cheques.', 'autopuzzle')],
+            '2' => ['text' => esc_html__('Yellow', 'autopuzzle'), 'desc' => esc_html__('One bounced cheque or a maximum of 50 million Rials in returned commitments.', 'autopuzzle')],
+            '3' => ['text' => esc_html__('Orange', 'autopuzzle'), 'desc' => esc_html__('Two to four bounced cheques or a maximum of 200 million Rials in returned commitments.', 'autopuzzle')],
+            '4' => ['text' => esc_html__('Brown', 'autopuzzle'), 'desc' => esc_html__('Five to ten bounced cheques or a maximum of 500 million Rials in returned commitments.', 'autopuzzle')],
+            '5' => ['text' => esc_html__('Red', 'autopuzzle'), 'desc' => esc_html__('More than ten bounced cheques or more than 500 million Rials in returned commitments.', 'autopuzzle')],
+            '0' => ['text' => esc_html__('Undetermined', 'autopuzzle'), 'desc' => esc_html__('Information was not received from Finotex or the inquiry was unsuccessful.', 'autopuzzle')],
         ];
 
         $cheque_color_code = (string) ($cheque_color_code ?? '0');
@@ -365,70 +365,70 @@ class Maneli_Render_Helpers {
         if (!$styles_printed) {
             $styles_printed = true;
             $output .= '<style>
-                .maneli-cheque-status-card {border:1px solid rgba(15,23,42,0.08);border-radius:18px;padding:22px;background:var(--bs-card-bg,#fff);}
-                .maneli-cheque-status-main {display:flex;align-items:center;gap:1.25rem;padding:20px;border-radius:16px;position:relative;overflow:hidden;color:#0f172a;}
-                .maneli-cheque-status-main .status-icon {width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,0.35);box-shadow:0 10px 25px rgba(15,23,42,0.08);}
-                .maneli-cheque-status-main .status-body {flex:1;min-width:0;}
-                .maneli-cheque-status-main .status-title {margin-bottom:.4rem;font-size:1rem;font-weight:600;}
-                .maneli-cheque-status-main .status-chip {display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:999px;font-weight:600;background:rgba(255,255,255,0.35);backdrop-filter:blur(4px);box-shadow:0 5px 18px rgba(15,23,42,0.12);}
-                .maneli-cheque-status-main .status-desc {margin-top:.75rem;color:rgba(15,23,42,0.75);font-size:.9rem;line-height:1.65;}
-                .maneli-cheque-status-legend {display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.5rem;}
-                .maneli-cheque-chip {display:inline-flex;align-items:center;gap:.45rem;padding:.42rem .95rem;border-radius:999px;font-size:.85rem;font-weight:500;border:1px solid transparent;transition:all .2s ease;}
-                .maneli-cheque-chip .chip-dot {width:10px;height:10px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(15,23,42,0.06);}
-                .maneli-cheque-chip.active {transform:translateY(-2px);box-shadow:0 10px 22px rgba(15,23,42,0.14);border-color:currentColor;background:#fff;}
-                .maneli-cheque-chip.chip-white {color:#475569;background:linear-gradient(135deg,#f8fafc,#fefefe);}
-                .maneli-cheque-chip.chip-yellow {color:#b7791f;background:linear-gradient(135deg,#fff7d6,#fde68a);}
-                .maneli-cheque-chip.chip-orange {color:#c2410c;background:linear-gradient(135deg,#ffe0c2,#fed7aa);}
-                .maneli-cheque-chip.chip-brown {color:#92400e;background:linear-gradient(135deg,#f5d7b8,#f3c98b);}
-                .maneli-cheque-chip.chip-red {color:#b91c1c;background:linear-gradient(135deg,#fecaca,#f87171);}
-                .maneli-cheque-chip.chip-undetermined {color:#475569;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);}
-                .maneli-cheque-status-main.status-color-white {background:linear-gradient(135deg,#f8fafc,#ffffff);color:#1f2937;}
-                .maneli-cheque-status-main.status-color-yellow {background:linear-gradient(135deg,#fffbeb,#fef08a);color:#854d0e;}
-                .maneli-cheque-status-main.status-color-orange {background:linear-gradient(135deg,#fff7ed,#fed7aa);color:#9a3412;}
-                .maneli-cheque-status-main.status-color-brown {background:linear-gradient(135deg,#f9eadf,#f3c999);color:#78350f;}
-                .maneli-cheque-status-main.status-color-red {background:linear-gradient(135deg,#fee2e2,#fca5a5);color:#7f1d1d;}
-                .maneli-cheque-status-main.status-color-undetermined {background:linear-gradient(135deg,#eef2f7,#cbd5f5);color:#1f2937;}
-                [data-theme-mode=dark] .maneli-cheque-status-card {border-color:rgba(148,163,184,0.25);background:rgba(15,23,42,0.85);}
-                [data-theme-mode=dark] .maneli-cheque-status-main {color:#e2e8f0;box-shadow:0 10px 30px rgba(2,6,23,0.35);}
-                [data-theme-mode=dark] .maneli-cheque-status-main .status-icon {background:rgba(15,23,42,0.65);box-shadow:0 10px 25px rgba(2,6,23,0.45);color:#f8fafc;}
-                [data-theme-mode=dark] .maneli-cheque-status-main .status-chip {background:rgba(15,23,42,0.55);color:#e2e8f0;box-shadow:0 5px 18px rgba(2,6,23,0.45);}
-                [data-theme-mode=dark] .maneli-cheque-status-main .status-desc {color:rgba(226,232,240,0.78);}
-                [data-theme-mode=dark] .maneli-cheque-status-legend {gap:.75rem;}
-                [data-theme-mode=dark] .maneli-cheque-chip {background:rgba(15,23,42,0.65);color:#cbd5f5;border-color:rgba(148,163,184,0.35);box-shadow:none;}
-                [data-theme-mode=dark] .maneli-cheque-chip .chip-dot {box-shadow:0 0 0 3px rgba(15,23,42,0.35);}
-                [data-theme-mode=dark] .maneli-cheque-chip.active {transform:translateY(-2px);box-shadow:0 10px 22px rgba(2,6,23,0.55);background:rgba(15,23,42,0.8);}
-                [data-theme-mode=dark] .maneli-cheque-chip.chip-white {color:#e2e8f0;background:linear-gradient(135deg,rgba(148,163,184,0.15),rgba(30,41,59,0.25));}
-                [data-theme-mode=dark] .maneli-cheque-chip.chip-yellow {color:#fde68a;background:linear-gradient(135deg,rgba(234,179,8,0.22),rgba(133,77,14,0.24));}
-                [data-theme-mode=dark] .maneli-cheque-chip.chip-orange {color:#fdba74;background:linear-gradient(135deg,rgba(251,146,60,0.22),rgba(194,65,12,0.26));}
-                [data-theme-mode=dark] .maneli-cheque-chip.chip-brown {color:#facc15;background:linear-gradient(135deg,rgba(214,158,46,0.25),rgba(120,53,15,0.3));}
-                [data-theme-mode=dark] .maneli-cheque-chip.chip-red {color:#fecaca;background:linear-gradient(135deg,rgba(248,113,113,0.22),rgba(185,28,28,0.3));}
-                [data-theme-mode=dark] .maneli-cheque-chip.chip-undetermined {color:#cbd5f5;background:linear-gradient(135deg,rgba(148,163,184,0.22),rgba(30,41,59,0.28));}
-                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-white {background:linear-gradient(135deg,#1e293b,#0f172a);color:#f8fafc;}
-                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-yellow {background:linear-gradient(135deg,#422006,#7c2d12);color:#fde68a;}
-                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-orange {background:linear-gradient(135deg,#431407,#7c2d12);color:#fdba74;}
-                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-brown {background:linear-gradient(135deg,#3f2510,#78350f);color:#facc15;}
-                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-red {background:linear-gradient(135deg,#450a0a,#991b1b);color:#fecaca;}
-                [data-theme-mode=dark] .maneli-cheque-status-main.status-color-undetermined {background:linear-gradient(135deg,#1e293b,#334155);color:#cbd5f5;}
-                @media (max-width: 576px){.maneli-cheque-status-main{flex-direction:column;text-align:center;}.maneli-cheque-status-main .status-icon{margin-bottom:.75rem;}}
+                .autopuzzle-cheque-status-card {border:1px solid rgba(15,23,42,0.08);border-radius:18px;padding:22px;background:var(--bs-card-bg,#fff);}
+                .autopuzzle-cheque-status-main {display:flex;align-items:center;gap:1.25rem;padding:20px;border-radius:16px;position:relative;overflow:hidden;color:#0f172a;}
+                .autopuzzle-cheque-status-main .status-icon {width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:rgba(255,255,255,0.35);box-shadow:0 10px 25px rgba(15,23,42,0.08);}
+                .autopuzzle-cheque-status-main .status-body {flex:1;min-width:0;}
+                .autopuzzle-cheque-status-main .status-title {margin-bottom:.4rem;font-size:1rem;font-weight:600;}
+                .autopuzzle-cheque-status-main .status-chip {display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:999px;font-weight:600;background:rgba(255,255,255,0.35);backdrop-filter:blur(4px);box-shadow:0 5px 18px rgba(15,23,42,0.12);}
+                .autopuzzle-cheque-status-main .status-desc {margin-top:.75rem;color:rgba(15,23,42,0.75);font-size:.9rem;line-height:1.65;}
+                .autopuzzle-cheque-status-legend {display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.5rem;}
+                .autopuzzle-cheque-chip {display:inline-flex;align-items:center;gap:.45rem;padding:.42rem .95rem;border-radius:999px;font-size:.85rem;font-weight:500;border:1px solid transparent;transition:all .2s ease;}
+                .autopuzzle-cheque-chip .chip-dot {width:10px;height:10px;border-radius:50%;background:currentColor;box-shadow:0 0 0 3px rgba(15,23,42,0.06);}
+                .autopuzzle-cheque-chip.active {transform:translateY(-2px);box-shadow:0 10px 22px rgba(15,23,42,0.14);border-color:currentColor;background:#fff;}
+                .autopuzzle-cheque-chip.chip-white {color:#475569;background:linear-gradient(135deg,#f8fafc,#fefefe);}
+                .autopuzzle-cheque-chip.chip-yellow {color:#b7791f;background:linear-gradient(135deg,#fff7d6,#fde68a);}
+                .autopuzzle-cheque-chip.chip-orange {color:#c2410c;background:linear-gradient(135deg,#ffe0c2,#fed7aa);}
+                .autopuzzle-cheque-chip.chip-brown {color:#92400e;background:linear-gradient(135deg,#f5d7b8,#f3c98b);}
+                .autopuzzle-cheque-chip.chip-red {color:#b91c1c;background:linear-gradient(135deg,#fecaca,#f87171);}
+                .autopuzzle-cheque-chip.chip-undetermined {color:#475569;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);}
+                .autopuzzle-cheque-status-main.status-color-white {background:linear-gradient(135deg,#f8fafc,#ffffff);color:#1f2937;}
+                .autopuzzle-cheque-status-main.status-color-yellow {background:linear-gradient(135deg,#fffbeb,#fef08a);color:#854d0e;}
+                .autopuzzle-cheque-status-main.status-color-orange {background:linear-gradient(135deg,#fff7ed,#fed7aa);color:#9a3412;}
+                .autopuzzle-cheque-status-main.status-color-brown {background:linear-gradient(135deg,#f9eadf,#f3c999);color:#78350f;}
+                .autopuzzle-cheque-status-main.status-color-red {background:linear-gradient(135deg,#fee2e2,#fca5a5);color:#7f1d1d;}
+                .autopuzzle-cheque-status-main.status-color-undetermined {background:linear-gradient(135deg,#eef2f7,#cbd5f5);color:#1f2937;}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-card {border-color:rgba(148,163,184,0.25);background:rgba(15,23,42,0.85);}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main {color:#e2e8f0;box-shadow:0 10px 30px rgba(2,6,23,0.35);}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main .status-icon {background:rgba(15,23,42,0.65);box-shadow:0 10px 25px rgba(2,6,23,0.45);color:#f8fafc;}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main .status-chip {background:rgba(15,23,42,0.55);color:#e2e8f0;box-shadow:0 5px 18px rgba(2,6,23,0.45);}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main .status-desc {color:rgba(226,232,240,0.78);}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-legend {gap:.75rem;}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip {background:rgba(15,23,42,0.65);color:#cbd5f5;border-color:rgba(148,163,184,0.35);box-shadow:none;}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip .chip-dot {box-shadow:0 0 0 3px rgba(15,23,42,0.35);}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip.active {transform:translateY(-2px);box-shadow:0 10px 22px rgba(2,6,23,0.55);background:rgba(15,23,42,0.8);}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip.chip-white {color:#e2e8f0;background:linear-gradient(135deg,rgba(148,163,184,0.15),rgba(30,41,59,0.25));}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip.chip-yellow {color:#fde68a;background:linear-gradient(135deg,rgba(234,179,8,0.22),rgba(133,77,14,0.24));}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip.chip-orange {color:#fdba74;background:linear-gradient(135deg,rgba(251,146,60,0.22),rgba(194,65,12,0.26));}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip.chip-brown {color:#facc15;background:linear-gradient(135deg,rgba(214,158,46,0.25),rgba(120,53,15,0.3));}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip.chip-red {color:#fecaca;background:linear-gradient(135deg,rgba(248,113,113,0.22),rgba(185,28,28,0.3));}
+                [data-theme-mode=dark] .autopuzzle-cheque-chip.chip-undetermined {color:#cbd5f5;background:linear-gradient(135deg,rgba(148,163,184,0.22),rgba(30,41,59,0.28));}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main.status-color-white {background:linear-gradient(135deg,#1e293b,#0f172a);color:#f8fafc;}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main.status-color-yellow {background:linear-gradient(135deg,#422006,#7c2d12);color:#fde68a;}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main.status-color-orange {background:linear-gradient(135deg,#431407,#7c2d12);color:#fdba74;}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main.status-color-brown {background:linear-gradient(135deg,#3f2510,#78350f);color:#facc15;}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main.status-color-red {background:linear-gradient(135deg,#450a0a,#991b1b);color:#fecaca;}
+                [data-theme-mode=dark] .autopuzzle-cheque-status-main.status-color-undetermined {background:linear-gradient(135deg,#1e293b,#334155);color:#cbd5f5;}
+                @media (max-width: 576px){.autopuzzle-cheque-status-main{flex-direction:column;text-align:center;}.autopuzzle-cheque-status-main .status-icon{margin-bottom:.75rem;}}
             </style>';
         }
 
-        $output .= '<div class="maneli-cheque-status-card">';
-        $output .= '<div class="maneli-cheque-status-main ' . esc_attr($status_class) . '">';
+        $output .= '<div class="autopuzzle-cheque-status-card">';
+        $output .= '<div class="autopuzzle-cheque-status-main ' . esc_attr($status_class) . '">';
         $output .= '<div class="status-icon"><i class="la la-shield-alt"></i></div>';
         $output .= '<div class="status-body">';
-        $output .= '<div class="status-title">' . esc_html__('Sadad Cheque Status Inquiry', 'maneli-car-inquiry') . '</div>';
+        $output .= '<div class="status-title">' . esc_html__('Sadad Cheque Status Inquiry', 'autopuzzle') . '</div>';
         $output .= '<div class="status-chip"><span class="chip-dot"></span><span>' . esc_html($active_info['text']) . '</span></div>';
         $output .= '<p class="status-desc">' . esc_html($active_info['desc']) . '</p>';
         $output .= '</div>';
         $output .= '</div>';
 
-        $output .= '<div class="maneli-cheque-status-legend">';
+        $output .= '<div class="autopuzzle-cheque-status-legend">';
         foreach ([1, 2, 3, 4, 5] as $code) {
             $info = $palette[$code];
-            $output .= '<div class="maneli-cheque-chip chip-' . esc_attr($info['class']) . ' ' . ($cheque_color_code === (string)$code ? 'active' : '') . '"><span class="chip-dot"></span><span>' . esc_html($info['name']) . '</span></div>';
+            $output .= '<div class="autopuzzle-cheque-chip chip-' . esc_attr($info['class']) . ' ' . ($cheque_color_code === (string)$code ? 'active' : '') . '"><span class="chip-dot"></span><span>' . esc_html($info['name']) . '</span></div>';
         }
-        $output .= '<div class="maneli-cheque-chip chip-undetermined ' . ($cheque_color_code === '0' ? 'active' : '') . '"><span class="chip-dot"></span><span>' . esc_html($palette[0]['name']) . '</span></div>';
+        $output .= '<div class="autopuzzle-cheque-chip chip-undetermined ' . ($cheque_color_code === '0' ? 'active' : '') . '"><span class="chip-dot"></span><span>' . esc_html($palette[0]['name']) . '</span></div>';
         $output .= '</div>';
 
         $output .= '</div>';
@@ -446,7 +446,7 @@ class Maneli_Render_Helpers {
         
         $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        $use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
         
         $product_id = $product->get_id();
         $installment_price = get_post_meta($product_id, 'installment_price', true);
@@ -481,9 +481,9 @@ class Maneli_Render_Helpers {
         
         // Status labels in Persian
         $statuses = [
-            'special_sale' => ['label' => esc_html__('Special Sale', 'maneli-car-inquiry'), 'class' => 'primary-transparent'],
-            'unavailable'  => ['label' => esc_html__('Unavailable', 'maneli-car-inquiry'), 'class' => 'warning-transparent'],
-            'disabled'     => ['label' => esc_html__('Disabled', 'maneli-car-inquiry'), 'class' => 'danger-transparent'],
+            'special_sale' => ['label' => esc_html__('Special Sale', 'autopuzzle'), 'class' => 'primary-transparent'],
+            'unavailable'  => ['label' => esc_html__('Unavailable', 'autopuzzle'), 'class' => 'warning-transparent'],
+            'disabled'     => ['label' => esc_html__('Disabled', 'autopuzzle'), 'class' => 'danger-transparent'],
         ];
         $current_status = $statuses[$car_status] ?? $statuses['special_sale'];
         
@@ -497,8 +497,8 @@ class Maneli_Render_Helpers {
             if ($value === '' || $value === null) {
                 return '';
             }
-            if ($use_persian_digits && function_exists('maneli_number_format_persian')) {
-                return maneli_number_format_persian($value, 0);
+            if ($use_persian_digits && function_exists('autopuzzle_number_format_persian')) {
+                return autopuzzle_number_format_persian($value, 0);
             }
             return number_format((float) str_replace(',', '', (string) $value), 0, '.', ',');
         };
@@ -524,7 +524,7 @@ class Maneli_Render_Helpers {
                                 <?php echo esc_html($product_name_display); ?>
                             </a>
                             <?php if ($manufacture_year_display !== '') : ?>
-                                <span class="badge maneli-year-badge ms-2"><?php echo esc_html($manufacture_year_display); ?></span>
+                                <span class="badge autopuzzle-year-badge ms-2"><?php echo esc_html($manufacture_year_display); ?></span>
                             <?php endif; ?>
                         </p>
                     </div>
@@ -540,9 +540,9 @@ class Maneli_Render_Helpers {
                            data-field-type="regular_price" 
                            data-raw-value="<?php echo esc_attr($regular_price_numeric); ?>"
                            value="<?php echo esc_attr($regular_price_formatted); ?>" 
-                           placeholder="<?php echo esc_attr__('Cash Price', 'maneli-car-inquiry'); ?>">
+                           placeholder="<?php echo esc_attr__('Cash Price', 'autopuzzle'); ?>">
                     <span class="spinner"></span>
-                    <span class="save-status-icon maneli-save-status-icon"></span>
+                    <span class="save-status-icon autopuzzle-save-status-icon"></span>
                 </div>
             </td>
             <td>
@@ -552,9 +552,9 @@ class Maneli_Render_Helpers {
                            data-field-type="installment_price" 
                            data-raw-value="<?php echo esc_attr($installment_price_numeric); ?>"
                            value="<?php echo esc_attr($installment_price_formatted); ?>" 
-                           placeholder="<?php echo esc_attr__('Installment Price', 'maneli-car-inquiry'); ?>">
+                           placeholder="<?php echo esc_attr__('Installment Price', 'autopuzzle'); ?>">
                     <span class="spinner"></span>
-                    <span class="save-status-icon maneli-save-status-icon"></span>
+                    <span class="save-status-icon autopuzzle-save-status-icon"></span>
                 </div>
             </td>
             <td>
@@ -564,9 +564,9 @@ class Maneli_Render_Helpers {
                            data-field-type="min_downpayment" 
                            data-raw-value="<?php echo esc_attr($min_downpayment_numeric); ?>"
                            value="<?php echo esc_attr($min_downpayment_formatted); ?>" 
-                           placeholder="<?php echo esc_attr__('Minimum Down Payment', 'maneli-car-inquiry'); ?>">
+                           placeholder="<?php echo esc_attr__('Minimum Down Payment', 'autopuzzle'); ?>">
                     <span class="spinner"></span>
-                    <span class="save-status-icon maneli-save-status-icon"></span>
+                    <span class="save-status-icon autopuzzle-save-status-icon"></span>
                 </div>
             </td>
             <td>
@@ -575,9 +575,9 @@ class Maneli_Render_Helpers {
                            data-product-id="<?php echo esc_attr($product_id); ?>" 
                            data-field-type="car_colors" 
                            value="<?php echo esc_attr($car_colors); ?>" 
-                           placeholder="<?php echo esc_attr__('Colors (e.g., White, Black, Silver)', 'maneli-car-inquiry'); ?>">
+                           placeholder="<?php echo esc_attr__('Colors (e.g., White, Black, Silver)', 'autopuzzle'); ?>">
                     <span class="spinner"></span>
-                    <span class="save-status-icon maneli-save-status-icon"></span>
+                    <span class="save-status-icon autopuzzle-save-status-icon"></span>
                 </div>
             </td>
             <td>
@@ -592,20 +592,20 @@ class Maneli_Render_Helpers {
                         <?php endforeach; ?>
                     </select>
                     <span class="spinner"></span>
-                    <span class="save-status-icon maneli-save-status-icon"></span>
+                    <span class="save-status-icon autopuzzle-save-status-icon"></span>
                 </div>
             </td>
             <td>
                 <div class="hstack gap-2 fs-15">
                     <a href="<?php echo esc_url(home_url('/dashboard/add-product?edit_product=' . $product_id)); ?>" 
                        class="btn btn-icon btn-sm btn-primary-light" 
-                       title="<?php esc_attr_e('Edit', 'maneli-car-inquiry'); ?>">
+                       title="<?php esc_attr_e('Edit', 'autopuzzle'); ?>">
                         <i class="ri-edit-line"></i>
                     </a>
                     <a href="<?php echo esc_url(get_permalink($product_id)); ?>" 
                        class="btn btn-icon btn-sm btn-info-light" 
                        target="_blank" 
-                       title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                       title="<?php esc_attr_e('View', 'autopuzzle'); ?>">
                         <i class="ri-eye-line"></i>
                     </a>
                 </div>
@@ -632,16 +632,16 @@ class Maneli_Render_Helpers {
         $edit_url = esc_url(add_query_arg('edit_user', $user->ID, $current_url));
         ?>
         <tr>
-            <td data-title="<?php esc_attr_e('Display Name', 'maneli-car-inquiry'); ?>">
+            <td data-title="<?php esc_attr_e('Display Name', 'autopuzzle'); ?>">
                 <strong><?php echo esc_html($user->display_name); ?></strong>
             </td>
-            <td data-title="<?php esc_attr_e('Username', 'maneli-car-inquiry'); ?>"><?php echo esc_html($user->user_login); ?></td>
-            <td data-title="<?php esc_attr_e('Email', 'maneli-car-inquiry'); ?>"><?php echo esc_html($user->user_email); ?></td>
-            <td data-title="<?php esc_attr_e('Role', 'maneli-car-inquiry'); ?>"><?php echo esc_html($role_display); ?></td>
+            <td data-title="<?php esc_attr_e('Username', 'autopuzzle'); ?>"><?php echo esc_html($user->user_login); ?></td>
+            <td data-title="<?php esc_attr_e('Email', 'autopuzzle'); ?>"><?php echo esc_html($user->user_email); ?></td>
+            <td data-title="<?php esc_attr_e('Role', 'autopuzzle'); ?>"><?php echo esc_html($role_display); ?></td>
             <td class="woocommerce-orders-table__cell-order-actions">
-                <a href="<?php echo esc_url($edit_url); ?>" class="button view"><?php esc_html_e('Edit', 'maneli-car-inquiry'); ?></a>
-                <button class="button delete-user-btn maneli-btn-delete" data-user-id="<?php echo esc_attr($user->ID); ?>">
-                    <?php esc_html_e('Delete', 'maneli-car-inquiry'); ?>
+                <a href="<?php echo esc_url($edit_url); ?>" class="button view"><?php esc_html_e('Edit', 'autopuzzle'); ?></a>
+                <button class="button delete-user-btn autopuzzle-btn-delete" data-user-id="<?php echo esc_attr($user->ID); ?>">
+                    <?php esc_html_e('Delete', 'autopuzzle'); ?>
                 </button>
             </td>
         </tr>
@@ -666,14 +666,14 @@ class Maneli_Render_Helpers {
         // Use correct dashboard URL for report link
         $report_url        = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
         // از کلاس CPT Handler برای گرفتن لیبل وضعیت استفاده می‌کنیم (باید بارگذاری شده باشد).
-        $status_label      = Maneli_CPT_Handler::get_status_label($inquiry_status); 
-        $is_admin          = current_user_can( 'manage_maneli_inquiries' );
+        $status_label      = Autopuzzle_CPT_Handler::get_status_label($inquiry_status); 
+        $is_admin          = current_user_can( 'manage_autopuzzle_inquiries' );
         
         // Check if current user is assigned expert
         $is_assigned_expert = false;
         if (!$is_admin) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-            $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+            $is_assigned_expert = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
         }
         
         // Get expert status info and tracking status
@@ -682,7 +682,7 @@ class Maneli_Render_Helpers {
         $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
         
         // Check Finnotech API data availability
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $credit_risk_data = get_post_meta($inquiry_id, '_finnotech_credit_risk_data', true);
         $credit_score_data = get_post_meta($inquiry_id, '_finnotech_credit_score_data', true);
         $collaterals_data = get_post_meta($inquiry_id, '_finnotech_collaterals_data', true);
@@ -697,19 +697,19 @@ class Maneli_Render_Helpers {
         $finnotech_indicators = [];
         if ($credit_risk_enabled && !empty($credit_risk_data)) {
             $has_finnotech_data = true;
-            $finnotech_indicators[] = '<i class="la la-exclamation-circle text-danger" title="' . esc_attr__('Credit Risk Available', 'maneli-car-inquiry') . '"></i>';
+            $finnotech_indicators[] = '<i class="la la-exclamation-circle text-danger" title="' . esc_attr__('Credit Risk Available', 'autopuzzle') . '"></i>';
         }
         if ($credit_score_enabled && !empty($credit_score_data)) {
             $has_finnotech_data = true;
-            $finnotech_indicators[] = '<i class="la la-chart-line text-warning" title="' . esc_attr__('Credit Score Available', 'maneli-car-inquiry') . '"></i>';
+            $finnotech_indicators[] = '<i class="la la-chart-line text-warning" title="' . esc_attr__('Credit Score Available', 'autopuzzle') . '"></i>';
         }
         if ($collaterals_enabled && !empty($collaterals_data)) {
             $has_finnotech_data = true;
-            $finnotech_indicators[] = '<i class="la la-file-contract text-info" title="' . esc_attr__('Contracts Available', 'maneli-car-inquiry') . '"></i>';
+            $finnotech_indicators[] = '<i class="la la-file-contract text-info" title="' . esc_attr__('Contracts Available', 'autopuzzle') . '"></i>';
         }
         if ($cheque_color_enabled && !empty($cheque_color_data)) {
             $has_finnotech_data = true;
-            $finnotech_indicators[] = '<i class="la la-shield-alt text-primary" title="' . esc_attr__('Cheque Status Available', 'maneli-car-inquiry') . '"></i>';
+            $finnotech_indicators[] = '<i class="la la-shield-alt text-primary" title="' . esc_attr__('Cheque Status Available', 'autopuzzle') . '"></i>';
         }
         
         // Get status badge color class
@@ -743,33 +743,33 @@ class Maneli_Render_Helpers {
         }
         
         // Format date with Persian numbers
-        $formatted_date = self::maneli_gregorian_to_jalali($inquiry_post->post_date, 'Y/m/d');
+        $formatted_date = self::autopuzzle_gregorian_to_jalali($inquiry_post->post_date, 'Y/m/d');
         $formatted_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($formatted_date) : $formatted_date;
         ?>
         <tr class="crm-contact">
-            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?></td>
-            <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer->display_name ?? '—'); ?></td>
-            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>">
+            <td data-title="<?php esc_attr_e('ID', 'autopuzzle'); ?>">#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?></td>
+            <td data-title="<?php esc_attr_e('Customer', 'autopuzzle'); ?>"><?php echo esc_html($customer->display_name ?? '—'); ?></td>
+            <td data-title="<?php esc_attr_e('Car', 'autopuzzle'); ?>">
                 <div class="d-flex align-items-center">
                     <?php echo esc_html(get_the_title($product_id)); ?>
                     <?php if ($has_finnotech_data && $is_admin): ?>
-                        <span class="ms-2" style="font-size: 14px;" title="<?php esc_attr_e('Credit Information Available', 'maneli-car-inquiry'); ?>">
+                        <span class="ms-2" style="font-size: 14px;" title="<?php esc_attr_e('Credit Information Available', 'autopuzzle'); ?>">
                             <?php echo implode(' ', $finnotech_indicators); ?>
                         </span>
                     <?php endif; ?>
                 </div>
             </td>
             <?php if ($show_followup_date): ?>
-                <td data-title="<?php esc_attr_e('Follow-up Date', 'maneli-car-inquiry'); ?>">
-                    <strong class="maneli-text-danger"><?php echo esc_html($follow_up_date ? (function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($follow_up_date) : $follow_up_date) : '—'); ?></strong>
+                <td data-title="<?php esc_attr_e('Follow-up Date', 'autopuzzle'); ?>">
+                    <strong class="autopuzzle-text-danger"><?php echo esc_html($follow_up_date ? (function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($follow_up_date) : $follow_up_date) : '—'); ?></strong>
                 </td>
             <?php endif; ?>
-            <td class="inquiry-status-cell-installment" data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
+            <td class="inquiry-status-cell-installment" data-title="<?php esc_attr_e('Status', 'autopuzzle'); ?>">
                 <?php
                 // Determine latest/current status to display
                 // Priority: tracking_status > expert_status > inquiry_status
                 if ($tracking_status) {
-                    echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html(Maneli_CPT_Handler::get_tracking_status_label($tracking_status)) . '</span>';
+                    echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html(Autopuzzle_CPT_Handler::get_tracking_status_label($tracking_status)) . '</span>';
                 } elseif ($expert_status_info) {
                     echo '<span class="badge ' . esc_attr($status_badge_class) . '">' . esc_html($expert_status_info['label']) . '</span>';
                 } else {
@@ -778,20 +778,20 @@ class Maneli_Render_Helpers {
                 ?>
             </td>
             <?php if ($is_admin) : ?>
-                <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
+                <td data-title="<?php esc_attr_e('Assigned', 'autopuzzle'); ?>">
                     <?php if (!empty($expert_name)) : ?>
                         <span class="assigned-expert-name"><?php echo esc_html($expert_name); ?></span>
                     <?php else : ?>
-                        <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment" title="<?php esc_attr_e('Assign Expert', 'maneli-car-inquiry'); ?>">
-                            <i class="la la-user-plus me-1"></i><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?>
+                        <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment" title="<?php esc_attr_e('Assign Expert', 'autopuzzle'); ?>">
+                            <i class="la la-user-plus me-1"></i><?php esc_html_e('Assign', 'autopuzzle'); ?>
                         </button>
                     <?php endif; ?>
                 </td>
             <?php endif; ?>
-            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($formatted_date); ?></td>
-            <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
+            <td data-title="<?php esc_attr_e('Date', 'autopuzzle'); ?>"><?php echo esc_html($formatted_date); ?></td>
+            <td data-title="<?php esc_attr_e('Actions', 'autopuzzle'); ?>">
                 <div class="btn-list">
-                    <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'maneli-car-inquiry'); ?>">
+                    <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'autopuzzle'); ?>">
                         <i class="la la-eye"></i>
                     </a>
                     <?php if ($is_admin || $is_assigned_expert) : 
@@ -808,14 +808,14 @@ class Maneli_Render_Helpers {
                                     data-phone="<?php echo esc_attr($customer_mobile); ?>"
                                     data-customer-name="<?php echo esc_attr($customer->display_name ?? ''); ?>"
                                     data-inquiry-type="installment"
-                                    title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                    title="<?php esc_attr_e('Send SMS', 'autopuzzle'); ?>">
                                 <i class="la la-sms"></i>
                             </button>
                         <?php endif; ?>
                         <button class="btn btn-sm btn-info-light btn-icon view-sms-history-btn" 
                                 data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
                                 data-inquiry-type="installment" 
-                                title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                                title="<?php esc_attr_e('SMS History', 'autopuzzle'); ?>">
                             <i class="la la-history"></i>
                         </button>
                     <?php endif; ?>
@@ -855,14 +855,14 @@ class Maneli_Render_Helpers {
         // Use correct dashboard URL for report link
         $report_url     = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
         // از کلاس CPT Handler برای گرفتن لیبل وضعیت استفاده می‌کنیم.
-        $status_label   = Maneli_CPT_Handler::get_cash_inquiry_status_label($inquiry_status); 
-        $is_admin       = current_user_can( 'manage_maneli_inquiries' );
+        $status_label   = Autopuzzle_CPT_Handler::get_cash_inquiry_status_label($inquiry_status); 
+        $is_admin       = current_user_can( 'manage_autopuzzle_inquiries' );
         
         // Check if current user is assigned expert
         $is_assigned_expert = false;
         if (!$is_admin) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-            $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+            $is_assigned_expert = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
         }
 
         // Get expert status info
@@ -908,17 +908,17 @@ class Maneli_Render_Helpers {
         }
         
         // Format date with Persian numbers
-        $formatted_date = self::maneli_gregorian_to_jalali($cash_post->post_date, 'Y/m/d');
+        $formatted_date = self::autopuzzle_gregorian_to_jalali($cash_post->post_date, 'Y/m/d');
         $formatted_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($formatted_date) : $formatted_date;
         ?>
         <tr class="crm-contact">
-            <td data-title="<?php esc_attr_e('ID', 'maneli-car-inquiry'); ?>">#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?></td>
-            <td data-title="<?php esc_attr_e('Customer', 'maneli-car-inquiry'); ?>"><?php echo esc_html($customer_name); ?></td>
-            <td data-title="<?php esc_attr_e('Mobile', 'maneli-car-inquiry'); ?>"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($customer_mobile) : esc_html($customer_mobile); ?></td>
-            <td data-title="<?php esc_attr_e('Car', 'maneli-car-inquiry'); ?>">
+            <td data-title="<?php esc_attr_e('ID', 'autopuzzle'); ?>">#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?></td>
+            <td data-title="<?php esc_attr_e('Customer', 'autopuzzle'); ?>"><?php echo esc_html($customer_name); ?></td>
+            <td data-title="<?php esc_attr_e('Mobile', 'autopuzzle'); ?>"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($customer_mobile) : esc_html($customer_mobile); ?></td>
+            <td data-title="<?php esc_attr_e('Car', 'autopuzzle'); ?>">
                 <?php echo esc_html(get_the_title($product_id)); ?>
             </td>
-            <td class="inquiry-status-cell-cash" data-title="<?php esc_attr_e('Status', 'maneli-car-inquiry'); ?>">
+            <td class="inquiry-status-cell-cash" data-title="<?php esc_attr_e('Status', 'autopuzzle'); ?>">
                 <?php
                 // Determine latest/current status to display
                 // Priority: expert_status > inquiry_status
@@ -930,20 +930,20 @@ class Maneli_Render_Helpers {
                 ?>
             </td>
             <?php if ($is_admin) : ?>
-                <td data-title="<?php esc_attr_e('Assigned', 'maneli-car-inquiry'); ?>">
+                <td data-title="<?php esc_attr_e('Assigned', 'autopuzzle'); ?>">
                     <?php if (!empty($expert_name)) : ?>
                         <span class="assigned-expert-name"><?php echo esc_html($expert_name); ?></span>
                     <?php else : ?>
-                        <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" title="<?php esc_attr_e('Assign Expert', 'maneli-car-inquiry'); ?>">
-                            <i class="la la-user-plus me-1"></i><?php esc_html_e('Assign', 'maneli-car-inquiry'); ?>
+                        <button class="btn btn-sm btn-info-light assign-expert-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="cash" title="<?php esc_attr_e('Assign Expert', 'autopuzzle'); ?>">
+                            <i class="la la-user-plus me-1"></i><?php esc_html_e('Assign', 'autopuzzle'); ?>
                         </button>
                     <?php endif; ?>
                 </td>
             <?php endif; ?>
-            <td data-title="<?php esc_attr_e('Date', 'maneli-car-inquiry'); ?>"><?php echo esc_html($formatted_date); ?></td>
-            <td data-title="<?php esc_attr_e('Actions', 'maneli-car-inquiry'); ?>">
+            <td data-title="<?php esc_attr_e('Date', 'autopuzzle'); ?>"><?php echo esc_html($formatted_date); ?></td>
+            <td data-title="<?php esc_attr_e('Actions', 'autopuzzle'); ?>">
                 <div class="btn-list">
-                    <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'maneli-car-inquiry'); ?>">
+                    <a href="<?php echo esc_url($report_url); ?>" class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'autopuzzle'); ?>">
                         <i class="la la-eye"></i>
                     </a>
                     <?php if ($is_admin || $is_assigned_expert) : 
@@ -953,14 +953,14 @@ class Maneli_Render_Helpers {
                                     data-phone="<?php echo esc_attr($customer_mobile); ?>"
                                     data-customer-name="<?php echo esc_attr($customer_name); ?>"
                                     data-inquiry-type="cash"
-                                    title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                    title="<?php esc_attr_e('Send SMS', 'autopuzzle'); ?>">
                                 <i class="la la-sms"></i>
                             </button>
                         <?php endif; ?>
                         <button class="btn btn-sm btn-info-light btn-icon view-sms-history-btn" 
                                 data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
                                 data-inquiry-type="cash" 
-                                title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                                title="<?php esc_attr_e('SMS History', 'autopuzzle'); ?>">
                             <i class="la la-history"></i>
                         </button>
                     <?php endif; ?>
@@ -981,7 +981,7 @@ class Maneli_Render_Helpers {
             return null;
         }
         
-        $raw = Maneli_Options_Helper::get_option('expert_statuses', '');
+        $raw = Autopuzzle_Options_Helper::get_option('expert_statuses', '');
         $lines = array_filter(array_map('trim', explode("\n", (string)$raw)));
         
         foreach ($lines as $line) {

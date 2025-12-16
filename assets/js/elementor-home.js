@@ -36,7 +36,7 @@
 
         // Close search when clicking outside
         $(document).on('click', function(e) {
-            if (!$(e.target).closest('.maneli-header-modern').length) {
+            if (!$(e.target).closest('.autopuzzle-header-modern').length) {
                 $('#search-bar').removeClass('active');
             }
         });
@@ -207,7 +207,7 @@
      */
     function initializeMobileMenu() {
         const menuToggle = $('#mobile-menu-toggle');
-        const header = $('.maneli-header-modern');
+        const header = $('.autopuzzle-header-modern');
         let mobileNavOpen = false;
 
         menuToggle.on('click', function(e) {
@@ -227,7 +227,7 @@
 
         // Close menu when clicking outside
         $(document).on('click', function(e) {
-            if (mobileNavOpen && !$(e.target).closest('.maneli-header-modern').length) {
+            if (mobileNavOpen && !$(e.target).closest('.autopuzzle-header-modern').length) {
                 mobileNavOpen = false;
                 menuToggle.removeClass('active');
                 hideMobileMenu();

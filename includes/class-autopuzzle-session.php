@@ -2,14 +2,14 @@
 /**
  * Session management for the plugin
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Session {
+class Autopuzzle_Session {
 
     /**
      * Start session if not started
@@ -101,7 +101,7 @@ class Maneli_Session {
     public function check_timeout() {
         if ($this->is_logged_in()) {
             $login_time = $this->get('login_time');
-            $timeout = get_option('maneli_session_timeout', 3600);
+            $timeout = get_option('autopuzzle_session_timeout', 3600);
             
             if (time() - $login_time > $timeout) {
                 $this->destroy();
@@ -117,13 +117,13 @@ class Maneli_Session {
      */
     public static function cleanup_old_sessions() {
         // Run cleanup every 24 hours only
-        $last_cleanup = get_transient('maneli_session_cleanup_last_run');
+        $last_cleanup = get_transient('autopuzzle_session_cleanup_last_run');
         if ($last_cleanup !== false) {
             return; // Already cleaned up recently
         }
         
         // Mark cleanup as done for next 24 hours
-        set_transient('maneli_session_cleanup_last_run', true, 24 * HOUR_IN_SECONDS);
+        set_transient('autopuzzle_session_cleanup_last_run', true, 24 * HOUR_IN_SECONDS);
         
         // Get session save path
         $session_path = ini_get('session.save_path');

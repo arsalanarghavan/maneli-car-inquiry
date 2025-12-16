@@ -5,7 +5,7 @@
  * This template is included at the top of the inquiry form to show the user's
  * current stage in the process.
  *
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryForm
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/InquiryForm
  * @author  Gemini
  * @version 1.0.0
  *
@@ -18,16 +18,16 @@ if (!defined('ABSPATH')) {
 
 // Define the steps of the process
 $steps = [
-    1 => esc_html__('Select Car', 'maneli-car-inquiry'),
-    2 => esc_html__('Complete Information', 'maneli-car-inquiry'),
-    3 => esc_html__('Confirm Car', 'maneli-car-inquiry'),
-    4 => esc_html__('Payment', 'maneli-car-inquiry'),
-    5 => esc_html__('Pending Review', 'maneli-car-inquiry'),
-    6 => esc_html__('Final Result', 'maneli-car-inquiry'),
+    1 => esc_html__('Select Car', 'autopuzzle'),
+    2 => esc_html__('Complete Information', 'autopuzzle'),
+    3 => esc_html__('Confirm Car', 'autopuzzle'),
+    4 => esc_html__('Payment', 'autopuzzle'),
+    5 => esc_html__('Pending Review', 'autopuzzle'),
+    6 => esc_html__('Final Result', 'autopuzzle'),
 ];
 
 // Conditionally remove the payment step if it's disabled in the settings
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $payment_enabled = !empty($options['payment_enabled']) && $options['payment_enabled'] == '1';
 if (!$payment_enabled) {
     unset($steps[4]);
@@ -74,7 +74,7 @@ if (!$payment_enabled) {
                         </span>
                     </div>
                     <div class="<?php echo $text_class; ?> fs-12">
-                        <div class="fw-semibold"><?php printf(esc_html__('Step %s', 'maneli-car-inquiry'), number_format_i18n($visual_step_number)); ?></div>
+                        <div class="fw-semibold"><?php printf(esc_html__('Step %s', 'autopuzzle'), number_format_i18n($visual_step_number)); ?></div>
                         <div><?php echo esc_html($title); ?></div>
                     </div>
                 </div>

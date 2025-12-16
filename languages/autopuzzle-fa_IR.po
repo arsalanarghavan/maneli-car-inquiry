@@ -18,7 +18,7 @@ msgstr ""
 
 
 msgid "Maneli Car Inquiry plugin requires WooCommerce to be installed and activated. Please activate WooCommerce to continue."
-msgstr "پلاگین استعلام خودرو مانلی نیازمند نصب و فعال‌سازی ووکامرس است. لطفاً ووکامرس را فعال کنید تا ادامه دهید."
+msgstr "پلاگین استعلام خودرو نیازمند نصب و فعال‌سازی ووکامرس است. لطفاً ووکامرس را فعال کنید تا ادامه دهید."
 
 
 msgid "You do not have sufficient permissions to access this page."
@@ -57,11 +57,11 @@ msgstr "مشتری"
 
 
 msgid "Maneli Expert"
-msgstr "کارشناس مانلی"
+msgstr "کارشناس سیستم"
 
 
 msgid "Maneli Manager"
-msgstr "مدیر مانلی"
+msgstr "مدیر سیستم"
 
 
 msgid "General Manager"
@@ -1643,7 +1643,7 @@ msgstr "کل کاربران"
 
 
 msgid "Maneli Experts"
-msgstr "کارشناسان مانلی"
+msgstr "کارشناسان سیستم"
 
 #: includes/public/class-cash-inquiry-handler.php
 msgid "New Cash Inquiry"
@@ -2084,7 +2084,7 @@ msgstr "مدیریت کارشناسان"
 
 
 msgid "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
-msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس مانلی\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس مانلی» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
+msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس سیستم\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس سیستم» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
 
 
 msgid "Finotex"
@@ -2697,7 +2697,7 @@ msgstr "تنظیمات افزونه"
 
 
 msgid "Configure all aspects of the Maneli Car Inquiry plugin from this centralized settings panel."
-msgstr "تمام جنبه‌های افزونه استعلام خودرو مانلی را از این پنل تنظیمات متمرکز پیکربندی کنید."
+msgstr "تمام جنبه‌های افزونه استعلام خودرو را از این پنل تنظیمات متمرکز پیکربندی کنید."
 
 
 msgid "Post-Approval Message"
@@ -3025,7 +3025,7 @@ msgstr "تنظیمات سیستم"
 
 
 msgid "Maneli Car System Settings"
-msgstr "تنظیمات سیستم مانلی کار"
+msgstr "تنظیمات سیستم"
 
 
 msgid "Success!"
@@ -4093,7 +4093,7 @@ msgid "Login Verification"
 msgstr "تایید ورود"
 
 msgid "Maneli Admin"
-msgstr "مدیر مانلی"
+msgstr "مدیر سیستم"
 
 msgid "Manufacturing Year"
 msgstr "سال ساخت"
@@ -11583,7 +11583,7 @@ msgstr "خلاصه کلی"
 
 # Create Password Page
 msgid "Create Password - Maneli Car Inquiry"
-msgstr "ایجاد رمز عبور - استعلام خودرو مانلی"
+msgstr "ایجاد رمز عبور - سیستم استعلام"
 
 msgid "Create Password"
 msgstr "ایجاد رمز عبور"

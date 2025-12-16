@@ -4,7 +4,7 @@
  * این کلاس خنثی شده است تا از ایجاد صفحه گزارش در بک‌اند جلوگیری کند،
  * زیرا تمامی عملکردهای گزارش‌گیری اکنون توسط شورت‌کدها در فرانت‌اند مدیریت می‌شوند.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.1.0 (Neutralized for frontend-only mode)
  */
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Credit_Report_Page {
+class Autopuzzle_Credit_Report_Page {
 
     /**
      * The hook suffix for the custom admin page.

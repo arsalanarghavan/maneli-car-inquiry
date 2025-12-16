@@ -3,7 +3,7 @@
  * Main handler for loading all shortcode-related classes and enqueuing global assets.
  * This class acts as a central loader and delegates the shortcode rendering to other specialized classes.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.1 (Removed duplicate calculator assets loading)
  */
@@ -12,11 +12,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Shortcode_Handler {
+class Autopuzzle_Shortcode_Handler {
 
     public function __construct() {
         // Check license before loading shortcodes (using optimized helper)
-        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+        if (!Autopuzzle_Permission_Helpers::is_license_active() && !Autopuzzle_Permission_Helpers::is_demo_mode()) {
             // License not active - don't load shortcodes
             return;
         }
@@ -32,11 +32,11 @@ class Maneli_Shortcode_Handler {
      * has been moved to dashboard pages for better UX.
      */
     private function load_shortcode_classes() {
-        $shortcode_path = MANELI_INQUIRY_PLUGIN_PATH . 'includes/shortcodes/';
+        $shortcode_path = AUTOPUZZLE_PLUGIN_PATH . 'includes/shortcodes/';
         
         // Active Shortcodes
         require_once $shortcode_path . 'class-loan-calculator-shortcode.php';
-        new Maneli_Loan_Calculator_Shortcode();
+        new Autopuzzle_Loan_Calculator_Shortcode();
     }
 
     /**
@@ -57,73 +57,73 @@ class Maneli_Shortcode_Handler {
         $should_load_assets = $has_shortcodes || $is_product_page;
         
         // Register Line Awesome Complete (but only enqueue if page has shortcodes or is product)
-        $line_awesome_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-line-awesome-complete.css';
+        $line_awesome_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-line-awesome-complete.css';
         if (file_exists($line_awesome_path)) {
-            wp_register_style('maneli-line-awesome-complete', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-line-awesome-complete.css', [], '1.0.0');
+            wp_register_style('autopuzzle-line-awesome-complete', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-line-awesome-complete.css', [], '1.0.0');
             // Only enqueue if needed - saves ~100KB per page
             if ($should_load_assets) {
-                wp_enqueue_style('maneli-line-awesome-complete');
+                wp_enqueue_style('autopuzzle-line-awesome-complete');
             }
         }
         
         // Register and enqueue frontend styles - Check if frontend.css exists before enqueuing
-        $frontend_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css';
+        $frontend_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/frontend.css';
         if (file_exists($frontend_css_path)) {
             $css_version = filemtime($frontend_css_path);
-            wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', ['maneli-line-awesome-complete'], $css_version);
+            wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css', ['autopuzzle-line-awesome-complete'], $css_version);
             // Only enqueue if page has shortcodes or is product page
             if ($should_load_assets) {
-                wp_enqueue_style('maneli-frontend-styles');
+                wp_enqueue_style('autopuzzle-frontend-styles');
             }
         } else {
-            // Use maneli-shortcode-assets.css as fallback if frontend.css doesn't exist
-            $fallback_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-shortcode-assets.css';
+            // Use autopuzzle-shortcode-assets.css as fallback if frontend.css doesn't exist
+            $fallback_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-shortcode-assets.css';
             if (file_exists($fallback_css_path)) {
                 $css_version = filemtime($fallback_css_path);
-                wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-shortcode-assets.css', ['maneli-line-awesome-complete'], $css_version);
-                wp_enqueue_style('maneli-frontend-styles');
+                wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-shortcode-assets.css', ['autopuzzle-line-awesome-complete'], $css_version);
+                wp_enqueue_style('autopuzzle-frontend-styles');
             }
         }
         
         // Register and enqueue Bootstrap RTL
-        wp_register_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
-        wp_enqueue_style('maneli-bootstrap-shortcode');
+        wp_register_style('autopuzzle-bootstrap-shortcode', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        wp_enqueue_style('autopuzzle-bootstrap-shortcode');
         
         // Shortcode Xintra compat - check if file exists
-        $xintra_compat_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
+        $xintra_compat_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
         if (file_exists($xintra_compat_path)) {
-            wp_register_style('maneli-shortcode-xintra-compat', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['maneli-frontend-styles'], '1.0.0');
-            wp_enqueue_style('maneli-shortcode-xintra-compat');
+            wp_register_style('autopuzzle-shortcode-xintra-compat', AUTOPUZZLE_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['autopuzzle-frontend-styles'], '1.0.0');
+            wp_enqueue_style('autopuzzle-shortcode-xintra-compat');
         }
         
         // Enqueue Cash Inquiry Form Styles
-        $cash_inquiry_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/cash-inquiry.css';
+        $cash_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/cash-inquiry.css';
         if (file_exists($cash_inquiry_css_path)) {
             $css_version = filemtime($cash_inquiry_css_path);
-            wp_enqueue_style('maneli-cash-inquiry-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/cash-inquiry.css', [], $css_version);
+            wp_enqueue_style('autopuzzle-cash-inquiry-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/cash-inquiry.css', [], $css_version);
         }
         
         // Enqueue Installment Inquiry Form Styles
-        $installment_inquiry_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/installment-inquiry.css';
+        $installment_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/installment-inquiry.css';
         if (file_exists($installment_inquiry_css_path)) {
             $css_version = filemtime($installment_inquiry_css_path);
-            wp_enqueue_style('maneli-installment-inquiry-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/installment-inquiry.css', [], $css_version);
+            wp_enqueue_style('autopuzzle-installment-inquiry-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/installment-inquiry.css', [], $css_version);
         }
         
         // Enqueue jQuery (required for all scripts)
         wp_enqueue_script('jquery');
         
         // Enqueue SweetAlert2 with jQuery dependency - Use local version
-        $sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+        $sweetalert2_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
         if (file_exists($sweetalert2_path)) {
-            wp_enqueue_style('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
-            wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+            wp_enqueue_style('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+            wp_enqueue_script('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
         } else {
             // Fallback to CDN if local file doesn't exist
             wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
         }
 
-        // NOTE: calculator.js is enqueued conditionally by Maneli_Loan_Calculator_Shortcode
+        // NOTE: calculator.js is enqueued conditionally by Autopuzzle_Loan_Calculator_Shortcode
         // Only on product pages to ensure proper localization and avoid duplicate loading        
         // Conditionally load assets for pages containing specific shortcodes that need Select2
         // Also load on product pages for calculator and inquiry forms
@@ -134,32 +134,32 @@ class Maneli_Shortcode_Handler {
         }
         
         // Logging tracker - Load on all frontend pages to track user actions (using optimized helper)
-        $enable_user_logging = Maneli_Options_Helper::is_option_enabled('enable_user_logging', false);
+        $enable_user_logging = Autopuzzle_Options_Helper::is_option_enabled('enable_user_logging', false);
         
         if ($enable_user_logging) {
-            $logging_tracker_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/logging-tracker.js';
+            $logging_tracker_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/logging-tracker.js';
             if (file_exists($logging_tracker_path)) {
                 wp_enqueue_script(
-                    'maneli-logging-tracker',
-                    MANELI_INQUIRY_PLUGIN_URL . 'assets/js/logging-tracker.js',
+                    'autopuzzle-logging-tracker',
+                    AUTOPUZZLE_PLUGIN_URL . 'assets/js/logging-tracker.js',
                     ['jquery'],
                     filemtime($logging_tracker_path),
                     true
                 );
                 
-                wp_localize_script('maneli-logging-tracker', 'maneliAjax', array(
+                wp_localize_script('autopuzzle-logging-tracker', 'maneliAjax', array(
                     'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('maneli_ajax_nonce'),
+                    'nonce' => wp_create_nonce('autopuzzle_ajax_nonce'),
                 ));
                 
-                wp_localize_script('maneli-logging-tracker', 'maneliLoggingSettings', array(
-                    'enable_logging_system' => Maneli_Options_Helper::is_option_enabled('enable_logging_system', false),
-                    'log_console_messages' => Maneli_Options_Helper::is_option_enabled('log_console_messages', false),
+                wp_localize_script('autopuzzle-logging-tracker', 'maneliLoggingSettings', array(
+                    'enable_logging_system' => Autopuzzle_Options_Helper::is_option_enabled('enable_logging_system', false),
+                    'log_console_messages' => Autopuzzle_Options_Helper::is_option_enabled('log_console_messages', false),
                     'enable_user_logging' => $enable_user_logging,
-                    'log_button_clicks' => Maneli_Options_Helper::is_option_enabled('log_button_clicks', false),
-                    'log_form_submissions' => Maneli_Options_Helper::is_option_enabled('log_form_submissions', false),
-                    'log_ajax_calls' => Maneli_Options_Helper::is_option_enabled('log_ajax_calls', false),
-                    'log_page_views' => Maneli_Options_Helper::is_option_enabled('log_page_views', false),
+                    'log_button_clicks' => Autopuzzle_Options_Helper::is_option_enabled('log_button_clicks', false),
+                    'log_form_submissions' => Autopuzzle_Options_Helper::is_option_enabled('log_form_submissions', false),
+                    'log_ajax_calls' => Autopuzzle_Options_Helper::is_option_enabled('log_ajax_calls', false),
+                    'log_page_views' => Autopuzzle_Options_Helper::is_option_enabled('log_page_views', false),
                 ));
             }
         }
@@ -173,12 +173,12 @@ class Maneli_Shortcode_Handler {
      */
     private function post_has_shortcodes($post) {
         $shortcodes_to_check = [
-            'maneli_user_list',
-            'maneli_inquiry_list',
-            'maneli_expert_inquiry_list',
-            'maneli_cash_inquiry_list',
-            'maneli_followup_list',
-            'maneli_product_editor',
+            'autopuzzle_user_list',
+            'autopuzzle_inquiry_list',
+            'autopuzzle_expert_inquiry_list',
+            'autopuzzle_cash_inquiry_list',
+            'autopuzzle_followup_list',
+            'autopuzzle_product_editor',
             // Add 'car_inquiry_form' for expert panel which uses Select2
             'car_inquiry_form', 
         ];

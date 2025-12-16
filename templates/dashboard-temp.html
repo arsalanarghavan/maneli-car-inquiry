@@ -7,12 +7,12 @@
         <meta charset="UTF-8">
         <meta name='viewport' content='width=device-width, initial-scale=1.0'>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="Description" content="داشبورد مدیریتی مانلی خودرو">
-        <meta name="Author" content="داشبورد مدیریتی مانلی خودرو">
-        <meta name="keywords" content="داشبورد مدیریتی مانلی خودرو">
+        <meta name="Description" content="AutoPuzzle Dashboard">
+        <meta name="Author" content="AutoPuzzle">
+        <meta name="keywords" content="dashboard, auto inquiry, system">
         
 		<!-- Title -->
-        <title>داشبورد مدیریتی مانلی خودرو</title>
+        <title>AutoPuzzle Dashboard</title>
 
         <!-- Favicon -->
         <link rel="icon" href="/mnt/1AF200F7F200D941/Projects/Plugin/maneli/assets/images/brand-logos/favicon.ico" type="image/x-icon">
@@ -2406,8 +2406,8 @@
 			<footer class="footer mt-auto py-3 bg-white text-center">
 				<div class="container">
 					<span class="text-muted"> <span id="year"></span>
-						طراحی با  <span class="bi bi-heart-fill text-danger"></span> توسط <a href="https://www.rtl-theme.com/author/hogondesign/products/" target="_blank">
-							<span class="fw-medium text-primary">مانلی خودرو</span></a>
+						طراحی با  <span class="bi bi-heart-fill text-danger"></span> توسط <a href="%%COMPANY_WEBSITE%%" target="_blank">
+							<span class="fw-medium text-primary">%%COMPANY_NAME%%</span></a>
 						
 
 
@@ -2493,7 +2493,7 @@
         <script>
             function changeLanguage(lang) {
                 // Store language preference in localStorage
-                localStorage.setItem('maneli_language', lang);
+                localStorage.setItem('autopuzzle_language', lang);
                 
                 // Update HTML lang attribute
                 document.documentElement.lang = lang;
@@ -2515,7 +2515,7 @@
             
             // Load saved language preference on page load
             document.addEventListener('DOMContentLoaded', function() {
-                const savedLang = localStorage.getItem('maneli_language') || 'fa';
+                const savedLang = localStorage.getItem('autopuzzle_language') || 'fa';
                 const currentLang = document.documentElement.lang || 'fa';
                 const currentDir = document.documentElement.dir || 'rtl';
                 

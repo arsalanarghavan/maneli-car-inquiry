@@ -2,7 +2,7 @@
 /**
  * Handles the submission and creation of cash inquiry posts.
  *
- * @package Maneli_Car_Inquiry/Includes/Public
+ * @package Autopuzzle_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.0
  */
@@ -11,11 +11,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Cash_Inquiry_Handler {
+class Autopuzzle_Cash_Inquiry_Handler {
 
     public function __construct() {
         // Check license before registering handlers (using optimized helper)
-        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+        if (!Autopuzzle_Permission_Helpers::is_license_active() && !Autopuzzle_Permission_Helpers::is_demo_mode()) {
             // License not active - don't register handlers
             return;
         }
@@ -53,8 +53,8 @@ class Maneli_Cash_Inquiry_Handler {
             }
         }
         
-        if (isset($_SESSION['maneli_user_id']) && !empty($_SESSION['maneli_user_id'])) {
-            $user_id = (int)$_SESSION['maneli_user_id'];
+        if (isset($_SESSION['autopuzzle_user_id']) && !empty($_SESSION['autopuzzle_user_id'])) {
+            $user_id = (int)$_SESSION['autopuzzle_user_id'];
             if ($user_id > 0 && get_user_by('ID', $user_id)) {
                 return $user_id;
             }
@@ -67,19 +67,19 @@ class Maneli_Cash_Inquiry_Handler {
      * AJAX handler for creating cash inquiry from customer dashboard
      */
     public function ajax_create_customer_cash_inquiry() {
-        check_ajax_referer('maneli_customer_cash_inquiry', 'nonce');
+        check_ajax_referer('autopuzzle_customer_cash_inquiry', 'nonce');
         
         $user_id = $this->get_current_user_id_for_inquiry();
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('You must be logged in to submit a request.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You must be logged in to submit a request.', 'autopuzzle')]);
             return;
         }
         
         // Verify CAPTCHA if enabled
-        if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
+        if (class_exists('Autopuzzle_Captcha_Helper') && Autopuzzle_Captcha_Helper::is_enabled()) {
             $captcha_token = '';
-            $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
+            $captcha_type = Autopuzzle_Captcha_Helper::get_captcha_type();
             
             // Get token based on CAPTCHA type
             if ($captcha_type === 'hcaptcha') {
@@ -90,7 +90,7 @@ class Maneli_Cash_Inquiry_Handler {
                 $captcha_token = isset($_POST['captcha_token']) ? sanitize_text_field($_POST['captcha_token']) : '';
             }
             
-            $captcha_result = Maneli_Captcha_Helper::verify_token($captcha_token, $captcha_type);
+            $captcha_result = Autopuzzle_Captcha_Helper::verify_token($captcha_token, $captcha_type);
             if (!$captcha_result['success']) {
                 wp_send_json_error(['message' => $captcha_result['message']]);
                 return;
@@ -101,7 +101,7 @@ class Maneli_Cash_Inquiry_Handler {
         $required_fields = ['product_id', 'first_name', 'last_name', 'mobile_number'];
         foreach ($required_fields as $field) {
             if (empty($_POST[$field])) {
-                wp_send_json_error(['message' => esc_html__('Please fill out all required fields.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Please fill out all required fields.', 'autopuzzle')]);
                 return;
             }
         }
@@ -128,12 +128,12 @@ class Maneli_Cash_Inquiry_Handler {
             }
             
             wp_send_json_success([
-                'message' => esc_html__('Your cash request has been successfully submitted. An expert will contact you soon.', 'maneli-car-inquiry'),
+                'message' => esc_html__('Your cash request has been successfully submitted. An expert will contact you soon.', 'autopuzzle'),
                 'inquiry_id' => $post_id,
                 'redirect_url' => add_query_arg('cash_inquiry_id', $post_id, home_url('/dashboard/inquiries/cash'))
             ]);
         } else {
-            wp_send_json_error(['message' => esc_html__('An error occurred while creating your request. Please try again.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('An error occurred while creating your request. Please try again.', 'autopuzzle')]);
         }
     }
 
@@ -141,20 +141,20 @@ class Maneli_Cash_Inquiry_Handler {
      * Handles the validation and processing of the cash inquiry submission form.
      */
     public function handle_cash_inquiry_submission() {
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_cash_inquiry_nonce')) {
-            wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'autopuzzle_cash_inquiry_nonce')) {
+            wp_die(esc_html__('Security check failed!', 'autopuzzle'));
         }
     
         $user_id = $this->get_current_user_id_for_inquiry();
         
         if (!$user_id) {
-            wp_die(esc_html__('You must be logged in to submit a request.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('You must be logged in to submit a request.', 'autopuzzle'));
         }
     
         $required_fields = ['product_id', 'cash_first_name', 'cash_last_name', 'cash_mobile_number', 'cash_car_color'];
         foreach ($required_fields as $field) {
             if (empty($_POST[$field])) {
-                wp_die(esc_html__('Please fill out all required fields.', 'maneli-car-inquiry'));
+                wp_die(esc_html__('Please fill out all required fields.', 'autopuzzle'));
             }
         }
     
@@ -175,7 +175,7 @@ class Maneli_Cash_Inquiry_Handler {
             exit;
         } else {
             // Handle error, maybe redirect back with an error query arg
-            wp_die(esc_html__('An error occurred while creating your request. Please try again.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('An error occurred while creating your request. Please try again.', 'autopuzzle'));
         }
     }
 
@@ -205,7 +205,7 @@ class Maneli_Cash_Inquiry_Handler {
     
         $post_title = sprintf(
             '%s: %s %s for %s',
-            esc_html__('Cash Request', 'maneli-car-inquiry'),
+            esc_html__('Cash Request', 'autopuzzle'),
             $first_name,
             $last_name,
             $car_name
@@ -222,7 +222,7 @@ class Maneli_Cash_Inquiry_Handler {
     
         if (is_wp_error($post_id)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Cash Inquiry Error: ' . $post_id->get_error_message());
+                error_log('AutoPuzzle Cash Inquiry Error: ' . $post_id->get_error_message());
             }
             return false;
         }
@@ -259,40 +259,40 @@ class Maneli_Cash_Inquiry_Handler {
         self::send_admin_notification($first_name . ' ' . $last_name, $car_name);
         
         // Send notifications about new cash inquiry
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         // Notify customer
         if ($user_id > 0) {
-            $customer_notification = Maneli_Notification_Handler::create_notification(array(
+            $customer_notification = Autopuzzle_Notification_Handler::create_notification(array(
                 'user_id' => $user_id,
                 'type' => 'inquiry_new',
-                'title' => esc_html__('Your cash request has been submitted', 'maneli-car-inquiry'),
-                'message' => sprintf(esc_html__('Your cash request for %s has been successfully submitted and is being reviewed', 'maneli-car-inquiry'), $car_name),
+                'title' => esc_html__('Your cash request has been submitted', 'autopuzzle'),
+                'message' => sprintf(esc_html__('Your cash request for %s has been successfully submitted and is being reviewed', 'autopuzzle'), $car_name),
                 'link' => home_url('/dashboard/inquiries/cash?cash_inquiry_id=' . $post_id),
                 'related_id' => $post_id,
             ));
             if (defined('WP_DEBUG') && WP_DEBUG && !$customer_notification) {
-                error_log('Maneli: Failed to create customer notification for cash inquiry ' . $post_id . ', user_id: ' . $user_id);
+                error_log('AutoPuzzle: Failed to create customer notification for cash inquiry ' . $post_id . ', user_id: ' . $user_id);
             }
         }
         
         // Notify all managers and admins
         $managers = get_users(array(
-            'role__in' => array('administrator', 'maneli_admin'),
+            'role__in' => array('administrator', 'autopuzzle_admin'),
             'fields' => 'ids'
         ));
         
         foreach ($managers as $manager_id) {
-            $manager_notification = Maneli_Notification_Handler::create_notification(array(
+            $manager_notification = Autopuzzle_Notification_Handler::create_notification(array(
                 'user_id' => $manager_id,
                 'type' => 'inquiry_new',
-                'title' => esc_html__('New Cash Inquiry', 'maneli-car-inquiry'),
-                'message' => sprintf(esc_html__('A new cash inquiry from %s for %s has been registered', 'maneli-car-inquiry'), $first_name . ' ' . $last_name, $car_name),
+                'title' => esc_html__('New Cash Inquiry', 'autopuzzle'),
+                'message' => sprintf(esc_html__('A new cash inquiry from %s for %s has been registered', 'autopuzzle'), $first_name . ' ' . $last_name, $car_name),
                 'link' => home_url('/dashboard/inquiries/cash?cash_inquiry_id=' . $post_id),
                 'related_id' => $post_id,
             ));
             if (defined('WP_DEBUG') && WP_DEBUG && !$manager_notification) {
-                error_log('Maneli: Failed to create manager notification for cash inquiry ' . $post_id . ', manager_id: ' . $manager_id);
+                error_log('AutoPuzzle: Failed to create manager notification for cash inquiry ' . $post_id . ', manager_id: ' . $manager_id);
             }
         }
         
@@ -306,13 +306,13 @@ class Maneli_Cash_Inquiry_Handler {
      * @param string $car_name      The name of the requested car.
      */
     private static function send_admin_notification($customer_name, $car_name) {
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $admin_mobile = $options['admin_notification_mobile'] ?? '';
         $pattern_admin = $options['sms_pattern_new_inquiry'] ?? 0;
         
         if (!empty($admin_mobile) && $pattern_admin > 0) {
-            $sms_handler = new Maneli_SMS_Handler();
-            $car_name_suffix = sprintf('%s (%s)', $car_name, esc_html__('Cash', 'maneli-car-inquiry'));
+            $sms_handler = new Autopuzzle_SMS_Handler();
+            $car_name_suffix = sprintf('%s (%s)', $car_name, esc_html__('Cash', 'autopuzzle'));
             $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name_suffix]);
         }
     }

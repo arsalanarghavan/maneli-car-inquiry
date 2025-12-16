@@ -16,7 +16,7 @@ if (!function_exists('persian_numbers')) {
 }
 
 // Permission check - Only Admin can access
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
@@ -28,7 +28,7 @@ $detail_user_id = $view_user_id ?: $edit_user_id;
 
 if ($detail_user_id) {
     // Load user detail page
-    $user_detail_file = MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/user-detail.php';
+    $user_detail_file = AUTOPUZZLE_PLUGIN_PATH . 'templates/dashboard/user-detail.php';
     if (file_exists($user_detail_file)) {
         include $user_detail_file;
         return;
@@ -73,7 +73,7 @@ $role_counts = count_users();
 $total_all_users = $role_counts['total_users'];
 $admin_count = isset($role_counts['avail_roles']['administrator']) ? $role_counts['avail_roles']['administrator'] : 0;
 $customer_count = isset($role_counts['avail_roles']['customer']) ? $role_counts['avail_roles']['customer'] : 0;
-$expert_count = isset($role_counts['avail_roles']['maneli_expert']) ? $role_counts['avail_roles']['maneli_expert'] : 0;
+$expert_count = isset($role_counts['avail_roles']['autopuzzle_expert']) ? $role_counts['avail_roles']['autopuzzle_expert'] : 0;
 
 // Active users (logged in last 7 days)
 $active_users_query = new WP_User_Query([
@@ -95,11 +95,11 @@ $active_users_count = $active_users_query->get_total();
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('User Management', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('User Management', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('User Management', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('User Management', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- Page Header Close -->
@@ -177,7 +177,7 @@ $active_users_count = $active_users_query->get_total();
                     color: rgba(255, 255, 255, 0.6) !important;
                 }
                 </style>
-                <div class="row mb-4 maneli-mobile-card-scroll">
+                <div class="row mb-4 autopuzzle-mobile-card-scroll">
                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
                         <div class="card custom-card crm-card overflow-hidden">
                             <div class="card-body">
@@ -188,10 +188,10 @@ $active_users_count = $active_users_query->get_total();
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Users', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Users', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($total_all_users) : persian_numbers(number_format_i18n($total_all_users)); ?></h4>
-                                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Total Users', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($total_all_users) : persian_numbers(number_format_i18n($total_all_users)); ?></h4>
+                                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Total Users', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -207,10 +207,10 @@ $active_users_count = $active_users_query->get_total();
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Managers', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Managers', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($admin_count) : persian_numbers(number_format_i18n($admin_count)); ?></h4>
-                                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Managers', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($admin_count) : persian_numbers(number_format_i18n($admin_count)); ?></h4>
+                                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Managers', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -226,10 +226,10 @@ $active_users_count = $active_users_query->get_total();
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Experts', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Experts', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($expert_count) : persian_numbers(number_format_i18n($expert_count)); ?></h4>
-                                    <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Experts', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($expert_count) : persian_numbers(number_format_i18n($expert_count)); ?></h4>
+                                    <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Experts', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -245,10 +245,10 @@ $active_users_count = $active_users_query->get_total();
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Customers', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Customers', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($customer_count) : persian_numbers(number_format_i18n($customer_count)); ?></h4>
-                                    <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Customers', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($customer_count) : persian_numbers(number_format_i18n($customer_count)); ?></h4>
+                                    <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Customers', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -260,28 +260,28 @@ $active_users_count = $active_users_query->get_total();
                     <div class="card-header d-flex justify-content-between align-items-center border-block-end">
                         <div class="card-title">
                             <i class="la la-users me-2"></i>
-                            <?php esc_html_e('User Management', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('User Management', 'autopuzzle'); ?>
                         </div>
                         <div class="btn-list">
                             <button class="btn btn-primary btn-wave" data-bs-toggle="modal" data-bs-target="#addUserModal">
                                 <i class="la la-plus me-1"></i>
-                                <?php esc_html_e('New User', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('New User', 'autopuzzle'); ?>
                             </button>
                         </div>
                     </div>
                     <div class="card-body">
                         <!-- Filters -->
-                        <div class="maneli-mobile-filter mb-3" data-maneli-mobile-filter>
+                        <div class="autopuzzle-mobile-filter mb-3" data-autopuzzle-mobile-filter>
                             <button
                                 type="button"
-                                class="maneli-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
-                                data-maneli-filter-toggle
+                                class="autopuzzle-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
+                                data-autopuzzle-filter-toggle
                                 aria-expanded="false"
                             >
-                                <span class="fw-semibold"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></span>
-                                <i class="ri-arrow-down-s-line maneli-mobile-filter-arrow"></i>
+                                <span class="fw-semibold"><?php esc_html_e('Filters', 'autopuzzle'); ?></span>
+                                <i class="ri-arrow-down-s-line autopuzzle-mobile-filter-arrow"></i>
                             </button>
-                            <div class="maneli-mobile-filter-body" data-maneli-filter-body>
+                            <div class="autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                         <form method="get" action="" class="mb-3">
                             <div class="row g-3 mb-0">
                                 <div class="col-md-4">
@@ -289,7 +289,7 @@ $active_users_count = $active_users_query->get_total();
                                         <span class="input-group-text bg-light">
                                             <i class="la la-search"></i>
                                         </span>
-                                        <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search name, mobile...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
+                                        <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search name, mobile...', 'autopuzzle'); ?>" value="<?php echo esc_attr($search); ?>">
                                         <?php 
                                         // Preserve page parameter if exists
                                         if (isset($_GET['page'])): 
@@ -308,21 +308,21 @@ $active_users_count = $active_users_query->get_total();
                                 </div>
                                 <div class="col-md-3">
                                     <select class="form-select" name="role">
-                                        <option value=""><?php esc_html_e('All Roles', 'maneli-car-inquiry'); ?></option>
-                                        <option value="administrator" <?php selected($role_filter, 'administrator'); ?>><?php esc_html_e('Administrator', 'maneli-car-inquiry'); ?></option>
-                                        <option value="maneli_expert" <?php selected($role_filter, 'maneli_expert'); ?>><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></option>
-                                        <option value="customer" <?php selected($role_filter, 'customer'); ?>><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Roles', 'autopuzzle'); ?></option>
+                                        <option value="administrator" <?php selected($role_filter, 'administrator'); ?>><?php esc_html_e('Administrator', 'autopuzzle'); ?></option>
+                                        <option value="autopuzzle_expert" <?php selected($role_filter, 'autopuzzle_expert'); ?>><?php esc_html_e('Expert', 'autopuzzle'); ?></option>
+                                        <option value="customer" <?php selected($role_filter, 'customer'); ?>><?php esc_html_e('Customer', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
                                     <button type="submit" class="btn btn-primary btn-wave">
                                         <i class="la la-search me-1"></i>
-                                        <?php esc_html_e('Search', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('Search', 'autopuzzle'); ?>
                                     </button>
                                     <?php if (!empty($search) || !empty($role_filter)): ?>
                                         <a href="?" class="btn btn-light">
                                             <i class="la la-times me-1"></i>
-                                            <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
+                                            <?php esc_html_e('Clear', 'autopuzzle'); ?>
                                         </a>
                                     <?php endif; ?>
                                 </div>
@@ -336,11 +336,11 @@ $active_users_count = $active_users_query->get_total();
                             <table class="table text-nowrap table-hover table-bordered">
                                 <thead class="table-light">
                                     <tr>
-                                        <th><?php esc_html_e('Username', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Role', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Username', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Mobile Number', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Role', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -348,23 +348,23 @@ $active_users_count = $active_users_query->get_total();
                                         <?php foreach ($users as $user): 
                                             $user_roles = is_array($user->roles) ? $user->roles : [];
                                             $primary_role = !empty($user_roles) && isset($user_roles[0]) ? $user_roles[0] : '';
-                                            $role_display = !empty($primary_role) ? ucfirst($primary_role) : esc_html__('No Role', 'maneli-car-inquiry');
+                                            $role_display = !empty($primary_role) ? ucfirst($primary_role) : esc_html__('No Role', 'autopuzzle');
                                             
                                             // Role names
                                             $role_labels = [
-                                                'administrator' => esc_html__('Administrator', 'maneli-car-inquiry'),
-                                                'maneli_admin' => esc_html__('Maneli Admin', 'maneli-car-inquiry'),
-                                                'maneli_expert' => esc_html__('Expert', 'maneli-car-inquiry'),
-                                                'customer' => esc_html__('Customer', 'maneli-car-inquiry'),
-                                                'subscriber' => esc_html__('Subscriber', 'maneli-car-inquiry')
+                                                'administrator' => esc_html__('Administrator', 'autopuzzle'),
+                                                'autopuzzle_admin' => esc_html__('AutoPuzzle Admin', 'autopuzzle'),
+                                                'autopuzzle_expert' => esc_html__('Expert', 'autopuzzle'),
+                                                'customer' => esc_html__('Customer', 'autopuzzle'),
+                                                'subscriber' => esc_html__('Subscriber', 'autopuzzle')
                                             ];
                                             $role_display = !empty($primary_role) && isset($role_labels[$primary_role]) ? $role_labels[$primary_role] : $role_display;
                                             
                                             // Role badge color
                                             $role_colors = [
                                                 'administrator' => 'success',
-                                                'maneli_admin' => 'success',
-                                                'maneli_expert' => 'info',
+                                                'autopuzzle_admin' => 'success',
+                                                'autopuzzle_expert' => 'info',
                                                 'customer' => 'warning',
                                                 'subscriber' => 'secondary'
                                             ];
@@ -399,17 +399,17 @@ $active_users_count = $active_users_query->get_total();
                                                 </td>
                                                 <td>
                                                     <?php if ($user->user_status == 0): ?>
-                                                        <span class="badge bg-success"><?php esc_html_e('Active', 'maneli-car-inquiry'); ?></span>
+                                                        <span class="badge bg-success"><?php esc_html_e('Active', 'autopuzzle'); ?></span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-danger"><?php esc_html_e('Inactive', 'maneli-car-inquiry'); ?></span>
+                                                        <span class="badge bg-danger"><?php esc_html_e('Inactive', 'autopuzzle'); ?></span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
                                                     <div class="btn-list">
-                                                        <button class="btn btn-sm btn-primary-light" onclick="viewUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-primary-light" onclick="viewUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('View', 'autopuzzle'); ?>">
                                                             <i class="la la-eye"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-info-light" onclick="editUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('Edit', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-info-light" onclick="editUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('Edit', 'autopuzzle'); ?>">
                                                             <i class="la la-edit"></i>
                                                         </button>
                                                         <?php if (!empty($mobile_number)): ?>
@@ -417,17 +417,17 @@ $active_users_count = $active_users_query->get_total();
                                                                 data-user-id="<?php echo esc_attr($user->ID); ?>" 
                                                                 data-phone="<?php echo esc_attr($mobile_number); ?>"
                                                                 data-user-name="<?php echo esc_attr($user->display_name); ?>"
-                                                                title="<?php esc_attr_e('Send SMS', 'maneli-car-inquiry'); ?>">
+                                                                title="<?php esc_attr_e('Send SMS', 'autopuzzle'); ?>">
                                                             <i class="la la-sms"></i>
                                                         </button>
                                                         <?php endif; ?>
                                                         <button class="btn btn-sm btn-info-light view-sms-history-btn" 
                                                                 data-user-id="<?php echo esc_attr($user->ID); ?>" 
                                                                 data-phone="<?php echo esc_attr($mobile_number); ?>"
-                                                                title="<?php esc_attr_e('SMS History', 'maneli-car-inquiry'); ?>">
+                                                                title="<?php esc_attr_e('SMS History', 'autopuzzle'); ?>">
                                                             <i class="la la-history"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger-light" onclick="deleteUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-danger-light" onclick="deleteUser(<?php echo $user->ID; ?>)" title="<?php esc_attr_e('Delete', 'autopuzzle'); ?>">
                                                             <i class="la la-trash"></i>
                                                         </button>
                                                     </div>
@@ -453,7 +453,7 @@ $active_users_count = $active_users_query->get_total();
                             <div class="card-footer border-top-0">
                                 <div class="d-flex align-items-center">
                                     <div>
-                                        <?php printf(esc_html__('Showing %s items', 'maneli-car-inquiry'), persian_numbers(number_format_i18n(count($users)))); ?> <i class="bi bi-arrow-left ms-2 fw-medium"></i>
+                                        <?php printf(esc_html__('Showing %s items', 'autopuzzle'), persian_numbers(number_format_i18n(count($users)))); ?> <i class="bi bi-arrow-left ms-2 fw-medium"></i>
                                     </div>
                                     <div class="ms-auto">
                                         <nav aria-label="Page navigation" class="pagination-style-4">
@@ -466,7 +466,7 @@ $active_users_count = $active_users_query->get_total();
                                         $prev_link = $paged > 1 ? add_query_arg('paged', $paged - 1, $base_url) : 'javascript:void(0);';
                                         $prev_disabled = $paged <= 1 ? ' disabled' : '';
                                         echo '<li class="page-item' . $prev_disabled . '">';
-                                        echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'maneli-car-inquiry') . '</a>';
+                                        echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'autopuzzle') . '</a>';
                                         echo '</li>';
                                         
                                         // Page numbers
@@ -482,7 +482,7 @@ $active_users_count = $active_users_query->get_total();
                                         $next_link = $paged < $total_pages ? add_query_arg('paged', $paged + 1, $base_url) : 'javascript:void(0);';
                                         $next_disabled = $paged >= $total_pages ? ' disabled' : '';
                                         echo '<li class="page-item' . $next_disabled . '">';
-                                        echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'maneli-car-inquiry') . '</a>';
+                                        echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'autopuzzle') . '</a>';
                                         echo '</li>';
                                         ?>
                                             </ul>
@@ -506,7 +506,7 @@ $active_users_count = $active_users_query->get_total();
             <div class="modal-header bg-primary-transparent">
                 <h5 class="modal-title">
                     <i class="la la-user-plus me-2"></i>
-                    <?php esc_html_e('Add New User', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Add New User', 'autopuzzle'); ?>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -515,46 +515,46 @@ $active_users_count = $active_users_query->get_total();
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" for="new-first-name">
-                                <?php esc_html_e('First Name', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('First Name', 'autopuzzle'); ?>
                                 <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="new-first-name" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" for="new-last-name">
-                                <?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Last Name', 'autopuzzle'); ?>
                                 <span class="text-danger">*</span>
                             </label>
                             <input type="text" class="form-control" id="new-last-name" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" for="new-mobile">
-                                <?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Mobile Number', 'autopuzzle'); ?>
                                 <span class="text-danger">*</span>
                             </label>
-                            <input type="tel" class="form-control" id="new-mobile" placeholder="<?php esc_attr_e('Enter mobile number', 'maneli-car-inquiry'); ?>" required>
+                            <input type="tel" class="form-control" id="new-mobile" placeholder="<?php esc_attr_e('Enter mobile number', 'autopuzzle'); ?>" required>
                             <small class="text-muted">
-                                <?php esc_html_e("Password is generated automatically. The user can reset it via \"Forgot Password\".", 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e("Password is generated automatically. The user can reset it via \"Forgot Password\".", 'autopuzzle'); ?>
                             </small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" for="new-role">
-                                <?php esc_html_e('Role', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Role', 'autopuzzle'); ?>
                                 <span class="text-danger">*</span>
                             </label>
                             <select class="form-select" id="new-role" required>
-                                <option value="customer"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></option>
-                                <option value="maneli_expert"><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></option>
+                                <option value="customer"><?php esc_html_e('Customer', 'autopuzzle'); ?></option>
+                                <option value="autopuzzle_expert"><?php esc_html_e('Expert', 'autopuzzle'); ?></option>
                             </select>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'autopuzzle'); ?></button>
                 <button type="button" class="btn btn-primary" onclick="saveUser()">
                     <i class="la la-save me-1"></i>
-                    <?php esc_html_e('Save', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Save', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -562,31 +562,31 @@ $active_users_count = $active_users_query->get_total();
 </div>
 
 <script>
-var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+var autopuzzleAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var autopuzzleAjaxNonce = '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>';
 
 // Localized strings
 const userTranslations = {
-    error: <?php echo wp_json_encode(esc_html__('Error!', 'maneli-car-inquiry')); ?>,
-    fillRequiredFields: <?php echo wp_json_encode(esc_html__('Please fill all required fields.', 'maneli-car-inquiry')); ?>,
-    saving: <?php echo wp_json_encode(esc_html__('Saving...', 'maneli-car-inquiry')); ?>,
-    success: <?php echo wp_json_encode(esc_html__('Success!', 'maneli-car-inquiry')); ?>,
-    userAdded: <?php echo wp_json_encode(esc_html__('User added successfully.', 'maneli-car-inquiry')); ?>,
-    addUserError: <?php echo wp_json_encode(esc_html__('Error adding user', 'maneli-car-inquiry')); ?>,
-    serverError: <?php echo wp_json_encode(esc_html__('Server connection error. Please try again.', 'maneli-car-inquiry')); ?>,
-    deleteUser: <?php echo wp_json_encode(esc_html__('Delete User?', 'maneli-car-inquiry')); ?>,
-    deleteIrreversible: <?php echo wp_json_encode(esc_html__('This action cannot be undone!', 'maneli-car-inquiry')); ?>,
-    confirmDelete: <?php echo wp_json_encode(esc_html__('Yes, Delete', 'maneli-car-inquiry')); ?>,
-    cancel: <?php echo wp_json_encode(esc_html__('Cancel', 'maneli-car-inquiry')); ?>,
-    deleting: <?php echo wp_json_encode(esc_html__('Deleting...', 'maneli-car-inquiry')); ?>,
-    deleted: <?php echo wp_json_encode(esc_html__('Deleted!', 'maneli-car-inquiry')); ?>,
-    userDeleted: <?php echo wp_json_encode(esc_html__('User deleted successfully.', 'maneli-car-inquiry')); ?>,
-    deleteUserError: <?php echo wp_json_encode(esc_html__('Error deleting user', 'maneli-car-inquiry')); ?>
+    error: <?php echo wp_json_encode(esc_html__('Error!', 'autopuzzle')); ?>,
+    fillRequiredFields: <?php echo wp_json_encode(esc_html__('Please fill all required fields.', 'autopuzzle')); ?>,
+    saving: <?php echo wp_json_encode(esc_html__('Saving...', 'autopuzzle')); ?>,
+    success: <?php echo wp_json_encode(esc_html__('Success!', 'autopuzzle')); ?>,
+    userAdded: <?php echo wp_json_encode(esc_html__('User added successfully.', 'autopuzzle')); ?>,
+    addUserError: <?php echo wp_json_encode(esc_html__('Error adding user', 'autopuzzle')); ?>,
+    serverError: <?php echo wp_json_encode(esc_html__('Server connection error. Please try again.', 'autopuzzle')); ?>,
+    deleteUser: <?php echo wp_json_encode(esc_html__('Delete User?', 'autopuzzle')); ?>,
+    deleteIrreversible: <?php echo wp_json_encode(esc_html__('This action cannot be undone!', 'autopuzzle')); ?>,
+    confirmDelete: <?php echo wp_json_encode(esc_html__('Yes, Delete', 'autopuzzle')); ?>,
+    cancel: <?php echo wp_json_encode(esc_html__('Cancel', 'autopuzzle')); ?>,
+    deleting: <?php echo wp_json_encode(esc_html__('Deleting...', 'autopuzzle')); ?>,
+    deleted: <?php echo wp_json_encode(esc_html__('Deleted!', 'autopuzzle')); ?>,
+    userDeleted: <?php echo wp_json_encode(esc_html__('User deleted successfully.', 'autopuzzle')); ?>,
+    deleteUserError: <?php echo wp_json_encode(esc_html__('Error deleting user', 'autopuzzle')); ?>
 };
 
 // Helper function to generate email from mobile
 function generateEmailFromMobile(mobile) {
-    return mobile + '@manelikhodro.com';
+    return mobile + '@' + (window.autopuzzleEmailDomain || 'system.local');
 }
 
 // Generate random password
@@ -613,7 +613,7 @@ function editUser(userId) {
 
 function saveUser() {
     if (typeof jQuery === 'undefined') {
-        alert('<?php echo esc_js(__('Please wait for the page to fully load.', 'maneli-car-inquiry')); ?>');
+        alert('<?php echo esc_js(__('Please wait for the page to fully load.', 'autopuzzle')); ?>');
         return;
     }
     
@@ -652,10 +652,10 @@ function saveUser() {
     }
     
     $.ajax({
-        url: maneliAjaxUrl,
+        url: autopuzzleAjaxUrl,
         type: 'POST',
         data: {
-            action: 'maneli_add_user',
+            action: 'autopuzzle_add_user',
             first_name: firstName,
             last_name: lastName,
             display_name: firstName + ' ' + lastName,
@@ -663,7 +663,7 @@ function saveUser() {
             role: role,
             password: password,
             email: email,
-            nonce: '<?php echo wp_create_nonce('maneli_add_user_nonce'); ?>'
+            nonce: '<?php echo wp_create_nonce('autopuzzle_add_user_nonce'); ?>'
         },
         success: function(response) {
             if (typeof Swal !== 'undefined') {
@@ -703,12 +703,12 @@ function deleteUser(userId) {
             if (typeof jQuery !== 'undefined') {
                 const $ = jQuery;
                 $.ajax({
-                    url: maneliAjaxUrl,
+                    url: autopuzzleAjaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'maneli_delete_user',
+                        action: 'autopuzzle_delete_user',
                         user_id: userId,
-                        nonce: '<?php echo wp_create_nonce('maneli_delete_user_nonce'); ?>'
+                        nonce: '<?php echo wp_create_nonce('autopuzzle_delete_user_nonce'); ?>'
                     },
                     success: function(response) {
                         if (response.success) {
@@ -723,7 +723,7 @@ function deleteUser(userId) {
                     }
                 });
             } else {
-                alert('<?php echo esc_js(__('Please wait for the page to fully load.', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('Please wait for the page to fully load.', 'autopuzzle')); ?>');
             }
         }
         return;
@@ -749,12 +749,12 @@ function deleteUser(userId) {
             });
             
             jQuery.ajax({
-                url: maneliAjaxUrl,
+                url: autopuzzleAjaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_delete_user',
+                    action: 'autopuzzle_delete_user',
                     user_id: userId,
-                    nonce: '<?php echo wp_create_nonce('maneli_delete_user_nonce'); ?>'
+                    nonce: '<?php echo wp_create_nonce('autopuzzle_delete_user_nonce'); ?>'
                 },
                 success: function(response) {
                     Swal.close();
@@ -796,28 +796,28 @@ function deleteUser(userId) {
                 
                 if (typeof Swal === 'undefined') {
                     console.error('SweetAlert2 is not loaded');
-                    alert('<?php echo esc_js(__('Please refresh the page and try again.', 'maneli-car-inquiry')); ?>');
+                    alert('<?php echo esc_js(__('Please refresh the page and try again.', 'autopuzzle')); ?>');
                     return;
                 }
                 
                 Swal.fire({
-                    title: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+                    title: '<?php echo esc_js(__('Send SMS', 'autopuzzle')); ?>',
                     html: `
                         <div class="text-start">
-                            <p><strong><?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?></strong> ${userName} (${phone})</p>
+                            <p><strong><?php echo esc_js(__('Recipient:', 'autopuzzle')); ?></strong> ${userName} (${phone})</p>
                             <div class="mb-3">
-                                <label class="form-label"><?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?></label>
-                                <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>"></textarea>
+                                <label class="form-label"><?php echo esc_js(__('Message:', 'autopuzzle')); ?></label>
+                                <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'autopuzzle')); ?>"></textarea>
                             </div>
                         </div>
                     `,
                     showCancelButton: true,
-                    confirmButtonText: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
-                    cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
+                    confirmButtonText: '<?php echo esc_js(__('Send', 'autopuzzle')); ?>',
+                    cancelButtonText: '<?php echo esc_js(__('Cancel', 'autopuzzle')); ?>',
                     preConfirm: function() {
                         var message = $('#sms-message').val();
                         if (!message.trim()) {
-                            Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>');
+                            Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'autopuzzle')); ?>');
                             return false;
                         }
                         return { message: message };
@@ -825,8 +825,8 @@ function deleteUser(userId) {
                 }).then(function(result) {
                     if (result.isConfirmed && result.value) {
                         Swal.fire({
-                            title: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
-                            text: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+                            title: '<?php echo esc_js(__('Sending...', 'autopuzzle')); ?>',
+                            text: '<?php echo esc_js(__('Please wait', 'autopuzzle')); ?>',
                             allowOutsideClick: false,
                             allowEscapeKey: false,
                             showConfirmButton: false,
@@ -836,11 +836,11 @@ function deleteUser(userId) {
                         });
                         
                         $.ajax({
-                            url: maneliAjaxUrl,
+                            url: autopuzzleAjaxUrl,
                             type: 'POST',
                             data: {
-                                action: 'maneli_send_single_sms',
-                                nonce: maneliAjaxNonce,
+                                action: 'autopuzzle_send_single_sms',
+                                nonce: autopuzzleAjaxNonce,
                                 recipient: phone,
                                 message: result.value.message,
                                 related_id: userId
@@ -848,14 +848,14 @@ function deleteUser(userId) {
                             success: function(response) {
                                 Swal.close();
                                 if (response.success) {
-                                    Swal.fire('<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>', 'success');
+                                    Swal.fire('<?php echo esc_js(__('Success', 'autopuzzle')); ?>', '<?php echo esc_js(__('SMS sent successfully!', 'autopuzzle')); ?>', 'success');
                                 } else {
-                                    Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', response.data?.message || '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>', 'error');
+                                    Swal.fire('<?php echo esc_js(__('Error', 'autopuzzle')); ?>', response.data?.message || '<?php echo esc_js(__('Failed to send SMS', 'autopuzzle')); ?>', 'error');
                                 }
                             },
                             error: function() {
                                 Swal.close();
-                                Swal.fire('<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>', '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>', 'error');
+                                Swal.fire('<?php echo esc_js(__('Error', 'autopuzzle')); ?>', '<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>', 'error');
                             }
                         });
                     }
@@ -890,8 +890,8 @@ function deleteUser(userId) {
                 if (!userId) {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
-                            title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
-                            text: '<?php echo esc_js(__('Invalid user ID.', 'maneli-car-inquiry')); ?>',
+                            title: '<?php echo esc_js(__('Error', 'autopuzzle')); ?>',
+                            text: '<?php echo esc_js(__('Invalid user ID.', 'autopuzzle')); ?>',
                             icon: 'error'
                         });
                     }
@@ -902,8 +902,8 @@ function deleteUser(userId) {
                 if (!modalElement) {
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
-                            title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
-                            text: '<?php echo esc_js(__('SMS history modal not found.', 'maneli-car-inquiry')); ?>',
+                            title: '<?php echo esc_js(__('Error', 'autopuzzle')); ?>',
+                            text: '<?php echo esc_js(__('SMS history modal not found.', 'autopuzzle')); ?>',
                             icon: 'error'
                         });
                     }
@@ -921,33 +921,33 @@ function deleteUser(userId) {
                     jQuery('body').append('<div class="modal-backdrop fade show"></div>');
                 }
                 
-                $('#sms-history-loading').removeClass('maneli-initially-hidden').show();
-                $('#sms-history-content').addClass('maneli-initially-hidden').hide();
+                $('#sms-history-loading').removeClass('autopuzzle-initially-hidden').show();
+                $('#sms-history-content').addClass('autopuzzle-initially-hidden').hide();
                 $('#sms-history-table-container').empty();
                 
-                if (!maneliAjaxNonce) {
-                    $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                    $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                if (!autopuzzleAjaxNonce) {
+                    $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                    $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                     $('#sms-history-table-container').html(
                         '<div class="alert alert-danger">' +
                         '<i class="la la-exclamation-triangle me-2"></i>' +
-                        '<?php echo esc_js(__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry')); ?>' +
+                        '<?php echo esc_js(__('Nonce is missing. Please refresh the page and try again.', 'autopuzzle')); ?>' +
                         '</div>'
                     );
                     return;
                 }
                 
                 $.ajax({
-                    url: maneliAjaxUrl,
+                    url: autopuzzleAjaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'maneli_get_sms_history',
-                        nonce: maneliAjaxNonce,
+                        action: 'autopuzzle_get_sms_history',
+                        nonce: autopuzzleAjaxNonce,
                         user_id: userId
                     },
                     success: function(response) {
-                        $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                        $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                        $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                        $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                         
                         if (response && response.success && response.data && response.data.html) {
                             $('#sms-history-table-container').html(response.data.html);
@@ -955,18 +955,18 @@ function deleteUser(userId) {
                             $('#sms-history-table-container').html(
                                 '<div class="alert alert-info">' +
                                 '<i class="la la-info-circle me-2"></i>' +
-                                '<?php echo esc_js(__('No SMS messages have been sent to this user yet.', 'maneli-car-inquiry')); ?>' +
+                                '<?php echo esc_js(__('No SMS messages have been sent to this user yet.', 'autopuzzle')); ?>' +
                                 '</div>'
                             );
                         }
                     },
                     error: function(xhr, status, error) {
-                        $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                        $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                        $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                        $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                         $('#sms-history-table-container').html(
                             '<div class="alert alert-danger">' +
                             '<i class="la la-exclamation-triangle me-2"></i>' +
-                            '<?php echo esc_js(__('Error loading SMS history.', 'maneli-car-inquiry')); ?>' +
+                            '<?php echo esc_js(__('Error loading SMS history.', 'autopuzzle')); ?>' +
                             '</div>'
                         );
                     }
@@ -985,7 +985,7 @@ function deleteUser(userId) {
 
 <?php
 // Include SMS History Modal (shared template)
-maneli_get_template_part('partials/sms-history-modal');
+autopuzzle_get_template_part('partials/sms-history-modal');
 ?>
 
 <style>

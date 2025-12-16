@@ -1,17 +1,17 @@
 <?php
 /**
- * General helper functions for the Maneli Car Inquiry plugin.
+ * General helper functions for the AutoPuzzle Car Inquiry plugin.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
- * @version 1.0.1 (Added maneli_get_template_part)
+ * @version 1.0.1 (Added autopuzzle_get_template_part)
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-if (!function_exists('maneli_gregorian_to_jalali')) {
+if (!function_exists('autopuzzle_gregorian_to_jalali')) {
     /**
      * Converts a Gregorian date to a Jalali (Persian/Shamsi) date.
      *
@@ -21,14 +21,14 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
      * @param string     $format The desired output format (e.g., 'Y/m/d').
      * @return string The formatted Jalali date.
      */
-    function maneli_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d', $convert_digits = true) {
+    function autopuzzle_gregorian_to_jalali($gy, $gm, $gd, $format = 'Y/m/d', $convert_digits = true) {
         $g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
 
         $gy = (int)$gy;
         $gm = (int)$gm;
         $gd = (int)$gd;
 
-        if (function_exists('maneli_should_use_persian_digits') && !maneli_should_use_persian_digits()) {
+        if (function_exists('autopuzzle_should_use_persian_digits') && !autopuzzle_should_use_persian_digits()) {
             try {
                 $timezone = function_exists('wp_timezone') ? wp_timezone() : new DateTimeZone('UTC');
                 $date = DateTime::createFromFormat('!Y-n-j', sprintf('%04d-%d-%d', $gy, $gm, $gd), $timezone);
@@ -83,14 +83,14 @@ if (!function_exists('maneli_gregorian_to_jalali')) {
     }
 }
 
-if (!function_exists('maneli_convert_to_english_digits')) {
+if (!function_exists('autopuzzle_convert_to_english_digits')) {
     /**
      * Convert Persian/Arabic digits within a string to English digits.
      *
      * @param string $value Input string.
      * @return string
      */
-    function maneli_convert_to_english_digits($value) {
+    function autopuzzle_convert_to_english_digits($value) {
         $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         $arabic  = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
         $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -100,14 +100,14 @@ if (!function_exists('maneli_convert_to_english_digits')) {
     }
 }
 
-if (!function_exists('maneli_normalize_jalali_date')) {
+if (!function_exists('autopuzzle_normalize_jalali_date')) {
     /**
      * Normalize a Jalali date string (convert digits to English and ensure 4/2/2 format).
      *
      * @param string $value Jalali date string (possibly with Persian digits).
      * @return string|null Normalized date in Y/m/d format or null if invalid.
      */
-    function maneli_normalize_jalali_date($value) {
+    function autopuzzle_normalize_jalali_date($value) {
         if (!is_string($value) || $value === '') {
             return null;
         }
@@ -118,7 +118,7 @@ if (!function_exists('maneli_normalize_jalali_date')) {
         }
 
         $value = str_replace(['-', '.'], '/', $value);
-        $value = maneli_convert_to_english_digits($value);
+        $value = autopuzzle_convert_to_english_digits($value);
 
         if (!preg_match('/^(\d{3,4})\/(\d{1,2})\/(\d{1,2})$/', $value, $matches)) {
             return null;
@@ -137,7 +137,7 @@ if (!function_exists('maneli_normalize_jalali_date')) {
     }
 }
 
-if (!function_exists('maneli_get_current_url')) {
+if (!function_exists('autopuzzle_get_current_url')) {
     /**
      * Gets the current page URL while preserving specific query parameters.
      * This is used for generating proper links within shortcodes.
@@ -146,7 +146,7 @@ if (!function_exists('maneli_get_current_url')) {
      * @param array $preserve_params Optional. Array of query parameter names to always preserve (e.g., 'endp').
      * @return string The current URL with query parameters.
      */
-    function maneli_get_current_url($remove_params = [], $preserve_params = ['endp']) {
+    function autopuzzle_get_current_url($remove_params = [], $preserve_params = ['endp']) {
         global $wp;
         
         // Get the base URL (without query string)
@@ -181,7 +181,7 @@ if (!function_exists('maneli_get_current_url')) {
     }
 }
 
-if (!function_exists('maneli_get_template_part')) {
+if (!function_exists('autopuzzle_get_template_part')) {
     /**
      * Includes a template file from the plugin's templates directory.
      * * @param string $template_name The template file name (e.g., 'shortcodes/inquiry-form/step-1-car-selection').
@@ -189,14 +189,14 @@ if (!function_exists('maneli_get_template_part')) {
      * @param bool $echo Whether to echo the template output or return it as a string.
      * @return string|void
      */
-    function maneli_get_template_part($template_name, $args = [], $echo = true) {
-        // فرض بر تعریف MANELI_INQUIRY_PLUGIN_PATH است
-        $template_file = MANELI_INQUIRY_PLUGIN_PATH . 'templates/' . $template_name . '.php';
+    function autopuzzle_get_template_part($template_name, $args = [], $echo = true) {
+        // فرض بر تعریف AUTOPUZZLE_PLUGIN_PATH است
+        $template_file = AUTOPUZZLE_PLUGIN_PATH . 'templates/' . $template_name . '.php';
 
         if (!file_exists($template_file)) {
             // گزارش خطا در صورت عدم وجود تمپلیت
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Template Error: Template file not found: ' . $template_file);
+                error_log('AutoPuzzle Template Error: Template file not found: ' . $template_file);
             }
             return '';
         }
@@ -216,7 +216,7 @@ if (!function_exists('maneli_get_template_part')) {
     }
 }
 
-if (!function_exists('maneli_number_format_persian')) {
+if (!function_exists('autopuzzle_number_format_persian')) {
     /**
      * Format number with localized digits and thousand separators.
      * Returns Persian digits only when current locale is fa.
@@ -225,14 +225,14 @@ if (!function_exists('maneli_number_format_persian')) {
      * @param int $decimals Number of decimal places
      * @return string Formatted number respecting current locale
      */
-    function maneli_number_format_persian($number, $decimals = 0) {
+    function autopuzzle_number_format_persian($number, $decimals = 0) {
         if (!is_numeric($number)) {
-            return maneli_should_use_persian_digits() ? '۰' : '0';
+            return autopuzzle_should_use_persian_digits() ? '۰' : '0';
         }
         
         $formatted = number_format_i18n((float)$number, $decimals);
 
-        if (!maneli_should_use_persian_digits()) {
+        if (!autopuzzle_should_use_persian_digits()) {
             return $formatted;
         }
 
@@ -252,13 +252,13 @@ if (!function_exists('persian_numbers')) {
      * @return string String with Persian digits
      */
     function persian_numbers($str) {
-        if (!maneli_should_use_persian_digits()) {
+        if (!autopuzzle_should_use_persian_digits()) {
             return (string) $str;
         }
 
-        // Use maneli_number_format_persian if it exists and input is numeric
-        if (function_exists('maneli_number_format_persian') && is_numeric($str)) {
-            return maneli_number_format_persian($str);
+        // Use autopuzzle_number_format_persian if it exists and input is numeric
+        if (function_exists('autopuzzle_number_format_persian') && is_numeric($str)) {
+            return autopuzzle_number_format_persian($str);
         }
         
         // Otherwise just convert digits
@@ -279,7 +279,7 @@ if (!function_exists('persian_numbers_no_separator')) {
      * @return string String with Persian digits
      */
     function persian_numbers_no_separator($str) {
-        if (!maneli_should_use_persian_digits()) {
+        if (!autopuzzle_should_use_persian_digits()) {
             return (string) $str;
         }
 
@@ -289,16 +289,16 @@ if (!function_exists('persian_numbers_no_separator')) {
     }
 }
 
-if (!function_exists('maneli_should_use_persian_digits')) {
+if (!function_exists('autopuzzle_should_use_persian_digits')) {
     /**
      * Determine if Persian digits should be used based on locale preference.
      *
      * @return bool
      */
-    function maneli_should_use_persian_digits() {
+    function autopuzzle_should_use_persian_digits() {
         // Respect dashboard language preference cookie first.
-        if (!empty($_COOKIE['maneli_language'])) {
-            $cookie_lang = strtolower(sanitize_text_field(wp_unslash($_COOKIE['maneli_language'])));
+        if (!empty($_COOKIE['autopuzzle_language'])) {
+            $cookie_lang = strtolower(sanitize_text_field(wp_unslash($_COOKIE['autopuzzle_language'])));
             if ($cookie_lang !== '') {
                 if (strpos($cookie_lang, 'en') === 0 || in_array($cookie_lang, ['english'], true)) {
                     return false;
@@ -314,7 +314,7 @@ if (!function_exists('maneli_should_use_persian_digits')) {
     }
 }
 
-if (!function_exists('maneli_enqueue_persian_datepicker')) {
+if (!function_exists('autopuzzle_enqueue_persian_datepicker')) {
     /**
      * Enqueue Persian datepicker assets only when Persian locale is active.
      *
@@ -323,24 +323,24 @@ if (!function_exists('maneli_enqueue_persian_datepicker')) {
      * @param bool $in_footer Whether to load the script in footer.
      * @return bool True if enqueued, false otherwise.
      */
-    function maneli_enqueue_persian_datepicker($deps = ['jquery'], $version = '1.0.0', $in_footer = true) {
-        if (!maneli_should_use_persian_digits()) {
+    function autopuzzle_enqueue_persian_datepicker($deps = ['jquery'], $version = '1.0.0', $in_footer = true) {
+        if (!autopuzzle_should_use_persian_digits()) {
             return false;
         }
 
-        if (!wp_style_is('maneli-persian-datepicker', 'enqueued')) {
+        if (!wp_style_is('autopuzzle-persian-datepicker', 'enqueued')) {
             wp_enqueue_style(
-                'maneli-persian-datepicker',
-                MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css',
+                'autopuzzle-persian-datepicker',
+                AUTOPUZZLE_PLUGIN_URL . 'assets/css/persianDatepicker-default.css',
                 [],
                 $version
             );
         }
 
-        if (!wp_script_is('maneli-persian-datepicker', 'enqueued')) {
+        if (!wp_script_is('autopuzzle-persian-datepicker', 'enqueued')) {
             wp_enqueue_script(
-                'maneli-persian-datepicker',
-                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js',
+                'autopuzzle-persian-datepicker',
+                AUTOPUZZLE_PLUGIN_URL . 'assets/js/persianDatepicker.min.js',
                 $deps,
                 $version,
                 $in_footer
@@ -348,5 +348,109 @@ if (!function_exists('maneli_enqueue_persian_datepicker')) {
         }
 
         return true;
+    }
+}
+
+/**
+ * Get branding information for templates
+ * 
+ * @param string $key The branding key (name, logo, color, etc.)
+ * @param string $default Default value if not set
+ * @return string The branding value
+ */
+if (!function_exists('autopuzzle_get_branding')) {
+    function autopuzzle_get_branding($key, $default = '') {
+        if (!class_exists('Autopuzzle_Branding_Helper')) {
+            return $default;
+        }
+        
+        $value = Autopuzzle_Branding_Helper::get($key, $default);
+        return !empty($value) ? $value : $default;
+    }
+}
+
+/**
+ * Display brand name in templates
+ * 
+ * @param string $locale Optional locale (en_US, fa_IR)
+ * @return string Brand name
+ */
+if (!function_exists('autopuzzle_brand_name')) {
+    function autopuzzle_brand_name($locale = '') {
+        if (!class_exists('Autopuzzle_Branding_Helper')) {
+            return 'AutoPuzzle'; // Fallback
+        }
+        
+        if (empty($locale)) {
+            return Autopuzzle_Branding_Helper::get_brand_name_localized();
+        }
+        
+        if ($locale === 'fa_IR') {
+            return Autopuzzle_Branding_Helper::get_brand_name_persian();
+        }
+        
+        return Autopuzzle_Branding_Helper::get_brand_name();
+    }
+}
+
+/**
+ * Get brand logo URL
+ * 
+ * @param string $type Type of logo (main, light, dark)
+ * @return string Logo URL
+ */
+if (!function_exists('autopuzzle_logo')) {
+    function autopuzzle_logo($type = 'main') {
+        if (!class_exists('Autopuzzle_Branding_Helper')) {
+            return AUTOPUZZLE_PLUGIN_URL . 'assets/images/logo.png'; // Fallback
+        }
+        
+        return Autopuzzle_Branding_Helper::get_logo($type);
+    }
+}
+
+/**
+ * Get brand color
+ * 
+ * @param string $type Type of color (primary, secondary, accent)
+ * @return string Color hex code
+ */
+if (!function_exists('autopuzzle_color')) {
+    function autopuzzle_color($type = 'primary') {
+        if (!class_exists('Autopuzzle_Branding_Helper')) {
+            // Default colors
+            $defaults = [
+                'primary' => '#007bff',
+                'secondary' => '#6c757d',
+                'accent' => '#ff6b6b'
+            ];
+            return $defaults[$type] ?? $defaults['primary'];
+        }
+        
+        switch ($type) {
+            case 'primary':
+                return Autopuzzle_Branding_Helper::get_primary_color();
+            case 'secondary':
+                return Autopuzzle_Branding_Helper::get_secondary_color();
+            case 'accent':
+                return Autopuzzle_Branding_Helper::get_accent_color();
+            default:
+                return Autopuzzle_Branding_Helper::get_primary_color();
+        }
+    }
+}
+
+/**
+ * Get brand copyright text
+ * 
+ * @return string Copyright text
+ */
+if (!function_exists('autopuzzle_copyright')) {
+    function autopuzzle_copyright() {
+        if (!class_exists('Autopuzzle_Branding_Helper')) {
+            return '© ' . date('Y') . ' AutoPuzzle. All rights reserved.'; // Fallback
+        }
+        
+        return Autopuzzle_Branding_Helper::get_copyright_localized();
     }
 }

@@ -2,14 +2,14 @@
 /**
  * Register all actions and filters for the plugin
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Loader {
+class Autopuzzle_Loader {
 
     /**
      * The array of actions registered with WordPress

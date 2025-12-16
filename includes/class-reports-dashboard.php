@@ -2,12 +2,12 @@
 /**
  * گزارشات پیشرفته و سیستم نظارتی
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 defined('ABSPATH') || exit;
 
-class Maneli_Reports_Dashboard {
+class Autopuzzle_Reports_Dashboard {
     
     /**
      * دریافت آمار کلی سیستم
@@ -327,12 +327,12 @@ class Maneli_Reports_Dashboard {
     public static function get_experts_statistics($start_date = null, $end_date = null) {
         // دریافت تمام کارشناسان
         $experts = get_users([
-            'role__in' => ['maneli_expert', 'maneli_admin', 'administrator'],
+            'role__in' => ['autopuzzle_expert', 'autopuzzle_admin', 'administrator'],
             'orderby' => 'display_name',
             'order' => 'ASC',
         ]);
         $expert_role_users = array_filter($experts, function ($user) {
-            return in_array('maneli_expert', (array) $user->roles, true);
+            return in_array('autopuzzle_expert', (array) $user->roles, true);
         });
         
         $experts_stats = [];
@@ -555,7 +555,7 @@ class Maneli_Reports_Dashboard {
         foreach ($products as $product) {
             $formatted_products[] = [
                 'id' => $product->product_id,
-                'name' => $product->product_name ?: esc_html__('N/A', 'maneli-car-inquiry'),
+                'name' => $product->product_name ?: esc_html__('N/A', 'autopuzzle'),
                 'count' => (int)$product->inquiry_count
             ];
         }
@@ -601,7 +601,7 @@ class Maneli_Reports_Dashboard {
         
         // سازماندهی داده‌ها
         $result = [];
-        $use_persian_labels = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        $use_persian_labels = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
         foreach ($monthly_data as $row) {
             $month = $row->month;
             if (!isset($result[$month])) {
@@ -636,18 +636,18 @@ class Maneli_Reports_Dashboard {
      */
     private static function convert_to_persian_month($date) {
         $months = [
-            '01' => esc_html__('Farvardin', 'maneli-car-inquiry'),
-            '02' => esc_html__('Ordibehesht', 'maneli-car-inquiry'),
-            '03' => esc_html__('Khordad', 'maneli-car-inquiry'),
-            '04' => esc_html__('Tir', 'maneli-car-inquiry'),
-            '05' => esc_html__('Mordad', 'maneli-car-inquiry'),
-            '06' => esc_html__('Shahrivar', 'maneli-car-inquiry'),
-            '07' => esc_html__('Mehr', 'maneli-car-inquiry'),
-            '08' => esc_html__('Aban', 'maneli-car-inquiry'),
-            '09' => esc_html__('Azar', 'maneli-car-inquiry'),
-            '10' => esc_html__('Dey', 'maneli-car-inquiry'),
-            '11' => esc_html__('Bahman', 'maneli-car-inquiry'),
-            '12' => esc_html__('Esfand', 'maneli-car-inquiry')
+            '01' => esc_html__('Farvardin', 'autopuzzle'),
+            '02' => esc_html__('Ordibehesht', 'autopuzzle'),
+            '03' => esc_html__('Khordad', 'autopuzzle'),
+            '04' => esc_html__('Tir', 'autopuzzle'),
+            '05' => esc_html__('Mordad', 'autopuzzle'),
+            '06' => esc_html__('Shahrivar', 'autopuzzle'),
+            '07' => esc_html__('Mehr', 'autopuzzle'),
+            '08' => esc_html__('Aban', 'autopuzzle'),
+            '09' => esc_html__('Azar', 'autopuzzle'),
+            '10' => esc_html__('Dey', 'autopuzzle'),
+            '11' => esc_html__('Bahman', 'autopuzzle'),
+            '12' => esc_html__('Esfand', 'autopuzzle')
         ];
         
         list($year, $month) = explode('-', $date);
@@ -786,16 +786,16 @@ class Maneli_Reports_Dashboard {
         
         // CSV headers
         fputcsv($output, [
-            esc_html__('ID', 'maneli-car-inquiry'),
-            esc_html__('Date', 'maneli-car-inquiry'),
-            esc_html__('Type', 'maneli-car-inquiry'),
-            esc_html__('Customer Name', 'maneli-car-inquiry'),
-            esc_html__('Phone', 'maneli-car-inquiry'),
-            esc_html__('National ID', 'maneli-car-inquiry'),
-            esc_html__('Product', 'maneli-car-inquiry'),
-            esc_html__('Status', 'maneli-car-inquiry'),
-            esc_html__('Amount', 'maneli-car-inquiry'),
-            esc_html__('Expert', 'maneli-car-inquiry')
+            esc_html__('ID', 'autopuzzle'),
+            esc_html__('Date', 'autopuzzle'),
+            esc_html__('Type', 'autopuzzle'),
+            esc_html__('Customer Name', 'autopuzzle'),
+            esc_html__('Phone', 'autopuzzle'),
+            esc_html__('National ID', 'autopuzzle'),
+            esc_html__('Product', 'autopuzzle'),
+            esc_html__('Status', 'autopuzzle'),
+            esc_html__('Amount', 'autopuzzle'),
+            esc_html__('Expert', 'autopuzzle')
         ]);
         
         // داده‌ها
@@ -805,13 +805,13 @@ class Maneli_Reports_Dashboard {
             fputcsv($output, [
                 $inquiry->ID,
                 $inquiry->post_date,
-                $inquiry->post_type === 'cash_inquiry' ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry'),
+                $inquiry->post_type === 'cash_inquiry' ? esc_html__('Cash', 'autopuzzle') : esc_html__('Installment', 'autopuzzle'),
                 $inquiry->customer_name,
                 $inquiry->customer_phone,
                 $inquiry->customer_national_id,
                 $inquiry->product_name,
                 self::get_status_label($inquiry->status),
-                number_format($inquiry->amount) . ' ' . esc_html__('Toman', 'maneli-car-inquiry'),
+                number_format($inquiry->amount) . ' ' . esc_html__('Toman', 'autopuzzle'),
                 $expert ? $expert->display_name : '-'
             ]);
         }
@@ -828,10 +828,10 @@ class Maneli_Reports_Dashboard {
      */
     private static function get_status_label($status) {
         $labels = [
-            'pending' => esc_html__('Pending Review', 'maneli-car-inquiry'),
-            'approved' => esc_html__('Approved and Referred', 'maneli-car-inquiry'),
-            'rejected' => esc_html__('Rejected', 'maneli-car-inquiry'),
-            'following' => esc_html__('Follow-up in Progress', 'maneli-car-inquiry'),
+            'pending' => esc_html__('Pending Review', 'autopuzzle'),
+            'approved' => esc_html__('Approved and Referred', 'autopuzzle'),
+            'rejected' => esc_html__('Rejected', 'autopuzzle'),
+            'following' => esc_html__('Follow-up in Progress', 'autopuzzle'),
         ];
         
         return isset($labels[$status]) ? $labels[$status] : $status;
@@ -881,7 +881,7 @@ class Maneli_Reports_Dashboard {
                 return [
                     'start_date' => $today,
                     'end_date' => $today,
-                    'label' => esc_html__('Today', 'maneli-car-inquiry')
+                    'label' => esc_html__('Today', 'autopuzzle')
                 ];
                 
             case 'yesterday':
@@ -889,28 +889,28 @@ class Maneli_Reports_Dashboard {
                 return [
                     'start_date' => $yesterday,
                     'end_date' => $yesterday,
-                    'label' => esc_html__('Yesterday', 'maneli-car-inquiry')
+                    'label' => esc_html__('Yesterday', 'autopuzzle')
                 ];
                 
             case 'weekly':
                 return [
                     'start_date' => date('Y-m-d', strtotime('-7 days')),
                     'end_date' => $today,
-                    'label' => esc_html__('Last Week', 'maneli-car-inquiry')
+                    'label' => esc_html__('Last Week', 'autopuzzle')
                 ];
                 
             case 'monthly':
                 return [
                     'start_date' => date('Y-m-d', strtotime('-30 days')),
                     'end_date' => $today,
-                    'label' => esc_html__('Last Month', 'maneli-car-inquiry')
+                    'label' => esc_html__('Last Month', 'autopuzzle')
                 ];
                 
             case 'yearly':
                 return [
                     'start_date' => date('Y-m-d', strtotime('-365 days')),
                     'end_date' => $today,
-                    'label' => esc_html__('Last Year', 'maneli-car-inquiry')
+                    'label' => esc_html__('Last Year', 'autopuzzle')
                 ];
                 
             case 'all':
@@ -927,28 +927,28 @@ class Maneli_Reports_Dashboard {
                     return [
                         'start_date' => date('Y-m-d', strtotime($first_date)),
                         'end_date' => $today,
-                        'label' => esc_html__('All Time', 'maneli-car-inquiry')
+                        'label' => esc_html__('All Time', 'autopuzzle')
                     ];
                 }
                 // Fallback
                 return [
                     'start_date' => date('Y-m-d', strtotime('-1 year')),
                     'end_date' => $today,
-                    'label' => esc_html__('All Time', 'maneli-car-inquiry')
+                    'label' => esc_html__('All Time', 'autopuzzle')
                 ];
                 
             case 'custom':
                 return [
                     'start_date' => $custom_start_date ?: date('Y-m-d', strtotime('-30 days')),
                     'end_date' => $custom_end_date ?: $today,
-                    'label' => esc_html__('Custom Range', 'maneli-car-inquiry')
+                    'label' => esc_html__('Custom Range', 'autopuzzle')
                 ];
                 
             default:
                 return [
                     'start_date' => date('Y-m-d', strtotime('-30 days')),
                     'end_date' => $today,
-                    'label' => esc_html__('Last Month', 'maneli-car-inquiry')
+                    'label' => esc_html__('Last Month', 'autopuzzle')
                 ];
         }
     }
@@ -976,12 +976,12 @@ class Maneli_Reports_Dashboard {
         
         // آمار کارشناسان
         $experts = get_users([
-            'role__in' => ['maneli_expert', 'maneli_admin', 'administrator'],
+            'role__in' => ['autopuzzle_expert', 'autopuzzle_admin', 'administrator'],
             'orderby' => 'display_name',
             'order' => 'ASC',
         ]);
         $expert_role_users = array_filter($experts, static function ($user) {
-            return in_array('maneli_expert', (array) $user->roles, true);
+            return in_array('autopuzzle_expert', (array) $user->roles, true);
         });
         
         $experts_detailed = [];
@@ -1246,11 +1246,11 @@ class Maneli_Reports_Dashboard {
         $stats = self::get_overall_statistics($start_date, $end_date, $expert_id);
         
         return [
-            ['status' => esc_html__('Completed', 'maneli-car-inquiry'), 'count' => $stats['completed'], 'color' => '#10b981'],
-            ['status' => esc_html__('Pending', 'maneli-car-inquiry'), 'count' => $stats['new'] + $stats['in_progress'], 'color' => '#f59e0b'],
-            ['status' => esc_html__('Rejected', 'maneli-car-inquiry'), 'count' => $stats['rejected'], 'color' => '#ef4444'],
-            ['status' => esc_html__('Referred', 'maneli-car-inquiry'), 'count' => $stats['referred'], 'color' => '#3b82f6'],
-            ['status' => esc_html__('Follow Up Scheduled', 'maneli-car-inquiry'), 'count' => $stats['followup_scheduled'], 'color' => '#8b5cf6'],
+            ['status' => esc_html__('Completed', 'autopuzzle'), 'count' => $stats['completed'], 'color' => '#10b981'],
+            ['status' => esc_html__('Pending', 'autopuzzle'), 'count' => $stats['new'] + $stats['in_progress'], 'color' => '#f59e0b'],
+            ['status' => esc_html__('Rejected', 'autopuzzle'), 'count' => $stats['rejected'], 'color' => '#ef4444'],
+            ['status' => esc_html__('Referred', 'autopuzzle'), 'count' => $stats['referred'], 'color' => '#3b82f6'],
+            ['status' => esc_html__('Follow Up Scheduled', 'autopuzzle'), 'count' => $stats['followup_scheduled'], 'color' => '#8b5cf6'],
         ];
     }
     

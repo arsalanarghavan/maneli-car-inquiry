@@ -3,7 +3,7 @@
  * Email Handler
  * Handles sending emails via SMTP or wp_mail
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @version 1.0.0
  */
 
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Email_Handler {
+class Autopuzzle_Email_Handler {
 
     /**
      * Plugin options array.
@@ -20,7 +20,7 @@ class Maneli_Email_Handler {
     private $options;
 
     public function __construct() {
-        $this->options = Maneli_Options_Helper::get_all_options();
+        $this->options = Autopuzzle_Options_Helper::get_all_options();
     }
 
     /**
@@ -35,7 +35,7 @@ class Maneli_Email_Handler {
     public function send_email($to, $subject, $message, $headers = []) {
         if (empty($to) || empty($subject) || empty($message)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Email Error: Missing required parameters (to, subject, or message).');
+                error_log('AutoPuzzle Email Error: Missing required parameters (to, subject, or message).');
             }
             return false;
         }
@@ -101,7 +101,7 @@ class Maneli_Email_Handler {
                 }
             } catch (Exception $e) {
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Email Exception: ' . $e->getMessage());
+                    error_log('AutoPuzzle Email Exception: ' . $e->getMessage());
                 }
                 $results[$email] = [
                     'success' => false,
@@ -139,7 +139,7 @@ class Maneli_Email_Handler {
 
         if (empty($smtp_host) || empty($smtp_username) || empty($smtp_password)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Email Error: SMTP settings are not configured.');
+                error_log('AutoPuzzle Email Error: SMTP settings are not configured.');
             }
             return false;
         }
@@ -200,7 +200,7 @@ class Maneli_Email_Handler {
 
             } catch (Exception $e) {
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Email SMTP Exception: ' . $e->getMessage());
+                    error_log('AutoPuzzle Email SMTP Exception: ' . $e->getMessage());
                 }
                 $results[$email] = [
                     'success' => false,

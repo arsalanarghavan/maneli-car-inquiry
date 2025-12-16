@@ -16,9 +16,9 @@ if (!$is_logged_in) {
     }
     
     // Check session-based login
-    if (isset($_SESSION['maneli']['user_id']) && !empty($_SESSION['maneli']['user_id'])) {
+    if (isset($_SESSION['autopuzzle']['user_id']) && !empty($_SESSION['autopuzzle']['user_id'])) {
         $is_logged_in = true;
-    } elseif (isset($_SESSION['maneli_dashboard_logged_in']) && $_SESSION['maneli_dashboard_logged_in'] === true) {
+    } elseif (isset($_SESSION['autopuzzle_dashboard_logged_in']) && $_SESSION['autopuzzle_dashboard_logged_in'] === true) {
         $is_logged_in = true;
     }
 }
@@ -31,8 +31,8 @@ if (!$is_logged_in) {
 
 // Permission check - Only customers can create new inquiries
 // Admins and experts should create inquiries directly from inquiry list
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_expert = in_array('autopuzzle_expert', wp_get_current_user()->roles, true);
 
 if ($is_admin || $is_expert) {
     ?>
@@ -40,11 +40,11 @@ if ($is_admin || $is_expert) {
         <div class="col-xl-12">
             <div class="alert alert-info alert-dismissible fade show">
                 <i class="la la-info-circle me-2"></i>
-                <?php esc_html_e('To submit an installment inquiry, please use the', 'maneli-car-inquiry'); ?>
+                <?php esc_html_e('To submit an installment inquiry, please use the', 'autopuzzle'); ?>
                 <a href="<?php echo home_url('/dashboard/new-installment-inquiry'); ?>" class="alert-link">
-                    <?php esc_html_e('New Installment Inquiry', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('New Installment Inquiry', 'autopuzzle'); ?>
                 </a>
-                <?php esc_html_e('page.', 'maneli-car-inquiry'); ?>
+                <?php esc_html_e('page.', 'autopuzzle'); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
@@ -63,41 +63,41 @@ if ($is_admin || $is_expert) {
 // 5. Final Report
 
 // Enqueue wizard scripts
-wp_enqueue_script('vanilla-wizard', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/vanilla-wizard/js/wizard.min.js', ['jquery'], '1.0.0', true);
-if (file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js')) {
-    wp_enqueue_script('form-wizard', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/form-wizard.js', ['jquery', 'vanilla-wizard'], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js'), true);
+wp_enqueue_script('vanilla-wizard', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/vanilla-wizard/js/wizard.min.js', ['jquery'], '1.0.0', true);
+if (file_exists(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/form-wizard.js')) {
+    wp_enqueue_script('form-wizard', AUTOPUZZLE_PLUGIN_URL . 'assets/js/form-wizard.js', ['jquery', 'vanilla-wizard'], filemtime(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/form-wizard.js'), true);
 }
 
 // Enqueue CAPTCHA scripts if enabled
-if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
-    $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
-    $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+if (class_exists('Autopuzzle_Captcha_Helper') && Autopuzzle_Captcha_Helper::is_enabled()) {
+    $captcha_type = Autopuzzle_Captcha_Helper::get_captcha_type();
+    $site_key = Autopuzzle_Captcha_Helper::get_site_key($captcha_type);
     
     if (!empty($captcha_type) && !empty($site_key)) {
-        Maneli_Captcha_Helper::enqueue_script($captcha_type, $site_key);
+        Autopuzzle_Captcha_Helper::enqueue_script($captcha_type, $site_key);
         
         // Enqueue our CAPTCHA handler script
         wp_enqueue_script(
-            'maneli-captcha',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/captcha.js',
+            'autopuzzle-captcha',
+            AUTOPUZZLE_PLUGIN_URL . 'assets/js/captcha.js',
             ['jquery'],
-            file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') ? filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') : '1.0.0',
+            file_exists(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/captcha.js') ? filemtime(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/captcha.js') : '1.0.0',
             true
         );
         
         // Localize script with CAPTCHA config and error messages
-        wp_localize_script('maneli-captcha', 'maneliCaptchaConfig', [
+        wp_localize_script('autopuzzle-captcha', 'autopuzzleCaptchaConfig', [
             'enabled' => true,
             'type' => $captcha_type,
             'siteKey' => $site_key,
             'strings' => [
-                'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'maneli-car-inquiry'),
-                'error_title' => esc_html__('Verification Failed', 'maneli-car-inquiry'),
-                'try_again' => esc_html__('Try Again', 'maneli-car-inquiry'),
-                'loading' => esc_html__('Verifying...', 'maneli-car-inquiry'),
-                'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'maneli-car-inquiry'),
-                'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'maneli-car-inquiry'),
-                'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'maneli-car-inquiry')
+                'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'autopuzzle'),
+                'error_title' => esc_html__('Verification Failed', 'autopuzzle'),
+                'try_again' => esc_html__('Try Again', 'autopuzzle'),
+                'loading' => esc_html__('Verifying...', 'autopuzzle'),
+                'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'autopuzzle'),
+                'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'autopuzzle'),
+                'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'autopuzzle')
             ]
         ]);
     }
@@ -110,7 +110,7 @@ if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()
     'use strict';
     
     // Check for pending calculator data in localStorage
-    const pendingData = localStorage.getItem('maneli_pending_calculator_data');
+    const pendingData = localStorage.getItem('autopuzzle_pending_calculator_data');
     if (pendingData) {
         try {
             const data = JSON.parse(pendingData);
@@ -118,17 +118,17 @@ if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()
             const oneHour = 60 * 60 * 1000;
             if (data.timestamp && (Date.now() - data.timestamp < oneHour)) {
                 // Send AJAX request to save calculator data to user meta
-                if (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.ajax_url && maneli_ajax_object.nonce) {
+                if (typeof autopuzzle_ajax_object !== 'undefined' && autopuzzle_ajax_object.ajax_url && autopuzzle_ajax_object.nonce) {
                     const formData = new FormData();
-                    formData.append('action', 'maneli_select_car_ajax');
+                    formData.append('action', 'autopuzzle_select_car_ajax');
                     formData.append('product_id', data.product_id);
-                    formData.append('nonce', maneli_ajax_object.nonce);
+                    formData.append('nonce', autopuzzle_ajax_object.nonce);
                     formData.append('down_payment', data.down_payment);
                     formData.append('term_months', data.term_months);
                     formData.append('installment_amount', data.installment_amount);
                     formData.append('total_price', data.total_price);
                     
-                    fetch(maneli_ajax_object.ajax_url, {
+                    fetch(autopuzzle_ajax_object.ajax_url, {
                         method: 'POST',
                         body: formData
                     })
@@ -136,8 +136,8 @@ if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()
                     .then(result => {
                         if (result.success) {
                             // Remove from localStorage after successful save
-                            localStorage.removeItem('maneli_pending_calculator_data');
-                            console.log('Maneli Calculator: Restored calculator data from localStorage');
+                            localStorage.removeItem('autopuzzle_pending_calculator_data');
+                            console.log('AutoPuzzle Calculator: Restored calculator data from localStorage');
                             // Reload page to step 2 if we're on step 1
                             const currentStep = <?php echo isset($_GET['step']) ? (int)$_GET['step'] : 1; ?>;
                             if (currentStep === 1) {
@@ -146,16 +146,16 @@ if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()
                         }
                     })
                     .catch(error => {
-                        console.error('Maneli Calculator: Error restoring data:', error);
+                        console.error('AutoPuzzle Calculator: Error restoring data:', error);
                     });
                 }
             } else {
                 // Data is too old, remove it
-                localStorage.removeItem('maneli_pending_calculator_data');
+                localStorage.removeItem('autopuzzle_pending_calculator_data');
             }
         } catch (e) {
-            console.error('Maneli Calculator: Error parsing localStorage data:', e);
-            localStorage.removeItem('maneli_pending_calculator_data');
+            console.error('AutoPuzzle Calculator: Error parsing localStorage data:', e);
+            localStorage.removeItem('autopuzzle_pending_calculator_data');
         }
     }
 })();
@@ -165,12 +165,12 @@ if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()
     <div class="container-fluid">
         <?php
         // Include wizard form template
-        maneli_get_template_part('shortcodes/inquiry-form/inquiry-form-wizard');
+        autopuzzle_get_template_part('shortcodes/inquiry-form/inquiry-form-wizard');
         
         // Include installment calculator modal (for step 3 car replacement)
         $current_step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
         if ($current_step === 3) {
-            maneli_get_template_part('dashboard/installment-calculator-modal');
+            autopuzzle_get_template_part('dashboard/installment-calculator-modal');
         }
         ?>
     </div>

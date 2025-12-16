@@ -2,7 +2,7 @@
 /**
  * Handles all Finnotech API calls for credit inquiries.
  * 
- * @package Maneli_Car_Inquiry/Includes/Public
+ * @package Autopuzzle_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan
  * @version 1.0.0
  */
@@ -11,17 +11,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Finnotech_API_Handler {
+class Autopuzzle_Finnotech_API_Handler {
 
     /**
      * Decrypts data using AES-256-CBC.
-     * Wrapper method for backward compatibility - uses Maneli_Encryption_Helper.
+     * Wrapper method for backward compatibility - uses Autopuzzle_Encryption_Helper.
      * 
      * @param string $encrypted_data The encrypted data (Base64 encoded).
      * @return string The decrypted data or empty string on failure.
      */
     private function decrypt_data($encrypted_data) {
-        return Maneli_Encryption_Helper::decrypt($encrypted_data);
+        return Autopuzzle_Encryption_Helper::decrypt($encrypted_data);
     }
 
     /**
@@ -29,13 +29,13 @@ class Maneli_Finnotech_API_Handler {
      * @return array ['client_id' => string, 'api_key' => string] or ['client_id' => '', 'api_key' => '']
      */
     private function get_decrypted_credentials() {
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         
         $client_id_raw = $options['finotex_username'] ?? '';
         $api_key_raw = $options['finotex_password'] ?? '';
         
-        $client_id = defined('MANELI_FINOTEX_CLIENT_ID') ? MANELI_FINOTEX_CLIENT_ID : $this->decrypt_data($client_id_raw);
-        $api_key = defined('MANELI_FINOTEX_API_KEY') ? MANELI_FINOTEX_API_KEY : $this->decrypt_data($api_key_raw);
+        $client_id = defined('AUTOPUZZLE_FINOTEX_CLIENT_ID') ? AUTOPUZZLE_FINOTEX_CLIENT_ID : $this->decrypt_data($client_id_raw);
+        $api_key = defined('AUTOPUZZLE_FINOTEX_API_KEY') ? AUTOPUZZLE_FINOTEX_API_KEY : $this->decrypt_data($api_key_raw);
         
         return [
             'client_id' => $client_id,
@@ -79,7 +79,7 @@ class Maneli_Finnotech_API_Handler {
                     );
                     
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli Finnotech API: Retrying after ' . $response_code . ' error. Attempt ' . $attempt . '/' . $max_retries);
+                        error_log('AutoPuzzle Finnotech API: Retrying after ' . $response_code . ' error. Attempt ' . $attempt . '/' . $max_retries);
                     }
                 } else {
                     // Other status codes - don't retry
@@ -90,7 +90,7 @@ class Maneli_Finnotech_API_Handler {
                 $last_error = $response;
                 
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Finnotech API: Network error: ' . $response->get_error_message() . ' (attempt ' . $attempt . '/' . $max_retries . ')');
+                    error_log('AutoPuzzle Finnotech API: Network error: ' . $response->get_error_message() . ' (attempt ' . $attempt . '/' . $max_retries . ')');
                 }
             }
             
@@ -169,11 +169,11 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_credit_risk_inquiry($national_code) {
-        if (!Maneli_Options_Helper::is_option_enabled('finnotech_credit_risk_enabled', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('finnotech_credit_risk_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Credit Risk API is disabled in settings.'];
         }
 
-        if (!defined('MANELI_FINNOTECH_CREDIT_RISK_API_URL')) {
+        if (!defined('AUTOPUZZLE_FINNOTECH_CREDIT_RISK_API_URL')) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Credit Risk API URL constant is missing.'];
         }
 
@@ -182,7 +182,7 @@ class Maneli_Finnotech_API_Handler {
             return ['status' => 'FAILED', 'data' => null, 'raw_response' => 'Finnotech Client ID or API Key not set.'];
         }
 
-        $api_url = sprintf(MANELI_FINNOTECH_CREDIT_RISK_API_URL, $credentials['client_id'], $national_code);
+        $api_url = sprintf(AUTOPUZZLE_FINNOTECH_CREDIT_RISK_API_URL, $credentials['client_id'], $national_code);
         $track_id = 'maneli_' . uniqid();
         
         return $this->make_api_request($api_url, ['trackId' => $track_id], $credentials['api_key']);
@@ -194,11 +194,11 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_credit_score_inquiry($national_code) {
-        if (!Maneli_Options_Helper::is_option_enabled('finnotech_credit_score_enabled', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('finnotech_credit_score_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Credit Score API is disabled in settings.'];
         }
 
-        if (!defined('MANELI_FINNOTECH_CREDIT_SCORE_API_URL')) {
+        if (!defined('AUTOPUZZLE_FINNOTECH_CREDIT_SCORE_API_URL')) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Credit Score API URL constant is missing.'];
         }
 
@@ -207,7 +207,7 @@ class Maneli_Finnotech_API_Handler {
             return ['status' => 'FAILED', 'data' => null, 'raw_response' => 'Finnotech Client ID or API Key not set.'];
         }
 
-        $api_url = sprintf(MANELI_FINNOTECH_CREDIT_SCORE_API_URL, $credentials['client_id'], $national_code);
+        $api_url = sprintf(AUTOPUZZLE_FINNOTECH_CREDIT_SCORE_API_URL, $credentials['client_id'], $national_code);
         $track_id = 'maneli_' . uniqid();
         
         return $this->make_api_request($api_url, ['trackId' => $track_id], $credentials['api_key']);
@@ -219,11 +219,11 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_collaterals_inquiry($national_code) {
-        if (!Maneli_Options_Helper::is_option_enabled('finnotech_collaterals_enabled', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('finnotech_collaterals_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Collaterals API is disabled in settings.'];
         }
 
-        if (!defined('MANELI_FINNOTECH_COLLATERALS_API_URL')) {
+        if (!defined('AUTOPUZZLE_FINNOTECH_COLLATERALS_API_URL')) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Collaterals API URL constant is missing.'];
         }
 
@@ -232,7 +232,7 @@ class Maneli_Finnotech_API_Handler {
             return ['status' => 'FAILED', 'data' => null, 'raw_response' => 'Finnotech Client ID or API Key not set.'];
         }
 
-        $api_url = sprintf(MANELI_FINNOTECH_COLLATERALS_API_URL, $credentials['client_id'], $national_code);
+        $api_url = sprintf(AUTOPUZZLE_FINNOTECH_COLLATERALS_API_URL, $credentials['client_id'], $national_code);
         $track_id = 'maneli_' . uniqid();
         
         return $this->make_api_request($api_url, ['trackId' => $track_id], $credentials['api_key']);
@@ -244,11 +244,11 @@ class Maneli_Finnotech_API_Handler {
      * @return array An array containing the status, data, and raw response.
      */
     public function execute_cheque_color_inquiry($national_code) {
-        if (!Maneli_Options_Helper::is_option_enabled('finnotech_cheque_color_enabled', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('finnotech_cheque_color_enabled', false)) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Cheque Color API is disabled in settings.'];
         }
 
-        if (!defined('MANELI_FINNOTECH_CHEQUE_COLOR_API_URL')) {
+        if (!defined('AUTOPUZZLE_FINNOTECH_CHEQUE_COLOR_API_URL')) {
             return ['status' => 'SKIPPED', 'data' => null, 'raw_response' => 'Cheque Color API URL constant is missing.'];
         }
 
@@ -257,7 +257,7 @@ class Maneli_Finnotech_API_Handler {
             return ['status' => 'FAILED', 'data' => null, 'raw_response' => 'Finnotech Client ID or API Key not set.'];
         }
 
-        $api_url = sprintf(MANELI_FINNOTECH_CHEQUE_COLOR_API_URL, $credentials['client_id']);
+        $api_url = sprintf(AUTOPUZZLE_FINNOTECH_CHEQUE_COLOR_API_URL, $credentials['client_id']);
         $track_id = 'maneli_' . uniqid();
         
         return $this->make_api_request($api_url, ['idCode' => $national_code, 'trackId' => $track_id], $credentials['api_key']);

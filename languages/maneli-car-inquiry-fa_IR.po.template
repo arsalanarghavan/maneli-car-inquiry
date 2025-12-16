@@ -2022,7 +2022,7 @@ msgstr ""
 
 
 msgid "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
-msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس مانلی\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس مانلی» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
+msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس سیستم\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس سیستم» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
 
 
 msgid "Finotex"

@@ -2,7 +2,7 @@
 /**
  * Handles the creation and management of custom user roles and capabilities for the plugin.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.0
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Roles_Caps {
+class Autopuzzle_Roles_Caps {
 
     public function __construct() {
         // Use priority 5 to ensure translations are loaded first (load_plugin_textdomain runs at priority 1)
@@ -20,7 +20,7 @@ class Maneli_Roles_Caps {
     }
 
     /**
-     * Sets up the custom user roles ('maneli_admin', 'maneli_expert') and assigns capabilities.
+     * Sets up the custom user roles ('autopuzzle_admin', 'autopuzzle_expert') and assigns capabilities.
      * Also ensures the administrator role has the master capability.
      */
     public function setup_roles_and_caps() {
@@ -28,7 +28,7 @@ class Maneli_Roles_Caps {
         $admin_role = get_role('administrator');
         if ($admin_role) {
             // Always ensure administrator has the master capability
-            $admin_role->add_cap('manage_maneli_inquiries', true);
+            $admin_role->add_cap('manage_autopuzzle_inquiries', true);
         }
 
         // Define a base set of capabilities for editing products, required by both roles.
@@ -43,35 +43,35 @@ class Maneli_Roles_Caps {
             'delete_products'       => false,
         ];
 
-        // Define capabilities for 'Maneli Admin'
-        $maneli_admin_caps = array_merge($product_caps, [
+        // Define capabilities for 'AutoPuzzle Admin'
+        $autopuzzle_admin_caps = array_merge($product_caps, [
             'read'                    => true,
-            'manage_maneli_inquiries' => true, // Master capability for the plugin
+            'manage_autopuzzle_inquiries' => true, // Master capability for the plugin
             'edit_posts'              => true, // Allows editing inquiries
-            'delete_users'            => true, // ADDED: Allows Maneli Admin to delete users from frontend panel
+            'delete_users'            => true, // ADDED: Allows AutoPuzzle Admin to delete users from frontend panel
         ]);
 
-        // Define capabilities for 'Maneli Expert'
-        $maneli_expert_caps = array_merge($product_caps, [
+        // Define capabilities for 'AutoPuzzle Expert'
+        $autopuzzle_expert_caps = array_merge($product_caps, [
             'read'       => true,
             'edit_posts' => true, // Allows editing inquiries they are assigned to
         ]);
         
         // Remove existing roles to ensure a clean slate before adding them again.
         // This is useful during development or if capabilities change.
-        remove_role('maneli_admin');
-        remove_role('maneli_expert');
+        remove_role('autopuzzle_admin');
+        remove_role('autopuzzle_expert');
 
         // Add the custom roles with their defined capabilities and translatable names.
         add_role(
-            'maneli_admin',
-            esc_html__('Maneli Manager', 'maneli-car-inquiry'),
-            $maneli_admin_caps
+            'autopuzzle_admin',
+            esc_html__('AutoPuzzle Manager', 'autopuzzle'),
+            $autopuzzle_admin_caps
         );
         add_role(
-            'maneli_expert',
-            esc_html__('Maneli Expert', 'maneli-car-inquiry'),
-            $maneli_expert_caps
+            'autopuzzle_expert',
+            esc_html__('AutoPuzzle Expert', 'autopuzzle'),
+            $autopuzzle_expert_caps
         );
     }
 
@@ -82,13 +82,13 @@ class Maneli_Roles_Caps {
     public static function deactivate() {
         // Remove the master capability from the administrator role
         $admin_role = get_role('administrator');
-        if ($admin_role && $admin_role->has_cap('manage_maneli_inquiries')) {
-            $admin_role->remove_cap('manage_maneli_inquiries');
+        if ($admin_role && $admin_role->has_cap('manage_autopuzzle_inquiries')) {
+            $admin_role->remove_cap('manage_autopuzzle_inquiries');
         }
 
         // Remove the custom roles
-        remove_role('maneli_expert');
-        remove_role('maneli_admin');
+        remove_role('autopuzzle_expert');
+        remove_role('autopuzzle_admin');
     }
 
     /**
@@ -102,10 +102,10 @@ class Maneli_Roles_Caps {
         }
 
         $translations = [
-            'maneli_admin'  => esc_html__('Maneli Manager', 'maneli-car-inquiry'),
-            'maneli_expert' => esc_html__('Maneli Expert', 'maneli-car-inquiry'),
-            'customer'      => esc_html__('Customer', 'maneli-car-inquiry'),
-            'administrator' => esc_html__('General Manager', 'maneli-car-inquiry'),
+            'autopuzzle_admin'  => esc_html__('AutoPuzzle Manager', 'autopuzzle'),
+            'autopuzzle_expert' => esc_html__('AutoPuzzle Expert', 'autopuzzle'),
+            'customer'      => esc_html__('Customer', 'autopuzzle'),
+            'administrator' => esc_html__('General Manager', 'autopuzzle'),
         ];
         
         foreach ($translations as $role => $name) {

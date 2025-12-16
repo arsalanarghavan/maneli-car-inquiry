@@ -3,7 +3,7 @@
  * Template for the Admin/Expert view of a single Installment Inquiry Report.
  * Modern redesign with Bootstrap theme styling - matching the cash inquiry report design.
  *
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryLists
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/InquiryLists
  * @author  Arsalan Arghavan (Redesigned by AI)
  * @version 2.0.0 (Complete modern redesign)
  *
@@ -15,26 +15,26 @@ if (!defined('ABSPATH')) {
 }
 
 // Ensure required classes are loaded
-if (!class_exists('Maneli_Permission_Helpers')) {
-    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+if (!class_exists('Autopuzzle_Permission_Helpers')) {
+    require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
 }
-if (!class_exists('Maneli_CPT_Handler')) {
-    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
+if (!class_exists('Autopuzzle_CPT_Handler')) {
+    require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-cpt-handler.php';
 }
-if (!class_exists('Maneli_Render_Helpers')) {
-    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+if (!class_exists('Autopuzzle_Render_Helpers')) {
+    require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
 }
 
 // Permission Check
-$can_view = Maneli_Permission_Helpers::can_user_view_inquiry($inquiry_id, get_current_user_id());
+$can_view = Autopuzzle_Permission_Helpers::can_user_view_inquiry($inquiry_id, get_current_user_id());
 
 if (!$can_view) {
-    echo '<div class="alert alert-danger">' . esc_html__('Inquiry not found or you do not have access.', 'maneli-car-inquiry') . '</div>';
+    echo '<div class="alert alert-danger">' . esc_html__('Inquiry not found or you do not have access.', 'autopuzzle') . '</div>';
 } else {
 // Data Retrieval
 $post = get_post($inquiry_id);
 $post_meta = get_post_meta($inquiry_id);
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $finotex_data = get_post_meta($inquiry_id, '_finotex_response_data', true);
 
 // Finnotech API data
@@ -58,16 +58,16 @@ $car_name = get_the_title($product_id);
 $cheque_color_code = $finotex_data['result']['chequeColor'] ?? ($cheque_color_data['result']['chequeColor'] ?? 0);
 
 $back_link = home_url('/dashboard/installment-inquiries');
-$status_label = Maneli_CPT_Handler::get_status_label($inquiry_status);
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+$status_label = Autopuzzle_CPT_Handler::get_status_label($inquiry_status);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_assigned_expert = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
 $is_admin_or_expert = $is_admin || $is_assigned_expert;
 
 // Loan Details
-$down_payment = (int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0);
-$total_price = (int)($post_meta['maneli_inquiry_total_price'][0] ?? 0);
-$term_months = (int)($post_meta['maneli_inquiry_term_months'][0] ?? 0);
-$installment_amount = (int)($post_meta['maneli_inquiry_installment'][0] ?? 0);
+$down_payment = (int)($post_meta['autopuzzle_inquiry_down_payment'][0] ?? 0);
+$total_price = (int)($post_meta['autopuzzle_inquiry_total_price'][0] ?? 0);
+$term_months = (int)($post_meta['autopuzzle_inquiry_term_months'][0] ?? 0);
+$installment_amount = (int)($post_meta['autopuzzle_inquiry_installment'][0] ?? 0);
 $loan_amount = $total_price - $down_payment;
 
 // Customer & Expert Details
@@ -79,7 +79,7 @@ $rejection_reason = get_post_meta($inquiry_id, 'rejection_reason', true);
 
 // Tracking Status
 $tracking_status = get_post_meta($inquiry_id, 'tracking_status', true) ?: 'new';
-$tracking_status_label = Maneli_CPT_Handler::get_tracking_status_label($tracking_status);
+$tracking_status_label = Autopuzzle_CPT_Handler::get_tracking_status_label($tracking_status);
 $follow_up_date = get_post_meta($inquiry_id, 'follow_up_date', true);
 $meeting_date = get_post_meta($inquiry_id, 'meeting_date', true);
 
@@ -91,7 +91,7 @@ $rejection_reasons = array_filter(array_map('trim', explode("\n", $rejection_rea
 $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
 
 $is_fa_locale = function_exists('get_locale') ? (get_locale() === 'fa_IR') : false;
-$maneli_digits = function ($value) use ($is_fa_locale) {
+$autopuzzle_digits = function ($value) use ($is_fa_locale) {
     if ($value === null || $value === '') {
         return '';
     }
@@ -106,7 +106,7 @@ $maneli_digits = function ($value) use ($is_fa_locale) {
     }
     return $string;
 };
-$maneli_number = function ($value, $precision = null) use ($maneli_digits) {
+$autopuzzle_number = function ($value, $precision = null) use ($autopuzzle_digits) {
     if ($value === null || $value === '') {
         return '';
     }
@@ -117,7 +117,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             $value = number_format((float) $value, 0, '.', ',');
         }
     }
-    return $maneli_digits($value);
+    return $autopuzzle_digits($value);
 };
 ?>
 
@@ -131,7 +131,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
         <div class="mb-3 report-back-button-wrapper">
             <a href="<?php echo esc_url($back_link); ?>" class="btn btn-light btn-wave">
                 <i class="la la-arrow-right me-1"></i>
-                <?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?>
+                <?php esc_html_e('Back to List', 'autopuzzle'); ?>
             </a>
         </div>
 
@@ -140,7 +140,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header">
                 <div class="card-title">
                     <i class="la la-file-invoice me-2"></i>
-                    <?php esc_html_e('Installment Request Details', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Installment Request Details', 'autopuzzle'); ?>
                     <small class="text-muted">(#<?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($inquiry_id) : esc_html($inquiry_id); ?>)</small>
                 </div>
             </div>
@@ -149,12 +149,12 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <div class="alert alert-<?php echo esc_attr($tracking_status === 'completed' ? 'success' : ($tracking_status === 'rejected' ? 'danger' : ($tracking_status === 'meeting_scheduled' ? 'info' : ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled' ? 'primary' : ($tracking_status === 'referred' ? 'info' : 'warning'))))); ?>">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <strong><?php esc_html_e('Current Status:', 'maneli-car-inquiry'); ?></strong> 
+                            <strong><?php esc_html_e('Current Status:', 'autopuzzle'); ?></strong> 
                             <span class="badge bg-<?php echo esc_attr($tracking_status === 'completed' ? 'success' : ($tracking_status === 'rejected' ? 'danger' : ($tracking_status === 'meeting_scheduled' ? 'info' : ($tracking_status === 'in_progress' || $tracking_status === 'follow_up_scheduled' ? 'primary' : ($tracking_status === 'referred' ? 'info' : 'warning'))))); ?>-transparent fs-14 ms-2">
                                 <?php echo esc_html($tracking_status_label); ?>
                             </span>
                             <?php if ($expert_name): ?>
-                                <br><strong class="mt-2 d-inline-block"><?php esc_html_e('Assigned Expert:', 'maneli-car-inquiry'); ?></strong> 
+                                <br><strong class="mt-2 d-inline-block"><?php esc_html_e('Assigned Expert:', 'autopuzzle'); ?></strong> 
                                 <span class="badge bg-info-transparent"><?php echo esc_html($expert_name); ?></span>
                             <?php endif; ?>
                         </div>
@@ -164,7 +164,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <?php if ($rejection_reason): ?>
                 <!-- Rejection Reason -->
                 <div class="alert alert-danger border-danger">
-                    <strong><i class="la la-exclamation-triangle me-1"></i><?php esc_html_e('Reason for Rejection:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><i class="la la-exclamation-triangle me-1"></i><?php esc_html_e('Reason for Rejection:', 'autopuzzle'); ?></strong>
                     <p class="mb-0 mt-2"><?php echo esc_html($rejection_reason); ?></p>
                 </div>
                 <?php endif; ?>
@@ -175,32 +175,32 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     <div class="card-header bg-light">
                         <div class="card-title">
                             <i class="la la-route me-2"></i>
-                            <?php esc_html_e('Request Journey', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Request Journey', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
                         <?php
                         // Define all possible statuses in order
                         $all_statuses = [
-                            'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'icon' => 'la-folder-open', 'color' => 'secondary'],
-                            'referred' => ['label' => esc_html__('Referred', 'maneli-car-inquiry'), 'icon' => 'la-share', 'color' => 'info'],
-                            'in_progress' => ['label' => esc_html__('In Progress', 'maneli-car-inquiry'), 'icon' => 'la-spinner', 'color' => 'primary'],
-                            'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'maneli-car-inquiry'), 'icon' => 'la-clock', 'color' => 'warning'],
-                            'meeting_scheduled' => ['label' => esc_html__('Meeting Scheduled', 'maneli-car-inquiry'), 'icon' => 'la-calendar-check', 'color' => 'cyan'],
-                            'awaiting_documents' => ['label' => esc_html__('Awaiting Documents', 'maneli-car-inquiry'), 'icon' => 'la-file-alt', 'color' => 'warning'],
-                            'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'icon' => 'la-check-circle', 'color' => 'success'],
+                            'new' => ['label' => esc_html__('New', 'autopuzzle'), 'icon' => 'la-folder-open', 'color' => 'secondary'],
+                            'referred' => ['label' => esc_html__('Referred', 'autopuzzle'), 'icon' => 'la-share', 'color' => 'info'],
+                            'in_progress' => ['label' => esc_html__('In Progress', 'autopuzzle'), 'icon' => 'la-spinner', 'color' => 'primary'],
+                            'follow_up_scheduled' => ['label' => esc_html__('Follow-up Scheduled', 'autopuzzle'), 'icon' => 'la-clock', 'color' => 'warning'],
+                            'meeting_scheduled' => ['label' => esc_html__('Meeting Scheduled', 'autopuzzle'), 'icon' => 'la-calendar-check', 'color' => 'cyan'],
+                            'awaiting_documents' => ['label' => esc_html__('Awaiting Documents', 'autopuzzle'), 'icon' => 'la-file-alt', 'color' => 'warning'],
+                            'approved' => ['label' => esc_html__('Approved', 'autopuzzle'), 'icon' => 'la-check-circle', 'color' => 'success'],
                         ];
                         
                         // End statuses (completed or rejected)
                         $end_statuses = [
-                            'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'icon' => 'la-check-circle', 'color' => 'success'],
-                            'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'icon' => 'la-times-circle', 'color' => 'danger'],
+                            'completed' => ['label' => esc_html__('Completed', 'autopuzzle'), 'icon' => 'la-check-circle', 'color' => 'success'],
+                            'rejected' => ['label' => esc_html__('Rejected', 'autopuzzle'), 'icon' => 'la-times-circle', 'color' => 'danger'],
                         ];
                         
                         $current_status = $tracking_status;
                         $status_reached = false;
 
-                        $dashboard_handler = Maneli_Dashboard_Handler::instance();
+                        $dashboard_handler = Autopuzzle_Dashboard_Handler::instance();
                         $preferred_language_slug = method_exists($dashboard_handler, 'get_preferred_language_slug')
                             ? $dashboard_handler->get_preferred_language_slug()
                             : (is_rtl() ? 'fa' : 'en');
@@ -221,7 +221,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         
                         <!-- Main Flow -->
                         <div class="status-roadmap mb-3 <?php echo esc_attr($roadmap_direction_class); ?>">
-                            <div class="d-flex align-items-center justify-content-between flex-wrap maneli-status-desktop">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap autopuzzle-status-desktop">
                                 <?php foreach ($all_statuses as $status_key => $status_info): 
                                     $is_current = ($status_key === $current_status);
                                     $is_passed = !$is_current && !$status_reached;
@@ -240,8 +240,8 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                         'color' => $status_info['color'],
                                         'state' => $is_current ? 'current' : ($is_passed ? 'passed' : 'upcoming'),
                                         'state_label' => $is_current
-                                            ? esc_html__('Current Status', 'maneli-car-inquiry')
-                                            : ($is_passed ? esc_html__('Completed Stage', 'maneli-car-inquiry') : esc_html__('Upcoming Stage', 'maneli-car-inquiry'))
+                                            ? esc_html__('Current Status', 'autopuzzle')
+                                            : ($is_passed ? esc_html__('Completed Stage', 'autopuzzle') : esc_html__('Upcoming Stage', 'autopuzzle'))
                                     ];
 
                                     if ($is_current) {
@@ -249,7 +249,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                     }
                                     $status_steps_index++;
                                 ?>
-                                    <div class="status-step text-center maneli-status-step" style="opacity: <?php echo esc_attr($opacity); ?>; flex: 1; position: relative;">
+                                    <div class="status-step text-center autopuzzle-status-step" style="opacity: <?php echo esc_attr($opacity); ?>; flex: 1; position: relative;">
                                         <?php if ($is_current): ?>
                                             <div class="pulse-ring"></div>
                                         <?php endif; ?>
@@ -267,12 +267,12 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                         <?php if ($is_current): ?>
                                             <div class="mt-1">
                                                 <span class="badge bg-<?php echo esc_attr($status_info['color']); ?>-transparent fs-11">
-                                                    <i class="la la-map-marker me-1"></i><?php esc_html_e('Current Status', 'maneli-car-inquiry'); ?>
+                                                    <i class="la la-map-marker me-1"></i><?php esc_html_e('Current Status', 'autopuzzle'); ?>
                                                 </span>
                                             </div>
                                         <?php endif; ?>
                                     </div>
-                                    <div class="status-arrow maneli-status-arrow" style="opacity: <?php echo esc_attr($opacity); ?>;">
+                                    <div class="status-arrow autopuzzle-status-arrow" style="opacity: <?php echo esc_attr($opacity); ?>;">
                                         <i class="la <?php echo esc_attr($arrow_icon_class); ?> fs-18 text-muted"></i>
                                     </div>
                                 <?php endforeach; ?>
@@ -286,19 +286,19 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
 
                                 $status_steps_payload[] = [
                                     'key' => $is_end_status ? $current_status : 'completed',
-                                    'label' => wp_strip_all_tags($is_end_status ? $end_status_info['label'] : esc_html__('Completed / Rejected', 'maneli-car-inquiry')),
+                                    'label' => wp_strip_all_tags($is_end_status ? $end_status_info['label'] : esc_html__('Completed / Rejected', 'autopuzzle')),
                                     'icon' => $end_status_info['icon'],
                                     'color' => $end_status_info['color'],
                                     'state' => $is_end_status ? 'current' : 'upcoming',
                                     'state_label' => $is_end_status
-                                        ? esc_html__('Current Status', 'maneli-car-inquiry')
-                                        : esc_html__('Final Stage', 'maneli-car-inquiry')
+                                        ? esc_html__('Current Status', 'autopuzzle')
+                                        : esc_html__('Final Stage', 'autopuzzle')
                                 ];
                                 if ($is_end_status) {
                                     $status_steps_current_index = $status_steps_index;
                                 }
                                 ?>
-                                <div class="status-step text-center maneli-status-step" style="opacity: <?php echo esc_attr($end_opacity); ?>; flex: 1; position: relative;">
+                                <div class="status-step text-center autopuzzle-status-step" style="opacity: <?php echo esc_attr($end_opacity); ?>; flex: 1; position: relative;">
                                     <?php if ($is_end_status): ?>
                                         <div class="pulse-ring"></div>
                                     <?php endif; ?>
@@ -311,25 +311,25 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                         </span>
                                     </div>
                                     <small class="d-block fw-semibold <?php echo esc_attr($is_end_status ? 'text-' . $end_status_info['color'] : ''); ?>">
-                                        <?php echo $is_end_status ? esc_html($end_status_info['label']) : esc_html__('Completed / Rejected', 'maneli-car-inquiry'); ?>
+                                        <?php echo $is_end_status ? esc_html($end_status_info['label']) : esc_html__('Completed / Rejected', 'autopuzzle'); ?>
                                     </small>
                                     <?php if ($is_end_status): ?>
                                         <div class="mt-1">
                                             <span class="badge bg-<?php echo esc_attr($end_status_info['color']); ?>-transparent fs-11">
-                                                <i class="la la-map-marker me-1"></i><?php esc_html_e('Current Status', 'maneli-car-inquiry'); ?>
+                                                <i class="la la-map-marker me-1"></i><?php esc_html_e('Current Status', 'autopuzzle'); ?>
                                             </span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
                             <div
-                                class="maneli-status-mobile d-none"
-                                data-maneli-status-mobile
+                                class="autopuzzle-status-mobile d-none"
+                                data-autopuzzle-status-mobile
                                 data-status-direction="<?php echo esc_attr($is_rtl_view ? 'rtl' : 'ltr'); ?>"
                                 data-current-index="<?php echo esc_attr($status_steps_current_index); ?>"
                                 data-statuses="<?php echo esc_attr(wp_json_encode($status_steps_payload)); ?>"
-                                data-label-prev="<?php echo esc_attr(esc_html__('Previous status', 'maneli-car-inquiry')); ?>"
-                                data-label-next="<?php echo esc_attr(esc_html__('Next status', 'maneli-car-inquiry')); ?>"
+                                data-label-prev="<?php echo esc_attr(esc_html__('Previous status', 'autopuzzle')); ?>"
+                                data-label-next="<?php echo esc_attr(esc_html__('Next status', 'autopuzzle')); ?>"
                             ></div>
                         </div>
                     </div>
@@ -341,7 +341,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         <div class="card-title text-fixed-white d-flex align-items-center justify-content-between">
                             <span>
                                 <i class="la la-user-cog me-2"></i>
-                                <?php esc_html_e('Expert Status Control', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Expert Status Control', 'autopuzzle'); ?>
                             </span>
                             <span class="badge bg-white text-primary"><?php echo esc_html($tracking_status_label); ?></span>
                         </div>
@@ -362,7 +362,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         // Initial creation
                         $timeline[] = [
                             'time' => $post->post_date,
-                            'label' => esc_html__('Request Created', 'maneli-car-inquiry'),
+                            'label' => esc_html__('Request Created', 'autopuzzle'),
                             'icon' => 'la-file-alt',
                             'color' => 'secondary'
                         ];
@@ -371,7 +371,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         if ($expert_name) {
                             $timeline[] = [
                                 'time' => get_post_meta($inquiry_id, 'referred_at', true) ?: $post->post_date,
-                                'label' => esc_html__('Assigned to Expert:', 'maneli-car-inquiry') . ' ' . $expert_name,
+                                'label' => esc_html__('Assigned to Expert:', 'autopuzzle') . ' ' . $expert_name,
                                 'icon' => 'la-user-tie',
                                 'color' => 'info'
                             ];
@@ -381,7 +381,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         if (in_array($tracking_status, ['in_progress', 'meeting_scheduled', 'follow_up_scheduled', 'completed', 'rejected'])) {
                             $timeline[] = [
                                 'time' => get_post_meta($inquiry_id, 'in_progress_at', true) ?: '',
-                                'label' => esc_html__('Follow-up Started by Expert', 'maneli-car-inquiry'),
+                                'label' => esc_html__('Follow-up Started by Expert', 'autopuzzle'),
                                 'icon' => 'la-spinner',
                                 'color' => 'primary'
                             ];
@@ -396,7 +396,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                 }
                                 $timeline[] = [
                                     'time' => $fh['completed_at'] ?? '',
-                                    'label' => esc_html__('Follow-up Completed (Date:', 'maneli-car-inquiry') . ' ' . $fh_date . ')',
+                                    'label' => esc_html__('Follow-up Completed (Date:', 'autopuzzle') . ' ' . $fh_date . ')',
                                     'icon' => 'la-check',
                                     'color' => 'success'
                                 ];
@@ -408,7 +408,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             $followup_date_label = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($followup_date) : $followup_date;
                             $timeline[] = [
                                 'time' => get_post_meta($inquiry_id, 'followup_scheduled_at', true) ?: '',
-                                'label' => esc_html__('Next Follow-up Scheduled for:', 'maneli-car-inquiry') . ' ' . $followup_date_label,
+                                'label' => esc_html__('Next Follow-up Scheduled for:', 'autopuzzle') . ' ' . $followup_date_label,
                                 'icon' => 'la-calendar',
                                 'color' => 'warning'
                             ];
@@ -420,7 +420,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             $meeting_time_label = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($meeting_time) : $meeting_time;
                             $timeline[] = [
                                 'time' => get_post_meta($inquiry_id, 'meeting_scheduled_at', true) ?: '',
-                                'label' => esc_html__('Meeting Scheduled:', 'maneli-car-inquiry') . ' ' . $meeting_date_label . ' - ' . $meeting_time_label,
+                                'label' => esc_html__('Meeting Scheduled:', 'autopuzzle') . ' ' . $meeting_date_label . ' - ' . $meeting_time_label,
                                 'icon' => 'la-handshake',
                                 'color' => 'cyan'
                             ];
@@ -430,7 +430,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         if ($tracking_status === 'completed') {
                             $timeline[] = [
                                 'time' => get_post_meta($inquiry_id, 'completed_at', true) ?: '',
-                                'label' => esc_html__('Completed', 'maneli-car-inquiry'),
+                                'label' => esc_html__('Completed', 'autopuzzle'),
                                 'icon' => 'la-check-circle',
                                 'color' => 'success'
                             ];
@@ -440,7 +440,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         if ($tracking_status === 'rejected') {
                             $timeline[] = [
                                 'time' => get_post_meta($inquiry_id, 'rejected_at', true) ?: '',
-                                'label' => esc_html__('Rejected', 'maneli-car-inquiry'),
+                                'label' => esc_html__('Rejected', 'autopuzzle'),
                                 'icon' => 'la-times-circle',
                                 'color' => 'danger'
                             ];
@@ -449,7 +449,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         if ($tracking_status === 'cancelled') {
                             $timeline[] = [
                                 'time' => get_post_meta($inquiry_id, 'cancelled_at', true) ?: '',
-                                'label' => esc_html__('Cancelled', 'maneli-car-inquiry'),
+                                'label' => esc_html__('Cancelled', 'autopuzzle'),
                                 'icon' => 'la-ban',
                                 'color' => 'danger'
                             ];
@@ -465,13 +465,13 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         <div class="alert alert-light border mb-3">
                             <h6 class="fw-semibold mb-3">
                                 <i class="la la-history me-2"></i>
-                                <?php esc_html_e('Activity Timeline', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Activity Timeline', 'autopuzzle'); ?>
                             </h6>
                             <div class="activity-timeline">
                                 <?php foreach ($timeline as $activity): ?>
                                     <?php if (!empty($activity['time'])): 
                                         // تبدیل تاریخ به شمسی
-                                        $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($activity['time'], 'Y/m/d H:i');
+                                        $jalali_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($activity['time'], 'Y/m/d H:i');
                                         // تبدیل اعداد به فارسی
                                         $jalali_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($jalali_date) : $jalali_date;
                                     ?>
@@ -493,7 +493,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         
                         <?php if ($meeting_date && $meeting_time): ?>
                         <div class="alert alert-info">
-                            <strong><i class="la la-calendar-check me-1"></i><?php esc_html_e('Meeting Scheduled:', 'maneli-car-inquiry'); ?></strong>
+                            <strong><i class="la la-calendar-check me-1"></i><?php esc_html_e('Meeting Scheduled:', 'autopuzzle'); ?></strong>
                             <p class="mb-0"><?php 
                                 $meeting_date_fa = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($meeting_date) : $meeting_date;
                                 $meeting_time_fa = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($meeting_time) : $meeting_time;
@@ -504,7 +504,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         
                         <?php if ($followup_date): ?>
                         <div class="alert alert-warning">
-                            <strong><i class="la la-clock me-1"></i><?php esc_html_e('Follow-up Date:', 'maneli-car-inquiry'); ?></strong>
+                            <strong><i class="la la-clock me-1"></i><?php esc_html_e('Follow-up Date:', 'autopuzzle'); ?></strong>
                             <p class="mb-0"><?php 
                                 $followup_date_fa = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($followup_date) : $followup_date;
                                 echo esc_html($followup_date_fa);
@@ -513,21 +513,21 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             $followup_note = get_post_meta($inquiry_id, 'followup_note', true);
                             if ($followup_note):
                             ?>
-                                <small class="d-block mt-2"><strong><?php esc_html_e('Note:', 'maneli-car-inquiry'); ?></strong> <?php echo esc_html($followup_note); ?></small>
+                                <small class="d-block mt-2"><strong><?php esc_html_e('Note:', 'autopuzzle'); ?></strong> <?php echo esc_html($followup_note); ?></small>
                             <?php endif; ?>
                         </div>
                         <?php endif; ?>
                         
                         <?php if ($cancel_reason): ?>
                         <div class="alert alert-danger">
-                            <strong><i class="la la-ban me-1"></i><?php esc_html_e('Cancellation Reason:', 'maneli-car-inquiry'); ?></strong>
+                            <strong><i class="la la-ban me-1"></i><?php esc_html_e('Cancellation Reason:', 'autopuzzle'); ?></strong>
                             <p class="mb-0"><?php echo esc_html($cancel_reason); ?></p>
                         </div>
                         <?php endif; ?>
                         
                         <?php if ($rejection_reason_exp): ?>
                         <div class="alert alert-danger">
-                            <strong><i class="la la-times-circle me-1"></i><?php esc_html_e('Rejection Reason:', 'maneli-car-inquiry'); ?></strong>
+                            <strong><i class="la la-times-circle me-1"></i><?php esc_html_e('Rejection Reason:', 'autopuzzle'); ?></strong>
                             <p class="mb-0"><?php echo esc_html($rejection_reason_exp); ?></p>
                         </div>
                         <?php endif; ?>
@@ -539,7 +539,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                         data-action="start_progress"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-play-circle me-1"></i>
-                                    <?php esc_html_e('Start Progress', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Start Progress', 'autopuzzle'); ?>
                                 </button>
                             <?php endif; ?>
                             
@@ -548,35 +548,35 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                         data-action="approve"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-check-circle me-1"></i>
-                                    <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Approve', 'autopuzzle'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-danger btn-wave installment-status-btn" 
                                         data-action="reject"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-times-circle me-1"></i>
-                                    <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Reject', 'autopuzzle'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-info btn-wave installment-status-btn" 
                                         data-action="schedule_meeting"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-calendar-check me-1"></i>
-                                    <?php esc_html_e('Schedule Meeting', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Schedule Meeting', 'autopuzzle'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-warning btn-wave installment-status-btn" 
                                         data-action="schedule_followup"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-clock me-1"></i>
-                                    <?php esc_html_e('Schedule Follow-up', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Schedule Follow-up', 'autopuzzle'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-secondary btn-wave installment-status-btn" 
                                         data-action="cancel"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-ban me-1"></i>
-                                    <?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Cancel', 'autopuzzle'); ?>
                                 </button>
                             <?php endif; ?>
                             
@@ -585,28 +585,28 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                         data-action="complete"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-check-circle me-1"></i>
-                                    <?php esc_html_e('Complete', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Complete', 'autopuzzle'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-danger btn-wave installment-status-btn" 
                                         data-action="reject"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-times-circle me-1"></i>
-                                    <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Reject', 'autopuzzle'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-warning btn-wave installment-cancel-meeting-btn" 
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
                                         data-inquiry-type="installment">
                                     <i class="la la-calendar-times me-1"></i>
-                                    <?php esc_html_e('Cancel Meeting', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Cancel Meeting', 'autopuzzle'); ?>
                                 </button>
                                 
                                 <button type="button" class="btn btn-info btn-wave installment-status-btn" 
                                         data-action="schedule_followup"
                                         data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>">
                                     <i class="la la-clock me-1"></i>
-                                    <?php esc_html_e('Schedule Follow-up', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Schedule Follow-up', 'autopuzzle'); ?>
                                 </button>
                             <?php endif; ?>
                         </div>
@@ -618,14 +618,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     <div class="card-header bg-secondary-transparent">
                         <div class="card-title">
                             <i class="la la-sticky-note me-2"></i>
-                            <?php esc_html_e('Expert Notes', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Expert Notes', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
                         <?php 
                         $expert_notes = get_post_meta($inquiry_id, 'expert_notes', true) ?: [];
-                        $is_manager = current_user_can('manage_maneli_inquiries');
-                        $is_expert_role = in_array('maneli_expert', wp_get_current_user()->roles, true);
+                        $is_manager = current_user_can('manage_autopuzzle_inquiries');
+                        $is_expert_role = in_array('autopuzzle_expert', wp_get_current_user()->roles, true);
                         
                         if (!empty($expert_notes)): ?>
                             <div class="<?php echo $is_manager ? '' : 'mb-3'; ?>">
@@ -638,7 +638,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                 <p class="mb-1"><?php echo esc_html($note['note']); ?></p>
                                                 <small class="text-muted">
                                                     <i class="la la-user me-1"></i>
-                                                    <strong><?php echo $note_expert ? esc_html($note_expert->display_name) : esc_html__('Expert', 'maneli-car-inquiry'); ?></strong>
+                                                    <strong><?php echo $note_expert ? esc_html($note_expert->display_name) : esc_html__('Expert', 'autopuzzle'); ?></strong>
                                                     <i class="la la-clock me-1 ms-2"></i>
                                                     <?php echo esc_html($note['created_at']); ?>
                                                 </small>
@@ -651,7 +651,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             <div class="alert alert-info-transparent border-info <?php echo $is_manager ? '' : 'mb-3'; ?>">
                                 <div class="d-flex align-items-center">
                                     <i class="la la-info-circle me-2 fs-18"></i>
-                                    <span><?php esc_html_e('No notes have been recorded yet.', 'maneli-car-inquiry'); ?></span>
+                                    <span><?php esc_html_e('No notes have been recorded yet.', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -661,10 +661,10 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             <form id="installment-expert-note-form">
                                 <div class="input-group">
                                     <textarea id="installment-expert-note-input" class="form-control" rows="2" 
-                                              placeholder="<?php esc_attr_e('Add a note...', 'maneli-car-inquiry'); ?>"></textarea>
+                                              placeholder="<?php esc_attr_e('Add a note...', 'autopuzzle'); ?>"></textarea>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="la la-save me-1"></i>
-                                        <?php esc_html_e('Save Note', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('Save Note', 'autopuzzle'); ?>
                                     </button>
                                 </div>
                             </form>
@@ -681,10 +681,10 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         if ($car_image) {
                             echo wp_kses_post($car_image);
                         } else {
-                            echo '<div class="bg-light rounded d-flex align-items-center justify-content-center text-muted maneli-placeholder-image">
+                            echo '<div class="bg-light rounded d-flex align-items-center justify-content-center text-muted autopuzzle-placeholder-image">
                                 <div class="text-center">
                                     <i class="la la-image fs-40"></i>
-                                    <p class="mb-0 mt-2">' . esc_html__('No Image', 'maneli-car-inquiry') . '</p>
+                                    <p class="mb-0 mt-2">' . esc_html__('No Image', 'autopuzzle') . '</p>
                                 </div>
                             </div>';
                         }
@@ -693,39 +693,39 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     <div class="col-md-8">
                         <h5 class="mb-3 fw-semibold">
                             <i class="la la-info-circle text-primary me-1"></i>
-                            <?php esc_html_e('Loan and Car Details', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Loan and Car Details', 'autopuzzle'); ?>
                         </h5>
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped mb-0">
                                 <tbody>
                                     <tr>
-                                        <td class="fw-semibold bg-light" width="40%"><?php esc_html_e('Selected Car', 'maneli-car-inquiry'); ?></td>
+                                        <td class="fw-semibold bg-light" width="40%"><?php esc_html_e('Selected Car', 'autopuzzle'); ?></td>
                                         <td><a href="<?php echo esc_url(get_permalink($product_id)); ?>" target="_blank" class="text-primary"><?php echo esc_html($car_name); ?> <i class="la la-external-link-alt"></i></a></td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold bg-light"><?php esc_html_e('Total Price', 'maneli-car-inquiry'); ?></td>
-                                        <td><strong class="text-success"><?php echo function_exists('persian_numbers') ? persian_numbers(Maneli_Render_Helpers::format_money($total_price)) : Maneli_Render_Helpers::format_money($total_price); ?></strong> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></td>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Total Price', 'autopuzzle'); ?></td>
+                                        <td><strong class="text-success"><?php echo function_exists('persian_numbers') ? persian_numbers(Autopuzzle_Render_Helpers::format_money($total_price)) : Autopuzzle_Render_Helpers::format_money($total_price); ?></strong> <?php esc_html_e('Toman', 'autopuzzle'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold bg-light"><?php esc_html_e('Down Payment', 'maneli-car-inquiry'); ?></td>
-                                        <td><strong class="text-info"><?php echo function_exists('persian_numbers') ? persian_numbers(Maneli_Render_Helpers::format_money($down_payment)) : Maneli_Render_Helpers::format_money($down_payment); ?></strong> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></td>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Down Payment', 'autopuzzle'); ?></td>
+                                        <td><strong class="text-info"><?php echo function_exists('persian_numbers') ? persian_numbers(Autopuzzle_Render_Helpers::format_money($down_payment)) : Autopuzzle_Render_Helpers::format_money($down_payment); ?></strong> <?php esc_html_e('Toman', 'autopuzzle'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold bg-light"><?php esc_html_e('Loan Amount', 'maneli-car-inquiry'); ?></td>
-                                        <td><strong class="text-warning"><?php echo function_exists('persian_numbers') ? persian_numbers(Maneli_Render_Helpers::format_money($loan_amount)) : Maneli_Render_Helpers::format_money($loan_amount); ?></strong> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></td>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Loan Amount', 'autopuzzle'); ?></td>
+                                        <td><strong class="text-warning"><?php echo function_exists('persian_numbers') ? persian_numbers(Autopuzzle_Render_Helpers::format_money($loan_amount)) : Autopuzzle_Render_Helpers::format_money($loan_amount); ?></strong> <?php esc_html_e('Toman', 'autopuzzle'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold bg-light"><?php esc_html_e('Installment Term', 'maneli-car-inquiry'); ?></td>
-                                        <td><span class="badge bg-secondary-transparent"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($term_months) : absint($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></span></td>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Installment Term', 'autopuzzle'); ?></td>
+                                        <td><span class="badge bg-secondary-transparent"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($term_months) : absint($term_months); ?> <?php esc_html_e('Months', 'autopuzzle'); ?></span></td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold bg-light"><?php esc_html_e('Monthly Installment', 'maneli-car-inquiry'); ?></td>
-                                        <td><strong class="text-primary fs-16"><?php echo function_exists('persian_numbers') ? persian_numbers(Maneli_Render_Helpers::format_money($installment_amount)) : Maneli_Render_Helpers::format_money($installment_amount); ?></strong> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></td>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Monthly Installment', 'autopuzzle'); ?></td>
+                                        <td><strong class="text-primary fs-16"><?php echo function_exists('persian_numbers') ? persian_numbers(Autopuzzle_Render_Helpers::format_money($installment_amount)) : Autopuzzle_Render_Helpers::format_money($installment_amount); ?></strong> <?php esc_html_e('Toman', 'autopuzzle'); ?></td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-semibold bg-light"><?php esc_html_e('Date Submitted', 'maneli-car-inquiry'); ?></td>
+                                        <td class="fw-semibold bg-light"><?php esc_html_e('Date Submitted', 'autopuzzle'); ?></td>
                                         <td><?php 
-                                            $formatted_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($post->post_date, 'Y/m/d H:i');
+                                            $formatted_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($post->post_date, 'Y/m/d H:i');
                                             echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($formatted_date) : $formatted_date;
                                         ?></td>
                                     </tr>
@@ -736,12 +736,12 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 </div>
 
                 <!-- Action Buttons -->
-                <?php if (current_user_can('manage_maneli_inquiries')): ?>
+                <?php if (current_user_can('manage_autopuzzle_inquiries')): ?>
             <div class="card border-primary mt-3">
                 <div class="card-header bg-primary-transparent">
                     <h6 class="card-title mb-0">
                         <i class="la la-shield-alt text-primary me-2"></i>
-                        <?php esc_html_e('Admin Actions', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('Admin Actions', 'autopuzzle'); ?>
                     </h6>
                 </div>
                 <div class="card-body">
@@ -751,7 +751,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             <div class="d-flex align-items-center">
                                 <i class="la la-user-tie fs-24 me-2"></i>
                                 <div>
-                                    <strong><?php esc_html_e('Assigned to:', 'maneli-car-inquiry'); ?></strong>
+                                    <strong><?php esc_html_e('Assigned to:', 'autopuzzle'); ?></strong>
                                     <span class="badge bg-info ms-2"><?php echo esc_html($expert_name); ?></span>
                                 </div>
                             </div>
@@ -762,7 +762,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         <?php if ($inquiry_status === 'pending' || $inquiry_status === 'more_docs' || $inquiry_status === 'failed'): ?>
                             <button type="button" class="btn btn-danger btn-wave reject-inquiry-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">
                                 <i class="la la-times-circle me-1"></i>
-                                <?php esc_html_e('Final Rejection of Request', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Final Rejection of Request', 'autopuzzle'); ?>
                             </button>
                         <?php endif; ?>
 
@@ -771,34 +771,34 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                     data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
                                     data-inquiry-type="installment">
                                 <i class="la la-user-plus me-1"></i>
-                                <?php esc_html_e('Assign to Expert', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Assign to Expert', 'autopuzzle'); ?>
                             </button>
                         <?php else: ?>
                             <button type="button" class="btn btn-warning btn-wave assign-expert-btn" 
                                     data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" 
                                     data-inquiry-type="installment">
                                 <i class="la la-user-edit me-1"></i>
-                                <?php esc_html_e('Change Expert', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Change Expert', 'autopuzzle'); ?>
                             </button>
                         <?php endif; ?>
 
                         <?php if ($inquiry_status === 'failed' && $is_admin_or_expert): ?>
                             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="d-inline-block">
-                                <input type="hidden" name="action" value="maneli_admin_retry_finotex">
+                                <input type="hidden" name="action" value="autopuzzle_admin_retry_finotex">
                                 <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
-                                <?php wp_nonce_field('maneli_retry_finotex_nonce'); ?>
+                                <?php wp_nonce_field('autopuzzle_retry_finotex_nonce'); ?>
                                 <button type="submit" class="btn btn-warning btn-wave">
                                     <i class="la la-sync me-1"></i>
-                                    <?php esc_html_e('Retry Finotex Inquiry', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Retry Finotex Inquiry', 'autopuzzle'); ?>
                                 </button>
                             </form>
                         <?php endif; ?>
 
-                        <?php if (current_user_can('manage_maneli_inquiries')): ?>
+                        <?php if (current_user_can('manage_autopuzzle_inquiries')): ?>
                             <?php if ($inquiry_status !== 'rejected' && $inquiry_status !== 'user_confirmed'): ?>
                                 <button type="button" class="btn btn-secondary btn-wave request-more-docs-btn" data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>" data-inquiry-type="installment">
                                     <i class="la la-file-alt me-1"></i>
-                                    <?php esc_html_e('Request More Documents', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Request More Documents', 'autopuzzle'); ?>
                                 </button>
                             <?php endif; ?>
 
@@ -811,7 +811,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                     data-customer-name="<?php echo esc_attr($customer_name); ?>"
                                     data-inquiry-type="installment">
                                 <i class="la la-sms me-1"></i>
-                                <?php esc_html_e('Send SMS', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Send SMS', 'autopuzzle'); ?>
                             </button>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -827,13 +827,13 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         <div class="mt-3 pt-3 border-top">
                             <h6 class="fw-semibold mb-3">
                                 <i class="la la-file-alt me-2"></i>
-                                <?php esc_html_e('Submitted Documents', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Submitted Documents', 'autopuzzle'); ?>
                             </h6>
                             
                             <?php if (empty($uploaded_docs) && !empty($requested_docs)): ?>
                                 <div class="alert alert-info border-info">
                                     <i class="la la-info-circle me-2"></i>
-                                    <?php esc_html_e('Request sent to user', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Request sent to user', 'autopuzzle'); ?>
                                 </div>
                             <?php elseif (!empty($uploaded_docs)): ?>
                                 <div class="document-list">
@@ -848,7 +848,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                             </div>
                                             <?php if (isset($doc['file'])): ?>
                                                 <a href="<?php echo esc_url($doc['file']); ?>" target="_blank" class="btn btn-sm btn-primary">
-                                                    <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                    <i class="la la-download"></i> <?php esc_html_e('Download', 'autopuzzle'); ?>
                                                 </a>
                                             <?php endif; ?>
                                         </div>
@@ -865,13 +865,13 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
         <?php if ($is_admin_or_expert): ?>
             <?php
             $sms_history = get_post_meta($inquiry_id, 'sms_history', true) ?: [];
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
             ?>
             <div class="card border-info mt-4">
                 <div class="card-header bg-info-transparent">
                     <h6 class="card-title mb-0">
                         <i class="la la-sms text-info me-2"></i>
-                        <?php esc_html_e('SMS History', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('SMS History', 'autopuzzle'); ?>
                         <?php if (!empty($sms_history)): ?>
                             <span class="badge bg-info ms-2"><?php echo count($sms_history); ?></span>
                         <?php endif; ?>
@@ -883,19 +883,19 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             <table class="table table-hover table-bordered">
                                 <thead class="table-light">
                                     <tr>
-                                        <th><?php esc_html_e('Sent By', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Recipient', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Date & Time', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Sent By', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Recipient', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Message', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Date & Time', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php 
                                     $index = 0;
                                     foreach ($sms_history as $sms): 
-                                        $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($sms['sent_at'], 'Y/m/d H:i');
+                                        $jalali_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($sms['sent_at'], 'Y/m/d H:i');
                                         $jalali_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($jalali_date) : $jalali_date;
                                         $recipient_formatted = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($sms['recipient']) : $sms['recipient'];
                                         $message_id = $sms['message_id'] ?? null;
@@ -907,7 +907,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                     <span class="avatar avatar-sm bg-primary-transparent me-2">
                                                         <i class="la la-user"></i>
                                                     </span>
-                                                    <span class="fw-semibold"><?php echo esc_html($sms['user_name'] ?? __('Unknown', 'maneli-car-inquiry')); ?></span>
+                                                    <span class="fw-semibold"><?php echo esc_html($sms['user_name'] ?? __('Unknown', 'autopuzzle')); ?></span>
                                                 </div>
                                             </td>
                                             <td>
@@ -924,16 +924,16 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                             <td>
                                                 <div class="sms-status-display">
                                                     <?php if ($sms['success']): ?>
-                                                        <span class="badge bg-success"><?php esc_html_e('Success', 'maneli-car-inquiry'); ?></span>
+                                                        <span class="badge bg-success"><?php esc_html_e('Success', 'autopuzzle'); ?></span>
                                                     <?php else: ?>
-                                                        <span class="badge bg-danger"><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></span>
+                                                        <span class="badge bg-danger"><?php esc_html_e('Failed', 'autopuzzle'); ?></span>
                                                         <?php if (!empty($sms['error'])): ?>
                                                             <br><small class="text-danger"><?php echo esc_html($sms['error']); ?></small>
                                                         <?php endif; ?>
                                                     <?php endif; ?>
                                                     <?php if (!empty($message_id)): ?>
                                                         <br><small class="text-muted delivery-status" data-message-id="<?php echo esc_attr($message_id); ?>">
-                                                            <span class="status-text"><?php esc_html_e('Checking status...', 'maneli-car-inquiry'); ?></span>
+                                                            <span class="status-text"><?php esc_html_e('Checking status...', 'autopuzzle'); ?></span>
                                                         </small>
                                                     <?php endif; ?>
                                                 </div>
@@ -946,14 +946,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                             data-related-id="<?php echo esc_attr($inquiry_id); ?>"
                                                             data-inquiry-type="installment">
                                                         <i class="la la-redo me-1"></i>
-                                                        <?php esc_html_e('Resend', 'maneli-car-inquiry'); ?>
+                                                        <?php esc_html_e('Resend', 'autopuzzle'); ?>
                                                     </button>
                                                 <?php endif; ?>
                                                 <?php if (!empty($message_id)): ?>
                                                     <button type="button" class="btn btn-sm btn-info btn-check-status <?php echo $is_failed ? 'mt-1' : ''; ?>" 
                                                             data-message-id="<?php echo esc_attr($message_id); ?>">
                                                         <i class="la la-sync me-1"></i>
-                                                        <?php esc_html_e('Check Status', 'maneli-car-inquiry'); ?>
+                                                        <?php esc_html_e('Check Status', 'autopuzzle'); ?>
                                                     </button>
                                                 <?php endif; ?>
                                             </td>
@@ -969,7 +969,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                         <div class="alert alert-info-transparent border-info">
                             <div class="d-flex align-items-center">
                                 <i class="la la-info-circle me-2 fs-18"></i>
-                                <span><?php esc_html_e('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry'); ?></span>
+                                <span><?php esc_html_e('No SMS messages have been sent for this inquiry yet.', 'autopuzzle'); ?></span>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -986,7 +986,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <div class="card-title d-flex justify-content-between align-items-center">
                     <span>
                         <i class="la la-user me-2"></i>
-                        <?php esc_html_e('Buyer Information', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('Buyer Information', 'autopuzzle'); ?>
                     </span>
                 </div>
             </div>
@@ -994,37 +994,37 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('First Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('First Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['first_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Last Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['last_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Father\'s Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Father\'s Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['father_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('National Code', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('National Code', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['national_code'][0] ?? '—') : esc_html($post_meta['national_code'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Date of Birth', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Date of Birth', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php 
                                 $birth_date = $post_meta['birth_date'][0] ?? '—';
                                 if ($birth_date && $birth_date !== '—') {
                                     // Try to convert if it's in Gregorian format
                                     if (strpos($birth_date, '/') !== false || strpos($birth_date, '-') !== false) {
-                                        $birth_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($birth_date, 'Y/m/d');
+                                        $birth_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($birth_date, 'Y/m/d');
                                     }
                                     $birth_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($birth_date) : $birth_date;
                                 }
@@ -1034,7 +1034,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Mobile Number', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold">
                                 <a href="tel:<?php echo esc_attr($post_meta['mobile_number'][0] ?? ''); ?>" class="text-primary">
                                     <i class="la la-phone me-1"></i><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['mobile_number'][0] ?? '—') : esc_html($post_meta['mobile_number'][0] ?? '—'); ?>
@@ -1044,31 +1044,31 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Phone Number', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Phone Number', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['phone_number'][0] ?? '—') : esc_html($post_meta['phone_number'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Email', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Email', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['email'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('job_type', $post_meta['job_type'][0] ?? '—')); ?></p>
+                            <small class="text-muted"><?php esc_html_e('Job Type', 'autopuzzle'); ?></small>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Autopuzzle_Render_Helpers::translate_field_value('job_type', $post_meta['job_type'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Occupation', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Occupation', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['occupation'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Income Level', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Income Level', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php 
                                 $income_level = $post_meta['income_level'][0] ?? '—';
                                 if ($income_level && $income_level !== '—') {
@@ -1087,19 +1087,19 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Residency Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('residency_status', $post_meta['residency_status'][0] ?? '—')); ?></p>
+                            <small class="text-muted"><?php esc_html_e('Residency Status', 'autopuzzle'); ?></small>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Autopuzzle_Render_Helpers::translate_field_value('residency_status', $post_meta['residency_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Workplace Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('workplace_status', $post_meta['workplace_status'][0] ?? '—')); ?></p>
+                            <small class="text-muted"><?php esc_html_e('Workplace Status', 'autopuzzle'); ?></small>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Autopuzzle_Render_Helpers::translate_field_value('workplace_status', $post_meta['workplace_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-12">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Address', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Address', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['address'][0] ?? '—'); ?></p>
                         </div>
                     </div>
@@ -1111,7 +1111,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
         <?php if ($is_admin_or_expert): ?>
         <?php
         // Get required documents from settings
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = get_option('autopuzzle_inquiry_all_options', []);
         $customer_docs_raw = $options['customer_required_documents'] ?? '';
         $required_docs = array_filter(array_map('trim', explode("\n", $customer_docs_raw)));
         
@@ -1126,7 +1126,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header bg-info-transparent">
                 <div class="card-title mb-0">
                     <i class="la la-file-alt text-info me-2"></i>
-                    <?php esc_html_e('Documents', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Documents', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
@@ -1165,11 +1165,11 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                             <?php if ($is_uploaded && $doc_status === 'approved'): ?>
                                                 <div class="alert alert-success border-success py-2 px-3 mb-2">
                                                     <i class="la la-check-circle me-2"></i>
-                                                    <?php esc_html_e('Approved', 'maneli-car-inquiry'); ?>
+                                                    <?php esc_html_e('Approved', 'autopuzzle'); ?>
                                                     <?php if ($doc_reviewed_at): ?>
                                                         <small class="d-block mt-1 text-muted">
                                                             <?php 
-                                                            $reviewed_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($doc_reviewed_at, 'Y/m/d H:i');
+                                                            $reviewed_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($doc_reviewed_at, 'Y/m/d H:i');
                                                             $reviewed_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($reviewed_date) : $reviewed_date;
                                                             echo esc_html($reviewed_date);
                                                             ?>
@@ -1178,23 +1178,23 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                 </div>
                                                 <?php if ($uploaded_file_url): ?>
                                                     <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary w-100 mb-2">
-                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'autopuzzle'); ?>
                                                     </a>
                                                 <?php endif; ?>
                                             <?php elseif ($is_uploaded && $doc_status === 'rejected'): ?>
                                                 <div class="alert alert-danger border-danger py-2 px-3 mb-2">
                                                     <i class="la la-times-circle me-2"></i>
-                                                    <?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?>
+                                                    <?php esc_html_e('Rejected', 'autopuzzle'); ?>
                                                     <?php if ($doc_rejection_reason): ?>
                                                         <div class="mt-2">
-                                                            <strong><?php esc_html_e('Reason:', 'maneli-car-inquiry'); ?></strong>
+                                                            <strong><?php esc_html_e('Reason:', 'autopuzzle'); ?></strong>
                                                             <p class="mb-0 mt-1"><?php echo esc_html($doc_rejection_reason); ?></p>
                                                         </div>
                                                     <?php endif; ?>
                                                     <?php if ($doc_reviewed_at): ?>
                                                         <small class="d-block mt-1 text-muted">
                                                             <?php 
-                                                            $reviewed_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($doc_reviewed_at, 'Y/m/d H:i');
+                                                            $reviewed_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($doc_reviewed_at, 'Y/m/d H:i');
                                                             $reviewed_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($reviewed_date) : $reviewed_date;
                                                             echo esc_html($reviewed_date);
                                                             ?>
@@ -1203,7 +1203,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                 </div>
                                                 <?php if ($uploaded_file_url): ?>
                                                     <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary w-100 mb-2">
-                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'autopuzzle'); ?>
                                                     </a>
                                                 <?php endif; ?>
                                                 <?php if ($is_admin_or_expert): ?>
@@ -1212,17 +1212,17 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                             data-doc-name="<?php echo esc_attr($doc_name); ?>"
                                                             data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
                                                             data-inquiry-type="installment">
-                                                        <i class="la la-check"></i> <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
+                                                        <i class="la la-check"></i> <?php esc_html_e('Approve', 'autopuzzle'); ?>
                                                     </button>
                                                 <?php endif; ?>
                                             <?php elseif ($is_uploaded): ?>
                                                 <div class="alert alert-info border-info py-2 px-3 mb-2">
                                                     <i class="la la-clock me-2"></i>
-                                                    <?php esc_html_e('Awaiting Review', 'maneli-car-inquiry'); ?>
+                                                    <?php esc_html_e('Awaiting Review', 'autopuzzle'); ?>
                                                 </div>
                                                 <?php if ($uploaded_file_url): ?>
                                                     <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary w-100 mb-2">
-                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'autopuzzle'); ?>
                                                     </a>
                                                 <?php endif; ?>
                                                 <?php if ($is_admin_or_expert): ?>
@@ -1232,7 +1232,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                                 data-doc-name="<?php echo esc_attr($doc_name); ?>"
                                                                 data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
                                                                 data-inquiry-type="installment">
-                                                            <i class="la la-check"></i> <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
+                                                            <i class="la la-check"></i> <?php esc_html_e('Approve', 'autopuzzle'); ?>
                                                         </button>
                                                         <button class="btn btn-sm btn-danger reject-doc-btn flex-fill" 
                                                                 data-user-id="<?php echo esc_attr($customer_id); ?>" 
@@ -1240,14 +1240,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                                                 data-inquiry-id="<?php echo esc_attr($inquiry_id); ?>"
                                                                 data-inquiry-type="installment"
                                                                 data-rejection-reasons='<?php echo wp_json_encode($rejection_reasons); ?>'>
-                                                            <i class="la la-times"></i> <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
+                                                            <i class="la la-times"></i> <?php esc_html_e('Reject', 'autopuzzle'); ?>
                                                         </button>
                                                     </div>
                                                 <?php endif; ?>
                                             <?php else: ?>
                                                 <div class="alert alert-warning border-warning py-2 px-3 mb-0">
                                                     <i class="la la-exclamation-triangle me-2"></i>
-                                                    <?php esc_html_e('Not Uploaded', 'maneli-car-inquiry'); ?>
+                                                    <?php esc_html_e('Not Uploaded', 'autopuzzle'); ?>
                                                 </div>
                                             <?php endif; ?>
                                     </div>
@@ -1263,14 +1263,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                     data-inquiry-type="installment"
                                     data-required-docs='<?php echo wp_json_encode(array_values($required_docs)); ?>'>
                                 <i class="la la-paper-plane me-2"></i>
-                                <?php esc_html_e('Request Documents', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Request Documents', 'autopuzzle'); ?>
                             </button>
                         </div>
                     <?php endif; ?>
                 <?php else: ?>
                     <div class="alert alert-info">
                         <i class="la la-info-circle me-2"></i>
-                        <?php esc_html_e('No documents have been configured in settings.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('No documents have been configured in settings.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1283,32 +1283,32 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header bg-success-transparent">
                 <div class="card-title">
                     <i class="la la-university me-2"></i>
-                    <?php esc_html_e('Bank Information (Cheque Holder)', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Bank Information (Cheque Holder)', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Bank Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Bank Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['bank_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Account Number', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Account Number', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['account_number'][0] ?? '—') : esc_html($post_meta['account_number'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Branch Code', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Branch Code', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['branch_code'][0] ?? '—') : esc_html($post_meta['branch_code'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Branch Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Branch Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['branch_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
@@ -1323,44 +1323,44 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header bg-warning-transparent">
                 <div class="card-title">
                     <i class="la la-user-friends me-2"></i>
-                    <?php esc_html_e('Cheque Issuer Information', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Cheque Issuer Information', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('First Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('First Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_full_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Last Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_last_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Father\'s Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Father\'s Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_father_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('National Code', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('National Code', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['issuer_national_code'][0] ?? '—') : esc_html($post_meta['issuer_national_code'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Date of Birth', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Date of Birth', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php 
                                 $issuer_birth_date = $post_meta['issuer_birth_date'][0] ?? '—';
                                 if ($issuer_birth_date && $issuer_birth_date !== '—') {
                                     // Try to convert if it's in Gregorian format
                                     if (strpos($issuer_birth_date, '/') !== false || strpos($issuer_birth_date, '-') !== false) {
-                                        $issuer_birth_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($issuer_birth_date, 'Y/m/d');
+                                        $issuer_birth_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($issuer_birth_date, 'Y/m/d');
                                     }
                                     $issuer_birth_date = function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($issuer_birth_date) : $issuer_birth_date;
                                 }
@@ -1370,7 +1370,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Mobile Number', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold">
                                 <a href="tel:<?php echo esc_attr($post_meta['issuer_mobile_number'][0] ?? ''); ?>" class="text-primary">
                                     <i class="la la-phone me-1"></i><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['issuer_mobile_number'][0] ?? '—') : esc_html($post_meta['issuer_mobile_number'][0] ?? '—'); ?>
@@ -1380,37 +1380,37 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Phone Number', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Phone Number', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['issuer_phone_number'][0] ?? '—') : esc_html($post_meta['issuer_phone_number'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Job Type', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('job_type', $post_meta['issuer_job_type'][0] ?? '—')); ?></p>
+                            <small class="text-muted"><?php esc_html_e('Job Type', 'autopuzzle'); ?></small>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Autopuzzle_Render_Helpers::translate_field_value('job_type', $post_meta['issuer_job_type'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Occupation', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Occupation', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_occupation'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Residency Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('residency_status', $post_meta['issuer_residency_status'][0] ?? '—')); ?></p>
+                            <small class="text-muted"><?php esc_html_e('Residency Status', 'autopuzzle'); ?></small>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Autopuzzle_Render_Helpers::translate_field_value('residency_status', $post_meta['issuer_residency_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Workplace Status', 'maneli-car-inquiry'); ?></small>
-                            <p class="mb-0 fw-semibold"><?php echo esc_html(Maneli_Render_Helpers::translate_field_value('workplace_status', $post_meta['issuer_workplace_status'][0] ?? '—')); ?></p>
+                            <small class="text-muted"><?php esc_html_e('Workplace Status', 'autopuzzle'); ?></small>
+                            <p class="mb-0 fw-semibold"><?php echo esc_html(Autopuzzle_Render_Helpers::translate_field_value('workplace_status', $post_meta['issuer_workplace_status'][0] ?? '—')); ?></p>
                         </div>
                     </div>
                     <div class="col-12">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Address', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Address', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_address'][0] ?? '—'); ?></p>
                         </div>
                     </div>
@@ -1420,30 +1420,30 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <!-- Issuer Bank Information - Admin Only -->
                 <h5 class="mt-4 mb-3 pt-3 border-top fw-semibold">
                     <i class="la la-university text-success me-1"></i>
-                    <?php esc_html_e('Bank Information (Cheque Holder)', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Bank Information (Cheque Holder)', 'autopuzzle'); ?>
                 </h5>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Bank Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Bank Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_bank_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Account Number', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Account Number', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['issuer_account_number'][0] ?? '—') : esc_html($post_meta['issuer_account_number'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Branch Code', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Branch Code', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($post_meta['issuer_branch_code'][0] ?? '—') : esc_html($post_meta['issuer_branch_code'][0] ?? '—'); ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border p-3 rounded bg-light">
-                            <small class="text-muted"><?php esc_html_e('Branch Name', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Branch Name', 'autopuzzle'); ?></small>
                             <p class="mb-0 fw-semibold"><?php echo esc_html($post_meta['issuer_branch_name'][0] ?? '—'); ?></p>
                         </div>
                     </div>
@@ -1459,14 +1459,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header bg-danger-transparent">
                 <div class="card-title">
                     <i class="la la-exclamation-circle me-2"></i>
-                    <?php esc_html_e('Banking Risk Assessment', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Banking Risk Assessment', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <?php if (!$credit_risk_enabled): ?>
                     <div class="alert alert-warning border">
                         <i class="la la-exclamation-triangle me-1"></i>
-                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
                 <?php
@@ -1478,44 +1478,44 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 ?>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <strong><?php esc_html_e('Credit Risk Level:', 'maneli-car-inquiry'); ?></strong>
+                        <strong><?php esc_html_e('Credit Risk Level:', 'autopuzzle'); ?></strong>
                         <?php if ($credit_risk !== null): ?>
                             <span class="badge bg-<?php echo esc_attr($credit_risk === 'low' ? 'success' : ($credit_risk === 'medium' ? 'warning' : 'danger')); ?>">
                                 <?php echo esc_html(ucfirst($credit_risk)); ?>
                             </span>
                         <?php else: ?>
-                            <span class="badge bg-light text-muted"><?php esc_html_e('Not available', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-light text-muted"><?php esc_html_e('Not available', 'autopuzzle'); ?></span>
                         <?php endif; ?>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <strong><?php esc_html_e('Risk Score:', 'maneli-car-inquiry'); ?></strong>
-                        <span><?php echo ($risk_score !== null) ? esc_html($maneli_digits($risk_score)) : esc_html__('Not available', 'maneli-car-inquiry'); ?></span>
+                        <strong><?php esc_html_e('Risk Score:', 'autopuzzle'); ?></strong>
+                        <span><?php echo ($risk_score !== null) ? esc_html($autopuzzle_digits($risk_score)) : esc_html__('Not available', 'autopuzzle'); ?></span>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <strong><?php esc_html_e('Prohibited Transaction Status:', 'maneli-car-inquiry'); ?></strong>
+                        <strong><?php esc_html_e('Prohibited Transaction Status:', 'autopuzzle'); ?></strong>
                         <?php if ($prohibited !== null): ?>
                             <span class="badge bg-<?php echo esc_attr($prohibited === 'yes' ? 'danger' : 'success'); ?>">
-                                <?php echo esc_html($prohibited === 'yes' ? __('Yes', 'maneli-car-inquiry') : __('No', 'maneli-car-inquiry')); ?>
+                                <?php echo esc_html($prohibited === 'yes' ? __('Yes', 'autopuzzle') : __('No', 'autopuzzle')); ?>
                             </span>
                         <?php else: ?>
-                            <span class="badge bg-light text-muted"><?php esc_html_e('Not available', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-light text-muted"><?php esc_html_e('Not available', 'autopuzzle'); ?></span>
                         <?php endif; ?>
                     </div>
                 </div>
                 <div class="mt-3">
-                    <strong><?php esc_html_e('Financial Judgments:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Financial Judgments:', 'autopuzzle'); ?></strong>
                     <ul class="list-group mt-2">
                         <?php if (!empty($judgments)): ?>
                             <?php foreach ($judgments as $judgment): ?>
                                 <li class="list-group-item">
-                                    <?php echo esc_html($judgment['caseNumber'] ? $maneli_digits($judgment['caseNumber']) : __('Not available', 'maneli-car-inquiry')); ?> -
-                                    <?php echo esc_html($judgment['judgmentAmount'] !== null ? $maneli_number($judgment['judgmentAmount']) : __('Not available', 'maneli-car-inquiry')); ?>
-                                    <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?>
+                                    <?php echo esc_html($judgment['caseNumber'] ? $autopuzzle_digits($judgment['caseNumber']) : __('Not available', 'autopuzzle')); ?> -
+                                    <?php echo esc_html($judgment['judgmentAmount'] !== null ? $autopuzzle_number($judgment['judgmentAmount']) : __('Not available', 'autopuzzle')); ?>
+                                    <?php esc_html_e('Rials', 'autopuzzle'); ?>
                                 </li>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <li class="list-group-item text-muted">
-                                <?php esc_html_e('No judgment records available.', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('No judgment records available.', 'autopuzzle'); ?>
                             </li>
                         <?php endif; ?>
                     </ul>
@@ -1523,7 +1523,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <?php if (empty($credit_risk_data) && $credit_risk_enabled): ?>
                     <div class="alert alert-light border mt-3">
                         <i class="la la-info-circle me-1"></i>
-                        <?php esc_html_e('No data received for this section yet.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('No data received for this section yet.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1536,14 +1536,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header bg-warning-transparent">
                 <div class="card-title">
                     <i class="la la-chart-line me-2"></i>
-                    <?php esc_html_e('Credit Score Decrease Reasons', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Credit Score Decrease Reasons', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <?php if (!$credit_score_enabled): ?>
                     <div class="alert alert-warning border">
                         <i class="la la-exclamation-triangle me-1"></i>
-                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
                 <?php
@@ -1553,13 +1553,13 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 $credit_score = $result['creditScore'] ?? null;
                 ?>
                 <div class="mb-3">
-                    <strong><?php esc_html_e('Current Credit Score:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Current Credit Score:', 'autopuzzle'); ?></strong>
                     <span class="badge <?php echo ($credit_score !== null) ? 'bg-primary fs-16 ms-2' : 'bg-light text-muted'; ?>">
-                        <?php echo ($credit_score !== null) ? esc_html($maneli_digits($credit_score)) : esc_html__('Not available', 'maneli-car-inquiry'); ?>
+                        <?php echo ($credit_score !== null) ? esc_html($autopuzzle_digits($credit_score)) : esc_html__('Not available', 'autopuzzle'); ?>
                     </span>
                 </div>
                 <div class="mb-3">
-                    <strong><?php esc_html_e('Negative Factors:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Negative Factors:', 'autopuzzle'); ?></strong>
                     <ul class="list-group mt-2">
                         <?php if (!empty($negative_factors)): ?>
                             <?php foreach ($negative_factors as $factor): ?>
@@ -1568,43 +1568,43 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                     <br>
                                     <small class="text-muted"><?php echo esc_html($factor['description'] ?? ''); ?></small>
                                     <?php if (isset($factor['impactOnScore'])): ?>
-                                        <span class="badge bg-danger ms-2">-<?php echo esc_html($maneli_digits($factor['impactOnScore'])); ?></span>
+                                        <span class="badge bg-danger ms-2">-<?php echo esc_html($autopuzzle_digits($factor['impactOnScore'])); ?></span>
                                     <?php endif; ?>
                                 </li>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <li class="list-group-item text-muted">
-                                <?php esc_html_e('No negative factors recorded.', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('No negative factors recorded.', 'autopuzzle'); ?>
                             </li>
                         <?php endif; ?>
                     </ul>
                 </div>
                 <div>
-                    <strong><?php esc_html_e('Score History:', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Score History:', 'autopuzzle'); ?></strong>
                     <div class="table-responsive mt-2">
                         <table class="table table-bordered table-striped mb-0">
                             <thead>
                                 <tr>
-                                    <th class="bg-light"><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
-                                    <th class="bg-light"><?php esc_html_e('Previous Score', 'maneli-car-inquiry'); ?></th>
-                                    <th class="bg-light"><?php esc_html_e('New Score', 'maneli-car-inquiry'); ?></th>
-                                    <th class="bg-light"><?php esc_html_e('Reason', 'maneli-car-inquiry'); ?></th>
+                                    <th class="bg-light"><?php esc_html_e('Date', 'autopuzzle'); ?></th>
+                                    <th class="bg-light"><?php esc_html_e('Previous Score', 'autopuzzle'); ?></th>
+                                    <th class="bg-light"><?php esc_html_e('New Score', 'autopuzzle'); ?></th>
+                                    <th class="bg-light"><?php esc_html_e('Reason', 'autopuzzle'); ?></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php if (!empty($score_history)): ?>
                                     <?php foreach ($score_history as $history): ?>
                                         <tr>
-                                            <td><?php echo esc_html(!empty($history['date']) ? $maneli_digits($history['date']) : '—'); ?></td>
-                                            <td><?php echo esc_html(isset($history['previousScore']) ? $maneli_digits($history['previousScore']) : '—'); ?></td>
-                                            <td><?php echo esc_html(isset($history['newScore']) ? $maneli_digits($history['newScore']) : '—'); ?></td>
+                                            <td><?php echo esc_html(!empty($history['date']) ? $autopuzzle_digits($history['date']) : '—'); ?></td>
+                                            <td><?php echo esc_html(isset($history['previousScore']) ? $autopuzzle_digits($history['previousScore']) : '—'); ?></td>
+                                            <td><?php echo esc_html(isset($history['newScore']) ? $autopuzzle_digits($history['newScore']) : '—'); ?></td>
                                             <td><?php echo esc_html($history['changeReason'] ?? '—'); ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
                                         <td colspan="4" class="text-center text-muted">
-                                            <?php esc_html_e('No credit score history available.', 'maneli-car-inquiry'); ?>
+                                            <?php esc_html_e('No credit score history available.', 'autopuzzle'); ?>
                                         </td>
                                     </tr>
                                 <?php endif; ?>
@@ -1615,7 +1615,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <?php if (empty($credit_score_data) && $credit_score_enabled): ?>
                     <div class="alert alert-light border mt-3">
                         <i class="la la-info-circle me-1"></i>
-                        <?php esc_html_e('No data received for this section yet.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('No data received for this section yet.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1628,14 +1628,14 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header bg-info-transparent">
                 <div class="card-title">
                     <i class="la la-file-contract me-2"></i>
-                    <?php esc_html_e('Contracts Summary (Loans/Facilities)', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Contracts Summary (Loans/Facilities)', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <?php if (!$collaterals_enabled): ?>
                     <div class="alert alert-warning border">
                         <i class="la la-exclamation-triangle me-1"></i>
-                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
                 <?php
@@ -1647,27 +1647,27 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 ?>
                 <div class="row mb-3">
                     <div class="col-md-4">
-                        <strong><?php esc_html_e('Total Contracts:', 'maneli-car-inquiry'); ?></strong>
-                        <span class="badge bg-primary ms-2"><?php echo esc_html($maneli_digits($total_contracts)); ?></span>
+                        <strong><?php esc_html_e('Total Contracts:', 'autopuzzle'); ?></strong>
+                        <span class="badge bg-primary ms-2"><?php echo esc_html($autopuzzle_digits($total_contracts)); ?></span>
                     </div>
                     <div class="col-md-4">
-                        <strong><?php esc_html_e('Total Loans:', 'maneli-car-inquiry'); ?></strong>
-                        <span><?php echo esc_html($maneli_number($total_loan_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
+                        <strong><?php esc_html_e('Total Loans:', 'autopuzzle'); ?></strong>
+                        <span><?php echo esc_html($autopuzzle_number($total_loan_amount)); ?> <?php esc_html_e('Rials', 'autopuzzle'); ?></span>
                     </div>
                     <div class="col-md-4">
-                        <strong><?php esc_html_e('Total Facilities:', 'maneli-car-inquiry'); ?></strong>
-                        <span><?php echo esc_html($maneli_number($total_facility_amount)); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></span>
+                        <strong><?php esc_html_e('Total Facilities:', 'autopuzzle'); ?></strong>
+                        <span><?php echo esc_html($autopuzzle_number($total_facility_amount)); ?> <?php esc_html_e('Rials', 'autopuzzle'); ?></span>
                     </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped mb-0">
                         <thead>
                             <tr>
-                                <th class="bg-light"><?php esc_html_e('Bank', 'maneli-car-inquiry'); ?></th>
-                                <th class="bg-light"><?php esc_html_e('Contract Number', 'maneli-car-inquiry'); ?></th>
-                                <th class="bg-light"><?php esc_html_e('Type', 'maneli-car-inquiry'); ?></th>
-                                <th class="bg-light"><?php esc_html_e('Amount', 'maneli-car-inquiry'); ?></th>
-                                <th class="bg-light"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
+                                <th class="bg-light"><?php esc_html_e('Bank', 'autopuzzle'); ?></th>
+                                <th class="bg-light"><?php esc_html_e('Contract Number', 'autopuzzle'); ?></th>
+                                <th class="bg-light"><?php esc_html_e('Type', 'autopuzzle'); ?></th>
+                                <th class="bg-light"><?php esc_html_e('Amount', 'autopuzzle'); ?></th>
+                                <th class="bg-light"><?php esc_html_e('Status', 'autopuzzle'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1675,9 +1675,9 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                                 <?php foreach ($contracts as $contract): ?>
                                     <tr>
                                         <td><?php echo esc_html($contract['bankName'] ?? ''); ?></td>
-                                        <td><?php echo esc_html(isset($contract['contractNumber']) ? $maneli_digits($contract['contractNumber']) : '—'); ?></td>
+                                        <td><?php echo esc_html(isset($contract['contractNumber']) ? $autopuzzle_digits($contract['contractNumber']) : '—'); ?></td>
                                         <td><?php echo esc_html($contract['contractType'] ?? ''); ?></td>
-                                        <td><?php echo esc_html(isset($contract['amount']) ? $maneli_number($contract['amount']) : '—'); ?> <?php esc_html_e('Rials', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php echo esc_html(isset($contract['amount']) ? $autopuzzle_number($contract['amount']) : '—'); ?> <?php esc_html_e('Rials', 'autopuzzle'); ?></td>
                                         <td>
                                             <span class="badge bg-<?php echo esc_attr(($contract['contractStatus'] ?? '') === 'active' ? 'success' : 'secondary'); ?>">
                                                 <?php echo esc_html($contract['contractStatus'] ?? ''); ?>
@@ -1688,7 +1688,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                             <?php else: ?>
                                 <tr>
                                     <td colspan="5" class="text-center text-muted">
-                                        <?php esc_html_e('No contract records available.', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('No contract records available.', 'autopuzzle'); ?>
                                     </td>
                                 </tr>
                             <?php endif; ?>
@@ -1698,7 +1698,7 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
                 <?php if (empty($collaterals_data) && $collaterals_enabled): ?>
                     <div class="alert alert-light border mt-3">
                         <i class="la la-info-circle me-1"></i>
-                        <?php esc_html_e('No data received for this section yet.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('No data received for this section yet.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1711,21 +1711,21 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
             <div class="card-header bg-primary-transparent">
                 <div class="card-title">
                     <i class="la la-shield-alt me-2"></i>
-                    <?php esc_html_e('Sadad Cheque Status Inquiry', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Sadad Cheque Status Inquiry', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <?php if (!$cheque_color_enabled): ?>
                     <div class="alert alert-warning border">
                         <i class="la la-exclamation-triangle me-1"></i>
-                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('This Finnotech inquiry is disabled in settings.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
-                <?php echo Maneli_Render_Helpers::render_cheque_status_info($cheque_color_code); ?>
+                <?php echo Autopuzzle_Render_Helpers::render_cheque_status_info($cheque_color_code); ?>
                 <?php if (empty($finotex_data) && empty($cheque_color_data) && $cheque_color_enabled): ?>
                     <div class="alert alert-light border mt-3">
                         <i class="la la-info-circle me-1"></i>
-                        <?php esc_html_e('No data received for this section yet.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('No data received for this section yet.', 'autopuzzle'); ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -1735,43 +1735,43 @@ $maneli_number = function ($value, $precision = null) use ($maneli_digits) {
 </div>
 
 <!-- Hidden Forms -->
-<form id="admin-action-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="maneli-initially-hidden">
-    <input type="hidden" name="action" value="maneli_admin_update_status">
+<form id="admin-action-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="autopuzzle-initially-hidden">
+    <input type="hidden" name="action" value="autopuzzle_admin_update_status">
     <input type="hidden" name="inquiry_id" value="<?php echo esc_attr($inquiry_id); ?>">
     <input type="hidden" id="final-status-input" name="new_status" value="">
     <input type="hidden" id="rejection-reason-input" name="rejection_reason" value="">
     <input type="hidden" id="assigned-expert-input" name="assigned_expert_id" value="">
-    <?php wp_nonce_field('maneli_admin_update_status_nonce'); ?>
+    <?php wp_nonce_field('autopuzzle_admin_update_status_nonce'); ?>
 </form>
 
 <!-- Tracking Status Modal -->
-<div id="tracking-status-modal" class="modal fade maneli-initially-hidden" tabindex="-1">
+<div id="tracking-status-modal" class="modal fade autopuzzle-initially-hidden" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Set Tracking Status', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title"><?php esc_html_e('Set Tracking Status', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close modal-close"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="tracking-status-select" class="form-label"><?php esc_html_e('Select Status:', 'maneli-car-inquiry'); ?></label>
+                    <label for="tracking-status-select" class="form-label"><?php esc_html_e('Select Status:', 'autopuzzle'); ?></label>
                     <select id="tracking-status-select" class="form-select">
-                        <?php foreach (Maneli_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
+                        <?php foreach (Autopuzzle_CPT_Handler::get_tracking_statuses() as $key => $label): ?>
                             <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($label); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 
-                <div id="calendar-wrapper" class="maneli-initially-hidden mb-3">
-                    <label id="calendar-label" class="form-label"><?php esc_html_e('Select Date:', 'maneli-car-inquiry'); ?></label>
-                    <input type="text" id="tracking-date-picker" class="form-control maneli-datepicker" readonly>
+                <div id="calendar-wrapper" class="autopuzzle-initially-hidden mb-3">
+                    <label id="calendar-label" class="form-label"><?php esc_html_e('Select Date:', 'autopuzzle'); ?></label>
+                    <input type="text" id="tracking-date-picker" class="form-control autopuzzle-datepicker" readonly>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light modal-close"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-light modal-close"><?php esc_html_e('Cancel', 'autopuzzle'); ?></button>
                 <button type="button" id="confirm-tracking-status-btn" class="btn btn-primary">
                     <i class="la la-check me-1"></i>
-                    <?php esc_html_e('Confirm Status', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Confirm Status', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -1979,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <?php 
 // EMERGENCY FIX: Output script directly in template to ensure it loads
-if (isset($GLOBALS['maneli_emergency_script']) && $GLOBALS['maneli_emergency_script']) {
+if (isset($GLOBALS['autopuzzle_emergency_script']) && $GLOBALS['autopuzzle_emergency_script']) {
 ?>
 <script type="text/javascript">
 console.log('🚨 EMERGENCY SCRIPT IN TEMPLATE LOADING...');
@@ -1988,7 +1988,7 @@ if (typeof jQuery !== 'undefined') {
         console.log('🚨 EMERGENCY HANDLERS LOADED IN TEMPLATE');
         
         // Check if objects exist
-        console.log('maneliInquiryLists:', typeof window.maneliInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
+        console.log('autopuzzleInquiryLists:', typeof window.autopuzzleInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
         console.log('Swal:', typeof Swal !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
         
         // Direct handler for assign expert button
@@ -2001,21 +2001,21 @@ if (typeof jQuery !== 'undefined') {
             var inquiryType = btn.data('inquiry-type');
             console.log('Inquiry ID:', inquiryId, 'Type:', inquiryType);
             
-            if (typeof window.maneliInquiryLists === 'undefined') {
-                alert(maneliInquiryLists?.text?.error || 'Error: maneliInquiryLists is not defined!');
-                console.error('maneliInquiryLists is undefined!');
+            if (typeof window.autopuzzleInquiryLists === 'undefined') {
+                alert(autopuzzleInquiryLists?.text?.error || 'Error: autopuzzleInquiryLists is not defined!');
+                console.error('autopuzzleInquiryLists is undefined!');
                 return;
             }
             
             if (typeof Swal === 'undefined') {
-                alert(maneliInquiryLists?.text?.error || 'Error: SweetAlert2 is not loaded!');
+                alert(autopuzzleInquiryLists?.text?.error || 'Error: SweetAlert2 is not loaded!');
                 console.error('Swal is undefined!');
                 return;
             }
             
             // Show working alert
                 Swal.fire({
-                    title: maneliInquiryLists?.text?.test_title || 'Button Works!',
+                    title: autopuzzleInquiryLists?.text?.test_title || 'Button Works!',
                 text: 'Inquiry ID: ' + inquiryId + ', Type: ' + inquiryType,
                 icon: 'success'
             });
@@ -2037,28 +2037,28 @@ if (typeof jQuery !== 'undefined') {
             console.log('SMS - Inquiry ID:', inquiryId, 'Phone:', phone);
             
             if (typeof Swal === 'undefined') {
-                alert('<?php echo esc_js(__('SweetAlert is not loaded', 'maneli-car-inquiry')); ?>');
+                alert('<?php echo esc_js(__('SweetAlert is not loaded', 'autopuzzle')); ?>');
                 return;
             }
             
             Swal.fire({
-                title: '<?php echo esc_js(__('Send SMS', 'maneli-car-inquiry')); ?>',
+                title: '<?php echo esc_js(__('Send SMS', 'autopuzzle')); ?>',
                 html: `
                     <div class="text-start">
-                        <p><strong><?php echo esc_js(__('Recipient:', 'maneli-car-inquiry')); ?></strong> ${customerName} (${phone})</p>
+                        <p><strong><?php echo esc_js(__('Recipient:', 'autopuzzle')); ?></strong> ${customerName} (${phone})</p>
                         <div class="mb-3">
-                            <label class="form-label"><?php echo esc_js(__('Message:', 'maneli-car-inquiry')); ?></label>
-                            <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'maneli-car-inquiry')); ?>"></textarea>
+                            <label class="form-label"><?php echo esc_js(__('Message:', 'autopuzzle')); ?></label>
+                            <textarea id="sms-message" class="form-control" rows="5" placeholder="<?php echo esc_js(__('Enter your message...', 'autopuzzle')); ?>"></textarea>
                         </div>
                     </div>
                 `,
                 showCancelButton: true,
-                confirmButtonText: '<?php echo esc_js(__('Send', 'maneli-car-inquiry')); ?>',
-                cancelButtonText: '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>',
+                confirmButtonText: '<?php echo esc_js(__('Send', 'autopuzzle')); ?>',
+                cancelButtonText: '<?php echo esc_js(__('Cancel', 'autopuzzle')); ?>',
                 preConfirm: function() {
                     var message = $('#sms-message').val();
                     if (!message.trim()) {
-                        Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'maneli-car-inquiry')); ?>');
+                        Swal.showValidationMessage('<?php echo esc_js(__('Please enter a message', 'autopuzzle')); ?>');
                         return false;
                     }
                     return { message: message };
@@ -2066,8 +2066,8 @@ if (typeof jQuery !== 'undefined') {
             }).then(function(result) {
                 if (result.isConfirmed && result.value) {
                     Swal.fire({
-                        title: '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>',
-                        text: '<?php echo esc_js(__('Please wait', 'maneli-car-inquiry')); ?>',
+                        title: '<?php echo esc_js(__('Sending...', 'autopuzzle')); ?>',
+                        text: '<?php echo esc_js(__('Please wait', 'autopuzzle')); ?>',
                         allowOutsideClick: false,
                         allowEscapeKey: false,
                         showConfirmButton: false,
@@ -2076,25 +2076,25 @@ if (typeof jQuery !== 'undefined') {
                         }
                     });
                     
-                    // Get AJAX URL and nonce - try multiple sources (prioritize maneliAjaxUrl and maneliAjaxNonce)
+                    // Get AJAX URL and nonce - try multiple sources (prioritize autopuzzleAjaxUrl and autopuzzleAjaxNonce)
                     var ajaxUrl = '';
                     var ajaxNonce = '';
                     
                     // Try global variables first (same as users.php and followups)
-                    if (typeof maneliAjaxUrl !== 'undefined' && maneliAjaxUrl) {
-                        ajaxUrl = maneliAjaxUrl;
-                    } else if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
-                        ajaxUrl = maneli_ajax.ajax_url || maneli_ajax.url || '';
-                    } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
-                        ajaxUrl = maneliInquiryLists.ajax_url || '';
+                    if (typeof autopuzzleAjaxUrl !== 'undefined' && autopuzzleAjaxUrl) {
+                        ajaxUrl = autopuzzleAjaxUrl;
+                    } else if (typeof autopuzzle_ajax !== 'undefined' && autopuzzle_ajax) {
+                        ajaxUrl = autopuzzle_ajax.ajax_url || autopuzzle_ajax.url || '';
+                    } else if (typeof autopuzzleInquiryLists !== 'undefined' && autopuzzleInquiryLists) {
+                        ajaxUrl = autopuzzleInquiryLists.ajax_url || '';
                     }
                     
-                    if (typeof maneliAjaxNonce !== 'undefined' && maneliAjaxNonce) {
-                        ajaxNonce = maneliAjaxNonce;
-                    } else if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
-                        ajaxNonce = maneli_ajax.nonce || '';
-                    } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
-                        ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
+                    if (typeof autopuzzleAjaxNonce !== 'undefined' && autopuzzleAjaxNonce) {
+                        ajaxNonce = autopuzzleAjaxNonce;
+                    } else if (typeof autopuzzle_ajax !== 'undefined' && autopuzzle_ajax) {
+                        ajaxNonce = autopuzzle_ajax.nonce || '';
+                    } else if (typeof autopuzzleInquiryLists !== 'undefined' && autopuzzleInquiryLists) {
+                        ajaxNonce = autopuzzleInquiryLists.nonces?.ajax || autopuzzleInquiryLists.nonce || '';
                     }
                     
                     // Fallback
@@ -2108,14 +2108,14 @@ if (typeof jQuery !== 'undefined') {
                         }
                     }
                     if (!ajaxNonce) {
-                        ajaxNonce = '<?php echo esc_js(wp_create_nonce('maneli-ajax-nonce')); ?>';
+                        ajaxNonce = '<?php echo esc_js(wp_create_nonce('autopuzzle-ajax-nonce')); ?>';
                     }
                     
                     $.ajax({
                         url: ajaxUrl,
                         type: 'POST',
                         data: {
-                            action: 'maneli_send_single_sms',
+                            action: 'autopuzzle_send_single_sms',
                             nonce: ajaxNonce,
                             recipient: phone,
                             message: result.value.message,
@@ -2125,18 +2125,18 @@ if (typeof jQuery !== 'undefined') {
                             Swal.close();
                             if (response && response.success) {
                                 Swal.fire({
-                                    title: '<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>',
-                                    text: '<?php echo esc_js(__('SMS sent successfully!', 'maneli-car-inquiry')); ?>',
+                                    title: '<?php echo esc_js(__('Success', 'autopuzzle')); ?>',
+                                    text: '<?php echo esc_js(__('SMS sent successfully!', 'autopuzzle')); ?>',
                                     icon: 'success',
-                                    confirmButtonText: '<?php echo esc_js(__('OK', 'maneli-car-inquiry')); ?>'
+                                    confirmButtonText: '<?php echo esc_js(__('OK', 'autopuzzle')); ?>'
                                 }).then(function() {
                                     // Reload page to show updated SMS history
                                     location.reload();
                                 });
                             } else {
-                                var errorMsg = (response && response.data && response.data.message) ? response.data.message : '<?php echo esc_js(__('Failed to send SMS', 'maneli-car-inquiry')); ?>';
+                                var errorMsg = (response && response.data && response.data.message) ? response.data.message : '<?php echo esc_js(__('Failed to send SMS', 'autopuzzle')); ?>';
                                 Swal.fire({
-                                    title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
+                                    title: '<?php echo esc_js(__('Error', 'autopuzzle')); ?>',
                                     text: errorMsg,
                                     icon: 'error'
                                 });
@@ -2145,8 +2145,8 @@ if (typeof jQuery !== 'undefined') {
                         error: function() {
                             Swal.close();
                             Swal.fire({
-                                title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
-                                text: '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>',
+                                title: '<?php echo esc_js(__('Error', 'autopuzzle')); ?>',
+                                text: '<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>',
                                 icon: 'error'
                             });
                         }
@@ -2165,8 +2165,8 @@ if (typeof jQuery !== 'undefined') {
 
 <script type="text/javascript">
 // Global AJAX variables for SMS sending (fallback for timing - main localization is in class-dashboard-handler.php)
-var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-var maneliAjaxNonce = '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>';
+var autopuzzleAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var autopuzzleAjaxNonce = '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>';
 
 // Note: Send SMS handler is now handled by inquiry-lists.js (same as other pages)
 // This ensures consistent behavior and translations across all pages
@@ -2182,8 +2182,8 @@ if (typeof jQuery !== 'undefined') {
             if (!inquiryId) {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
-                        text: '<?php echo esc_js(__('Invalid inquiry ID.', 'maneli-car-inquiry')); ?>',
+                        title: '<?php echo esc_js(__('Error', 'autopuzzle')); ?>',
+                        text: '<?php echo esc_js(__('Invalid inquiry ID.', 'autopuzzle')); ?>',
                         icon: 'error'
                     });
                 }
@@ -2194,8 +2194,8 @@ if (typeof jQuery !== 'undefined') {
             if (!modalElement) {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
-                        title: '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>',
-                        text: '<?php echo esc_js(__('SMS history modal not found.', 'maneli-car-inquiry')); ?>',
+                        title: '<?php echo esc_js(__('Error', 'autopuzzle')); ?>',
+                        text: '<?php echo esc_js(__('SMS history modal not found.', 'autopuzzle')); ?>',
                         icon: 'error'
                     });
                 }
@@ -2213,14 +2213,14 @@ if (typeof jQuery !== 'undefined') {
                 jQuery('body').append('<div class="modal-backdrop fade show"></div>');
             }
             
-            $('#sms-history-loading').removeClass('maneli-initially-hidden').show();
-            $('#sms-history-content').addClass('maneli-initially-hidden').hide();
+            $('#sms-history-loading').removeClass('autopuzzle-initially-hidden').show();
+            $('#sms-history-content').addClass('autopuzzle-initially-hidden').hide();
             $('#sms-history-table-container').empty();
             
-            var ajaxUrl = typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : 
-                         (typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists.ajax_url : '');
-            var ajaxNonce = typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce :
-                           (typeof maneliInquiryLists !== 'undefined' ? (maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '') : '');
+            var ajaxUrl = typeof autopuzzleAjaxUrl !== 'undefined' ? autopuzzleAjaxUrl : 
+                         (typeof autopuzzleInquiryLists !== 'undefined' ? autopuzzleInquiryLists.ajax_url : '');
+            var ajaxNonce = typeof autopuzzleAjaxNonce !== 'undefined' ? autopuzzleAjaxNonce :
+                           (typeof autopuzzleInquiryLists !== 'undefined' ? (autopuzzleInquiryLists.nonces?.ajax || autopuzzleInquiryLists.nonce || '') : '');
             
             if (!ajaxUrl) {
                 ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';
@@ -2230,12 +2230,12 @@ if (typeof jQuery !== 'undefined') {
             }
             
             if (!ajaxNonce) {
-                $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                 $('#sms-history-table-container').html(
                     '<div class="alert alert-danger">' +
                     '<i class="la la-exclamation-triangle me-2"></i>' +
-                    '<?php echo esc_js(__('Nonce is missing. Please refresh the page and try again.', 'maneli-car-inquiry')); ?>' +
+                    '<?php echo esc_js(__('Nonce is missing. Please refresh the page and try again.', 'autopuzzle')); ?>' +
                     '</div>'
                 );
                 return;
@@ -2245,14 +2245,14 @@ if (typeof jQuery !== 'undefined') {
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_sms_history',
+                    action: 'autopuzzle_get_sms_history',
                     nonce: ajaxNonce,
                     inquiry_id: inquiryId,
                     inquiry_type: inquiryType
                 },
                 success: function(response) {
-                    $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                    $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                    $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                    $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                     
                     if (response && response.success && response.data && response.data.html) {
                         $('#sms-history-table-container').html(response.data.html);
@@ -2260,18 +2260,18 @@ if (typeof jQuery !== 'undefined') {
                         $('#sms-history-table-container').html(
                             '<div class="alert alert-info">' +
                             '<i class="la la-info-circle me-2"></i>' +
-                            '<?php echo esc_js(__('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry')); ?>' +
+                            '<?php echo esc_js(__('No SMS messages have been sent for this inquiry yet.', 'autopuzzle')); ?>' +
                             '</div>'
                         );
                     }
                 },
                 error: function(xhr, status, error) {
-                    $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                    $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                    $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                    $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                     $('#sms-history-table-container').html(
                         '<div class="alert alert-danger">' +
                         '<i class="la la-exclamation-triangle me-2"></i>' +
-                        '<?php echo esc_js(__('Error loading SMS history.', 'maneli-car-inquiry')); ?>' +
+                        '<?php echo esc_js(__('Error loading SMS history.', 'autopuzzle')); ?>' +
                         '</div>'
                     );
                 }
@@ -2288,5 +2288,5 @@ if (typeof jQuery !== 'undefined') {
 
 <?php
 // Include SMS History Modal (shared template)
-maneli_get_template_part('partials/sms-history-modal');
+autopuzzle_get_template_part('partials/sms-history-modal');
 ?>

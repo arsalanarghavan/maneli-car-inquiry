@@ -2,7 +2,7 @@
  * Visitor Tracking Script
  * ردیابی بازدیدکنندگان - client-side
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 (function($) {
@@ -37,7 +37,7 @@
             url: maneliVisitorTracking.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'maneli_track_visit',
+                action: 'autopuzzle_track_visit',
                 nonce: maneliVisitorTracking.nonce,
                 page_url: pageUrl,
                 page_title: pageTitle,

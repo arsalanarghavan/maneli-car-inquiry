@@ -4,7 +4,7 @@
  *
  * تابع sadad_call_api برای استفاده از wp_remote_post به جای cURL خام بازنویسی شده است.
  *
- * @package Maneli_Car_Inquiry/Includes/Public
+ * @package Autopuzzle_Car_Inquiry/Includes/Public
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.8 (Security Fix: Encrypted key decryption and tokenization)
  */
@@ -13,11 +13,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Payment_Handler {
+class Autopuzzle_Payment_Handler {
 
     public function __construct() {
         // Check license before registering handlers (using optimized helper)
-        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+        if (!Autopuzzle_Permission_Helpers::is_license_active() && !Autopuzzle_Permission_Helpers::is_demo_mode()) {
             // License not active - don't register handlers
             return;
         }
@@ -33,18 +33,18 @@ class Maneli_Payment_Handler {
     }
     
     // =======================================================
-    //  DECRYPTION HELPER (uses centralized Maneli_Encryption_Helper)
+    //  DECRYPTION HELPER (uses centralized Autopuzzle_Encryption_Helper)
     // =======================================================
     
     /**
      * Decrypts data using AES-256-CBC.
-     * Wrapper method for backward compatibility - uses Maneli_Encryption_Helper.
+     * Wrapper method for backward compatibility - uses Autopuzzle_Encryption_Helper.
      * 
      * @param string $encrypted_data The encrypted data (Base64 encoded).
      * @return string The decrypted data or empty string on failure.
      */
     private function decrypt_data($encrypted_data) {
-        return Maneli_Encryption_Helper::decrypt($encrypted_data);
+        return Autopuzzle_Encryption_Helper::decrypt($encrypted_data);
     }
     
     // =======================================================
@@ -62,10 +62,10 @@ class Maneli_Payment_Handler {
         
         // Store the token and associated metadata (user ID) for lookup
         // Transients are used for auto-cleanup and security.
-        set_transient('maneli_payment_token_' . $token, $user_id, 3600); // Token -> User ID (Expires in 1 hour)
+        set_transient('autopuzzle_payment_token_' . $token, $user_id, 3600); // Token -> User ID (Expires in 1 hour)
         
         // Store the current token as user meta for redundancy
-        update_user_meta($user_id, 'maneli_current_payment_token', $token);
+        update_user_meta($user_id, 'autopuzzle_current_payment_token', $token);
         
         return $token;
     }
@@ -74,8 +74,8 @@ class Maneli_Payment_Handler {
      * Handles the submission for the initial inquiry fee.
      */
     public function handle_inquiry_fee_submission() {
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_payment_nonce')) {
-            wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'autopuzzle_payment_nonce')) {
+            wp_die(esc_html__('Security check failed!', 'autopuzzle'));
         }
         if (!is_user_logged_in()) {
             wp_redirect(home_url());
@@ -83,25 +83,25 @@ class Maneli_Payment_Handler {
         }
 
         $user_id = get_current_user_id();
-        $amount_toman = (int)Maneli_Options_Helper::get_option('inquiry_fee', 0);
-        $discount_code = Maneli_Options_Helper::get_option('discount_code', '');
+        $amount_toman = (int)Autopuzzle_Options_Helper::get_option('inquiry_fee', 0);
+        $discount_code = Autopuzzle_Options_Helper::get_option('discount_code', '');
         $submitted_code = isset($_POST['discount_code_input']) ? trim(sanitize_text_field($_POST['discount_code_input'])) : '';
 
         // Apply discount if applicable
         if (!empty($discount_code) && !empty($submitted_code) && $submitted_code === $discount_code) {
             $amount_toman = 0;
-            update_user_meta($user_id, 'maneli_discount_applied', 'yes');
+            update_user_meta($user_id, 'autopuzzle_discount_applied', 'yes');
         }
 
         // If amount is zero, skip payment and finalize the inquiry
         if ($amount_toman <= 0) {
-            do_action('maneli_inquiry_payment_successful', $user_id);
+            do_action('autopuzzle_inquiry_payment_successful', $user_id);
             wp_redirect(home_url('/dashboard/installment-inquiries'));
             exit;
         }
 
         // Set payment type for standard inquiry
-        update_user_meta($user_id, 'maneli_payment_type', 'inquiry_fee');
+        update_user_meta($user_id, 'autopuzzle_payment_type', 'inquiry_fee');
         $this->initiate_payment_gateway($user_id, $amount_toman);
     }
 
@@ -109,8 +109,8 @@ class Maneli_Payment_Handler {
      * Handles the submission for the cash inquiry down payment.
      */
     public function handle_cash_down_payment_submission() {
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'maneli_start_cash_payment_nonce')) {
-            wp_die(esc_html__('Security check failed!', 'maneli-car-inquiry'));
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'autopuzzle_start_cash_payment_nonce')) {
+            wp_die(esc_html__('Security check failed!', 'autopuzzle'));
         }
         if (!is_user_logged_in()) {
             wp_redirect(home_url());
@@ -121,17 +121,17 @@ class Maneli_Payment_Handler {
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
 
         if (!$inquiry_id || get_post_field('post_author', $inquiry_id) != $user_id) {
-            wp_die(esc_html__('Access Denied: You are not the owner of this inquiry.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Access Denied: You are not the owner of this inquiry.', 'autopuzzle'));
         }
 
         $amount_toman = (int)get_post_meta($inquiry_id, 'cash_down_payment', true);
         if ($amount_toman <= 0) {
-            wp_die(esc_html__('Down payment amount has not been specified.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Down payment amount has not been specified.', 'autopuzzle'));
         }
 
         // Set payment type for cash inquiry
-        update_user_meta($user_id, 'maneli_payment_type', 'cash_down_payment');
-        update_user_meta($user_id, 'maneli_payment_cash_inquiry_id', $inquiry_id);
+        update_user_meta($user_id, 'autopuzzle_payment_type', 'cash_down_payment');
+        update_user_meta($user_id, 'autopuzzle_payment_cash_inquiry_id', $inquiry_id);
 
         $this->initiate_payment_gateway($user_id, $amount_toman);
     }
@@ -143,24 +143,24 @@ class Maneli_Payment_Handler {
      * @param int $amount_toman Amount in Toman.
      */
     private function initiate_payment_gateway($user_id, $amount_toman) {
-        $active_gateway = Maneli_Options_Helper::get_option('active_gateway', 'zarinpal');
+        $active_gateway = Autopuzzle_Options_Helper::get_option('active_gateway', 'zarinpal');
         $order_id = time() . '-' . $user_id;
         $payment_token = $this->generate_and_save_token($user_id); // Generate the secure token
         
         // Store necessary payment details against the token
-        $transient_key = 'maneli_payment_data_' . $payment_token;
+        $transient_key = 'autopuzzle_payment_data_' . $payment_token;
         set_transient($transient_key, [
             'order_id'      => $order_id,
             'amount'        => $amount_toman,
-            'payment_type'  => get_user_meta($user_id, 'maneli_payment_type', true),
-            'cash_inquiry_id' => get_user_meta($user_id, 'maneli_payment_cash_inquiry_id', true),
+            'payment_type'  => get_user_meta($user_id, 'autopuzzle_payment_type', true),
+            'cash_inquiry_id' => get_user_meta($user_id, 'autopuzzle_payment_cash_inquiry_id', true),
         ], 3600);
 
         // Clean up redundant user meta
-        delete_user_meta($user_id, 'maneli_payment_order_id');
-        delete_user_meta($user_id, 'maneli_payment_amount');
-        delete_user_meta($user_id, 'maneli_payment_authority');
-        delete_user_meta($user_id, 'maneli_payment_token');
+        delete_user_meta($user_id, 'autopuzzle_payment_order_id');
+        delete_user_meta($user_id, 'autopuzzle_payment_amount');
+        delete_user_meta($user_id, 'autopuzzle_payment_authority');
+        delete_user_meta($user_id, 'autopuzzle_payment_token');
         
         $gateway_map = [
             'sadad'    => 'process_sadad_payment',
@@ -181,7 +181,7 @@ class Maneli_Payment_Handler {
                     return;
                 }
             }
-            wp_die(esc_html__('No active payment gateway is configured in the settings.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('No active payment gateway is configured in the settings.', 'autopuzzle'));
         }
     }
 
@@ -189,11 +189,11 @@ class Maneli_Payment_Handler {
      * Handles the callback from payment gateways to verify transactions.
      */
     public function handle_payment_verification() {
-        if (!isset($_GET['maneli_payment_verify'])) {
+        if (!isset($_GET['autopuzzle_payment_verify'])) {
             return;
         }
 
-        $gateway = sanitize_key($_GET['maneli_payment_verify']);
+        $gateway = sanitize_key($_GET['autopuzzle_payment_verify']);
 
         switch ($gateway) {
             case 'zarinpal':
@@ -210,18 +210,18 @@ class Maneli_Payment_Handler {
      */
     private function process_zarinpal_payment($user_id, $payment_token, $amount_toman, $options) {
         $merchant_id = $options['zarinpal_merchant_code'] ?? '';
-        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        $payment_data = get_transient('autopuzzle_payment_data_' . $payment_token);
         $order_id = $payment_data['order_id'];
         
         if (empty($merchant_id)) {
-            wp_die(esc_html__('Zarinpal Merchant ID is not configured.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Zarinpal Merchant ID is not configured.', 'autopuzzle'));
         }
 
         $user_info = get_userdata($user_id);
-        $description = sprintf(esc_html__('Payment for order ID %s', 'maneli-car-inquiry'), $order_id);
+        $description = sprintf(esc_html__('Payment for order ID %s', 'autopuzzle'), $order_id);
         
         // === SECURITY FIX: Use token in callback URL instead of user_id ===
-        $callback_url = home_url('/?maneli_payment_verify=zarinpal&token=' . $payment_token);
+        $callback_url = home_url('/?autopuzzle_payment_verify=zarinpal&token=' . $payment_token);
         // === END: SECURITY FIX ===
 
         $data = [
@@ -236,8 +236,8 @@ class Maneli_Payment_Handler {
             ],
         ];
 
-        // Using MANELI_ZARINPAL_REQUEST_URL constant
-        $request_url = defined('MANELI_ZARINPAL_REQUEST_URL') ? MANELI_ZARINPAL_REQUEST_URL : 'https://api.zarinpal.com/pg/v4/payment/request.json';
+        // Using AUTOPUZZLE_ZARINPAL_REQUEST_URL constant
+        $request_url = defined('AUTOPUZZLE_ZARINPAL_REQUEST_URL') ? AUTOPUZZLE_ZARINPAL_REQUEST_URL : 'https://api.zarinpal.com/pg/v4/payment/request.json';
         $response = wp_remote_post($request_url, [
             'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json'],
             'body'    => json_encode($data),
@@ -245,7 +245,7 @@ class Maneli_Payment_Handler {
         ]);
 
         if (is_wp_error($response)) {
-            wp_die(esc_html__('Could not connect to Zarinpal gateway.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Could not connect to Zarinpal gateway.', 'autopuzzle'));
         }
 
         $result = json_decode(wp_remote_retrieve_body($response), true);
@@ -253,15 +253,15 @@ class Maneli_Payment_Handler {
         if (!empty($result['data']) && !empty($result['data']['authority']) && $result['data']['code'] == 100) {
             // Save authority against the payment token for verification lookup
             $payment_data['authority'] = $result['data']['authority'];
-            set_transient('maneli_payment_data_' . $payment_token, $payment_data, 3600);
+            set_transient('autopuzzle_payment_data_' . $payment_token, $payment_data, 3600);
             
-            // Using MANELI_ZARINPAL_STARTPAY_URL constant
-            $startpay_url = defined('MANELI_ZARINPAL_STARTPAY_URL') ? MANELI_ZARINPAL_STARTPAY_URL : 'https://www.zarinpal.com/pg/StartPay/';
+            // Using AUTOPUZZLE_ZARINPAL_STARTPAY_URL constant
+            $startpay_url = defined('AUTOPUZZLE_ZARINPAL_STARTPAY_URL') ? AUTOPUZZLE_ZARINPAL_STARTPAY_URL : 'https://www.zarinpal.com/pg/StartPay/';
             wp_redirect($startpay_url . $result['data']['authority']);
             exit;
         } else {
-            $error_message = $result['errors']['message'] ?? esc_html__('An unknown error occurred.', 'maneli-car-inquiry');
-            wp_die(sprintf(esc_html__('Error from Zarinpal: %s', 'maneli-car-inquiry'), $error_message));
+            $error_message = $result['errors']['message'] ?? esc_html__('An unknown error occurred.', 'autopuzzle');
+            wp_die(sprintf(esc_html__('Error from Zarinpal: %s', 'autopuzzle'), $error_message));
         }
     }
 
@@ -279,16 +279,16 @@ class Maneli_Payment_Handler {
         }
         
         // 1. LOOKUP USER ID AND PAYMENT DATA VIA TOKEN
-        $user_id = (int)get_transient('maneli_payment_token_' . $payment_token);
-        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        $user_id = (int)get_transient('autopuzzle_payment_token_' . $payment_token);
+        $payment_data = get_transient('autopuzzle_payment_data_' . $payment_token);
         
         if (!$user_id || empty($payment_data)) {
-            $this->finalize_and_redirect(0, home_url('/dashboard/'), 'failed', esc_html__('Payment token expired or invalid.', 'maneli-car-inquiry'));
+            $this->finalize_and_redirect(0, home_url('/dashboard/'), 'failed', esc_html__('Payment token expired or invalid.', 'autopuzzle'));
             return;
         }
         
         $current_user_id = get_current_user_id();
-        $merchant_id = Maneli_Options_Helper::get_option('zarinpal_merchant_code', '');
+        $merchant_id = Autopuzzle_Options_Helper::get_option('zarinpal_merchant_code', '');
         $amount_toman = (int)$payment_data['amount'];
         $saved_authority = $payment_data['authority'] ?? '';
         $payment_type = $payment_data['payment_type'] ?? '';
@@ -299,13 +299,13 @@ class Maneli_Payment_Handler {
 
         // 2. SECURITY CHECK: Ensure the token is current for the logged-in user if available
         if (is_user_logged_in() && $current_user_id !== $user_id) {
-             $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'maneli-car-inquiry'));
+             $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'autopuzzle'));
              return;
         }
         
         // 3. CHECK AUTHORITY MATCH
         if ($authority !== $saved_authority) {
-            $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Transaction details mismatch.', 'maneli-car-inquiry'));
+            $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Transaction details mismatch.', 'autopuzzle'));
             return;
         }
         // === END: SECURITY FIX ===
@@ -317,8 +317,8 @@ class Maneli_Payment_Handler {
                 'amount'      => $amount_toman * 10, // Amount in Rials
             ];
 
-            // Using MANELI_ZARINPAL_VERIFY_URL constant
-            $verify_url = defined('MANELI_ZARINPAL_VERIFY_URL') ? MANELI_ZARINPAL_VERIFY_URL : 'https://api.zarinpal.com/pg/v4/payment/verify.json';
+            // Using AUTOPUZZLE_ZARINPAL_VERIFY_URL constant
+            $verify_url = defined('AUTOPUZZLE_ZARINPAL_VERIFY_URL') ? AUTOPUZZLE_ZARINPAL_VERIFY_URL : 'https://api.zarinpal.com/pg/v4/payment/verify.json';
             $response = wp_remote_post($verify_url, [
                 'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json'],
                 'body'    => json_encode($data),
@@ -326,7 +326,7 @@ class Maneli_Payment_Handler {
             ]);
 
             if (is_wp_error($response)) {
-                $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Error communicating with payment gateway for verification.', 'maneli-car-inquiry'));
+                $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Error communicating with payment gateway for verification.', 'autopuzzle'));
                 return;
             }
             
@@ -343,7 +343,7 @@ class Maneli_Payment_Handler {
                 ];
                 
                 // Store transaction data in user meta temporarily (will be saved to inquiry later)
-                update_user_meta($user_id, 'maneli_last_payment_transaction', $transaction_data);
+                update_user_meta($user_id, 'autopuzzle_last_payment_transaction', $transaction_data);
                 
                 // Payment successful, trigger finalization hooks
                 if ($payment_type === 'cash_down_payment') {
@@ -356,14 +356,14 @@ class Maneli_Payment_Handler {
                         update_post_meta($inquiry_id, 'payment_amount', $amount_toman);
                         update_post_meta($inquiry_id, 'payment_date', current_time('mysql'));
                         
-                        do_action('maneli_cash_inquiry_payment_successful', $user_id, $inquiry_id);
+                        do_action('autopuzzle_cash_inquiry_payment_successful', $user_id, $inquiry_id);
                     }
                 } else {
-                    do_action('maneli_inquiry_payment_successful', $user_id);
+                    do_action('autopuzzle_inquiry_payment_successful', $user_id);
                 }
                 $this->finalize_and_redirect($user_id, $redirect_url, 'success');
             } else {
-                $error_message = $result['errors']['message'] ?? esc_html__('Transaction not confirmed by gateway.', 'maneli-car-inquiry');
+                $error_message = $result['errors']['message'] ?? esc_html__('Transaction not confirmed by gateway.', 'autopuzzle');
                 $this->finalize_and_redirect($user_id, $redirect_url, 'failed', $error_message);
             }
         } else {
@@ -383,11 +383,11 @@ class Maneli_Payment_Handler {
         $terminal_key = $this->decrypt_data($encrypted_key);
         // === END: SECURITY FIX ===
         
-        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        $payment_data = get_transient('autopuzzle_payment_data_' . $payment_token);
         $order_id = $payment_data['order_id'];
         
         if (empty($merchant_id) || empty($terminal_id) || empty($terminal_key)) {
-            wp_die(esc_html__('Sadad payment gateway information is incomplete (missing IDs or Sadad Encryption Key).', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Sadad payment gateway information is incomplete (missing IDs or Sadad Encryption Key).', 'autopuzzle'));
         }
 
         $amount_rial = $amount_toman * 10;
@@ -399,11 +399,11 @@ class Maneli_Payment_Handler {
         
         // FIX: Handle OpenSSL check result before proceeding
         if ($sign_data === 'OPENSSL_NOT_AVAILABLE') {
-            wp_die(esc_html__('OpenSSL PHP extension is not enabled. Sadad payment gateway requires this extension.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('OpenSSL PHP extension is not enabled. Sadad payment gateway requires this extension.', 'autopuzzle'));
         }
 
         // === START: SECURITY FIX - Use token in ReturnUrl ===
-        $return_url = home_url('/?maneli_payment_verify=sadad&token=' . $payment_token);
+        $return_url = home_url('/?autopuzzle_payment_verify=sadad&token=' . $payment_token);
         // === END: SECURITY FIX ===
 
         $data = [
@@ -416,22 +416,22 @@ class Maneli_Payment_Handler {
             'OrderId'       => $order_id
         ];
 
-        // Using MANELI_SADAD_REQUEST_URL constant
-        $request_url = defined('MANELI_SADAD_REQUEST_URL') ? MANELI_SADAD_REQUEST_URL : 'https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest';
+        // Using AUTOPUZZLE_SADAD_REQUEST_URL constant
+        $request_url = defined('AUTOPUZZLE_SADAD_REQUEST_URL') ? AUTOPUZZLE_SADAD_REQUEST_URL : 'https://sadad.shaparak.ir/vpg/api/v0/Request/PaymentRequest';
         $result = $this->sadad_call_api($request_url, $data);
 
         if ($result && isset($result->ResCode) && $result->ResCode == 0) {
             // Save Token and Sadad-specific data against the unique payment token
             $payment_data['sadad_token'] = $result->Token;
-            set_transient('maneli_payment_data_' . $payment_token, $payment_data, 3600);
+            set_transient('autopuzzle_payment_data_' . $payment_token, $payment_data, 3600);
             
-            // Using MANELI_SADAD_PURCHASE_URL constant
-            $purchase_url = defined('MANELI_SADAD_PURCHASE_URL') ? MANELI_SADAD_PURCHASE_URL : 'https://sadad.shaparak.ir/VPG/Purchase?Token=';
+            // Using AUTOPUZZLE_SADAD_PURCHASE_URL constant
+            $purchase_url = defined('AUTOPUZZLE_SADAD_PURCHASE_URL') ? AUTOPUZZLE_SADAD_PURCHASE_URL : 'https://sadad.shaparak.ir/VPG/Purchase?Token=';
             wp_redirect($purchase_url . $result->Token);
             exit;
         } else {
-            $error_message = $result->Description ?? esc_html__('Unknown error during token generation.', 'maneli-car-inquiry');
-            wp_die(sprintf(esc_html__('Sadad Gateway Error: %s', 'maneli-car-inquiry'), $error_message));
+            $error_message = $result->Description ?? esc_html__('Unknown error during token generation.', 'autopuzzle');
+            wp_die(sprintf(esc_html__('Sadad Gateway Error: %s', 'autopuzzle'), $error_message));
         }
     }
 
@@ -446,11 +446,11 @@ class Maneli_Payment_Handler {
         }
 
         // 1. LOOKUP USER ID AND PAYMENT DATA VIA TOKEN
-        $user_id = (int)get_transient('maneli_payment_token_' . $payment_token);
-        $payment_data = get_transient('maneli_payment_data_' . $payment_token);
+        $user_id = (int)get_transient('autopuzzle_payment_token_' . $payment_token);
+        $payment_data = get_transient('autopuzzle_payment_data_' . $payment_token);
         
         if (!$user_id || empty($payment_data)) {
-            $this->finalize_and_redirect(0, home_url('/dashboard/'), 'failed', esc_html__('Payment token expired or invalid.', 'maneli-car-inquiry'));
+            $this->finalize_and_redirect(0, home_url('/dashboard/'), 'failed', esc_html__('Payment token expired or invalid.', 'autopuzzle'));
             return;
         }
         
@@ -464,18 +464,18 @@ class Maneli_Payment_Handler {
 
         // 2. SECURITY CHECK: Ensure token is current for the logged-in user and OrderId matches
         if (is_user_logged_in() && $current_user_id !== $user_id) {
-             $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'maneli-car-inquiry'));
+             $this->finalize_and_redirect($current_user_id, $redirect_url, 'failed', esc_html__('Security check failed. Transaction user mismatch.', 'autopuzzle'));
              return;
         }
         if ($order_id !== $expected_order_id) {
-            $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Security check failed. Order ID mismatch.', 'maneli-car-inquiry'));
+            $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Security check failed. Order ID mismatch.', 'autopuzzle'));
              return;
         }
         // === END: SECURITY FIX ===
 
         if ($res_code == 0) {
             if (empty($_POST["token"])) {
-                $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Invalid token returned from the bank.', 'maneli-car-inquiry'));
+                $this->finalize_and_redirect($user_id, $redirect_url, 'failed', esc_html__('Invalid token returned from the bank.', 'autopuzzle'));
             } else {
                 $token = sanitize_text_field($_POST["token"]);
                 
@@ -489,8 +489,8 @@ class Maneli_Payment_Handler {
                     'SignData' => $this->sadad_encrypt_pkcs7($token, $terminal_key)
                 ];
                 
-                // Using MANELI_SADAD_VERIFY_URL constant
-                $verify_url = defined('MANELI_SADAD_VERIFY_URL') ? MANELI_SADAD_VERIFY_URL : 'https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify';
+                // Using AUTOPUZZLE_SADAD_VERIFY_URL constant
+                $verify_url = defined('AUTOPUZZLE_SADAD_VERIFY_URL') ? AUTOPUZZLE_SADAD_VERIFY_URL : 'https://sadad.shaparak.ir/vpg/api/v0/Advice/Verify';
                 $result = $this->sadad_call_api($verify_url, $verify_data);
     
                 if ($result && isset($result->ResCode) && $result->ResCode == 0) {
@@ -502,7 +502,7 @@ class Maneli_Payment_Handler {
                         'amount' => $payment_data['amount'] ?? 0,
                         'payment_date' => current_time('mysql')
                     ];
-                    update_user_meta($user_id, 'maneli_last_payment_transaction', $transaction_data);
+                    update_user_meta($user_id, 'autopuzzle_last_payment_transaction', $transaction_data);
                     
                     if ($payment_type === 'cash_down_payment') {
                         $inquiry_id = $payment_data['cash_inquiry_id'] ?? 0;
@@ -514,19 +514,19 @@ class Maneli_Payment_Handler {
                             update_post_meta($inquiry_id, 'payment_amount', $payment_data['amount'] ?? 0);
                             update_post_meta($inquiry_id, 'payment_date', current_time('mysql'));
                             
-                            do_action('maneli_cash_inquiry_payment_successful', $user_id, $inquiry_id);
+                            do_action('autopuzzle_cash_inquiry_payment_successful', $user_id, $inquiry_id);
                         }
                     } else {
-                        do_action('maneli_inquiry_payment_successful', $user_id);
+                        do_action('autopuzzle_inquiry_payment_successful', $user_id);
                     }
                     $this->finalize_and_redirect($user_id, $redirect_url, 'success');
                 } else {
-                    $error_message = $result->Description ?? esc_html__('Transaction failed at the final verification step.', 'maneli-car-inquiry');
+                    $error_message = $result->Description ?? esc_html__('Transaction failed at the final verification step.', 'autopuzzle');
                     $this->finalize_and_redirect($user_id, $redirect_url, 'failed', $error_message);
                 }
             }
         } else {
-            $error_message = isset($_POST['Description']) ? sanitize_text_field($_POST['Description']) : esc_html__('Transaction was canceled by the bank.', 'maneli-car-inquiry');
+            $error_message = isset($_POST['Description']) ? sanitize_text_field($_POST['Description']) : esc_html__('Transaction was canceled by the bank.', 'autopuzzle');
             $this->finalize_and_redirect($user_id, $redirect_url, 'failed', $error_message);
         }
     }
@@ -538,21 +538,21 @@ class Maneli_Payment_Handler {
         
         // --- START: CLEANUP --- 
         // Look up the token via user ID for cleanup
-        $token = get_user_meta($user_id, 'maneli_current_payment_token', true);
+        $token = get_user_meta($user_id, 'autopuzzle_current_payment_token', true);
 
         if ($token) {
             // Delete transients associated with the token
-            delete_transient('maneli_payment_token_' . $token);
-            delete_transient('maneli_payment_data_' . $token);
+            delete_transient('autopuzzle_payment_token_' . $token);
+            delete_transient('autopuzzle_payment_data_' . $token);
             // Delete the redundant user meta
-            delete_user_meta($user_id, 'maneli_current_payment_token'); 
+            delete_user_meta($user_id, 'autopuzzle_current_payment_token'); 
         }
         
         // Clean up other old/redundant meta fields
-        delete_user_meta($user_id, 'maneli_payment_authority'); 
-        delete_user_meta($user_id, 'maneli_payment_token');      
-        delete_user_meta($user_id, 'maneli_payment_type');
-        delete_user_meta($user_id, 'maneli_payment_cash_inquiry_id');
+        delete_user_meta($user_id, 'autopuzzle_payment_authority'); 
+        delete_user_meta($user_id, 'autopuzzle_payment_token');      
+        delete_user_meta($user_id, 'autopuzzle_payment_type');
+        delete_user_meta($user_id, 'autopuzzle_payment_cash_inquiry_id');
         // --- END: CLEANUP --- 
         
         // Build the redirect URL with status
@@ -575,7 +575,7 @@ class Maneli_Payment_Handler {
         // FIX: Check for OpenSSL extension availability
         if (!extension_loaded('openssl')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Sadad Error: The OpenSSL extension is required for Sadad payment gateway but is not enabled.');
+                error_log('AutoPuzzle Sadad Error: The OpenSSL extension is required for Sadad payment gateway but is not enabled.');
             }
             // Return a distinct string to be handled in process_sadad_payment
             return 'OPENSSL_NOT_AVAILABLE'; 
@@ -605,7 +605,7 @@ class Maneli_Payment_Handler {
 
         if (is_wp_error($response)) {
              if (defined('WP_DEBUG') && WP_DEBUG) {
-                 error_log('Maneli Sadad API Error: ' . $response->get_error_message());
+                 error_log('AutoPuzzle Sadad API Error: ' . $response->get_error_message());
              }
              return false;
         }

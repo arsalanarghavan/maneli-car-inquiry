@@ -1,5 +1,5 @@
 /**
- * Maneli Car Inquiry Custom Styles
+ * AutoPuzzle Car Inquiry Custom Styles
  * Custom styles for the dashboard
  */
 
@@ -16,35 +16,35 @@
 }
 
 /* Custom Dashboard Styles */
-.maneli-dashboard {
+.autopuzzle-dashboard {
     min-height: 100vh;
 }
 
-.maneli-card-stat {
+.autopuzzle-card-stat {
     border-radius: 12px;
     padding: 1.5rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
 
-[data-theme-mode=dark] .maneli-card-stat {
+[data-theme-mode=dark] .autopuzzle-card-stat {
     background: linear-gradient(135deg, #4c5fd5 0%, #6a3a8f 100%);
 }
 
-.maneli-card-stat .stat-value {
+.autopuzzle-card-stat .stat-value {
     font-size: 2rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
 }
 
-.maneli-card-stat .stat-label {
+.autopuzzle-card-stat .stat-label {
     opacity: 0.9;
     font-size: 0.875rem;
 }
 
 /* Status Indicator Styles - Colored Badges */
-/* Using .maneli- prefix to avoid conflicts with theme */
-.maneli-status-indicator,
+/* Using .autopuzzle- prefix to avoid conflicts with theme */
+.autopuzzle-status-indicator,
 .status-indicator {
     display: inline-block;
     padding: 4px 12px;
@@ -168,8 +168,8 @@
 }
 
 /* Assigned Expert Name Style - Colored */
-/* Using .maneli- prefix to avoid conflicts with theme */
-.maneli-expert-name,
+/* Using .autopuzzle- prefix to avoid conflicts with theme */
+.autopuzzle-expert-name,
 .assigned-expert-name {
     display: inline-block;
     padding: 4px 12px;
@@ -181,14 +181,14 @@
     white-space: nowrap;
 }
 
-[data-theme-mode=dark] .maneli-expert-name,
+[data-theme-mode=dark] .autopuzzle-expert-name,
 [data-theme-mode=dark] .assigned-expert-name {
     background-color: rgba(79, 70, 229, 0.2);
     color: #818cf8;
 }
 
 /* Loading States */
-.maneli-loading {
+.autopuzzle-loading {
     display: inline-block;
     width: 1rem;
     height: 1rem;
@@ -382,11 +382,11 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .maneli-card-stat {
+    .autopuzzle-card-stat {
         padding: 1rem;
     }
     
-    .maneli-card-stat .stat-value {
+    .autopuzzle-card-stat .stat-value {
         font-size: 1.5rem;
     }
     
@@ -725,7 +725,7 @@ body:has(#expert-filter.select2-hidden-accessible) .select2-dropdown .select2-se
 }
 
 /* Method 3: Hide search box in dropdowns marked by JavaScript */
-.maneli-expert-filter-dropdown .select2-search--dropdown {
+.autopuzzle-expert-filter-dropdown .select2-search--dropdown {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;

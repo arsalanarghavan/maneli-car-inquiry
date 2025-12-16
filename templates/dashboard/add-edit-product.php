@@ -2,7 +2,7 @@
 /**
  * Template for adding/editing products
  * 
- * @package Maneli_Car_Inquiry
+ * @package AutoPuzzle
  */
 
 if (!defined('ABSPATH')) {
@@ -21,7 +21,7 @@ if (!function_exists('persian_numbers')) {
 // Get product ID from query var
 $product_id = isset($_GET['edit_product']) ? intval($_GET['edit_product']) : (get_query_var('edit_product') ? intval(get_query_var('edit_product')) : 0);
 $is_edit_mode = $product_id > 0;
-$page_title = $is_edit_mode ? esc_html__('Edit Product', 'maneli-car-inquiry') : esc_html__('Add New Product', 'maneli-car-inquiry');
+$page_title = $is_edit_mode ? esc_html__('Edit Product', 'autopuzzle') : esc_html__('Add New Product', 'autopuzzle');
 
 // Initialize product data
 $product_name = '';
@@ -84,8 +84,8 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard/products')); ?>"><?php esc_html_e('Products', 'maneli-car-inquiry'); ?></a></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard/products')); ?>"><?php esc_html_e('Products', 'autopuzzle'); ?></a></li>
                         <li class="breadcrumb-item active" aria-current="page"><?php echo esc_html($page_title); ?></li>
                     </ol>
                 </nav>
@@ -94,7 +94,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
             <div>
                 <a href="<?php echo esc_url(home_url('/dashboard/products')); ?>" class="btn btn-primary btn-wave">
                     <i class="la la-arrow-right me-1"></i>
-                    <?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Back to List', 'autopuzzle'); ?>
                 </a>
             </div>
         </div>
@@ -106,34 +106,34 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                 <div class="card custom-card">
                     <div class="card-body">
                         <form id="add-edit-product-form" method="post">
-                            <?php wp_nonce_field('maneli_save_product', 'maneli_product_nonce'); ?>
+                            <?php wp_nonce_field('autopuzzle_save_product', 'autopuzzle_product_nonce'); ?>
                             <input type="hidden" name="product_id" value="<?php echo esc_attr($product_id); ?>">
-                            <input type="hidden" name="action" value="maneli_save_product">
+                            <input type="hidden" name="action" value="autopuzzle_save_product">
                             
                             <div class="row gy-3">
                                 <!-- Product Name -->
                                 <div class="col-12">
-                                    <label for="product-name" class="form-label"><?php esc_html_e('Car Name', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span></label>
+                                    <label for="product-name" class="form-label"><?php esc_html_e('Car Name', 'autopuzzle'); ?> <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="product-name" name="product_name" 
-                                           value="<?php echo esc_attr($product_name); ?>" placeholder="<?php esc_attr_e('Car Name', 'maneli-car-inquiry'); ?>" required>
+                                           value="<?php echo esc_attr($product_name); ?>" placeholder="<?php esc_attr_e('Car Name', 'autopuzzle'); ?>" required>
                                     <div class="form-text text-muted mt-1">
                                         <i class="la la-info-circle me-1"></i>
-                                        <?php esc_html_e('Product name should not exceed 30 characters.', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('Product name should not exceed 30 characters.', 'autopuzzle'); ?>
                                     </div>
                                 </div>
                                 
                                 <!-- Year -->
                                 <div class="col-xl-6 col-lg-6">
-                                    <label for="product-year" class="form-label"><?php esc_html_e('Manufacturing Year', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-year" class="form-label"><?php esc_html_e('Manufacturing Year', 'autopuzzle'); ?></label>
                                     <input type="text" class="form-control" id="product-year" name="product_year" 
-                                           value="<?php echo esc_attr($year); ?>" placeholder="<?php esc_attr_e('Manufacturing Year', 'maneli-car-inquiry'); ?>">
+                                           value="<?php echo esc_attr($year); ?>" placeholder="<?php esc_attr_e('Manufacturing Year', 'autopuzzle'); ?>">
                                 </div>
                                 
                                 <!-- Brand -->
                                 <div class="col-xl-6 col-lg-6">
-                                    <label for="product-brand" class="form-label"><?php esc_html_e('Brand', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-brand" class="form-label"><?php esc_html_e('Brand', 'autopuzzle'); ?></label>
                                     <select class="form-control" data-trigger="" name="product_brand" id="product-brand">
-                                        <option value=""><?php esc_html_e('Select', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('Select', 'autopuzzle'); ?></option>
                                         <?php
                                         // Get brand terms (assuming pa_brand is a product attribute)
                                         $brands = get_terms([
@@ -150,7 +150,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                 
                                 <!-- Category -->
                                 <div class="col-xl-6 col-lg-6">
-                                    <label for="product-category" class="form-label"><?php esc_html_e('Category', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-category" class="form-label"><?php esc_html_e('Category', 'autopuzzle'); ?></label>
                                     <select class="form-control" data-trigger="" name="product_category[]" id="product-category" multiple>
                                         <?php
                                         foreach ($product_categories as $category) {
@@ -163,17 +163,17 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                 
                                 <!-- Sales Status -->
                                 <div class="col-xl-6 col-lg-6">
-                                    <label for="product-status" class="form-label"><?php esc_html_e('Sales Status', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-status" class="form-label"><?php esc_html_e('Sales Status', 'autopuzzle'); ?></label>
                                     <select class="form-control" data-trigger="" name="product_status" id="product-status">
-                                        <option value="special_sale" <?php selected($car_status, 'special_sale'); ?>><?php esc_html_e('Special Sale', 'maneli-car-inquiry'); ?></option>
-                                        <option value="unavailable" <?php selected($car_status, 'unavailable'); ?>><?php esc_html_e('Unavailable', 'maneli-car-inquiry'); ?></option>
-                                        <option value="disabled" <?php selected($car_status, 'disabled'); ?>><?php esc_html_e('Disabled', 'maneli-car-inquiry'); ?></option>
+                                        <option value="special_sale" <?php selected($car_status, 'special_sale'); ?>><?php esc_html_e('Special Sale', 'autopuzzle'); ?></option>
+                                        <option value="unavailable" <?php selected($car_status, 'unavailable'); ?>><?php esc_html_e('Unavailable', 'autopuzzle'); ?></option>
+                                        <option value="disabled" <?php selected($car_status, 'disabled'); ?>><?php esc_html_e('Disabled', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 
                                 <!-- Colors (Dynamic Fields) -->
                                 <div class="col-xl-6 col-lg-6">
-                                    <label class="form-label"><?php esc_html_e('Colors', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Colors', 'autopuzzle'); ?></label>
                                     <div id="product-colors-container">
                                         <?php
                                         if (!empty($colors_array)) {
@@ -181,7 +181,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                                 ?>
                                                 <div class="d-flex mb-2 color-field-row">
                                                     <input type="text" class="form-control me-2" name="product_colors[]" 
-                                                           value="<?php echo esc_attr($color); ?>" placeholder="<?php esc_attr_e('Color', 'maneli-car-inquiry'); ?>">
+                                                           value="<?php echo esc_attr($color); ?>" placeholder="<?php esc_attr_e('Color', 'autopuzzle'); ?>">
                                                     <button type="button" class="btn btn-danger btn-sm remove-color-field">
                                                         <i class="bi bi-dash-lg"></i>
                                                     </button>
@@ -191,7 +191,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                         } else {
                                             ?>
                                             <div class="d-flex mb-2 color-field-row">
-                                                <input type="text" class="form-control me-2" name="product_colors[]" placeholder="<?php esc_attr_e('Color', 'maneli-car-inquiry'); ?>">
+                                                <input type="text" class="form-control me-2" name="product_colors[]" placeholder="<?php esc_attr_e('Color', 'autopuzzle'); ?>">
                                                 <button type="button" class="btn btn-danger btn-sm remove-color-field">
                                                     <i class="bi bi-dash-lg"></i>
                                                 </button>
@@ -201,45 +201,45 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                         ?>
                                     </div>
                                     <button type="button" class="btn btn-primary btn-sm mt-2" id="add-color-field">
-                                        <i class="bi bi-plus-lg me-1"></i><?php esc_html_e('Add Color', 'maneli-car-inquiry'); ?>
+                                        <i class="bi bi-plus-lg me-1"></i><?php esc_html_e('Add Color', 'autopuzzle'); ?>
                                     </button>
                                 </div>
                                 
                                 <!-- Prices -->
                                 <div class="col-xl-4 col-lg-4 col-md-6">
-                                    <label for="product-regular-price" class="form-label"><?php esc_html_e('Cash Price', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-regular-price" class="form-label"><?php esc_html_e('Cash Price', 'autopuzzle'); ?></label>
                                     <input type="text" class="form-control manli-price-input" id="product-regular-price" 
                                            name="product_regular_price" value="<?php echo esc_attr($regular_price_formatted); ?>" 
-                                           placeholder="<?php esc_attr_e('Cash Price', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo ($regular_price > 0) ? esc_attr($regular_price) : ''; ?>">
+                                           placeholder="<?php esc_attr_e('Cash Price', 'autopuzzle'); ?>" data-raw-value="<?php echo ($regular_price > 0) ? esc_attr($regular_price) : ''; ?>">
                                 </div>
                                 
                                 <div class="col-xl-4 col-lg-4 col-md-6">
-                                    <label for="product-installment-price" class="form-label"><?php esc_html_e('Installment Price', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-installment-price" class="form-label"><?php esc_html_e('Installment Price', 'autopuzzle'); ?></label>
                                     <input type="text" class="form-control manli-price-input" id="product-installment-price" 
                                            name="product_installment_price" value="<?php echo esc_attr($installment_price_formatted); ?>" 
-                                           placeholder="<?php esc_attr_e('Installment Price', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo ($installment_price > 0) ? esc_attr($installment_price) : ''; ?>">
+                                           placeholder="<?php esc_attr_e('Installment Price', 'autopuzzle'); ?>" data-raw-value="<?php echo ($installment_price > 0) ? esc_attr($installment_price) : ''; ?>">
                                 </div>
                                 
                                 <div class="col-xl-4 col-lg-4 col-md-6">
-                                    <label for="product-min-downpayment" class="form-label"><?php esc_html_e('Minimum Down Payment', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-min-downpayment" class="form-label"><?php esc_html_e('Minimum Down Payment', 'autopuzzle'); ?></label>
                                     <input type="text" class="form-control manli-price-input" id="product-min-downpayment" 
                                            name="product_min_downpayment" value="<?php echo esc_attr($min_downpayment_formatted); ?>" 
-                                           placeholder="<?php esc_attr_e('Minimum Down Payment', 'maneli-car-inquiry'); ?>" data-raw-value="<?php echo ($min_downpayment > 0) ? esc_attr($min_downpayment) : ''; ?>">
+                                           placeholder="<?php esc_attr_e('Minimum Down Payment', 'autopuzzle'); ?>" data-raw-value="<?php echo ($min_downpayment > 0) ? esc_attr($min_downpayment) : ''; ?>">
                                 </div>
                                 
                                 <!-- Description -->
                                 <div class="col-12">
-                                    <label for="product-description" class="form-label"><?php esc_html_e('Product Description', 'maneli-car-inquiry'); ?></label>
+                                    <label for="product-description" class="form-label"><?php esc_html_e('Product Description', 'autopuzzle'); ?></label>
                                     <textarea class="form-control" id="product-description" name="product_description" rows="4"><?php echo esc_textarea($product_description); ?></textarea>
                                     <div class="form-text text-muted mt-1">
                                         <i class="la la-info-circle me-1"></i>
-                                        <?php esc_html_e('Description should not exceed 500 characters.', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('Description should not exceed 500 characters.', 'autopuzzle'); ?>
                                     </div>
                                 </div>
                                 
                                 <!-- Product Features (Dynamic Fields) -->
                                 <div class="col-12">
-                                    <label class="form-label"><?php esc_html_e('Car Features', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Car Features', 'autopuzzle'); ?></label>
                                     <div id="product-features-container">
                                         <?php
                                         if (!empty($features)) {
@@ -247,7 +247,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                                 ?>
                                                 <div class="d-flex mb-2 feature-field-row">
                                                     <input type="text" class="form-control me-2" name="product_features[]" 
-                                                           value="<?php echo esc_attr($feature); ?>" placeholder="<?php esc_attr_e('Feature', 'maneli-car-inquiry'); ?>">
+                                                           value="<?php echo esc_attr($feature); ?>" placeholder="<?php esc_attr_e('Feature', 'autopuzzle'); ?>">
                                                     <button type="button" class="btn btn-danger btn-sm remove-feature-field">
                                                         <i class="bi bi-dash-lg"></i>
                                                     </button>
@@ -257,7 +257,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                         } else {
                                             ?>
                                             <div class="d-flex mb-2 feature-field-row">
-                                                <input type="text" class="form-control me-2" name="product_features[]" placeholder="<?php esc_attr_e('Feature', 'maneli-car-inquiry'); ?>">
+                                                <input type="text" class="form-control me-2" name="product_features[]" placeholder="<?php esc_attr_e('Feature', 'autopuzzle'); ?>">
                                                 <button type="button" class="btn btn-danger btn-sm remove-feature-field">
                                                     <i class="bi bi-dash-lg"></i>
                                                 </button>
@@ -267,24 +267,24 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                         ?>
                                     </div>
                                     <button type="button" class="btn btn-primary btn-sm mt-2" id="add-feature-field">
-                                        <i class="bi bi-plus-lg me-1"></i><?php esc_html_e('Add Feature', 'maneli-car-inquiry'); ?>
+                                        <i class="bi bi-plus-lg me-1"></i><?php esc_html_e('Add Feature', 'autopuzzle'); ?>
                                     </button>
                                 </div>
                                 
                                 <!-- Product Images -->
                                 <div class="col-12">
-                                    <label class="form-label mb-3"><?php esc_html_e('Product Images', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label mb-3"><?php esc_html_e('Product Images', 'autopuzzle'); ?></label>
                                     
                                     <!-- Cover Image -->
                                     <div class="mb-4">
-                                        <label class="form-label d-block mb-2"><?php esc_html_e('Cover Image', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label d-block mb-2"><?php esc_html_e('Cover Image', 'autopuzzle'); ?></label>
                                         <div id="cover-image-upload" class="image-upload-container">
                                             <?php
                                             if ($featured_image_id) {
                                                 $cover_url = wp_get_attachment_image_url($featured_image_id, 'medium');
                                                 echo '<div class="uploaded-image-wrapper mb-2 d-inline-block">';
-                                                echo '<img src="' . esc_url($cover_url) . '" class="uploaded-image me-2 maneli-img-responsive">';
-                                                echo '<button type="button" class="btn btn-sm btn-danger remove-image" data-image-id="' . esc_attr($featured_image_id) . '">' . esc_html__('Delete', 'maneli-car-inquiry') . '</button>';
+                                                echo '<img src="' . esc_url($cover_url) . '" class="uploaded-image me-2 autopuzzle-img-responsive">';
+                                                echo '<button type="button" class="btn btn-sm btn-danger remove-image" data-image-id="' . esc_attr($featured_image_id) . '">' . esc_html__('Delete', 'autopuzzle') . '</button>';
                                                 echo '</div>';
                                                 echo '<input type="hidden" name="featured_image_id" id="featured_image_id" value="' . esc_attr($featured_image_id) . '">';
                                             } else {
@@ -292,14 +292,14 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                             }
                                             ?>
                                             <button type="button" class="btn btn-outline-primary btn-sm" id="upload-cover-image">
-                                                <i class="bi bi-cloud-upload me-1"></i><?php esc_html_e('Select Cover Image', 'maneli-car-inquiry'); ?>
+                                                <i class="bi bi-cloud-upload me-1"></i><?php esc_html_e('Select Cover Image', 'autopuzzle'); ?>
                                             </button>
                                         </div>
                                     </div>
                                     
                                     <!-- Gallery Images -->
                                     <div>
-                                        <label class="form-label d-block mb-2"><?php esc_html_e('Image Gallery', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label d-block mb-2"><?php esc_html_e('Image Gallery', 'autopuzzle'); ?></label>
                                         <div id="gallery-images-upload" class="image-upload-container">
                                             <?php
                                             if (!empty($gallery_image_ids)) {
@@ -307,8 +307,8 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                                 foreach ($gallery_image_ids as $gallery_id) {
                                                     $gallery_url = wp_get_attachment_image_url($gallery_id, 'thumbnail');
                                                     echo '<div class="gallery-image-item position-relative">';
-                                                    echo '<img src="' . esc_url($gallery_url) . '" class="uploaded-image maneli-img-responsive-sm">';
-                                                    echo '<button type="button" class="btn btn-sm btn-danger remove-gallery-image position-absolute top-0 end-0 maneli-remove-image-btn" data-image-id="' . esc_attr($gallery_id) . '">×</button>';
+                                                    echo '<img src="' . esc_url($gallery_url) . '" class="uploaded-image autopuzzle-img-responsive-sm">';
+                                                    echo '<button type="button" class="btn btn-sm btn-danger remove-gallery-image position-absolute top-0 end-0 autopuzzle-remove-image-btn" data-image-id="' . esc_attr($gallery_id) . '">×</button>';
                                                     echo '</div>';
                                                 }
                                                 echo '</div>';
@@ -316,7 +316,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                             ?>
                                             <input type="hidden" name="gallery_image_ids" id="gallery-image-ids" value="<?php echo esc_attr(implode(',', $gallery_image_ids)); ?>">
                                             <button type="button" class="btn btn-outline-primary btn-sm" id="upload-gallery-images">
-                                                <i class="bi bi-images me-1"></i><?php esc_html_e('Add Image to Gallery', 'maneli-car-inquiry'); ?>
+                                                <i class="bi bi-images me-1"></i><?php esc_html_e('Add Image to Gallery', 'autopuzzle'); ?>
                                             </button>
                                         </div>
                                     </div>
@@ -326,10 +326,10 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                             <!-- Card Footer -->
                             <div class="card-footer border-top border-block-start-dashed d-sm-flex justify-content-end mt-4">
                                 <a href="<?php echo home_url('/dashboard/products'); ?>" class="btn btn-light me-2 mb-2 mb-sm-0">
-                                    <i class="bi bi-x-lg me-1"></i><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>
+                                    <i class="bi bi-x-lg me-1"></i><?php esc_html_e('Cancel', 'autopuzzle'); ?>
                                 </a>
                                 <button type="submit" class="btn btn-primary mb-2 mb-sm-0">
-                                    <i class="bi bi-download me-2"></i><?php echo $is_edit_mode ? esc_html__('Save Changes', 'maneli-car-inquiry') : esc_html__('Save Product', 'maneli-car-inquiry'); ?>
+                                    <i class="bi bi-download me-2"></i><?php echo $is_edit_mode ? esc_html__('Save Changes', 'autopuzzle') : esc_html__('Save Product', 'autopuzzle'); ?>
                                 </button>
                             </div>
                         </form>
@@ -354,7 +354,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
     
     const shouldUsePersianDigits = (function() {
         try {
-            const cookieMatch = document.cookie.match(/(?:^|;\s*)maneli_language=([^;]+)/);
+            const cookieMatch = document.cookie.match(/(?:^|;\s*)autopuzzle_language=([^;]+)/);
             if (cookieMatch) {
                 const lang = decodeURIComponent(cookieMatch[1]).toLowerCase();
                 if (['en', 'en-us', 'en_us', 'english'].includes(lang)) {
@@ -490,31 +490,31 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                 window.maneliAdminProductEditor = {
                     ajaxUrl: '<?php echo esc_js(admin_url("admin-ajax.php")); ?>',
                     productsUrl: '<?php echo esc_js(home_url("/dashboard/products")); ?>',
-                    nonce: '<?php echo esc_js(wp_create_nonce("maneli_product_data_nonce")); ?>'
+                    nonce: '<?php echo esc_js(wp_create_nonce("autopuzzle_product_data_nonce")); ?>'
                 };
                 // Translation object
                 window.maneliProductTranslations = {
-                    error: <?php echo wp_json_encode(esc_html__('Error!', 'maneli-car-inquiry')); ?>,
-                    serverConfigError: <?php echo wp_json_encode(esc_html__('Server configuration not available. Please refresh the page.', 'maneli-car-inquiry')); ?>,
-                    fileSizeError: <?php echo wp_json_encode(esc_html__('File size should not exceed 5MB.', 'maneli-car-inquiry')); ?>,
-                    uploading: <?php echo wp_json_encode(esc_html__('Uploading...', 'maneli-car-inquiry')); ?>,
-                    uploadSuccess: <?php echo wp_json_encode(esc_html__('Image uploaded successfully.', 'maneli-car-inquiry')); ?>,
-                    uploadError: <?php echo wp_json_encode(esc_html__('Error uploading image. Please try again.', 'maneli-car-inquiry')); ?>,
-                    warning: <?php echo wp_json_encode(esc_html__('Warning', 'maneli-car-inquiry')); ?>,
-                    fileTooLarge: <?php echo wp_json_encode(esc_html__('File %s is larger than 5MB and will be ignored.', 'maneli-car-inquiry')); ?>,
-                    noValidFiles: <?php echo wp_json_encode(esc_html__('No valid files selected.', 'maneli-car-inquiry')); ?>,
-                    uploadingImages: <?php echo wp_json_encode(esc_html__('Uploading %d images...', 'maneli-car-inquiry')); ?>,
-                    uploadImagesSuccess: <?php echo wp_json_encode(esc_html__('%d images uploaded successfully%s.', 'maneli-car-inquiry')); ?>,
-                    uploadImagesFailed: <?php echo wp_json_encode(esc_html__('Failed to upload images.', 'maneli-car-inquiry')); ?>,
-                    enterCarName: <?php echo wp_json_encode(esc_html__('Please enter car name.', 'maneli-car-inquiry')); ?>,
-                    saving: <?php echo wp_json_encode(esc_html__('Saving...', 'maneli-car-inquiry')); ?>,
-                    success: <?php echo wp_json_encode(esc_html__('Success!', 'maneli-car-inquiry')); ?>,
-                    productSaved: <?php echo wp_json_encode(esc_html__('Product saved successfully.', 'maneli-car-inquiry')); ?>,
-                    saveError: <?php echo wp_json_encode(esc_html__('Error saving product. Please try again.', 'maneli-car-inquiry')); ?>,
-                    requestError: <?php echo wp_json_encode(esc_html__('Error sending request. Please try again.', 'maneli-car-inquiry')); ?>,
-                    ok: <?php echo wp_json_encode(esc_html__('OK', 'maneli-car-inquiry')); ?>,
-                    delete: <?php echo wp_json_encode(esc_html__('Delete', 'maneli-car-inquiry')); ?>,
-                    selectCategory: <?php echo wp_json_encode(esc_html__('Select category', 'maneli-car-inquiry')); ?>
+                    error: <?php echo wp_json_encode(esc_html__('Error!', 'autopuzzle')); ?>,
+                    serverConfigError: <?php echo wp_json_encode(esc_html__('Server configuration not available. Please refresh the page.', 'autopuzzle')); ?>,
+                    fileSizeError: <?php echo wp_json_encode(esc_html__('File size should not exceed 5MB.', 'autopuzzle')); ?>,
+                    uploading: <?php echo wp_json_encode(esc_html__('Uploading...', 'autopuzzle')); ?>,
+                    uploadSuccess: <?php echo wp_json_encode(esc_html__('Image uploaded successfully.', 'autopuzzle')); ?>,
+                    uploadError: <?php echo wp_json_encode(esc_html__('Error uploading image. Please try again.', 'autopuzzle')); ?>,
+                    warning: <?php echo wp_json_encode(esc_html__('Warning', 'autopuzzle')); ?>,
+                    fileTooLarge: <?php echo wp_json_encode(esc_html__('File %s is larger than 5MB and will be ignored.', 'autopuzzle')); ?>,
+                    noValidFiles: <?php echo wp_json_encode(esc_html__('No valid files selected.', 'autopuzzle')); ?>,
+                    uploadingImages: <?php echo wp_json_encode(esc_html__('Uploading %d images...', 'autopuzzle')); ?>,
+                    uploadImagesSuccess: <?php echo wp_json_encode(esc_html__('%d images uploaded successfully%s.', 'autopuzzle')); ?>,
+                    uploadImagesFailed: <?php echo wp_json_encode(esc_html__('Failed to upload images.', 'autopuzzle')); ?>,
+                    enterCarName: <?php echo wp_json_encode(esc_html__('Please enter car name.', 'autopuzzle')); ?>,
+                    saving: <?php echo wp_json_encode(esc_html__('Saving...', 'autopuzzle')); ?>,
+                    success: <?php echo wp_json_encode(esc_html__('Success!', 'autopuzzle')); ?>,
+                    productSaved: <?php echo wp_json_encode(esc_html__('Product saved successfully.', 'autopuzzle')); ?>,
+                    saveError: <?php echo wp_json_encode(esc_html__('Error saving product. Please try again.', 'autopuzzle')); ?>,
+                    requestError: <?php echo wp_json_encode(esc_html__('Error sending request. Please try again.', 'autopuzzle')); ?>,
+                    ok: <?php echo wp_json_encode(esc_html__('OK', 'autopuzzle')); ?>,
+                    delete: <?php echo wp_json_encode(esc_html__('Delete', 'autopuzzle')); ?>,
+                    selectCategory: <?php echo wp_json_encode(esc_html__('Select category', 'autopuzzle')); ?>
                 };
             } else {
                 console.log('maneliAdminProductEditor loaded:', maneliAdminProductEditor);
@@ -620,7 +620,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         $('#add-color-field').on('click', function() {
             const newField = `
                 <div class="d-flex mb-2 color-field-row">
-                    <input type="text" class="form-control me-2" name="product_colors[]" placeholder="<?php esc_attr_e('Color', 'maneli-car-inquiry'); ?>">
+                    <input type="text" class="form-control me-2" name="product_colors[]" placeholder="<?php esc_attr_e('Color', 'autopuzzle'); ?>">
                     <button type="button" class="btn btn-danger btn-sm remove-color-field">
                         <i class="bi bi-dash-lg"></i>
                     </button>
@@ -639,7 +639,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
         $('#add-feature-field').on('click', function() {
             const newField = `
                 <div class="d-flex mb-2 feature-field-row">
-                    <input type="text" class="form-control me-2" name="product_features[]" placeholder="<?php esc_attr_e('Feature', 'maneli-car-inquiry'); ?>">
+                    <input type="text" class="form-control me-2" name="product_features[]" placeholder="<?php esc_attr_e('Feature', 'autopuzzle'); ?>">
                     <button type="button" class="btn btn-danger btn-sm remove-feature-field">
                         <i class="bi bi-dash-lg"></i>
                     </button>
@@ -712,7 +712,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                 });
                 
                 const formData = new FormData();
-                formData.append('action', 'maneli_upload_image');
+                formData.append('action', 'autopuzzle_upload_image');
                 formData.append('image', file);
                 formData.append('nonce', maneliAdminProductEditor.nonce || '');
                 
@@ -730,7 +730,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                             if (!$('.uploaded-image-wrapper').length) {
                                 $('#cover-image-upload').prepend(
                                     '<div class="uploaded-image-wrapper mb-2 d-inline-block">' +
-                                    '<img src="' + response.data.url + '" class="uploaded-image me-2 maneli-img-responsive">' +
+                                    '<img src="' + response.data.url + '" class="uploaded-image me-2 autopuzzle-img-responsive">' +
                                     '<button type="button" class="btn btn-sm btn-danger remove-image" data-image-id="' + response.data.attachment_id + '">' + maneliProductTranslations.delete + '</button>' +
                                     '</div>'
                                 );
@@ -836,7 +836,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                             Swal.fire({
                                 icon: 'success',
                                 title: maneliProductTranslations.success,
-                                text: maneliProductTranslations.uploadImagesSuccess.replace('%d', successCount).replace('%s', errorCount > 0 ? ' (' + errorCount + ' ' + <?php echo wp_json_encode(esc_html__('failed', 'maneli-car-inquiry')); ?> + ')' : ''),
+                                text: maneliProductTranslations.uploadImagesSuccess.replace('%d', successCount).replace('%s', errorCount > 0 ? ' (' + errorCount + ' ' + <?php echo wp_json_encode(esc_html__('failed', 'autopuzzle')); ?> + ')' : ''),
                                 timer: 3000,
                                 showConfirmButton: false
                             });
@@ -853,7 +853,7 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                 
                 for (let i = 0; i < validFiles.length; i++) {
                     const formData = new FormData();
-                    formData.append('action', 'maneli_upload_image');
+                    formData.append('action', 'autopuzzle_upload_image');
                     formData.append('image', validFiles[i]);
                     formData.append('nonce', maneliAdminProductEditor.nonce || '');
                     
@@ -875,8 +875,8 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
                                 
                                 $('.gallery-images-wrapper').append(
                                     '<div class="gallery-image-item position-relative">' +
-                                    '<img src="' + response.data.url + '" class="uploaded-image maneli-img-responsive-sm">' +
-                                    '<button type="button" class="btn btn-sm btn-danger remove-gallery-image position-absolute top-0 end-0 maneli-remove-image-btn" data-image-id="' + response.data.attachment_id + '">×</button>' +
+                                    '<img src="' + response.data.url + '" class="uploaded-image autopuzzle-img-responsive-sm">' +
+                                    '<button type="button" class="btn btn-sm btn-danger remove-gallery-image position-absolute top-0 end-0 autopuzzle-remove-image-btn" data-image-id="' + response.data.attachment_id + '">×</button>' +
                                     '</div>'
                                 );
                             } else {
@@ -915,8 +915,8 @@ $min_downpayment_formatted = $min_downpayment > 0 ? persian_numbers(number_forma
             
             // Collect all form data
             const formData = {
-                action: 'maneli_save_product_full',
-                maneli_product_nonce: $('#maneli_product_nonce').val(),
+                action: 'autopuzzle_save_product_full',
+                autopuzzle_product_nonce: $('#autopuzzle_product_nonce').val(),
                 product_id: $('input[name="product_id"]').val(),
                 product_name: $('#product-name').val(),
                 product_description: $('#product-description').val() || (typeof quill !== 'undefined' ? quill.root.innerHTML : ''),

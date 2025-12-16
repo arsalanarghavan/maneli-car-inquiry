@@ -3,7 +3,7 @@
  * Handles form submissions sent via admin-post.php for administrative and expert actions.
  * این فایل شامل منطق کامل شده برای ایجاد استعلام توسط کارشناس است.
  *
- * @package Maneli_Car_Inquiry/Includes/Admin
+ * @package Autopuzzle_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.6 (Removed loan calculator duplication and added expert form validation)
  */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Admin_Actions_Handler {
+class Autopuzzle_Admin_Actions_Handler {
 
     public function __construct() {
         // Admin Workflow Hooks
@@ -29,16 +29,16 @@ class Maneli_Admin_Actions_Handler {
     }
     
     // NOTE: private function calculate_installment_amount has been removed. 
-    // All installment calculations now use Maneli_Render_Helpers::calculate_installment_amount().
+    // All installment calculations now use Autopuzzle_Render_Helpers::calculate_installment_amount().
 
     /**
      * Handles the final status update for an installment inquiry by an admin from the frontend report page.
      */
     public function handle_admin_update_status() {
-        check_admin_referer('maneli_admin_update_status_nonce');
+        check_admin_referer('autopuzzle_admin_update_status_nonce');
         
-        if (!current_user_can('manage_maneli_inquiries') || empty($_POST['inquiry_id']) || empty($_POST['new_status'])) { 
-            wp_die(esc_html__('Invalid request or insufficient permissions.', 'maneli-car-inquiry')); 
+        if (!current_user_can('manage_autopuzzle_inquiries') || empty($_POST['inquiry_id']) || empty($_POST['new_status'])) { 
+            wp_die(esc_html__('Invalid request or insufficient permissions.', 'autopuzzle')); 
         }
         
         $post_id = intval($_POST['inquiry_id']);
@@ -48,12 +48,12 @@ class Maneli_Admin_Actions_Handler {
         $redirect_url = add_query_arg('inquiry_id', $post_id, home_url('/dashboard/installment-inquiries'));
 
         if (!in_array($new_status_request, $valid_statuses, true)) {
-            wp_die(esc_html__('Invalid status provided.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Invalid status provided.', 'autopuzzle'));
         }
         
         $final_status = $new_status_request; // Initialize $final_status for robustness
         $sms_params = [];
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         
         if ($new_status_request === 'approved') {
             $final_status = 'user_confirmed';
@@ -81,11 +81,11 @@ class Maneli_Admin_Actions_Handler {
         update_post_meta($post_id, 'inquiry_status', $final_status);
         
         // Send notification for status change
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         // This function handles installment inquiries only (based on redirect URL)
         $inquiry_type = 'installment';
         if ($inquiry_type === 'installment') {
-            Maneli_Notification_Handler::notify_installment_status_change($post_id, $old_status, $final_status, 'inquiry_status');
+            Autopuzzle_Notification_Handler::notify_installment_status_change($post_id, $old_status, $final_status, 'inquiry_status');
         }
         
         // Send notification to the customer
@@ -100,7 +100,7 @@ class Maneli_Admin_Actions_Handler {
         
         $sms_pattern_id = $options[$sms_pattern_key] ?? 0;
         if ($sms_pattern_id > 0 && !empty($mobile_number)) {
-            $sms_handler = new Maneli_SMS_Handler();
+            $sms_handler = new Autopuzzle_SMS_Handler();
             $sms_handler->send_pattern($sms_pattern_id, $mobile_number, $sms_params);
         }
         
@@ -112,9 +112,9 @@ class Maneli_Admin_Actions_Handler {
      * Saves expert decision (status + optional note) for installment or cash inquiries.
      */
     public function handle_expert_update_decision() {
-        check_admin_referer('maneli_expert_update_decision');
-        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true))) {
-            wp_die(esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry'));
+        check_admin_referer('autopuzzle_expert_update_decision');
+        if (!is_user_logged_in() || !(current_user_can('manage_autopuzzle_inquiries') || in_array('autopuzzle_expert', wp_get_current_user()->roles, true))) {
+            wp_die(esc_html__('You do not have permission to perform this action.', 'autopuzzle'));
         }
 
         $post_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
@@ -123,13 +123,13 @@ class Maneli_Admin_Actions_Handler {
         $note    = isset($_POST['expert_note']) ? sanitize_textarea_field($_POST['expert_note']) : '';
 
         if (!$post_id) {
-            wp_die(esc_html__('Invalid request ID.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Invalid request ID.', 'autopuzzle'));
         }
         if ($type === 'cash' && get_post_type($post_id) !== 'cash_inquiry') {
-            wp_die(esc_html__('Invalid request ID.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Invalid request ID.', 'autopuzzle'));
         }
         if ($type !== 'cash' && get_post_type($post_id) !== 'inquiry') {
-            wp_die(esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Invalid inquiry ID.', 'autopuzzle'));
         }
 
         update_post_meta($post_id, 'expert_status', $status);
@@ -146,14 +146,14 @@ class Maneli_Admin_Actions_Handler {
      * Handles inquiry creation by an expert or admin from the frontend form.
      */
     public function handle_expert_create_inquiry() {
-        check_admin_referer('maneli_expert_create_nonce');
-        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles, true))) {
-            wp_die(esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry'));
+        check_admin_referer('autopuzzle_expert_create_nonce');
+        if (!is_user_logged_in() || !(current_user_can('manage_autopuzzle_inquiries') || in_array('autopuzzle_expert', wp_get_current_user()->roles, true))) {
+            wp_die(esc_html__('You do not have permission to perform this action.', 'autopuzzle'));
         }
         
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
         if (empty($product_id)) {
-            wp_die(esc_html__('Please select a car.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Please select a car.', 'autopuzzle'));
         }
         
         $base_redirect_url = wp_get_referer() ? esc_url_raw(wp_unslash(wp_get_referer())) : home_url('/dashboard/');
@@ -162,21 +162,21 @@ class Maneli_Admin_Actions_Handler {
         $required_fields = ['first_name', 'last_name', 'national_code', 'mobile_number', 'father_name', 'birth_date'];
         foreach($required_fields as $field) {
             if (empty($_POST[$field])) {
-                wp_die(sprintf(esc_html__('Error: The field "%s" for the buyer is required.', 'maneli-car-inquiry'), $field));
+                wp_die(sprintf(esc_html__('Error: The field "%s" for the buyer is required.', 'autopuzzle'), $field));
             }
         }
         
         // Validate National Code format and checksum
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
         $national_code = sanitize_text_field($_POST['national_code']);
-        if (!Maneli_Render_Helpers::validate_national_code($national_code)) {
-            wp_die(esc_html__('Error: Invalid national code format or checksum.', 'maneli-car-inquiry'));
+        if (!Autopuzzle_Render_Helpers::validate_national_code($national_code)) {
+            wp_die(esc_html__('Error: Invalid national code format or checksum.', 'autopuzzle'));
         }
         
         // Validate Mobile Number format
         $mobile_number = sanitize_text_field($_POST['mobile_number']);
-        if (!Maneli_Render_Helpers::validate_mobile_number($mobile_number)) {
-            wp_die(esc_html__('Error: Invalid mobile number format. Must be 11 digits starting with 09.', 'maneli-car-inquiry'));
+        if (!Autopuzzle_Render_Helpers::validate_mobile_number($mobile_number)) {
+            wp_die(esc_html__('Error: Invalid mobile number format. Must be 11 digits starting with 09.', 'autopuzzle'));
         }
         
         // 2. Validate Issuer Fields (if issuer_type is 'other')
@@ -185,13 +185,13 @@ class Maneli_Admin_Actions_Handler {
             $issuer_required_fields = ['issuer_national_code', 'issuer_birth_date', 'issuer_first_name', 'issuer_last_name'];
             foreach($issuer_required_fields as $field) {
                 if (empty($_POST[$field])) {
-                     wp_die(sprintf(esc_html__('Error: The field "%s" for the cheque issuer is required.', 'maneli-car-inquiry'), $field));
+                     wp_die(sprintf(esc_html__('Error: The field "%s" for the cheque issuer is required.', 'autopuzzle'), $field));
                 }
             }
             // Validate Issuer National Code
             $issuer_national_code = sanitize_text_field($_POST['issuer_national_code']);
-            if (!Maneli_Render_Helpers::validate_national_code($issuer_national_code)) {
-                wp_die(esc_html__('Error: Invalid issuer national code format or checksum.', 'maneli-car-inquiry'));
+            if (!Autopuzzle_Render_Helpers::validate_national_code($issuer_national_code)) {
+                wp_die(esc_html__('Error: Invalid issuer national code format or checksum.', 'autopuzzle'));
             }
         }
         $customer_id = username_exists($mobile_number);
@@ -204,7 +204,7 @@ class Maneli_Admin_Actions_Handler {
             $random_password = wp_generate_password(12, false);
             $customer_id = wp_create_user($mobile_number, $random_password, $dummy_email);
             if (is_wp_error($customer_id)) {
-                wp_die(esc_html__('Error creating new user: ', 'maneli-car-inquiry') . $customer_id->get_error_message());
+                wp_die(esc_html__('Error creating new user: ', 'autopuzzle') . $customer_id->get_error_message());
             }
             $is_new_user = true;
         }
@@ -217,17 +217,17 @@ class Maneli_Admin_Actions_Handler {
         }
 
         // Validate name fields length
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
         
         $first_name = sanitize_text_field($_POST['first_name']);
         $last_name = sanitize_text_field($_POST['last_name']);
         
-        $first_name_validation = Maneli_Render_Helpers::validate_name_field($first_name);
+        $first_name_validation = Autopuzzle_Render_Helpers::validate_name_field($first_name);
         if (!$first_name_validation['valid']) {
             wp_die($first_name_validation['error']);
         }
         
-        $last_name_validation = Maneli_Render_Helpers::validate_name_field($last_name);
+        $last_name_validation = Autopuzzle_Render_Helpers::validate_name_field($last_name);
         if (!$last_name_validation['valid']) {
             wp_die($last_name_validation['error']);
         }
@@ -247,13 +247,13 @@ class Maneli_Admin_Actions_Handler {
         try {
             $update_result = wp_update_user($user_update_data);
             if (is_wp_error($update_result)) {
-                wp_die(esc_html__('Error updating user data: ', 'maneli-car-inquiry') . $update_result->get_error_message());
+                wp_die(esc_html__('Error updating user data: ', 'autopuzzle') . $update_result->get_error_message());
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Failed to update user. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Failed to update user. Error: ' . $e->getMessage());
             }
-            wp_die(esc_html__('An error occurred while updating user information. Please try again.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('An error occurred while updating user information. Please try again.', 'autopuzzle'));
         }
         // --- END FIX ---
 
@@ -267,13 +267,13 @@ class Maneli_Admin_Actions_Handler {
             $this->update_customer_meta($customer_id, $_POST);
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Failed to update customer meta. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Failed to update customer meta. Error: ' . $e->getMessage());
             }
             // Continue execution - meta update failure is not critical
         }
         
         // --- Inquiry Creation Logic START ---
-        $inquiry_handler = new Maneli_Installment_Inquiry_Handler();
+        $inquiry_handler = new Autopuzzle_Installment_Inquiry_Handler();
         
         $national_code_for_api = ($issuer_type === 'other' && !empty($_POST['issuer_national_code']))
             ? sanitize_text_field($_POST['issuer_national_code'])
@@ -283,22 +283,22 @@ class Maneli_Admin_Actions_Handler {
         try {
             $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
             if (empty($finotex_result) || !is_array($finotex_result)) {
-                $finotex_result = ['status' => 'FAILED', 'data' => null, 'raw_response' => esc_html__('Unknown error', 'maneli-car-inquiry')];
+                $finotex_result = ['status' => 'FAILED', 'data' => null, 'raw_response' => esc_html__('Unknown error', 'autopuzzle')];
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Finotex inquiry failed. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Finotex inquiry failed. Error: ' . $e->getMessage());
             }
-            $finotex_result = ['status' => 'FAILED', 'data' => null, 'raw_response' => esc_html__('API error occurred', 'maneli-car-inquiry')];
+            $finotex_result = ['status' => 'FAILED', 'data' => null, 'raw_response' => esc_html__('API error occurred', 'autopuzzle')];
         }
         
         // Execute additional Finnotech APIs if enabled
-        $finnotech_handler = new Maneli_Finnotech_API_Handler();
+        $finnotech_handler = new Autopuzzle_Finnotech_API_Handler();
         try {
             $credit_risk_result = $finnotech_handler->execute_credit_risk_inquiry($national_code_for_api);
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Credit risk inquiry failed. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Credit risk inquiry failed. Error: ' . $e->getMessage());
             }
             $credit_risk_result = ['status' => 'FAILED', 'data' => null];
         }
@@ -307,7 +307,7 @@ class Maneli_Admin_Actions_Handler {
             $credit_score_result = $finnotech_handler->execute_credit_score_inquiry($national_code_for_api);
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Credit score inquiry failed. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Credit score inquiry failed. Error: ' . $e->getMessage());
             }
             $credit_score_result = ['status' => 'FAILED', 'data' => null];
         }
@@ -316,7 +316,7 @@ class Maneli_Admin_Actions_Handler {
             $collaterals_result = $finnotech_handler->execute_collaterals_inquiry($national_code_for_api);
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Collaterals inquiry failed. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Collaterals inquiry failed. Error: ' . $e->getMessage());
             }
             $collaterals_result = ['status' => 'FAILED', 'data' => null];
         }
@@ -325,7 +325,7 @@ class Maneli_Admin_Actions_Handler {
             $cheque_color_result = $finnotech_handler->execute_cheque_color_inquiry($national_code_for_api);
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Cheque color inquiry failed. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Cheque color inquiry failed. Error: ' . $e->getMessage());
             }
             $cheque_color_result = ['status' => 'FAILED', 'data' => null];
         }
@@ -341,14 +341,14 @@ class Maneli_Admin_Actions_Handler {
         $loan_amount = $total_price - $down_payment;
         
         // NEW: Use the centralized helper function
-        $installment_amount = Maneli_Render_Helpers::calculate_installment_amount($loan_amount, $term_months);
+        $installment_amount = Autopuzzle_Render_Helpers::calculate_installment_amount($loan_amount, $term_months);
 
         // 3. Prepare All Data for Post Meta
         $all_post_meta = $this->prepare_expert_inquiry_meta($_POST, $issuer_type, $product_id, $total_price, $down_payment, $term_months, $installment_amount);
         
         $post_title = sprintf(
             '%s: %s - %s',
-            esc_html__('Inquiry for', 'maneli-car-inquiry'),
+            esc_html__('Inquiry for', 'autopuzzle'),
             get_the_title($product_id),
             $all_post_meta['first_name'] . ' ' . $all_post_meta['last_name']
         );
@@ -368,13 +368,13 @@ class Maneli_Admin_Actions_Handler {
             }
             
             if (!$post_id || $post_id <= 0) {
-                throw new Exception(esc_html__('Post creation returned invalid ID.', 'maneli-car-inquiry'));
+                throw new Exception(esc_html__('Post creation returned invalid ID.', 'autopuzzle'));
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Failed to create inquiry post. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Failed to create inquiry post. Error: ' . $e->getMessage());
             }
-            wp_die(esc_html__('Error creating inquiry post. Please try again.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('Error creating inquiry post. Please try again.', 'autopuzzle'));
         }
 
         // 5. Save All Meta Data
@@ -430,8 +430,8 @@ class Maneli_Admin_Actions_Handler {
             update_post_meta($post_id, 'inquiry_status', 'user_confirmed');
             
             // Send notification for status change
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-            Maneli_Notification_Handler::notify_installment_status_change($post_id, $old_status, 'user_confirmed', 'inquiry_status');
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Autopuzzle_Notification_Handler::notify_installment_status_change($post_id, $old_status, 'user_confirmed', 'inquiry_status');
         }
 
         // 7. Cleanup temporary user meta
@@ -448,30 +448,30 @@ class Maneli_Admin_Actions_Handler {
      * Handles user profile updates from the frontend user management panel.
      */
     public function handle_admin_update_user_profile() {
-        check_admin_referer('maneli_admin_update_user', 'maneli_update_user_nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_die(esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry'));
+        check_admin_referer('autopuzzle_admin_update_user', 'autopuzzle_update_user_nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_die(esc_html__('You do not have permission to perform this action.', 'autopuzzle'));
         }
 
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         if (!$user_id) {
-            wp_die(esc_html__('User ID not specified.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('User ID not specified.', 'autopuzzle'));
         }
         
         if ($user_id === get_current_user_id() && isset($_POST['user_role'])) {
             $new_role = sanitize_key($_POST['user_role']);
-            if (!in_array($new_role, ['maneli_admin', 'administrator'], true)) {
-                 wp_die(esc_html__('You cannot change your own administrative role to a lower-level role.', 'maneli-car-inquiry'));
+            if (!in_array($new_role, ['autopuzzle_admin', 'administrator'], true)) {
+                 wp_die(esc_html__('You cannot change your own administrative role to a lower-level role.', 'autopuzzle'));
             }
         }
         
         // Validate name fields length
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
         
         $user_data = [ 'ID' => $user_id ];
         if (isset($_POST['first_name'])) {
             $first_name = sanitize_text_field($_POST['first_name']);
-            $first_name_validation = Maneli_Render_Helpers::validate_name_field($first_name);
+            $first_name_validation = Autopuzzle_Render_Helpers::validate_name_field($first_name);
             if (!$first_name_validation['valid']) {
                 wp_die($first_name_validation['error']);
             }
@@ -479,16 +479,16 @@ class Maneli_Admin_Actions_Handler {
         }
         if (isset($_POST['last_name'])) {
             $last_name = sanitize_text_field($_POST['last_name']);
-            $last_name_validation = Maneli_Render_Helpers::validate_name_field($last_name);
+            $last_name_validation = Autopuzzle_Render_Helpers::validate_name_field($last_name);
             if (!$last_name_validation['valid']) {
                 wp_die($last_name_validation['error']);
             }
             $user_data['last_name'] = $last_name;
         }
         if (isset($_POST['email']) && !empty($_POST['email'])) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
             $email = sanitize_email($_POST['email']);
-            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            $email_validation = Autopuzzle_Render_Helpers::validate_email_field($email);
             if (!$email_validation['valid']) {
                 wp_die($email_validation['error']);
             }
@@ -505,7 +505,7 @@ class Maneli_Admin_Actions_Handler {
 
         if (isset($_POST['user_role'])) {
             $new_role = sanitize_key($_POST['user_role']);
-            if (in_array($new_role, ['customer', 'maneli_expert', 'maneli_admin', 'administrator'], true)) {
+            if (in_array($new_role, ['customer', 'autopuzzle_expert', 'autopuzzle_admin', 'administrator'], true)) {
                 $current_user_obj = get_userdata($user_id);
                 $old_role = $current_user_obj ? (is_array($current_user_obj->roles) ? $current_user_obj->roles[0] : '') : '';
                 
@@ -513,11 +513,11 @@ class Maneli_Admin_Actions_Handler {
                     $user_data['role'] = $new_role;
                     
                     // Audit log: Record role change
-                    if (class_exists('Maneli_Logger')) {
-                        $logger = Maneli_Logger::instance();
+                    if (class_exists('Autopuzzle_Logger')) {
+                        $logger = Autopuzzle_Logger::instance();
                         $logger->log_user_action(
                             'change_role',
-                            sprintf(esc_html__('Changed user role from %s to %s', 'maneli-car-inquiry'), $old_role, $new_role),
+                            sprintf(esc_html__('Changed user role from %s to %s', 'autopuzzle'), $old_role, $new_role),
                             'user',
                             $user_id,
                             ['old_role' => $old_role, 'new_role' => $new_role, 'target_user_id' => $user_id]
@@ -530,13 +530,13 @@ class Maneli_Admin_Actions_Handler {
         try {
             $update_result = wp_update_user($user_data);
             if (is_wp_error($update_result)) {
-                wp_die(esc_html__('Error updating user: ', 'maneli-car-inquiry') . $update_result->get_error_message());
+                wp_die(esc_html__('Error updating user: ', 'autopuzzle') . $update_result->get_error_message());
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Failed to update user. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Failed to update user. Error: ' . $e->getMessage());
             }
-            wp_die(esc_html__('An error occurred while updating user. Please try again.', 'maneli-car-inquiry'));
+            wp_die(esc_html__('An error occurred while updating user. Please try again.', 'autopuzzle'));
         }
 
         $meta_fields = ['national_code', 'father_name', 'birth_date', 'mobile_number', 'first_name', 'last_name'];
@@ -556,9 +556,9 @@ class Maneli_Admin_Actions_Handler {
      * Handles new user creation from the frontend user management panel.
      */
     public function handle_admin_create_user() {
-        check_admin_referer('maneli_admin_create_user_nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_die(esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry'));
+        check_admin_referer('autopuzzle_admin_create_user_nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_die(esc_html__('You do not have permission to perform this action.', 'autopuzzle'));
         }
 
         $redirect_url = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url();
@@ -567,13 +567,13 @@ class Maneli_Admin_Actions_Handler {
         $password = isset($_POST['password']) ? trim($_POST['password']) : '';
 
         if (empty($mobile) || empty($password)) {
-            wp_redirect(add_query_arg('error', urlencode(esc_html__('Mobile number and password are required.', 'maneli-car-inquiry')), $redirect_url));
+            wp_redirect(add_query_arg('error', urlencode(esc_html__('Mobile number and password are required.', 'autopuzzle')), $redirect_url));
             exit;
         }
 
         // Validate password length (minimum 8 characters recommended)
         if (strlen($password) < 8) {
-            wp_redirect(add_query_arg('error', urlencode(esc_html__('Password must be at least 8 characters long.', 'maneli-car-inquiry')), $redirect_url));
+            wp_redirect(add_query_arg('error', urlencode(esc_html__('Password must be at least 8 characters long.', 'autopuzzle')), $redirect_url));
             exit;
         }
 
@@ -584,11 +584,11 @@ class Maneli_Admin_Actions_Handler {
         $email = $mobile . '@manelikhodro.com';
 
         if (username_exists($user_login)) {
-            wp_redirect(add_query_arg('error', urlencode(esc_html__('A user with this mobile number already exists.', 'maneli-car-inquiry')), $redirect_url));
+            wp_redirect(add_query_arg('error', urlencode(esc_html__('A user with this mobile number already exists.', 'autopuzzle')), $redirect_url));
             exit;
         }
         if (email_exists($email)) {
-             wp_redirect(add_query_arg('error', urlencode(esc_html__('An email associated with this mobile number already exists.', 'maneli-car-inquiry')), $redirect_url));
+             wp_redirect(add_query_arg('error', urlencode(esc_html__('An email associated with this mobile number already exists.', 'autopuzzle')), $redirect_url));
             exit;
         }
 
@@ -622,9 +622,9 @@ class Maneli_Admin_Actions_Handler {
      * Re-runs the Finotex API call for an inquiry where it previously failed or was skipped.
      */
     public function handle_admin_retry_finotex() {
-        check_admin_referer('maneli_retry_finotex_nonce');
-        if (!current_user_can('manage_maneli_inquiries') || empty($_POST['inquiry_id'])) {
-            wp_die(esc_html__('Invalid request or insufficient permissions.', 'maneli-car-inquiry'));
+        check_admin_referer('autopuzzle_retry_finotex_nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries') || empty($_POST['inquiry_id'])) {
+            wp_die(esc_html__('Invalid request or insufficient permissions.', 'autopuzzle'));
         }
 
         $post_id = intval($_POST['inquiry_id']);
@@ -632,12 +632,12 @@ class Maneli_Admin_Actions_Handler {
         $issuer_type = $post_meta['issuer_type'][0] ?? 'self';
         $national_code_for_api = ($issuer_type === 'other' && !empty($post_meta['issuer_national_code'][0])) ? $post_meta['issuer_national_code'][0] : ($post_meta['national_code'][0] ?? '');
         
-        $inquiry_handler = new Maneli_Installment_Inquiry_Handler();
+        $inquiry_handler = new Autopuzzle_Installment_Inquiry_Handler();
         // Handler now manages decryption internally
         $finotex_result = $inquiry_handler->execute_finotex_inquiry($national_code_for_api);
 
         // Retry additional Finnotech APIs
-        $finnotech_handler = new Maneli_Finnotech_API_Handler();
+        $finnotech_handler = new Autopuzzle_Finnotech_API_Handler();
         $credit_risk_result = $finnotech_handler->execute_credit_risk_inquiry($national_code_for_api);
         $credit_score_result = $finnotech_handler->execute_credit_score_inquiry($national_code_for_api);
         $collaterals_result = $finnotech_handler->execute_collaterals_inquiry($national_code_for_api);
@@ -669,8 +669,8 @@ class Maneli_Admin_Actions_Handler {
         update_post_meta($post_id, 'inquiry_status', $new_status);
         
         // Send notification for status change
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_installment_status_change($post_id, $old_status, $new_status, 'inquiry_status');
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_installment_status_change($post_id, $old_status, $new_status, 'inquiry_status');
 
         wp_redirect(add_query_arg('inquiry_id', $post_id, home_url('/dashboard/installment-inquiries')));
         exit;
@@ -681,12 +681,12 @@ class Maneli_Admin_Actions_Handler {
      */
     public function assign_expert_to_post($post_id, $expert_id_str, $inquiry_type) {
         if ('auto' === $expert_id_str) {
-            $option_key = ($inquiry_type === 'cash') ? 'maneli_cash_expert_last_assigned_index' : 'maneli_expert_last_assigned_index';
-            // Only consider users with the 'maneli_expert' role
-            $expert_users = get_users(['role' => 'maneli_expert', 'orderby' => 'ID', 'order' => 'ASC']);
+            $option_key = ($inquiry_type === 'cash') ? 'autopuzzle_cash_expert_last_assigned_index' : 'autopuzzle_expert_last_assigned_index';
+            // Only consider users with the 'autopuzzle_expert' role
+            $expert_users = get_users(['role' => 'autopuzzle_expert', 'orderby' => 'ID', 'order' => 'ASC']);
             
             if (empty($expert_users)) {
-                return new WP_Error('no_experts', esc_html__('No experts found for automatic assignment.', 'maneli-car-inquiry'));
+                return new WP_Error('no_experts', esc_html__('No experts found for automatic assignment.', 'autopuzzle'));
             }
             $last_index = get_option($option_key, -1);
             $next_index = ($last_index + 1) % count($expert_users);
@@ -694,8 +694,8 @@ class Maneli_Admin_Actions_Handler {
             update_option($option_key, $next_index);
         } else {
             $expert_user = get_userdata(intval($expert_id_str));
-            if (!$expert_user || !in_array('maneli_expert', $expert_user->roles, true)) {
-                return new WP_Error('invalid_expert', esc_html__('The selected expert is not valid.', 'maneli-car-inquiry'));
+            if (!$expert_user || !in_array('autopuzzle_expert', $expert_user->roles, true)) {
+                return new WP_Error('invalid_expert', esc_html__('The selected expert is not valid.', 'autopuzzle'));
             }
             $assigned_expert_id = $expert_user->ID;
         }
@@ -707,8 +707,8 @@ class Maneli_Admin_Actions_Handler {
         $this->notify_expert_of_assignment($post_id, $assigned_expert_id, $inquiry_type);
         
         // Send notification using the helper method (notifies both expert and customer)
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_expert_assigned($post_id, $assigned_expert_id);
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_expert_assigned($post_id, $assigned_expert_id);
         
         return ['id' => $assigned_expert_id, 'name' => $expert_info->display_name];
     }
@@ -717,7 +717,7 @@ class Maneli_Admin_Actions_Handler {
      * Helper method to send SMS notification to an expert.
      */
     private function notify_expert_of_assignment($post_id, $expert_id, $inquiry_type) {
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $expert_phone = get_user_meta($expert_id, 'mobile_number', true);
         
         if ($inquiry_type === 'cash') {
@@ -736,7 +736,7 @@ class Maneli_Admin_Actions_Handler {
             $car_name = get_the_title(get_post_meta($post_id, 'product_id', true));
             $params = [(string)$expert_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
             
-            (new Maneli_SMS_Handler())->send_pattern($pattern_id, $expert_phone, $params);
+            (new Autopuzzle_SMS_Handler())->send_pattern($pattern_id, $expert_phone, $params);
         }
     }
 
@@ -765,10 +765,10 @@ class Maneli_Admin_Actions_Handler {
         $meta_map = [
             'product_id'                 => $product_id,
             'issuer_type'                => $issuer_type,
-            'maneli_inquiry_total_price' => $total_price,
-            'maneli_inquiry_down_payment' => $down_payment,
-            'maneli_inquiry_term_months' => $term_months,
-            'maneli_inquiry_installment' => $installment_amount,
+            'autopuzzle_inquiry_total_price' => $total_price,
+            'autopuzzle_inquiry_down_payment' => $down_payment,
+            'autopuzzle_inquiry_term_months' => $term_months,
+            'autopuzzle_inquiry_installment' => $installment_amount,
 
             // Applicant Fields (Buyer)
             'first_name'                 => sanitize_text_field($post_data['first_name'] ?? ''),
@@ -821,12 +821,12 @@ class Maneli_Admin_Actions_Handler {
      */
     private function cleanup_user_meta($user_id) {
         $keys_to_delete = [
-            'maneli_inquiry_down_payment', 
-            'maneli_inquiry_term_months',
-            'maneli_inquiry_total_price',
-            'maneli_inquiry_step', 
-            'maneli_selected_car_id', 
-            'maneli_temp_inquiry_data'
+            'autopuzzle_inquiry_down_payment', 
+            'autopuzzle_inquiry_term_months',
+            'autopuzzle_inquiry_total_price',
+            'autopuzzle_inquiry_step', 
+            'autopuzzle_selected_car_id', 
+            'autopuzzle_temp_inquiry_data'
         ];
         foreach ($keys_to_delete as $key) {
             delete_user_meta($user_id, $key);

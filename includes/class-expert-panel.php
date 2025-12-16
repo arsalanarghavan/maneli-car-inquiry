@@ -3,7 +3,7 @@
  * Handles AJAX functionality for the Expert Panel, specifically for searching products
  * and localizing assets with the configurable loan interest rate.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.2 (Added Localization for Expert Panel JS strings)
  */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Expert_Panel {
+class Autopuzzle_Expert_Panel {
 
     public function __construct() {
         add_action('wp_ajax_maneli_search_cars', [$this, 'handle_car_search_ajax']);
@@ -32,16 +32,16 @@ class Maneli_Expert_Panel {
         
         // Check if user is admin or expert
         $current_user = wp_get_current_user();
-        $is_admin = current_user_can('manage_maneli_inquiries');
-        $is_expert = in_array('maneli_expert', $current_user->roles);
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
+        $is_expert = in_array('autopuzzle_expert', $current_user->roles);
         
         if (!$is_admin && !$is_expert) {
             return;
         }
         
         $datepicker_loaded = false;
-        if (function_exists('maneli_enqueue_persian_datepicker')) {
-            $datepicker_loaded = maneli_enqueue_persian_datepicker();
+        if (function_exists('autopuzzle_enqueue_persian_datepicker')) {
+            $datepicker_loaded = autopuzzle_enqueue_persian_datepicker();
         }
         
         // Don't load on product pages - only on dashboard/inquiry pages
@@ -50,53 +50,53 @@ class Maneli_Expert_Panel {
         }
         
         // Enqueue the expert panel JavaScript file - check if file exists first
-        $expert_panel_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/expert-panel.js';
+        $expert_panel_js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/expert-panel.js';
         if (!file_exists($expert_panel_js_path)) {
             return; // File doesn't exist, skip enqueue
         }
         
         $expert_panel_deps = ['jquery', 'select2'];
         if ($datepicker_loaded) {
-            $expert_panel_deps[] = 'maneli-persian-datepicker';
+            $expert_panel_deps[] = 'autopuzzle-persian-datepicker';
         }
 
         wp_enqueue_script(
-            'maneli-expert-panel-js',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js',
+            'autopuzzle-expert-panel-js',
+            AUTOPUZZLE_PLUGIN_URL . 'assets/js/expert-panel.js',
             $expert_panel_deps,
             filemtime($expert_panel_js_path),
             true
         );
         
         // Fetch configurable interest rate
-        $interest_rate = floatval(Maneli_Options_Helper::get_option('loan_interest_rate', 0.035)); 
+        $interest_rate = floatval(Autopuzzle_Options_Helper::get_option('loan_interest_rate', 0.035)); 
         
         // Localize the script with necessary data
-        wp_localize_script('maneli-expert-panel-js', 'maneli_expert_ajax', [
+        wp_localize_script('autopuzzle-expert-panel-js', 'autopuzzle_expert_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('maneli_expert_car_search_nonce'),
+            'nonce'    => wp_create_nonce('autopuzzle_expert_car_search_nonce'),
             'interestRate' => $interest_rate, // Pass the monthly rate
             'text'     => [
-                'car_search_placeholder' => esc_html__('Search for a car name...', 'maneli-car-inquiry'),
-                'down_payment_label'     => esc_html__('Down Payment Amount (Toman)', 'maneli-car-inquiry'),
-                'min_down_payment_desc'  => esc_html__('Minimum recommended down payment:', 'maneli-car-inquiry'),
-                'term_months_label'      => esc_html__('Repayment Period (Months)', 'maneli-car-inquiry'),
-                'loan_amount_label'      => esc_html__('Total Loan Amount', 'maneli-car-inquiry'),
-                'total_repayment_label'  => esc_html__('Total Repayment Amount', 'maneli-car-inquiry'),
-                'installment_amount_label' => esc_html__('Approximate Installment Amount', 'maneli-car-inquiry'),
-                'toman'                  => esc_html__('Toman', 'maneli-car-inquiry'),
-                'term_12'                => esc_html__('12 Months', 'maneli-car-inquiry'),
-                'term_18'                => esc_html__('18 Months', 'maneli-car-inquiry'),
-                'term_24'                => esc_html__('24 Months', 'maneli-car-inquiry'),
-                'term_36'                => esc_html__('36 Months', 'maneli-car-inquiry'),
-                'server_error'           => esc_html__('Server error:', 'maneli-car-inquiry'),
-                'unknown_error'          => esc_html__('Unknown error', 'maneli-car-inquiry'),
-                'datepicker_placeholder' => esc_html__('e.g., 1365/04/15', 'maneli-car-inquiry'),
-                'search_placeholder'     => esc_html__('Start typing to search for a car... (minimum 2 characters)', 'maneli-car-inquiry'),
-                'input_too_short'        => esc_html__('Please enter at least 2 characters...', 'maneli-car-inquiry'),
-                'searching'              => esc_html__('Searching...', 'maneli-car-inquiry'),
-                'no_results'             => esc_html__('No car found', 'maneli-car-inquiry'),
-                'loading_more'           => esc_html__('Loading more...', 'maneli-car-inquiry'),
+                'car_search_placeholder' => esc_html__('Search for a car name...', 'autopuzzle'),
+                'down_payment_label'     => esc_html__('Down Payment Amount (Toman)', 'autopuzzle'),
+                'min_down_payment_desc'  => esc_html__('Minimum recommended down payment:', 'autopuzzle'),
+                'term_months_label'      => esc_html__('Repayment Period (Months)', 'autopuzzle'),
+                'loan_amount_label'      => esc_html__('Total Loan Amount', 'autopuzzle'),
+                'total_repayment_label'  => esc_html__('Total Repayment Amount', 'autopuzzle'),
+                'installment_amount_label' => esc_html__('Approximate Installment Amount', 'autopuzzle'),
+                'toman'                  => esc_html__('Toman', 'autopuzzle'),
+                'term_12'                => esc_html__('12 Months', 'autopuzzle'),
+                'term_18'                => esc_html__('18 Months', 'autopuzzle'),
+                'term_24'                => esc_html__('24 Months', 'autopuzzle'),
+                'term_36'                => esc_html__('36 Months', 'autopuzzle'),
+                'server_error'           => esc_html__('Server error:', 'autopuzzle'),
+                'unknown_error'          => esc_html__('Unknown error', 'autopuzzle'),
+                'datepicker_placeholder' => esc_html__('e.g., 1365/04/15', 'autopuzzle'),
+                'search_placeholder'     => esc_html__('Start typing to search for a car... (minimum 2 characters)', 'autopuzzle'),
+                'input_too_short'        => esc_html__('Please enter at least 2 characters...', 'autopuzzle'),
+                'searching'              => esc_html__('Searching...', 'autopuzzle'),
+                'no_results'             => esc_html__('No car found', 'autopuzzle'),
+                'loading_more'           => esc_html__('Loading more...', 'autopuzzle'),
             ]
         ]);
     }
@@ -107,9 +107,9 @@ class Maneli_Expert_Panel {
      */
     public function handle_car_search_ajax() {
         // 1. Security Check: Verify the AJAX nonce.
-        if (!check_ajax_referer('maneli_expert_car_search_nonce', 'nonce', false)) {
+        if (!check_ajax_referer('autopuzzle_expert_car_search_nonce', 'nonce', false)) {
             wp_send_json_error(
-                ['message' => esc_html__('Security check failed. Please refresh the page and try again.', 'maneli-car-inquiry')],
+                ['message' => esc_html__('Security check failed. Please refresh the page and try again.', 'autopuzzle')],
                 403
             );
             return;
@@ -118,7 +118,7 @@ class Maneli_Expert_Panel {
         // 2. Permission Check: Ensure the user is logged in
         if (!is_user_logged_in()) {
             wp_send_json_error(
-                ['message' => esc_html__('You must be logged in to perform this action.', 'maneli-car-inquiry')],
+                ['message' => esc_html__('You must be logged in to perform this action.', 'autopuzzle')],
                 403
             );
             return;
@@ -137,7 +137,7 @@ class Maneli_Expert_Panel {
         // 4. Database Query: Directly query the database for published products matching the title.
         // Exclude disabled products for non-admin users
         $admin_query = '';
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             $admin_query = " AND NOT EXISTS (
                 SELECT 1 FROM {$wpdb->postmeta} pm 
                 WHERE pm.post_id = {$wpdb->posts}.ID 

@@ -2,7 +2,7 @@
  * Visitor Statistics Styles
  * استایل‌های صفحه آمار بازدیدکنندگان
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 /* Visitor Statistics Page */
@@ -71,16 +71,16 @@
     color: #718096;
 }
 
-.visitor-statistics-page .maneli-stat-card .card-body {
+.visitor-statistics-page .autopuzzle-stat-card .card-body {
     padding: 1.5rem;
 }
 
-.visitor-statistics-page .maneli-stat-card .maneli-stat-value {
+.visitor-statistics-page .autopuzzle-stat-card .autopuzzle-stat-value {
     font-size: 1.75rem;
     color: #1a202c;
 }
 
-.visitor-statistics-page .maneli-stat-card .text-muted {
+.visitor-statistics-page .autopuzzle-stat-card .text-muted {
     font-size: 0.9rem;
 }
 
@@ -197,7 +197,7 @@
     opacity: 0.5;
 }
 
-.maneli-emoji-flag {
+.autopuzzle-emoji-flag {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -206,11 +206,11 @@
     vertical-align: middle;
 }
 
-html[dir="rtl"] .maneli-emoji-flag {
+html[dir="rtl"] .autopuzzle-emoji-flag {
     margin-left: 0.5rem;
 }
 
-html:not([dir="rtl"]) .maneli-emoji-flag {
+html:not([dir="rtl"]) .autopuzzle-emoji-flag {
     margin-right: 0.5rem;
 }
 

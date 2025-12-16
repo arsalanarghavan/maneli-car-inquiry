@@ -3,7 +3,7 @@
  * Wizard Step 1: Selected Car Summary
  * استایل ویزارد - خلاصه خودرو انتخاب شده
  * 
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryForm/Wizard
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/InquiryForm/Wizard
  * @version 2.0.0
  * 
  * @var array $car_data Array containing car information
@@ -23,18 +23,18 @@ $term_months = $car_data['term_months'] ?? '';
 $total_price = $car_data['total_price'] ?? '';
 $installment_amount = $car_data['installment_amount'] ?? '';
 
-$options = get_option('maneli_inquiry_all_options', []);
-$price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe market fluctuations, car prices are approximate and may change until final confirmation.', 'maneli-car-inquiry');
+$options = get_option('autopuzzle_inquiry_all_options', []);
+$price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe market fluctuations, car prices are approximate and may change until final confirmation.', 'autopuzzle');
 ?>
 
-<h6 class="mb-3"><?php esc_html_e('Selected Car Summary:', 'maneli-car-inquiry'); ?></h6>
+<h6 class="mb-3"><?php esc_html_e('Selected Car Summary:', 'autopuzzle'); ?></h6>
 
 <!-- Selected Car Card -->
 <div class="card border mb-4">
     <div class="card-header bg-light">
         <h6 class="card-title mb-0">
             <i class="la la-check-circle text-success me-2"></i>
-            <?php esc_html_e('Your Selected Car', 'maneli-car-inquiry'); ?>
+            <?php esc_html_e('Your Selected Car', 'autopuzzle'); ?>
         </h6>
     </div>
     <div class="card-body">
@@ -56,27 +56,27 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
                         <div class="border rounded p-3 bg-success-transparent">
                             <div class="text-muted fs-12 mb-1">
                                 <i class="la la-money-bill me-1"></i>
-                                <?php esc_html_e('Down Payment', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Down Payment', 'autopuzzle'); ?>
                             </div>
-                            <strong class="fs-16 text-success"><?php echo number_format_i18n((int)$down_payment); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></strong>
+                            <strong class="fs-16 text-success"><?php echo number_format_i18n((int)$down_payment); ?> <?php esc_html_e('Toman', 'autopuzzle'); ?></strong>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="border rounded p-3 bg-info-transparent">
                             <div class="text-muted fs-12 mb-1">
                                 <i class="la la-calendar me-1"></i>
-                                <?php esc_html_e('Installment Period', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Installment Period', 'autopuzzle'); ?>
                             </div>
-                            <strong class="fs-16 text-info"><?php echo esc_html($term_months); ?> <?php esc_html_e('Months', 'maneli-car-inquiry'); ?></strong>
+                            <strong class="fs-16 text-info"><?php echo esc_html($term_months); ?> <?php esc_html_e('Months', 'autopuzzle'); ?></strong>
                         </div>
                     </div>
                     <div class="col-md-12">
                         <div class="border rounded p-3 bg-warning-transparent">
                             <div class="text-muted fs-12 mb-1">
                                 <i class="la la-calculator me-1"></i>
-                                <?php esc_html_e('Approximate Monthly Installment', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Approximate Monthly Installment', 'autopuzzle'); ?>
                             </div>
-                            <strong class="fs-18 text-warning"><?php echo number_format_i18n((int)$installment_amount); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></strong>
+                            <strong class="fs-18 text-warning"><?php echo number_format_i18n((int)$installment_amount); ?> <?php esc_html_e('Toman', 'autopuzzle'); ?></strong>
                         </div>
                     </div>
                 </div>
@@ -92,6 +92,6 @@ $price_msg = $options['msg_price_disclaimer'] ?? esc_html__('Due to severe marke
 
 <div class="alert alert-info">
     <i class="la la-arrow-right me-2"></i>
-    <?php esc_html_e('Please proceed to the next step to complete your information.', 'maneli-car-inquiry'); ?>
+    <?php esc_html_e('Please proceed to the next step to complete your information.', 'autopuzzle'); ?>
 </div>
 

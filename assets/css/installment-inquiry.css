@@ -5,7 +5,7 @@
  */
 
 /* === Form Container === */
-.maneli-inquiry-form {
+.autopuzzle-inquiry-form {
     max-width: 800px;
     margin: 30px auto;
     background: #fff;
@@ -15,22 +15,22 @@
 }
 
 /* === Form Fields === */
-.maneli-inquiry-form .form-group {
+.autopuzzle-inquiry-form .form-group {
     margin-bottom: 20px;
 }
 
-.maneli-inquiry-form label {
+.autopuzzle-inquiry-form label {
     display: block;
     font-weight: 600;
     margin-bottom: 8px;
     color: #555;
 }
 
-.maneli-inquiry-form input[type="text"],
-.maneli-inquiry-form input[type="tel"],
-.maneli-inquiry-form input[type="number"],
-.maneli-inquiry-form select,
-.maneli-inquiry-form textarea {
+.autopuzzle-inquiry-form input[type="text"],
+.autopuzzle-inquiry-form input[type="tel"],
+.autopuzzle-inquiry-form input[type="number"],
+.autopuzzle-inquiry-form select,
+.autopuzzle-inquiry-form textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid #ddd;
@@ -39,20 +39,20 @@
     transition: border-color 0.3s;
 }
 
-.maneli-inquiry-form input:focus,
-.maneli-inquiry-form select:focus,
-.maneli-inquiry-form textarea:focus {
+.autopuzzle-inquiry-form input:focus,
+.autopuzzle-inquiry-form select:focus,
+.autopuzzle-inquiry-form textarea:focus {
     border-color: #3989BE;
     outline: none;
 }
 
 /* === Form Grid === */
-.maneli-inquiry-form .form-grid {
+.autopuzzle-inquiry-form .form-grid {
     display: grid;
     gap: 20px;
 }
 
-.maneli-inquiry-form .form-row {
+.autopuzzle-inquiry-form .form-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
@@ -100,7 +100,7 @@
 
 /* === Responsive === */
 @media (max-width: 768px) {
-    .maneli-inquiry-form .form-row {
+    .autopuzzle-inquiry-form .form-row {
         grid-template-columns: 1fr;
     }
 }

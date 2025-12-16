@@ -62,8 +62,8 @@
 
     // Perform AJAX search
     function performSearch(query) {
-        if (!window.maneli_ajax || !window.maneli_ajax.url) {
-            console.error('Maneli AJAX configuration not found');
+        if (!window.autopuzzle_ajax || !window.autopuzzle_ajax.url) {
+            console.error('AutoPuzzle AJAX configuration not found');
             return;
         }
 
@@ -75,12 +75,12 @@
         showResults();
 
         $.ajax({
-            url: window.maneli_ajax.url,
+            url: window.autopuzzle_ajax.url,
             type: 'POST',
             data: {
-                action: 'maneli_global_search',
+                action: 'autopuzzle_global_search',
                 query: query,
-                nonce: window.maneli_ajax.nonce
+                nonce: window.autopuzzle_ajax.nonce
             },
             success: function(response) {
                 if (response.success && response.data) {
@@ -218,8 +218,8 @@
 
     // Initialize when DOM is ready
     $(document).ready(function() {
-        // Wait for jQuery and maneli_ajax to be available
-        if (typeof jQuery !== 'undefined' && window.maneli_ajax) {
+        // Wait for jQuery and autopuzzle_ajax to be available
+        if (typeof jQuery !== 'undefined' && window.autopuzzle_ajax) {
             initGlobalSearch();
         } else {
             // Retry if not ready

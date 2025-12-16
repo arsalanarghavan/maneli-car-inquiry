@@ -3,7 +3,7 @@
  * 
  * Updates notification icon badge and dropdown in the dashboard header
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 (function($) {
@@ -15,11 +15,11 @@
         updateInterval: 30000, // 30 seconds
         
         init: function() {
-            this.ajaxUrl = typeof maneli_ajax !== 'undefined' ? maneli_ajax.url : '';
-            this.nonce = typeof maneli_ajax !== 'undefined' ? maneli_ajax.notifications_nonce : '';
+            this.ajaxUrl = typeof autopuzzle_ajax !== 'undefined' ? autopuzzle_ajax.url : '';
+            this.nonce = typeof autopuzzle_ajax !== 'undefined' ? autopuzzle_ajax.notifications_nonce : '';
             
             if (!this.ajaxUrl || !this.nonce) {
-                console.warn('Maneli Notifications: AJAX configuration not found');
+                console.warn('AutoPuzzle Notifications: AJAX configuration not found');
                 return;
             }
             
@@ -38,7 +38,7 @@
                 url: this.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_unread_count',
+                    action: 'autopuzzle_get_unread_count',
                     nonce: this.nonce
                 },
                 success: function(response) {
@@ -51,7 +51,7 @@
                             $badge
                                 .text('')
                                 .removeAttr('data-count')
-                                .removeClass('maneli-initially-hidden')
+                                .removeClass('autopuzzle-initially-hidden')
                                 .show();
                             if ($badgeLabel.length) {
                                 var template = $badgeLabel.data('template') || '%s unread';
@@ -61,7 +61,7 @@
                             $badge
                                 .text('')
                                 .removeAttr('data-count')
-                                .addClass('maneli-initially-hidden')
+                                .addClass('autopuzzle-initially-hidden')
                                 .hide();
                             if ($badgeLabel.length) {
                                 var emptyText = $badgeLabel.data('empty') || '';
@@ -71,7 +71,7 @@
                     }
                 },
                 error: function() {
-                    console.warn('Maneli Notifications: Failed to load unread count');
+                    console.warn('AutoPuzzle Notifications: Failed to load unread count');
                 }
             });
         },
@@ -81,7 +81,7 @@
                 url: this.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_notifications',
+                    action: 'autopuzzle_get_notifications',
                     nonce: this.nonce,
                     limit: 5,
                     offset: 0
@@ -92,7 +92,7 @@
                     }
                 },
                 error: function() {
-                    console.warn('Maneli Notifications: Failed to load header notifications');
+                    console.warn('AutoPuzzle Notifications: Failed to load header notifications');
                 }
             });
         },
@@ -174,7 +174,7 @@
                     url: self.ajaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'maneli_mark_notification_read',
+                        action: 'autopuzzle_mark_notification_read',
                         nonce: self.nonce,
                         notification_id: notificationId
                     },

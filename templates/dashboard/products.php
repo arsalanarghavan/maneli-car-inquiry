@@ -8,7 +8,7 @@
 // Helper function to convert numbers to Persian
 if (!function_exists('persian_numbers')) {
     function persian_numbers($str) {
-        if (function_exists('maneli_should_use_persian_digits') && !maneli_should_use_persian_digits()) {
+        if (function_exists('autopuzzle_should_use_persian_digits') && !autopuzzle_should_use_persian_digits()) {
             return (string) $str;
         }
         $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -18,7 +18,7 @@ if (!function_exists('persian_numbers')) {
 }
 
 // Permission check - Only Admin can access
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
@@ -38,7 +38,7 @@ $filter_category = isset($_GET['filter_category']) ? absint($_GET['filter_catego
 $filter_price = isset($_GET['filter_price']) ? sanitize_text_field($_GET['filter_price']) : '';
 
 // Get products - Include all statuses including disabled products for admin
-// Note: The hooks check for is_admin() OR current_user_can('manage_maneli_inquiries')
+// Note: The hooks check for is_admin() OR current_user_can('manage_autopuzzle_inquiries')
 // Since we're in dashboard (frontend), we check user capability, so filters should not run
 // But to be safe, we'll use WP_Query directly to get ALL products
 
@@ -65,7 +65,7 @@ if (!empty($search)) {
 // Status filter (car_status meta)
 if (!empty($filter_status)) {
     $query_args['meta_query'][] = [
-        'key' => '_maneli_car_status',
+        'key' => '_autopuzzle_car_status',
         'value' => $filter_status,
         'compare' => '='
     ];
@@ -141,7 +141,7 @@ if (!empty($filter_brand)) {
         $brand_meta_clauses = [];
         foreach ($brand_meta_candidates as $brand_candidate) {
             $brand_meta_clauses[] = [
-                'key' => '_maneli_car_brand',
+                'key' => '_autopuzzle_car_brand',
                 'value' => $brand_candidate,
                 'compare' => 'LIKE'
             ];
@@ -291,7 +291,7 @@ $installment_unavailable_count = 0; // محصولات با قیمت اقساطی
 
 foreach ($all_products as $product) {
     $product_id = $product->get_id();
-    $car_status = get_post_meta($product_id, '_maneli_car_status', true);
+    $car_status = get_post_meta($product_id, '_autopuzzle_car_status', true);
     
     // Get prices
     $cash_price = $product->get_regular_price();
@@ -377,7 +377,7 @@ global $wpdb;
 $meta_brands = $wpdb->get_col("
     SELECT DISTINCT meta_value 
     FROM {$wpdb->postmeta} 
-    WHERE meta_key = '_maneli_car_brand' 
+    WHERE meta_key = '_autopuzzle_car_brand' 
     AND meta_value != '' 
     ORDER BY meta_value ASC
 ");
@@ -540,11 +540,11 @@ $product_categories = get_terms([
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Products Management', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Products Management', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Products Management', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Products Management', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- Page Header Close -->
@@ -552,9 +552,9 @@ $product_categories = get_terms([
 <div class="row">
     <div class="col-xl-12">
         <!-- آمار محصولات -->
-        <div class="row mb-4 product-stats-cards maneli-mobile-card-scroll">
+        <div class="row mb-4 product-stats-cards autopuzzle-mobile-card-scroll">
             <!-- کارت مجموع محصولات -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 autopuzzle-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -564,17 +564,17 @@ $product_categories = get_terms([
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Products', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Products', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($published_count)); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- کارت محصولات فعال برای فروش -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 autopuzzle-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -584,17 +584,17 @@ $product_categories = get_terms([
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Active for Sale', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Active for Sale', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($active_count)); ?></h4>
-                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Available', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Available', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- کارت نقدی ناموجود -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 autopuzzle-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -604,17 +604,17 @@ $product_categories = get_terms([
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Unavailable', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Unavailable', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($cash_unavailable_count)); ?></h4>
-                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Cash Price Missing', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Cash Price Missing', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- کارت اقساطی ناموجود -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 autopuzzle-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -624,17 +624,17 @@ $product_categories = get_terms([
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Unavailable', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Unavailable', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($installment_unavailable_count)); ?></h4>
-                            <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Installment Price Missing', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Installment Price Missing', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- کارت محصولات مخفی -->
-            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 maneli-mobile-card">
+            <div class="col-xl col-lg-6 col-md-6 col-sm-12 mb-3 autopuzzle-mobile-card">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -644,10 +644,10 @@ $product_categories = get_terms([
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Hidden Products', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Hidden Products', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($disabled_count)); ?></h4>
-                            <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Hidden', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Hidden', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -658,59 +658,59 @@ $product_categories = get_terms([
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div class="card-title">
                     <i class="la la-edit me-2"></i>
-                    <?php esc_html_e('Edit Product Prices & Status', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Edit Product Prices & Status', 'autopuzzle'); ?>
                 </div>
                 <a href="<?php echo home_url('/dashboard/add-product'); ?>" class="btn btn-primary btn-wave">
                     <i class="la la-plus me-1"></i>
-                    <?php esc_html_e('New Product', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('New Product', 'autopuzzle'); ?>
                 </a>
             </div>
             <div class="card-body">
                 <div class="row mb-3">
                     <div class="col-md-12">
-                        <div class="maneli-mobile-filter" data-maneli-mobile-filter>
+                        <div class="autopuzzle-mobile-filter" data-autopuzzle-mobile-filter>
                             <button
                                 type="button"
-                                class="maneli-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
-                                data-maneli-filter-toggle
+                                class="autopuzzle-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
+                                data-autopuzzle-filter-toggle
                                 aria-expanded="false"
                             >
-                                <span class="fw-semibold"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></span>
-                                <i class="ri-arrow-down-s-line maneli-mobile-filter-arrow"></i>
+                                <span class="fw-semibold"><?php esc_html_e('Filters', 'autopuzzle'); ?></span>
+                                <i class="ri-arrow-down-s-line autopuzzle-mobile-filter-arrow"></i>
                             </button>
-                            <div class="maneli-mobile-filter-body" data-maneli-filter-body>
+                            <div class="autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                         <form method="get" action="" id="product-filter-form">
                             <input type="hidden" name="page" value="products">
                             
                             <!-- Search Row - Full Width -->
                             <div class="mb-3">
-                                <label for="product-search-input" class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
+                                <label for="product-search-input" class="form-label"><?php esc_html_e('Search', 'autopuzzle'); ?></label>
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="la la-search"></i>
                                     </span>
-                                    <input type="search" name="search" id="product-search-input" class="form-control" placeholder="<?php esc_attr_e('Search car name...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
+                                    <input type="search" name="search" id="product-search-input" class="form-control" placeholder="<?php esc_attr_e('Search car name...', 'autopuzzle'); ?>" value="<?php echo esc_attr($search); ?>">
                                 </div>
                             </div>
                             
                             <!-- Filters Row - Full Width in One Line -->
-                            <div class="row g-3 align-items-end maneli-desktop-filter-row">
+                            <div class="row g-3 align-items-end autopuzzle-desktop-filter-row">
                                 <!-- Status Filter -->
                                 <div class="col-6 col-lg-2">
-                                    <label for="filter_status" class="form-label"><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></label>
+                                    <label for="filter_status" class="form-label"><?php esc_html_e('Status', 'autopuzzle'); ?></label>
                                     <select name="filter_status" id="filter_status" class="form-control form-select">
-                                        <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                                        <option value="special_sale" <?php selected($filter_status, 'special_sale'); ?>><?php esc_html_e('Active for Sale', 'maneli-car-inquiry'); ?></option>
-                                        <option value="unavailable" <?php selected($filter_status, 'unavailable'); ?>><?php esc_html_e('Unavailable', 'maneli-car-inquiry'); ?></option>
-                                        <option value="disabled" <?php selected($filter_status, 'disabled'); ?>><?php esc_html_e('Hidden', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Statuses', 'autopuzzle'); ?></option>
+                                        <option value="special_sale" <?php selected($filter_status, 'special_sale'); ?>><?php esc_html_e('Active for Sale', 'autopuzzle'); ?></option>
+                                        <option value="unavailable" <?php selected($filter_status, 'unavailable'); ?>><?php esc_html_e('Unavailable', 'autopuzzle'); ?></option>
+                                        <option value="disabled" <?php selected($filter_status, 'disabled'); ?>><?php esc_html_e('Hidden', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 
                                 <!-- Brand Filter -->
                                 <div class="col-6 col-lg-2">
-                                    <label for="filter_brand" class="form-label"><?php esc_html_e('Brand', 'maneli-car-inquiry'); ?></label>
+                                    <label for="filter_brand" class="form-label"><?php esc_html_e('Brand', 'autopuzzle'); ?></label>
                                     <select name="filter_brand" id="filter_brand" class="form-control form-select">
-                                        <option value=""><?php esc_html_e('All Brands', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Brands', 'autopuzzle'); ?></option>
                                         <?php
                                         if (!empty($brands)) {
                                             foreach ($brands as $brand_slug => $brand_name) {
@@ -724,9 +724,9 @@ $product_categories = get_terms([
                                 
                                 <!-- Category Filter -->
                                 <div class="col-6 col-lg-2">
-                                    <label for="filter_category" class="form-label"><?php esc_html_e('Category', 'maneli-car-inquiry'); ?></label>
+                                    <label for="filter_category" class="form-label"><?php esc_html_e('Category', 'autopuzzle'); ?></label>
                                     <select name="filter_category" id="filter_category" class="form-control form-select">
-                                        <option value=""><?php esc_html_e('All Categories', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Categories', 'autopuzzle'); ?></option>
                                         <?php
                                         if (!empty($product_categories) && !is_wp_error($product_categories)) {
                                             foreach ($product_categories as $category) {
@@ -740,13 +740,13 @@ $product_categories = get_terms([
                                 
                                 <!-- Price Availability Filter -->
                                 <div class="col-6 col-lg-2">
-                                    <label for="filter_price" class="form-label"><?php esc_html_e('Price Availability', 'maneli-car-inquiry'); ?></label>
+                                    <label for="filter_price" class="form-label"><?php esc_html_e('Price Availability', 'autopuzzle'); ?></label>
                                     <select name="filter_price" id="filter_price" class="form-control form-select">
-                                        <option value=""><?php esc_html_e('All Products', 'maneli-car-inquiry'); ?></option>
-                                        <option value="cash_available" <?php selected($filter_price, 'cash_available'); ?>><?php esc_html_e('Cash Available', 'maneli-car-inquiry'); ?></option>
-                                        <option value="cash_unavailable" <?php selected($filter_price, 'cash_unavailable'); ?>><?php esc_html_e('Cash Unavailable', 'maneli-car-inquiry'); ?></option>
-                                        <option value="installment_available" <?php selected($filter_price, 'installment_available'); ?>><?php esc_html_e('Installment Available', 'maneli-car-inquiry'); ?></option>
-                                        <option value="installment_unavailable" <?php selected($filter_price, 'installment_unavailable'); ?>><?php esc_html_e('Installment Unavailable', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Products', 'autopuzzle'); ?></option>
+                                        <option value="cash_available" <?php selected($filter_price, 'cash_available'); ?>><?php esc_html_e('Cash Available', 'autopuzzle'); ?></option>
+                                        <option value="cash_unavailable" <?php selected($filter_price, 'cash_unavailable'); ?>><?php esc_html_e('Cash Unavailable', 'autopuzzle'); ?></option>
+                                        <option value="installment_available" <?php selected($filter_price, 'installment_available'); ?>><?php esc_html_e('Installment Available', 'autopuzzle'); ?></option>
+                                        <option value="installment_unavailable" <?php selected($filter_price, 'installment_unavailable'); ?>><?php esc_html_e('Installment Unavailable', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 
@@ -756,13 +756,13 @@ $product_categories = get_terms([
                                         <div class="col-6 col-lg-6">
                                             <button type="submit" class="btn btn-primary btn-wave w-100">
                                                 <i class="la la-filter me-1"></i>
-                                                <?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
+                                                <?php esc_html_e('Apply Filters', 'autopuzzle'); ?>
                                             </button>
                                         </div>
                                         <div class="col-6 col-lg-6">
                                             <a href="<?php echo esc_url(home_url('/dashboard/products')); ?>" class="btn btn-secondary btn-wave w-100">
                                                 <i class="la la-times me-1"></i>
-                                                <?php esc_html_e('Reset', 'maneli-car-inquiry'); ?>
+                                                <?php esc_html_e('Reset', 'autopuzzle'); ?>
                                             </a>
                                         </div>
                                     </div>
@@ -778,22 +778,22 @@ $product_categories = get_terms([
                     <table class="table text-nowrap table-bordered">
                         <thead>
                             <tr>
-                                <th scope="col"><?php esc_html_e('Product', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Category', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Cash Price', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Installment Price', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Minimum Down Payment', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Colors', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Sale Status', 'maneli-car-inquiry'); ?></th>
-                                <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                <th scope="col"><?php esc_html_e('Product', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Category', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Cash Price', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Installment Price', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Minimum Down Payment', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Colors', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Sale Status', 'autopuzzle'); ?></th>
+                                <th scope="col"><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                             </tr>
                         </thead>
-                        <tbody id="maneli-product-list-tbody">
+                        <tbody id="autopuzzle-product-list-tbody">
                             <?php
                             if (!empty($products)) {
                                 foreach ($products as $product) {
                                     if ($product instanceof WC_Product) {
-                                        Maneli_Render_Helpers::render_product_editor_row($product);
+                                        Autopuzzle_Render_Helpers::render_product_editor_row($product);
                                     }
                                 }
                             } else {
@@ -809,7 +809,7 @@ $product_categories = get_terms([
                     </table>
                 </div>
 
-                <div id="product-list-loader" class="maneli-list-loader" style="display: none;">
+                <div id="product-list-loader" class="autopuzzle-list-loader" style="display: none;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">در حال بارگذاری...</span>
                     </div>
@@ -840,7 +840,7 @@ $product_categories = get_terms([
                                         $prev_link = $paged > 1 ? add_query_arg($pagination_args, home_url('/dashboard/products')) : 'javascript:void(0);';
                                         $prev_disabled = $paged <= 1 ? ' disabled' : '';
                                         echo '<li class="page-item' . $prev_disabled . '">';
-                                        echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'maneli-car-inquiry') . '</a>';
+                                        echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'autopuzzle') . '</a>';
                                         echo '</li>';
                                         
                                         // Page numbers - preserve filters
@@ -869,7 +869,7 @@ $product_categories = get_terms([
                                         $next_link = $paged < $max_num_pages ? add_query_arg($pagination_args, home_url('/dashboard/products')) : 'javascript:void(0);';
                                         $next_disabled = $paged >= $max_num_pages ? ' disabled' : '';
                                         echo '<li class="page-item' . $next_disabled . '">';
-                                        echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'maneli-car-inquiry') . '</a>';
+                                        echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'autopuzzle') . '</a>';
                                         echo '</li>';
                                         ?>
                                     </ul>
@@ -918,7 +918,7 @@ $product_categories = get_terms([
     background-color: #fff5f5;
 }
 
-.maneli-year-badge {
+.autopuzzle-year-badge {
     display: inline-flex;
     align-items: center;
     padding: 2px 8px;
@@ -987,13 +987,13 @@ $product_categories = get_terms([
     'use strict';
     
     // Helper functions (available globally)
-    if (typeof window.maneliPersianHelpers === 'undefined') {
-        window.maneliPersianHelpers = {};
+    if (typeof window.autopuzzlePersianHelpers === 'undefined') {
+        window.autopuzzlePersianHelpers = {};
     }
     
     const shouldUsePersianDigits = (function() {
         try {
-            const cookieMatch = document.cookie.match(/(?:^|;\s*)maneli_language=([^;]+)/);
+            const cookieMatch = document.cookie.match(/(?:^|;\s*)autopuzzle_language=([^;]+)/);
             if (cookieMatch) {
                 const lang = decodeURIComponent(cookieMatch[1]).toLowerCase();
                 if (['en', 'en-us', 'en_us', 'english'].includes(lang)) {
@@ -1016,7 +1016,7 @@ $product_categories = get_terms([
         return true;
     })();
 
-    window.maneliPersianHelpers = {
+    window.autopuzzlePersianHelpers = {
         usePersianDigits: shouldUsePersianDigits,
         persianToEnglish: function(str) {
         const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -1044,7 +1044,7 @@ $product_categories = get_terms([
         formatNumberWithSeparators: function(value) {
             if (!value) return '';
             // Convert Persian to English first
-            let numStr = window.maneliPersianHelpers.persianToEnglish(String(value));
+            let numStr = window.autopuzzlePersianHelpers.persianToEnglish(String(value));
             // Remove all non-digit characters
             numStr = numStr.replace(/[^\d]/g, '');
             if (!numStr) return '';
@@ -1052,13 +1052,13 @@ $product_categories = get_terms([
             const locale = shouldUsePersianDigits ? 'fa-IR' : 'en-US';
             const formatted = parseInt(numStr, 10).toLocaleString(locale);
             // Convert to Persian
-            return window.maneliPersianHelpers.englishToPersian(formatted);
+            return window.autopuzzlePersianHelpers.englishToPersian(formatted);
         },
         
         getRawNumber: function(value) {
             if (!value) return '';
             // Convert Persian to English
-            let numStr = window.maneliPersianHelpers.persianToEnglish(String(value));
+            let numStr = window.autopuzzlePersianHelpers.persianToEnglish(String(value));
             // Remove all non-digit characters (commas, spaces, etc.)
             numStr = numStr.replace(/[^\d]/g, '');
             return numStr;
@@ -1066,7 +1066,7 @@ $product_categories = get_terms([
     };
     
     // Verify it was created
-    console.log('maneliPersianHelpers initialized:', typeof window.maneliPersianHelpers);
+    console.log('autopuzzlePersianHelpers initialized:', typeof window.autopuzzlePersianHelpers);
 })();
 
 // Wait for jQuery and DOM to be ready
@@ -1086,35 +1086,35 @@ $product_categories = get_terms([
         
         console.log('Product editor script initialized');
         
-        // Ensure maneliPersianHelpers is available
-        if (typeof window.maneliPersianHelpers === 'undefined') {
-            console.error('maneliPersianHelpers is not defined!');
+        // Ensure autopuzzlePersianHelpers is available
+        if (typeof window.autopuzzlePersianHelpers === 'undefined') {
+            console.error('autopuzzlePersianHelpers is not defined!');
             return;
         }
         
         // Helper functions shortcut - use bind to ensure correct context
         var persianToEnglish = function(str) {
-            return window.maneliPersianHelpers.persianToEnglish(str);
+            return window.autopuzzlePersianHelpers.persianToEnglish(str);
         };
         var englishToPersian = function(str) {
-            return window.maneliPersianHelpers.englishToPersian(str);
+            return window.autopuzzlePersianHelpers.englishToPersian(str);
         };
         var formatNumberWithSeparators = function(value) {
-            return window.maneliPersianHelpers.formatNumberWithSeparators(value);
+            return window.autopuzzlePersianHelpers.formatNumberWithSeparators(value);
         };
         var getRawNumber = function(value) {
-            return window.maneliPersianHelpers.getRawNumber(value);
+            return window.autopuzzlePersianHelpers.getRawNumber(value);
         };
         
-        // Ensure maneliAdminProductEditor is available
-        if (typeof maneliAdminProductEditor === 'undefined') {
-            console.warn('maneliAdminProductEditor is undefined, using fallback');
-            window.maneliAdminProductEditor = {
+        // Ensure autopuzzleAdminProductEditor is available
+        if (typeof autopuzzleAdminProductEditor === 'undefined') {
+            console.warn('autopuzzleAdminProductEditor is undefined, using fallback');
+            window.autopuzzleAdminProductEditor = {
                 ajaxUrl: '<?php echo esc_js(admin_url("admin-ajax.php")); ?>',
-                nonce: '<?php echo esc_js(wp_create_nonce("maneli_product_data_nonce")); ?>'
+                nonce: '<?php echo esc_js(wp_create_nonce("autopuzzle_product_data_nonce")); ?>'
             };
         } else {
-            console.log('maneliAdminProductEditor loaded:', maneliAdminProductEditor);
+            console.log('autopuzzleAdminProductEditor loaded:', autopuzzleAdminProductEditor);
         }
         
         // Count inputs for debugging
@@ -1127,7 +1127,7 @@ $product_categories = get_terms([
         $('.manli-price-input').each(function() {
             const $input = $(this);
             const rawValue = $input.data('raw-value') || $input.attr('data-raw-value');
-            if (rawValue && window.maneliPersianHelpers) {
+            if (rawValue && window.autopuzzlePersianHelpers) {
                 $input.val(formatNumberWithSeparators(rawValue));
             }
         });
@@ -1236,12 +1236,12 @@ $product_categories = get_terms([
             $statusIcon.hide();
             
             // Send AJAX request with raw value
-            const ajaxUrl = (typeof maneliAdminProductEditor !== 'undefined' && maneliAdminProductEditor.ajaxUrl) 
-                ? maneliAdminProductEditor.ajaxUrl 
+            const ajaxUrl = (typeof autopuzzleAdminProductEditor !== 'undefined' && autopuzzleAdminProductEditor.ajaxUrl) 
+                ? autopuzzleAdminProductEditor.ajaxUrl 
                 : '<?php echo esc_js(admin_url("admin-ajax.php")); ?>';
-            const ajaxNonce = (typeof maneliAdminProductEditor !== 'undefined' && maneliAdminProductEditor.nonce) 
-                ? maneliAdminProductEditor.nonce 
-                : '<?php echo esc_js(wp_create_nonce("maneli_product_data_nonce")); ?>';
+            const ajaxNonce = (typeof autopuzzleAdminProductEditor !== 'undefined' && autopuzzleAdminProductEditor.nonce) 
+                ? autopuzzleAdminProductEditor.nonce 
+                : '<?php echo esc_js(wp_create_nonce("autopuzzle_product_data_nonce")); ?>';
             
             console.log('Saving product:', {productId, fieldType, rawValue, ajaxUrl, hasNonce: !!ajaxNonce});
             
@@ -1249,7 +1249,7 @@ $product_categories = get_terms([
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_update_product_data',
+                    action: 'autopuzzle_update_product_data',
                     product_id: productId,
                     field_type: fieldType,
                     field_value: rawValue,
@@ -1314,12 +1314,12 @@ $product_categories = get_terms([
             $statusIcon.hide();
             
             // Send AJAX request
-            const ajaxUrl = (typeof maneliAdminProductEditor !== 'undefined' && maneliAdminProductEditor.ajaxUrl) 
-                ? maneliAdminProductEditor.ajaxUrl 
+            const ajaxUrl = (typeof autopuzzleAdminProductEditor !== 'undefined' && autopuzzleAdminProductEditor.ajaxUrl) 
+                ? autopuzzleAdminProductEditor.ajaxUrl 
                 : '<?php echo esc_js(admin_url("admin-ajax.php")); ?>';
-            const ajaxNonce = (typeof maneliAdminProductEditor !== 'undefined' && maneliAdminProductEditor.nonce) 
-                ? maneliAdminProductEditor.nonce 
-                : '<?php echo esc_js(wp_create_nonce("maneli_product_data_nonce")); ?>';
+            const ajaxNonce = (typeof autopuzzleAdminProductEditor !== 'undefined' && autopuzzleAdminProductEditor.nonce) 
+                ? autopuzzleAdminProductEditor.nonce 
+                : '<?php echo esc_js(wp_create_nonce("autopuzzle_product_data_nonce")); ?>';
             
             console.log('Saving product (non-price):', {productId, fieldType, fieldValue, ajaxUrl, hasNonce: !!ajaxNonce});
             
@@ -1327,7 +1327,7 @@ $product_categories = get_terms([
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_update_product_data',
+                    action: 'autopuzzle_update_product_data',
                     product_id: productId,
                     field_type: fieldType,
                     field_value: fieldValue,
@@ -1390,12 +1390,12 @@ $product_categories = get_terms([
             $statusIcon.hide();
             
             // Send AJAX request
-            const ajaxUrl = (typeof maneliAdminProductEditor !== 'undefined' && maneliAdminProductEditor.ajaxUrl) 
-                ? maneliAdminProductEditor.ajaxUrl 
+            const ajaxUrl = (typeof autopuzzleAdminProductEditor !== 'undefined' && autopuzzleAdminProductEditor.ajaxUrl) 
+                ? autopuzzleAdminProductEditor.ajaxUrl 
                 : '<?php echo esc_js(admin_url("admin-ajax.php")); ?>';
-            const ajaxNonce = (typeof maneliAdminProductEditor !== 'undefined' && maneliAdminProductEditor.nonce) 
-                ? maneliAdminProductEditor.nonce 
-                : '<?php echo esc_js(wp_create_nonce("maneli_product_data_nonce")); ?>';
+            const ajaxNonce = (typeof autopuzzleAdminProductEditor !== 'undefined' && autopuzzleAdminProductEditor.nonce) 
+                ? autopuzzleAdminProductEditor.nonce 
+                : '<?php echo esc_js(wp_create_nonce("autopuzzle_product_data_nonce")); ?>';
             
             console.log('Saving product (status):', {productId, fieldType, fieldValue, ajaxUrl, hasNonce: !!ajaxNonce});
             
@@ -1403,7 +1403,7 @@ $product_categories = get_terms([
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_update_product_data',
+                    action: 'autopuzzle_update_product_data',
                     product_id: productId,
                     field_type: fieldType,
                     field_value: fieldValue,

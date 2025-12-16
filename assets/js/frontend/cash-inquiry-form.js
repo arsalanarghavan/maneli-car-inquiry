@@ -25,7 +25,7 @@ jQuery(document).ready(function($) {
             url: maneliCashInquiryForm.ajax_url,
             type: 'POST',
             data: {
-                action: 'maneli_get_products_for_cash',
+                action: 'autopuzzle_get_products_for_cash',
                 nonce: maneliCashInquiryForm.nonce
             },
             success: function(response) {
@@ -170,7 +170,7 @@ jQuery(document).ready(function($) {
         
         // Get CAPTCHA token if enabled
         const ajaxData = {
-            action: 'maneli_create_cash_inquiry',
+            action: 'autopuzzle_create_cash_inquiry',
             product_id: data.productId,
             first_name: data.firstName,
             last_name: data.lastName,

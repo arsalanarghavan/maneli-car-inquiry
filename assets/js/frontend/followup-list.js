@@ -17,11 +17,11 @@ jQuery(document).ready(function($) {
     //  AJAX LIST FILTERING & PAGINATION
     //======================================================================
     
-    const listBody = $('#maneli-followup-list-tbody');
+    const listBody = $('#autopuzzle-followup-list-tbody');
     const searchInput = $('#followup-search-input');
     const expertFilter = $('#followup-expert-filter');
     const loader = $('#followup-list-loader');
-    const paginationWrapper = $('.maneli-pagination-wrapper');
+    const paginationWrapper = $('.autopuzzle-pagination-wrapper');
 
     let xhr;
     let searchTimeout;
@@ -48,7 +48,7 @@ jQuery(document).ready(function($) {
         const colspan = expertFilter.length ? 8 : 7; // Number of columns
 
         const formData = {
-            action: 'maneli_filter_followup_inquiries',
+            action: 'autopuzzle_filter_followup_inquiries',
             _ajax_nonce: maneliFollowupList.nonces.followup_filter,
             search: searchInput.val(),
             expert: expertFilter.val(),
@@ -175,7 +175,7 @@ jQuery(document).ready(function($) {
                 const originalText = button.text();
                 button.prop('disabled', true).text('...');
                 $.post(maneliFollowupList.ajax_url, {
-                    action: 'maneli_assign_expert_to_inquiry',
+                    action: 'autopuzzle_assign_expert_to_inquiry',
                     nonce: maneliFollowupList.nonces.assign_expert,
                     inquiry_id: inquiryId,
                     expert_id: result.value

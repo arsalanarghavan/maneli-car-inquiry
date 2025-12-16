@@ -5,7 +5,7 @@
  * This page allows experts/admins to create a new installment inquiry on behalf of customers
  * Includes full form with all fields from the expert panel
  * 
- * @package Maneli_Car_Inquiry/Templates/Dashboard
+ * @package AutoPuzzle/Templates/Dashboard
  * @version 1.0.0
  */
 
@@ -14,8 +14,8 @@ if (!defined('ABSPATH')) {
 }
 
 // Permission check - Only admins and experts can create inquiries
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_expert = in_array('autopuzzle_expert', wp_get_current_user()->roles, true);
 
 if (!$is_admin && !$is_expert) {
     ?>
@@ -23,7 +23,7 @@ if (!$is_admin && !$is_expert) {
         <div class="col-xl-12">
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="la la-exclamation-triangle me-2"></i>
-                <?php esc_html_e('You do not have access to this page.', 'maneli-car-inquiry'); ?>
+                <?php esc_html_e('You do not have access to this page.', 'autopuzzle'); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
@@ -42,34 +42,34 @@ if (!wp_script_is('select2', 'enqueued')) {
 
 // Enqueue Persian Datepicker - use persianDatepicker like in expert reports when locale is Persian
 $datepicker_dependency_loaded = false;
-if (function_exists('maneli_enqueue_persian_datepicker')) {
-    $datepicker_dependency_loaded = maneli_enqueue_persian_datepicker();
+if (function_exists('autopuzzle_enqueue_persian_datepicker')) {
+    $datepicker_dependency_loaded = autopuzzle_enqueue_persian_datepicker();
 }
 
 // Enqueue inquiry form script (for datepicker initialization)
-if (!wp_script_is('maneli-inquiry-form-js', 'enqueued')) {
+if (!wp_script_is('autopuzzle-inquiry-form-js', 'enqueued')) {
     $inquiry_form_deps = ['jquery'];
     if ($datepicker_dependency_loaded) {
-        $inquiry_form_deps[] = 'maneli-persian-datepicker';
+        $inquiry_form_deps[] = 'autopuzzle-persian-datepicker';
     }
     wp_enqueue_script(
-        'maneli-inquiry-form-js',
-        MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
+        'autopuzzle-inquiry-form-js',
+        AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
         $inquiry_form_deps,
-        filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'),
+        filemtime(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'),
         true
     );
 }
 
 // Enqueue expert panel JS (for car search and calculator)
 add_action('wp_footer', function() {
-    $options = get_option('maneli_inquiry_all_options', []);
+    $options = get_option('autopuzzle_inquiry_all_options', []);
     $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
     ?>
     <script>
-    var maneli_expert_ajax = {
+    var autopuzzle_expert_ajax = {
         ajax_url: '<?php echo admin_url('admin-ajax.php'); ?>',
-        nonce: '<?php echo wp_create_nonce('maneli_expert_car_search_nonce'); ?>',
+        nonce: '<?php echo wp_create_nonce('autopuzzle_expert_car_search_nonce'); ?>',
         interestRate: <?php echo $interest_rate; ?>,
         text: {
             search_placeholder: 'جستجوی خودرو...',
@@ -85,22 +85,22 @@ add_action('wp_footer', function() {
             term_months: 'مدت (ماه)',
             monthly_installment: 'قسط ماهانه',
             total_price: 'قیمت کل',
-            toman: <?php echo wp_json_encode(esc_html__('Toman', 'maneli-car-inquiry')); ?>,
+            toman: <?php echo wp_json_encode(esc_html__('Toman', 'autopuzzle')); ?>,
             month: 'ماه',
         }
     };
     </script>
     <?php
-    $expert_panel_js_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/expert-panel.js';
+    $expert_panel_js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/expert-panel.js';
     if (file_exists($expert_panel_js_path)) {
-        echo '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/expert-panel.js?ver=' . filemtime($expert_panel_js_path)) . '"></script>';
+        echo '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/expert-panel.js?ver=' . filemtime($expert_panel_js_path)) . '"></script>';
     }
 }, 999);
 
 // Get experts list for dropdown (only for admins)
 $experts = [];
-if (current_user_can('manage_maneli_inquiries')) {
-    $experts = get_users(['role' => 'maneli_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
+if (current_user_can('manage_autopuzzle_inquiries')) {
+    $experts = get_users(['role' => 'autopuzzle_expert', 'orderby' => 'display_name', 'order' => 'ASC']);
 }
 ?>
 <div class="main-content app-content">
@@ -132,8 +132,8 @@ if (current_user_can('manage_maneli_inquiries')) {
             </div>
             <div class="card-body">
                 <form id="expert-inquiry-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="needs-validation" novalidate>
-                    <input type="hidden" name="action" value="maneli_expert_create_inquiry">
-                    <?php wp_nonce_field('maneli_expert_create_nonce'); ?>
+                    <input type="hidden" name="action" value="autopuzzle_expert_create_inquiry">
+                    <?php wp_nonce_field('autopuzzle_expert_create_nonce'); ?>
 
                     <!-- Step 1: Car Selection -->
                     <div class="mb-4 pb-3 border-bottom">
@@ -150,7 +150,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                 جستجوی خودرو
                                 <span class="text-danger">*</span>
                             </label>
-                            <select id="product_id_expert" name="product_id" class="form-select form-select-lg maneli-car-search-select" required>
+                            <select id="product_id_expert" name="product_id" class="form-select form-select-lg autopuzzle-car-search-select" required>
                                 <option value=""></option>
                             </select>
                             <div class="form-text text-muted">
@@ -159,7 +159,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                             </div>
                         </div>
                         
-                        <?php if (current_user_can('manage_maneli_inquiries') && !empty($experts)): ?>
+                        <?php if (current_user_can('manage_autopuzzle_inquiries') && !empty($experts)): ?>
                             <div class="mb-3 pt-3">
                                 <label for="assigned_expert_id" class="form-label">
                                     <i class="la la-user-tie me-1 text-info"></i>
@@ -232,7 +232,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="first_name" class="form-control" placeholder="<?php esc_attr_e('First Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="first_name" class="form-control" placeholder="<?php esc_attr_e('First Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -240,7 +240,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام خانوادگی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="last_name" class="form-control" placeholder="<?php esc_attr_e('Last Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="last_name" class="form-control" placeholder="<?php esc_attr_e('Last Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام خانوادگی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -248,7 +248,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-male me-1 text-muted"></i>
                                                 نام پدر <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="father_name" class="form-control" placeholder="<?php esc_attr_e('Father\'s Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="father_name" class="form-control" placeholder="<?php esc_attr_e('Father\'s Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام پدر را وارد کنید.</div>
                                         </div>
                                     </div>
@@ -259,7 +259,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-birthday-cake me-1 text-muted"></i>
                                                 تاریخ تولد <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" id="expert_buyer_birth_date" name="birth_date" class="form-control maneli-datepicker" placeholder="1370/01/01" required>
+                                            <input type="text" id="expert_buyer_birth_date" name="birth_date" class="form-control autopuzzle-datepicker" placeholder="1370/01/01" required>
                                             <div class="invalid-feedback">لطفاً تاریخ تولد را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -292,20 +292,20 @@ if (current_user_can('manage_maneli_inquiries')) {
                                             <label class="form-label">نوع شغل <span class="text-danger">*</span></label>
                                             <select name="job_type" id="buyer_job_type" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
-                                                <option value="self"><?php esc_html_e('Self-employed', 'maneli-car-inquiry'); ?></option>
-                                                <option value="employee"><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
+                                                <option value="self"><?php esc_html_e('Self-employed', 'autopuzzle'); ?></option>
+                                                <option value="employee"><?php esc_html_e('Employee', 'autopuzzle'); ?></option>
                                             </select>
                                             <div class="invalid-feedback">لطفاً نوع شغل را انتخاب کنید.</div>
                                         </div>
                                         <div class="col-md-4 buyer-job-title-wrapper" style="display:none;">
                                             <label class="form-label">عنوان شغلی <span class="text-danger">*</span></label>
-                                            <input type="text" name="job_title" id="buyer_job_title" class="form-control" placeholder="<?php esc_attr_e('Example: Engineer', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="job_title" id="buyer_job_title" class="form-control" placeholder="<?php esc_attr_e('Example: Engineer', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً عنوان شغلی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-money-bill me-1 text-success"></i>
-                                                <?php echo esc_html__('Income Amount (Toman)', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span>
+                                                <?php echo esc_html__('Income Amount (Toman)', 'autopuzzle'); ?> <span class="text-danger">*</span>
                                             </label>
                                             <input type="number" name="income_level" class="form-control" placeholder="0" required min="0">
                                             <div class="invalid-feedback">لطفاً سطح درآمد را وارد کنید.</div>
@@ -317,8 +317,8 @@ if (current_user_can('manage_maneli_inquiries')) {
                                             </label>
                                             <select name="residency_status" id="buyer_residency_status" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
-                                                <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                                <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                                <option value="owner"><?php esc_html_e('Owner', 'autopuzzle'); ?></option>
+                                                <option value="tenant"><?php esc_html_e('Tenant', 'autopuzzle'); ?></option>
                                             </select>
                                             <div class="invalid-feedback">لطفاً وضعیت مسکن را انتخاب کنید.</div>
                                         </div>
@@ -329,8 +329,8 @@ if (current_user_can('manage_maneli_inquiries')) {
                                             </label>
                                             <select name="work_location_status" id="buyer_work_location_status" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
-                                                <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                                <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                                <option value="owner"><?php esc_html_e('Owner', 'autopuzzle'); ?></option>
+                                                <option value="tenant"><?php esc_html_e('Tenant', 'autopuzzle'); ?></option>
                                             </select>
                                             <div class="invalid-feedback">لطفاً وضعیت محل کار را انتخاب کنید.</div>
                                         </div>
@@ -357,7 +357,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-map-marker me-1"></i>
                                                 آدرس <span class="text-danger">*</span>
                                             </label>
-                                            <textarea name="address" class="form-control" rows="2" placeholder="<?php esc_attr_e('Full Address', 'maneli-car-inquiry'); ?>" required></textarea>
+                                            <textarea name="address" class="form-control" rows="2" placeholder="<?php esc_attr_e('Full Address', 'autopuzzle'); ?>" required></textarea>
                                             <div class="invalid-feedback">لطفاً آدرس را وارد کنید.</div>
                                         </div>
                                     </div>
@@ -372,7 +372,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">نام بانک <span class="text-danger">*</span></label>
-                                            <input type="text" name="bank_name" class="form-control" placeholder="<?php esc_attr_e('Example: National', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="bank_name" class="form-control" placeholder="<?php esc_attr_e('Example: National', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام بانک را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-3">
@@ -387,7 +387,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label">نام شعبه <span class="text-danger">*</span></label>
-                                            <input type="text" name="branch_name" class="form-control" placeholder="<?php esc_attr_e('Example: Central', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="branch_name" class="form-control" placeholder="<?php esc_attr_e('Example: Central', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام شعبه را وارد کنید.</div>
                                         </div>
                                     </div>
@@ -411,7 +411,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="issuer_first_name" class="form-control" placeholder="<?php esc_attr_e('First Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="issuer_first_name" class="form-control" placeholder="<?php esc_attr_e('First Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -419,7 +419,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام خانوادگی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="issuer_last_name" class="form-control" placeholder="<?php esc_attr_e('Last Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="issuer_last_name" class="form-control" placeholder="<?php esc_attr_e('Last Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام خانوادگی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -427,7 +427,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-male me-1 text-muted"></i>
                                                 نام پدر <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="issuer_father_name" class="form-control" placeholder="<?php esc_attr_e('Father\'s Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="issuer_father_name" class="form-control" placeholder="<?php esc_attr_e('Father\'s Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام پدر را وارد کنید.</div>
                                         </div>
                                     </div>
@@ -438,7 +438,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                                 <i class="la la-birthday-cake me-1 text-muted"></i>
                                                 تاریخ تولد <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" id="expert_issuer_birth_date" name="issuer_birth_date" class="form-control maneli-datepicker" placeholder="1370/01/01" required>
+                                            <input type="text" id="expert_issuer_birth_date" name="issuer_birth_date" class="form-control autopuzzle-datepicker" placeholder="1370/01/01" required>
                                             <div class="invalid-feedback">لطفاً تاریخ تولد را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-4">
@@ -471,8 +471,8 @@ if (current_user_can('manage_maneli_inquiries')) {
                                             <label class="form-label">نوع شغل <span class="text-danger">*</span></label>
                                             <select name="issuer_job_type" id="issuer_job_type" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
-                                                <option value="self"><?php esc_html_e('Self-employed', 'maneli-car-inquiry'); ?></option>
-                                                <option value="employee"><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
+                                                <option value="self"><?php esc_html_e('Self-employed', 'autopuzzle'); ?></option>
+                                                <option value="employee"><?php esc_html_e('Employee', 'autopuzzle'); ?></option>
                                             </select>
                                             <div class="invalid-feedback">لطفاً نوع شغل را انتخاب کنید.</div>
                                         </div>
@@ -484,7 +484,7 @@ if (current_user_can('manage_maneli_inquiries')) {
                                         <div class="col-md-4">
                                             <label class="form-label">
                                                 <i class="la la-money-bill me-1 text-success"></i>
-                                                <?php echo esc_html__('Income Amount (Toman)', 'maneli-car-inquiry'); ?> <span class="text-danger">*</span>
+                                                <?php echo esc_html__('Income Amount (Toman)', 'autopuzzle'); ?> <span class="text-danger">*</span>
                                             </label>
                                             <input type="number" name="issuer_income_level" class="form-control" placeholder="0" required min="0">
                                             <div class="invalid-feedback">لطفاً سطح درآمد را وارد کنید.</div>
@@ -496,8 +496,8 @@ if (current_user_can('manage_maneli_inquiries')) {
                                             </label>
                                             <select name="issuer_residency_status" id="issuer_residency_status" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
-                                                <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                                <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                                <option value="owner"><?php esc_html_e('Owner', 'autopuzzle'); ?></option>
+                                                <option value="tenant"><?php esc_html_e('Tenant', 'autopuzzle'); ?></option>
                                             </select>
                                             <div class="invalid-feedback">لطفاً وضعیت مسکن را انتخاب کنید.</div>
                                         </div>
@@ -508,8 +508,8 @@ if (current_user_can('manage_maneli_inquiries')) {
                                             </label>
                                             <select name="issuer_work_location_status" id="issuer_work_location_status" class="form-select" required>
                                                 <option value="">-- انتخاب کنید --</option>
-                                                <option value="owner"><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                                <option value="tenant"><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                                <option value="owner"><?php esc_html_e('Owner', 'autopuzzle'); ?></option>
+                                                <option value="tenant"><?php esc_html_e('Tenant', 'autopuzzle'); ?></option>
                                             </select>
                                             <div class="invalid-feedback">لطفاً وضعیت محل کار را انتخاب کنید.</div>
                                         </div>

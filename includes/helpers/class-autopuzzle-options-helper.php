@@ -5,7 +5,7 @@
  * This class provides a centralized way to get plugin options with in-memory caching
  * to prevent multiple database queries for the same option in a single request.
  *
- * @package Maneli_Car_Inquiry/Includes/Helpers
+ * @package Autopuzzle_Car_Inquiry/Includes/Helpers
  * @version 1.0.0
  */
 
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Options_Helper {
+class Autopuzzle_Options_Helper {
 
     /**
      * In-memory cache for options
@@ -34,7 +34,7 @@ class Maneli_Options_Helper {
         }
 
         // Get from database
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = get_option('autopuzzle_inquiry_all_options', []);
 
         // Cache it
         self::$options_cache['all_options'] = $options;

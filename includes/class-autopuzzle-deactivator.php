@@ -2,14 +2,14 @@
 /**
  * Fired during plugin deactivation
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Deactivator {
+class Autopuzzle_Deactivator {
 
     /**
      * Deactivate the plugin

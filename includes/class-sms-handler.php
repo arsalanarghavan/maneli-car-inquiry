@@ -2,7 +2,7 @@
 /**
  * Handles sending SMS notifications via the Payamak-Panel (MeliPayamak) web service.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.2 (API URL Fixed with Constant)
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_SMS_Handler {
+class Autopuzzle_SMS_Handler {
 
     /**
      * Plugin options array.
@@ -20,7 +20,7 @@ class Maneli_SMS_Handler {
     private $options;
 
     public function __construct() {
-        $this->options = Maneli_Options_Helper::get_all_options();
+        $this->options = Autopuzzle_Options_Helper::get_all_options();
     }
 
     /**
@@ -38,7 +38,7 @@ class Maneli_SMS_Handler {
         // 1. Validate required credentials and parameters
         if (empty($username) || empty($password) || empty($bodyId) || empty($recipient)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: Missing required parameters (username, password, bodyId, or recipient) for sending pattern SMS.');
+                error_log('AutoPuzzle SMS Error: Missing required parameters (username, password, bodyId, or recipient) for sending pattern SMS.');
             }
             return false;
         }
@@ -46,15 +46,15 @@ class Maneli_SMS_Handler {
         // 2. Check if the SOAP extension is enabled on the server
         if (!class_exists('SoapClient')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: SoapClient class not found. Please enable the PHP SOAP extension on your server.');
+                error_log('AutoPuzzle SMS Error: SoapClient class not found. Please enable the PHP SOAP extension on your server.');
             }
             return false;
         }
 
         // 3. Check if WSDL constant is defined
-        if (!defined('MANELI_SMS_API_WSDL')) {
+        if (!defined('AUTOPUZZLE_SMS_API_WSDL')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: MANELI_SMS_API_WSDL constant is not defined.');
+                error_log('AutoPuzzle SMS Error: AUTOPUZZLE_SMS_API_WSDL constant is not defined.');
             }
             return false;
         }
@@ -63,8 +63,8 @@ class Maneli_SMS_Handler {
             // Disable WSDL caching for development/reliability
             ini_set("soap.wsdl_cache_enabled", "0");
             
-            // FIX: Using MANELI_SMS_API_WSDL constant for secure connection
-            $sms_client = new SoapClient(MANELI_SMS_API_WSDL, ['encoding' => 'UTF-8']);
+            // FIX: Using AUTOPUZZLE_SMS_API_WSDL constant for secure connection
+            $sms_client = new SoapClient(AUTOPUZZLE_SMS_API_WSDL, ['encoding' => 'UTF-8']);
 
             // Prepare parameters for pattern SMS
             // According to MeliPayamak SOAP API (api.payamak-panel.com):
@@ -139,14 +139,14 @@ class Maneli_SMS_Handler {
                             11 => 'Rate limit exceeded or service temporarily unavailable',
                         ];
                         $error_msg = $error_messages[$code_num] ?? 'Unknown error';
-                        error_log('Maneli SMS API Error: Failed to send SMS via Pattern. API returned error code: ' . $code_num . ' (' . $error_msg . ')');
+                        error_log('AutoPuzzle SMS API Error: Failed to send SMS via Pattern. API returned error code: ' . $code_num . ' (' . $error_msg . ')');
                     }
                     return false;
                 } elseif ($code_num < 0) {
                     // Negative error code
                     $this->last_error_code = $code_num;
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli SMS API Error: Failed to send SMS via Pattern. API returned negative error code: ' . $code_num);
+                        error_log('AutoPuzzle SMS API Error: Failed to send SMS via Pattern. API returned negative error code: ' . $code_num);
                     }
                     return false;
                 } elseif ($result_len > 10) {
@@ -159,7 +159,7 @@ class Maneli_SMS_Handler {
                     // Code 0 with short length - might be error, but could also be empty MessageID
                     // This is ambiguous - log it but treat as error for safety
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli SMS API Warning: Received code 0 with short length. This might indicate an error or empty MessageID.');
+                        error_log('AutoPuzzle SMS API Warning: Received code 0 with short length. This might indicate an error or empty MessageID.');
                     }
                     return false;
                 }
@@ -176,7 +176,7 @@ class Maneli_SMS_Handler {
             
             // Unknown format - log for debugging but treat as error
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS API Warning: Unexpected response format. Code: ' . var_export($send_Result_code, true) . ' (Type: ' . gettype($send_Result_code) . ', Length: ' . $result_len . ')');
+                error_log('AutoPuzzle SMS API Warning: Unexpected response format. Code: ' . var_export($send_Result_code, true) . ' (Type: ' . gettype($send_Result_code) . ', Length: ' . $result_len . ')');
             }
             
             // Conservative approach: if length > 3, might be MessageID (success)
@@ -192,12 +192,12 @@ class Maneli_SMS_Handler {
 
         } catch (SoapFault $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS SOAP Fault: ' . $e->getMessage());
+                error_log('AutoPuzzle SMS SOAP Fault: ' . $e->getMessage());
             }
             return false;
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS General Exception: ' . $e->getMessage());
+                error_log('AutoPuzzle SMS General Exception: ' . $e->getMessage());
             }
             return false;
         }
@@ -238,7 +238,7 @@ class Maneli_SMS_Handler {
         // Validate required credentials
         if (empty($username) || empty($password) || empty($recipient) || empty($message)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: Missing required parameters for sending SMS.');
+                error_log('AutoPuzzle SMS Error: Missing required parameters for sending SMS.');
             }
             return false;
         }
@@ -246,15 +246,15 @@ class Maneli_SMS_Handler {
         // Check if the SOAP extension is enabled
         if (!class_exists('SoapClient')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: SoapClient class not found. Please enable the PHP SOAP extension on your server.');
+                error_log('AutoPuzzle SMS Error: SoapClient class not found. Please enable the PHP SOAP extension on your server.');
             }
             return false;
         }
 
         // Check if WSDL constant is defined
-        if (!defined('MANELI_SMS_API_WSDL')) {
+        if (!defined('AUTOPUZZLE_SMS_API_WSDL')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: MANELI_SMS_API_WSDL constant is not defined.');
+                error_log('AutoPuzzle SMS Error: AUTOPUZZLE_SMS_API_WSDL constant is not defined.');
             }
             return false;
         }
@@ -263,7 +263,7 @@ class Maneli_SMS_Handler {
             // Disable WSDL caching
             ini_set("soap.wsdl_cache_enabled", "0");
             
-            $sms_client = new SoapClient(MANELI_SMS_API_WSDL, ['encoding' => 'UTF-8']);
+            $sms_client = new SoapClient(AUTOPUZZLE_SMS_API_WSDL, ['encoding' => 'UTF-8']);
 
             $data = [
                 "username" => $username,
@@ -311,14 +311,14 @@ class Maneli_SMS_Handler {
                             11 => 'Rate limit exceeded or service temporarily unavailable',
                         ];
                         $error_msg = $error_messages[$code_num] ?? 'Unknown error';
-                        error_log('Maneli SMS API Error: Failed to send SMS. API returned error code: ' . $code_num . ' (' . $error_msg . ')');
+                        error_log('AutoPuzzle SMS API Error: Failed to send SMS. API returned error code: ' . $code_num . ' (' . $error_msg . ')');
                     }
                     return false;
                 } elseif ($code_num < 0) {
                     // Negative error code
                     $this->last_error_code = $code_num;
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli SMS API Error: Failed to send SMS. API returned negative error code: ' . $code_num);
+                        error_log('AutoPuzzle SMS API Error: Failed to send SMS. API returned negative error code: ' . $code_num);
                     }
                     return false;
                 } elseif ($result_len > 10) {
@@ -330,7 +330,7 @@ class Maneli_SMS_Handler {
                 } elseif ($code_num == 0 && $result_len <= 3) {
                     // Code 0 with short length - might be error
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli SMS API Warning: Received code 0 with short length. This might indicate an error.');
+                        error_log('AutoPuzzle SMS API Warning: Received code 0 with short length. This might indicate an error.');
                     }
                     return false;
                 }
@@ -347,7 +347,7 @@ class Maneli_SMS_Handler {
             
             // Unknown format - log for debugging but treat as error
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS API Warning: Unexpected response format. Code: ' . var_export($send_Result_code, true) . ' (Type: ' . gettype($send_Result_code) . ', Length: ' . $result_len . ')');
+                error_log('AutoPuzzle SMS API Warning: Unexpected response format. Code: ' . var_export($send_Result_code, true) . ' (Type: ' . gettype($send_Result_code) . ', Length: ' . $result_len . ')');
             }
             
             // Conservative approach: if length > 3, might be MessageID (success)
@@ -363,12 +363,12 @@ class Maneli_SMS_Handler {
 
         } catch (SoapFault $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS SOAP Fault: ' . $e->getMessage());
+                error_log('AutoPuzzle SMS SOAP Fault: ' . $e->getMessage());
             }
             return false;
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS General Exception: ' . $e->getMessage());
+                error_log('AutoPuzzle SMS General Exception: ' . $e->getMessage());
             }
             return false;
         }
@@ -387,28 +387,28 @@ class Maneli_SMS_Handler {
 
         if (empty($username) || empty($password) || empty($message_id)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: Missing required parameters for getting message status.');
+                error_log('AutoPuzzle SMS Error: Missing required parameters for getting message status.');
             }
             return false;
         }
 
         if (!class_exists('SoapClient')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: SoapClient class not found.');
+                error_log('AutoPuzzle SMS Error: SoapClient class not found.');
             }
             return false;
         }
 
-        if (!defined('MANELI_SMS_API_WSDL')) {
+        if (!defined('AUTOPUZZLE_SMS_API_WSDL')) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: MANELI_SMS_API_WSDL constant is not defined.');
+                error_log('AutoPuzzle SMS Error: AUTOPUZZLE_SMS_API_WSDL constant is not defined.');
             }
             return false;
         }
 
         try {
             ini_set("soap.wsdl_cache_enabled", "0");
-            $sms_client = new SoapClient(MANELI_SMS_API_WSDL, ['encoding' => 'UTF-8']);
+            $sms_client = new SoapClient(AUTOPUZZLE_SMS_API_WSDL, ['encoding' => 'UTF-8']);
 
             // GetMessagesReceptions method from MeliPayamak API
             // Parameters: username, password, msgId, fromRows
@@ -460,12 +460,12 @@ class Maneli_SMS_Handler {
 
         } catch (SoapFault $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS SOAP Fault (get_message_status): ' . $e->getMessage());
+                error_log('AutoPuzzle SMS SOAP Fault (get_message_status): ' . $e->getMessage());
             }
             return false;
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS General Exception (get_message_status): ' . $e->getMessage());
+                error_log('AutoPuzzle SMS General Exception (get_message_status): ' . $e->getMessage());
             }
             return false;
         }
@@ -480,14 +480,14 @@ class Maneli_SMS_Handler {
     private function parse_delivery_status($status) {
         $status = (string)$status;
         $status_messages = [
-            '1' => esc_html__('Delivered', 'maneli-car-inquiry'),
-            '2' => esc_html__('Failed', 'maneli-car-inquiry'),
-            '3' => esc_html__('Pending', 'maneli-car-inquiry'),
-            '4' => esc_html__('Blocked', 'maneli-car-inquiry'),
-            '5' => esc_html__('Rejected', 'maneli-car-inquiry'),
+            '1' => esc_html__('Delivered', 'autopuzzle'),
+            '2' => esc_html__('Failed', 'autopuzzle'),
+            '3' => esc_html__('Pending', 'autopuzzle'),
+            '4' => esc_html__('Blocked', 'autopuzzle'),
+            '5' => esc_html__('Rejected', 'autopuzzle'),
         ];
         
-        return $status_messages[$status] ?? esc_html__('Unknown status', 'maneli-car-inquiry');
+        return $status_messages[$status] ?? esc_html__('Unknown status', 'autopuzzle');
     }
 
     /**
@@ -502,7 +502,7 @@ class Maneli_SMS_Handler {
         // Validate required credentials
         if (empty($username) || empty($password)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Error: Missing required credentials (username or password) for getting credit.');
+                error_log('AutoPuzzle SMS Error: Missing required credentials (username or password) for getting credit.');
             }
             return false;
         }
@@ -541,7 +541,7 @@ class Maneli_SMS_Handler {
                 if (is_wp_error($response)) {
                     $last_error = $response->get_error_message();
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli SMS REST API Error (URL: ' . $rest_url . '): ' . $last_error);
+                        error_log('AutoPuzzle SMS REST API Error (URL: ' . $rest_url . '): ' . $last_error);
                     }
                     continue; // Try next URL
                 }
@@ -552,7 +552,7 @@ class Maneli_SMS_Handler {
                 if ($response_code !== 200) {
                     $last_error = 'HTTP ' . $response_code . ' - ' . $response_body;
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli SMS REST API Error (URL: ' . $rest_url . '): ' . $last_error);
+                        error_log('AutoPuzzle SMS REST API Error (URL: ' . $rest_url . '): ' . $last_error);
                     }
                     continue; // Try next URL
                 }
@@ -578,7 +578,7 @@ class Maneli_SMS_Handler {
             } catch (Exception $e) {
                 $last_error = $e->getMessage();
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli SMS REST API Exception (URL: ' . $rest_url . '): ' . $last_error);
+                    error_log('AutoPuzzle SMS REST API Exception (URL: ' . $rest_url . '): ' . $last_error);
                 }
                 continue; // Try next URL
             }
@@ -587,7 +587,7 @@ class Maneli_SMS_Handler {
         // Check if we got a valid result
         if ($credit_result === null || $credit_result === '') {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS API Error: getCredit returned null/empty result after trying all URLs. Last error: ' . $last_error);
+                error_log('AutoPuzzle SMS API Error: getCredit returned null/empty result after trying all URLs. Last error: ' . $last_error);
             }
             return false;
         }
@@ -598,7 +598,7 @@ class Maneli_SMS_Handler {
         // Check if it's a valid positive number
         if ($credit === false || $credit < 0) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS API Error: Invalid credit value returned: ' . var_export($credit_result, true) . ' (Type: ' . gettype($credit_result) . ')');
+                error_log('AutoPuzzle SMS API Error: Invalid credit value returned: ' . var_export($credit_result, true) . ' (Type: ' . gettype($credit_result) . ')');
             }
             return false;
         }
@@ -607,7 +607,7 @@ class Maneli_SMS_Handler {
 
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS General Exception (getCredit): ' . $e->getMessage());
+                error_log('AutoPuzzle SMS General Exception (getCredit): ' . $e->getMessage());
             }
             return false;
         }

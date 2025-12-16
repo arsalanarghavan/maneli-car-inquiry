@@ -3,8 +3,8 @@
  * Handles the logic and rendering for Admin Dashboard Widgets and Statistics.
  * این کلاس برای ارائه متدهای استاتیک نمایش ویجت‌های آماری به داشبورد وردپرس و شورت‌کدها استفاده می‌شود.
  *
- * @package Maneli_Car_Inquiry/Includes
- * @author  Maneli
+ * @package Autopuzzle_Car_Inquiry/Includes
+ * @author  AutoPuzzle
  * @version 1.0.2 (Implemented live statistics)
  */
 
@@ -12,14 +12,14 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Admin_Dashboard_Widgets {
+class Autopuzzle_Admin_Dashboard_Widgets {
 
     /**
      * Constructor.
      */
     public function __construct() {
         // افزودن ویجت‌های داشبورد فقط برای نقش‌هایی که دسترسی دارند
-        // اگرچه هیچ رولی به پیشخوان دسترسی ندارد، این ویجت‌ها برای admin/maneli_admin نمایش داده می‌شوند.
+        // اگرچه هیچ رولی به پیشخوان دسترسی ندارد، این ویجت‌ها برای admin/autopuzzle_admin نمایش داده می‌شوند.
         add_action('wp_dashboard_setup', array($this, 'register_dashboard_widgets'));
     }
 
@@ -27,42 +27,42 @@ class Maneli_Admin_Dashboard_Widgets {
      * Registers the custom dashboard widgets.
      */
     public function register_dashboard_widgets() {
-        // از فرض وجود کلاس Maneli_Permission_Helpers برای بررسی دسترسی استفاده شده است.
-        if (!current_user_can('manage_maneli_inquiries')) {
+        // از فرض وجود کلاس Autopuzzle_Permission_Helpers برای بررسی دسترسی استفاده شده است.
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             return;
         }
         
         // ویجت‌های آماری استعلام قسطی
         wp_add_dashboard_widget(
-            'maneli_inquiry_stats',
-            esc_html__('Installment Inquiry Statistics', 'maneli-car-inquiry'),
+            'autopuzzle_inquiry_stats',
+            esc_html__('Installment Inquiry Statistics', 'autopuzzle'),
             array(__CLASS__, 'render_inquiry_statistics_widgets') 
         );
 
         // ویجت‌های آماری استعلام نقدی
         wp_add_dashboard_widget(
-            'maneli_cash_inquiry_stats',
-            esc_html__('Cash Inquiry Statistics', 'maneli-car-inquiry'),
+            'autopuzzle_cash_inquiry_stats',
+            esc_html__('Cash Inquiry Statistics', 'autopuzzle'),
             array(__CLASS__, 'render_cash_inquiry_statistics_widgets')
         );
 
         // ویجت‌های آماری کاربران و محصولات
         wp_add_dashboard_widget(
-            'maneli_user_stats',
-            esc_html__('User Statistics', 'maneli-car-inquiry'),
+            'autopuzzle_user_stats',
+            esc_html__('User Statistics', 'autopuzzle'),
             array(__CLASS__, 'render_user_statistics_widgets')
         );
         
         wp_add_dashboard_widget(
-            'maneli_product_stats',
-            esc_html__('Product Statistics', 'maneli-car-inquiry'),
+            'autopuzzle_product_stats',
+            esc_html__('Product Statistics', 'autopuzzle'),
             array(__CLASS__, 'render_product_statistics_widgets')
         );
         
         // ویجت گزارشات پیشرفته
         wp_add_dashboard_widget(
-            'maneli_advanced_reports',
-            '📊 ' . esc_html__('Advanced Reports', 'maneli-car-inquiry'),
+            'autopuzzle_advanced_reports',
+            '📊 ' . esc_html__('Advanced Reports', 'autopuzzle'),
             array(__CLASS__, 'render_advanced_reports_widget')
         );
     }
@@ -105,10 +105,10 @@ class Maneli_Admin_Dashboard_Widgets {
      * این متد هم برای ویجت داشبورد و هم برای فراخوانی استاتیک در شورت‌کدها استفاده می‌شود.
      */
     public static function render_inquiry_statistics_widgets() {
-        if (!class_exists('Maneli_CPT_Handler')) return '';
+        if (!class_exists('Autopuzzle_CPT_Handler')) return '';
 
         $counts = self::get_inquiry_counts('inquiry');
-        $statuses = Maneli_CPT_Handler::get_tracking_statuses();
+        $statuses = Autopuzzle_CPT_Handler::get_tracking_statuses();
         
         // مهم‌ترین وضعیت‌ها برای نمایش (حداکثر 10 کارت: 1 کل + 9 وضعیت)
         $important_statuses = [
@@ -125,7 +125,7 @@ class Maneli_Admin_Dashboard_Widgets {
         
         // Build stats array with important statuses only
         $stats = [
-            'total' => ['label' => esc_html__('Total Installment Requests', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+            'total' => ['label' => esc_html__('Total Installment Requests', 'autopuzzle'), 'count' => $counts['total'], 'class' => 'total'],
         ];
         
         // Add only important tracking statuses
@@ -157,32 +157,32 @@ class Maneli_Admin_Dashboard_Widgets {
         ?>
         <style>
         /* Inquiry Statistics Cards */
-        .maneli-inquiry-stats {
+        .autopuzzle-inquiry-stats {
             display: flex !important;
             flex-wrap: wrap !important;
             margin-right: -0.5rem;
             margin-left: -0.5rem;
         }
-        .maneli-inquiry-stats__col {
+        .autopuzzle-inquiry-stats__col {
             padding-right: 0.5rem;
             padding-left: 0.5rem;
             flex: 0 0 20% !important;
             max-width: 20% !important;
         }
         @media (max-width: 1399.98px) {
-            .maneli-inquiry-stats__col {
+            .autopuzzle-inquiry-stats__col {
                 flex: 0 0 25% !important;
                 max-width: 25% !important;
             }
         }
         @media (max-width: 991.98px) {
-            .maneli-inquiry-stats__col {
+            .autopuzzle-inquiry-stats__col {
                 flex: 0 0 33.333333% !important;
                 max-width: 33.333333% !important;
             }
         }
         @media (max-width: 767.98px) {
-            .maneli-inquiry-stats {
+            .autopuzzle-inquiry-stats {
                 flex-wrap: nowrap !important;
                 overflow-x: auto;
                 padding-bottom: 0.75rem;
@@ -191,13 +191,13 @@ class Maneli_Admin_Dashboard_Widgets {
                 gap: 0.75rem;
                 -webkit-overflow-scrolling: touch;
             }
-            .maneli-inquiry-stats__col {
+            .autopuzzle-inquiry-stats__col {
                 flex: 0 0 66% !important;
                 max-width: 66% !important;
                 padding-right: 0;
                 padding-left: 0;
             }
-            .maneli-inquiry-stats::-webkit-scrollbar {
+            .autopuzzle-inquiry-stats::-webkit-scrollbar {
                 display: none;
             }
         }
@@ -272,11 +272,11 @@ class Maneli_Admin_Dashboard_Widgets {
         .card.custom-card.crm-card .border-warning, .card.custom-card.crm-card .bg-warning { background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important; }
         .card.custom-card.crm-card .border-danger, .card.custom-card.crm-card .bg-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; }
         </style>
-        <div class="row mb-4 maneli-inquiry-stats">
+        <div class="row mb-4 autopuzzle-inquiry-stats">
             <?php foreach ($stats as $key => $stat) : 
                 $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="maneli-inquiry-stats__col col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
+                <div class="autopuzzle-inquiry-stats__col col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
                     <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">
@@ -288,7 +288,7 @@ class Maneli_Admin_Dashboard_Widgets {
                             </div>
                             <p class="flex-fill text-muted fs-14 mb-1"><?php echo esc_html($stat['label']); ?></p>
                             <div class="d-flex align-items-center justify-content-between mt-1">
-                                <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                                <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stat['count']); ?></h4>
                                 <span class="badge bg-<?php echo esc_attr($config['color']); ?>-transparent rounded-pill fs-11"><?php echo esc_html($stat['label']); ?></span>
                             </div>
                         </div>
@@ -304,10 +304,10 @@ class Maneli_Admin_Dashboard_Widgets {
      * Renders the statistics widgets for cash inquiries.
      */
     public static function render_cash_inquiry_statistics_widgets() {
-        if (!class_exists('Maneli_CPT_Handler')) return '';
+        if (!class_exists('Autopuzzle_CPT_Handler')) return '';
 
         $counts = self::get_inquiry_counts('cash_inquiry');
-        $statuses = Maneli_CPT_Handler::get_all_cash_inquiry_statuses();
+        $statuses = Autopuzzle_CPT_Handler::get_all_cash_inquiry_statuses();
         
         // مهم‌ترین وضعیت‌ها برای نمایش (حداکثر 10 کارت: 1 کل + 9 وضعیت)
         $important_statuses = [
@@ -324,7 +324,7 @@ class Maneli_Admin_Dashboard_Widgets {
         
         // Build stats array with important statuses only
         $stats = [
-            'total' => ['label' => esc_html__('Total Cash Requests', 'maneli-car-inquiry'), 'count' => $counts['total'], 'class' => 'total'],
+            'total' => ['label' => esc_html__('Total Cash Requests', 'autopuzzle'), 'count' => $counts['total'], 'class' => 'total'],
         ];
         
         // Add only important cash inquiry statuses
@@ -358,32 +358,32 @@ class Maneli_Admin_Dashboard_Widgets {
         ?>
         <style>
         /* Cash Inquiry Statistics Cards */
-        .maneli-inquiry-stats {
+        .autopuzzle-inquiry-stats {
             display: flex !important;
             flex-wrap: wrap !important;
             margin-right: -0.5rem;
             margin-left: -0.5rem;
         }
-        .maneli-inquiry-stats__col {
+        .autopuzzle-inquiry-stats__col {
             padding-right: 0.5rem;
             padding-left: 0.5rem;
             flex: 0 0 20% !important;
             max-width: 20% !important;
         }
         @media (max-width: 1399.98px) {
-            .maneli-inquiry-stats__col {
+            .autopuzzle-inquiry-stats__col {
                 flex: 0 0 25% !important;
                 max-width: 25% !important;
             }
         }
         @media (max-width: 991.98px) {
-            .maneli-inquiry-stats__col {
+            .autopuzzle-inquiry-stats__col {
                 flex: 0 0 33.333333% !important;
                 max-width: 33.333333% !important;
             }
         }
         @media (max-width: 767.98px) {
-            .maneli-inquiry-stats {
+            .autopuzzle-inquiry-stats {
                 flex-wrap: nowrap !important;
                 overflow-x: auto;
                 padding-bottom: 0.75rem;
@@ -392,13 +392,13 @@ class Maneli_Admin_Dashboard_Widgets {
                 gap: 0.75rem;
                 -webkit-overflow-scrolling: touch;
             }
-            .maneli-inquiry-stats__col {
+            .autopuzzle-inquiry-stats__col {
                 flex: 0 0 66% !important;
                 max-width: 66% !important;
                 padding-right: 0;
                 padding-left: 0;
             }
-            .maneli-inquiry-stats::-webkit-scrollbar {
+            .autopuzzle-inquiry-stats::-webkit-scrollbar {
                 display: none;
             }
         }
@@ -473,11 +473,11 @@ class Maneli_Admin_Dashboard_Widgets {
         .card.custom-card.crm-card .border-warning, .card.custom-card.crm-card .bg-warning { background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%) !important; }
         .card.custom-card.crm-card .border-danger, .card.custom-card.crm-card .bg-danger { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important; }
         </style>
-        <div class="row mb-4 maneli-inquiry-stats">
+        <div class="row mb-4 autopuzzle-inquiry-stats">
             <?php foreach ($stats as $key => $stat) :
                 $config = $stat_configs[$key] ?? ['icon' => 'la-info-circle', 'color' => 'secondary', 'bg' => 'bg-secondary-transparent'];
             ?>
-                <div class="maneli-inquiry-stats__col col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
+                <div class="autopuzzle-inquiry-stats__col col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-3">
                     <div class="card custom-card crm-card overflow-hidden">
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">
@@ -489,7 +489,7 @@ class Maneli_Admin_Dashboard_Widgets {
                             </div>
                             <p class="flex-fill text-muted fs-14 mb-1"><?php echo esc_html($stat['label']); ?></p>
                             <div class="d-flex align-items-center justify-content-between mt-1">
-                                <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stat['count']); ?></h4>
+                                <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stat['count']); ?></h4>
                                 <span class="badge bg-<?php echo esc_attr($config['color']); ?>-transparent rounded-pill fs-11"><?php echo esc_html($stat['label']); ?></span>
                             </div>
                         </div>
@@ -506,17 +506,17 @@ class Maneli_Admin_Dashboard_Widgets {
      */
     public static function render_user_statistics_widgets() {
         $total_users = count_users();
-        $expert_count = $total_users['avail_roles']['maneli_expert'] ?? 0;
+        $expert_count = $total_users['avail_roles']['autopuzzle_expert'] ?? 0;
         
         $stats = [
-            'total_users' => ['label' => esc_html__('Total Users', 'maneli-car-inquiry'), 'count' => $total_users['total_users'], 'class' => 'total'],
-            'experts'     => ['label' => esc_html__('Maneli Experts', 'maneli-car-inquiry'), 'count' => $expert_count, 'class' => 'expert'],
-            'admins'      => ['label' => esc_html__('Managers', 'maneli-car-inquiry'), 'count' => $total_users['avail_roles']['maneli_admin'] ?? 0, 'class' => 'admin'],
+            'total_users' => ['label' => esc_html__('Total Users', 'autopuzzle'), 'count' => $total_users['total_users'], 'class' => 'total'],
+            'experts'     => ['label' => esc_html__('AutoPuzzle Experts', 'autopuzzle'), 'count' => $expert_count, 'class' => 'expert'],
+            'admins'      => ['label' => esc_html__('Managers', 'autopuzzle'), 'count' => $total_users['avail_roles']['autopuzzle_admin'] ?? 0, 'class' => 'admin'],
         ];
         
         ob_start();
         ?>
-        <div class="maneli-dashboard-stats-wrapper">
+        <div class="autopuzzle-dashboard-stats-wrapper">
             <?php foreach ($stats as $stat) : ?>
                 <div class="stat-widget stat-<?php echo esc_attr($stat['class']); ?>">
                     <span class="stat-count"><?php echo number_format_i18n($stat['count']); ?></span>
@@ -541,15 +541,15 @@ class Maneli_Admin_Dashboard_Widgets {
         $disabled_products_count = count(wc_get_products(['limit' => -1, 'status' => 'publish', 'meta_key' => '_maneli_car_status', 'meta_value' => 'disabled', 'return' => 'ids']));
         
         $stats = [
-            'total'       => ['label' => esc_html__('Total Products', 'maneli-car-inquiry'), 'count' => $total_products, 'class' => 'total'],
-            'active_sale' => ['label' => esc_html__('Active for Sale', 'maneli-car-inquiry'), 'count' => $active_products_count, 'class' => 'active'],
-            'unavailable' => ['label' => esc_html__('Unavailable', 'maneli-car-inquiry'), 'count' => $unavailable_products_count, 'class' => 'unavailable'],
-            'disabled'    => ['label' => esc_html__('Hidden Products', 'maneli-car-inquiry'), 'count' => $disabled_products_count, 'class' => 'disabled'],
+            'total'       => ['label' => esc_html__('Total Products', 'autopuzzle'), 'count' => $total_products, 'class' => 'total'],
+            'active_sale' => ['label' => esc_html__('Active for Sale', 'autopuzzle'), 'count' => $active_products_count, 'class' => 'active'],
+            'unavailable' => ['label' => esc_html__('Unavailable', 'autopuzzle'), 'count' => $unavailable_products_count, 'class' => 'unavailable'],
+            'disabled'    => ['label' => esc_html__('Hidden Products', 'autopuzzle'), 'count' => $disabled_products_count, 'class' => 'disabled'],
         ];
 
         ob_start();
         ?>
-        <div class="maneli-dashboard-stats-wrapper">
+        <div class="autopuzzle-dashboard-stats-wrapper">
             <?php foreach ($stats as $stat) : ?>
                 <div class="stat-widget stat-<?php echo esc_attr($stat['class']); ?>">
                     <span class="stat-count"><?php echo number_format_i18n($stat['count']); ?></span>
@@ -565,23 +565,23 @@ class Maneli_Admin_Dashboard_Widgets {
      * رندر ویجت گزارشات پیشرفته
      */
     public static function render_advanced_reports_widget() {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-reports-dashboard.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-reports-dashboard.php';
         
         // دریافت آمار 30 روز گذشته
-        $stats = Maneli_Reports_Dashboard::get_overall_statistics();
+        $stats = Autopuzzle_Reports_Dashboard::get_overall_statistics();
         
         // دریافت کارشناس فعلی
         $current_user = wp_get_current_user();
-        $is_expert = in_array('maneli_expert', $current_user->roles);
+        $is_expert = in_array('autopuzzle_expert', $current_user->roles);
         
         if ($is_expert) {
-            $stats = Maneli_Reports_Dashboard::get_overall_statistics(null, null, $current_user->ID);
+            $stats = Autopuzzle_Reports_Dashboard::get_overall_statistics(null, null, $current_user->ID);
         }
         
         ?>
-        <div class="maneli-advanced-reports-widget">
+        <div class="autopuzzle-advanced-reports-widget">
             <style>
-                .maneli-advanced-reports-widget {
+                .autopuzzle-advanced-reports-widget {
                     padding: 10px 0;
                 }
                 .reports-stats-grid {
@@ -684,7 +684,7 @@ class Maneli_Admin_Dashboard_Widgets {
                 
                 <div class="report-stat-box following">
                     <span class="number"><?php echo number_format($stats['following']); ?></span>
-                    <span class="label"><?php esc_html_e('Follow-up', 'maneli-car-inquiry'); ?></span>
+                    <span class="label"><?php esc_html_e('Follow-up', 'autopuzzle'); ?></span>
                 </div>
                 
                 <div class="report-stat-box revenue">
@@ -706,7 +706,7 @@ class Maneli_Admin_Dashboard_Widgets {
             </div>
             
             <div class="reports-quick-links">
-                <a href="<?php echo admin_url('edit.php?post_type=cash_inquiry&page=maneli-reports'); ?>">
+                <a href="<?php echo admin_url('edit.php?post_type=cash_inquiry&page=autopuzzle-reports'); ?>">
                     📊 گزارشات کامل
                 </a>
                 <a href="<?php echo admin_url('edit.php?post_type=cash_inquiry'); ?>">

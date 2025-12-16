@@ -4,7 +4,7 @@
  * Complete notifications page that syncs with header notifications
  * Displays all new inquiries and notifications
  *
- * @package Maneli_Car_Inquiry
+ * @package AutoPuzzle
  */
 
 if (!defined('ABSPATH')) {
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Get user data - works for all users (customer, expert, manager, admin)
-$handler = Maneli_Dashboard_Handler::instance();
+$handler = Autopuzzle_Dashboard_Handler::instance();
 $user_data = $handler->get_current_user_for_template();
 $current_user = $user_data['wp_user'];
 $user_id = $user_data['user_id'] ?? 0;
@@ -28,16 +28,16 @@ if (!$current_user) {
     if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
         session_start();
     }
-    if (isset($_SESSION['maneli']['user_id'])) {
-        $user_id = $_SESSION['maneli']['user_id'];
-    } elseif (isset($_SESSION['maneli_user_name'])) {
+    if (isset($_SESSION['autopuzzle']['user_id'])) {
+        $user_id = $_SESSION['autopuzzle']['user_id'];
+    } elseif (isset($_SESSION['autopuzzle_user_name'])) {
         // Fallback for old session format
         $user_id = 0; // Session-based users don't have WP user ID
     }
 }
 
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_expert = in_array('maneli_expert', $current_user ? $current_user->roles : [], true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_expert = in_array('autopuzzle_expert', $current_user ? $current_user->roles : [], true);
 
 // Check permission - must be logged in (either WordPress or session)
 if (!is_user_logged_in() && empty($user_id)) {
@@ -45,13 +45,13 @@ if (!is_user_logged_in() && empty($user_id)) {
     exit;
 }
 
-require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
 
 // Get notification statistics - works for all users
 // For session-based users without WP user ID, try to find user by phone
 $notification_user_id = $user_id;
-if ($user_id == 0 && isset($_SESSION['maneli_user_phone'])) {
-    $phone_user = get_user_by('login', $_SESSION['maneli_user_phone']);
+if ($user_id == 0 && isset($_SESSION['autopuzzle_user_phone'])) {
+    $phone_user = get_user_by('login', $_SESSION['autopuzzle_user_phone']);
     if ($phone_user) {
         $notification_user_id = $phone_user->ID;
     }
@@ -63,16 +63,16 @@ $read_count = 0;
 
 if ($notification_user_id > 0) {
     // OPTIMIZED: Reduced limit from 1000 to 100 to save memory (load more via AJAX if needed)
-    $total_notifications = count(Maneli_Notification_Handler::get_notifications([
+    $total_notifications = count(Autopuzzle_Notification_Handler::get_notifications([
         'user_id' => $notification_user_id,
         'limit' => 100,  // Reduced from 1000 for memory efficiency
         'offset' => 0,
     ]));
-    $unread_count = Maneli_Notification_Handler::get_unread_count($notification_user_id);
+    $unread_count = Autopuzzle_Notification_Handler::get_unread_count($notification_user_id);
     $read_count = $total_notifications - $unread_count;
 }
 
-$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+$use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 
 // Get all new inquiries (for admin and experts)
 $new_inquiries = [];
@@ -123,7 +123,7 @@ if ($is_admin || $is_expert) {
 }
 
 $ajax_url = admin_url('admin-ajax.php');
-$nonce = wp_create_nonce('maneli_notifications_nonce');
+$nonce = wp_create_nonce('autopuzzle_notifications_nonce');
 ?>
 
 <div class="main-content app-content">
@@ -135,21 +135,21 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                 <nav>
                     <ol class="breadcrumb mb-1">
                         <li class="breadcrumb-item">
-                            <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                            <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Notifications', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Notifications', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Notifications and Alerts', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Notifications and Alerts', 'autopuzzle'); ?></h1>
             </div>
             <div class="notification-actions d-flex flex-wrap gap-2 w-100 justify-content-lg-end">
                 <button type="button" class="btn btn-primary btn-wave" id="mark-all-read-btn">
                     <i class="la la-check-double me-1"></i>
-                    <?php esc_html_e('Mark All as Read', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Mark All as Read', 'autopuzzle'); ?>
                 </button>
                 <button type="button" class="btn btn-light btn-wave" id="delete-read-btn">
                     <i class="la la-trash me-1"></i>
-                    <?php esc_html_e('Delete Read', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Delete Read', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -283,10 +283,10 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Notifications', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Notifications', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center" id="total-count"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($total_notifications) : number_format_i18n($total_notifications); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center" id="total-count"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($total_notifications) : number_format_i18n($total_notifications); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -301,10 +301,10 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Unread', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Unread', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-danger" id="unread-count"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($unread_count) : number_format_i18n($unread_count); ?></h4>
-                            <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Unread', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center text-danger" id="unread-count"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($unread_count) : number_format_i18n($unread_count); ?></h4>
+                            <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Unread', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -319,10 +319,10 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Read', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Read', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-success" id="read-count"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($read_count) : number_format_i18n($read_count); ?></h4>
-                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Read', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center text-success" id="read-count"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($read_count) : number_format_i18n($read_count); ?></h4>
+                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Read', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -336,20 +336,20 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="all-tab" data-filter="all" type="button" role="tab">
                             <i class="la la-list me-1"></i>
-                            <?php esc_html_e('All Notifications', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('All Notifications', 'autopuzzle'); ?>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="unread-tab" data-filter="unread" type="button" role="tab">
                             <i class="la la-bell-slash me-1"></i>
-                            <?php esc_html_e('Unread', 'maneli-car-inquiry'); ?>
-                            <span class="badge bg-danger ms-1" id="unread-badge"><?php echo maneli_number_format_persian($unread_count); ?></span>
+                            <?php esc_html_e('Unread', 'autopuzzle'); ?>
+                            <span class="badge bg-danger ms-1" id="unread-badge"><?php echo autopuzzle_number_format_persian($unread_count); ?></span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="read-tab" data-filter="read" type="button" role="tab">
                             <i class="la la-check-circle me-1"></i>
-                            <?php esc_html_e('Read', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Read', 'autopuzzle'); ?>
                         </button>
                     </li>
                 </ul>
@@ -363,9 +363,9 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     <!-- Notifications will be loaded here -->
                     <div class="text-center py-5">
                         <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
+                            <span class="visually-hidden"><?php esc_html_e('Loading...', 'autopuzzle'); ?></span>
                         </div>
-                        <p class="text-muted mt-3"><?php esc_html_e('Loading notifications...', 'maneli-car-inquiry'); ?></p>
+                        <p class="text-muted mt-3"><?php esc_html_e('Loading notifications...', 'autopuzzle'); ?></p>
                     </div>
                 </div>
             </div>
@@ -401,32 +401,32 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
         
         // Localized strings
         const notifTranslations = {
-            noNotifications: <?php echo wp_json_encode(esc_html__('No notifications', 'maneli-car-inquiry')); ?>,
-            noNotificationsDesc: <?php echo wp_json_encode(esc_html__('When you receive new notifications, they will appear here.', 'maneli-car-inquiry')); ?>,
-            markAsRead: <?php echo wp_json_encode(esc_html__('Mark as Read', 'maneli-car-inquiry')); ?>,
-            delete: <?php echo wp_json_encode(esc_html__('Delete', 'maneli-car-inquiry')); ?>,
-            processing: <?php echo wp_json_encode(esc_html__('Processing...', 'maneli-car-inquiry')); ?>,
-            markAllRead: <?php echo wp_json_encode(esc_html__('Mark All as Read', 'maneli-car-inquiry')); ?>,
-            loadingError: <?php echo wp_json_encode(esc_html__('Error loading notifications', 'maneli-car-inquiry')); ?>,
-            serverError: <?php echo wp_json_encode(esc_html__('Server connection error', 'maneli-car-inquiry')); ?>,
-            operationFailed: <?php echo wp_json_encode(esc_html__('Operation failed', 'maneli-car-inquiry')); ?>,
-            deleteAllReadConfirm: <?php echo wp_json_encode(esc_html__('Are you sure you want to delete all read notifications?', 'maneli-car-inquiry')); ?>,
-            deleting: <?php echo wp_json_encode(esc_html__('Deleting...', 'maneli-car-inquiry')); ?>,
-            deleteRead: <?php echo wp_json_encode(esc_html__('Delete Read', 'maneli-car-inquiry')); ?>,
-            deleteConfirm: <?php echo wp_json_encode(esc_html__('Are you sure you want to delete this notification?', 'maneli-car-inquiry')); ?>,
-            loadingShort: <?php echo wp_json_encode(esc_html__('Loading...', 'maneli-car-inquiry')); ?>,
-            loadingLong: <?php echo wp_json_encode(esc_html__('Loading notifications...', 'maneli-car-inquiry')); ?>,
-            unreadLabel: <?php echo wp_json_encode(esc_html__('%s unread', 'maneli-car-inquiry')); ?>,
-            errorPrefix: <?php echo wp_json_encode(esc_html__('Error: ', 'maneli-car-inquiry')); ?>
+            noNotifications: <?php echo wp_json_encode(esc_html__('No notifications', 'autopuzzle')); ?>,
+            noNotificationsDesc: <?php echo wp_json_encode(esc_html__('When you receive new notifications, they will appear here.', 'autopuzzle')); ?>,
+            markAsRead: <?php echo wp_json_encode(esc_html__('Mark as Read', 'autopuzzle')); ?>,
+            delete: <?php echo wp_json_encode(esc_html__('Delete', 'autopuzzle')); ?>,
+            processing: <?php echo wp_json_encode(esc_html__('Processing...', 'autopuzzle')); ?>,
+            markAllRead: <?php echo wp_json_encode(esc_html__('Mark All as Read', 'autopuzzle')); ?>,
+            loadingError: <?php echo wp_json_encode(esc_html__('Error loading notifications', 'autopuzzle')); ?>,
+            serverError: <?php echo wp_json_encode(esc_html__('Server connection error', 'autopuzzle')); ?>,
+            operationFailed: <?php echo wp_json_encode(esc_html__('Operation failed', 'autopuzzle')); ?>,
+            deleteAllReadConfirm: <?php echo wp_json_encode(esc_html__('Are you sure you want to delete all read notifications?', 'autopuzzle')); ?>,
+            deleting: <?php echo wp_json_encode(esc_html__('Deleting...', 'autopuzzle')); ?>,
+            deleteRead: <?php echo wp_json_encode(esc_html__('Delete Read', 'autopuzzle')); ?>,
+            deleteConfirm: <?php echo wp_json_encode(esc_html__('Are you sure you want to delete this notification?', 'autopuzzle')); ?>,
+            loadingShort: <?php echo wp_json_encode(esc_html__('Loading...', 'autopuzzle')); ?>,
+            loadingLong: <?php echo wp_json_encode(esc_html__('Loading notifications...', 'autopuzzle')); ?>,
+            unreadLabel: <?php echo wp_json_encode(esc_html__('%s unread', 'autopuzzle')); ?>,
+            errorPrefix: <?php echo wp_json_encode(esc_html__('Error: ', 'autopuzzle')); ?>
         };
 
         const shouldUsePersianDigits = <?php echo $use_persian_digits ? 'true' : 'false'; ?>;
-        const digitsHelper = window.maneliLocale || window.maneliDigits || {};
+        const digitsHelper = window.autopuzzleLocale || window.autopuzzleDigits || {};
         
         // Load notifications
     function loadNotifications(filter) {
         var data = {
-            action: 'maneli_get_notifications',
+            action: 'autopuzzle_get_notifications',
             nonce: nonce,
             limit: 100,
             offset: 0
@@ -490,7 +490,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
             html += '<div class="d-flex align-items-start gap-3 p-3 border-bottom">';
             
             // Icon
-            html += '<div class="notification-icon ' + bgClass + ' rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 maneli-notification-icon">';
+            html += '<div class="notification-icon ' + bgClass + ' rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 autopuzzle-notification-icon">';
             html += '<i class="' + iconClass + ' fs-5"></i>';
             html += '</div>';
             
@@ -556,7 +556,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
             url: ajaxUrl,
             type: 'POST',
             data: {
-                action: 'maneli_get_unread_count',
+                action: 'autopuzzle_get_unread_count',
                 nonce: nonce
             },
             success: function(response) {
@@ -583,12 +583,12 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                         if (unread > 0) {
                             $headerBadge
                                 .text('')
-                                .removeClass('maneli-initially-hidden')
+                                .removeClass('autopuzzle-initially-hidden')
                                 .show();
                         } else {
                             $headerBadge
                                 .text('')
-                                .addClass('maneli-initially-hidden')
+                                .addClass('autopuzzle-initially-hidden')
                                 .hide();
                         }
                     }
@@ -646,7 +646,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
             url: ajaxUrl,
             type: 'POST',
             data: {
-                action: 'maneli_mark_all_notifications_read',
+                action: 'autopuzzle_mark_all_notifications_read',
                 nonce: nonce
             },
             success: function(response) {
@@ -654,12 +654,12 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     loadNotifications(currentFilter);
                     updateCounts();
                     // Reload header notifications if function exists
-                    if (typeof maneliNotifications !== 'undefined') {
-                        if (maneliNotifications.loadHeaderNotifications) {
-                            maneliNotifications.loadHeaderNotifications();
+                    if (typeof autopuzzleNotifications !== 'undefined') {
+                        if (autopuzzleNotifications.loadHeaderNotifications) {
+                            autopuzzleNotifications.loadHeaderNotifications();
                         }
-                        if (maneliNotifications.loadUnreadCount) {
-                            maneliNotifications.loadUnreadCount();
+                        if (autopuzzleNotifications.loadUnreadCount) {
+                            autopuzzleNotifications.loadUnreadCount();
                         }
                     }
                 } else {
@@ -688,7 +688,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
             url: ajaxUrl,
             type: 'POST',
             data: {
-                action: 'maneli_delete_all_read_notifications',
+                action: 'autopuzzle_delete_all_read_notifications',
                 nonce: nonce
             },
             success: function(response) {
@@ -720,7 +720,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
             url: ajaxUrl,
             type: 'POST',
             data: {
-                action: 'maneli_mark_notification_read',
+                action: 'autopuzzle_mark_notification_read',
                 nonce: nonce,
                 notification_id: notificationId
             },
@@ -734,12 +734,12 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                     );
                     updateCounts();
                     // Reload header notifications if function exists
-                    if (typeof maneliNotifications !== 'undefined') {
-                        if (maneliNotifications.loadHeaderNotifications) {
-                            maneliNotifications.loadHeaderNotifications();
+                    if (typeof autopuzzleNotifications !== 'undefined') {
+                        if (autopuzzleNotifications.loadHeaderNotifications) {
+                            autopuzzleNotifications.loadHeaderNotifications();
                         }
-                        if (maneliNotifications.loadUnreadCount) {
-                            maneliNotifications.loadUnreadCount();
+                        if (autopuzzleNotifications.loadUnreadCount) {
+                            autopuzzleNotifications.loadUnreadCount();
                         }
                     }
                 }
@@ -769,7 +769,7 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
             url: ajaxUrl,
             type: 'POST',
             data: {
-                action: 'maneli_delete_notification',
+                action: 'autopuzzle_delete_notification',
                 nonce: nonce,
                 notification_id: notificationId
             },
@@ -782,12 +782,12 @@ $nonce = wp_create_nonce('maneli_notifications_nonce');
                         }
                         updateCounts();
                     // Reload header notifications if function exists
-                    if (typeof maneliNotifications !== 'undefined') {
-                        if (maneliNotifications.loadHeaderNotifications) {
-                            maneliNotifications.loadHeaderNotifications();
+                    if (typeof autopuzzleNotifications !== 'undefined') {
+                        if (autopuzzleNotifications.loadHeaderNotifications) {
+                            autopuzzleNotifications.loadHeaderNotifications();
                         }
-                        if (maneliNotifications.loadUnreadCount) {
-                            maneliNotifications.loadUnreadCount();
+                        if (autopuzzleNotifications.loadUnreadCount) {
+                            autopuzzleNotifications.loadUnreadCount();
                         }
                     }
                     });

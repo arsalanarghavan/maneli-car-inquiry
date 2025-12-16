@@ -4,7 +4,7 @@
  * 
  * Renders the sidebar menu based on user role
  * 
- * @package Maneli_Car_Inquiry
+ * @package AutoPuzzle
  */
 
 if (!defined('ABSPATH')) {
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Get menu items from handler
-$handler = Maneli_Dashboard_Handler::instance();
+$handler = Autopuzzle_Dashboard_Handler::instance();
 $menu_items = $handler->get_menu_items();
 
 /**
@@ -85,12 +85,12 @@ function render_menu_items($menu_items, $level = 0) {
     <!-- Start::main-sidebar-header -->
     <div class="main-sidebar-header">
         <a href="<?php echo home_url('/dashboard'); ?>" class="header-logo">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-dark.ico" alt="logo" class="toggle-dark">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/toggle-white.ico" alt="logo" class="toggle-white">
-            <img src="<?php echo MANELI_INQUIRY_PLUGIN_URL; ?>assets/images/brand-logos/desktop-white.png" alt="logo" class="desktop-white">
+            <img src="<?php echo autopuzzle_logo('main'); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="desktop-logo">
+            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/toggle-dark.ico" alt="logo" class="toggle-dark">
+            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
+            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
+            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/toggle-white.ico" alt="logo" class="toggle-white">
+            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/desktop-white.png" alt="logo" class="desktop-white">
         </a>
     </div>
     <!-- End::main-sidebar-header -->

@@ -16,7 +16,7 @@ if (!function_exists('persian_numbers')) {
 }
 
 // Permission check - must have capability to view user details
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
@@ -33,7 +33,7 @@ if (!$user_id || $user_id <= 0) {
         <div class="col-xl-12">
             <div class="alert alert-warning">
                 <i class="la la-exclamation-triangle me-2"></i>
-                <?php esc_html_e('User not specified.', 'maneli-car-inquiry'); ?>
+                <?php esc_html_e('User not specified.', 'autopuzzle'); ?>
             </div>
         </div>
     </div>
@@ -49,7 +49,7 @@ if (!$user) {
         <div class="col-xl-12">
             <div class="alert alert-danger">
                 <i class="la la-exclamation-triangle me-2"></i>
-                <?php esc_html_e('User not found.', 'maneli-car-inquiry'); ?>
+                <?php esc_html_e('User not found.', 'autopuzzle'); ?>
             </div>
         </div>
     </div>
@@ -57,9 +57,9 @@ if (!$user) {
     return;
 }
 
-// Additional security: Users can only view their own profile unless they have manage_maneli_inquiries capability
+// Additional security: Users can only view their own profile unless they have manage_autopuzzle_inquiries capability
 // (This is already enforced by the capability check above, but adding explicit check for clarity)
-if (!current_user_can('manage_maneli_inquiries') && get_current_user_id() !== $user_id) {
+if (!current_user_can('manage_autopuzzle_inquiries') && get_current_user_id() !== $user_id) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
@@ -105,30 +105,30 @@ $cash_inquiries = get_posts([
 $user_roles = $user->roles;
 $role_display = !empty($user_roles) ? $user_roles[0] : '';
 $role_labels = [
-    'administrator' => esc_html__('Administrator', 'maneli-car-inquiry'),
-    'maneli_admin' => esc_html__('Maneli Admin', 'maneli-car-inquiry'),
-    'maneli_expert' => esc_html__('Expert', 'maneli-car-inquiry'),
-    'customer' => esc_html__('Customer', 'maneli-car-inquiry'),
-    'subscriber' => esc_html__('Subscriber', 'maneli-car-inquiry')
+    'administrator' => esc_html__('Administrator', 'autopuzzle'),
+    'autopuzzle_admin' => esc_html__('AutoPuzzle Admin', 'autopuzzle'),
+    'autopuzzle_expert' => esc_html__('Expert', 'autopuzzle'),
+    'customer' => esc_html__('Customer', 'autopuzzle'),
+    'subscriber' => esc_html__('Subscriber', 'autopuzzle')
 ];
 $role_display_persian = isset($role_labels[$role_display]) ? $role_labels[$role_display] : $role_display;
 
 // Residency status display
 $residency_display = '';
 if ($residency_status === 'owner') {
-    $residency_display = esc_html__('Owner', 'maneli-car-inquiry');
+    $residency_display = esc_html__('Owner', 'autopuzzle');
 } elseif ($residency_status === 'tenant') {
-    $residency_display = esc_html__('Tenant', 'maneli-car-inquiry');
+    $residency_display = esc_html__('Tenant', 'autopuzzle');
 }
 
 // Workplace status display
 $workplace_display = '';
 if ($workplace_status === 'owner') {
-    $workplace_display = esc_html__('Owner', 'maneli-car-inquiry');
+    $workplace_display = esc_html__('Owner', 'autopuzzle');
 } elseif ($workplace_status === 'employee') {
-    $workplace_display = esc_html__('Employee', 'maneli-car-inquiry');
+    $workplace_display = esc_html__('Employee', 'autopuzzle');
 } elseif ($workplace_status === 'tenant') {
-    $workplace_display = esc_html__('Tenant', 'maneli-car-inquiry');
+    $workplace_display = esc_html__('Tenant', 'autopuzzle');
 }
 ?>
 <div class="main-content app-content">
@@ -138,17 +138,17 @@ if ($workplace_status === 'owner') {
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard/users')); ?>"><?php esc_html_e('User Management', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php echo $is_edit_mode ? esc_html__('Edit', 'maneli-car-inquiry') : esc_html__('View', 'maneli-car-inquiry'); ?> <?php esc_html_e('User', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard/users')); ?>"><?php esc_html_e('User Management', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php echo $is_edit_mode ? esc_html__('Edit', 'autopuzzle') : esc_html__('View', 'autopuzzle'); ?> <?php esc_html_e('User', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php echo $is_edit_mode ? esc_html__('Edit User', 'maneli-car-inquiry') : esc_html__('User Details', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php echo $is_edit_mode ? esc_html__('Edit User', 'autopuzzle') : esc_html__('User Details', 'autopuzzle'); ?></h1>
             </div>
             <div>
                 <a href="<?php echo esc_url(home_url('/dashboard/users')); ?>" class="btn btn-primary btn-wave">
                     <i class="la la-arrow-right me-1"></i>
-                    <?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Back to List', 'autopuzzle'); ?>
                 </a>
             </div>
         </div>
@@ -161,17 +161,17 @@ if ($workplace_status === 'owner') {
                     <ul class="nav nav-tabs tab-style-8 scaleX rounded m-3 profile-settings-tab gap-2" id="userDetailTabs" role="tablist">
                         <li class="nav-item me-1" role="presentation">
                             <button class="nav-link px-4 bg-primary-transparent active" id="account-tab" data-bs-toggle="tab" data-bs-target="#account-pane" type="button" role="tab" aria-controls="account-pane" aria-selected="true">
-                                <?php esc_html_e('User Account', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('User Account', 'autopuzzle'); ?>
                             </button>
                         </li>
                         <li class="nav-item me-1" role="presentation">
                             <button class="nav-link px-4 bg-primary-transparent" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents-pane" type="button" role="tab" aria-controls="documents-pane" aria-selected="false">
-                                <?php esc_html_e('Documents', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Documents', 'autopuzzle'); ?>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link px-4 bg-primary-transparent" id="inquiries-tab" data-bs-toggle="tab" data-bs-target="#inquiries-pane" type="button" role="tab" aria-controls="inquiries-pane" aria-selected="false">
-                                <?php esc_html_e('Registered Inquiries', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Registered Inquiries', 'autopuzzle'); ?>
                             </button>
                         </li>
                     </ul>
@@ -180,36 +180,36 @@ if ($workplace_status === 'owner') {
                         <div class="tab-pane show active overflow-hidden p-0 border-0" id="account-pane" role="tabpanel" aria-labelledby="account-tab" tabindex="0">
                             <div class="p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
-                                    <div class="fw-semibold d-block fs-15"><?php echo $is_edit_mode ? esc_html__('Edit User Account', 'maneli-car-inquiry') : esc_html__('User Account Information', 'maneli-car-inquiry'); ?>:</div>
+                                    <div class="fw-semibold d-block fs-15"><?php echo $is_edit_mode ? esc_html__('Edit User Account', 'autopuzzle') : esc_html__('User Account Information', 'autopuzzle'); ?>:</div>
                                     <?php if ($is_edit_mode): ?>
                                         <button class="btn btn-primary btn-sm" onclick="saveUserDetails(<?php echo $user_id; ?>)">
-                                            <i class="la la-save me-1"></i><?php esc_html_e('Save Changes', 'maneli-car-inquiry'); ?>
+                                            <i class="la la-save me-1"></i><?php esc_html_e('Save Changes', 'autopuzzle'); ?>
                                         </button>
                                     <?php else: ?>
                                         <a href="<?php echo esc_url(add_query_arg(['edit_user' => $user_id], home_url('/dashboard/users'))); ?>" class="btn btn-primary btn-sm">
-                                            <i class="la la-edit me-1"></i><?php esc_html_e('Edit', 'maneli-car-inquiry'); ?>
+                                            <i class="la la-edit me-1"></i><?php esc_html_e('Edit', 'autopuzzle'); ?>
                                         </a>
                                     <?php endif; ?>
                                 </div>
                                 <div class="row gy-3">
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('First Name', 'maneli-car-inquiry'); ?> <?php echo $is_edit_mode ? '*' : ''; ?>:</label>
+                                        <label class="form-label"><?php esc_html_e('First Name', 'autopuzzle'); ?> <?php echo $is_edit_mode ? '*' : ''; ?>:</label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-first-name" value="<?php echo esc_attr($user->first_name); ?>" placeholder="<?php esc_attr_e('First Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-first-name" value="<?php echo esc_attr($user->first_name); ?>" placeholder="<?php esc_attr_e('First Name', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($user->first_name)) : esc_html($user->first_name); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?> <?php echo $is_edit_mode ? '*' : ''; ?>:</label>
+                                        <label class="form-label"><?php esc_html_e('Last Name', 'autopuzzle'); ?> <?php echo $is_edit_mode ? '*' : ''; ?>:</label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-last-name" value="<?php echo esc_attr($user->last_name); ?>" placeholder="<?php esc_attr_e('Last Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-last-name" value="<?php echo esc_attr($user->last_name); ?>" placeholder="<?php esc_attr_e('Last Name', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($user->last_name)) : esc_html($user->last_name); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?> <?php echo $is_edit_mode ? '*' : ''; ?>:</label>
+                                        <label class="form-label"><?php esc_html_e('Mobile Number', 'autopuzzle'); ?> <?php echo $is_edit_mode ? '*' : ''; ?>:</label>
                                         <?php if ($is_edit_mode): ?>
                                             <input type="tel" class="form-control" id="edit-user-mobile" value="<?php echo esc_attr($mobile_number); ?>" placeholder="09123456789">
                                         <?php else: ?>
@@ -221,12 +221,12 @@ if ($workplace_status === 'owner') {
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Role:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Role:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
                                             <select class="form-select" id="edit-user-role">
-                                                <option value="customer" <?php selected($role_display, 'customer'); ?>><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></option>
-                                                <option value="maneli_expert" <?php selected($role_display, 'maneli_expert'); ?>><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></option>
-                                                <option value="administrator" <?php selected($role_display, 'administrator'); ?>><?php esc_html_e('Administrator', 'maneli-car-inquiry'); ?></option>
+                                                <option value="customer" <?php selected($role_display, 'customer'); ?>><?php esc_html_e('Customer', 'autopuzzle'); ?></option>
+                                                <option value="autopuzzle_expert" <?php selected($role_display, 'autopuzzle_expert'); ?>><?php esc_html_e('Expert', 'autopuzzle'); ?></option>
+                                                <option value="administrator" <?php selected($role_display, 'administrator'); ?>><?php esc_html_e('Administrator', 'autopuzzle'); ?></option>
                                             </select>
                                         <?php else: ?>
                                             <div class="form-control-plaintext">
@@ -238,11 +238,11 @@ if ($workplace_status === 'owner') {
                                     <!-- Identity Information Section -->
                                     <div class="col-xl-12">
                                         <hr class="my-3">
-                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Identity Information', 'maneli-car-inquiry'); ?></h5>
+                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Identity Information', 'autopuzzle'); ?></h5>
                                     </div>
                                     
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('National Code:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('National Code:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
                                             <input type="text" class="form-control" id="edit-user-national-code" value="<?php echo esc_attr($national_code); ?>" placeholder="0123456789" pattern="\d{10}" maxlength="10">
                                         <?php else: ?>
@@ -250,23 +250,23 @@ if ($workplace_status === 'owner') {
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Father\'s Name:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Father\'s Name:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-father-name" value="<?php echo esc_attr($father_name); ?>" placeholder="<?php esc_attr_e('Father\'s Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-father-name" value="<?php echo esc_attr($father_name); ?>" placeholder="<?php esc_attr_e('Father\'s Name', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo esc_html($father_name ?: '-'); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Birth Date:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Birth Date:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control maneli-datepicker" id="edit-user-birth-date" value="<?php echo esc_attr($birth_date); ?>" placeholder="1370/01/01">
+                                            <input type="text" class="form-control autopuzzle-datepicker" id="edit-user-birth-date" value="<?php echo esc_attr($birth_date); ?>" placeholder="1370/01/01">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo persian_numbers(esc_html($birth_date ?: '-')); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Phone Number:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Phone Number:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
                                             <input type="tel" class="form-control" id="edit-user-phone" value="<?php echo esc_attr($phone_number); ?>" placeholder="02112345678">
                                         <?php else: ?>
@@ -285,56 +285,56 @@ if ($workplace_status === 'owner') {
                                     <!-- Job Information Section -->
                                     <div class="col-xl-12">
                                         <hr class="my-3">
-                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Job Information', 'maneli-car-inquiry'); ?></h5>
+                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Job Information', 'autopuzzle'); ?></h5>
                                     </div>
                                     
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Occupation / Position:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Occupation / Position:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-occupation" value="<?php echo esc_attr($job_title ?: $occupation); ?>" placeholder="<?php esc_attr_e('Occupation or Position', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-occupation" value="<?php echo esc_attr($job_title ?: $occupation); ?>" placeholder="<?php esc_attr_e('Occupation or Position', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo esc_html($job_title ?: $occupation ?: '-'); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Job Type:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Job Type:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
                                             <select class="form-select" id="edit-user-job-type">
-                                                <option value=""><?php esc_html_e('-- Please Select --', 'maneli-car-inquiry'); ?></option>
-                                                <option value="government" <?php selected($job_type, 'government'); ?>><?php esc_html_e('Government', 'maneli-car-inquiry'); ?></option>
-                                                <option value="private" <?php selected($job_type, 'private'); ?>><?php esc_html_e('Private', 'maneli-car-inquiry'); ?></option>
-                                                <option value="self_employed" <?php selected($job_type, 'self_employed'); ?>><?php esc_html_e('Self-Employed', 'maneli-car-inquiry'); ?></option>
+                                                <option value=""><?php esc_html_e('-- Please Select --', 'autopuzzle'); ?></option>
+                                                <option value="government" <?php selected($job_type, 'government'); ?>><?php esc_html_e('Government', 'autopuzzle'); ?></option>
+                                                <option value="private" <?php selected($job_type, 'private'); ?>><?php esc_html_e('Private', 'autopuzzle'); ?></option>
+                                                <option value="self_employed" <?php selected($job_type, 'self_employed'); ?>><?php esc_html_e('Self-Employed', 'autopuzzle'); ?></option>
                                             </select>
                                         <?php else: ?>
                                             <div class="form-control-plaintext">
                                                 <?php
                                                 $job_type_display = '';
-                                                if ($job_type === 'government') $job_type_display = esc_html__('Government', 'maneli-car-inquiry');
-                                                elseif ($job_type === 'private') $job_type_display = esc_html__('Private', 'maneli-car-inquiry');
-                                                elseif ($job_type === 'self_employed') $job_type_display = esc_html__('Self-Employed', 'maneli-car-inquiry');
+                                                if ($job_type === 'government') $job_type_display = esc_html__('Government', 'autopuzzle');
+                                                elseif ($job_type === 'private') $job_type_display = esc_html__('Private', 'autopuzzle');
+                                                elseif ($job_type === 'self_employed') $job_type_display = esc_html__('Self-Employed', 'autopuzzle');
                                                 echo esc_html($job_type_display ?: '-');
                                                 ?>
                                             </div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Income Level (Toman):', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Income Level (Toman):', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="number" class="form-control" id="edit-user-income" value="<?php echo esc_attr($income_level); ?>" placeholder="<?php esc_attr_e('Example: 50000000', 'maneli-car-inquiry'); ?>">
+                                            <input type="number" class="form-control" id="edit-user-income" value="<?php echo esc_attr($income_level); ?>" placeholder="<?php esc_attr_e('Example: 50000000', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext">
-                                                <?php echo $income_level ? persian_numbers(number_format_i18n($income_level)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry') : '-'; ?>
+                                                <?php echo $income_level ? persian_numbers(number_format_i18n($income_level)) . ' ' . esc_html__('Toman', 'autopuzzle') : '-'; ?>
                                             </div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Workplace Status:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Workplace Status:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
                                             <select class="form-select" id="edit-user-workplace-status">
-                                                <option value=""><?php esc_html_e('-- Please Select --', 'maneli-car-inquiry'); ?></option>
-                                                <option value="owner" <?php selected($workplace_status, 'owner'); ?>><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                                <option value="employee" <?php selected($workplace_status, 'employee'); ?>><?php esc_html_e('Employee', 'maneli-car-inquiry'); ?></option>
-                                                <option value="tenant" <?php selected($workplace_status, 'tenant'); ?>><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                                <option value=""><?php esc_html_e('-- Please Select --', 'autopuzzle'); ?></option>
+                                                <option value="owner" <?php selected($workplace_status, 'owner'); ?>><?php esc_html_e('Owner', 'autopuzzle'); ?></option>
+                                                <option value="employee" <?php selected($workplace_status, 'employee'); ?>><?php esc_html_e('Employee', 'autopuzzle'); ?></option>
+                                                <option value="tenant" <?php selected($workplace_status, 'tenant'); ?>><?php esc_html_e('Tenant', 'autopuzzle'); ?></option>
                                             </select>
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo esc_html($workplace_display ?: '-'); ?></div>
@@ -344,25 +344,25 @@ if ($workplace_status === 'owner') {
                                     <!-- Address Information Section -->
                                     <div class="col-xl-12">
                                         <hr class="my-3">
-                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Contact Information', 'maneli-car-inquiry'); ?></h5>
+                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Contact Information', 'autopuzzle'); ?></h5>
                                     </div>
                                     
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Residency Status:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Residency Status:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
                                             <select class="form-select" id="edit-user-residency-status">
-                                                <option value=""><?php esc_html_e('-- Please Select --', 'maneli-car-inquiry'); ?></option>
-                                                <option value="owner" <?php selected($residency_status, 'owner'); ?>><?php esc_html_e('Owner', 'maneli-car-inquiry'); ?></option>
-                                                <option value="tenant" <?php selected($residency_status, 'tenant'); ?>><?php esc_html_e('Tenant', 'maneli-car-inquiry'); ?></option>
+                                                <option value=""><?php esc_html_e('-- Please Select --', 'autopuzzle'); ?></option>
+                                                <option value="owner" <?php selected($residency_status, 'owner'); ?>><?php esc_html_e('Owner', 'autopuzzle'); ?></option>
+                                                <option value="tenant" <?php selected($residency_status, 'tenant'); ?>><?php esc_html_e('Tenant', 'autopuzzle'); ?></option>
                                             </select>
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo esc_html($residency_display ?: '-'); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-12">
-                                        <label class="form-label"><?php esc_html_e('Address:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Address:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <textarea class="form-control" id="edit-user-address" rows="3" placeholder="<?php esc_attr_e('Full Address', 'maneli-car-inquiry'); ?>"><?php echo esc_textarea($address); ?></textarea>
+                                            <textarea class="form-control" id="edit-user-address" rows="3" placeholder="<?php esc_attr_e('Full Address', 'autopuzzle'); ?>"><?php echo esc_textarea($address); ?></textarea>
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo esc_html($address ?: '-'); ?></div>
                                         <?php endif; ?>
@@ -371,37 +371,37 @@ if ($workplace_status === 'owner') {
                                     <!-- Bank Information Section -->
                                     <div class="col-xl-12">
                                         <hr class="my-3">
-                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Bank Information', 'maneli-car-inquiry'); ?></h5>
+                                        <h5 class="fw-semibold mb-3"><?php esc_html_e('Bank Information', 'autopuzzle'); ?></h5>
                                     </div>
                                     
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Bank Name:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Bank Name:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-bank-name" value="<?php echo esc_attr($bank_name); ?>" placeholder="<?php esc_attr_e('Bank Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-bank-name" value="<?php echo esc_attr($bank_name); ?>" placeholder="<?php esc_attr_e('Bank Name', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo esc_html($bank_name ?: '-'); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Account Number:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Account Number:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-account-number" value="<?php echo esc_attr($account_number); ?>" placeholder="<?php esc_attr_e('Account Number', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-account-number" value="<?php echo esc_attr($account_number); ?>" placeholder="<?php esc_attr_e('Account Number', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($account_number ?: '-')) : esc_html($account_number ?: '-'); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Branch Code:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Branch Code:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-branch-code" value="<?php echo esc_attr($branch_code); ?>" placeholder="<?php esc_attr_e('Branch Code', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-branch-code" value="<?php echo esc_attr($branch_code); ?>" placeholder="<?php esc_attr_e('Branch Code', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($branch_code ?: '-')) : esc_html($branch_code ?: '-'); ?></div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-xl-6">
-                                        <label class="form-label"><?php esc_html_e('Branch Name:', 'maneli-car-inquiry'); ?></label>
+                                        <label class="form-label"><?php esc_html_e('Branch Name:', 'autopuzzle'); ?></label>
                                         <?php if ($is_edit_mode): ?>
-                                            <input type="text" class="form-control" id="edit-user-branch-name" value="<?php echo esc_attr($branch_name); ?>" placeholder="<?php esc_attr_e('Branch Name', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" class="form-control" id="edit-user-branch-name" value="<?php echo esc_attr($branch_name); ?>" placeholder="<?php esc_attr_e('Branch Name', 'autopuzzle'); ?>">
                                         <?php else: ?>
                                             <div class="form-control-plaintext"><?php echo esc_html($branch_name ?: '-'); ?></div>
                                         <?php endif; ?>
@@ -414,11 +414,11 @@ if ($workplace_status === 'owner') {
                         <div class="tab-pane overflow-hidden p-0 border-0" id="documents-pane" role="tabpanel" aria-labelledby="documents-tab" tabindex="0">
                             <div class="p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
-                                    <div class="fw-semibold d-block fs-15"><?php esc_html_e('Customer Documents:', 'maneli-car-inquiry'); ?></div>
+                                    <div class="fw-semibold d-block fs-15"><?php esc_html_e('Customer Documents:', 'autopuzzle'); ?></div>
                                 </div>
                                 <?php 
                                 // Get required documents from settings
-                                $options = get_option('maneli_inquiry_all_options', []);
+                                $options = get_option('autopuzzle_inquiry_all_options', []);
                                 $customer_docs_raw = $options['customer_required_documents'] ?? '';
                                 
                                 // Get documents list
@@ -454,47 +454,47 @@ if ($workplace_status === 'owner') {
                                                             <?php if ($is_uploaded && $doc_status === 'approved'): ?>
                                                                 <div class="alert alert-success border-success py-2 px-3 mb-2">
                                                                     <i class="la la-check-circle me-2"></i>
-                                                                    <?php esc_html_e('Approved', 'maneli-car-inquiry'); ?>
+                                                                    <?php esc_html_e('Approved', 'autopuzzle'); ?>
                                                                 </div>
                                                                 <?php if ($uploaded_file_url): ?>
                                                                     <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary me-2">
-                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'autopuzzle'); ?>
                                                                     </a>
                                                                 <?php endif; ?>
                                                             <?php elseif ($is_uploaded && $doc_status === 'rejected'): ?>
                                                                 <div class="alert alert-danger border-danger py-2 px-3 mb-2">
                                                                     <i class="la la-times-circle me-2"></i>
-                                                                    <?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?>
+                                                                    <?php esc_html_e('Rejected', 'autopuzzle'); ?>
                                                                 </div>
                                                                 <?php if ($uploaded_file_url): ?>
                                                                     <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary me-2">
-                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'autopuzzle'); ?>
                                                                     </a>
                                                                 <?php endif; ?>
                                                             <?php elseif ($is_uploaded): ?>
                                                                 <div class="alert alert-info border-info py-2 px-3 mb-2">
                                                                     <i class="la la-clock me-2"></i>
-                                                                    <?php esc_html_e('Awaiting Review', 'maneli-car-inquiry'); ?>
+                                                                    <?php esc_html_e('Awaiting Review', 'autopuzzle'); ?>
                                                                 </div>
                                                                 <?php if ($uploaded_file_url): ?>
                                                                     <a href="<?php echo esc_url($uploaded_file_url); ?>" target="_blank" class="btn btn-sm btn-primary me-2">
-                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'maneli-car-inquiry'); ?>
+                                                                        <i class="la la-download"></i> <?php esc_html_e('Download', 'autopuzzle'); ?>
                                                                     </a>
                                                                 <?php endif; ?>
                                                                 <button class="btn btn-sm btn-success approve-doc-btn" 
                                                                         data-user-id="<?php echo esc_attr($user_id); ?>" 
                                                                         data-doc-name="<?php echo esc_attr($doc_name); ?>">
-                                                                    <i class="la la-check"></i> <?php esc_html_e('Approve', 'maneli-car-inquiry'); ?>
+                                                                    <i class="la la-check"></i> <?php esc_html_e('Approve', 'autopuzzle'); ?>
                                                                 </button>
                                                                 <button class="btn btn-sm btn-danger ms-2 reject-doc-btn" 
                                                                         data-user-id="<?php echo esc_attr($user_id); ?>" 
                                                                         data-doc-name="<?php echo esc_attr($doc_name); ?>">
-                                                                    <i class="la la-times"></i> <?php esc_html_e('Reject', 'maneli-car-inquiry'); ?>
+                                                                    <i class="la la-times"></i> <?php esc_html_e('Reject', 'autopuzzle'); ?>
                                                                 </button>
                                                             <?php else: ?>
                                                                 <div class="alert alert-warning border-warning py-2 px-3 mb-0">
                                                                     <i class="la la-exclamation-triangle me-2"></i>
-                                                                    <?php esc_html_e('Not Uploaded', 'maneli-car-inquiry'); ?>
+                                                                    <?php esc_html_e('Not Uploaded', 'autopuzzle'); ?>
                                                                 </div>
                                                             <?php endif; ?>
                                                         </div>
@@ -504,7 +504,7 @@ if ($workplace_status === 'owner') {
                                         <?php endforeach; ?>
                                     </div>
                                 <?php else: ?>
-                                    <p class="text-muted"><?php esc_html_e('No documents have been configured yet.', 'maneli-car-inquiry'); ?></p>
+                                    <p class="text-muted"><?php esc_html_e('No documents have been configured yet.', 'autopuzzle'); ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -513,10 +513,10 @@ if ($workplace_status === 'owner') {
                         <div class="tab-pane overflow-hidden p-0 border-0" id="inquiries-pane" role="tabpanel" aria-labelledby="inquiries-tab" tabindex="0">
                             <div class="p-4">
                                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
-                                    <div class="fw-semibold d-block fs-15"><?php esc_html_e('Registered Inquiries:', 'maneli-car-inquiry'); ?></div>
+                                    <div class="fw-semibold d-block fs-15"><?php esc_html_e('Registered Inquiries:', 'autopuzzle'); ?></div>
                                     <div class="text-muted">
-                                        <span class="badge bg-info-transparent me-2"><?php esc_html_e('Installment Inquiries:', 'maneli-car-inquiry'); ?> <?php echo persian_numbers(number_format_i18n(count($installment_inquiries))); ?></span>
-                                        <span class="badge bg-warning-transparent"><?php esc_html_e('Cash Inquiries:', 'maneli-car-inquiry'); ?> <?php echo persian_numbers(number_format_i18n(count($cash_inquiries))); ?></span>
+                                        <span class="badge bg-info-transparent me-2"><?php esc_html_e('Installment Inquiries:', 'autopuzzle'); ?> <?php echo persian_numbers(number_format_i18n(count($installment_inquiries))); ?></span>
+                                        <span class="badge bg-warning-transparent"><?php esc_html_e('Cash Inquiries:', 'autopuzzle'); ?> <?php echo persian_numbers(number_format_i18n(count($cash_inquiries))); ?></span>
                                     </div>
                                 </div>
                                 
@@ -525,41 +525,41 @@ if ($workplace_status === 'owner') {
                                     <div class="mb-4">
                                         <h6 class="fw-semibold mb-3">
                                             <i class="la la-bank me-2"></i>
-                                            <?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?> (<?php echo persian_numbers(number_format_i18n(count($installment_inquiries))); ?>)
+                                            <?php esc_html_e('Installment Inquiries', 'autopuzzle'); ?> (<?php echo persian_numbers(number_format_i18n(count($installment_inquiries))); ?>)
                                         </h6>
                                         <div class="table-responsive">
                                             <table class="table table-hover table-bordered">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Total Price', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Down Payment', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                                        <th><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Car', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Total Price', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Down Payment', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Registration Date', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <?php foreach ($installment_inquiries as $inquiry): 
                                                         $product_id = get_post_meta($inquiry->ID, 'product_id', true);
                                                         $product = wc_get_product($product_id);
-                                                        $total_price = get_post_meta($inquiry->ID, 'maneli_inquiry_total_price', true);
-                                                        $down_payment = get_post_meta($inquiry->ID, 'maneli_inquiry_down_payment', true);
+                                                        $total_price = get_post_meta($inquiry->ID, 'autopuzzle_inquiry_total_price', true);
+                                                        $down_payment = get_post_meta($inquiry->ID, 'autopuzzle_inquiry_down_payment', true);
                                                         $status = get_post_meta($inquiry->ID, 'inquiry_status', true);
                                                         $status_display = [
-                                                            'pending' => ['label' => esc_html__('Pending', 'maneli-car-inquiry'), 'class' => 'warning'],
-                                                            'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
-                                                            'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                                            'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'info']
+                                                            'pending' => ['label' => esc_html__('Pending', 'autopuzzle'), 'class' => 'warning'],
+                                                            'approved' => ['label' => esc_html__('Approved', 'autopuzzle'), 'class' => 'success'],
+                                                            'rejected' => ['label' => esc_html__('Rejected', 'autopuzzle'), 'class' => 'danger'],
+                                                            'new' => ['label' => esc_html__('New', 'autopuzzle'), 'class' => 'info']
                                                         ];
                                                         $status_info = isset($status_display[$status]) ? $status_display[$status] : ['label' => $status, 'class' => 'secondary'];
                                                     ?>
                                                         <tr>
                                                             <td><?php echo persian_numbers('#' . $inquiry->ID); ?></td>
                                                             <td><?php echo $product ? persian_numbers(esc_html($product->get_name())) : '-'; ?></td>
-                                                            <td><?php echo $total_price ? persian_numbers(number_format_i18n($total_price)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry') : '-'; ?></td>
-                                                            <td><?php echo $down_payment ? persian_numbers(number_format_i18n($down_payment)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry') : '-'; ?></td>
+                                                            <td><?php echo $total_price ? persian_numbers(number_format_i18n($total_price)) . ' ' . esc_html__('Toman', 'autopuzzle') : '-'; ?></td>
+                                                            <td><?php echo $down_payment ? persian_numbers(number_format_i18n($down_payment)) . ' ' . esc_html__('Toman', 'autopuzzle') : '-'; ?></td>
                                                             <td>
                                                                 <span class="badge bg-<?php echo esc_attr($status_info['class']); ?>">
                                                                     <?php echo esc_html($status_info['label']); ?>
@@ -584,18 +584,18 @@ if ($workplace_status === 'owner') {
                                     <div class="mb-4">
                                         <h6 class="fw-semibold mb-3">
                                             <i class="la la-money-bill-wave me-2"></i>
-                                            <?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?> (<?php echo persian_numbers(number_format_i18n(count($cash_inquiries))); ?>)
+                                            <?php esc_html_e('Cash Inquiries', 'autopuzzle'); ?> (<?php echo persian_numbers(number_format_i18n(count($cash_inquiries))); ?>)
                                         </h6>
                                         <div class="table-responsive">
                                             <table class="table table-hover table-bordered">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Price', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></th>
-                                                        <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                                        <th><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Car', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Price', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Registration Date', 'autopuzzle'); ?></th>
+                                                        <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -605,18 +605,18 @@ if ($workplace_status === 'owner') {
                                                         $total_price = get_post_meta($inquiry->ID, 'cash_total_price', true);
                                                         $status = get_post_meta($inquiry->ID, 'cash_inquiry_status', true);
                                                         $status_display = [
-                                                            'new' => ['label' => esc_html__('New', 'maneli-car-inquiry'), 'class' => 'info'],
-                                                            'in_progress' => ['label' => esc_html__('In Progress', 'maneli-car-inquiry'), 'class' => 'warning'],
-                                                            'approved' => ['label' => esc_html__('Approved', 'maneli-car-inquiry'), 'class' => 'success'],
-                                                            'rejected' => ['label' => esc_html__('Rejected', 'maneli-car-inquiry'), 'class' => 'danger'],
-                                                            'completed' => ['label' => esc_html__('Completed', 'maneli-car-inquiry'), 'class' => 'primary']
+                                                            'new' => ['label' => esc_html__('New', 'autopuzzle'), 'class' => 'info'],
+                                                            'in_progress' => ['label' => esc_html__('In Progress', 'autopuzzle'), 'class' => 'warning'],
+                                                            'approved' => ['label' => esc_html__('Approved', 'autopuzzle'), 'class' => 'success'],
+                                                            'rejected' => ['label' => esc_html__('Rejected', 'autopuzzle'), 'class' => 'danger'],
+                                                            'completed' => ['label' => esc_html__('Completed', 'autopuzzle'), 'class' => 'primary']
                                                         ];
                                                         $status_info = isset($status_display[$status]) ? $status_display[$status] : ['label' => $status, 'class' => 'secondary'];
                                                     ?>
                                                         <tr>
                                                             <td><?php echo persian_numbers('#' . $inquiry->ID); ?></td>
                                                             <td><?php echo $product ? persian_numbers(esc_html($product->get_name())) : '-'; ?></td>
-                                                            <td><?php echo $total_price ? persian_numbers(number_format_i18n($total_price)) . ' ' . esc_html__('Toman', 'maneli-car-inquiry') : '-'; ?></td>
+                                                            <td><?php echo $total_price ? persian_numbers(number_format_i18n($total_price)) . ' ' . esc_html__('Toman', 'autopuzzle') : '-'; ?></td>
                                                             <td>
                                                                 <span class="badge bg-<?php echo esc_attr($status_info['class']); ?>">
                                                                     <?php echo esc_html($status_info['label']); ?>
@@ -653,11 +653,12 @@ if ($workplace_status === 'owner') {
 </div>
 
 <script>
-var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var autopuzzleAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var autopuzzleAjaxNonce = '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>';
 
 // Helper function to generate email from mobile
 function generateEmailFromMobile(mobile) {
-    return mobile + '@manelikhodro.com';
+    return mobile + '@' + (window.autopuzzleEmailDomain || 'system.local');
 }
 
 // Save user details
@@ -702,10 +703,10 @@ function saveUserDetails(userId) {
     const email = generateEmailFromMobile(mobile);
     
     jQuery.ajax({
-        url: maneliAjaxUrl,
+        url: autopuzzleAjaxUrl,
         type: 'POST',
         data: {
-            action: 'maneli_update_user_full',
+            action: 'autopuzzle_update_user_full',
             user_id: userId,
             first_name: firstName,
             last_name: lastName,
@@ -728,7 +729,7 @@ function saveUserDetails(userId) {
             account_number: accountNumber,
             branch_code: branchCode,
             branch_name: branchName,
-            nonce: '<?php echo wp_create_nonce('maneli_update_user_full_nonce'); ?>'
+            nonce: '<?php echo wp_create_nonce('autopuzzle_update_user_full_nonce'); ?>'
         },
         success: function(response) {
             Swal.close();
@@ -757,34 +758,34 @@ jQuery(document).ready(function($) {
         const docName = $btn.data('doc-name');
         
         Swal.fire({
-            title: '<?php esc_html_e('Approve Document?', 'maneli-car-inquiry'); ?>',
-            text: '<?php esc_html_e('Are you sure you want to approve this document?', 'maneli-car-inquiry'); ?>',
+            title: '<?php esc_html_e('Approve Document?', 'autopuzzle'); ?>',
+            text: '<?php esc_html_e('Are you sure you want to approve this document?', 'autopuzzle'); ?>',
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '<?php esc_html_e('Yes, Approve', 'maneli-car-inquiry'); ?>',
-            cancelButtonText: '<?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>'
+            confirmButtonText: '<?php esc_html_e('Yes, Approve', 'autopuzzle'); ?>',
+            cancelButtonText: '<?php esc_html_e('Cancel', 'autopuzzle'); ?>'
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: maneliAjaxUrl,
+                    url: autopuzzleAjaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'maneli_approve_customer_document',
-                        security: '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
+                        action: 'autopuzzle_approve_customer_document',
+                        security: '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>',
                         user_id: userId,
                         document_name: docName
                     },
                     success: function(response) {
                         if (response.success) {
-                            Swal.fire('<?php esc_html_e('Success', 'maneli-car-inquiry'); ?>', response.data.message, 'success').then(() => {
+                            Swal.fire('<?php esc_html_e('Success', 'autopuzzle'); ?>', response.data.message, 'success').then(() => {
                                 location.reload();
                             });
                         } else {
-                            Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', response.data.message, 'error');
+                            Swal.fire('<?php esc_html_e('Error', 'autopuzzle'); ?>', response.data.message, 'error');
                         }
                     },
                     error: function() {
-                        Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', '<?php esc_html_e('Server error. Please try again.', 'maneli-car-inquiry'); ?>', 'error');
+                        Swal.fire('<?php esc_html_e('Error', 'autopuzzle'); ?>', '<?php esc_html_e('Server error. Please try again.', 'autopuzzle'); ?>', 'error');
                     }
                 });
             }
@@ -798,35 +799,35 @@ jQuery(document).ready(function($) {
         const docName = $btn.data('doc-name');
         
         Swal.fire({
-            title: '<?php esc_html_e('Reject Document?', 'maneli-car-inquiry'); ?>',
-            text: '<?php esc_html_e('Are you sure you want to reject this document?', 'maneli-car-inquiry'); ?>',
+            title: '<?php esc_html_e('Reject Document?', 'autopuzzle'); ?>',
+            text: '<?php esc_html_e('Are you sure you want to reject this document?', 'autopuzzle'); ?>',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: '<?php esc_html_e('Yes, Reject', 'maneli-car-inquiry'); ?>',
-            cancelButtonText: '<?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?>',
+            confirmButtonText: '<?php esc_html_e('Yes, Reject', 'autopuzzle'); ?>',
+            cancelButtonText: '<?php esc_html_e('Cancel', 'autopuzzle'); ?>',
             confirmButtonColor: '#dc3545'
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
-                    url: maneliAjaxUrl,
+                    url: autopuzzleAjaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'maneli_reject_customer_document',
-                        security: '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
+                        action: 'autopuzzle_reject_customer_document',
+                        security: '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>',
                         user_id: userId,
                         document_name: docName
                     },
                     success: function(response) {
                         if (response.success) {
-                            Swal.fire('<?php esc_html_e('Success', 'maneli-car-inquiry'); ?>', response.data.message, 'success').then(() => {
+                            Swal.fire('<?php esc_html_e('Success', 'autopuzzle'); ?>', response.data.message, 'success').then(() => {
                                 location.reload();
                             });
                         } else {
-                            Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', response.data.message, 'error');
+                            Swal.fire('<?php esc_html_e('Error', 'autopuzzle'); ?>', response.data.message, 'error');
                         }
                     },
                     error: function() {
-                        Swal.fire('<?php esc_html_e('Error', 'maneli-car-inquiry'); ?>', '<?php esc_html_e('Server error. Please try again.', 'maneli-car-inquiry'); ?>', 'error');
+                        Swal.fire('<?php esc_html_e('Error', 'autopuzzle'); ?>', '<?php esc_html_e('Server error. Please try again.', 'autopuzzle'); ?>', 'error');
                     }
                 });
             }

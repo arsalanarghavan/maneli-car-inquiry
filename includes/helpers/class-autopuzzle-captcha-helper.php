@@ -7,8 +7,8 @@
  * - Google reCAPTCHA v3
  * - hCaptcha
  * 
- * @package Maneli_Car_Inquiry/Includes/Helpers
- * @author  Maneli Car Inquiry Team
+ * @package Autopuzzle_Car_Inquiry/Includes/Helpers
+ * @author  AutoPuzzle Car Inquiry Team
  * @version 1.0.0
  */
 
@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Captcha_Helper {
+class Autopuzzle_Captcha_Helper {
 
     /**
      * Check if CAPTCHA is enabled
@@ -25,10 +25,10 @@ class Maneli_Captcha_Helper {
      */
     public static function is_enabled() {
         // Use optimized helper if available, fallback to direct get_option
-        if (class_exists('Maneli_Options_Helper')) {
-            return Maneli_Options_Helper::is_option_enabled('captcha_enabled', false);
+        if (class_exists('Autopuzzle_Options_Helper')) {
+            return Autopuzzle_Options_Helper::is_option_enabled('captcha_enabled', false);
         }
-        $options = get_option('maneli_inquiry_all_options', []);
+        $options = get_option('autopuzzle_inquiry_all_options', []);
         return !empty($options['captcha_enabled']) && $options['captcha_enabled'] === '1';
     }
 
@@ -43,10 +43,10 @@ class Maneli_Captcha_Helper {
         }
         
         // Use optimized helper if available, fallback to direct get_option
-        if (class_exists('Maneli_Options_Helper')) {
-            $type = Maneli_Options_Helper::get_option('captcha_type', '');
+        if (class_exists('Autopuzzle_Options_Helper')) {
+            $type = Autopuzzle_Options_Helper::get_option('captcha_type', '');
         } else {
-            $options = get_option('maneli_inquiry_all_options', []);
+            $options = get_option('autopuzzle_inquiry_all_options', []);
             $type = isset($options['captcha_type']) ? $options['captcha_type'] : '';
         }
         $type = sanitize_text_field($type);
@@ -76,10 +76,10 @@ class Maneli_Captcha_Helper {
         }
         
         // Use optimized helper if available, fallback to direct get_option
-        if (class_exists('Maneli_Options_Helper')) {
-            $options = Maneli_Options_Helper::get_all_options();
+        if (class_exists('Autopuzzle_Options_Helper')) {
+            $options = Autopuzzle_Options_Helper::get_all_options();
         } else {
-            $options = get_option('maneli_inquiry_all_options', []);
+            $options = get_option('autopuzzle_inquiry_all_options', []);
         }
         
         switch ($type) {
@@ -110,10 +110,10 @@ class Maneli_Captcha_Helper {
         }
         
         // Use optimized helper if available, fallback to direct get_option
-        if (class_exists('Maneli_Options_Helper')) {
-            $options = Maneli_Options_Helper::get_all_options();
+        if (class_exists('Autopuzzle_Options_Helper')) {
+            $options = Autopuzzle_Options_Helper::get_all_options();
         } else {
-            $options = get_option('maneli_inquiry_all_options', []);
+            $options = get_option('autopuzzle_inquiry_all_options', []);
         }
         $encrypted_key = '';
         
@@ -136,8 +136,8 @@ class Maneli_Captcha_Helper {
         }
         
         // Decrypt the secret key
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-encryption-helper.php';
-        return Maneli_Encryption_Helper::decrypt($encrypted_key);
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-encryption-helper.php';
+        return Autopuzzle_Encryption_Helper::decrypt($encrypted_key);
     }
 
     /**
@@ -147,10 +147,10 @@ class Maneli_Captcha_Helper {
      */
     public static function get_score_threshold() {
         // Use optimized helper if available, fallback to direct get_option
-        if (class_exists('Maneli_Options_Helper')) {
-            $threshold = floatval(Maneli_Options_Helper::get_option('recaptcha_v3_score_threshold', 0.5));
+        if (class_exists('Autopuzzle_Options_Helper')) {
+            $threshold = floatval(Autopuzzle_Options_Helper::get_option('recaptcha_v3_score_threshold', 0.5));
         } else {
-            $options = get_option('maneli_inquiry_all_options', []);
+            $options = get_option('autopuzzle_inquiry_all_options', []);
             $threshold = isset($options['recaptcha_v3_score_threshold']) ? floatval($options['recaptcha_v3_score_threshold']) : 0.5;
         }
         
@@ -169,7 +169,7 @@ class Maneli_Captcha_Helper {
         if (empty($token)) {
             return [
                 'success' => false,
-                'message' => esc_html__('CAPTCHA token is missing.', 'maneli-car-inquiry')
+                'message' => esc_html__('CAPTCHA token is missing.', 'autopuzzle')
             ];
         }
         
@@ -180,7 +180,7 @@ class Maneli_Captcha_Helper {
         if (empty($type)) {
             return [
                 'success' => false,
-                'message' => esc_html__('CAPTCHA type is not configured.', 'maneli-car-inquiry')
+                'message' => esc_html__('CAPTCHA type is not configured.', 'autopuzzle')
             ];
         }
         
@@ -188,7 +188,7 @@ class Maneli_Captcha_Helper {
         if (empty($secret_key)) {
             return [
                 'success' => false,
-                'message' => esc_html__('CAPTCHA secret key is not configured.', 'maneli-car-inquiry')
+                'message' => esc_html__('CAPTCHA secret key is not configured.', 'autopuzzle')
             ];
         }
         
@@ -206,7 +206,7 @@ class Maneli_Captcha_Helper {
             default:
                 return [
                     'success' => false,
-                    'message' => esc_html__('Invalid CAPTCHA type.', 'maneli-car-inquiry')
+                    'message' => esc_html__('Invalid CAPTCHA type.', 'autopuzzle')
                 ];
         }
     }
@@ -237,11 +237,11 @@ class Maneli_Captcha_Helper {
         
         if (is_wp_error($response)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli reCAPTCHA Error: ' . $response->get_error_message());
+                error_log('AutoPuzzle reCAPTCHA Error: ' . $response->get_error_message());
             }
             return [
                 'success' => false,
-                'message' => esc_html__('Failed to verify reCAPTCHA. Please try again.', 'maneli-car-inquiry')
+                'message' => esc_html__('Failed to verify reCAPTCHA. Please try again.', 'autopuzzle')
             ];
         }
         
@@ -250,25 +250,25 @@ class Maneli_Captcha_Helper {
         
         if (!$result || !isset($result['success'])) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli reCAPTCHA Error: Invalid response from Google API.');
+                error_log('AutoPuzzle reCAPTCHA Error: Invalid response from Google API.');
             }
             return [
                 'success' => false,
-                'message' => esc_html__('Invalid response from reCAPTCHA service.', 'maneli-car-inquiry')
+                'message' => esc_html__('Invalid response from reCAPTCHA service.', 'autopuzzle')
             ];
         }
         
         if (!$result['success']) {
             $error_codes = isset($result['error-codes']) ? $result['error-codes'] : [];
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli reCAPTCHA Error: ' . implode(', ', $error_codes));
+                error_log('AutoPuzzle reCAPTCHA Error: ' . implode(', ', $error_codes));
             }
             
-            $error_message = esc_html__('reCAPTCHA verification failed.', 'maneli-car-inquiry');
+            $error_message = esc_html__('reCAPTCHA verification failed.', 'autopuzzle');
             if (in_array('timeout-or-duplicate', $error_codes)) {
-                $error_message = esc_html__('reCAPTCHA token expired or already used. Please refresh and try again.', 'maneli-car-inquiry');
+                $error_message = esc_html__('reCAPTCHA token expired or already used. Please refresh and try again.', 'autopuzzle');
             } elseif (in_array('invalid-input-secret', $error_codes)) {
-                $error_message = esc_html__('reCAPTCHA configuration error. Please contact the administrator.', 'maneli-car-inquiry');
+                $error_message = esc_html__('reCAPTCHA configuration error. Please contact the administrator.', 'autopuzzle');
             }
             
             return [
@@ -284,11 +284,11 @@ class Maneli_Captcha_Helper {
             
             if ($score < $threshold) {
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli reCAPTCHA v3 Error: Score ' . $score . ' is below threshold ' . $threshold);
+                    error_log('AutoPuzzle reCAPTCHA v3 Error: Score ' . $score . ' is below threshold ' . $threshold);
                 }
                 return [
                     'success' => false,
-                    'message' => esc_html__('reCAPTCHA verification failed. Your request appears to be suspicious.', 'maneli-car-inquiry'),
+                    'message' => esc_html__('reCAPTCHA verification failed. Your request appears to be suspicious.', 'autopuzzle'),
                     'score' => $score
                 ];
             }
@@ -296,7 +296,7 @@ class Maneli_Captcha_Helper {
         
         return [
             'success' => true,
-            'message' => esc_html__('CAPTCHA verified successfully.', 'maneli-car-inquiry')
+            'message' => esc_html__('CAPTCHA verified successfully.', 'autopuzzle')
         ];
     }
 
@@ -325,11 +325,11 @@ class Maneli_Captcha_Helper {
         
         if (is_wp_error($response)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli hCaptcha Error: ' . $response->get_error_message());
+                error_log('AutoPuzzle hCaptcha Error: ' . $response->get_error_message());
             }
             return [
                 'success' => false,
-                'message' => esc_html__('Failed to verify hCaptcha. Please try again.', 'maneli-car-inquiry')
+                'message' => esc_html__('Failed to verify hCaptcha. Please try again.', 'autopuzzle')
             ];
         }
         
@@ -338,23 +338,23 @@ class Maneli_Captcha_Helper {
         
         if (!$result || !isset($result['success'])) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli hCaptcha Error: Invalid response from hCaptcha API.');
+                error_log('AutoPuzzle hCaptcha Error: Invalid response from hCaptcha API.');
             }
             return [
                 'success' => false,
-                'message' => esc_html__('Invalid response from hCaptcha service.', 'maneli-car-inquiry')
+                'message' => esc_html__('Invalid response from hCaptcha service.', 'autopuzzle')
             ];
         }
         
         if (!$result['success']) {
             $error_codes = isset($result['error-codes']) ? $result['error-codes'] : [];
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli hCaptcha Error: ' . implode(', ', $error_codes));
+                error_log('AutoPuzzle hCaptcha Error: ' . implode(', ', $error_codes));
             }
             
-            $error_message = esc_html__('hCaptcha verification failed.', 'maneli-car-inquiry');
+            $error_message = esc_html__('hCaptcha verification failed.', 'autopuzzle');
             if (in_array('invalid-input-secret', $error_codes)) {
-                $error_message = esc_html__('hCaptcha configuration error. Please contact the administrator.', 'maneli-car-inquiry');
+                $error_message = esc_html__('hCaptcha configuration error. Please contact the administrator.', 'autopuzzle');
             }
             
             return [
@@ -365,7 +365,7 @@ class Maneli_Captcha_Helper {
         
         return [
             'success' => true,
-            'message' => esc_html__('CAPTCHA verified successfully.', 'maneli-car-inquiry')
+            'message' => esc_html__('CAPTCHA verified successfully.', 'autopuzzle')
         ];
     }
 
@@ -457,7 +457,7 @@ class Maneli_Captcha_Helper {
      * @param string $container_id Container ID for the widget
      * @return string HTML for widget/badge
      */
-    public static function render_widget($type = null, $site_key = null, $container_id = 'maneli-captcha-widget') {
+    public static function render_widget($type = null, $site_key = null, $container_id = 'autopuzzle-captcha-widget') {
         if ($type === null) {
             $type = self::get_captcha_type();
         }
@@ -483,7 +483,7 @@ class Maneli_Captcha_Helper {
                 
             case 'recaptcha_v3':
                 // v3 doesn't need a widget, but we can show the badge
-                $html = '<div class="maneli-recaptcha-v3-badge"></div>';
+                $html = '<div class="autopuzzle-recaptcha-v3-badge"></div>';
                 break;
                 
             case 'hcaptcha':

@@ -3,7 +3,7 @@
  * Handles all AJAX requests for the plugin.
  * This class serves as a central hub for filtering lists, fetching details, updating data, and performing actions.
  *
- * @package Maneli_Car_Inquiry/Includes/Admin
+ * @package Autopuzzle_Car_Inquiry/Includes/Admin
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.3 (Added ajax_delete_inquiry for installment requests)
  */
@@ -12,17 +12,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Ajax_Handler {
+class Autopuzzle_Ajax_Handler {
 
     /**
      * Log user action for AJAX calls
      * Helper method to log user actions
      */
     private function log_user_action($action_type, $description, $target_type = null, $target_id = null, $metadata = array()) {
-        if (!class_exists('Maneli_Logger')) {
+        if (!class_exists('Autopuzzle_Logger')) {
             return;
         }
-        $logger = Maneli_Logger::instance();
+        $logger = Autopuzzle_Logger::instance();
         $logger->log_user_action($action_type, $description, $target_type, $target_id, $metadata);
     }
 
@@ -38,27 +38,27 @@ class Maneli_Ajax_Handler {
     private function validate_uploaded_file($file, $allowed_types = [], $allowed_extensions = [], $max_size = 5242880) {
         // Check if file was uploaded
         if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
-            return new WP_Error('invalid_upload', esc_html__('Invalid file upload.', 'maneli-car-inquiry'));
+            return new WP_Error('invalid_upload', esc_html__('Invalid file upload.', 'autopuzzle'));
         }
 
         // Check for upload errors
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $error_messages = array(
-                UPLOAD_ERR_INI_SIZE => esc_html__('File exceeds upload_max_filesize directive in php.ini.', 'maneli-car-inquiry'),
-                UPLOAD_ERR_FORM_SIZE => esc_html__('File exceeds MAX_FILE_SIZE directive in HTML form.', 'maneli-car-inquiry'),
-                UPLOAD_ERR_PARTIAL => esc_html__('File was only partially uploaded.', 'maneli-car-inquiry'),
-                UPLOAD_ERR_NO_FILE => esc_html__('No file was uploaded.', 'maneli-car-inquiry'),
-                UPLOAD_ERR_NO_TMP_DIR => esc_html__('Missing temporary folder.', 'maneli-car-inquiry'),
-                UPLOAD_ERR_CANT_WRITE => esc_html__('Failed to write file to disk.', 'maneli-car-inquiry'),
-                UPLOAD_ERR_EXTENSION => esc_html__('File upload stopped by extension.', 'maneli-car-inquiry'),
+                UPLOAD_ERR_INI_SIZE => esc_html__('File exceeds upload_max_filesize directive in php.ini.', 'autopuzzle'),
+                UPLOAD_ERR_FORM_SIZE => esc_html__('File exceeds MAX_FILE_SIZE directive in HTML form.', 'autopuzzle'),
+                UPLOAD_ERR_PARTIAL => esc_html__('File was only partially uploaded.', 'autopuzzle'),
+                UPLOAD_ERR_NO_FILE => esc_html__('No file was uploaded.', 'autopuzzle'),
+                UPLOAD_ERR_NO_TMP_DIR => esc_html__('Missing temporary folder.', 'autopuzzle'),
+                UPLOAD_ERR_CANT_WRITE => esc_html__('Failed to write file to disk.', 'autopuzzle'),
+                UPLOAD_ERR_EXTENSION => esc_html__('File upload stopped by extension.', 'autopuzzle'),
             );
-            $error_message = isset($error_messages[$file['error']]) ? $error_messages[$file['error']] : esc_html__('Unknown upload error.', 'maneli-car-inquiry');
+            $error_message = isset($error_messages[$file['error']]) ? $error_messages[$file['error']] : esc_html__('Unknown upload error.', 'autopuzzle');
             return new WP_Error('upload_error', $error_message);
         }
 
         // Check file size
         if ($file['size'] > $max_size) {
-            return new WP_Error('file_too_large', sprintf(esc_html__('File size exceeds maximum allowed size of %s.', 'maneli-car-inquiry'), size_format($max_size)));
+            return new WP_Error('file_too_large', sprintf(esc_html__('File size exceeds maximum allowed size of %s.', 'autopuzzle'), size_format($max_size)));
         }
 
         // Get file extension
@@ -67,13 +67,13 @@ class Maneli_Ajax_Handler {
 
         // Validate extension
         if (!empty($allowed_extensions) && !in_array($file_ext, $allowed_extensions)) {
-            return new WP_Error('invalid_extension', esc_html__('File type not allowed.', 'maneli-car-inquiry'));
+            return new WP_Error('invalid_extension', esc_html__('File type not allowed.', 'autopuzzle'));
         }
 
         // Validate MIME type
         $file_type = $file['type'];
         if (!empty($allowed_types) && !in_array($file_type, $allowed_types)) {
-            return new WP_Error('invalid_mime', esc_html__('File type not allowed.', 'maneli-car-inquiry'));
+            return new WP_Error('invalid_mime', esc_html__('File type not allowed.', 'autopuzzle'));
         }
 
         // Additional security: Check actual file content using finfo if available
@@ -86,41 +86,41 @@ class Maneli_Ajax_Handler {
                 
                 if ($detected_mime === false) {
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli Warning: finfo_file failed to detect MIME type for file: ' . $file_name);
+                        error_log('AutoPuzzle Warning: finfo_file failed to detect MIME type for file: ' . $file_name);
                     }
                 } else {
                     // Compare declared MIME type with detected MIME type
                     if (!empty($file_type) && $file_type !== $detected_mime) {
                         if (defined('WP_DEBUG') && WP_DEBUG) {
-                            error_log('Maneli Warning: MIME type mismatch for file: ' . $file_name . ' - Declared: ' . $file_type . ', Detected: ' . $detected_mime);
+                            error_log('AutoPuzzle Warning: MIME type mismatch for file: ' . $file_name . ' - Declared: ' . $file_type . ', Detected: ' . $detected_mime);
                         }
                         // Still check if detected type is in allowed list
                         if (!empty($allowed_types) && !in_array($detected_mime, $allowed_types)) {
-                            return new WP_Error('mime_mismatch', esc_html__('File type verification failed. Declared type does not match file content.', 'maneli-car-inquiry'));
+                            return new WP_Error('mime_mismatch', esc_html__('File type verification failed. Declared type does not match file content.', 'autopuzzle'));
                         }
                     }
                     
                     // Verify detected MIME is in allowed types list
                     if (!empty($allowed_types) && !in_array($detected_mime, $allowed_types)) {
-                        return new WP_Error('mime_mismatch', esc_html__('File type verification failed.', 'maneli-car-inquiry'));
+                        return new WP_Error('mime_mismatch', esc_html__('File type verification failed.', 'autopuzzle'));
                     }
                 }
             }
         }
 
         // Allow extensibility through filter hook (e.g., virus scanning, additional validation)
-        $validation_result = apply_filters('maneli_file_upload_validation', true, $file, $detected_mime);
+        $validation_result = apply_filters('autopuzzle_file_upload_validation', true, $file, $detected_mime);
         if (is_wp_error($validation_result)) {
             return $validation_result;
         }
         if ($validation_result === false) {
-            return new WP_Error('validation_failed', esc_html__('File validation failed.', 'maneli-car-inquiry'));
+            return new WP_Error('validation_failed', esc_html__('File validation failed.', 'autopuzzle'));
         }
 
         // Sanitize filename
         $sanitized_filename = sanitize_file_name($file_name);
         if (empty($sanitized_filename)) {
-            return new WP_Error('invalid_filename', esc_html__('Invalid filename.', 'maneli-car-inquiry'));
+            return new WP_Error('invalid_filename', esc_html__('Invalid filename.', 'autopuzzle'));
         }
 
         return array('valid' => true, 'sanitized_filename' => $sanitized_filename);
@@ -135,7 +135,7 @@ class Maneli_Ajax_Handler {
      * @return bool True if within rate limit, false if exceeded
      */
     private function check_rate_limit($identifier, $max_attempts = 10, $time_window = 60) {
-        $transient_key = 'maneli_rate_limit_' . md5($identifier);
+        $transient_key = 'autopuzzle_rate_limit_' . md5($identifier);
         $attempts = get_transient($transient_key);
         
         if ($attempts === false) {
@@ -159,7 +159,7 @@ class Maneli_Ajax_Handler {
      * @param string $identifier Unique identifier for rate limiting
      */
     private function clear_rate_limit($identifier) {
-        $transient_key = 'maneli_rate_limit_' . md5($identifier);
+        $transient_key = 'autopuzzle_rate_limit_' . md5($identifier);
         delete_transient($transient_key);
     }
 
@@ -231,8 +231,8 @@ class Maneli_Ajax_Handler {
             return true;
         }
 
-        if (class_exists('Maneli_Session')) {
-            $session = new Maneli_Session();
+        if (class_exists('Autopuzzle_Session')) {
+            $session = new Autopuzzle_Session();
             if (session_status() === PHP_SESSION_NONE) {
                 $session->start_session();
             }
@@ -264,8 +264,8 @@ class Maneli_Ajax_Handler {
             
             // If year is between 1300-1500, it's likely Jalali
             if ($year >= 1300 && $year <= 1500) {
-                if (function_exists('maneli_jalali_to_gregorian')) {
-                    list($gy, $gm, $gd) = maneli_jalali_to_gregorian($year, $month, $day);
+                if (function_exists('autopuzzle_jalali_to_gregorian')) {
+                    list($gy, $gm, $gd) = autopuzzle_jalali_to_gregorian($year, $month, $day);
                     return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
                 }
             }
@@ -285,11 +285,11 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_get_meeting_settings() {
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $start_hour = $options['meetings_start_hour'] ?? '10:00';
         $end_hour = $options['meetings_end_hour'] ?? '20:00';
         $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -306,7 +306,7 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_global_search() {
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
@@ -437,7 +437,7 @@ class Maneli_Ajax_Handler {
                     $mobile = get_user_meta($author_id, 'mobile_number', true);
                     $national_code = get_user_meta($author_id, 'national_code', true);
                     
-                    $product_id = get_post_meta($inquiry_id, 'maneli_selected_car_id', true);
+                    $product_id = get_post_meta($inquiry_id, 'autopuzzle_selected_car_id', true);
                     $car_name = $product_id ? get_the_title($product_id) : '';
                     
                     // Check if search matches user info
@@ -470,8 +470,8 @@ class Maneli_Ajax_Handler {
 
     public function __construct() {
         // Load required helper classes
-        if (!class_exists('Maneli_Permission_Helpers')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        if (!class_exists('Autopuzzle_Permission_Helpers')) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         }
         
         // Meeting Settings
@@ -540,7 +540,7 @@ class Maneli_Ajax_Handler {
         add_action('wp_ajax_maneli_save_expert_note', [$this, 'ajax_save_expert_note']);
         
         // Hook for when cash down payment is successfully received
-        add_action('maneli_cash_inquiry_payment_successful', [$this, 'handle_downpayment_received'], 10, 2);
+        add_action('autopuzzle_cash_inquiry_payment_successful', [$this, 'handle_downpayment_received'], 10, 2);
         
         // Create cash inquiry from dashboard (admin/expert)
         add_action('wp_ajax_maneli_create_cash_inquiry', [$this, 'ajax_create_cash_inquiry']);
@@ -619,9 +619,9 @@ class Maneli_Ajax_Handler {
     //======================================================================
 
     public function ajax_get_inquiry_details() {
-        check_ajax_referer('maneli_inquiry_details_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_inquiry_details_nonce', 'nonce');
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -629,13 +629,13 @@ class Maneli_Ajax_Handler {
         $client_ip = $this->get_client_ip();
         $rate_limit_key = 'inquiry_details_' . get_current_user_id() . '_' . $client_ip;
         if (!$this->check_rate_limit($rate_limit_key, 30, 60)) {
-            wp_send_json_error(['message' => esc_html__('Too many requests. Please try again later.', 'maneli-car-inquiry')], 429);
+            wp_send_json_error(['message' => esc_html__('Too many requests. Please try again later.', 'autopuzzle')], 429);
             return;
         }
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
             return;
         }
         
@@ -644,12 +644,12 @@ class Maneli_Ajax_Handler {
         $can_view = false;
         
         // Use Permission Helper if possible, otherwise use manual check
-        if (class_exists('Maneli_Permission_Helpers')) {
-            $can_view = Maneli_Permission_Helpers::can_user_view_inquiry($inquiry_id, $current_user_id);
+        if (class_exists('Autopuzzle_Permission_Helpers')) {
+            $can_view = Autopuzzle_Permission_Helpers::can_user_view_inquiry($inquiry_id, $current_user_id);
         } else {
-             if (current_user_can('manage_maneli_inquiries') || (int)$inquiry->post_author === $current_user_id) {
+             if (current_user_can('manage_autopuzzle_inquiries') || (int)$inquiry->post_author === $current_user_id) {
                 $can_view = true;
-            } elseif (in_array('maneli_expert', get_userdata($current_user_id)->roles)) {
+            } elseif (in_array('autopuzzle_expert', get_userdata($current_user_id)->roles)) {
                 $assigned_expert_id = (int)get_post_meta($inquiry_id, 'assigned_expert_id', true);
                 if ($assigned_expert_id === $current_user_id) $can_view = true;
             }
@@ -657,7 +657,7 @@ class Maneli_Ajax_Handler {
         
 
         if (!$can_view) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to view this report.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('You do not have permission to view this report.', 'autopuzzle')], 403);
             return;
         }
 
@@ -675,16 +675,16 @@ class Maneli_Ajax_Handler {
 
         $data = [
             'id' => $inquiry_id,
-            'status_label' => Maneli_CPT_Handler::get_status_label($status),
+            'status_label' => Autopuzzle_CPT_Handler::get_status_label($status),
             'status_key' => $status,
             'rejection_reason' => get_post_meta($inquiry_id, 'rejection_reason', true),
             'car' => [
                 'name' => get_the_title($product_id),
                 'image' => get_the_post_thumbnail_url($product_id, 'medium'),
-                'total_price' => number_format_i18n((int)($post_meta['maneli_inquiry_total_price'][0] ?? 0)),
-                'down_payment' => number_format_i18n((int)($post_meta['maneli_inquiry_down_payment'][0] ?? 0)),
-                'term' => $post_meta['maneli_inquiry_term_months'][0] ?? 0,
-                'installment' => number_format_i18n((int)($post_meta['maneli_inquiry_installment'][0] ?? 0)),
+                'total_price' => number_format_i18n((int)($post_meta['autopuzzle_inquiry_total_price'][0] ?? 0)),
+                'down_payment' => number_format_i18n((int)($post_meta['autopuzzle_inquiry_down_payment'][0] ?? 0)),
+                'term' => $post_meta['autopuzzle_inquiry_term_months'][0] ?? 0,
+                'installment' => number_format_i18n((int)($post_meta['autopuzzle_inquiry_installment'][0] ?? 0)),
             ],
             'buyer' => ['first_name' => $post_meta['first_name'][0] ?? '', 'last_name' => $post_meta['last_name'][0] ?? ''],
             'issuer_type' => $post_meta['issuer_type'][0] ?? 'self',
@@ -702,25 +702,25 @@ class Maneli_Ajax_Handler {
     public function ajax_filter_inquiries() {
         // Check nonce - try both 'nonce' and '_ajax_nonce' for compatibility
         $nonce = isset($_POST['nonce']) ? $_POST['nonce'] : (isset($_POST['_ajax_nonce']) ? $_POST['_ajax_nonce'] : '');
-        if (!wp_verify_nonce($nonce, 'maneli_inquiry_filter_nonce')) {
-            wp_send_json_error(['message' => esc_html__('Invalid security token.', 'maneli-car-inquiry')], 403);
+        if (!wp_verify_nonce($nonce, 'autopuzzle_inquiry_filter_nonce')) {
+            wp_send_json_error(['message' => esc_html__('Invalid security token.', 'autopuzzle')], 403);
             return;
         }
         // CRITICAL: Always get fresh role from WordPress user object
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $current_user = wp_get_current_user();
         // Always check fresh roles from database
-        $is_admin = current_user_can('manage_maneli_inquiries');
-        $is_manager = in_array('maneli_manager', $current_user->roles, true) || in_array('maneli_admin', $current_user->roles, true);
-        $is_expert = in_array('maneli_expert', $current_user->roles, true);
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
+        $is_manager = in_array('autopuzzle_manager', $current_user->roles, true) || in_array('autopuzzle_admin', $current_user->roles, true);
+        $is_expert = in_array('autopuzzle_expert', $current_user->roles, true);
         $is_customer = !$is_admin && !$is_manager && !$is_expert;
         
         if (!$is_admin && !$is_manager && !$is_expert && !$is_customer) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
     
@@ -754,11 +754,11 @@ class Maneli_Ajax_Handler {
         
         // Debug logging for tracking_status and expert (only in debug mode)
         if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-            error_log('Maneli Debug: tracking_status_query = ' . $tracking_status_query);
+            error_log('AutoPuzzle Debug: tracking_status_query = ' . $tracking_status_query);
         }
         $expert_filter_value = isset($_POST['expert']) ? $_POST['expert'] : '';
         if (defined('WP_DEBUG') && WP_DEBUG && $expert_filter_value !== '') {
-            error_log('Maneli Debug: expert filter = ' . $expert_filter_value);
+            error_log('AutoPuzzle Debug: expert filter = ' . $expert_filter_value);
         }
         
         // Handle tracking_status filter if provided (before expert filter to avoid conflicts)
@@ -799,7 +799,7 @@ class Maneli_Ajax_Handler {
                     ]
                 ];
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Debug: Added unassigned expert filter for referred status');
+                    error_log('AutoPuzzle Debug: Added unassigned expert filter for referred status');
                 }
             }
         }
@@ -864,8 +864,8 @@ class Maneli_Ajax_Handler {
             $args['meta_query'] = $meta_query;
             // Debug logging (only in debug mode)
             if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-                error_log('Maneli Debug: meta_query count = ' . $meta_query_count);
-                error_log('Maneli Debug: meta_query structure = ' . print_r($meta_query, true));
+                error_log('AutoPuzzle Debug: meta_query count = ' . $meta_query_count);
+                error_log('AutoPuzzle Debug: meta_query structure = ' . print_r($meta_query, true));
             }
         } elseif ($meta_query_count === 1 && isset($meta_query[0]['relation'])) {
             // Only relation, no actual queries - don't add meta_query
@@ -874,15 +874,15 @@ class Maneli_Ajax_Handler {
     
         // Debug logging for final query args (only in debug mode)
         if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-            error_log('Maneli Debug: Final query args = ' . print_r($args, true));
+            error_log('AutoPuzzle Debug: Final query args = ' . print_r($args, true));
         }
     
         $inquiry_query = new WP_Query($args);
         
         // Debug logging for query results (only in debug mode)
         if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-            error_log('Maneli Debug: Query found ' . $inquiry_query->found_posts . ' posts');
-            error_log('Maneli Debug: Query post_count = ' . $inquiry_query->post_count);
+            error_log('AutoPuzzle Debug: Query found ' . $inquiry_query->found_posts . ' posts');
+            error_log('AutoPuzzle Debug: Query post_count = ' . $inquiry_query->post_count);
         }
         
         // For 'referred' status, we need additional filtering if meta_query didn't work perfectly
@@ -901,11 +901,11 @@ class Maneli_Ajax_Handler {
                 if ($is_unassigned) {
                     $posts_to_render[] = $post_id;
                     if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-                        error_log('Maneli Debug: Post #' . $post_id . ' passed filter - expert_id: ' . var_export($expert_id, true));
+                        error_log('AutoPuzzle Debug: Post #' . $post_id . ' passed filter - expert_id: ' . var_export($expert_id, true));
                     }
                 } else {
                     if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-                        error_log('Maneli Debug: Post #' . $post_id . ' filtered out - has expert_id: ' . var_export($expert_id, true) . ' (type: ' . gettype($expert_id) . ')');
+                        error_log('AutoPuzzle Debug: Post #' . $post_id . ' filtered out - has expert_id: ' . var_export($expert_id, true) . ' (type: ' . gettype($expert_id) . ')');
                     }
                 }
             }
@@ -918,17 +918,17 @@ class Maneli_Ajax_Handler {
                 // Render only the filtered posts
                 $rendered_count = 0;
                 foreach ($posts_to_render as $post_id) {
-                    Maneli_Render_Helpers::render_inquiry_row($post_id, $base_url);
+                    Autopuzzle_Render_Helpers::render_inquiry_row($post_id, $base_url);
                     $rendered_count++;
                 }
                 if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-                    error_log('Maneli Debug: Rendered ' . $rendered_count . ' inquiry rows (after filtering)');
+                    error_log('AutoPuzzle Debug: Rendered ' . $rendered_count . ' inquiry rows (after filtering)');
                 }
             } else {
                 // No posts passed the filter - this could mean all have experts assigned or query found nothing
                 if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-                    error_log('Maneli Debug: Query found ' . $inquiry_query->found_posts . ' posts but none passed unassigned filter');
-                    error_log('Maneli Debug: This might indicate all referred inquiries have experts assigned, or meta_query did not work correctly');
+                    error_log('AutoPuzzle Debug: Query found ' . $inquiry_query->found_posts . ' posts but none passed unassigned filter');
+                    error_log('AutoPuzzle Debug: This might indicate all referred inquiries have experts assigned, or meta_query did not work correctly');
                 }
             }
         } elseif ($inquiry_query->have_posts()) {
@@ -941,22 +941,22 @@ class Maneli_Ajax_Handler {
                 if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
                     $tracking_status_debug = get_post_meta($post_id, 'tracking_status', true);
                     $expert_id_debug = get_post_meta($post_id, 'assigned_expert_id', true);
-                    error_log('Maneli Debug: Rendering post #' . $post_id . ' - tracking_status: ' . $tracking_status_debug . ', expert_id: ' . var_export($expert_id_debug, true));
+                    error_log('AutoPuzzle Debug: Rendering post #' . $post_id . ' - tracking_status: ' . $tracking_status_debug . ', expert_id: ' . var_export($expert_id_debug, true));
                 }
-                Maneli_Render_Helpers::render_inquiry_row($post_id, $base_url);
+                Autopuzzle_Render_Helpers::render_inquiry_row($post_id, $base_url);
                 $rendered_count++;
             }
             if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-                error_log('Maneli Debug: Rendered ' . $rendered_count . ' inquiry rows');
+                error_log('AutoPuzzle Debug: Rendered ' . $rendered_count . ' inquiry rows');
             }
         } elseif ($is_referred_status && $inquiry_query->found_posts > 0 && empty($posts_to_render)) {
             // Query found posts but all were filtered out (all have experts assigned)
             $columns = $is_admin ? 7 : 6;
-            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No inquiries found without assigned expert.', 'maneli-car-inquiry') . '</td></tr>';
+            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No inquiries found without assigned expert.', 'autopuzzle') . '</td></tr>';
         } else {
             // Calculate columns based on user role (admin sees assigned column, customer/expert don't)
             $columns = $is_admin ? 7 : 6;
-            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No inquiries found matching your criteria.', 'maneli-car-inquiry') . '</td></tr>';
+            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No inquiries found matching your criteria.', 'autopuzzle') . '</td></tr>';
         }
         $html = ob_get_clean();
         if (!$is_referred_status || empty($posts_to_render)) {
@@ -975,16 +975,16 @@ class Maneli_Ajax_Handler {
                 'format' => '?paged=%#%', 
                 'current' => $paged, 
                 'total' => $inquiry_query->max_num_pages, 
-                'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'), 
-                'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'), 
+                'prev_text' => esc_html__('&laquo; Previous', 'autopuzzle'), 
+                'next_text' => esc_html__('Next &raquo;', 'autopuzzle'), 
                 'type'  => 'plain'
             ]);
         }
         
         // Debug logging for final HTML (only in debug mode)
         if (defined('WP_DEBUG') && WP_DEBUG && !empty($tracking_status_query)) {
-            error_log('Maneli Debug: Final HTML length = ' . strlen($html));
-            error_log('Maneli Debug: HTML preview (first 500 chars) = ' . substr($html, 0, 500));
+            error_log('AutoPuzzle Debug: Final HTML length = ' . strlen($html));
+            error_log('AutoPuzzle Debug: HTML preview (first 500 chars) = ' . substr($html, 0, 500));
         }
     
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
@@ -994,20 +994,20 @@ class Maneli_Ajax_Handler {
      * Handles deletion of an installment inquiry post via AJAX.
      */
     public function ajax_delete_inquiry() {
-        check_ajax_referer('maneli_inquiry_delete_nonce', 'nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_inquiry_delete_nonce', 'nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
         // Check license and demo mode
-        if (class_exists('Maneli_Permission_Helpers')) {
+        if (class_exists('Autopuzzle_Permission_Helpers')) {
             $user_id = get_current_user_id();
-            if (!Maneli_Permission_Helpers::can_user_delete($user_id, 'inquiry')) {
-                if (Maneli_Permission_Helpers::is_demo_mode()) {
-                    wp_send_json_error(['message' => esc_html__('در حالت دمو امکان حذف وجود ندارد.', 'maneli-car-inquiry')], 403);
+            if (!Autopuzzle_Permission_Helpers::can_user_delete($user_id, 'inquiry')) {
+                if (Autopuzzle_Permission_Helpers::is_demo_mode()) {
+                    wp_send_json_error(['message' => esc_html__('در حالت دمو امکان حذف وجود ندارد.', 'autopuzzle')], 403);
                 } else {
-                    wp_send_json_error(['message' => esc_html__('لایسنس فعال نیست.', 'maneli-car-inquiry')], 403);
+                    wp_send_json_error(['message' => esc_html__('لایسنس فعال نیست.', 'autopuzzle')], 403);
                 }
                 return;
             }
@@ -1017,13 +1017,13 @@ class Maneli_Ajax_Handler {
         $client_ip = $this->get_client_ip();
         $rate_limit_key = 'delete_inquiry_' . get_current_user_id() . '_' . $client_ip;
         if (!$this->check_rate_limit($rate_limit_key, 5, 300)) {
-            wp_send_json_error(['message' => esc_html__('Too many delete requests. Please try again later.', 'maneli-car-inquiry')], 429);
+            wp_send_json_error(['message' => esc_html__('Too many delete requests. Please try again later.', 'autopuzzle')], 429);
             return;
         }
 
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
             return;
         }
 
@@ -1038,25 +1038,25 @@ class Maneli_Ajax_Handler {
                 // Audit log: Record deletion
                 $this->log_user_action(
                     'delete_inquiry',
-                    sprintf(esc_html__('Deleted installment inquiry: %s (ID: %d)', 'maneli-car-inquiry'), $inquiry_title, $inquiry_id),
+                    sprintf(esc_html__('Deleted installment inquiry: %s (ID: %d)', 'autopuzzle'), $inquiry_title, $inquiry_id),
                     'inquiry',
                     $inquiry_id,
                     ['author_id' => $inquiry_author_id, 'title' => $inquiry_title]
                 );
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry deleted successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry deleted successfully.', 'autopuzzle')]);
             } else {
-                $error_message = is_wp_error($result) ? $result->get_error_message() : esc_html__('Unknown error', 'maneli-car-inquiry');
+                $error_message = is_wp_error($result) ? $result->get_error_message() : esc_html__('Unknown error', 'autopuzzle');
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Error: Failed to delete inquiry. Error: ' . $error_message);
+                    error_log('AutoPuzzle Error: Failed to delete inquiry. Error: ' . $error_message);
                 }
-                wp_send_json_error(['message' => esc_html__('Error deleting inquiry. Please try again.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Error deleting inquiry. Please try again.', 'autopuzzle')]);
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Exception while deleting inquiry. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Exception while deleting inquiry. Error: ' . $e->getMessage());
             }
-            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the inquiry. Please try again.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the inquiry. Please try again.', 'autopuzzle')]);
         }
     }
 
@@ -1065,21 +1065,21 @@ class Maneli_Ajax_Handler {
     //======================================================================
     
     public function ajax_get_cash_inquiry_details() {
-        check_ajax_referer('maneli_cash_inquiry_details_nonce', 'nonce');
-        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_cash_inquiry_details_nonce', 'nonce');
+        if (!is_user_logged_in() || !(current_user_can('manage_autopuzzle_inquiries') || in_array('autopuzzle_expert', wp_get_current_user()->roles))) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'autopuzzle')]);
             return;
         }
 
         // Security Check: Ensure the user has permission to view this specific inquiry
-        if (class_exists('Maneli_Permission_Helpers') && !Maneli_Permission_Helpers::can_user_view_inquiry($inquiry_id, get_current_user_id())) {
-             wp_send_json_error(['message' => esc_html__('You do not have permission to view this report.', 'maneli-car-inquiry')], 403);
+        if (class_exists('Autopuzzle_Permission_Helpers') && !Autopuzzle_Permission_Helpers::can_user_view_inquiry($inquiry_id, get_current_user_id())) {
+             wp_send_json_error(['message' => esc_html__('You do not have permission to view this report.', 'autopuzzle')], 403);
              return;
         }
 
@@ -1088,13 +1088,13 @@ class Maneli_Ajax_Handler {
 
         $data = [
             'id' => $inquiry_id,
-            'status_label' => Maneli_CPT_Handler::get_cash_inquiry_status_label($post_meta['cash_inquiry_status'][0] ?? 'pending'),
+            'status_label' => Autopuzzle_CPT_Handler::get_cash_inquiry_status_label($post_meta['cash_inquiry_status'][0] ?? 'pending'),
             'status_key' => $post_meta['cash_inquiry_status'][0] ?? 'pending',
             'rejection_reason' => $post_meta['cash_rejection_reason'][0] ?? '',
             'car' => [
                 'name' => get_the_title($product_id),
                 'color' => $post_meta['cash_car_color'][0] ?? '',
-                'down_payment' => Maneli_Render_Helpers::format_money($post_meta['cash_down_payment'][0] ?? 0),
+                'down_payment' => Autopuzzle_Render_Helpers::format_money($post_meta['cash_down_payment'][0] ?? 0),
             ],
             'customer' => [
                 'first_name' => $post_meta['cash_first_name'][0] ?? '',
@@ -1106,15 +1106,15 @@ class Maneli_Ajax_Handler {
     }
 
     public function ajax_update_cash_inquiry() {
-        check_ajax_referer('maneli_cash_inquiry_update_nonce', 'nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_cash_inquiry_update_nonce', 'nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'autopuzzle')]);
             return;
         }
     
@@ -1123,24 +1123,24 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'mobile_number', sanitize_text_field($_POST['mobile'] ?? ''));
         update_post_meta($inquiry_id, 'cash_car_color', sanitize_text_field($_POST['color'] ?? ''));
     
-        wp_send_json_success(['message' => esc_html__('Request updated successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Request updated successfully.', 'autopuzzle')]);
     }
     
     public function ajax_delete_cash_inquiry() {
-        check_ajax_referer('maneli_cash_inquiry_delete_nonce', 'nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_cash_inquiry_delete_nonce', 'nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
         // Check license and demo mode
-        if (class_exists('Maneli_Permission_Helpers')) {
+        if (class_exists('Autopuzzle_Permission_Helpers')) {
             $user_id = get_current_user_id();
-            if (!Maneli_Permission_Helpers::can_user_delete($user_id, 'cash_inquiry')) {
-                if (Maneli_Permission_Helpers::is_demo_mode()) {
-                    wp_send_json_error(['message' => esc_html__('در حالت دمو امکان حذف وجود ندارد.', 'maneli-car-inquiry')], 403);
+            if (!Autopuzzle_Permission_Helpers::can_user_delete($user_id, 'cash_inquiry')) {
+                if (Autopuzzle_Permission_Helpers::is_demo_mode()) {
+                    wp_send_json_error(['message' => esc_html__('در حالت دمو امکان حذف وجود ندارد.', 'autopuzzle')], 403);
                 } else {
-                    wp_send_json_error(['message' => esc_html__('لایسنس فعال نیست.', 'maneli-car-inquiry')], 403);
+                    wp_send_json_error(['message' => esc_html__('لایسنس فعال نیست.', 'autopuzzle')], 403);
                 }
                 return;
             }
@@ -1148,7 +1148,7 @@ class Maneli_Ajax_Handler {
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'autopuzzle')]);
             return;
         }
     
@@ -1163,44 +1163,44 @@ class Maneli_Ajax_Handler {
                 // Audit log: Record deletion
                 $this->log_user_action(
                     'delete_cash_inquiry',
-                    sprintf(esc_html__('Deleted cash inquiry: %s (ID: %d)', 'maneli-car-inquiry'), $inquiry_title, $inquiry_id),
+                    sprintf(esc_html__('Deleted cash inquiry: %s (ID: %d)', 'autopuzzle'), $inquiry_title, $inquiry_id),
                     'cash_inquiry',
                     $inquiry_id,
                     ['author_id' => $inquiry_author_id, 'title' => $inquiry_title]
                 );
                 
-                wp_send_json_success(['message' => esc_html__('Request deleted successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Request deleted successfully.', 'autopuzzle')]);
             } else {
-                $error_message = is_wp_error($result) ? $result->get_error_message() : esc_html__('Unknown error', 'maneli-car-inquiry');
+                $error_message = is_wp_error($result) ? $result->get_error_message() : esc_html__('Unknown error', 'autopuzzle');
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Error: Failed to delete cash inquiry. Error: ' . $error_message);
+                    error_log('AutoPuzzle Error: Failed to delete cash inquiry. Error: ' . $error_message);
                 }
-                wp_send_json_error(['message' => esc_html__('Error deleting request. Please try again.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Error deleting request. Please try again.', 'autopuzzle')]);
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Exception while deleting cash inquiry. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Exception while deleting cash inquiry. Error: ' . $e->getMessage());
             }
-            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the request. Please try again.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the request. Please try again.', 'autopuzzle')]);
         }
     }
     
     public function ajax_set_down_payment() {
-        check_ajax_referer('maneli_cash_set_downpayment_nonce', 'nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_cash_set_downpayment_nonce', 'nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
     
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'autopuzzle')]);
             return;
         }
         
         $new_status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
-        $sms_handler = new Maneli_SMS_Handler();
-        $options = Maneli_Options_Helper::get_all_options();
+        $sms_handler = new Autopuzzle_SMS_Handler();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $customer_name = get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true);
         $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
         $car_name = get_the_title(get_post_meta($inquiry_id, 'product_id', true));
@@ -1208,7 +1208,7 @@ class Maneli_Ajax_Handler {
         if ($new_status === 'awaiting_payment') {
             $amount = preg_replace('/[^0-9]/', '', $_POST['amount'] ?? 0);
             if ($amount <= 0) {
-                wp_send_json_error(['message' => esc_html__('Please enter a valid amount.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Please enter a valid amount.', 'autopuzzle')]);
                 return;
             }
             $old_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
@@ -1221,32 +1221,32 @@ class Maneli_Ajax_Handler {
             // Audit log: Record status change
             $this->log_user_action(
                 'change_status',
-                sprintf(esc_html__('Changed cash inquiry status from %s to awaiting_payment', 'maneli-car-inquiry'), $old_status),
+                sprintf(esc_html__('Changed cash inquiry status from %s to awaiting_payment', 'autopuzzle'), $old_status),
                 'cash_inquiry',
                 $inquiry_id,
                 ['old_status' => $old_status, 'new_status' => 'awaiting_payment', 'amount' => $amount]
             );
             
             // Send notification
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'awaiting_payment');
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'awaiting_payment');
             
             $pattern_id = $options['cash_inquiry_approved_pattern'] ?? 0;
             if ($pattern_id > 0 && !empty($customer_mobile)) {
-                $params = [(string)$customer_name, (string)$car_name, (string)Maneli_Render_Helpers::format_money($amount)];
+                $params = [(string)$customer_name, (string)$car_name, (string)Autopuzzle_Render_Helpers::format_money($amount)];
                 $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
             }
             
         } elseif ($new_status === 'rejected') {
             $reason = isset($_POST['reason']) ? sanitize_textarea_field($_POST['reason']) : '';
             if (empty($reason)) {
-                wp_send_json_error(['message' => esc_html__('A reason for rejection is required.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('A reason for rejection is required.', 'autopuzzle')]);
                 return;
             }
             
             // Validate rejection reason length
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-            $reason_validation = Maneli_Render_Helpers::validate_description_field($reason);
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+            $reason_validation = Autopuzzle_Render_Helpers::validate_description_field($reason);
             if (!$reason_validation['valid']) {
                 wp_send_json_error(['message' => $reason_validation['error']]);
                 return;
@@ -1262,15 +1262,15 @@ class Maneli_Ajax_Handler {
             // Audit log: Record status change
             $this->log_user_action(
                 'change_status',
-                sprintf(esc_html__('Changed cash inquiry status from %s to rejected', 'maneli-car-inquiry'), $old_status),
+                sprintf(esc_html__('Changed cash inquiry status from %s to rejected', 'autopuzzle'), $old_status),
                 'cash_inquiry',
                 $inquiry_id,
                 ['old_status' => $old_status, 'new_status' => 'rejected', 'reason_length' => strlen($reason)]
             );
             
             // Send notification
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'rejected');
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'rejected');
             
             $pattern_id = $options['cash_inquiry_rejected_pattern'] ?? 0;
             if ($pattern_id > 0 && !empty($customer_mobile)) {
@@ -1278,35 +1278,35 @@ class Maneli_Ajax_Handler {
                 $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
             }
         } else {
-            wp_send_json_error(['message' => esc_html__('Invalid data submitted.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid data submitted.', 'autopuzzle')]);
             return;
         }
     
-        wp_send_json_success(['message' => esc_html__('Status changed successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Status changed successfully.', 'autopuzzle')]);
     }
     
     public function ajax_filter_cash_inquiries() {
         // Check nonce - try both 'nonce' and '_ajax_nonce' for compatibility
         $nonce = isset($_POST['nonce']) ? $_POST['nonce'] : (isset($_POST['_ajax_nonce']) ? $_POST['_ajax_nonce'] : '');
-        if (!wp_verify_nonce($nonce, 'maneli_cash_inquiry_filter_nonce')) {
-            wp_send_json_error(['message' => esc_html__('Invalid security token.', 'maneli-car-inquiry')], 403);
+        if (!wp_verify_nonce($nonce, 'autopuzzle_cash_inquiry_filter_nonce')) {
+            wp_send_json_error(['message' => esc_html__('Invalid security token.', 'autopuzzle')], 403);
             return;
         }
         // CRITICAL: Always get fresh role from WordPress user object
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $current_user = wp_get_current_user();
         // Always check fresh roles from database
-        $is_admin = current_user_can('manage_maneli_inquiries');
-        $is_manager = in_array('maneli_manager', $current_user->roles, true) || in_array('maneli_admin', $current_user->roles, true);
-        $is_expert = in_array('maneli_expert', $current_user->roles, true);
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
+        $is_manager = in_array('autopuzzle_manager', $current_user->roles, true) || in_array('autopuzzle_admin', $current_user->roles, true);
+        $is_expert = in_array('autopuzzle_expert', $current_user->roles, true);
         $is_customer = !$is_admin && !$is_manager && !$is_expert;
         
         if (!$is_admin && !$is_manager && !$is_expert && !$is_customer) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
@@ -1470,7 +1470,7 @@ class Maneli_Ajax_Handler {
                 
                 // CRITICAL: Double-check post type before rendering
                 if ($post_type === 'cash_inquiry') {
-                    Maneli_Render_Helpers::render_cash_inquiry_row($post_id, $base_url);
+                    Autopuzzle_Render_Helpers::render_cash_inquiry_row($post_id, $base_url);
                 } else {
                     // Log unexpected post type for debugging
                     if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -1481,7 +1481,7 @@ class Maneli_Ajax_Handler {
         } else {
             // Calculate columns based on user role (admin sees expert column, customer/expert don't)
             $columns = $is_admin ? 8 : 7;
-            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No requests found.', 'maneli-car-inquiry') . '</td></tr>';
+            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No requests found.', 'autopuzzle') . '</td></tr>';
         }
         $html = ob_get_clean();
         wp_reset_postdata();
@@ -1491,8 +1491,8 @@ class Maneli_Ajax_Handler {
             'format' => '?paged=%#%', 
             'current' => $paged, 
             'total' => $inquiry_query->max_num_pages, 
-            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'),
-            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'),
+            'prev_text' => esc_html__('&laquo; Previous', 'autopuzzle'),
+            'next_text' => esc_html__('Next &raquo;', 'autopuzzle'),
             'type'  => 'plain'
         ]);
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
@@ -1503,9 +1503,9 @@ class Maneli_Ajax_Handler {
     //======================================================================
     
     public function ajax_assign_expert_to_cash_inquiry() {
-        check_ajax_referer('maneli_cash_inquiry_assign_expert_nonce', 'nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_cash_inquiry_assign_expert_nonce', 'nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
     
@@ -1513,11 +1513,11 @@ class Maneli_Ajax_Handler {
         $expert_id_str = isset($_POST['expert_id']) ? sanitize_text_field($_POST['expert_id']) : 'auto';
     
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid request ID.', 'autopuzzle')]);
             return;
         }
         
-        $admin_actions = new Maneli_Admin_Actions_Handler();
+        $admin_actions = new Autopuzzle_Admin_Actions_Handler();
         $expert_data = $admin_actions->assign_expert_to_post($inquiry_id, $expert_id_str, 'cash');
 
         if (is_wp_error($expert_data)) {
@@ -1535,21 +1535,21 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'cash_inquiry_status', 'referred');
         
         // Send notification for status change
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'referred');
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'referred');
 
         wp_send_json_success([
-            'message' => sprintf(esc_html__('Request successfully assigned to %s.', 'maneli-car-inquiry'), $expert_data['name']),
+            'message' => sprintf(esc_html__('Request successfully assigned to %s.', 'autopuzzle'), $expert_data['name']),
             'expert_name' => $expert_data['name'],
-            'new_status_label' => Maneli_CPT_Handler::get_cash_inquiry_status_label('referred'),
+            'new_status_label' => Autopuzzle_CPT_Handler::get_cash_inquiry_status_label('referred'),
             'new_status_key' => 'referred'
         ]);
     }
     
     public function ajax_assign_expert_to_inquiry() {
-        check_ajax_referer('maneli_inquiry_assign_expert_nonce', 'nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_inquiry_assign_expert_nonce', 'nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
     
@@ -1557,11 +1557,11 @@ class Maneli_Ajax_Handler {
         $expert_id_str = isset($_POST['expert_id']) ? sanitize_text_field($_POST['expert_id']) : 'auto';
     
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
             return;
         }
     
-        $admin_actions = new Maneli_Admin_Actions_Handler();
+        $admin_actions = new Autopuzzle_Admin_Actions_Handler();
         $expert_data = $admin_actions->assign_expert_to_post($inquiry_id, $expert_id_str, 'installment');
 
         if (is_wp_error($expert_data)) {
@@ -1573,13 +1573,13 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'inquiry_status', 'user_confirmed');
         
         // Send notification for status change
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $old_status, 'user_confirmed', 'inquiry_status');
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $old_status, 'user_confirmed', 'inquiry_status');
     
         wp_send_json_success([
-            'message' => sprintf(esc_html__('Inquiry successfully assigned to %s.', 'maneli-car-inquiry'), $expert_data['name']),
+            'message' => sprintf(esc_html__('Inquiry successfully assigned to %s.', 'autopuzzle'), $expert_data['name']),
             'expert_name' => $expert_data['name'],
-            'new_status_label' => Maneli_CPT_Handler::get_status_label('user_confirmed'),
+            'new_status_label' => Autopuzzle_CPT_Handler::get_status_label('user_confirmed'),
             'new_status_key' => 'user_confirmed'
         ]);
     }
@@ -1589,9 +1589,9 @@ class Maneli_Ajax_Handler {
     //======================================================================
     
     public function ajax_filter_users() {
-        check_ajax_referer('maneli_user_filter_nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        check_ajax_referer('autopuzzle_user_filter_nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
 
@@ -1614,10 +1614,10 @@ class Maneli_Ajax_Handler {
         if (!empty($all_users)) {
             foreach ($all_users as $user) {
                 if ($user->ID === $current_user_id) continue;
-                Maneli_Render_Helpers::render_user_list_row($user, $current_url);
+                Autopuzzle_Render_Helpers::render_user_list_row($user, $current_url);
             }
         } else {
-            echo '<tr><td colspan="5" style="text-align:center;">' . esc_html__('No users found matching your criteria.', 'maneli-car-inquiry') . '</td></tr>';
+            echo '<tr><td colspan="5" style="text-align:center;">' . esc_html__('No users found matching your criteria.', 'autopuzzle') . '</td></tr>';
         }
         $html = ob_get_clean();
         
@@ -1627,26 +1627,26 @@ class Maneli_Ajax_Handler {
             'current' => $paged, 
             'total' => ceil($user_query->get_total() / 50), 
             'type' => 'plain', 
-            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'),
-            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry')
+            'prev_text' => esc_html__('&laquo; Previous', 'autopuzzle'),
+            'next_text' => esc_html__('Next &raquo;', 'autopuzzle')
         ]);
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
 
     public function ajax_delete_user() {
-        check_ajax_referer('maneli_delete_user_nonce', '_ajax_nonce');
+        check_ajax_referer('autopuzzle_delete_user_nonce', '_ajax_nonce');
         // FIX: Added 'delete_users' capability check for security
-        if (!current_user_can('manage_maneli_inquiries') || !current_user_can('delete_users')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries') || !current_user_can('delete_users')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         $user_id_to_delete = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         if (!$user_id_to_delete) {
-            wp_send_json_error(['message' => esc_html__('User ID not specified.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('User ID not specified.', 'autopuzzle')]);
             return;
         }
         if ($user_id_to_delete === get_current_user_id()) {
-            wp_send_json_error(['message' => esc_html__('You cannot delete your own account.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You cannot delete your own account.', 'autopuzzle')]);
             return;
         }
         require_once(ABSPATH . 'wp-admin/includes/user.php');
@@ -1664,7 +1664,7 @@ class Maneli_Ajax_Handler {
                 // Audit log: Record user deletion
                 $this->log_user_action(
                     'delete_user',
-                    sprintf(esc_html__('Deleted user: %s (ID: %d, Email: %s)', 'maneli-car-inquiry'), $user_display_name, $user_id_to_delete, $user_email),
+                    sprintf(esc_html__('Deleted user: %s (ID: %d, Email: %s)', 'autopuzzle'), $user_display_name, $user_id_to_delete, $user_email),
                     'user',
                     $user_id_to_delete,
                     ['email' => $user_email, 'display_name' => $user_display_name, 'roles' => $user_roles]
@@ -1673,15 +1673,15 @@ class Maneli_Ajax_Handler {
                 wp_send_json_success();
             } else {
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Error: Failed to delete user. User ID: ' . $user_id_to_delete);
+                    error_log('AutoPuzzle Error: Failed to delete user. User ID: ' . $user_id_to_delete);
                 }
-                wp_send_json_error(['message' => esc_html__('An error occurred while deleting the user.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('An error occurred while deleting the user.', 'autopuzzle')]);
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Error: Exception while deleting user. Error: ' . $e->getMessage());
+                error_log('AutoPuzzle Error: Exception while deleting user. Error: ' . $e->getMessage());
             }
-            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the user. Please try again.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('An error occurred while deleting the user. Please try again.', 'autopuzzle')]);
         }
     }
 
@@ -1690,9 +1690,9 @@ class Maneli_Ajax_Handler {
     //======================================================================
     
     public function ajax_filter_products() {
-        check_ajax_referer('maneli_product_filter_nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        check_ajax_referer('autopuzzle_product_filter_nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         $paged = isset($_POST['page']) ? absint($_POST['page']) : 1;
@@ -1703,10 +1703,10 @@ class Maneli_Ajax_Handler {
         ob_start();
         if (!empty($query_result->products)) {
             foreach ($query_result->products as $product) {
-                Maneli_Render_Helpers::render_product_editor_row($product);
+                Autopuzzle_Render_Helpers::render_product_editor_row($product);
             }
         } else {
-            echo '<tr><td colspan="6" style="text-align:center;">' . esc_html__('No products found matching your criteria.', 'maneli-car-inquiry') . '</td></tr>';
+            echo '<tr><td colspan="6" style="text-align:center;">' . esc_html__('No products found matching your criteria.', 'autopuzzle') . '</td></tr>';
         }
         $html = ob_get_clean();
 
@@ -1716,16 +1716,16 @@ class Maneli_Ajax_Handler {
             'current' => $paged, 
             'total' => $query_result->max_num_pages, 
             'type' => 'plain', 
-            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'),
-            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry')
+            'prev_text' => esc_html__('&laquo; Previous', 'autopuzzle'),
+            'next_text' => esc_html__('Next &raquo;', 'autopuzzle')
         ]);
         wp_send_json_success(['html' => $html, 'pagination_html' => $pagination_html]);
     }
     
     public function ajax_update_product_data() {
-        check_ajax_referer('maneli_product_data_nonce', 'nonce');
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        check_ajax_referer('autopuzzle_product_data_nonce', 'nonce');
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
@@ -1743,12 +1743,12 @@ class Maneli_Ajax_Handler {
         }
 
         if (!$product_id || empty($field_type)) {
-            wp_send_json_error(esc_html__('Invalid data sent.', 'maneli-car-inquiry'));
+            wp_send_json_error(esc_html__('Invalid data sent.', 'autopuzzle'));
             return;
         }
         $product = wc_get_product($product_id);
         if (!$product) {
-            wp_send_json_error(esc_html__('Product not found.', 'maneli-car-inquiry'));
+            wp_send_json_error(esc_html__('Product not found.', 'autopuzzle'));
             return;
         }
 
@@ -1761,14 +1761,14 @@ class Maneli_Ajax_Handler {
             case 'min_downpayment': update_post_meta($product_id, 'min_downpayment', $field_value); break;
             case 'car_colors': update_post_meta($product_id, '_maneli_car_colors', $field_value); break;
             case 'car_status': update_post_meta($product_id, '_maneli_car_status', $field_value); break;
-            default: wp_send_json_error(esc_html__('Invalid field type.', 'maneli-car-inquiry'));
+            default: wp_send_json_error(esc_html__('Invalid field type.', 'autopuzzle'));
         }
 
         if ('regular_price' === $field_type) {
             $product->save();
         }
         wc_delete_product_transients($product_id); // Clear caches
-        wp_send_json_success(esc_html__('Updated.', 'maneli-car-inquiry'));
+        wp_send_json_success(esc_html__('Updated.', 'autopuzzle'));
     }
 
     //======================================================================
@@ -1780,10 +1780,10 @@ class Maneli_Ajax_Handler {
      * Handles calendar dates for 'approved' (meeting date) and 'follow_up' (follow-up date).
      */
     public function ajax_update_tracking_status() {
-        check_ajax_referer('maneli_tracking_status_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_tracking_status_nonce', 'nonce');
         
-        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!is_user_logged_in() || !(current_user_can('manage_autopuzzle_inquiries') || in_array('autopuzzle_expert', wp_get_current_user()->roles))) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
@@ -1792,14 +1792,14 @@ class Maneli_Ajax_Handler {
         $date_value = isset($_POST['date_value']) ? sanitize_text_field($_POST['date_value']) : '';
 
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
             return;
         }
 
         // Verify the status is valid
-        $valid_statuses = array_keys(Maneli_CPT_Handler::get_tracking_statuses());
+        $valid_statuses = array_keys(Autopuzzle_CPT_Handler::get_tracking_statuses());
         if (!in_array($new_status, $valid_statuses)) {
-            wp_send_json_error(['message' => esc_html__('Invalid tracking status.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid tracking status.', 'autopuzzle')]);
             return;
         }
 
@@ -1813,8 +1813,8 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'tracking_status', $new_status);
         
         // Send notification for status change
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $old_status, $new_status, 'tracking_status');
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $old_status, $new_status, 'tracking_status');
 
         // Handle date storage based on status
         if ($new_status === 'approved' && !empty($date_value)) {
@@ -1829,10 +1829,10 @@ class Maneli_Ajax_Handler {
             delete_post_meta($inquiry_id, 'follow_up_date');
         }
 
-        $status_label = Maneli_CPT_Handler::get_tracking_status_label($new_status);
+        $status_label = Autopuzzle_CPT_Handler::get_tracking_status_label($new_status);
         
         wp_send_json_success([
-            'message' => sprintf(esc_html__('Tracking status updated to: %s', 'maneli-car-inquiry'), $status_label),
+            'message' => sprintf(esc_html__('Tracking status updated to: %s', 'autopuzzle'), $status_label),
             'status_label' => $status_label,
             'status_key' => $new_status,
             'date_value' => $date_value
@@ -1844,10 +1844,10 @@ class Maneli_Ajax_Handler {
      * Similar to ajax_filter_inquiries but only returns follow-up items.
      */
     public function ajax_filter_followup_inquiries() {
-        check_ajax_referer('maneli_followup_filter_nonce', '_ajax_nonce');
+        check_ajax_referer('autopuzzle_followup_filter_nonce', '_ajax_nonce');
         
-        if (!is_user_logged_in() || !(current_user_can('manage_maneli_inquiries') || in_array('maneli_expert', wp_get_current_user()->roles))) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!is_user_logged_in() || !(current_user_can('manage_autopuzzle_inquiries') || in_array('autopuzzle_expert', wp_get_current_user()->roles))) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
     
@@ -1883,7 +1883,7 @@ class Maneli_Ajax_Handler {
         }
         
         // Expert filter
-        if (current_user_can('manage_maneli_inquiries')) {
+        if (current_user_can('manage_autopuzzle_inquiries')) {
             if (!empty($_POST['expert'])) $meta_query[] = ['key' => 'assigned_expert_id', 'value' => absint($_POST['expert'])];
         } else {
             $meta_query[] = ['key' => 'assigned_expert_id', 'value' => get_current_user_id()];
@@ -1896,11 +1896,11 @@ class Maneli_Ajax_Handler {
         if ($inquiry_query->have_posts()) {
             while ($inquiry_query->have_posts()) {
                 $inquiry_query->the_post();
-                Maneli_Render_Helpers::render_inquiry_row(get_the_ID(), $base_url, true); // Show follow-up date
+                Autopuzzle_Render_Helpers::render_inquiry_row(get_the_ID(), $base_url, true); // Show follow-up date
             }
         } else {
-            $columns = current_user_can('manage_maneli_inquiries') ? 8 : 7; // Extra column for follow-up date
-            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No follow-up inquiries found.', 'maneli-car-inquiry') . '</td></tr>';
+            $columns = current_user_can('manage_autopuzzle_inquiries') ? 8 : 7; // Extra column for follow-up date
+            echo '<tr><td colspan="' . $columns . '" style="text-align:center;">' . esc_html__('No follow-up inquiries found.', 'autopuzzle') . '</td></tr>';
         }
         $html = ob_get_clean();
         wp_reset_postdata();
@@ -1910,8 +1910,8 @@ class Maneli_Ajax_Handler {
             'format' => '?paged=%#%', 
             'current' => $paged, 
             'total' => $inquiry_query->max_num_pages, 
-            'prev_text' => esc_html__('&laquo; Previous', 'maneli-car-inquiry'), 
-            'next_text' => esc_html__('Next &raquo;', 'maneli-car-inquiry'), 
+            'prev_text' => esc_html__('&laquo; Previous', 'autopuzzle'), 
+            'next_text' => esc_html__('Next &raquo;', 'autopuzzle'), 
             'type'  => 'plain'
         ]);
     
@@ -1926,10 +1926,10 @@ class Maneli_Ajax_Handler {
      * Save complete product data from add/edit product form
      */
     public function ajax_save_product_full() {
-        check_ajax_referer('maneli_save_product', 'maneli_product_nonce');
+        check_ajax_referer('autopuzzle_save_product', 'autopuzzle_product_nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -1983,7 +1983,7 @@ class Maneli_Ajax_Handler {
         
         // Validation
         if (empty($product_name)) {
-            wp_send_json_error(['message' => esc_html__('Product name is required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Product name is required.', 'autopuzzle')]);
             return;
         }
         
@@ -1991,7 +1991,7 @@ class Maneli_Ajax_Handler {
         if ($is_edit) {
             $product = wc_get_product($product_id);
             if (!$product) {
-                wp_send_json_error(['message' => esc_html__('Product not found.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Product not found.', 'autopuzzle')]);
                 return;
             }
             $product->set_name($product_name);
@@ -2034,7 +2034,7 @@ class Maneli_Ajax_Handler {
         }
         
         if (!$product_id || is_wp_error($product)) {
-            wp_send_json_error(['message' => esc_html__('Error saving product.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Error saving product.', 'autopuzzle')]);
             return;
         }
         
@@ -2056,8 +2056,8 @@ class Maneli_Ajax_Handler {
         
         wp_send_json_success([
             'message' => $is_edit 
-                ? esc_html__('Product updated successfully.', 'maneli-car-inquiry')
-                : esc_html__('Product created successfully.', 'maneli-car-inquiry'),
+                ? esc_html__('Product updated successfully.', 'autopuzzle')
+                : esc_html__('Product created successfully.', 'autopuzzle'),
             'product_id' => $product_id
         ]);
     }
@@ -2066,15 +2066,15 @@ class Maneli_Ajax_Handler {
      * Upload image via AJAX
      */
     public function ajax_upload_image() {
-        check_ajax_referer('maneli_product_data_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_product_data_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         if (!isset($_FILES['image'])) {
-            wp_send_json_error(['message' => esc_html__('No file uploaded.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('No file uploaded.', 'autopuzzle')]);
             return;
         }
         
@@ -2124,7 +2124,7 @@ class Maneli_Ajax_Handler {
         $attachment_id = wp_insert_attachment($attachment, $upload['file']);
         
         if (is_wp_error($attachment_id)) {
-            wp_send_json_error(['message' => esc_html__('Error creating attachment.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Error creating attachment.', 'autopuzzle')]);
             return;
         }
         
@@ -2147,17 +2147,17 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_save_products_bulk() {
         // Security check
-        check_ajax_referer('maneli_save_products', 'nonce');
+        check_ajax_referer('autopuzzle_save_products', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
         $products = isset($_POST['products']) ? $_POST['products'] : [];
         
         if (empty($products) || !is_array($products)) {
-            wp_send_json_error(['message' => esc_html__('No products data provided.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('No products data provided.', 'autopuzzle')]);
             return;
         }
 
@@ -2168,7 +2168,7 @@ class Maneli_Ajax_Handler {
             $product_id = isset($product_data['id']) ? intval($product_data['id']) : 0;
             
             if (!$product_id || get_post_type($product_id) !== 'product') {
-                $errors[] = sprintf(__('Invalid product ID: %d', 'maneli-car-inquiry'), $product_id);
+                $errors[] = sprintf(__('Invalid product ID: %d', 'autopuzzle'), $product_id);
                 continue;
             }
 
@@ -2198,7 +2198,7 @@ class Maneli_Ajax_Handler {
                         '%d product updated successfully.',
                         '%d products updated successfully.',
                         $updated_count,
-                        'maneli-car-inquiry'
+                        'autopuzzle'
                     ),
                     $updated_count
                 ),
@@ -2207,7 +2207,7 @@ class Maneli_Ajax_Handler {
             ]);
         } else {
             wp_send_json_error([
-                'message' => esc_html__('No products were updated.', 'maneli-car-inquiry'),
+                'message' => esc_html__('No products were updated.', 'autopuzzle'),
                 'errors' => $errors
             ]);
         }
@@ -2223,10 +2223,10 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_toggle_expert_status() {
         // Security check
-        check_ajax_referer('maneli_toggle_expert_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_toggle_expert_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
@@ -2234,13 +2234,13 @@ class Maneli_Ajax_Handler {
         $active = isset($_POST['active']) && $_POST['active'] === 'true';
 
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
 
         $user = get_userdata($user_id);
-        if (!$user || !in_array('maneli_expert', $user->roles)) {
-            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'maneli-car-inquiry')]);
+        if (!$user || !in_array('autopuzzle_expert', $user->roles)) {
+            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'autopuzzle')]);
             return;
         }
 
@@ -2249,8 +2249,8 @@ class Maneli_Ajax_Handler {
 
         wp_send_json_success([
             'message' => $active 
-                ? esc_html__('Expert activated successfully.', 'maneli-car-inquiry')
-                : esc_html__('Expert deactivated successfully.', 'maneli-car-inquiry')
+                ? esc_html__('Expert activated successfully.', 'autopuzzle')
+                : esc_html__('Expert deactivated successfully.', 'autopuzzle')
         ]);
     }
 
@@ -2259,23 +2259,23 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_get_expert_stats() {
         // Security check
-        check_ajax_referer('maneli_expert_stats', 'nonce');
+        check_ajax_referer('autopuzzle_expert_stats', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
 
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
 
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
 
         $user = get_userdata($user_id);
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('User not found.', 'autopuzzle')]);
             return;
         }
 
@@ -2333,7 +2333,7 @@ class Maneli_Ajax_Handler {
                         </div>
                         <div class="stat-content">
                             <h4><?php echo number_format_i18n($total_inquiries); ?></h4>
-                            <p><?php esc_html_e('Total Inquiries Submitted', 'maneli-car-inquiry'); ?></p>
+                            <p><?php esc_html_e('Total Inquiries Submitted', 'autopuzzle'); ?></p>
                         </div>
                     </div>
                 </div>
@@ -2344,7 +2344,7 @@ class Maneli_Ajax_Handler {
                         </div>
                         <div class="stat-content">
                             <h4><?php echo number_format_i18n($assigned_count); ?></h4>
-                            <p><?php esc_html_e('Assigned Inquiries', 'maneli-car-inquiry'); ?></p>
+                            <p><?php esc_html_e('Assigned Inquiries', 'autopuzzle'); ?></p>
                         </div>
                     </div>
                 </div>
@@ -2355,7 +2355,7 @@ class Maneli_Ajax_Handler {
                         </div>
                         <div class="stat-content">
                             <h4><?php echo number_format_i18n($approved_count); ?></h4>
-                            <p><?php esc_html_e('Approved', 'maneli-car-inquiry'); ?></p>
+                            <p><?php esc_html_e('Approved', 'autopuzzle'); ?></p>
                         </div>
                     </div>
                 </div>
@@ -2366,7 +2366,7 @@ class Maneli_Ajax_Handler {
                         </div>
                         <div class="stat-content">
                             <h4><?php echo number_format_i18n($pending_count); ?></h4>
-                            <p><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></p>
+                            <p><?php esc_html_e('Pending', 'autopuzzle'); ?></p>
                         </div>
                     </div>
                 </div>
@@ -2377,7 +2377,7 @@ class Maneli_Ajax_Handler {
                         </div>
                         <div class="stat-content">
                             <h4><?php echo number_format_i18n($rejected_count); ?></h4>
-                            <p><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></p>
+                            <p><?php esc_html_e('Rejected', 'autopuzzle'); ?></p>
                         </div>
                     </div>
                 </div>
@@ -2438,10 +2438,10 @@ class Maneli_Ajax_Handler {
      * Save meeting schedule for cash inquiry
      */
     public function ajax_save_meeting_schedule() {
-        check_ajax_referer('maneli_save_meeting', 'nonce');
+        check_ajax_referer('autopuzzle_save_meeting', 'nonce');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
@@ -2450,18 +2450,18 @@ class Maneli_Ajax_Handler {
         $meeting_time = isset($_POST['meeting_time']) ? sanitize_text_field($_POST['meeting_time']) : '';
         
         if (!$inquiry_id || !$meeting_date || !$meeting_time) {
-            wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'autopuzzle')]);
         }
         
         // Ensure Permission Helpers is loaded
-        if (!class_exists('Maneli_Permission_Helpers')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        if (!class_exists('Autopuzzle_Permission_Helpers')) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         }
         
         // Check permission
-        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
-        if (!$is_assigned && !current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        $is_assigned = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        if (!$is_assigned && !current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         // Combine date and time
@@ -2469,7 +2469,7 @@ class Maneli_Ajax_Handler {
         $date_only = date('Y-m-d', strtotime($meeting_datetime));
         
         // Get settings and validate meeting time
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $start_hour = $options['meetings_start_hour'] ?? '10:00';
         $end_hour = $options['meetings_end_hour'] ?? '20:00';
         $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -2487,26 +2487,26 @@ class Maneli_Ajax_Handler {
         if (!empty($excluded_days)) {
             $day_of_week = strtolower(date('l', $meeting_time_ts));
             if (in_array($day_of_week, $excluded_days)) {
-                wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'autopuzzle')]);
                 return;
             }
         }
         
         if ($meeting_time_ts < $start_ts || $meeting_time_ts >= $end_ts) {
-            wp_send_json_error(['message' => esc_html__('Meeting time must be within the allowed schedule range.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Meeting time must be within the allowed schedule range.', 'autopuzzle')]);
             return;
         }
         
         // Validate meeting time matches slot boundaries
         $minutes_from_start = ($meeting_time_ts - $start_ts) / 60;
         if ($minutes_from_start % $slot_minutes !== 0) {
-            wp_send_json_error(['message' => esc_html__('Meeting time must match the configured slot intervals.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Meeting time must match the configured slot intervals.', 'autopuzzle')]);
             return;
         }
         
         // SECURITY: Check for duplicate meeting time (prevent conflict with other experts)
         $existing_meetings = get_posts([
-            'post_type' => 'maneli_meeting',
+            'post_type' => 'autopuzzle_meeting',
             'posts_per_page' => 1,
             'post_status' => 'publish',
             'meta_query' => [
@@ -2521,7 +2521,7 @@ class Maneli_Ajax_Handler {
         if (!empty($existing_meetings)) {
             // Check if all slots for this day are taken
             $all_day_meetings = get_posts([
-                'post_type' => 'maneli_meeting',
+                'post_type' => 'autopuzzle_meeting',
                 'posts_per_page' => -1,
                 'post_status' => 'publish',
                 'date_query' => [
@@ -2537,24 +2537,24 @@ class Maneli_Ajax_Handler {
             $total_slots = ($end_ts - $start_ts) / ($slot_minutes * 60);
             
             if (count($all_day_meetings) >= $total_slots) {
-                wp_send_json_error(['message' => esc_html__('Unfortunately all time slots are full today. Please choose another day.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Unfortunately all time slots are full today. Please choose another day.', 'autopuzzle')]);
             } else {
-                wp_send_json_error(['message' => esc_html__('This time slot is already booked. Please choose another time.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('This time slot is already booked. Please choose another time.', 'autopuzzle')]);
             }
             return;
         }
         
         // Create meeting post
-        $title = sprintf(esc_html__('Meeting - %s', 'maneli-car-inquiry'), date_i18n('Y/m/d H:i', strtotime($meeting_datetime)));
+        $title = sprintf(esc_html__('Meeting - %s', 'autopuzzle'), date_i18n('Y/m/d H:i', strtotime($meeting_datetime)));
         $meeting_post_id = wp_insert_post([
-            'post_type' => 'maneli_meeting',
+            'post_type' => 'autopuzzle_meeting',
             'post_title' => $title,
             'post_status' => 'publish',
             'post_author' => get_current_user_id(),
         ]);
         
         if (is_wp_error($meeting_post_id)) {
-            wp_send_json_error(['message' => esc_html__('Error saving meeting:', 'maneli-car-inquiry') . ' ' . $meeting_post_id->get_error_message()]);
+            wp_send_json_error(['message' => esc_html__('Error saving meeting:', 'autopuzzle') . ' ' . $meeting_post_id->get_error_message()]);
             return;
         }
         
@@ -2567,17 +2567,17 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
         update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
         
-        wp_send_json_success(['message' => esc_html__('Meeting time saved successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Meeting time saved successfully.', 'autopuzzle')]);
     }
     
     /**
      * Save expert decision for cash inquiry
      */
     public function ajax_save_expert_decision_cash() {
-        check_ajax_referer('maneli_expert_decision', 'nonce');
+        check_ajax_referer('autopuzzle_expert_decision', 'nonce');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
@@ -2586,18 +2586,18 @@ class Maneli_Ajax_Handler {
         $note = isset($_POST['note']) ? sanitize_textarea_field($_POST['note']) : '';
         
         if (!$inquiry_id || !$decision) {
-            wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid data sent.', 'autopuzzle')]);
         }
         
         // Ensure Permission Helpers is loaded
-        if (!class_exists('Maneli_Permission_Helpers')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        if (!class_exists('Autopuzzle_Permission_Helpers')) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         }
         
         // Check permission (must be assigned expert)
-        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        $is_assigned = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
         if (!$is_assigned) {
-            wp_send_json_error(['message' => esc_html__('Only assigned expert can make decision.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Only assigned expert can make decision.', 'autopuzzle')]);
         }
         
         // Save expert decision
@@ -2618,38 +2618,38 @@ class Maneli_Ajax_Handler {
         if ($decision === 'approved') {
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
             // Send notification
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'approved');
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'approved');
         } elseif ($decision === 'rejected') {
             update_post_meta($inquiry_id, 'cash_inquiry_status', 'rejected');
             // Send notification
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-            Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'rejected');
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+            Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'rejected');
         }
         
-        wp_send_json_success(['message' => esc_html__('Decision saved successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Decision saved successfully.', 'autopuzzle')]);
     }
     
     /**
      * Admin final approval for cash inquiry
      */
     public function ajax_admin_approve_cash() {
-        check_ajax_referer('maneli_admin_approve', 'nonce');
+        check_ajax_referer('autopuzzle_admin_approve', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Only administrator can perform final approval.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Only administrator can perform final approval.', 'autopuzzle')]);
         }
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         
         if (!$inquiry_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
         }
         
         // Check if expert has approved
         $expert_decision = get_post_meta($inquiry_id, 'expert_decision', true);
         if ($expert_decision !== 'approved') {
-            wp_send_json_error(['message' => esc_html__('Expert has not approved yet.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Expert has not approved yet.', 'autopuzzle')]);
         }
         
         // Get old status before update
@@ -2664,17 +2664,17 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'admin_approved_date', current_time('mysql'));
         
         // Send notification
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'completed');
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'completed');
         
-        wp_send_json_success(['message' => esc_html__('Request finalized successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Request finalized successfully.', 'autopuzzle')]);
     }
     
     /**
      * Update cash inquiry status with workflow logic
      */
     public function ajax_update_cash_status() {
-        check_ajax_referer('maneli_update_cash_status', 'nonce');
+        check_ajax_referer('autopuzzle_update_cash_status', 'nonce');
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         $action = isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : '';
@@ -2688,26 +2688,26 @@ class Maneli_Ajax_Handler {
         $new_status = isset($_POST['new_status']) ? sanitize_text_field($_POST['new_status']) : '';
         
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
         }
         
         // Ensure Permission Helpers is loaded
-        if (!class_exists('Maneli_Permission_Helpers')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        if (!class_exists('Autopuzzle_Permission_Helpers')) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         }
         
         // Check permissions
-        $is_admin = current_user_can('manage_maneli_inquiries');
-        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
+        $is_assigned = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
         
         if (!$is_admin && !$is_assigned) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'autopuzzle')]);
         }
         
         // Validate status
         $valid_statuses = ['in_progress', 'follow_up_scheduled', 'awaiting_downpayment', 'meeting_scheduled', 'approved', 'rejected'];
         if (!in_array($new_status, $valid_statuses)) {
-            wp_send_json_error(['message' => esc_html__('Invalid status provided.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid status provided.', 'autopuzzle')]);
         }
         
         // Get old status before update
@@ -2720,8 +2720,8 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'cash_inquiry_status', $new_status);
         
         // Send notification for status change
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, $new_status);
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, $new_status);
         
         // Handle additional data based on status
         if ($new_status === 'follow_up_scheduled') {
@@ -2767,7 +2767,7 @@ class Maneli_Ajax_Handler {
             }
         }
         
-        wp_send_json_success(['message' => esc_html__('Status changed successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Status changed successfully.', 'autopuzzle')]);
     }
     
     /**
@@ -2775,27 +2775,27 @@ class Maneli_Ajax_Handler {
      * Handles: start_progress, schedule_meeting, schedule_followup, complete, reject
      */
     public function ajax_update_cash_status_action() {
-        check_ajax_referer('maneli_update_cash_status', 'nonce');
+        check_ajax_referer('autopuzzle_update_cash_status', 'nonce');
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         $action = isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : '';
         
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'cash_inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
         }
         
         // Ensure Permission Helpers is loaded
-        if (!class_exists('Maneli_Permission_Helpers')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        if (!class_exists('Autopuzzle_Permission_Helpers')) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         }
         
         // Security: Check permissions - Admin or assigned expert only
-        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
         $current_user_id = get_current_user_id();
-        $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, $current_user_id);
+        $is_assigned_expert = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, $current_user_id);
         
         if (!$is_admin && !$is_assigned_expert) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'autopuzzle')]);
         }
         
         $current_status = get_post_meta($inquiry_id, 'cash_inquiry_status', true);
@@ -2803,14 +2803,14 @@ class Maneli_Ajax_Handler {
             $current_status = 'new';
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         switch ($action) {
             case 'start_progress':
                 update_post_meta($inquiry_id, 'cash_inquiry_status', 'in_progress');
                 update_post_meta($inquiry_id, 'in_progress_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'in_progress');
-                wp_send_json_success(['message' => esc_html__('Inquiry status updated to In Progress.', 'maneli-car-inquiry')]);
+                Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'in_progress');
+                wp_send_json_success(['message' => esc_html__('Inquiry status updated to In Progress.', 'autopuzzle')]);
                 break;
                 
             case 'schedule_meeting':
@@ -2818,11 +2818,11 @@ class Maneli_Ajax_Handler {
                 $meeting_time = isset($_POST['meeting_time']) ? sanitize_text_field($_POST['meeting_time']) : '';
                 
                 if (empty($meeting_date) || empty($meeting_time)) {
-                    wp_send_json_error(['message' => esc_html__('Meeting date and time are required.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Meeting date and time are required.', 'autopuzzle')]);
                 }
                 
                 // Validate time against settings
-                $options = Maneli_Options_Helper::get_all_options();
+                $options = Autopuzzle_Options_Helper::get_all_options();
                 $settings_start = $options['meetings_start_hour'] ?? '10:00';
                 $settings_end = $options['meetings_end_hour'] ?? '20:00';
                 $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -2830,7 +2830,7 @@ class Maneli_Ajax_Handler {
                 // Convert Jalali date to Gregorian if needed
                 $meeting_date_gregorian = $this->convert_jalali_to_gregorian($meeting_date);
                 if (!$meeting_date_gregorian) {
-                    wp_send_json_error(['message' => esc_html__('Invalid date format.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Invalid date format.', 'autopuzzle')]);
                 }
                 
                 // Build datetime string
@@ -2838,7 +2838,7 @@ class Maneli_Ajax_Handler {
                 $meeting_timestamp = strtotime($meeting_datetime_str);
                 
                 if ($meeting_timestamp === false) {
-                    wp_send_json_error(['message' => esc_html__('Invalid time format.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Invalid time format.', 'autopuzzle')]);
                 }
                 
                 // Check if the selected date is an excluded day
@@ -2849,7 +2849,7 @@ class Maneli_Ajax_Handler {
                 if (!empty($excluded_days)) {
                     $day_of_week = strtolower(date('l', $meeting_timestamp));
                     if (in_array($day_of_week, $excluded_days)) {
-                        wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'maneli-car-inquiry')]);
+                        wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'autopuzzle')]);
                         break;
                     }
                 }
@@ -2859,13 +2859,13 @@ class Maneli_Ajax_Handler {
                 $workday_end_ts = strtotime($meeting_date_gregorian . ' ' . $settings_end);
                 
                 if ($workday_end_ts <= $workday_start_ts) {
-                    wp_send_json_error(['message' => esc_html__('Invalid schedule range in settings.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Invalid schedule range in settings.', 'autopuzzle')]);
                     break;
                 }
                 
                 // Check if time is within allowed range
                 if ($meeting_timestamp < $workday_start_ts || $meeting_timestamp >= $workday_end_ts) {
-                    wp_send_json_error(['message' => esc_html__('Selected time is outside allowed working hours.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Selected time is outside allowed working hours.', 'autopuzzle')]);
                     break;
                 }
                 
@@ -2873,7 +2873,7 @@ class Maneli_Ajax_Handler {
                 $time_diff = $meeting_timestamp - $workday_start_ts;
                 $slot_seconds = $slot_minutes * 60;
                 if ($time_diff % $slot_seconds !== 0) {
-                    wp_send_json_error(['message' => esc_html__('Selected time does not match available slot intervals.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Selected time does not match available slot intervals.', 'autopuzzle')]);
                     break;
                 }
                 
@@ -2881,29 +2881,29 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
                 update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
                 update_post_meta($inquiry_id, 'meeting_scheduled_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'meeting_scheduled');
+                Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'meeting_scheduled');
                 
-                wp_send_json_success(['message' => esc_html__('Meeting scheduled successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Meeting scheduled successfully.', 'autopuzzle')]);
                 break;
                 
             case 'schedule_followup':
                 // Expert schedules next follow-up (from in_progress or meeting_scheduled)
                 // Allow from in_progress or meeting_scheduled
                 if ($current_status !== 'in_progress' && $current_status !== 'meeting_scheduled') {
-                    wp_send_json_error(['message' => esc_html__('Can only schedule follow-up from In Progress or Meeting Scheduled status.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only schedule follow-up from In Progress or Meeting Scheduled status.', 'autopuzzle')]);
                 }
                 
                 $followup_date = isset($_POST['followup_date']) ? sanitize_text_field($_POST['followup_date']) : '';
                 $followup_note = isset($_POST['followup_note']) ? sanitize_textarea_field($_POST['followup_note']) : '';
                 
                 if (empty($followup_date)) {
-                    wp_send_json_error(['message' => esc_html__('Follow-up date is required.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Follow-up date is required.', 'autopuzzle')]);
                 }
                 
                 // If meeting was scheduled, cancel it before scheduling follow-up
                 if ($current_status === 'meeting_scheduled') {
                     $meeting_id = get_posts([
-                        'post_type' => 'maneli_meeting',
+                        'post_type' => 'autopuzzle_meeting',
                         'posts_per_page' => 1,
                         'meta_query' => [
                             ['key' => 'meeting_inquiry_id', 'value' => $inquiry_id, 'compare' => '='],
@@ -2929,35 +2929,35 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'followup_date', $followup_date);
                 update_post_meta($inquiry_id, 'followup_note', $followup_note);
                 update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'follow_up_scheduled');
+                Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'follow_up_scheduled');
                 
-                wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'autopuzzle')]);
                 break;
                 
             case 'complete':
                 if ($current_status !== 'meeting_scheduled') {
-                    wp_send_json_error(['message' => esc_html__('Can only complete after meeting is scheduled.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only complete after meeting is scheduled.', 'autopuzzle')]);
                 }
                 
                 update_post_meta($inquiry_id, 'cash_inquiry_status', 'completed');
                 update_post_meta($inquiry_id, 'completed_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'completed');
+                Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'completed');
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'autopuzzle')]);
                 break;
                 
             case 'approve':
                 // Expert approves the cash inquiry (from in_progress)
                 if ($current_status !== 'in_progress') {
-                    wp_send_json_error(['message' => esc_html__('Can only approve from In Progress status.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only approve from In Progress status.', 'autopuzzle')]);
                 }
                 
                 update_post_meta($inquiry_id, 'cash_inquiry_status', 'approved');
                 update_post_meta($inquiry_id, 'approved_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'approved_by', $current_user_id);
-                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'approved');
+                Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'approved');
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry approved successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry approved successfully.', 'autopuzzle')]);
                 break;
                 
             case 'reject':
@@ -2965,18 +2965,18 @@ class Maneli_Ajax_Handler {
                 $rejection_reason = isset($_POST['rejection_reason']) ? sanitize_textarea_field($_POST['rejection_reason']) : '';
                 
                 if (empty($rejection_reason)) {
-                    wp_send_json_error(['message' => esc_html__('Rejection reason is required.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Rejection reason is required.', 'autopuzzle')]);
                 }
                 
                 // Allow reject from in_progress or meeting_scheduled
                 if ($current_status !== 'in_progress' && $current_status !== 'meeting_scheduled') {
-                    wp_send_json_error(['message' => esc_html__('Can only reject from In Progress or Meeting Scheduled status.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only reject from In Progress or Meeting Scheduled status.', 'autopuzzle')]);
                 }
                 
                 // If meeting was scheduled, cancel it
                 if ($current_status === 'meeting_scheduled') {
                     $meeting_id = get_posts([
-                        'post_type' => 'maneli_meeting',
+                        'post_type' => 'autopuzzle_meeting',
                         'posts_per_page' => 1,
                         'meta_query' => [
                             ['key' => 'meeting_inquiry_id', 'value' => $inquiry_id, 'compare' => '='],
@@ -2992,13 +2992,13 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'cash_rejection_reason', $rejection_reason);
                 update_post_meta($inquiry_id, 'rejected_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'rejected_by', $current_user_id);
-                Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'rejected');
+                Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $current_status, 'rejected');
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'autopuzzle')]);
                 break;
                 
             default:
-                wp_send_json_error(['message' => esc_html__('Invalid action.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Invalid action.', 'autopuzzle')]);
         }
     }
     
@@ -3006,31 +3006,31 @@ class Maneli_Ajax_Handler {
      * Save expert note
      */
     public function ajax_save_expert_note() {
-        check_ajax_referer('maneli_save_expert_note', 'nonce');
+        check_ajax_referer('autopuzzle_save_expert_note', 'nonce');
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         $note = isset($_POST['note']) ? sanitize_textarea_field($_POST['note']) : '';
         
         if (!$inquiry_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
         }
         
         // Check post type (cash_inquiry or inquiry)
         $post_type = get_post_type($inquiry_id);
         if (!in_array($post_type, ['cash_inquiry', 'inquiry'])) {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry type.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry type.', 'autopuzzle')]);
         }
         
         // Check permissions
-        $is_admin = current_user_can('manage_maneli_inquiries');
-        $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
+        $is_assigned = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
         
         if (!$is_admin && !$is_assigned) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'autopuzzle')]);
         }
         
         if (empty($note)) {
-            wp_send_json_error(['message' => esc_html__('Note cannot be empty.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Note cannot be empty.', 'autopuzzle')]);
         }
         
         // Save note in array with timestamp and expert information
@@ -3042,7 +3042,7 @@ class Maneli_Ajax_Handler {
         ];
         update_post_meta($inquiry_id, 'expert_notes', $notes);
         
-        wp_send_json_success(['message' => esc_html__('Note saved successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Note saved successfully.', 'autopuzzle')]);
     }
     
     /**
@@ -3065,8 +3065,8 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'downpayment_paid_date', current_time('mysql'));
         
         // Send notification
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'downpayment_received');
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_cash_status_change($inquiry_id, $old_status, 'downpayment_received');
         
         // TODO: Send SMS to expert notifying them that payment is received
     }
@@ -3075,11 +3075,11 @@ class Maneli_Ajax_Handler {
      * Create a new cash inquiry from dashboard (by admin or expert)
      */
     public function ajax_create_cash_inquiry() {
-        check_ajax_referer('maneli_create_cash_inquiry', 'nonce');
+        check_ajax_referer('autopuzzle_create_cash_inquiry', 'nonce');
         
         // Check access: only admin or expert
-        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries') && !in_array('autopuzzle_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'autopuzzle')]);
         }
         
         // Get and validate data
@@ -3090,15 +3090,15 @@ class Maneli_Ajax_Handler {
         $car_color = isset($_POST['car_color']) ? sanitize_text_field($_POST['car_color']) : '';
         
         if (!$product_id || !wc_get_product($product_id)) {
-            wp_send_json_error(['message' => esc_html__('Selected product is invalid.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Selected product is invalid.', 'autopuzzle')]);
         }
         
         if (empty($first_name) || empty($last_name)) {
-            wp_send_json_error(['message' => esc_html__('First and last name are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('First and last name are required.', 'autopuzzle')]);
         }
         
         if (empty($mobile) || !preg_match('/^09[0-9]{9}$/', $mobile)) {
-            wp_send_json_error(['message' => esc_html__('Mobile number is invalid.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Mobile number is invalid.', 'autopuzzle')]);
         }
         
         // Create cash inquiry post
@@ -3112,7 +3112,7 @@ class Maneli_Ajax_Handler {
         $inquiry_id = wp_insert_post($post_data, true);
         
         if (is_wp_error($inquiry_id)) {
-            wp_send_json_error(['message' => esc_html__('Error creating inquiry post.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Error creating inquiry post.', 'autopuzzle')]);
         }
         
         // Get original product price at the time of request
@@ -3140,7 +3140,7 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'created_at', current_time('mysql'));
         
         wp_send_json_success([
-            'message' => esc_html__('Inquiry created successfully.', 'maneli-car-inquiry'),
+            'message' => esc_html__('Inquiry created successfully.', 'autopuzzle'),
             'inquiry_id' => $inquiry_id
         ]);
     }
@@ -3149,11 +3149,11 @@ class Maneli_Ajax_Handler {
      * Get products list for cash inquiry form
      */
     public function ajax_get_products_for_cash() {
-        check_ajax_referer('maneli_create_cash_inquiry', 'nonce');
+        check_ajax_referer('autopuzzle_create_cash_inquiry', 'nonce');
         
         // Check access
-        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries') && !in_array('autopuzzle_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'autopuzzle')]);
         }
         
         // Get products list
@@ -3187,31 +3187,31 @@ class Maneli_Ajax_Handler {
      */
     public function ajax_update_installment_status() {
         // Ensure Notification Handler is loaded
-        if (!class_exists('Maneli_Notification_Handler')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        if (!class_exists('Autopuzzle_Notification_Handler')) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         }
         
         // Debug: Log nonce verification attempt
         $nonce_received = isset($_POST['nonce']) ? sanitize_text_field($_POST['nonce']) : '';
         
         // First try the standard check_ajax_referer (this checks both -1 and 1 nonce life)
-        $nonce_check_result = check_ajax_referer('maneli_installment_status', 'nonce', false);
+        $nonce_check_result = check_ajax_referer('autopuzzle_installment_status', 'nonce', false);
         
         // If that fails, try manual verification with wp_verify_nonce (allows -2, -1, 0, 1, 2)
         if (!$nonce_check_result && !empty($nonce_received)) {
-            $manual_verify = wp_verify_nonce($nonce_received, 'maneli_installment_status');
+            $manual_verify = wp_verify_nonce($nonce_received, 'autopuzzle_installment_status');
             if ($manual_verify === 1 || $manual_verify === 2) {
                 $nonce_check_result = true; // Manual verification succeeded
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli AJAX: Nonce verified manually with wp_verify_nonce (result: ' . $manual_verify . ')');
+                    error_log('AutoPuzzle AJAX: Nonce verified manually with wp_verify_nonce (result: ' . $manual_verify . ')');
                 }
             } else {
                 // Try with alternative action name (in case nonce was created with different name)
-                $alt_verify = wp_verify_nonce($nonce_received, 'maneli_tracking_status_nonce');
+                $alt_verify = wp_verify_nonce($nonce_received, 'autopuzzle_tracking_status_nonce');
                 if ($alt_verify === 1 || $alt_verify === 2) {
                     $nonce_check_result = true;
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli AJAX: Nonce verified with alternative name maneli_tracking_status_nonce');
+                        error_log('AutoPuzzle AJAX: Nonce verified with alternative name autopuzzle_tracking_status_nonce');
                     }
                 }
             }
@@ -3220,19 +3220,19 @@ class Maneli_Ajax_Handler {
         // FINAL FALLBACK: If nonce is provided but verification fails, accept if user is logged in and has permission
         // This is a security risk but necessary for compatibility - only if nonce length is correct (10 chars)
         if (!$nonce_check_result && !empty($nonce_received) && strlen($nonce_received) === 10) {
-            $is_admin = current_user_can('manage_maneli_inquiries');
+            $is_admin = current_user_can('manage_autopuzzle_inquiries');
             $current_user_id = get_current_user_id();
             $inquiry_id_temp = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
             $is_assigned_expert = false;
             if ($inquiry_id_temp > 0) {
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-                $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id_temp, $current_user_id);
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+                $is_assigned_expert = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id_temp, $current_user_id);
             }
             
             if (is_user_logged_in() && ($is_admin || $is_assigned_expert)) {
                 // Accept nonce if user is logged in and has permission - log for security audit (only in debug mode)
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli AJAX: Nonce verification bypassed for user ' . $current_user_id . ' (has permission)');
+                    error_log('AutoPuzzle AJAX: Nonce verification bypassed for user ' . $current_user_id . ' (has permission)');
                 }
                 $nonce_check_result = true;
             }
@@ -3241,15 +3241,15 @@ class Maneli_Ajax_Handler {
         if (!$nonce_check_result) {
             // Log more details for debugging (only in debug mode to prevent information disclosure)
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli AJAX: Nonce verification failed for update_installment_status');
-                error_log('Maneli AJAX: Received nonce: ' . (empty($nonce_received) ? 'EMPTY' : substr($nonce_received, 0, 10) . '...'));
-                error_log('Maneli AJAX: Expected action: maneli_installment_status');
-                error_log('Maneli AJAX: User ID: ' . get_current_user_id());
-                error_log('Maneli AJAX: User logged in: ' . (is_user_logged_in() ? 'YES' : 'NO'));
+                error_log('AutoPuzzle AJAX: Nonce verification failed for update_installment_status');
+                error_log('AutoPuzzle AJAX: Received nonce: ' . (empty($nonce_received) ? 'EMPTY' : substr($nonce_received, 0, 10) . '...'));
+                error_log('AutoPuzzle AJAX: Expected action: autopuzzle_installment_status');
+                error_log('AutoPuzzle AJAX: User ID: ' . get_current_user_id());
+                error_log('AutoPuzzle AJAX: User logged in: ' . (is_user_logged_in() ? 'YES' : 'NO'));
             }
             
             wp_send_json_error([
-                'message' => esc_html__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry'),
+                'message' => esc_html__('Security verification failed. Please refresh the page and try again.', 'autopuzzle'),
                 'debug' => [
                     'nonce_received' => !empty($nonce_received),
                     'nonce_length' => strlen($nonce_received),
@@ -3264,21 +3264,21 @@ class Maneli_Ajax_Handler {
         $action = isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : '';
         
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
         }
         
         // Ensure Permission Helpers is loaded
-        if (!class_exists('Maneli_Permission_Helpers')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        if (!class_exists('Autopuzzle_Permission_Helpers')) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         }
         
         // Security: Check permissions - Admin or assigned expert only
-        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
         $current_user_id = get_current_user_id();
-        $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, $current_user_id);
+        $is_assigned_expert = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, $current_user_id);
         
         if (!$is_admin && !$is_assigned_expert) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You do not have permission to perform this action.', 'autopuzzle')]);
         }
         
         // Get current status (default to 'new' if empty)
@@ -3292,8 +3292,8 @@ class Maneli_Ajax_Handler {
                 // Expert starts follow-up
                 update_post_meta($inquiry_id, 'tracking_status', 'in_progress');
                 update_post_meta($inquiry_id, 'in_progress_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'in_progress', 'tracking_status');
-                wp_send_json_success(['message' => esc_html__('Inquiry status updated to In Progress.', 'maneli-car-inquiry')]);
+                Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'in_progress', 'tracking_status');
+                wp_send_json_success(['message' => esc_html__('Inquiry status updated to In Progress.', 'autopuzzle')]);
                 break;
                 
             case 'schedule_meeting':
@@ -3302,11 +3302,11 @@ class Maneli_Ajax_Handler {
                 $meeting_time = isset($_POST['meeting_time']) ? sanitize_text_field($_POST['meeting_time']) : '';
                 
                 if (empty($meeting_date) || empty($meeting_time)) {
-                    wp_send_json_error(['message' => esc_html__('Meeting date and time are required.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Meeting date and time are required.', 'autopuzzle')]);
                 }
                 
                 // Validate time against settings
-                $options = Maneli_Options_Helper::get_all_options();
+                $options = Autopuzzle_Options_Helper::get_all_options();
                 $settings_start = $options['meetings_start_hour'] ?? '10:00';
                 $settings_end = $options['meetings_end_hour'] ?? '20:00';
                 $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
@@ -3314,7 +3314,7 @@ class Maneli_Ajax_Handler {
                 // Convert Jalali date to Gregorian if needed
                 $meeting_date_gregorian = $this->convert_jalali_to_gregorian($meeting_date);
                 if (!$meeting_date_gregorian) {
-                    wp_send_json_error(['message' => esc_html__('Invalid date format.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Invalid date format.', 'autopuzzle')]);
                 }
                 
                 // Build datetime string
@@ -3322,7 +3322,7 @@ class Maneli_Ajax_Handler {
                 $meeting_timestamp = strtotime($meeting_datetime_str);
                 
                 if ($meeting_timestamp === false) {
-                    wp_send_json_error(['message' => esc_html__('Invalid time format.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Invalid time format.', 'autopuzzle')]);
                 }
                 
                 // Check if the selected date is an excluded day
@@ -3333,7 +3333,7 @@ class Maneli_Ajax_Handler {
                 if (!empty($excluded_days)) {
                     $day_of_week = strtolower(date('l', $meeting_timestamp));
                     if (in_array($day_of_week, $excluded_days)) {
-                        wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'maneli-car-inquiry')]);
+                        wp_send_json_error(['message' => esc_html__('This day is excluded from meeting schedules.', 'autopuzzle')]);
                         break;
                     }
                 }
@@ -3343,13 +3343,13 @@ class Maneli_Ajax_Handler {
                 $workday_end_ts = strtotime($meeting_date_gregorian . ' ' . $settings_end);
                 
                 if ($workday_end_ts <= $workday_start_ts) {
-                    wp_send_json_error(['message' => esc_html__('Invalid schedule range in settings.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Invalid schedule range in settings.', 'autopuzzle')]);
                     break;
                 }
                 
                 // Check if time is within allowed range
                 if ($meeting_timestamp < $workday_start_ts || $meeting_timestamp >= $workday_end_ts) {
-                    wp_send_json_error(['message' => esc_html__('Selected time is outside allowed working hours.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Selected time is outside allowed working hours.', 'autopuzzle')]);
                     break;
                 }
                 
@@ -3357,7 +3357,7 @@ class Maneli_Ajax_Handler {
                 $time_diff = $meeting_timestamp - $workday_start_ts;
                 $slot_seconds = $slot_minutes * 60;
                 if ($time_diff % $slot_seconds !== 0) {
-                    wp_send_json_error(['message' => esc_html__('Selected time does not match available slot intervals.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Selected time does not match available slot intervals.', 'autopuzzle')]);
                     break;
                 }
                 
@@ -3365,9 +3365,9 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'meeting_date', $meeting_date);
                 update_post_meta($inquiry_id, 'meeting_time', $meeting_time);
                 update_post_meta($inquiry_id, 'meeting_scheduled_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'meeting_scheduled', 'tracking_status');
+                Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'meeting_scheduled', 'tracking_status');
                 
-                wp_send_json_success(['message' => esc_html__('Meeting scheduled successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Meeting scheduled successfully.', 'autopuzzle')]);
                 break;
                 
             case 'schedule_followup':
@@ -3375,7 +3375,7 @@ class Maneli_Ajax_Handler {
                 // Allow from multiple statuses for flexibility
                 $allowed_statuses = ['in_progress', 'meeting_scheduled', 'referred', 'new', 'follow_up_scheduled'];
                 if (!in_array($current_status, $allowed_statuses)) {
-                    wp_send_json_error(['message' => esc_html__('Can only schedule follow-up from In Progress, Meeting Scheduled, Referred, or New status.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only schedule follow-up from In Progress, Meeting Scheduled, Referred, or New status.', 'autopuzzle')]);
                     return;
                 }
                 
@@ -3383,7 +3383,7 @@ class Maneli_Ajax_Handler {
                 $followup_note = isset($_POST['followup_note']) ? sanitize_textarea_field($_POST['followup_note']) : '';
                 
                 if (empty($followup_date)) {
-                    wp_send_json_error(['message' => esc_html__('Follow-up date is required.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Follow-up date is required.', 'autopuzzle')]);
                     return;
                 }
                 
@@ -3391,7 +3391,7 @@ class Maneli_Ajax_Handler {
                     // If meeting was scheduled, cancel it before scheduling follow-up
                     if ($current_status === 'meeting_scheduled') {
                         $meeting_id = get_posts([
-                            'post_type' => 'maneli_meeting',
+                            'post_type' => 'autopuzzle_meeting',
                             'posts_per_page' => 1,
                             'meta_query' => [
                                 ['key' => 'meeting_inquiry_id', 'value' => $inquiry_id, 'compare' => '='],
@@ -3419,15 +3419,15 @@ class Maneli_Ajax_Handler {
                     update_post_meta($inquiry_id, 'followup_date', $followup_date);
                     update_post_meta($inquiry_id, 'followup_note', $followup_note);
                     update_post_meta($inquiry_id, 'followup_scheduled_at', current_time('mysql'));
-                    Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'follow_up_scheduled', 'tracking_status');
+                    Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'follow_up_scheduled', 'tracking_status');
                     
-                    wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'maneli-car-inquiry')]);
+                    wp_send_json_success(['message' => esc_html__('Follow-up scheduled successfully.', 'autopuzzle')]);
                 } catch (Exception $e) {
                     // Log error only in debug mode to prevent information disclosure
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli: Error in schedule_followup: ' . $e->getMessage());
+                        error_log('AutoPuzzle: Error in schedule_followup: ' . $e->getMessage());
                     }
-                    wp_send_json_error(['message' => esc_html__('An error occurred while scheduling the follow-up. Please try again.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('An error occurred while scheduling the follow-up. Please try again.', 'autopuzzle')]);
                 }
                 break;
                 
@@ -3436,12 +3436,12 @@ class Maneli_Ajax_Handler {
                 $cancel_reason = isset($_POST['cancel_reason']) ? sanitize_textarea_field($_POST['cancel_reason']) : '';
                 
                 if (empty($cancel_reason)) {
-                    wp_send_json_error(['message' => esc_html__('Cancellation reason is required.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Cancellation reason is required.', 'autopuzzle')]);
                 }
                 
                 // Validate cancellation reason length
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-                $cancel_reason_validation = Maneli_Render_Helpers::validate_description_field($cancel_reason);
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+                $cancel_reason_validation = Autopuzzle_Render_Helpers::validate_description_field($cancel_reason);
                 if (!$cancel_reason_validation['valid']) {
                     wp_send_json_error(['message' => $cancel_reason_validation['error']]);
                 }
@@ -3449,63 +3449,63 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'tracking_status', 'cancelled');
                 update_post_meta($inquiry_id, 'cancel_reason', $cancel_reason);
                 update_post_meta($inquiry_id, 'cancelled_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'cancelled', 'tracking_status');
+                Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'cancelled', 'tracking_status');
                 
                 // Audit log: Record status change
                 $this->log_user_action(
                     'change_status',
-                    sprintf(esc_html__('Changed inquiry status from %s to cancelled', 'maneli-car-inquiry'), $current_status),
+                    sprintf(esc_html__('Changed inquiry status from %s to cancelled', 'autopuzzle'), $current_status),
                     'inquiry',
                     $inquiry_id,
                     ['old_status' => $current_status, 'new_status' => 'cancelled', 'action' => 'cancel', 'reason_length' => strlen($cancel_reason)]
                 );
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry cancelled successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry cancelled successfully.', 'autopuzzle')]);
                 break;
                 
             case 'complete':
                 // Expert completes the inquiry (after in-person visit)
                 if ($current_status !== 'meeting_scheduled') {
-                    wp_send_json_error(['message' => esc_html__('Can only complete after meeting is scheduled.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only complete after meeting is scheduled.', 'autopuzzle')]);
                 }
                 
                 update_post_meta($inquiry_id, 'tracking_status', 'completed');
                 update_post_meta($inquiry_id, 'completed_at', current_time('mysql'));
-                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
+                Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
                 
                 // Audit log: Record status change
                 $this->log_user_action(
                     'change_status',
-                    sprintf(esc_html__('Changed inquiry status from %s to completed', 'maneli-car-inquiry'), $current_status),
+                    sprintf(esc_html__('Changed inquiry status from %s to completed', 'autopuzzle'), $current_status),
                     'inquiry',
                     $inquiry_id,
                     ['old_status' => $current_status, 'new_status' => 'completed', 'action' => 'complete']
                 );
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry completed successfully.', 'autopuzzle')]);
                 break;
                 
             case 'approve':
                 // Expert approves the inquiry (from in_progress)
                 if ($current_status !== 'in_progress') {
-                    wp_send_json_error(['message' => esc_html__('Can only approve from In Progress status.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only approve from In Progress status.', 'autopuzzle')]);
                 }
                 
                 update_post_meta($inquiry_id, 'tracking_status', 'completed');
                 update_post_meta($inquiry_id, 'approved_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'approved_by', $current_user_id);
-                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
+                Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'completed', 'tracking_status');
                 
                 // Audit log: Record status change
                 $this->log_user_action(
                     'change_status',
-                    sprintf(esc_html__('Changed inquiry status from %s to completed (approved)', 'maneli-car-inquiry'), $current_status),
+                    sprintf(esc_html__('Changed inquiry status from %s to completed (approved)', 'autopuzzle'), $current_status),
                     'inquiry',
                     $inquiry_id,
                     ['old_status' => $current_status, 'new_status' => 'completed', 'action' => 'approve']
                 );
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry approved successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry approved successfully.', 'autopuzzle')]);
                 break;
                 
             case 'reject':
@@ -3513,25 +3513,25 @@ class Maneli_Ajax_Handler {
                 $rejection_reason = isset($_POST['rejection_reason']) ? sanitize_textarea_field($_POST['rejection_reason']) : '';
                 
                 if (empty($rejection_reason)) {
-                    wp_send_json_error(['message' => esc_html__('Rejection reason is required.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Rejection reason is required.', 'autopuzzle')]);
                 }
                 
                 // Validate rejection reason length
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-                $rejection_reason_validation = Maneli_Render_Helpers::validate_description_field($rejection_reason);
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+                $rejection_reason_validation = Autopuzzle_Render_Helpers::validate_description_field($rejection_reason);
                 if (!$rejection_reason_validation['valid']) {
                     wp_send_json_error(['message' => $rejection_reason_validation['error']]);
                 }
                 
                 // Allow reject from in_progress or meeting_scheduled
                 if ($current_status !== 'in_progress' && $current_status !== 'meeting_scheduled') {
-                    wp_send_json_error(['message' => esc_html__('Can only reject from In Progress or Meeting Scheduled status.', 'maneli-car-inquiry')]);
+                    wp_send_json_error(['message' => esc_html__('Can only reject from In Progress or Meeting Scheduled status.', 'autopuzzle')]);
                 }
                 
                 // If meeting was scheduled, cancel it
                 if ($current_status === 'meeting_scheduled') {
                     $meeting_id = get_posts([
-                        'post_type' => 'maneli_meeting',
+                        'post_type' => 'autopuzzle_meeting',
                         'posts_per_page' => 1,
                         'meta_query' => [
                             ['key' => 'meeting_inquiry_id', 'value' => $inquiry_id, 'compare' => '='],
@@ -3547,22 +3547,22 @@ class Maneli_Ajax_Handler {
                 update_post_meta($inquiry_id, 'rejection_reason', $rejection_reason);
                 update_post_meta($inquiry_id, 'rejected_at', current_time('mysql'));
                 update_post_meta($inquiry_id, 'rejected_by', $current_user_id);
-                Maneli_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'rejected', 'tracking_status');
+                Autopuzzle_Notification_Handler::notify_installment_status_change($inquiry_id, $current_status, 'rejected', 'tracking_status');
                 
                 // Audit log: Record status change
                 $this->log_user_action(
                     'change_status',
-                    sprintf(esc_html__('Changed inquiry status from %s to rejected', 'maneli-car-inquiry'), $current_status),
+                    sprintf(esc_html__('Changed inquiry status from %s to rejected', 'autopuzzle'), $current_status),
                     'inquiry',
                     $inquiry_id,
                     ['old_status' => $current_status, 'new_status' => 'rejected', 'action' => 'reject', 'reason_length' => strlen($rejection_reason)]
                 );
                 
-                wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Inquiry rejected successfully.', 'autopuzzle')]);
                 break;
                 
             default:
-                wp_send_json_error(['message' => esc_html__('Invalid action.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Invalid action.', 'autopuzzle')]);
         }
     }
     
@@ -3574,27 +3574,27 @@ class Maneli_Ajax_Handler {
         $nonce_received = isset($_POST['nonce']) ? sanitize_text_field($_POST['nonce']) : '';
         
         // First try the standard check_ajax_referer
-        $nonce_check_result = check_ajax_referer('maneli_installment_note', 'nonce', false);
+        $nonce_check_result = check_ajax_referer('autopuzzle_installment_note', 'nonce', false);
         
         // If that fails, try manual verification with wp_verify_nonce
         if (!$nonce_check_result && !empty($nonce_received)) {
-            $manual_verify = wp_verify_nonce($nonce_received, 'maneli_installment_note');
+            $manual_verify = wp_verify_nonce($nonce_received, 'autopuzzle_installment_note');
             if ($manual_verify === 1 || $manual_verify === 2) {
                 $nonce_check_result = true;
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli AJAX: Save note nonce verified manually (result: ' . $manual_verify . ')');
+                    error_log('AutoPuzzle AJAX: Save note nonce verified manually (result: ' . $manual_verify . ')');
                 }
             }
         }
         
         // FINAL FALLBACK: If nonce is provided but verification fails, accept if user is logged in and has permission
         if (!$nonce_check_result && !empty($nonce_received) && strlen($nonce_received) === 10) {
-            $is_admin = current_user_can('manage_maneli_inquiries');
-            $is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+            $is_admin = current_user_can('manage_autopuzzle_inquiries');
+            $is_expert = in_array('autopuzzle_expert', wp_get_current_user()->roles, true);
             
             if (is_user_logged_in() && ($is_admin || $is_expert)) {
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli AJAX: Save note nonce verification bypassed for user ' . get_current_user_id() . ' (has permission)');
+                    error_log('AutoPuzzle AJAX: Save note nonce verification bypassed for user ' . get_current_user_id() . ' (has permission)');
                 }
                 $nonce_check_result = true;
             }
@@ -3602,24 +3602,24 @@ class Maneli_Ajax_Handler {
         
         if (!$nonce_check_result) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli AJAX: Save note nonce verification failed');
+                error_log('AutoPuzzle AJAX: Save note nonce verification failed');
             }
-            wp_send_json_error(['message' => esc_html__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Security verification failed. Please refresh the page and try again.', 'autopuzzle')]);
         }
         
-        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries') && !in_array('autopuzzle_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
         $note = isset($_POST['note']) ? sanitize_textarea_field($_POST['note']) : '';
         
         if (!$inquiry_id || get_post_type($inquiry_id) !== 'inquiry') {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
         }
         
         if (empty($note)) {
-            wp_send_json_error(['message' => esc_html__('Note cannot be empty.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Note cannot be empty.', 'autopuzzle')]);
         }
         
         // Save note with timestamp
@@ -3631,7 +3631,7 @@ class Maneli_Ajax_Handler {
         ];
         update_post_meta($inquiry_id, 'expert_notes', $notes);
         
-        wp_send_json_success(['message' => esc_html__('Note saved successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Note saved successfully.', 'autopuzzle')]);
     }
     
     //======================================================================
@@ -3662,15 +3662,15 @@ class Maneli_Ajax_Handler {
             }
         }
         
-        if (isset($_SESSION['maneli_user_id']) && !empty($_SESSION['maneli_user_id'])) {
-            $user_id = (int)$_SESSION['maneli_user_id'];
+        if (isset($_SESSION['autopuzzle_user_id']) && !empty($_SESSION['autopuzzle_user_id'])) {
+            $user_id = (int)$_SESSION['autopuzzle_user_id'];
             if ($user_id > 0 && get_user_by('ID', $user_id)) {
                 return $user_id;
             }
         }
         
         // Resolve user ID via stored phone number for session-based logins
-        $session_phone_keys = ['maneli_user_phone', 'maneli_sms_phone'];
+        $session_phone_keys = ['autopuzzle_user_phone', 'autopuzzle_sms_phone'];
         foreach ($session_phone_keys as $key) {
             if (!empty($_SESSION[$key])) {
                 $resolved = $this->resolve_user_id_by_phone($_SESSION[$key]);
@@ -3694,16 +3694,16 @@ class Maneli_Ajax_Handler {
      * Get notifications for current user
      */
     public function ajax_get_notifications() {
-        check_ajax_referer('maneli_notifications_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_notifications_nonce', 'nonce');
         
         $user_id = $this->get_current_user_id_for_notifications();
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         $args = array(
             'user_id' => $user_id,
@@ -3715,7 +3715,7 @@ class Maneli_Ajax_Handler {
             $args['is_read'] = intval($_POST['is_read']);
         }
         
-        $notifications = Maneli_Notification_Handler::get_notifications($args);
+        $notifications = Autopuzzle_Notification_Handler::get_notifications($args);
 
         $user_locale = function_exists('get_user_locale') ? get_user_locale($user_id) : get_locale();
         $switched_locale = false;
@@ -3767,7 +3767,7 @@ class Maneli_Ajax_Handler {
         // Attempt to split "6 hours" into [6, hours]
         $parts = explode(' ', $time_diff, 2);
         if (count($parts) < 2) {
-            return sprintf(esc_html__('%s ago', 'maneli-car-inquiry'), $time_diff);
+            return sprintf(esc_html__('%s ago', 'autopuzzle'), $time_diff);
         }
 
         list($number, $unit) = $parts;
@@ -3775,28 +3775,28 @@ class Maneli_Ajax_Handler {
         // Translate common units
         $unit_key = strtolower($unit);
         $unit_translations = array(
-            'second' => esc_html__('second', 'maneli-car-inquiry'),
-            'seconds' => esc_html__('seconds', 'maneli-car-inquiry'),
-            'ثانیه' => esc_html__('seconds', 'maneli-car-inquiry'),
-            'ثانیه\u200c' => esc_html__('seconds', 'maneli-car-inquiry'),
-            'minute' => esc_html__('minute', 'maneli-car-inquiry'),
-            'minutes' => esc_html__('minutes', 'maneli-car-inquiry'),
-            'دقیقه' => esc_html__('minutes', 'maneli-car-inquiry'),
-            'hour' => esc_html__('hour', 'maneli-car-inquiry'),
-            'hours' => esc_html__('hours', 'maneli-car-inquiry'),
-            'ساعت' => esc_html__('hours', 'maneli-car-inquiry'),
-            'day' => esc_html__('day', 'maneli-car-inquiry'),
-            'days' => esc_html__('days', 'maneli-car-inquiry'),
-            'روز' => esc_html__('days', 'maneli-car-inquiry'),
-            'week' => esc_html__('week', 'maneli-car-inquiry'),
-            'weeks' => esc_html__('weeks', 'maneli-car-inquiry'),
-            'هفته' => esc_html__('weeks', 'maneli-car-inquiry'),
-            'month' => esc_html__('month', 'maneli-car-inquiry'),
-            'months' => esc_html__('months', 'maneli-car-inquiry'),
-            'ماه' => esc_html__('months', 'maneli-car-inquiry'),
-            'year' => esc_html__('year', 'maneli-car-inquiry'),
-            'years' => esc_html__('years', 'maneli-car-inquiry'),
-            'سال' => esc_html__('years', 'maneli-car-inquiry'),
+            'second' => esc_html__('second', 'autopuzzle'),
+            'seconds' => esc_html__('seconds', 'autopuzzle'),
+            'ثانیه' => esc_html__('seconds', 'autopuzzle'),
+            'ثانیه\u200c' => esc_html__('seconds', 'autopuzzle'),
+            'minute' => esc_html__('minute', 'autopuzzle'),
+            'minutes' => esc_html__('minutes', 'autopuzzle'),
+            'دقیقه' => esc_html__('minutes', 'autopuzzle'),
+            'hour' => esc_html__('hour', 'autopuzzle'),
+            'hours' => esc_html__('hours', 'autopuzzle'),
+            'ساعت' => esc_html__('hours', 'autopuzzle'),
+            'day' => esc_html__('day', 'autopuzzle'),
+            'days' => esc_html__('days', 'autopuzzle'),
+            'روز' => esc_html__('days', 'autopuzzle'),
+            'week' => esc_html__('week', 'autopuzzle'),
+            'weeks' => esc_html__('weeks', 'autopuzzle'),
+            'هفته' => esc_html__('weeks', 'autopuzzle'),
+            'month' => esc_html__('month', 'autopuzzle'),
+            'months' => esc_html__('months', 'autopuzzle'),
+            'ماه' => esc_html__('months', 'autopuzzle'),
+            'year' => esc_html__('year', 'autopuzzle'),
+            'years' => esc_html__('years', 'autopuzzle'),
+            'سال' => esc_html__('years', 'autopuzzle'),
         );
 
         if (isset($unit_translations[$unit_key])) {
@@ -3804,7 +3804,7 @@ class Maneli_Ajax_Handler {
         }
 
         return sprintf(
-            esc_html__('%1$s %2$s ago', 'maneli-car-inquiry'),
+            esc_html__('%1$s %2$s ago', 'autopuzzle'),
             $number,
             $unit
         );
@@ -3823,16 +3823,16 @@ class Maneli_Ajax_Handler {
         if ($notification->type === 'inquiry_new') {
             // Normalize cash inquiry notification
             if ($this->string_contains($title, 'New Cash Inquiry') || $this->string_contains($title, 'استعلام نقدی جدید')) {
-                $title = esc_html__('New Cash Inquiry', 'maneli-car-inquiry');
+                $title = esc_html__('New Cash Inquiry', 'autopuzzle');
             } elseif ($this->string_contains($title, 'New Installment Inquiry') || $this->string_contains($title, 'استعلام اقساطی جدید')) {
-                $title = esc_html__('New Installment Inquiry', 'maneli-car-inquiry');
+                $title = esc_html__('New Installment Inquiry', 'autopuzzle');
             }
 
             if (preg_match('/A new cash inquiry from (.+) for (.+) has been registered/i', $message, $matches)) {
                 $customer = $matches[1];
                 $car = $matches[2];
                 $message = sprintf(
-                    esc_html__('A new cash inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    esc_html__('A new cash inquiry from %s for %s has been registered', 'autopuzzle'),
                     $customer,
                     $car
                 );
@@ -3840,7 +3840,7 @@ class Maneli_Ajax_Handler {
                 $customer = $matches[1];
                 $car = $matches[2];
                 $message = sprintf(
-                    esc_html__('A new cash inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    esc_html__('A new cash inquiry from %s for %s has been registered', 'autopuzzle'),
                     $customer,
                     $car
                 );
@@ -3848,7 +3848,7 @@ class Maneli_Ajax_Handler {
                 $customer = $matches[1];
                 $car = $matches[2];
                 $message = sprintf(
-                    esc_html__('A new installment inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    esc_html__('A new installment inquiry from %s for %s has been registered', 'autopuzzle'),
                     $customer,
                     $car
                 );
@@ -3856,7 +3856,7 @@ class Maneli_Ajax_Handler {
                 $customer = $matches[1];
                 $car = $matches[2];
                 $message = sprintf(
-                    esc_html__('A new installment inquiry from %s for %s has been registered', 'maneli-car-inquiry'),
+                    esc_html__('A new installment inquiry from %s for %s has been registered', 'autopuzzle'),
                     $customer,
                     $car
                 );
@@ -3892,7 +3892,7 @@ class Maneli_Ajax_Handler {
      * Get unread notification count
      */
     public function ajax_get_unread_count() {
-        check_ajax_referer('maneli_notifications_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_notifications_nonce', 'nonce');
         
         $user_id = $this->get_current_user_id_for_notifications();
         
@@ -3901,9 +3901,9 @@ class Maneli_Ajax_Handler {
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
-        $count = Maneli_Notification_Handler::get_unread_count($user_id);
+        $count = Autopuzzle_Notification_Handler::get_unread_count($user_id);
         
         wp_send_json_success(['count' => $count]);
     }
@@ -3912,30 +3912,30 @@ class Maneli_Ajax_Handler {
      * Mark notification as read
      */
     public function ajax_mark_notification_read() {
-        check_ajax_referer('maneli_notifications_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_notifications_nonce', 'nonce');
         
         $user_id = $this->get_current_user_id_for_notifications();
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         $notification_id = isset($_POST['notification_id']) ? intval($_POST['notification_id']) : 0;
         
         if (!$notification_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid notification ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid notification ID.', 'autopuzzle')]);
             return;
         }
         
-        $result = Maneli_Notification_Handler::mark_as_read($notification_id, $user_id);
+        $result = Autopuzzle_Notification_Handler::mark_as_read($notification_id, $user_id);
         
         if ($result) {
-            wp_send_json_success(['message' => esc_html__('Notification marked as read.', 'maneli-car-inquiry')]);
+            wp_send_json_success(['message' => esc_html__('Notification marked as read.', 'autopuzzle')]);
         } else {
-            wp_send_json_error(['message' => esc_html__('Failed to mark notification as read.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Failed to mark notification as read.', 'autopuzzle')]);
         }
     }
     
@@ -3943,23 +3943,23 @@ class Maneli_Ajax_Handler {
      * Mark all notifications as read
      */
     public function ajax_mark_all_notifications_read() {
-        check_ajax_referer('maneli_notifications_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_notifications_nonce', 'nonce');
         
         $user_id = $this->get_current_user_id_for_notifications();
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
-        $result = Maneli_Notification_Handler::mark_all_as_read($user_id);
+        $result = Autopuzzle_Notification_Handler::mark_all_as_read($user_id);
         
         if ($result) {
-            wp_send_json_success(['message' => esc_html__('All notifications marked as read.', 'maneli-car-inquiry')]);
+            wp_send_json_success(['message' => esc_html__('All notifications marked as read.', 'autopuzzle')]);
         } else {
-            wp_send_json_error(['message' => esc_html__('Failed to mark notifications as read.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Failed to mark notifications as read.', 'autopuzzle')]);
         }
     }
     
@@ -3967,30 +3967,30 @@ class Maneli_Ajax_Handler {
      * Delete a notification
      */
     public function ajax_delete_notification() {
-        check_ajax_referer('maneli_notifications_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_notifications_nonce', 'nonce');
         
         $user_id = $this->get_current_user_id_for_notifications();
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         $notification_id = isset($_POST['notification_id']) ? intval($_POST['notification_id']) : 0;
         
         if (!$notification_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid notification ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid notification ID.', 'autopuzzle')]);
             return;
         }
         
-        $result = Maneli_Notification_Handler::delete_notification($notification_id, $user_id);
+        $result = Autopuzzle_Notification_Handler::delete_notification($notification_id, $user_id);
         
         if ($result) {
-            wp_send_json_success(['message' => esc_html__('Notification deleted.', 'maneli-car-inquiry')]);
+            wp_send_json_success(['message' => esc_html__('Notification deleted.', 'autopuzzle')]);
         } else {
-            wp_send_json_error(['message' => esc_html__('Failed to delete notification.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Failed to delete notification.', 'autopuzzle')]);
         }
     }
     
@@ -3998,23 +3998,23 @@ class Maneli_Ajax_Handler {
      * Delete all read notifications
      */
     public function ajax_delete_all_read_notifications() {
-        check_ajax_referer('maneli_notifications_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_notifications_nonce', 'nonce');
         
         $user_id = $this->get_current_user_id_for_notifications();
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
-        $result = Maneli_Notification_Handler::delete_all_read($user_id);
+        $result = Autopuzzle_Notification_Handler::delete_all_read($user_id);
         
         if ($result) {
-            wp_send_json_success(['message' => esc_html__('All read notifications deleted.', 'maneli-car-inquiry')]);
+            wp_send_json_success(['message' => esc_html__('All read notifications deleted.', 'autopuzzle')]);
         } else {
-            wp_send_json_error(['message' => esc_html__('Failed to delete read notifications.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Failed to delete read notifications.', 'autopuzzle')]);
         }
     }
     
@@ -4026,15 +4026,15 @@ class Maneli_Ajax_Handler {
      * Handle profile image upload
      */
     public function ajax_upload_profile_image() {
-        check_ajax_referer('maneli-profile-image-nonce', 'security');
+        check_ajax_referer('autopuzzle-profile-image-nonce', 'security');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
         if (!isset($_FILES['profile_image'])) {
-            wp_send_json_error(['message' => esc_html__('No file uploaded.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('No file uploaded.', 'autopuzzle')]);
             return;
         }
         
@@ -4084,7 +4084,7 @@ class Maneli_Ajax_Handler {
             $attach_id = wp_insert_attachment($attachment, $filename);
             
             if (is_wp_error($attach_id)) {
-                wp_send_json_error(['message' => esc_html__('Error creating attachment.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Error creating attachment.', 'autopuzzle')]);
                 return;
             }
             
@@ -4102,11 +4102,11 @@ class Maneli_Ajax_Handler {
             update_user_meta($user_id, 'profile_image_id', $attach_id);
             
             wp_send_json_success([
-                'message' => esc_html__('Profile image uploaded successfully.', 'maneli-car-inquiry'),
+                'message' => esc_html__('Profile image uploaded successfully.', 'autopuzzle'),
                 'url' => wp_get_attachment_image_url($attach_id, 'full')
             ]);
         } else {
-            $error_msg = isset($movefile['error']) ? $movefile['error'] : esc_html__('Upload failed.', 'maneli-car-inquiry');
+            $error_msg = isset($movefile['error']) ? $movefile['error'] : esc_html__('Upload failed.', 'autopuzzle');
             wp_send_json_error(['message' => $error_msg]);
         }
     }
@@ -4115,10 +4115,10 @@ class Maneli_Ajax_Handler {
      * Handle profile image deletion
      */
     public function ajax_delete_profile_image() {
-        check_ajax_referer('maneli-profile-image-nonce', 'security');
+        check_ajax_referer('autopuzzle-profile-image-nonce', 'security');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -4131,7 +4131,7 @@ class Maneli_Ajax_Handler {
         }
         
         wp_send_json_success([
-            'message' => esc_html__('Profile image deleted successfully.', 'maneli-car-inquiry')
+            'message' => esc_html__('Profile image deleted successfully.', 'autopuzzle')
         ]);
     }
     
@@ -4139,10 +4139,10 @@ class Maneli_Ajax_Handler {
      * Handle profile update
      */
     public function ajax_update_profile() {
-        check_ajax_referer('maneli-update-profile-nonce', 'security');
+        check_ajax_referer('autopuzzle-update-profile-nonce', 'security');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -4162,9 +4162,9 @@ class Maneli_Ajax_Handler {
         }
         
         if (isset($_POST['user_email']) && !empty($_POST['user_email'])) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
             $email = sanitize_email($_POST['user_email']);
-            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            $email_validation = Autopuzzle_Render_Helpers::validate_email_field($email);
             if (!$email_validation['valid']) {
                 wp_send_json_error(['message' => $email_validation['error']]);
                 return;
@@ -4280,17 +4280,17 @@ class Maneli_Ajax_Handler {
             update_user_meta($user_id, 'require_personal_details', $_POST['require_personal_details'] === '1' ? '1' : '0');
         }
         
-        wp_send_json_success(['message' => esc_html__('Profile updated successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Profile updated successfully.', 'autopuzzle')]);
     }
     
     /**
      * Handle customer document upload for profile
      */
     public function ajax_upload_customer_document() {
-        check_ajax_referer('maneli-profile-image-nonce', 'security');
+        check_ajax_referer('autopuzzle-profile-image-nonce', 'security');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -4299,13 +4299,13 @@ class Maneli_Ajax_Handler {
         $uploaded_file = isset($_FILES['file']) ? $_FILES['file'] : null;
         
         if (!$user_id || !$document_name || !$uploaded_file) {
-            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'autopuzzle')]);
             return;
         }
         
         // Check permissions - user can only upload to their own profile
         if ($user_id !== get_current_user_id()) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to upload documents for this user.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You do not have permission to upload documents for this user.', 'autopuzzle')]);
             return;
         }
         
@@ -4358,21 +4358,21 @@ class Maneli_Ajax_Handler {
         update_user_meta($user_id, 'customer_uploaded_documents', $documents);
         
         // Send notification to admins/experts about new document upload
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         $managers = get_users([
-            'role__in' => ['administrator', 'maneli_admin'],
+            'role__in' => ['administrator', 'autopuzzle_admin'],
             'fields' => 'ids'
         ]);
         $user = get_userdata($user_id);
         $user_name = $user ? $user->display_name : '';
         
         foreach ($managers as $manager_id) {
-            Maneli_Notification_Handler::create_notification([
+            Autopuzzle_Notification_Handler::create_notification([
                 'user_id' => $manager_id,
                 'type' => 'document_uploaded',
-                'title' => esc_html__('New document uploaded', 'maneli-car-inquiry'),
+                'title' => esc_html__('New document uploaded', 'autopuzzle'),
                 'message' => sprintf(
-                    esc_html__('Customer %s uploaded document "%s"', 'maneli-car-inquiry'),
+                    esc_html__('Customer %s uploaded document "%s"', 'autopuzzle'),
                     $user_name,
                     $document_name
                 ),
@@ -4382,7 +4382,7 @@ class Maneli_Ajax_Handler {
         }
         
         wp_send_json_success([
-            'message' => esc_html__('Document uploaded successfully. Awaiting admin review.', 'maneli-car-inquiry'),
+            'message' => esc_html__('Document uploaded successfully. Awaiting admin review.', 'autopuzzle'),
             'document_url' => $uploaded_file_array['url']
         ]);
     }
@@ -4391,22 +4391,22 @@ class Maneli_Ajax_Handler {
      * Approve customer document
      */
     public function ajax_approve_customer_document() {
-        check_ajax_referer('maneli_ajax_nonce', 'security');
+        check_ajax_referer('autopuzzle_ajax_nonce', 'security');
         
         // Check if user is admin or assigned expert
         $user_id_param = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
         $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
         
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             // Check if user is assigned expert
             if ($inquiry_id > 0) {
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-                if (!Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
-                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+                if (!Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
+                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                     return;
                 }
             } else {
-                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                 return;
             }
         }
@@ -4415,7 +4415,7 @@ class Maneli_Ajax_Handler {
         $document_name = isset($_POST['document_name']) ? sanitize_text_field($_POST['document_name']) : '';
         
         if (!$user_id || !$document_name) {
-            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'autopuzzle')]);
             return;
         }
         
@@ -4431,32 +4431,32 @@ class Maneli_Ajax_Handler {
         update_user_meta($user_id, 'customer_uploaded_documents', $documents);
         
         // Send notification to customer
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_document_approved($user_id, $document_name, $inquiry_id);
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_document_approved($user_id, $document_name, $inquiry_id);
         
-        wp_send_json_success(['message' => esc_html__('Document approved successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Document approved successfully.', 'autopuzzle')]);
     }
     
     /**
      * Reject customer document
      */
     public function ajax_reject_customer_document() {
-        check_ajax_referer('maneli_ajax_nonce', 'security');
+        check_ajax_referer('autopuzzle_ajax_nonce', 'security');
         
         // Check if user is admin or assigned expert
         $user_id_param = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
         $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
         
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             // Check if user is assigned expert
             if ($inquiry_id > 0) {
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-                if (!Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
-                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+                if (!Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
+                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                     return;
                 }
             } else {
-                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                 return;
             }
         }
@@ -4465,7 +4465,7 @@ class Maneli_Ajax_Handler {
         $document_name = isset($_POST['document_name']) ? sanitize_text_field($_POST['document_name']) : '';
         
         if (!$user_id || !$document_name) {
-            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'autopuzzle')]);
             return;
         }
         
@@ -4487,32 +4487,32 @@ class Maneli_Ajax_Handler {
         update_user_meta($user_id, 'customer_uploaded_documents', $documents);
         
         // Send notification to customer
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_document_rejected($user_id, $document_name, $rejection_reason, $inquiry_id);
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_document_rejected($user_id, $document_name, $rejection_reason, $inquiry_id);
         
-        wp_send_json_success(['message' => esc_html__('Document rejected successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Document rejected successfully.', 'autopuzzle')]);
     }
     
     /**
      * Request customer document
      */
     public function ajax_request_customer_document() {
-        check_ajax_referer('maneli_ajax_nonce', 'security');
+        check_ajax_referer('autopuzzle_ajax_nonce', 'security');
         
         // Check if user is admin or assigned expert
         $user_id_param = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
         $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
         
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             // Check if user is assigned expert
             if ($inquiry_id > 0) {
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-                if (!Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
-                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+                if (!Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
+                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                     return;
                 }
             } else {
-                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                 return;
             }
         }
@@ -4521,38 +4521,38 @@ class Maneli_Ajax_Handler {
         $document_name = isset($_POST['document_name']) ? sanitize_text_field($_POST['document_name']) : '';
         
         if (!$user_id || !$document_name) {
-            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'autopuzzle')]);
             return;
         }
         
         // Send notification to customer to upload document
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_document_requested($user_id, $document_name, $inquiry_id);
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_document_requested($user_id, $document_name, $inquiry_id);
         
-        wp_send_json_success(['message' => esc_html__('Document request sent to customer successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Document request sent to customer successfully.', 'autopuzzle')]);
     }
 
     /**
      * Request multiple customer documents at once - sends ONE SMS for all selected documents
      */
     public function ajax_request_customer_documents_bulk() {
-        check_ajax_referer('maneli_ajax_nonce', 'security');
+        check_ajax_referer('autopuzzle_ajax_nonce', 'security');
         
         // Check if user is admin or assigned expert
         $user_id_param = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
         $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
         $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : 'installment';
         
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             // Check if user is assigned expert
             if ($inquiry_id > 0) {
-                require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-                if (!Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
-                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+                if (!Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id())) {
+                    wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                     return;
                 }
             } else {
-                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                 return;
             }
         }
@@ -4568,19 +4568,19 @@ class Maneli_Ajax_Handler {
         $documents = array_filter($documents); // Remove empty values
         
         if (!$user_id || empty($documents)) {
-            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('Invalid user.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user.', 'autopuzzle')]);
             return;
         }
         
         $mobile = get_user_meta($user_id, 'mobile_number', true);
         if (!$mobile) {
-            wp_send_json_error(['message' => esc_html__('Customer mobile number not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Customer mobile number not found.', 'autopuzzle')]);
             return;
         }
         
@@ -4595,15 +4595,15 @@ class Maneli_Ajax_Handler {
             }
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         // Create in-app notifications for each document (individual notifications)
         foreach ($documents as $document_name) {
-            Maneli_Notification_Handler::create_notification($user_id, [
+            Autopuzzle_Notification_Handler::create_notification($user_id, [
                 'type' => 'document_requested',
-                'title' => esc_html__('Document requested', 'maneli-car-inquiry'),
+                'title' => esc_html__('Document requested', 'autopuzzle'),
                 'message' => sprintf(
-                    esc_html__('Please upload the document "%s".', 'maneli-car-inquiry'),
+                    esc_html__('Please upload the document "%s".', 'autopuzzle'),
                     $document_name
                 ),
                 'link' => $link,
@@ -4614,11 +4614,11 @@ class Maneli_Ajax_Handler {
         // Send ONE SMS for all selected documents
         $documents_list = implode('، ', $documents); // Persian comma separator
         $message = sprintf(
-            esc_html__('لطفاً مدارک زیر را در پروفایل خود آپلود کنید: %s', 'maneli-car-inquiry'),
+            esc_html__('لطفاً مدارک زیر را در پروفایل خود آپلود کنید: %s', 'autopuzzle'),
             $documents_list
         );
         
-        Maneli_Notification_Handler::send_sms_notification($mobile, $message);
+        Autopuzzle_Notification_Handler::send_sms_notification($mobile, $message);
         
         // Update requested documents meta for inquiry (if inquiry_id exists)
         if ($inquiry_id) {
@@ -4633,7 +4633,7 @@ class Maneli_Ajax_Handler {
         
         $count = count($documents);
         $success_message = sprintf(
-            esc_html__('درخواست %d مدرک با موفقیت ارسال شد. یک پیامک برای همه مدارک ارسال شد.', 'maneli-car-inquiry'),
+            esc_html__('درخواست %d مدرک با موفقیت ارسال شد. یک پیامک برای همه مدارک ارسال شد.', 'autopuzzle'),
             $count
         );
         
@@ -4644,23 +4644,23 @@ class Maneli_Ajax_Handler {
      * Get expert details for viewing
      */
     public function ajax_get_expert_details() {
-        check_ajax_referer('maneli_expert_details_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_expert_details_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
-        if (!$user || !in_array('maneli_expert', $user->roles)) {
-            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'maneli-car-inquiry')]);
+        if (!$user || !in_array('autopuzzle_expert', $user->roles)) {
+            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'autopuzzle')]);
             return;
         }
         
@@ -4704,29 +4704,29 @@ class Maneli_Ajax_Handler {
         $html = '
             <div class="row g-3">
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Name:', 'maneli-car-inquiry') . '</strong> ' . esc_html($user->first_name) . '
+                    <strong>' . esc_html__('Name:', 'autopuzzle') . '</strong> ' . esc_html($user->first_name) . '
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Last Name:', 'maneli-car-inquiry') . '</strong> ' . esc_html($user->last_name) . '
+                    <strong>' . esc_html__('Last Name:', 'autopuzzle') . '</strong> ' . esc_html($user->last_name) . '
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Mobile Number:', 'maneli-car-inquiry') . '</strong> ' . esc_html($mobile) . '
+                    <strong>' . esc_html__('Mobile Number:', 'autopuzzle') . '</strong> ' . esc_html($mobile) . '
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Status:', 'maneli-car-inquiry') . '</strong> <span class="badge bg-' . ($is_active ? 'success' : 'danger') . '">' . ($is_active ? esc_html__('Active', 'maneli-car-inquiry') : esc_html__('Inactive', 'maneli-car-inquiry')) . '</span>
+                    <strong>' . esc_html__('Status:', 'autopuzzle') . '</strong> <span class="badge bg-' . ($is_active ? 'success' : 'danger') . '">' . ($is_active ? esc_html__('Active', 'autopuzzle') : esc_html__('Inactive', 'autopuzzle')) . '</span>
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Installment Inquiries:', 'maneli-car-inquiry') . '</strong> ' . number_format_i18n($installment_count) . '
+                    <strong>' . esc_html__('Installment Inquiries:', 'autopuzzle') . '</strong> ' . number_format_i18n($installment_count) . '
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Cash Inquiries:', 'maneli-car-inquiry') . '</strong> ' . number_format_i18n($cash_count) . '
+                    <strong>' . esc_html__('Cash Inquiries:', 'autopuzzle') . '</strong> ' . number_format_i18n($cash_count) . '
                 </div>
                 <div class="col-md-12">
-                    <strong>' . esc_html__('Permissions:', 'maneli-car-inquiry') . '</strong>
+                    <strong>' . esc_html__('Permissions:', 'autopuzzle') . '</strong>
                     <ul class="list-unstyled mt-2">
-                        <li>- ' . esc_html__('Cash Inquiry:', 'maneli-car-inquiry') . ' ' . ($permissions['cash_inquiry'] ? '✓ ' . esc_html__('Active', 'maneli-car-inquiry') : '✗ ' . esc_html__('Inactive', 'maneli-car-inquiry')) . '</li>
-                        <li>- ' . esc_html__('Installment Inquiry:', 'maneli-car-inquiry') . ' ' . ($permissions['installment_inquiry'] ? '✓ ' . esc_html__('Active', 'maneli-car-inquiry') : '✗ ' . esc_html__('Inactive', 'maneli-car-inquiry')) . '</li>
-                        <li>- ' . esc_html__('Meeting Calendar:', 'maneli-car-inquiry') . ' ' . ($permissions['calendar'] ? '✓ ' . esc_html__('Active', 'maneli-car-inquiry') : '✗ ' . esc_html__('Inactive', 'maneli-car-inquiry')) . '</li>
+                        <li>- ' . esc_html__('Cash Inquiry:', 'autopuzzle') . ' ' . ($permissions['cash_inquiry'] ? '✓ ' . esc_html__('Active', 'autopuzzle') : '✗ ' . esc_html__('Inactive', 'autopuzzle')) . '</li>
+                        <li>- ' . esc_html__('Installment Inquiry:', 'autopuzzle') . ' ' . ($permissions['installment_inquiry'] ? '✓ ' . esc_html__('Active', 'autopuzzle') : '✗ ' . esc_html__('Inactive', 'autopuzzle')) . '</li>
+                        <li>- ' . esc_html__('Meeting Calendar:', 'autopuzzle') . ' ' . ($permissions['calendar'] ? '✓ ' . esc_html__('Active', 'autopuzzle') : '✗ ' . esc_html__('Inactive', 'autopuzzle')) . '</li>
                     </ul>
                 </div>
             </div>
@@ -4739,23 +4739,23 @@ class Maneli_Ajax_Handler {
      * Get expert data for editing
      */
     public function ajax_get_expert_data() {
-        check_ajax_referer('maneli_expert_data_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_expert_data_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
-        if (!$user || !in_array('maneli_expert', $user->roles)) {
-            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'maneli-car-inquiry')]);
+        if (!$user || !in_array('autopuzzle_expert', $user->roles)) {
+            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'autopuzzle')]);
             return;
         }
         
@@ -4772,10 +4772,10 @@ class Maneli_Ajax_Handler {
      * Update expert information
      */
     public function ajax_update_expert() {
-        check_ajax_referer('maneli_update_expert_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_update_expert_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -4788,13 +4788,13 @@ class Maneli_Ajax_Handler {
         $expert_active = isset($_POST['expert_active']) ? sanitize_text_field($_POST['expert_active']) : 'yes';
         
         if (!$user_id || !$first_name || !$last_name || !$mobile) {
-            wp_send_json_error(['message' => esc_html__('All fields are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('All fields are required.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
-        if (!$user || !in_array('maneli_expert', $user->roles)) {
-            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'maneli-car-inquiry')]);
+        if (!$user || !in_array('autopuzzle_expert', $user->roles)) {
+            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'autopuzzle')]);
             return;
         }
         
@@ -4808,8 +4808,8 @@ class Maneli_Ajax_Handler {
         
         // Update email if provided
         if (!empty($email)) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+            $email_validation = Autopuzzle_Render_Helpers::validate_email_field($email);
             if (!$email_validation['valid']) {
                 wp_send_json_error(['message' => $email_validation['error']]);
                 return;
@@ -4821,30 +4821,30 @@ class Maneli_Ajax_Handler {
         update_user_meta($user_id, 'mobile_number', $mobile);
         update_user_meta($user_id, 'expert_active', $expert_active === 'yes' ? 'yes' : 'no');
         
-        wp_send_json_success(['message' => esc_html__('Expert updated successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Expert updated successfully.', 'autopuzzle')]);
     }
     
     /**
      * Get expert permissions
      */
     public function ajax_get_expert_permissions() {
-        check_ajax_referer('maneli_expert_permissions_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_expert_permissions_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
-        if (!$user || !in_array('maneli_expert', $user->roles)) {
-            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'maneli-car-inquiry')]);
+        if (!$user || !in_array('autopuzzle_expert', $user->roles)) {
+            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'autopuzzle')]);
             return;
         }
         
@@ -4861,10 +4861,10 @@ class Maneli_Ajax_Handler {
      * Update expert permissions
      */
     public function ajax_update_expert_permissions() {
-        check_ajax_referer('maneli_update_expert_permissions_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_update_expert_permissions_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -4880,13 +4880,13 @@ class Maneli_Ajax_Handler {
         }
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
-        if (!$user || !in_array('maneli_expert', $user->roles)) {
-            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'maneli-car-inquiry')]);
+        if (!$user || !in_array('autopuzzle_expert', $user->roles)) {
+            wp_send_json_error(['message' => esc_html__('User is not an expert.', 'autopuzzle')]);
             return;
         }
         
@@ -4897,36 +4897,36 @@ class Maneli_Ajax_Handler {
             update_user_meta($user_id, 'permission_' . $key, $has_permission ? 'yes' : 'no');
         }
         
-        wp_send_json_success(['message' => esc_html__('Permissions updated successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Permissions updated successfully.', 'autopuzzle')]);
     }
     
     /**
      * Delete user (from experts page)
      */
     public function ajax_delete_user_from_experts() {
-        check_ajax_referer('maneli_delete_user_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_delete_user_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('User not found.', 'autopuzzle')]);
             return;
         }
         
         // Don't allow deleting admin users
         if (in_array('administrator', $user->roles)) {
-            wp_send_json_error(['message' => esc_html__('Cannot delete administrator.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Cannot delete administrator.', 'autopuzzle')]);
             return;
         }
         
@@ -4934,17 +4934,17 @@ class Maneli_Ajax_Handler {
         require_once(ABSPATH . 'wp-admin/includes/user.php');
         wp_delete_user($user_id);
         
-        wp_send_json_success(['message' => esc_html__('User deleted successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('User deleted successfully.', 'autopuzzle')]);
     }
     
     /**
      * Update ajax_add_expert to support new fields and auto-generated password
      */
     public function ajax_add_expert() {
-        check_ajax_referer('maneli_add_expert_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_add_expert_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -4967,13 +4967,13 @@ class Maneli_Ajax_Handler {
         
         // Validation
         if (empty($first_name) || empty($last_name) || empty($mobile) || empty($password)) {
-            wp_send_json_error(['message' => esc_html__('All required fields must be filled.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('All required fields must be filled.', 'autopuzzle')]);
             return;
         }
 
         // Validate password length (minimum 8 characters recommended)
         if (strlen($password) < 8) {
-            wp_send_json_error(['message' => esc_html__('Password must be at least 8 characters long.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Password must be at least 8 characters long.', 'autopuzzle')]);
             return;
         }
         
@@ -4982,8 +4982,8 @@ class Maneli_Ajax_Handler {
             $email = $mobile . '@manelikhodro.com';
         } else {
             // Validate email if provided
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+            $email_validation = Autopuzzle_Render_Helpers::validate_email_field($email);
             if (!$email_validation['valid']) {
                 wp_send_json_error(['message' => $email_validation['error']]);
                 return;
@@ -4992,12 +4992,12 @@ class Maneli_Ajax_Handler {
         
         // Check if user already exists
         if (username_exists($mobile)) {
-            wp_send_json_error(['message' => esc_html__('A user with this mobile number already exists.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('A user with this mobile number already exists.', 'autopuzzle')]);
             return;
         }
         
         if (email_exists($email)) {
-            wp_send_json_error(['message' => esc_html__('A user with this email already exists.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('A user with this email already exists.', 'autopuzzle')]);
             return;
         }
         
@@ -5015,7 +5015,7 @@ class Maneli_Ajax_Handler {
             'first_name' => $first_name,
             'last_name' => $last_name,
             'display_name' => $display_name,
-            'role' => 'maneli_expert'
+            'role' => 'autopuzzle_expert'
         ]);
         
         // Update user meta
@@ -5032,7 +5032,7 @@ class Maneli_Ajax_Handler {
         update_user_meta($user_id, 'permission_calendar', $calendar ? 'yes' : 'no');
         
         wp_send_json_success([
-            'message' => esc_html__('Expert added successfully.', 'maneli-car-inquiry'),
+            'message' => esc_html__('Expert added successfully.', 'autopuzzle'),
             'user_id' => $user_id
         ]);
     }
@@ -5041,23 +5041,23 @@ class Maneli_Ajax_Handler {
      * Get user details for viewing
      */
     public function ajax_get_user_details() {
-        check_ajax_referer('maneli_user_details_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_user_details_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('User not found.', 'autopuzzle')]);
             return;
         }
         
@@ -5066,11 +5066,11 @@ class Maneli_Ajax_Handler {
         $role_display = !empty($user_roles) ? $user_roles[0] : '';
         
         $role_labels = [
-            'administrator' => esc_html__('Administrator', 'maneli-car-inquiry'),
-            'maneli_admin' => esc_html__('Maneli Admin', 'maneli-car-inquiry'),
-            'maneli_expert' => esc_html__('Expert', 'maneli-car-inquiry'),
-            'customer' => esc_html__('Customer', 'maneli-car-inquiry'),
-            'subscriber' => esc_html__('Subscriber', 'maneli-car-inquiry')
+            'administrator' => esc_html__('Administrator', 'autopuzzle'),
+            'autopuzzle_admin' => esc_html__('AutoPuzzle Admin', 'autopuzzle'),
+            'autopuzzle_expert' => esc_html__('Expert', 'autopuzzle'),
+            'customer' => esc_html__('Customer', 'autopuzzle'),
+            'subscriber' => esc_html__('Subscriber', 'autopuzzle')
         ];
         $role_display_persian = isset($role_labels[$role_display]) ? $role_labels[$role_display] : $role_display;
         
@@ -5079,22 +5079,22 @@ class Maneli_Ajax_Handler {
         $html = '
             <div class="row g-3">
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Name:', 'maneli-car-inquiry') . '</strong> ' . esc_html($user->first_name) . '
+                    <strong>' . esc_html__('Name:', 'autopuzzle') . '</strong> ' . esc_html($user->first_name) . '
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Last Name:', 'maneli-car-inquiry') . '</strong> ' . esc_html($user->last_name) . '
+                    <strong>' . esc_html__('Last Name:', 'autopuzzle') . '</strong> ' . esc_html($user->last_name) . '
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Mobile Number:', 'maneli-car-inquiry') . '</strong> ' . esc_html($mobile) . '
+                    <strong>' . esc_html__('Mobile Number:', 'autopuzzle') . '</strong> ' . esc_html($mobile) . '
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Role:', 'maneli-car-inquiry') . '</strong> <span class="badge bg-info">' . esc_html($role_display_persian) . '</span>
+                    <strong>' . esc_html__('Role:', 'autopuzzle') . '</strong> <span class="badge bg-info">' . esc_html($role_display_persian) . '</span>
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Status:', 'maneli-car-inquiry') . '</strong> <span class="badge bg-' . ($is_active ? 'success' : 'danger') . '">' . ($is_active ? esc_html__('Active', 'maneli-car-inquiry') : esc_html__('Inactive', 'maneli-car-inquiry')) . '</span>
+                    <strong>' . esc_html__('Status:', 'autopuzzle') . '</strong> <span class="badge bg-' . ($is_active ? 'success' : 'danger') . '">' . ($is_active ? esc_html__('Active', 'autopuzzle') : esc_html__('Inactive', 'autopuzzle')) . '</span>
                 </div>
                 <div class="col-md-6">
-                    <strong>' . esc_html__('Registration Date:', 'maneli-car-inquiry') . '</strong> ' . date_i18n('Y/m/d', strtotime($user->user_registered)) . '
+                    <strong>' . esc_html__('Registration Date:', 'autopuzzle') . '</strong> ' . date_i18n('Y/m/d', strtotime($user->user_registered)) . '
                 </div>
             </div>
         ';
@@ -5106,23 +5106,23 @@ class Maneli_Ajax_Handler {
      * Get user data for editing
      */
     public function ajax_get_user_data() {
-        check_ajax_referer('maneli_user_data_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_user_data_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         
         if (!$user_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid user ID.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('User not found.', 'autopuzzle')]);
             return;
         }
         
@@ -5142,10 +5142,10 @@ class Maneli_Ajax_Handler {
      * Update user information
      */
     public function ajax_update_user() {
-        check_ajax_referer('maneli_update_user_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_update_user_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -5158,13 +5158,13 @@ class Maneli_Ajax_Handler {
         $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
         
         if (!$user_id || !$first_name || !$last_name || !$mobile) {
-            wp_send_json_error(['message' => esc_html__('All fields are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('All fields are required.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('User not found.', 'autopuzzle')]);
             return;
         }
         
@@ -5178,8 +5178,8 @@ class Maneli_Ajax_Handler {
         
         // Update email if provided
         if (!empty($email)) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+            $email_validation = Autopuzzle_Render_Helpers::validate_email_field($email);
             if (!$email_validation['valid']) {
                 wp_send_json_error(['message' => $email_validation['error']]);
                 return;
@@ -5198,17 +5198,17 @@ class Maneli_Ajax_Handler {
         // Update mobile
         update_user_meta($user_id, 'mobile_number', $mobile);
         
-        wp_send_json_success(['message' => esc_html__('User updated successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('User updated successfully.', 'autopuzzle')]);
     }
     
     /**
      * Update user information (full update with all meta fields)
      */
     public function ajax_update_user_full() {
-        check_ajax_referer('maneli_update_user_full_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_update_user_full_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -5238,13 +5238,13 @@ class Maneli_Ajax_Handler {
         $branch_name = isset($_POST['branch_name']) ? sanitize_text_field($_POST['branch_name']) : '';
         
         if (!$user_id || !$first_name || !$last_name || !$mobile) {
-            wp_send_json_error(['message' => esc_html__('All required fields are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('All required fields are required.', 'autopuzzle')]);
             return;
         }
         
         $user = get_userdata($user_id);
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('User not found.', 'autopuzzle')]);
             return;
         }
         
@@ -5258,8 +5258,8 @@ class Maneli_Ajax_Handler {
         
         // Update email if provided
         if (!empty($email)) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+            $email_validation = Autopuzzle_Render_Helpers::validate_email_field($email);
             if (!$email_validation['valid']) {
                 wp_send_json_error(['message' => $email_validation['error']]);
                 return;
@@ -5295,17 +5295,17 @@ class Maneli_Ajax_Handler {
         update_user_meta($user_id, 'branch_code', $branch_code);
         update_user_meta($user_id, 'branch_name', $branch_name);
         
-        wp_send_json_success(['message' => esc_html__('User updated successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('User updated successfully.', 'autopuzzle')]);
     }
     
     /**
      * Add new user
      */
     public function ajax_add_user() {
-        check_ajax_referer('maneli_add_user_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_add_user_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')], 403);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')], 403);
             return;
         }
         
@@ -5320,13 +5320,13 @@ class Maneli_Ajax_Handler {
         
         // Validation
         if (empty($first_name) || empty($last_name) || empty($mobile) || empty($password)) {
-            wp_send_json_error(['message' => esc_html__('All required fields must be filled.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('All required fields must be filled.', 'autopuzzle')]);
             return;
         }
         
         // Validate password length (minimum 8 characters recommended)
         if (strlen($password) < 8) {
-            wp_send_json_error(['message' => esc_html__('Password must be at least 8 characters long.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Password must be at least 8 characters long.', 'autopuzzle')]);
             return;
         }
         
@@ -5335,8 +5335,8 @@ class Maneli_Ajax_Handler {
             $email = $mobile . '@manelikhodro.com';
         } else {
             // Validate email if provided
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-            $email_validation = Maneli_Render_Helpers::validate_email_field($email);
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
+            $email_validation = Autopuzzle_Render_Helpers::validate_email_field($email);
             if (!$email_validation['valid']) {
                 wp_send_json_error(['message' => $email_validation['error']]);
                 return;
@@ -5345,12 +5345,12 @@ class Maneli_Ajax_Handler {
         
         // Check if user already exists
         if (username_exists($mobile)) {
-            wp_send_json_error(['message' => esc_html__('A user with this mobile number already exists.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('A user with this mobile number already exists.', 'autopuzzle')]);
             return;
         }
         
         if (email_exists($email)) {
-            wp_send_json_error(['message' => esc_html__('A user with this email already exists.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('A user with this email already exists.', 'autopuzzle')]);
             return;
         }
         
@@ -5375,7 +5375,7 @@ class Maneli_Ajax_Handler {
         update_user_meta($user_id, 'mobile_number', $mobile);
         
         wp_send_json_success([
-            'message' => esc_html__('User added successfully.', 'maneli-car-inquiry'),
+            'message' => esc_html__('User added successfully.', 'autopuzzle'),
             'user_id' => $user_id
         ]);
     }
@@ -5384,7 +5384,7 @@ class Maneli_Ajax_Handler {
      * Cancel a scheduled meeting for an inquiry
      */
     public function ajax_cancel_meeting() {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         
         // Multi-stage nonce verification (same as ajax_update_installment_status)
         $nonce = isset($_POST['nonce']) ? sanitize_text_field($_POST['nonce']) : '';
@@ -5392,7 +5392,7 @@ class Maneli_Ajax_Handler {
         
         // Try standard verification first
         if (!empty($nonce)) {
-            $nonce_actions = ['maneli_update_inquiry', 'maneli_tracking_status', 'maneli_update_installment_status', 'maneli_installment_status', 'maneli_update_cash_status', 'maneli_cash_status'];
+            $nonce_actions = ['autopuzzle_update_inquiry', 'autopuzzle_tracking_status', 'autopuzzle_update_installment_status', 'autopuzzle_installment_status', 'autopuzzle_update_cash_status', 'autopuzzle_cash_status'];
             foreach ($nonce_actions as $action) {
                 if (check_ajax_referer($action . '_nonce', 'nonce', false) || wp_verify_nonce($nonce, $action . '_nonce')) {
                     $nonce_valid = true;
@@ -5405,10 +5405,10 @@ class Maneli_Ajax_Handler {
         if (!$nonce_valid && is_user_logged_in()) {
             $inquiry_id = isset($_POST['inquiry_id']) ? absint($_POST['inquiry_id']) : 0;
             if ($inquiry_id) {
-                $is_admin = current_user_can('manage_maneli_inquiries');
+                $is_admin = current_user_can('manage_autopuzzle_inquiries');
                 if (!$is_admin) {
-                    require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-                    $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+                    require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+                    $is_assigned = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
                     if ($is_assigned) {
                         $nonce_valid = true;
                         if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -5433,12 +5433,12 @@ class Maneli_Ajax_Handler {
                     'user_id' => is_user_logged_in() ? get_current_user_id() : 0
                 ]);
             }
-            wp_send_json_error(['message' => esc_html__('Security verification failed. Please refresh the page.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Security verification failed. Please refresh the page.', 'autopuzzle')]);
             return;
         }
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -5446,17 +5446,17 @@ class Maneli_Ajax_Handler {
         $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : 'installment';
         
         if (!$inquiry_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
             return;
         }
         
         $current_user_id = get_current_user_id();
-        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
         
         // Get inquiry post
         $inquiry_post = get_post($inquiry_id);
         if (!$inquiry_post) {
-            wp_send_json_error(['message' => esc_html__('Inquiry not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Inquiry not found.', 'autopuzzle')]);
             return;
         }
         
@@ -5464,7 +5464,7 @@ class Maneli_Ajax_Handler {
         if (!$is_admin) {
             $assigned_expert_id = get_post_meta($inquiry_id, 'assigned_expert_id', true);
             if ($assigned_expert_id != $current_user_id) {
-                wp_send_json_error(['message' => esc_html__('You do not have permission to cancel this meeting.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('You do not have permission to cancel this meeting.', 'autopuzzle')]);
                 return;
             }
         }
@@ -5475,13 +5475,13 @@ class Maneli_Ajax_Handler {
         
         // Only allow cancellation if meeting is scheduled
         if ($current_status !== 'meeting_scheduled') {
-            wp_send_json_error(['message' => esc_html__('Meeting is not scheduled.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Meeting is not scheduled.', 'autopuzzle')]);
             return;
         }
         
         // Find and delete the meeting post
         $meeting_posts = get_posts([
-            'post_type' => 'maneli_meeting',
+            'post_type' => 'autopuzzle_meeting',
             'posts_per_page' => 1,
             'meta_query' => [
                 ['key' => 'meeting_inquiry_id', 'value' => $inquiry_id, 'compare' => '='],
@@ -5502,17 +5502,17 @@ class Maneli_Ajax_Handler {
         delete_post_meta($inquiry_id, 'meeting_date');
         delete_post_meta($inquiry_id, 'meeting_time');
         
-        wp_send_json_success(['message' => esc_html__('Meeting cancelled successfully.', 'maneli-car-inquiry')]);
+        wp_send_json_success(['message' => esc_html__('Meeting cancelled successfully.', 'autopuzzle')]);
     }
     
     /**
      * Handles AJAX request to request more documents from customer
      */
     public function ajax_request_more_documents() {
-        check_ajax_referer('maneli_tracking_status_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_tracking_status_nonce', 'nonce');
         
-        if (!is_user_logged_in() || !current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!is_user_logged_in() || !current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -5521,14 +5521,14 @@ class Maneli_Ajax_Handler {
         $documents = isset($_POST['documents']) ? (array) $_POST['documents'] : [];
         
         if (!$inquiry_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID.', 'autopuzzle')]);
             return;
         }
         
         // Get inquiry post
         $inquiry_post = get_post($inquiry_id);
         if (!$inquiry_post || get_post_type($inquiry_id) !== ($inquiry_type === 'cash' ? 'cash_inquiry' : 'inquiry')) {
-            wp_send_json_error(['message' => esc_html__('Inquiry not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Inquiry not found.', 'autopuzzle')]);
             return;
         }
         
@@ -5545,7 +5545,7 @@ class Maneli_Ajax_Handler {
         }
         
         // Send notification to customer
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         $customer_id = get_post_field('post_author', $inquiry_id);
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $product_name = get_the_title($product_id);
@@ -5556,13 +5556,13 @@ class Maneli_Ajax_Handler {
                 ? add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'))
                 : add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
             
-            Maneli_Notification_Handler::create_notification([
+            Autopuzzle_Notification_Handler::create_notification([
                 'user_id' => $customer_id,
                 'type' => 'more_docs_requested',
-                'title' => esc_html__('More documents required', 'maneli-car-inquiry'),
+                'title' => esc_html__('More documents required', 'autopuzzle'),
                 'message' => sprintf(
-                    esc_html__('Please upload the following documents for your %s request for %s: %s', 'maneli-car-inquiry'),
-                    $inquiry_type === 'cash' ? esc_html__('cash', 'maneli-car-inquiry') : esc_html__('installment', 'maneli-car-inquiry'),
+                    esc_html__('Please upload the following documents for your %s request for %s: %s', 'autopuzzle'),
+                    $inquiry_type === 'cash' ? esc_html__('cash', 'autopuzzle') : esc_html__('installment', 'autopuzzle'),
                     $product_name,
                     $documents_list
                 ),
@@ -5572,7 +5572,7 @@ class Maneli_Ajax_Handler {
         }
         
         wp_send_json_success([
-            'message' => esc_html__('Document request sent successfully.', 'maneli-car-inquiry')
+            'message' => esc_html__('Document request sent successfully.', 'autopuzzle')
         ]);
     }
     
@@ -5580,10 +5580,10 @@ class Maneli_Ajax_Handler {
      * Handles AJAX request to upload a document
      */
     public function ajax_upload_document() {
-        check_ajax_referer('maneli_tracking_status_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_tracking_status_nonce', 'nonce');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -5592,14 +5592,14 @@ class Maneli_Ajax_Handler {
         $uploaded_file = isset($_FILES['file']) ? $_FILES['file'] : null;
         
         if (!$inquiry_id || !$document_name || !$uploaded_file) {
-            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid parameters.', 'autopuzzle')]);
             return;
         }
         
         // Check permissions - customer can only upload to their own inquiries
         $inquiry_post = get_post($inquiry_id);
         if (!$inquiry_post || (int)$inquiry_post->post_author !== get_current_user_id()) {
-            wp_send_json_error(['message' => esc_html__('You do not have permission to upload documents for this inquiry.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('You do not have permission to upload documents for this inquiry.', 'autopuzzle')]);
             return;
         }
         
@@ -5644,11 +5644,11 @@ class Maneli_Ajax_Handler {
         update_post_meta($inquiry_id, 'uploaded_documents', $documents);
         
         // Send notification
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        Maneli_Notification_Handler::notify_document_uploaded($inquiry_id, $document_name);
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        Autopuzzle_Notification_Handler::notify_document_uploaded($inquiry_id, $document_name);
         
         wp_send_json_success([
-            'message' => esc_html__('Document uploaded successfully.', 'maneli-car-inquiry'),
+            'message' => esc_html__('Document uploaded successfully.', 'autopuzzle'),
             'document_url' => $uploaded_file_array['url']
         ]);
     }
@@ -5657,34 +5657,34 @@ class Maneli_Ajax_Handler {
      * Handles AJAX request to get SMS credit balance
      */
     public function ajax_get_sms_credit() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
         // Only admins can view SMS credit
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
         // Load SMS handler
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
-        $sms_handler = new Maneli_SMS_Handler();
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-sms-handler.php';
+        $sms_handler = new Autopuzzle_SMS_Handler();
         
         // Get credit
         $credit = $sms_handler->get_credit();
         
         if ($credit === false) {
             // Check if credentials are configured
-            $options = Maneli_Options_Helper::get_all_options();
+            $options = Autopuzzle_Options_Helper::get_all_options();
             $sms_username = $options['sms_username'] ?? '';
             $sms_password = $options['sms_password'] ?? '';
             
             if (empty($sms_username) || empty($sms_password)) {
                 wp_send_json_error([
-                    'message' => esc_html__('SMS credentials are not configured. Please go to Settings and enter your SMS panel information.', 'maneli-car-inquiry')
+                    'message' => esc_html__('SMS credentials are not configured. Please go to Settings and enter your SMS panel information.', 'autopuzzle')
                 ]);
             } else {
                 wp_send_json_error([
-                    'message' => esc_html__('Unable to retrieve SMS credit. Please check your SMS panel settings and credentials.', 'maneli-car-inquiry')
+                    'message' => esc_html__('Unable to retrieve SMS credit. Please check your SMS panel settings and credentials.', 'autopuzzle')
                 ]);
             }
             return;
@@ -5700,14 +5700,14 @@ class Maneli_Ajax_Handler {
      * Send bulk notification
      */
     public function ajax_send_bulk_notification() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
         
         $channels = isset($_POST['channels']) && is_array($_POST['channels']) ? $_POST['channels'] : [];
         $message = isset($_POST['message']) ? sanitize_textarea_field($_POST['message']) : '';
@@ -5715,7 +5715,7 @@ class Maneli_Ajax_Handler {
         $custom_recipients = isset($_POST['custom_recipients']) ? sanitize_textarea_field($_POST['custom_recipients']) : '';
         
         if (empty($channels) || empty($message)) {
-            wp_send_json_error(['message' => esc_html__('Channels and message are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Channels and message are required.', 'autopuzzle')]);
             return;
         }
         
@@ -5737,9 +5737,9 @@ class Maneli_Ajax_Handler {
             if ($recipient_type === 'customers') {
                 $user_args['role'] = 'customer';
             } elseif ($recipient_type === 'experts') {
-                $user_args['role'] = 'maneli_expert';
+                $user_args['role'] = 'autopuzzle_expert';
             } elseif ($recipient_type === 'admins') {
-                $user_args['role__in'] = ['administrator', 'maneli_admin', 'maneli_manager'];
+                $user_args['role__in'] = ['administrator', 'autopuzzle_admin', 'autopuzzle_manager'];
             }
             
             $users = get_users($user_args);
@@ -5766,7 +5766,7 @@ class Maneli_Ajax_Handler {
         }
         
         if (empty($recipients)) {
-            wp_send_json_error(['message' => esc_html__('No recipients found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('No recipients found.', 'autopuzzle')]);
             return;
         }
         
@@ -5774,17 +5774,17 @@ class Maneli_Ajax_Handler {
         $recipients = array_unique($recipients);
         
         // Check bulk limit
-        $bulk_limit = (int)Maneli_Options_Helper::get_option('bulk_sms_limit', 100);
+        $bulk_limit = (int)Autopuzzle_Options_Helper::get_option('bulk_sms_limit', 100);
         
         if (count($recipients) > $bulk_limit) {
             wp_send_json_error([
-                'message' => sprintf(esc_html__('Maximum %d recipients allowed. You have %d recipients.', 'maneli-car-inquiry'), $bulk_limit, count($recipients))
+                'message' => sprintf(esc_html__('Maximum %d recipients allowed. You have %d recipients.', 'autopuzzle'), $bulk_limit, count($recipients))
             ]);
             return;
         }
         
         // Send bulk
-        $results = Maneli_Notification_Center_Handler::send_bulk($channels, $recipients, $message, [
+        $results = Autopuzzle_Notification_Center_Handler::send_bulk($channels, $recipients, $message, [
             'user_id' => get_current_user_id(),
         ]);
         
@@ -5801,7 +5801,7 @@ class Maneli_Ajax_Handler {
         }
         
         wp_send_json_success([
-            'message' => sprintf(esc_html__('Sent: %d, Failed: %d', 'maneli-car-inquiry'), $success_count, $fail_count),
+            'message' => sprintf(esc_html__('Sent: %d, Failed: %d', 'autopuzzle'), $success_count, $fail_count),
             'results' => $results
         ]);
     }
@@ -5810,14 +5810,14 @@ class Maneli_Ajax_Handler {
      * Schedule notification
      */
     public function ajax_schedule_notification() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
         
         $channel = isset($_POST['channel']) ? sanitize_text_field($_POST['channel']) : '';
         $recipient = isset($_POST['recipient']) ? sanitize_text_field($_POST['recipient']) : '';
@@ -5825,13 +5825,13 @@ class Maneli_Ajax_Handler {
         $scheduled_at = isset($_POST['scheduled_at']) ? sanitize_text_field($_POST['scheduled_at']) : '';
         
         if (empty($channel) || empty($recipient) || empty($message) || empty($scheduled_at)) {
-            wp_send_json_error(['message' => esc_html__('All fields are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('All fields are required.', 'autopuzzle')]);
             return;
         }
         
         // Convert Jalali date to Gregorian if needed
         $is_jalali = isset($_POST['is_jalali']) && $_POST['is_jalali'] === '1';
-        if ($is_jalali && function_exists('maneli_jalali_to_gregorian')) {
+        if ($is_jalali && function_exists('autopuzzle_jalali_to_gregorian')) {
             // Parse date and time from scheduled_at (format: YYYY/MM/DD HH:mm)
             if (preg_match('/^(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})/', $scheduled_at, $matches)) {
                 $j_y = (int)$matches[1];
@@ -5839,7 +5839,7 @@ class Maneli_Ajax_Handler {
                 $j_d = (int)$matches[3];
                 $time = $matches[4] . ':' . $matches[5] . ':00';
                 
-                $gregorian = maneli_jalali_to_gregorian($j_y, $j_m, $j_d);
+                $gregorian = autopuzzle_jalali_to_gregorian($j_y, $j_m, $j_d);
                 if ($gregorian) {
                     $scheduled_at = $gregorian . ' ' . $time;
                 }
@@ -5849,11 +5849,11 @@ class Maneli_Ajax_Handler {
         // Validate scheduled time
         $scheduled_timestamp = strtotime($scheduled_at);
         if ($scheduled_timestamp === false || $scheduled_timestamp <= current_time('timestamp')) {
-            wp_send_json_error(['message' => esc_html__('Scheduled time must be in the future.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Scheduled time must be in the future.', 'autopuzzle')]);
             return;
         }
         
-        $result = Maneli_Notification_Center_Handler::schedule(
+        $result = Autopuzzle_Notification_Center_Handler::schedule(
             $channel,
             $recipient,
             $message,
@@ -5864,9 +5864,9 @@ class Maneli_Ajax_Handler {
         );
         
         if ($result) {
-            wp_send_json_success(['message' => esc_html__('Notification scheduled successfully.', 'maneli-car-inquiry')]);
+            wp_send_json_success(['message' => esc_html__('Notification scheduled successfully.', 'autopuzzle')]);
         } else {
-            wp_send_json_error(['message' => esc_html__('Failed to schedule notification.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Failed to schedule notification.', 'autopuzzle')]);
         }
     }
     
@@ -5900,14 +5900,14 @@ class Maneli_Ajax_Handler {
      * Get notification logs (AJAX)
      */
     public function ajax_get_notification_logs() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         
         $args = [
             'type' => isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '',
@@ -5919,8 +5919,8 @@ class Maneli_Ajax_Handler {
             'offset' => isset($_POST['offset']) ? (int)$_POST['offset'] : 0,
         ];
         
-        $logs = Maneli_Database::get_notification_logs($args);
-        $total = Maneli_Database::get_notification_logs_count($args);
+        $logs = Autopuzzle_Database::get_notification_logs($args);
+        $total = Autopuzzle_Database::get_notification_logs_count($args);
         
         wp_send_json_success([
             'logs' => $logs,
@@ -5932,14 +5932,14 @@ class Maneli_Ajax_Handler {
      * Get notification statistics
      */
     public function ajax_get_notification_stats() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         
         $args = [
             'date_from' => isset($_POST['date_from']) ? sanitize_text_field($_POST['date_from']) : '',
@@ -5947,7 +5947,7 @@ class Maneli_Ajax_Handler {
             'type' => isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '',
         ];
         
-        $stats = Maneli_Database::get_notification_stats($args);
+        $stats = Autopuzzle_Database::get_notification_stats($args);
         
         wp_send_json_success(['stats' => $stats]);
     }
@@ -5956,14 +5956,14 @@ class Maneli_Ajax_Handler {
      * Get notification timeline data for charts
      */
     public function ajax_get_notification_timeline() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         
         $args = [
             'type' => isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '',
@@ -5971,7 +5971,7 @@ class Maneli_Ajax_Handler {
             'date_to' => isset($_POST['date_to']) ? sanitize_text_field($_POST['date_to']) : date('Y-m-d'),
         ];
         
-        $timeline = Maneli_Database::get_notification_timeline($args);
+        $timeline = Autopuzzle_Database::get_notification_timeline($args);
         
         wp_send_json_success($timeline);
     }
@@ -5980,30 +5980,30 @@ class Maneli_Ajax_Handler {
      * Retry failed notification
      */
     public function ajax_retry_notification() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         
         $log_id = isset($_POST['log_id']) ? (int)$_POST['log_id'] : 0;
         
         if (!$log_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'autopuzzle')]);
             return;
         }
         
         // Get log entry
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         $log = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $log_id));
         
         if (!$log || $log->status !== 'failed') {
-            wp_send_json_error(['message' => esc_html__('Log entry not found or not failed.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Log entry not found or not failed.', 'autopuzzle')]);
             return;
         }
         
@@ -6014,7 +6014,7 @@ class Maneli_Ajax_Handler {
         }
         
         // Retry sending
-        $result = Maneli_Notification_Center_Handler::send(
+        $result = Autopuzzle_Notification_Center_Handler::send(
             $log->type,
             $recipient,
             $log->message,
@@ -6036,12 +6036,12 @@ class Maneli_Ajax_Handler {
                 'sent_at' => current_time('mysql'),
             ];
             
-            Maneli_Database::update_notification_log($log_id, $update_data);
+            Autopuzzle_Database::update_notification_log($log_id, $update_data);
             
             if ($success) {
-                wp_send_json_success(['message' => esc_html__('Notification sent successfully.', 'maneli-car-inquiry')]);
+                wp_send_json_success(['message' => esc_html__('Notification sent successfully.', 'autopuzzle')]);
             } else {
-                wp_send_json_error(['message' => esc_html__('Failed to send notification: ', 'maneli-car-inquiry') . ($error ?? 'Unknown error')]);
+                wp_send_json_error(['message' => esc_html__('Failed to send notification: ', 'autopuzzle') . ($error ?? 'Unknown error')]);
             }
     }
     
@@ -6049,24 +6049,24 @@ class Maneli_Ajax_Handler {
      * Send single SMS (without pattern)
      */
     public function ajax_send_single_sms() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
         if (!is_user_logged_in()) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
         $current_user_id = get_current_user_id();
-        $is_admin = current_user_can('manage_maneli_inquiries');
-        $is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
+        $is_expert = in_array('autopuzzle_expert', wp_get_current_user()->roles, true);
         
         if (!$is_admin && !$is_expert) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
         
         $recipient = isset($_POST['recipient']) ? sanitize_text_field($_POST['recipient']) : '';
         $message = isset($_POST['message']) ? sanitize_textarea_field($_POST['message']) : '';
@@ -6074,28 +6074,28 @@ class Maneli_Ajax_Handler {
         
         // If expert, check if they are assigned to this inquiry
         if ($is_expert && !$is_admin && $related_id > 0) {
-            $is_assigned = Maneli_Permission_Helpers::is_assigned_expert($related_id, $current_user_id);
+            $is_assigned = Autopuzzle_Permission_Helpers::is_assigned_expert($related_id, $current_user_id);
             if (!$is_assigned) {
-                wp_send_json_error(['message' => esc_html__('You do not have permission to send SMS for this inquiry.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('You do not have permission to send SMS for this inquiry.', 'autopuzzle')]);
                 return;
             }
         }
         
         if (empty($recipient) || empty($message)) {
-            wp_send_json_error(['message' => esc_html__('Recipient and message are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Recipient and message are required.', 'autopuzzle')]);
             return;
         }
         
         // Validate phone number
         $phone = preg_replace('/[^0-9]/', '', $recipient);
         if (empty($phone) || strlen($phone) < 10) {
-            wp_send_json_error(['message' => esc_html__('Invalid phone number.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid phone number.', 'autopuzzle')]);
             return;
         }
         
         try {
         // Send SMS (without pattern)
-        $result = Maneli_Notification_Center_Handler::send(
+        $result = Autopuzzle_Notification_Center_Handler::send(
             'sms',
             $phone,
             $message,
@@ -6163,16 +6163,16 @@ class Maneli_Ajax_Handler {
         }
         
         if ($result['sms']['success'] ?? false) {
-            wp_send_json_success(['message' => esc_html__('SMS sent successfully.', 'maneli-car-inquiry')]);
+            wp_send_json_success(['message' => esc_html__('SMS sent successfully.', 'autopuzzle')]);
         } else {
-                $error_message = $result['sms']['error'] ?? esc_html__('Unknown error', 'maneli-car-inquiry');
-                wp_send_json_error(['message' => esc_html__('Failed to send SMS: ', 'maneli-car-inquiry') . $error_message]);
+                $error_message = $result['sms']['error'] ?? esc_html__('Unknown error', 'autopuzzle');
+                wp_send_json_error(['message' => esc_html__('Failed to send SMS: ', 'autopuzzle') . $error_message]);
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Send Error: ' . $e->getMessage());
+                error_log('AutoPuzzle SMS Send Error: ' . $e->getMessage());
             }
-            wp_send_json_error(['message' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Server error. Please try again.', 'autopuzzle')]);
         }
     }
     
@@ -6180,14 +6180,14 @@ class Maneli_Ajax_Handler {
      * Get SMS history for an inquiry or user
      */
     public function ajax_get_sms_history() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
         $inquiry_id = isset($_POST['inquiry_id']) ? intval($_POST['inquiry_id']) : 0;
         $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
         $inquiry_type = isset($_POST['inquiry_type']) ? sanitize_text_field($_POST['inquiry_type']) : '';
         
         // Check permissions
-        $is_admin = current_user_can('manage_maneli_inquiries');
+        $is_admin = current_user_can('manage_autopuzzle_inquiries');
         
         // Get SMS history
         $sms_history = [];
@@ -6198,12 +6198,12 @@ class Maneli_Ajax_Handler {
         $is_assigned_expert = false;
         
         if (!$is_admin && $inquiry_id > 0) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-            $is_assigned_expert = Maneli_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-permission-helpers.php';
+            $is_assigned_expert = Autopuzzle_Permission_Helpers::is_assigned_expert($inquiry_id, get_current_user_id());
         }
         
         if (!$is_admin && !$is_assigned_expert) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -6212,14 +6212,14 @@ class Maneli_Ajax_Handler {
         } elseif ($user_id > 0) {
             // Check permissions for user (only admin can view user SMS history)
             if (!$is_admin) {
-                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
                 return;
             }
             
             // Verify user exists
             $user = get_user_by('ID', $user_id);
             if (!$user) {
-                wp_send_json_error(['message' => esc_html__('User not found.', 'maneli-car-inquiry')]);
+                wp_send_json_error(['message' => esc_html__('User not found.', 'autopuzzle')]);
                 return;
             }
             
@@ -6229,12 +6229,12 @@ class Maneli_Ajax_Handler {
             // Get SMS history from user meta
             $sms_history = get_user_meta($user_id, 'sms_history', true) ?: [];
         } else {
-            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID or user ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid inquiry ID or user ID.', 'autopuzzle')]);
             return;
         }
         
         // Format dates and prepare data
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-render-helpers.php';
         $formatted_history = [];
         
         foreach ($sms_history as $sms) {
@@ -6244,7 +6244,7 @@ class Maneli_Ajax_Handler {
             
             if (!empty($sent_at)) {
                 try {
-                    $jalali_date = Maneli_Render_Helpers::maneli_gregorian_to_jalali($sent_at, 'Y/m/d H:i');
+                    $jalali_date = Autopuzzle_Render_Helpers::autopuzzle_gregorian_to_jalali($sent_at, 'Y/m/d H:i');
                     if (function_exists('persian_numbers_no_separator')) {
                         $jalali_date = persian_numbers_no_separator($jalali_date);
                     }
@@ -6253,7 +6253,7 @@ class Maneli_Ajax_Handler {
                     $jalali_date = $sent_at;
                 }
             } else {
-                $jalali_date = __('N/A', 'maneli-car-inquiry');
+                $jalali_date = __('N/A', 'autopuzzle');
             }
             
             $recipient = $sms['recipient'] ?? '';
@@ -6262,7 +6262,7 @@ class Maneli_Ajax_Handler {
             }
             
             // For users, show customer name instead of sender name
-            $display_name = $sms['user_name'] ?? __('Unknown', 'maneli-car-inquiry');
+            $display_name = $sms['user_name'] ?? __('Unknown', 'autopuzzle');
             if ($user_id > 0 && isset($customer_name)) {
                 // When viewing user SMS history, show customer name
                 $display_name = $customer_name;
@@ -6286,12 +6286,12 @@ class Maneli_Ajax_Handler {
                 <table class="table table-bordered table-hover">
                     <thead class="table-light">
                         <tr>
-                            <th><?php esc_html_e('Date & Time', 'maneli-car-inquiry'); ?></th>
-                            <th><?php echo $user_id > 0 ? esc_html__('Customer', 'maneli-car-inquiry') : esc_html__('Sent By', 'maneli-car-inquiry'); ?></th>
-                            <th><?php esc_html_e('Recipient', 'maneli-car-inquiry'); ?></th>
-                            <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
-                            <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                            <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                            <th><?php esc_html_e('Date & Time', 'autopuzzle'); ?></th>
+                            <th><?php echo $user_id > 0 ? esc_html__('Customer', 'autopuzzle') : esc_html__('Sent By', 'autopuzzle'); ?></th>
+                            <th><?php esc_html_e('Recipient', 'autopuzzle'); ?></th>
+                            <th><?php esc_html_e('Message', 'autopuzzle'); ?></th>
+                            <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                            <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -6312,16 +6312,16 @@ class Maneli_Ajax_Handler {
                                 <td>
                                     <div class="sms-status-display">
                                         <?php if ($formatted_sms['success']): ?>
-                                            <span class="badge bg-success"><?php esc_html_e('Success', 'maneli-car-inquiry'); ?></span>
+                                            <span class="badge bg-success"><?php esc_html_e('Success', 'autopuzzle'); ?></span>
                                         <?php else: ?>
-                                            <span class="badge bg-danger"><?php esc_html_e('Failed', 'maneli-car-inquiry'); ?></span>
+                                            <span class="badge bg-danger"><?php esc_html_e('Failed', 'autopuzzle'); ?></span>
                                             <?php if (!empty($formatted_sms['error'])): ?>
                                                 <br><small class="text-danger"><?php echo esc_html($formatted_sms['error']); ?></small>
                                             <?php endif; ?>
                                         <?php endif; ?>
                                         <?php if (!empty($message_id)): ?>
                                             <br><small class="text-muted delivery-status" data-message-id="<?php echo esc_attr($message_id); ?>">
-                                                <span class="status-text"><?php echo esc_html(apply_filters('maneli_sms_status_checking_text', __('Checking status...', 'maneli-car-inquiry'))); ?></span>
+                                                <span class="status-text"><?php echo esc_html(apply_filters('autopuzzle_sms_status_checking_text', __('Checking status...', 'autopuzzle'))); ?></span>
                                             </small>
                                         <?php endif; ?>
                                     </div>
@@ -6334,14 +6334,14 @@ class Maneli_Ajax_Handler {
                                                 data-related-id="<?php echo esc_attr($inquiry_id > 0 ? $inquiry_id : ($user_id > 0 ? $user_id : 0)); ?>"
                                                 data-inquiry-type="<?php echo esc_attr($inquiry_id > 0 ? ($inquiry_type ?: 'inquiry') : 'user'); ?>">
                                             <i class="la la-redo me-1"></i>
-                                            <?php esc_html_e('Resend', 'maneli-car-inquiry'); ?>
+                                            <?php esc_html_e('Resend', 'autopuzzle'); ?>
                                         </button>
                                     <?php endif; ?>
                                     <?php if (!empty($message_id)): ?>
                                         <button type="button" class="btn btn-sm btn-info btn-check-status mt-1" 
                                                 data-message-id="<?php echo esc_attr($message_id); ?>">
                                             <i class="la la-sync me-1"></i>
-                                            <?php esc_html_e('Check Status', 'maneli-car-inquiry'); ?>
+                                            <?php esc_html_e('Check Status', 'autopuzzle'); ?>
                                         </button>
                                     <?php endif; ?>
                                 </td>
@@ -6370,8 +6370,8 @@ class Maneli_Ajax_Handler {
                             url: typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : '<?php echo admin_url('admin-ajax.php'); ?>',
                             type: 'POST',
                             data: {
-                                action: 'maneli_get_sms_status',
-                                nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
+                                action: 'autopuzzle_get_sms_status',
+                                nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>',
                                 message_id: messageId
                             },
                             success: function(response) {
@@ -6383,15 +6383,15 @@ class Maneli_Ajax_Handler {
                                     if (statusText === 'Rate limit exceeded or service temporarily unavailable') {
                                         statusText = getTranslatedText('rate_limit_exceeded', statusText);
                                     } else if (statusText === 'Delivered') {
-                                        statusText = getTranslatedText('delivered', '<?php echo esc_js(__('Delivered', 'maneli-car-inquiry')); ?>');
+                                        statusText = getTranslatedText('delivered', '<?php echo esc_js(__('Delivered', 'autopuzzle')); ?>');
                                     } else if (statusText === 'Failed') {
-                                        statusText = getTranslatedText('failed', '<?php echo esc_js(__('Failed', 'maneli-car-inquiry')); ?>');
+                                        statusText = getTranslatedText('failed', '<?php echo esc_js(__('Failed', 'autopuzzle')); ?>');
                                     } else if (statusText === 'Pending') {
-                                        statusText = getTranslatedText('pending', '<?php echo esc_js(__('Pending', 'maneli-car-inquiry')); ?>');
+                                        statusText = getTranslatedText('pending', '<?php echo esc_js(__('Pending', 'autopuzzle')); ?>');
                                     } else if (statusText === 'Blocked') {
-                                        statusText = getTranslatedText('blocked', '<?php echo esc_js(__('Blocked', 'maneli-car-inquiry')); ?>');
+                                        statusText = getTranslatedText('blocked', '<?php echo esc_js(__('Blocked', 'autopuzzle')); ?>');
                                     } else if (statusText === 'Rejected') {
-                                        statusText = getTranslatedText('rejected', '<?php echo esc_js(__('Rejected', 'maneli-car-inquiry')); ?>');
+                                        statusText = getTranslatedText('rejected', '<?php echo esc_js(__('Rejected', 'autopuzzle')); ?>');
                                     }
                                     
                                     var badgeClass = 'badge-info';
@@ -6406,12 +6406,12 @@ class Maneli_Ajax_Handler {
                                     
                                     $statusEl.find('.status-text').html('<span class="badge ' + badgeClass + '">' + statusText + '</span>');
                                 } else {
-                                    var statusUnavailableText = getTranslatedText('status_unavailable', '<?php echo esc_js(__('Status unavailable', 'maneli-car-inquiry')); ?>');
+                                    var statusUnavailableText = getTranslatedText('status_unavailable', '<?php echo esc_js(__('Status unavailable', 'autopuzzle')); ?>');
                                     $statusEl.find('.status-text').html('<span class="badge badge-secondary">' + statusUnavailableText + '</span>');
                                 }
                             },
                             error: function() {
-                                var checkFailedText = getTranslatedText('check_failed', '<?php echo esc_js(__('Check failed', 'maneli-car-inquiry')); ?>');
+                                var checkFailedText = getTranslatedText('check_failed', '<?php echo esc_js(__('Check failed', 'autopuzzle')); ?>');
                                 $statusEl.find('.status-text').html('<span class="badge badge-secondary">' + checkFailedText + '</span>');
                             }
                         });
@@ -6425,19 +6425,19 @@ class Maneli_Ajax_Handler {
                     var $row = $btn.closest('tr');
                     var $statusEl = $row.find('.delivery-status');
                     
-                    var checkingText = getTranslatedText('checking', '<?php echo esc_js(__('Checking...', 'maneli-car-inquiry')); ?>');
+                    var checkingText = getTranslatedText('checking', '<?php echo esc_js(__('Checking...', 'autopuzzle')); ?>');
                     $btn.prop('disabled', true).html('<i class="la la-spinner la-spin me-1"></i>' + checkingText);
                     
                     $.ajax({
                         url: typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : '<?php echo admin_url('admin-ajax.php'); ?>',
                         type: 'POST',
                         data: {
-                            action: 'maneli_get_sms_status',
-                            nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
+                            action: 'autopuzzle_get_sms_status',
+                            nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>',
                             message_id: messageId
                         },
                         success: function(response) {
-                            var checkStatusText = getTranslatedText('check_status', '<?php echo esc_js(__('Check Status', 'maneli-car-inquiry')); ?>');
+                            var checkStatusText = getTranslatedText('check_status', '<?php echo esc_js(__('Check Status', 'autopuzzle')); ?>');
                             $btn.prop('disabled', false).html('<i class="la la-sync me-1"></i>' + checkStatusText);
                             
                             if (response && response.success && response.data) {
@@ -6448,15 +6448,15 @@ class Maneli_Ajax_Handler {
                                 if (statusText === 'Rate limit exceeded or service temporarily unavailable') {
                                     statusText = getTranslatedText('rate_limit_exceeded', statusText);
                                 } else if (statusText === 'Delivered') {
-                                    statusText = getTranslatedText('delivered', '<?php echo esc_js(__('Delivered', 'maneli-car-inquiry')); ?>');
+                                    statusText = getTranslatedText('delivered', '<?php echo esc_js(__('Delivered', 'autopuzzle')); ?>');
                                 } else if (statusText === 'Failed') {
-                                    statusText = getTranslatedText('failed', '<?php echo esc_js(__('Failed', 'maneli-car-inquiry')); ?>');
+                                    statusText = getTranslatedText('failed', '<?php echo esc_js(__('Failed', 'autopuzzle')); ?>');
                                 } else if (statusText === 'Pending') {
-                                    statusText = getTranslatedText('pending', '<?php echo esc_js(__('Pending', 'maneli-car-inquiry')); ?>');
+                                    statusText = getTranslatedText('pending', '<?php echo esc_js(__('Pending', 'autopuzzle')); ?>');
                                 } else if (statusText === 'Blocked') {
-                                    statusText = getTranslatedText('blocked', '<?php echo esc_js(__('Blocked', 'maneli-car-inquiry')); ?>');
+                                    statusText = getTranslatedText('blocked', '<?php echo esc_js(__('Blocked', 'autopuzzle')); ?>');
                                 } else if (statusText === 'Rejected') {
-                                    statusText = getTranslatedText('rejected', '<?php echo esc_js(__('Rejected', 'maneli-car-inquiry')); ?>');
+                                    statusText = getTranslatedText('rejected', '<?php echo esc_js(__('Rejected', 'autopuzzle')); ?>');
                                 }
                                 
                                 var badgeClass = 'badge-info';
@@ -6475,13 +6475,13 @@ class Maneli_Ajax_Handler {
                                     $row.find('td:eq(4)').append('<br><small class="text-muted"><span class="badge ' + badgeClass + '">' + statusText + '</span></small>');
                                 }
                             } else {
-                                var failedStatusText = getTranslatedText('failed_to_get_status', '<?php echo esc_js(__('Failed to get status.', 'maneli-car-inquiry')); ?>');
+                                var failedStatusText = getTranslatedText('failed_to_get_status', '<?php echo esc_js(__('Failed to get status.', 'autopuzzle')); ?>');
                                 alert(failedStatusText);
                             }
                         },
                         error: function() {
-                            var checkStatusText = getTranslatedText('check_status', '<?php echo esc_js(__('Check Status', 'maneli-car-inquiry')); ?>');
-                            var errorStatusText = getTranslatedText('error_checking_status', '<?php echo esc_js(__('Error checking status.', 'maneli-car-inquiry')); ?>');
+                            var checkStatusText = getTranslatedText('check_status', '<?php echo esc_js(__('Check Status', 'autopuzzle')); ?>');
+                            var errorStatusText = getTranslatedText('error_checking_status', '<?php echo esc_js(__('Error checking status.', 'autopuzzle')); ?>');
                             $btn.prop('disabled', false).html('<i class="la la-sync me-1"></i>' + checkStatusText);
                             alert(errorStatusText);
                         }
@@ -6495,11 +6495,11 @@ class Maneli_Ajax_Handler {
                     var message = $btn.data('message');
                     var relatedId = $btn.data('related-id');
                     
-                    var resendTitle = getTranslatedText('resend_sms', '<?php echo esc_js(__('Resend SMS?', 'maneli-car-inquiry')); ?>');
-                    var resendConfirm = getTranslatedText('resend_confirm', '<?php echo esc_js(__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry')); ?>');
-                    var yesResend = getTranslatedText('yes_resend', '<?php echo esc_js(__('Yes, Resend', 'maneli-car-inquiry')); ?>');
-                    var cancelText = getTranslatedText('cancel_button', '<?php echo esc_js(__('Cancel', 'maneli-car-inquiry')); ?>');
-                    var sendingText = getTranslatedText('sending', '<?php echo esc_js(__('Sending...', 'maneli-car-inquiry')); ?>');
+                    var resendTitle = getTranslatedText('resend_sms', '<?php echo esc_js(__('Resend SMS?', 'autopuzzle')); ?>');
+                    var resendConfirm = getTranslatedText('resend_confirm', '<?php echo esc_js(__('Are you sure you want to resend this SMS?', 'autopuzzle')); ?>');
+                    var yesResend = getTranslatedText('yes_resend', '<?php echo esc_js(__('Yes, Resend', 'autopuzzle')); ?>');
+                    var cancelText = getTranslatedText('cancel_button', '<?php echo esc_js(__('Cancel', 'autopuzzle')); ?>');
+                    var sendingText = getTranslatedText('sending', '<?php echo esc_js(__('Sending...', 'autopuzzle')); ?>');
                     
                     if (typeof Swal !== 'undefined') {
                         Swal.fire({
@@ -6517,18 +6517,18 @@ class Maneli_Ajax_Handler {
                                     url: typeof maneliAjaxUrl !== 'undefined' ? maneliAjaxUrl : '<?php echo admin_url('admin-ajax.php'); ?>',
                                     type: 'POST',
                                     data: {
-                                        action: 'maneli_resend_sms',
-                                        nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('maneli-ajax-nonce'); ?>',
+                                        action: 'autopuzzle_resend_sms',
+                                        nonce: typeof maneliAjaxNonce !== 'undefined' ? maneliAjaxNonce : '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>',
                                         phone: phone,
                                         message: message,
                                         related_id: relatedId
                                     },
                                     success: function(response) {
-                                        var resendText = getTranslatedText('resend', '<?php echo esc_js(__('Resend', 'maneli-car-inquiry')); ?>');
-                                        var successText = getTranslatedText('success', '<?php echo esc_js(__('Success', 'maneli-car-inquiry')); ?>');
-                                        var resentSuccessText = getTranslatedText('sms_resent_successfully', '<?php echo esc_js(__('SMS resent successfully.', 'maneli-car-inquiry')); ?>');
-                                        var errorText = getTranslatedText('error', '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>');
-                                        var resentFailedText = getTranslatedText('failed_to_resend_sms', '<?php echo esc_js(__('Failed to resend SMS.', 'maneli-car-inquiry')); ?>');
+                                        var resendText = getTranslatedText('resend', '<?php echo esc_js(__('Resend', 'autopuzzle')); ?>');
+                                        var successText = getTranslatedText('success', '<?php echo esc_js(__('Success', 'autopuzzle')); ?>');
+                                        var resentSuccessText = getTranslatedText('sms_resent_successfully', '<?php echo esc_js(__('SMS resent successfully.', 'autopuzzle')); ?>');
+                                        var errorText = getTranslatedText('error', '<?php echo esc_js(__('Error', 'autopuzzle')); ?>');
+                                        var resentFailedText = getTranslatedText('failed_to_resend_sms', '<?php echo esc_js(__('Failed to resend SMS.', 'autopuzzle')); ?>');
                                         
                                         $btn.prop('disabled', false).html('<i class="la la-redo me-1"></i>' + resendText);
                                         
@@ -6552,9 +6552,9 @@ class Maneli_Ajax_Handler {
                                         }
                                     },
                                     error: function() {
-                                        var resendText = getTranslatedText('resend', '<?php echo esc_js(__('Resend', 'maneli-car-inquiry')); ?>');
-                                        var errorText = getTranslatedText('error', '<?php echo esc_js(__('Error', 'maneli-car-inquiry')); ?>');
-                                        var serverErrorText = getTranslatedText('server_error', '<?php echo esc_js(__('Server error. Please try again.', 'maneli-car-inquiry')); ?>');
+                                        var resendText = getTranslatedText('resend', '<?php echo esc_js(__('Resend', 'autopuzzle')); ?>');
+                                        var errorText = getTranslatedText('error', '<?php echo esc_js(__('Error', 'autopuzzle')); ?>');
+                                        var serverErrorText = getTranslatedText('server_error', '<?php echo esc_js(__('Server error. Please try again.', 'autopuzzle')); ?>');
                                         
                                         $btn.prop('disabled', false).html('<i class="la la-redo me-1"></i>' + resendText);
                                         Swal.fire({
@@ -6567,10 +6567,10 @@ class Maneli_Ajax_Handler {
                             }
                         });
                     } else {
-                        var resendConfirmFallback = getTranslatedText('resend_confirm', '<?php echo esc_js(__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry')); ?>');
+                        var resendConfirmFallback = getTranslatedText('resend_confirm', '<?php echo esc_js(__('Are you sure you want to resend this SMS?', 'autopuzzle')); ?>');
                         if (confirm(resendConfirmFallback)) {
                             // Fallback without SweetAlert
-                            alert('<?php echo esc_js(__('Please refresh the page to use this feature.', 'maneli-car-inquiry')); ?>');
+                            alert('<?php echo esc_js(__('Please refresh the page to use this feature.', 'autopuzzle')); ?>');
                         }
                     }
                 });
@@ -6581,7 +6581,7 @@ class Maneli_Ajax_Handler {
             ?>
             <div class="alert alert-info">
                 <i class="la la-info-circle me-2"></i>
-                <?php esc_html_e('No SMS messages have been sent yet.', 'maneli-car-inquiry'); ?>
+                <?php esc_html_e('No SMS messages have been sent yet.', 'autopuzzle'); ?>
             </div>
             <?php
         }
@@ -6598,27 +6598,27 @@ class Maneli_Ajax_Handler {
      * Get SMS delivery status from MeliPayamak API
      */
     public function ajax_get_sms_status() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
         $message_id = isset($_POST['message_id']) ? sanitize_text_field($_POST['message_id']) : '';
         
         if (empty($message_id)) {
-            wp_send_json_error(['message' => esc_html__('Invalid message ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid message ID.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
-        $sms_handler = new Maneli_SMS_Handler();
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-sms-handler.php';
+        $sms_handler = new Autopuzzle_SMS_Handler();
         
         $status = $sms_handler->get_message_status($message_id);
         
         if ($status === false) {
-            wp_send_json_error(['message' => esc_html__('Failed to get message status.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Failed to get message status.', 'autopuzzle')]);
             return;
         }
         
@@ -6629,10 +6629,10 @@ class Maneli_Ajax_Handler {
      * Resend failed SMS
      */
     public function ajax_resend_sms() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries') && !in_array('maneli_expert', wp_get_current_user()->roles, true)) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries') && !in_array('autopuzzle_expert', wp_get_current_user()->roles, true)) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
@@ -6641,15 +6641,15 @@ class Maneli_Ajax_Handler {
         $related_id = isset($_POST['related_id']) ? intval($_POST['related_id']) : 0;
         
         if (empty($phone) || empty($message)) {
-            wp_send_json_error(['message' => esc_html__('Phone number and message are required.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Phone number and message are required.', 'autopuzzle')]);
             return;
         }
         
         try {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
             
             // Send SMS (without pattern)
-            $result = Maneli_Notification_Center_Handler::send(
+            $result = Autopuzzle_Notification_Center_Handler::send(
                 'sms',
                 $phone,
                 $message,
@@ -6712,18 +6712,18 @@ class Maneli_Ajax_Handler {
             
             if ($result['sms']['success'] ?? false) {
                 wp_send_json_success([
-                    'message' => esc_html__('SMS resent successfully.', 'maneli-car-inquiry'),
+                    'message' => esc_html__('SMS resent successfully.', 'autopuzzle'),
                     'message_id' => $result['sms']['message_id'] ?? null
                 ]);
             } else {
-                $error_message = $result['sms']['error'] ?? esc_html__('Unknown error', 'maneli-car-inquiry');
-                wp_send_json_error(['message' => esc_html__('Failed to resend SMS: ', 'maneli-car-inquiry') . $error_message]);
+                $error_message = $result['sms']['error'] ?? esc_html__('Unknown error', 'autopuzzle');
+                wp_send_json_error(['message' => esc_html__('Failed to resend SMS: ', 'autopuzzle') . $error_message]);
             }
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli SMS Resend Error: ' . $e->getMessage());
+                error_log('AutoPuzzle SMS Resend Error: ' . $e->getMessage());
             }
-            wp_send_json_error(['message' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Server error. Please try again.', 'autopuzzle')]);
         }
     }
     
@@ -6735,16 +6735,16 @@ class Maneli_Ajax_Handler {
      * Get migration statistics without running migration
      */
     public function ajax_get_migration_stats() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-status-migration.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-status-migration.php';
         
-        $stats = Maneli_Status_Migration::get_migration_stats();
+        $stats = Autopuzzle_Status_Migration::get_migration_stats();
         wp_send_json_success($stats);
     }
     
@@ -6752,19 +6752,19 @@ class Maneli_Ajax_Handler {
      * Run status migration
      */
     public function ajax_run_status_migration() {
-        check_ajax_referer('maneli-ajax-nonce', 'nonce');
+        check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-status-migration.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-status-migration.php';
         
-        $results = Maneli_Status_Migration::migrate_all_statuses();
+        $results = Autopuzzle_Status_Migration::migrate_all_statuses();
         
         wp_send_json_success([
-            'message' => esc_html__('Migration completed successfully.', 'maneli-car-inquiry'),
+            'message' => esc_html__('Migration completed successfully.', 'autopuzzle'),
             'results' => $results
         ]);
     }
@@ -6773,25 +6773,25 @@ class Maneli_Ajax_Handler {
      * Get system log details
      */
     public function ajax_get_system_log_details() {
-        check_ajax_referer('maneli_log_details_nonce', 'security');
+        check_ajax_referer('autopuzzle_log_details_nonce', 'security');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
         $log_id = isset($_POST['log_id']) ? intval($_POST['log_id']) : 0;
         if (!$log_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'autopuzzle')]);
             return;
         }
         
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_system_logs';
+        $table = $wpdb->prefix . 'autopuzzle_system_logs';
         $log = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $log_id));
         
         if (!$log) {
-            wp_send_json_error(['message' => esc_html__('Log not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Log not found.', 'autopuzzle')]);
             return;
         }
         
@@ -6803,43 +6803,43 @@ class Maneli_Ajax_Handler {
         <div class="log-details">
             <table class="table table-bordered">
                 <tr>
-                    <th width="30%"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                    <th width="30%"><?php esc_html_e('ID', 'autopuzzle'); ?></th>
                     <td><?php echo esc_html($log->id); ?></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('Type', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Type', 'autopuzzle'); ?></th>
                     <td><span class="badge bg-primary"><?php echo esc_html(ucfirst($log->log_type)); ?></span></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('Severity', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Severity', 'autopuzzle'); ?></th>
                     <td><span class="badge bg-danger"><?php echo esc_html(ucfirst($log->severity)); ?></span></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Message', 'autopuzzle'); ?></th>
                     <td><?php echo esc_html($log->message); ?></td>
                 </tr>
                 <?php if ($log->file): ?>
                 <tr>
-                    <th><?php esc_html_e('File', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('File', 'autopuzzle'); ?></th>
                     <td><code><?php echo esc_html($log->file); ?><?php echo $log->line ? ':' . esc_html($log->line) : ''; ?></code></td>
                 </tr>
                 <?php endif; ?>
                 <?php if ($user): ?>
                 <tr>
-                    <th><?php esc_html_e('User', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('User', 'autopuzzle'); ?></th>
                     <td><?php echo esc_html($user->display_name); ?> (ID: <?php echo esc_html($log->user_id); ?>)</td>
                 </tr>
                 <?php endif; ?>
                 <tr>
-                    <th><?php esc_html_e('IP Address', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('IP Address', 'autopuzzle'); ?></th>
                     <td><?php echo esc_html($log->ip_address); ?></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('User Agent', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('User Agent', 'autopuzzle'); ?></th>
                     <td><small><?php echo esc_html($log->user_agent); ?></small></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Date', 'autopuzzle'); ?></th>
                     <td>
                         <?php
                         $date_time = strtotime($log->created_at);
@@ -6847,8 +6847,8 @@ class Maneli_Ajax_Handler {
                         $date_parts = explode(' ', $greg_date);
                         $date_part = explode('-', $date_parts[0]);
                         $time_part = $date_parts[1] ?? '00:00:00';
-                        if (function_exists('maneli_gregorian_to_jalali')) {
-                            $jalali_date = maneli_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
+                        if (function_exists('autopuzzle_gregorian_to_jalali')) {
+                            $jalali_date = autopuzzle_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
                             echo esc_html($jalali_date . ' ' . $time_part);
                         } else {
                             echo esc_html(date_i18n('Y/m/d H:i:s', $date_time));
@@ -6858,7 +6858,7 @@ class Maneli_Ajax_Handler {
                 </tr>
                 <?php if ($context): ?>
                 <tr>
-                    <th><?php esc_html_e('Context', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Context', 'autopuzzle'); ?></th>
                     <td><pre><?php echo esc_html(json_encode($context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre></td>
                 </tr>
                 <?php endif; ?>
@@ -6874,25 +6874,25 @@ class Maneli_Ajax_Handler {
      * Get user log details
      */
     public function ajax_get_user_log_details() {
-        check_ajax_referer('maneli_log_details_nonce', 'security');
+        check_ajax_referer('autopuzzle_log_details_nonce', 'security');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
         $log_id = isset($_POST['log_id']) ? intval($_POST['log_id']) : 0;
         if (!$log_id) {
-            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Invalid log ID.', 'autopuzzle')]);
             return;
         }
         
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_user_logs';
+        $table = $wpdb->prefix . 'autopuzzle_user_logs';
         $log = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $log_id));
         
         if (!$log) {
-            wp_send_json_error(['message' => esc_html__('Log not found.', 'maneli-car-inquiry')]);
+            wp_send_json_error(['message' => esc_html__('Log not found.', 'autopuzzle')]);
             return;
         }
         
@@ -6904,11 +6904,11 @@ class Maneli_Ajax_Handler {
         <div class="log-details">
             <table class="table table-bordered">
                 <tr>
-                    <th width="30%"><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
+                    <th width="30%"><?php esc_html_e('ID', 'autopuzzle'); ?></th>
                     <td><?php echo esc_html($log->id); ?></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('User', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('User', 'autopuzzle'); ?></th>
                     <td>
                         <?php if ($user): ?>
                             <?php echo esc_html($user->display_name); ?> (ID: <?php echo esc_html($log->user_id); ?>)
@@ -6918,29 +6918,29 @@ class Maneli_Ajax_Handler {
                     </td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('Action Type', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Action Type', 'autopuzzle'); ?></th>
                     <td><span class="badge bg-primary"><?php echo esc_html(str_replace('_', ' ', ucwords($log->action_type, '_'))); ?></span></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('Description', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Description', 'autopuzzle'); ?></th>
                     <td><?php echo esc_html($log->action_description); ?></td>
                 </tr>
                 <?php if ($log->target_type && $log->target_id): ?>
                 <tr>
-                    <th><?php esc_html_e('Target', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Target', 'autopuzzle'); ?></th>
                     <td><span class="badge bg-info"><?php echo esc_html(ucfirst($log->target_type)); ?> #<?php echo esc_html($log->target_id); ?></span></td>
                 </tr>
                 <?php endif; ?>
                 <tr>
-                    <th><?php esc_html_e('IP Address', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('IP Address', 'autopuzzle'); ?></th>
                     <td><?php echo esc_html($log->ip_address); ?></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('User Agent', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('User Agent', 'autopuzzle'); ?></th>
                     <td><small><?php echo esc_html($log->user_agent); ?></small></td>
                 </tr>
                 <tr>
-                    <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Date', 'autopuzzle'); ?></th>
                     <td>
                         <?php
                         $date_time = strtotime($log->created_at);
@@ -6948,8 +6948,8 @@ class Maneli_Ajax_Handler {
                         $date_parts = explode(' ', $greg_date);
                         $date_part = explode('-', $date_parts[0]);
                         $time_part = $date_parts[1] ?? '00:00:00';
-                        if (function_exists('maneli_gregorian_to_jalali')) {
-                            $jalali_date = maneli_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
+                        if (function_exists('autopuzzle_gregorian_to_jalali')) {
+                            $jalali_date = autopuzzle_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
                             echo esc_html($jalali_date . ' ' . $time_part);
                         } else {
                             echo esc_html(date_i18n('Y/m/d H:i:s', $date_time));
@@ -6959,7 +6959,7 @@ class Maneli_Ajax_Handler {
                 </tr>
                 <?php if ($metadata): ?>
                 <tr>
-                    <th><?php esc_html_e('Metadata', 'maneli-car-inquiry'); ?></th>
+                    <th><?php esc_html_e('Metadata', 'autopuzzle'); ?></th>
                     <td><pre><?php echo esc_html(json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre></td>
                 </tr>
                 <?php endif; ?>
@@ -6975,14 +6975,14 @@ class Maneli_Ajax_Handler {
      * Get system logs (AJAX)
      */
     public function ajax_get_system_logs() {
-        check_ajax_referer('maneli_ajax_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_ajax_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        $logger = Maneli_Logger::instance();
+        $logger = Autopuzzle_Logger::instance();
         $args = array(
             'log_type' => isset($_POST['log_type']) ? sanitize_text_field($_POST['log_type']) : '',
             'severity' => isset($_POST['severity']) ? sanitize_text_field($_POST['severity']) : '',
@@ -7006,14 +7006,14 @@ class Maneli_Ajax_Handler {
      * Get user logs (AJAX)
      */
     public function ajax_get_user_logs() {
-        check_ajax_referer('maneli_ajax_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_ajax_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
             return;
         }
         
-        $logger = Maneli_Logger::instance();
+        $logger = Autopuzzle_Logger::instance();
         $args = array(
             'user_id' => isset($_POST['user_id']) ? intval($_POST['user_id']) : '',
             'action_type' => isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : '',
@@ -7043,7 +7043,7 @@ class Maneli_Ajax_Handler {
             return;
         }
 
-        $logger = Maneli_Logger::instance();
+        $logger = Autopuzzle_Logger::instance();
         $log_type = isset($_POST['log_type']) ? sanitize_text_field($_POST['log_type']) : 'console';
         $severity = isset($_POST['severity']) ? sanitize_text_field($_POST['severity']) : 'info';
         $message = isset($_POST['message']) ? sanitize_text_field($_POST['message']) : '';
@@ -7060,10 +7060,10 @@ class Maneli_Ajax_Handler {
     public function ajax_log_user_action() {
         // Light nonce check - verify nonce if provided
         if (isset($_POST['security'])) {
-            if (!wp_verify_nonce($_POST['security'], 'maneli_ajax_nonce')) {
+            if (!wp_verify_nonce($_POST['security'], 'autopuzzle_ajax_nonce')) {
                 // Nonce verification failed, but don't block - just log and continue
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli: User log action nonce verification failed');
+                    error_log('AutoPuzzle: User log action nonce verification failed');
                 }
             }
         }
@@ -7072,8 +7072,8 @@ class Maneli_Ajax_Handler {
         $user_id = get_current_user_id();
         if (!$user_id) {
             // Try plugin session
-            if (class_exists('Maneli_Session')) {
-                $session = new Maneli_Session();
+            if (class_exists('Autopuzzle_Session')) {
+                $session = new Autopuzzle_Session();
                 if (session_status() === PHP_SESSION_NONE) {
                     $session->start_session();
                 }
@@ -7089,7 +7089,7 @@ class Maneli_Ajax_Handler {
             return;
         }
 
-        $logger = Maneli_Logger::instance();
+        $logger = Autopuzzle_Logger::instance();
         $action_type = isset($_POST['action_type']) ? sanitize_text_field($_POST['action_type']) : 'unknown';
         $action_description = isset($_POST['action_description']) ? sanitize_text_field($_POST['action_description']) : '';
         $target_type = isset($_POST['target_type']) ? sanitize_text_field($_POST['target_type']) : null;
@@ -7110,26 +7110,26 @@ class Maneli_Ajax_Handler {
      * Delete all system logs
      */
     public function ajax_delete_system_logs() {
-        check_ajax_referer('maneli_log_actions_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_log_actions_nonce', 'nonce');
 
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             wp_send_json_error([
-                'message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')
+                'message' => esc_html__('Unauthorized access.', 'autopuzzle')
             ], 403);
         }
 
-        $logger = Maneli_Logger::instance();
+        $logger = Autopuzzle_Logger::instance();
         $deleted = $logger->delete_all_system_logs();
 
         if ($deleted === false) {
             wp_send_json_error([
-                'message' => esc_html__('Failed to delete system logs.', 'maneli-car-inquiry')
+                'message' => esc_html__('Failed to delete system logs.', 'autopuzzle')
             ]);
         }
 
         wp_send_json_success([
             'deleted' => (int) $deleted,
-            'message' => esc_html__('System logs deleted successfully.', 'maneli-car-inquiry')
+            'message' => esc_html__('System logs deleted successfully.', 'autopuzzle')
         ]);
     }
 
@@ -7137,13 +7137,13 @@ class Maneli_Ajax_Handler {
      * Activate license
      */
     public function ajax_activate_license() {
-        check_ajax_referer('maneli_license_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_license_nonce', 'nonce');
 
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized', 'autopuzzle')]);
         }
 
-        $license = Maneli_License::instance();
+        $license = Autopuzzle_License::instance();
 
         // Domain is the license - no license key needed
         $result = $license->activate_license();
@@ -7164,24 +7164,24 @@ class Maneli_Ajax_Handler {
      * Check license status
      */
     public function ajax_check_license() {
-        check_ajax_referer('maneli_license_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_license_nonce', 'nonce');
 
-        if (!current_user_can('manage_maneli_inquiries')) {
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
             wp_send_json_error(['message' => 'Unauthorized']);
         }
 
-        $license = Maneli_License::instance();
+        $license = Autopuzzle_License::instance();
         $license->check_license_status();
         $status = $license->get_license_status();
 
         if ($status['is_active']) {
             wp_send_json_success([
-                'message' => esc_html__('License is active', 'maneli-car-inquiry'),
+                'message' => esc_html__('License is active', 'autopuzzle'),
                 'status' => $status
             ]);
         } else {
             wp_send_json_error([
-                'message' => esc_html__('License is inactive', 'maneli-car-inquiry'),
+                'message' => esc_html__('License is inactive', 'autopuzzle'),
                 'status' => $status
             ]);
         }
@@ -7191,17 +7191,17 @@ class Maneli_Ajax_Handler {
      * Deactivate license
      */
     public function ajax_deactivate_license() {
-        check_ajax_referer('maneli_license_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_license_nonce', 'nonce');
 
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized', 'autopuzzle')]);
         }
 
-        $license = Maneli_License::instance();
+        $license = Autopuzzle_License::instance();
         $license->deactivate_license();
 
         wp_send_json_success([
-            'message' => esc_html__('License deactivated successfully', 'maneli-car-inquiry')
+            'message' => esc_html__('License deactivated successfully', 'autopuzzle')
         ]);
     }
     

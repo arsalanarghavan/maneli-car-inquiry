@@ -2,14 +2,14 @@
 /**
  * Database operations
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Database {
+class Autopuzzle_Database {
 
     /**
      * Get inquiries
@@ -28,7 +28,7 @@ class Maneli_Database {
         
         $args = wp_parse_args($args, $defaults);
         
-        $table = $wpdb->prefix . 'maneli_inquiries';
+        $table = $wpdb->prefix . 'autopuzzle_inquiries';
         $where = array('1=1');
         
         if ($args['user_id']) {
@@ -60,7 +60,7 @@ class Maneli_Database {
      */
     public static function get_inquiry($id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_inquiries';
+        $table = $wpdb->prefix . 'autopuzzle_inquiries';
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $id));
     }
 
@@ -69,7 +69,7 @@ class Maneli_Database {
      */
     public static function create_inquiry($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_inquiries';
+        $table = $wpdb->prefix . 'autopuzzle_inquiries';
         
         $defaults = array(
             'user_id' => 0,
@@ -89,7 +89,7 @@ class Maneli_Database {
         
         if ($result === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Database Error (create_inquiry): ' . $wpdb->last_error);
+                error_log('AutoPuzzle Database Error (create_inquiry): ' . $wpdb->last_error);
             }
             return false;
         }
@@ -102,7 +102,7 @@ class Maneli_Database {
      */
     public static function update_inquiry($id, $data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_inquiries';
+        $table = $wpdb->prefix . 'autopuzzle_inquiries';
         
         if (isset($data['meta'])) {
             $data['meta'] = maybe_serialize($data['meta']);
@@ -112,7 +112,7 @@ class Maneli_Database {
         
         if ($result === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Database Error (update_inquiry): ' . $wpdb->last_error);
+                error_log('AutoPuzzle Database Error (update_inquiry): ' . $wpdb->last_error);
             }
             return false;
         }
@@ -125,7 +125,7 @@ class Maneli_Database {
      */
     public static function log_notification($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         
         $defaults = array(
             'type' => 'sms',
@@ -155,7 +155,7 @@ class Maneli_Database {
         
         if ($result === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Database Error (log_notification): ' . $wpdb->last_error);
+                error_log('AutoPuzzle Database Error (log_notification): ' . $wpdb->last_error);
             }
             return false;
         }
@@ -168,7 +168,7 @@ class Maneli_Database {
      */
     public static function update_notification_log($id, $data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         
         if (isset($data['sent_at']) && !is_string($data['sent_at'])) {
             $data['sent_at'] = date('Y-m-d H:i:s', strtotime($data['sent_at']));
@@ -178,7 +178,7 @@ class Maneli_Database {
         
         if ($result === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Database Error (update_notification_log): ' . $wpdb->last_error);
+                error_log('AutoPuzzle Database Error (update_notification_log): ' . $wpdb->last_error);
             }
             return false;
         }
@@ -191,7 +191,7 @@ class Maneli_Database {
      */
     public static function get_notification_logs($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         
         $defaults = array(
             'type' => '',
@@ -395,7 +395,7 @@ class Maneli_Database {
      */
     public static function get_notification_logs_count($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         
         $defaults = array(
             'type' => '',
@@ -539,7 +539,7 @@ class Maneli_Database {
      */
     public static function get_notification_stats($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         
         $defaults = array(
             'date_from' => '',
@@ -674,7 +674,7 @@ class Maneli_Database {
      */
     public static function get_notification_timeline($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         
         $defaults = array(
             'date_from' => date('Y-m-d', strtotime('-30 days')),
@@ -883,7 +883,7 @@ class Maneli_Database {
      */
     public static function get_notification_templates($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_templates';
+        $table = $wpdb->prefix . 'autopuzzle_notification_templates';
         
         $defaults = array(
             'type' => '',
@@ -928,7 +928,7 @@ class Maneli_Database {
      */
     public static function get_notification_template($id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_templates';
+        $table = $wpdb->prefix . 'autopuzzle_notification_templates';
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $id));
     }
 
@@ -937,7 +937,7 @@ class Maneli_Database {
      */
     public static function create_notification_template($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_templates';
+        $table = $wpdb->prefix . 'autopuzzle_notification_templates';
         
         $defaults = array(
             'type' => 'sms',
@@ -956,13 +956,13 @@ class Maneli_Database {
             if ($json_variables === false) {
                 // Log JSON encoding error
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Error: JSON encoding failed for variables. JSON error: ' . json_last_error_msg());
+                    error_log('AutoPuzzle Database Error: JSON encoding failed for variables. JSON error: ' . json_last_error_msg());
                 }
                 $data['variables'] = json_encode([]); // Fallback to empty array
             } elseif (strlen($json_variables) > 5000) {
                 // Limit JSON size to 5KB for notification templates
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Warning: Variables JSON too large (' . strlen($json_variables) . ' bytes), truncating.');
+                    error_log('AutoPuzzle Database Warning: Variables JSON too large (' . strlen($json_variables) . ' bytes), truncating.');
                 }
                 $data['variables'] = substr($json_variables, 0, 5000);
             } else {
@@ -987,7 +987,7 @@ class Maneli_Database {
      */
     public static function update_notification_template($id, $data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_templates';
+        $table = $wpdb->prefix . 'autopuzzle_notification_templates';
         
         if (isset($data['variables']) && is_array($data['variables'])) {
             // Validate JSON encoding and limit size
@@ -995,13 +995,13 @@ class Maneli_Database {
             if ($json_variables === false) {
                 // Log JSON encoding error
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Error: JSON encoding failed for variables. JSON error: ' . json_last_error_msg());
+                    error_log('AutoPuzzle Database Error: JSON encoding failed for variables. JSON error: ' . json_last_error_msg());
                 }
                 $data['variables'] = json_encode([]); // Fallback to empty array
             } elseif (strlen($json_variables) > 5000) {
                 // Limit JSON size to 5KB for notification templates
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Warning: Variables JSON too large (' . strlen($json_variables) . ' bytes), truncating.');
+                    error_log('AutoPuzzle Database Warning: Variables JSON too large (' . strlen($json_variables) . ' bytes), truncating.');
                 }
                 $data['variables'] = substr($json_variables, 0, 5000);
             } else {
@@ -1054,7 +1054,7 @@ class Maneli_Database {
      */
     public static function delete_notification_template($id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_templates';
+        $table = $wpdb->prefix . 'autopuzzle_notification_templates';
         return $wpdb->delete($table, array('id' => $id), array('%d'));
     }
 
@@ -1063,10 +1063,10 @@ class Maneli_Database {
      */
     public static function log_system_log($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_system_logs';
+        $table = $wpdb->prefix . 'autopuzzle_system_logs';
         
         $session_user_id = self::get_session_user_id();
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
 
         $defaults = array(
             'log_type' => 'debug',
@@ -1088,13 +1088,13 @@ class Maneli_Database {
             if ($json_context === false) {
                 // Log JSON encoding error
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Error: JSON encoding failed for context. JSON error: ' . json_last_error_msg());
+                    error_log('AutoPuzzle Database Error: JSON encoding failed for context. JSON error: ' . json_last_error_msg());
                 }
                 $data['context'] = json_encode([]); // Fallback to empty array
             } elseif (strlen($json_context) > 10000) {
                 // Limit JSON size to 10KB to prevent database issues
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Warning: Context JSON too large (' . strlen($json_context) . ' bytes), truncating.');
+                    error_log('AutoPuzzle Database Warning: Context JSON too large (' . strlen($json_context) . ' bytes), truncating.');
                 }
                 $data['context'] = substr($json_context, 0, 10000);
             } else {
@@ -1162,7 +1162,7 @@ class Maneli_Database {
     private static function maybe_prune_system_logs($options) {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'maneli_system_logs';
+        $table = $wpdb->prefix . 'autopuzzle_system_logs';
         $max_size_mb = isset($options['log_max_size_mb']) ? max(1, (int)$options['log_max_size_mb']) : 10;
         $max_records = isset($options['log_max_records']) ? max(1000, (int)$options['log_max_records']) : 50000;
 
@@ -1236,7 +1236,7 @@ class Maneli_Database {
      */
     public static function log_user_log($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_user_logs';
+        $table = $wpdb->prefix . 'autopuzzle_user_logs';
         
         $session_user_id = self::get_session_user_id();
 
@@ -1263,13 +1263,13 @@ class Maneli_Database {
             if ($json_metadata === false) {
                 // Log JSON encoding error
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Error: JSON encoding failed for metadata. JSON error: ' . json_last_error_msg());
+                    error_log('AutoPuzzle Database Error: JSON encoding failed for metadata. JSON error: ' . json_last_error_msg());
                 }
                 $data['metadata'] = json_encode([]); // Fallback to empty array
             } elseif (strlen($json_metadata) > 10000) {
                 // Limit JSON size to 10KB to prevent database issues
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Database Warning: Metadata JSON too large (' . strlen($json_metadata) . ' bytes), truncating.');
+                    error_log('AutoPuzzle Database Warning: Metadata JSON too large (' . strlen($json_metadata) . ' bytes), truncating.');
                 }
                 $data['metadata'] = substr($json_metadata, 0, 10000);
             } else {
@@ -1290,7 +1290,7 @@ class Maneli_Database {
         
         if ($result === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Database Error (log_user_log): ' . $wpdb->last_error);
+                error_log('AutoPuzzle Database Error (log_user_log): ' . $wpdb->last_error);
             }
             return false;
         }
@@ -1303,7 +1303,7 @@ class Maneli_Database {
      */
     public static function get_system_logs($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_system_logs';
+        $table = $wpdb->prefix . 'autopuzzle_system_logs';
         
         $defaults = array(
             'log_type' => '',
@@ -1363,7 +1363,7 @@ class Maneli_Database {
      */
     public static function get_system_logs_count($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_system_logs';
+        $table = $wpdb->prefix . 'autopuzzle_system_logs';
         
         $defaults = array(
             'log_type' => '',
@@ -1413,7 +1413,7 @@ class Maneli_Database {
      */
     public static function get_user_logs($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_user_logs';
+        $table = $wpdb->prefix . 'autopuzzle_user_logs';
         
         $defaults = array(
             'user_id' => '',
@@ -1478,7 +1478,7 @@ class Maneli_Database {
      */
     public static function get_user_logs_count($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_user_logs';
+        $table = $wpdb->prefix . 'autopuzzle_user_logs';
         
         $defaults = array(
             'user_id' => '',
@@ -1560,8 +1560,8 @@ class Maneli_Database {
      * Retrieve the user ID stored in the plugin session if available
      */
     private static function get_session_user_id() {
-        if (class_exists('Maneli_Session')) {
-            $session = new Maneli_Session();
+        if (class_exists('Autopuzzle_Session')) {
+            $session = new Autopuzzle_Session();
             if (session_status() === PHP_SESSION_NONE) {
                 $session->start_session();
             }
@@ -1583,7 +1583,7 @@ class Maneli_Database {
      */
     public static function delete_system_logs() {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_system_logs';
+        $table = $wpdb->prefix . 'autopuzzle_system_logs';
 
         $total = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
         if ($total === 0) {

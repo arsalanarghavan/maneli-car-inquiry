@@ -16,33 +16,33 @@ if (!function_exists('persian_numbers')) {
 }
 
 // Permission check - Only Admin can access
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
 
-$settings_page_handler = new Maneli_Settings_Page();
+$settings_page_handler = new Autopuzzle_Settings_Page();
 $all_settings = $settings_page_handler->get_all_settings_public();
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 
 // Tab mapping to Persian names
 $tab_persian_names = [
-    'finance' => esc_html__('Finance & Calculator', 'maneli-car-inquiry'),
-    'gateways' => esc_html__('Payment Gateways', 'maneli-car-inquiry'),
-    'authentication' => esc_html__('Authentication', 'maneli-car-inquiry'),
-    'sms' => esc_html__('SMS', 'maneli-car-inquiry'),
-    'telegram' => esc_html__('Telegram', 'maneli-car-inquiry'),
-    'email' => esc_html__('Email', 'maneli-car-inquiry'),
-    'cash_inquiry' => esc_html__('Cash Inquiry', 'maneli-car-inquiry'),
-    'installment' => esc_html__('Installment Inquiry', 'maneli-car-inquiry'),
-    'experts' => esc_html__('Experts', 'maneli-car-inquiry'),
-    'finotex' => esc_html__('Finotex', 'maneli-car-inquiry'),
-    'meetings' => esc_html__('Meetings & Calendar', 'maneli-car-inquiry'),
-    'documents' => esc_html__('Documents', 'maneli-car-inquiry'),
-    'availability' => esc_html__('Availability', 'maneli-car-inquiry'),
-    'notifications' => esc_html__('Notifications', 'maneli-car-inquiry'),
-    'visitor_statistics' => esc_html__('Visitor Statistics', 'maneli-car-inquiry'),
-    'advanced' => esc_html__('Advanced', 'maneli-car-inquiry')
+    'finance' => esc_html__('Finance & Calculator', 'autopuzzle'),
+    'gateways' => esc_html__('Payment Gateways', 'autopuzzle'),
+    'authentication' => esc_html__('Authentication', 'autopuzzle'),
+    'sms' => esc_html__('SMS', 'autopuzzle'),
+    'telegram' => esc_html__('Telegram', 'autopuzzle'),
+    'email' => esc_html__('Email', 'autopuzzle'),
+    'cash_inquiry' => esc_html__('Cash Inquiry', 'autopuzzle'),
+    'installment' => esc_html__('Installment Inquiry', 'autopuzzle'),
+    'experts' => esc_html__('Experts', 'autopuzzle'),
+    'finotex' => esc_html__('Finotex', 'autopuzzle'),
+    'meetings' => esc_html__('Meetings & Calendar', 'autopuzzle'),
+    'documents' => esc_html__('Documents', 'autopuzzle'),
+    'availability' => esc_html__('Availability', 'autopuzzle'),
+    'notifications' => esc_html__('Notifications', 'autopuzzle'),
+    'visitor_statistics' => esc_html__('Visitor Statistics', 'autopuzzle'),
+    'advanced' => esc_html__('Advanced', 'autopuzzle')
 ];
 ?>
 <div class="main-content app-content">
@@ -52,11 +52,11 @@ $tab_persian_names = [
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('System Settings', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('System Settings', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Maneli Car System Settings', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php printf(esc_html__('%s System Settings', 'autopuzzle'), esc_html(Autopuzzle_Branding_Helper::get_brand_name())); ?></h1>
             </div>
         </div>
         <!-- Page Header Close -->
@@ -68,7 +68,7 @@ $tab_persian_names = [
                     <div class="alert alert-success alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
                         <i class="la la-check-circle fs-20 me-2"></i>
                         <div class="flex-grow-1">
-                            <strong><?php esc_html_e('Success!', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('Settings saved successfully.', 'maneli-car-inquiry'); ?>
+                            <strong><?php esc_html_e('Success!', 'autopuzzle'); ?></strong> <?php esc_html_e('Settings saved successfully.', 'autopuzzle'); ?>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -76,8 +76,8 @@ $tab_persian_names = [
 
                 <div class="card custom-card">
                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="settings-form">
-                        <input type="hidden" name="action" value="maneli_save_frontend_settings">
-                        <?php wp_nonce_field('maneli_save_frontend_settings_nonce'); ?>
+                        <input type="hidden" name="action" value="autopuzzle_save_frontend_settings">
+                        <?php wp_nonce_field('autopuzzle_save_frontend_settings_nonce'); ?>
                         <input type="hidden" name="_wp_http_referer" value="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
                         
                         <!-- Tabs Navigation -->
@@ -141,7 +141,7 @@ $tab_persian_names = [
                                         <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-1">
                                             <div class="fw-semibold d-block fs-15"><?php echo esc_html($persian_title); ?>:</div>
                                             <button type="reset" class="btn btn-primary btn-sm">
-                                                <i class="la la-undo me-1"></i><?php esc_html_e('Undo Changes', 'maneli-car-inquiry'); ?>
+                                                <i class="la la-undo me-1"></i><?php esc_html_e('Undo Changes', 'autopuzzle'); ?>
                                             </button>
                                         </div>
                                         
@@ -161,19 +161,19 @@ $tab_persian_names = [
                                                         <?php endif; ?>
                                                         
                                                         <!-- Special handling for Advanced tab sections -->
-                                                        <?php if ($tab_key === 'advanced' && $section_key === 'maneli_demo_mode_section'): ?>
+                                                        <?php if ($tab_key === 'advanced' && $section_key === 'autopuzzle_demo_mode_section'): ?>
                                                             <!-- Demo Mode Settings -->
                                                             <div class="row gy-3">
                                                                 <?php
                                                                 $demo_mode_enabled = $options['demo_mode_enabled'] ?? '0';
-                                                                $field_name = "maneli_inquiry_all_options[demo_mode_enabled]";
+                                                                $field_name = "autopuzzle_inquiry_all_options[demo_mode_enabled]";
                                                                 $toggle_class = ($demo_mode_enabled == '1') ? 'toggle on toggle-success' : 'toggle toggle-success';
                                                                 ?>
                                                                 <div class="col-xl-12">
                                                                     <div class="d-flex align-items-top justify-content-between mt-3">
                                                                         <div class="mail-notification-settings">
-                                                                            <p class="fs-14 mb-1 fw-medium"><?php esc_html_e('Enable Demo Mode', 'maneli-car-inquiry'); ?></p>
-                                                                            <p class="fs-12 mb-0 text-muted"><?php esc_html_e('When enabled, you can import sample data including customers, experts, cars, and inquiries.', 'maneli-car-inquiry'); ?></p>
+                                                                            <p class="fs-14 mb-1 fw-medium"><?php esc_html_e('Enable Demo Mode', 'autopuzzle'); ?></p>
+                                                                            <p class="fs-12 mb-0 text-muted"><?php esc_html_e('When enabled, you can import sample data including customers, experts, cars, and inquiries.', 'autopuzzle'); ?></p>
                                                                         </div>
                                                                         <div class="toggle-wrapper">
                                                                             <input type="hidden" name="<?php echo esc_attr($field_name); ?>" value="0">
@@ -192,29 +192,29 @@ $tab_persian_names = [
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        <?php elseif ($tab_key === 'advanced' && $section_key === 'maneli_demo_import_section'): ?>
+                                                        <?php elseif ($tab_key === 'advanced' && $section_key === 'autopuzzle_demo_import_section'): ?>
                                                             <!-- Demo Import Section -->
                                                             <div id="demo-import-section" style="display: <?php echo ($demo_mode_enabled == '1') ? 'block' : 'none'; ?>">
                                                                 <div class="alert alert-info mb-4" role="alert">
                                                                     <i class="la la-info-circle me-2"></i>
-                                                                    <strong><?php esc_html_e('Demo Data Information', 'maneli-car-inquiry'); ?>:</strong><br>
-                                                                    <?php esc_html_e('Clicking the button below will create:', 'maneli-car-inquiry'); ?>
+                                                                    <strong><?php esc_html_e('Demo Data Information', 'autopuzzle'); ?>:</strong><br>
+                                                                    <?php esc_html_e('Clicking the button below will create:', 'autopuzzle'); ?>
                                                                     <ul class="mb-0 mt-2" style="margin-left: 1.5rem;">
-                                                                        <li><?php esc_html_e('30 sample customers', 'maneli-car-inquiry'); ?></li>
-                                                                        <li><?php esc_html_e('30 sample experts', 'maneli-car-inquiry'); ?></li>
-                                                                        <li><?php esc_html_e('30 sample cars', 'maneli-car-inquiry'); ?></li>
-                                                                        <li><?php esc_html_e('30 cash inquiries with all possible statuses', 'maneli-car-inquiry'); ?></li>
-                                                                        <li><?php esc_html_e('30 installment inquiries with all possible statuses', 'maneli-car-inquiry'); ?></li>
+                                                                        <li><?php esc_html_e('30 sample customers', 'autopuzzle'); ?></li>
+                                                                        <li><?php esc_html_e('30 sample experts', 'autopuzzle'); ?></li>
+                                                                        <li><?php esc_html_e('30 sample cars', 'autopuzzle'); ?></li>
+                                                                        <li><?php esc_html_e('30 cash inquiries with all possible statuses', 'autopuzzle'); ?></li>
+                                                                        <li><?php esc_html_e('30 installment inquiries with all possible statuses', 'autopuzzle'); ?></li>
                                                                     </ul>
                                                                 </div>
                                                                 <div class="d-flex gap-2 flex-wrap">
-                                                                    <button type="button" class="btn btn-primary" id="import-demo-data-btn" data-nonce="<?php echo wp_create_nonce('maneli_import_demo_data'); ?>">
+                                                                    <button type="button" class="btn btn-primary" id="import-demo-data-btn" data-nonce="<?php echo wp_create_nonce('autopuzzle_import_demo_data'); ?>">
                                                                         <i class="la la-download me-2"></i>
-                                                                        <?php esc_html_e('Import Sample Data', 'maneli-car-inquiry'); ?>
+                                                                        <?php esc_html_e('Import Sample Data', 'autopuzzle'); ?>
                                                                     </button>
-                                                                    <button type="button" class="btn btn-danger" id="delete-demo-data-btn" data-nonce="<?php echo wp_create_nonce('maneli_delete_demo_data'); ?>">
+                                                                    <button type="button" class="btn btn-danger" id="delete-demo-data-btn" data-nonce="<?php echo wp_create_nonce('autopuzzle_delete_demo_data'); ?>">
                                                                         <i class="la la-trash me-2"></i>
-                                                                        <?php esc_html_e('Delete Demo Data', 'maneli-car-inquiry'); ?>
+                                                                        <?php esc_html_e('Delete Demo Data', 'autopuzzle'); ?>
                                                                     </button>
                                                                 </div>
                                                                 <div id="demo-import-progress" class="mt-3" style="display: none;">
@@ -240,7 +240,7 @@ $tab_persian_names = [
                                                                                 </div>
                                                                                 <?php 
                                                                                 $value = $options[$field['name']] ?? ($field['default'] ?? '0');
-                                                                                $field_name = "maneli_inquiry_all_options[" . $field['name'] . "]";
+                                                                                $field_name = "autopuzzle_inquiry_all_options[" . $field['name'] . "]";
                                                                                 $toggle_class = ($value == '1') ? 'toggle on toggle-success' : 'toggle toggle-success';
                                                                                 ?>
                                                                                 <div class="toggle-wrapper">
@@ -303,11 +303,11 @@ $tab_persian_names = [
                                                                     <?php endif; ?>
                                                                 <?php endforeach; ?>
                                                             </div>
-                                                        <?php elseif ($tab_key === 'experts' && $section_key === 'maneli_experts_list_section'): ?>
+                                                        <?php elseif ($tab_key === 'experts' && $section_key === 'autopuzzle_experts_list_section'): ?>
                                                             <!-- Experts List -->
                                                             <?php 
                                                             $experts_list = get_users([
-                                                                'role' => 'maneli_expert',
+                                                                'role' => 'autopuzzle_expert',
                                                                 'orderby' => 'display_name',
                                                                 'order' => 'ASC'
                                                             ]);
@@ -317,10 +317,10 @@ $tab_persian_names = [
                                                                     <table class="table table-hover table-bordered">
                                                                         <thead class="table-light">
                                                                             <tr>
-                                                                                <th><?php esc_html_e('Expert Name', 'maneli-car-inquiry'); ?></th>
-                                                                                <th><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?></th>
-                                                                                <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                                                                <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                                                                <th><?php esc_html_e('Expert Name', 'autopuzzle'); ?></th>
+                                                                                <th><?php esc_html_e('Mobile Number', 'autopuzzle'); ?></th>
+                                                                                <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                                                                <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
@@ -343,13 +343,13 @@ $tab_persian_names = [
                                                                                     </td>
                                                                                     <td>
                                                                                         <?php if ($is_active): ?>
-                                                                                            <span class="badge bg-success"><?php esc_html_e('Active', 'maneli-car-inquiry'); ?></span>
+                                                                                            <span class="badge bg-success"><?php esc_html_e('Active', 'autopuzzle'); ?></span>
                                                                                         <?php else: ?>
-                                                                                            <span class="badge bg-danger"><?php esc_html_e('Inactive', 'maneli-car-inquiry'); ?></span>
+                                                                                            <span class="badge bg-danger"><?php esc_html_e('Inactive', 'autopuzzle'); ?></span>
                                                                                         <?php endif; ?>
                                                                                     </td>
                                                                                     <td>
-                                                                                        <a href="<?php echo esc_url(home_url('/dashboard/experts?view_expert=' . $expert->ID)); ?>" class="btn btn-sm btn-primary-light" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                                                        <a href="<?php echo esc_url(home_url('/dashboard/experts?view_expert=' . $expert->ID)); ?>" class="btn btn-sm btn-primary-light" title="<?php esc_attr_e('View', 'autopuzzle'); ?>">
                                                                                             <i class="la la-eye"></i>
                                                                                         </a>
                                                                                     </td>
@@ -361,7 +361,7 @@ $tab_persian_names = [
                                                             <?php else: ?>
                                                                 <div class="alert alert-info">
                                                                     <i class="la la-info-circle me-2"></i>
-                                                                    <?php esc_html_e('No experts are currently registered.', 'maneli-car-inquiry'); ?>
+                                                                    <?php esc_html_e('No experts are currently registered.', 'autopuzzle'); ?>
                                                                 </div>
                                                             <?php endif; ?>
                                                         <?php endif; ?>
@@ -382,11 +382,11 @@ $tab_persian_names = [
                             <div class="btn-list float-end">
                                 <button type="reset" class="btn btn-light btn-wave">
                                     <i class="la la-undo me-1"></i>
-                                    <?php esc_html_e('Reset Changes', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Reset Changes', 'autopuzzle'); ?>
                                 </button>
                                 <button type="submit" class="btn btn-primary btn-wave">
                                     <i class="la la-save me-1"></i>
-                                    <?php esc_html_e('Save Changes', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Save Changes', 'autopuzzle'); ?>
                                 </button>
                             </div>
                         </div>
@@ -503,10 +503,10 @@ textarea.form-control {
 </style>
 
 <script>
-function initializeManeliBtnHandlers() {
+function initializeAutoPuzzleBtnHandlers() {
     if (typeof jQuery === 'undefined') {
         // jQuery not available yet, retry after a delay
-        setTimeout(initializeManeliBtnHandlers, 100);
+        setTimeout(initializeAutoPuzzleBtnHandlers, 100);
         return;
     }
     
@@ -548,7 +548,7 @@ function initializeManeliBtnHandlers() {
     
     // Handle form reset
     $('button[type="reset"]').on('click', function(e) {
-        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to revert changes?', 'maneli-car-inquiry')); ?>)) {
+        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to revert changes?', 'autopuzzle')); ?>)) {
             e.preventDefault();
             return false;
         }
@@ -564,42 +564,42 @@ function initializeManeliBtnHandlers() {
         const originalText = btn.html();
         const nonce = btn.data('nonce');
         
-        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to import demo data? This will create sample customers, experts, cars, and inquiries.', 'maneli-car-inquiry')); ?>)) {
+        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to import demo data? This will create sample customers, experts, cars, and inquiries.', 'autopuzzle')); ?>)) {
             return;
         }
         
         btn.prop('disabled', true);
-        btn.html('<i class="la la-spinner la-spin me-2"></i><?php esc_html_e('Importing...', 'maneli-car-inquiry'); ?>');
+        btn.html('<i class="la la-spinner la-spin me-2"></i><?php esc_html_e('Importing...', 'autopuzzle'); ?>');
         
         $('#demo-import-progress').show();
         $('#demo-import-progress-bar').css('width', '0%');
-        $('#demo-import-message').text('<?php esc_html_e('Importing demo data...', 'maneli-car-inquiry'); ?>');
+        $('#demo-import-message').text('<?php esc_html_e('Importing demo data...', 'autopuzzle'); ?>');
         
         $.ajax({
             url: '<?php echo admin_url('admin-ajax.php'); ?>',
             type: 'POST',
             data: {
-                action: 'maneli_import_demo_data',
+                action: 'autopuzzle_import_demo_data',
                 nonce: nonce
             },
             success: function(response) {
                 if (response.success) {
                     $('#demo-import-progress-bar').css('width', '100%');
-                    $('#demo-import-message').text('<?php esc_html_e('Demo data imported successfully!', 'maneli-car-inquiry'); ?>');
+                    $('#demo-import-message').text('<?php esc_html_e('Demo data imported successfully!', 'autopuzzle'); ?>');
                     
                     setTimeout(function() {
-                        alert(response.data.message || '<?php esc_html_e('Demo data imported successfully!', 'maneli-car-inquiry'); ?>');
+                        alert(response.data.message || '<?php esc_html_e('Demo data imported successfully!', 'autopuzzle'); ?>');
                         location.reload();
                     }, 1000);
                 } else {
-                    alert(response.data?.message || '<?php esc_html_e('Error importing demo data', 'maneli-car-inquiry'); ?>');
+                    alert(response.data?.message || '<?php esc_html_e('Error importing demo data', 'autopuzzle'); ?>');
                     btn.prop('disabled', false);
                     btn.html(originalText);
                     $('#demo-import-progress').hide();
                 }
             },
             error: function(xhr) {
-                alert('<?php esc_html_e('Error importing demo data', 'maneli-car-inquiry'); ?>');
+                alert('<?php esc_html_e('Error importing demo data', 'autopuzzle'); ?>');
                 btn.prop('disabled', false);
                 btn.html(originalText);
                 $('#demo-import-progress').hide();
@@ -615,42 +615,42 @@ function initializeManeliBtnHandlers() {
         const originalText = btn.html();
         const nonce = btn.data('nonce');
         
-        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to delete all demo data? This action cannot be undone.', 'maneli-car-inquiry')); ?>)) {
+        if (!confirm(<?php echo wp_json_encode(esc_html__('Are you sure you want to delete all demo data? This action cannot be undone.', 'autopuzzle')); ?>)) {
             return;
         }
         
         btn.prop('disabled', true);
-        btn.html('<i class="la la-spinner la-spin me-2"></i><?php esc_html_e('Deleting...', 'maneli-car-inquiry'); ?>');
+        btn.html('<i class="la la-spinner la-spin me-2"></i><?php esc_html_e('Deleting...', 'autopuzzle'); ?>');
         
         $('#demo-import-progress').show();
         $('#demo-import-progress-bar').css('width', '0%');
-        $('#demo-import-message').text('<?php esc_html_e('Deleting demo data...', 'maneli-car-inquiry'); ?>');
+        $('#demo-import-message').text('<?php esc_html_e('Deleting demo data...', 'autopuzzle'); ?>');
         
         $.ajax({
             url: '<?php echo admin_url('admin-ajax.php'); ?>',
             type: 'POST',
             data: {
-                action: 'maneli_delete_demo_data',
+                action: 'autopuzzle_delete_demo_data',
                 nonce: nonce
             },
             success: function(response) {
                 if (response.success) {
                     $('#demo-import-progress-bar').css('width', '100%');
-                    $('#demo-import-message').text('<?php esc_html_e('Demo data deleted successfully!', 'maneli-car-inquiry'); ?>');
+                    $('#demo-import-message').text('<?php esc_html_e('Demo data deleted successfully!', 'autopuzzle'); ?>');
                     
                     setTimeout(function() {
-                        alert(response.data.message || '<?php esc_html_e('Demo data deleted successfully!', 'maneli-car-inquiry'); ?>');
+                        alert(response.data.message || '<?php esc_html_e('Demo data deleted successfully!', 'autopuzzle'); ?>');
                         location.reload();
                     }, 1000);
                 } else {
-                    alert(response.data?.message || '<?php esc_html_e('Error deleting demo data', 'maneli-car-inquiry'); ?>');
+                    alert(response.data?.message || '<?php esc_html_e('Error deleting demo data', 'autopuzzle'); ?>');
                     btn.prop('disabled', false);
                     btn.html(originalText);
                     $('#demo-import-progress').hide();
                 }
             },
             error: function(xhr) {
-                alert('<?php esc_html_e('Error deleting demo data', 'maneli-car-inquiry'); ?>');
+                alert('<?php esc_html_e('Error deleting demo data', 'autopuzzle'); ?>');
                 btn.prop('disabled', false);
                 btn.html(originalText);
                 $('#demo-import-progress').hide();
@@ -661,8 +661,8 @@ function initializeManeliBtnHandlers() {
 
 // Initialize on document ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeManeliBtnHandlers);
+    document.addEventListener('DOMContentLoaded', initializeAutoPuzzleBtnHandlers);
 } else {
-    initializeManeliBtnHandlers();
+    initializeAutoPuzzleBtnHandlers();
 }
 </script>

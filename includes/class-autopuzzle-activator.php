@@ -2,14 +2,14 @@
 /**
  * Fired during plugin activation
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Activator {
+class Autopuzzle_Activator {
 
     /**
      * Activate the plugin
@@ -22,14 +22,14 @@ class Maneli_Activator {
         self::create_default_options();
         
         // Set flag for rewrite flush
-        update_option('maneli_flush_rewrite_rules', false);
+        update_option('autopuzzle_flush_rewrite_rules', false);
         
         // Flush rewrite rules
         flush_rewrite_rules();
 
         // Store current database schema version
-        $current_version = defined('MANELI_DB_VERSION') ? MANELI_DB_VERSION : MANELI_VERSION;
-        update_option('maneli_db_version', $current_version);
+        $current_version = defined('AUTOPUZZLE_DB_VERSION') ? AUTOPUZZLE_DB_VERSION : AUTOPUZZLE_VERSION;
+        update_option('autopuzzle_db_version', $current_version);
     }
 
     /**
@@ -41,7 +41,7 @@ class Maneli_Activator {
         $charset_collate = $wpdb->get_charset_collate();
 
         // Inquiries table
-        $table_inquiries = $wpdb->prefix . 'maneli_inquiries';
+        $table_inquiries = $wpdb->prefix . 'autopuzzle_inquiries';
         $sql_inquiries = "CREATE TABLE IF NOT EXISTS $table_inquiries (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL,
@@ -61,7 +61,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Followups table
-        $table_followups = $wpdb->prefix . 'maneli_followups';
+        $table_followups = $wpdb->prefix . 'autopuzzle_followups';
         $sql_followups = "CREATE TABLE IF NOT EXISTS $table_followups (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             inquiry_id bigint(20) NOT NULL,
@@ -75,7 +75,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Notifications table
-        $table_notifications = $wpdb->prefix . 'maneli_notifications';
+        $table_notifications = $wpdb->prefix . 'autopuzzle_notifications';
         $sql_notifications = "CREATE TABLE IF NOT EXISTS $table_notifications (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL,
@@ -93,7 +93,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Notification logs table
-        $table_notification_logs = $wpdb->prefix . 'maneli_notification_logs';
+        $table_notification_logs = $wpdb->prefix . 'autopuzzle_notification_logs';
         $sql_notification_logs = "CREATE TABLE IF NOT EXISTS $table_notification_logs (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             type varchar(50) NOT NULL COMMENT 'sms, telegram, email, notification',
@@ -117,7 +117,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Notification templates table
-        $table_notification_templates = $wpdb->prefix . 'maneli_notification_templates';
+        $table_notification_templates = $wpdb->prefix . 'autopuzzle_notification_templates';
         $sql_notification_templates = "CREATE TABLE IF NOT EXISTS $table_notification_templates (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             type varchar(50) NOT NULL COMMENT 'sms, telegram, email, notification',
@@ -135,7 +135,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Visitors table - برای ذخیره اطلاعات بازدیدکنندگان
-        $table_visitors = $wpdb->prefix . 'maneli_visitors';
+        $table_visitors = $wpdb->prefix . 'autopuzzle_visitors';
         $sql_visitors = "CREATE TABLE IF NOT EXISTS $table_visitors (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             ip_address varchar(45) NOT NULL COMMENT 'IPv4 or IPv6 address',
@@ -164,7 +164,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Visits table - برای ذخیره هر بازدید
-        $table_visits = $wpdb->prefix . 'maneli_visits';
+        $table_visits = $wpdb->prefix . 'autopuzzle_visits';
         $sql_visits = "CREATE TABLE IF NOT EXISTS $table_visits (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             visitor_id bigint(20) NOT NULL,
@@ -188,7 +188,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Pages table - آمار صفحات
-        $table_pages = $wpdb->prefix . 'maneli_pages';
+        $table_pages = $wpdb->prefix . 'autopuzzle_pages';
         $sql_pages = "CREATE TABLE IF NOT EXISTS $table_pages (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             page_url varchar(500) NOT NULL,
@@ -203,7 +203,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Search engines table - آمار موتورهای جستجو
-        $table_search_engines = $wpdb->prefix . 'maneli_search_engines';
+        $table_search_engines = $wpdb->prefix . 'autopuzzle_search_engines';
         $sql_search_engines = "CREATE TABLE IF NOT EXISTS $table_search_engines (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             engine_name varchar(50) NOT NULL,
@@ -217,7 +217,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // Referrers table - آمار ارجاع‌دهندگان
-        $table_referrers = $wpdb->prefix . 'maneli_referrers';
+        $table_referrers = $wpdb->prefix . 'autopuzzle_referrers';
         $sql_referrers = "CREATE TABLE IF NOT EXISTS $table_referrers (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             referrer_url varchar(500) NOT NULL,
@@ -232,7 +232,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // System logs table - لاگ سیستم
-        $table_system_logs = $wpdb->prefix . 'maneli_system_logs';
+        $table_system_logs = $wpdb->prefix . 'autopuzzle_system_logs';
         $sql_system_logs = "CREATE TABLE IF NOT EXISTS $table_system_logs (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             log_type varchar(50) NOT NULL COMMENT 'error, debug, console, button_error',
@@ -254,7 +254,7 @@ class Maneli_Activator {
         ) $charset_collate;";
 
         // User logs table - لاگ کاربر
-        $table_user_logs = $wpdb->prefix . 'maneli_user_logs';
+        $table_user_logs = $wpdb->prefix . 'autopuzzle_user_logs';
         $sql_user_logs = "CREATE TABLE IF NOT EXISTS $table_user_logs (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL,
@@ -290,7 +290,7 @@ class Maneli_Activator {
         dbDelta($sql_user_logs);
         
         // License table
-        $table_license = $wpdb->prefix . 'maneli_license';
+        $table_license = $wpdb->prefix . 'autopuzzle_license';
         $sql_license = "CREATE TABLE IF NOT EXISTS $table_license (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             license_key varchar(255) NOT NULL,
@@ -314,12 +314,12 @@ class Maneli_Activator {
         self::add_composite_indexes();
         
         // Schedule cron jobs
-        if (!wp_next_scheduled('maneli_send_meeting_reminders')) {
-            wp_schedule_event(time(), 'hourly', 'maneli_send_meeting_reminders');
+        if (!wp_next_scheduled('autopuzzle_send_meeting_reminders')) {
+            wp_schedule_event(time(), 'hourly', 'autopuzzle_send_meeting_reminders');
         }
         
-        if (!wp_next_scheduled('maneli_process_scheduled_notifications')) {
-            wp_schedule_event(time(), 'hourly', 'maneli_process_scheduled_notifications');
+        if (!wp_next_scheduled('autopuzzle_process_scheduled_notifications')) {
+            wp_schedule_event(time(), 'hourly', 'autopuzzle_process_scheduled_notifications');
         }
     }
 
@@ -336,16 +336,16 @@ class Maneli_Activator {
     public static function maybe_run_updates() {
         global $wpdb;
 
-        $current_version = defined('MANELI_DB_VERSION') ? MANELI_DB_VERSION : MANELI_VERSION;
-        $stored_version = get_option('maneli_db_version');
+        $current_version = defined('AUTOPUZZLE_DB_VERSION') ? AUTOPUZZLE_DB_VERSION : AUTOPUZZLE_VERSION;
+        $stored_version = get_option('autopuzzle_db_version');
 
         // Check if any of the visitor statistics tables are missing
         $tables_to_check = [
-            $wpdb->prefix . 'maneli_visitors',
-            $wpdb->prefix . 'maneli_visits',
-            $wpdb->prefix . 'maneli_pages',
-            $wpdb->prefix . 'maneli_search_engines',
-            $wpdb->prefix . 'maneli_referrers',
+            $wpdb->prefix . 'autopuzzle_visitors',
+            $wpdb->prefix . 'autopuzzle_visits',
+            $wpdb->prefix . 'autopuzzle_pages',
+            $wpdb->prefix . 'autopuzzle_search_engines',
+            $wpdb->prefix . 'autopuzzle_referrers',
         ];
 
         $missing_tables = false;
@@ -359,7 +359,7 @@ class Maneli_Activator {
 
         if ($missing_tables || empty($stored_version) || version_compare($stored_version, $current_version, '<')) {
             self::create_tables();
-            update_option('maneli_db_version', $current_version);
+            update_option('autopuzzle_db_version', $current_version);
         }
     }
 
@@ -370,7 +370,7 @@ class Maneli_Activator {
         global $wpdb;
         
         // Add composite index for notification_logs: (related_id, type, created_at)
-        $notification_logs_table = $wpdb->prefix . 'maneli_notification_logs';
+        $notification_logs_table = $wpdb->prefix . 'autopuzzle_notification_logs';
         $index_name_notification = 'idx_notification_logs_related_type_created';
         
         // Check if index already exists
@@ -389,12 +389,12 @@ class Maneli_Activator {
                 ADD INDEX {$index_name_notification} (related_id, type, created_at)");
             
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli: Added composite index ' . $index_name_notification . ' to ' . $notification_logs_table);
+                error_log('AutoPuzzle: Added composite index ' . $index_name_notification . ' to ' . $notification_logs_table);
             }
         }
         
         // Add composite index for user_logs: (user_id, action_type, created_at)
-        $user_logs_table = $wpdb->prefix . 'maneli_user_logs';
+        $user_logs_table = $wpdb->prefix . 'autopuzzle_user_logs';
         $index_name_user = 'idx_user_logs_user_action_created';
         
         // Check if index already exists
@@ -413,7 +413,7 @@ class Maneli_Activator {
                 ADD INDEX {$index_name_user} (user_id, action_type, created_at)");
             
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli: Added composite index ' . $index_name_user . ' to ' . $user_logs_table);
+                error_log('AutoPuzzle: Added composite index ' . $index_name_user . ' to ' . $user_logs_table);
             }
         }
     }
@@ -423,13 +423,13 @@ class Maneli_Activator {
      */
     private static function create_default_options() {
         $defaults = array(
-            'maneli_theme_mode' => 'light',
-            'maneli_primary_color' => '#5e72e4',
-            'maneli_logo' => '',
-            'loan_interest_rate' => '0.035', // نرخ سود ماهانه 3.5% (previously maneli_interest_rate was wrong)
-            'maneli_payment_gateway' => 'zarinpal',
-            'maneli_login_method' => 'both',
-            'maneli_session_timeout' => '3600',
+            'autopuzzle_theme_mode' => 'light',
+            'autopuzzle_primary_color' => '#5e72e4',
+            'autopuzzle_logo' => '',
+            'loan_interest_rate' => '0.035', // نرخ سود ماهانه 3.5% (previously autopuzzle_interest_rate was wrong)
+            'autopuzzle_payment_gateway' => 'zarinpal',
+            'autopuzzle_login_method' => 'both',
+            'autopuzzle_session_timeout' => '3600',
         );
 
         foreach ($defaults as $key => $value) {

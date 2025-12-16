@@ -2,12 +2,12 @@
 /**
  * مدیریت Ajax برای گزارشات
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 defined('ABSPATH') || exit;
 
-class Maneli_Reports_Ajax_Handler {
+class Autopuzzle_Reports_Ajax_Handler {
     
     /**
      * سازنده کلاس
@@ -27,10 +27,10 @@ class Maneli_Reports_Ajax_Handler {
      * دریافت آمار کلی
      */
     public function get_overall_stats() {
-        check_ajax_referer('maneli_reports_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -39,7 +39,7 @@ class Maneli_Reports_Ajax_Handler {
         
         require_once plugin_dir_path(dirname(__FILE__)) . 'class-reports-dashboard.php';
         
-        $stats = Maneli_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
+        $stats = Autopuzzle_Reports_Dashboard::get_overall_statistics($start_date, $end_date, $expert_id);
         
         wp_send_json_success($stats);
     }
@@ -48,10 +48,10 @@ class Maneli_Reports_Ajax_Handler {
      * دریافت آمار کارشناسان
      */
     public function get_experts_stats() {
-        check_ajax_referer('maneli_reports_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -59,7 +59,7 @@ class Maneli_Reports_Ajax_Handler {
         
         require_once plugin_dir_path(dirname(__FILE__)) . 'class-reports-dashboard.php';
         
-        $stats = Maneli_Reports_Dashboard::get_experts_statistics($start_date, $end_date);
+        $stats = Autopuzzle_Reports_Dashboard::get_experts_statistics($start_date, $end_date);
         
         wp_send_json_success($stats);
     }
@@ -68,10 +68,10 @@ class Maneli_Reports_Ajax_Handler {
      * دریافت آمار روزانه
      */
     public function get_daily_stats() {
-        check_ajax_referer('maneli_reports_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -80,7 +80,7 @@ class Maneli_Reports_Ajax_Handler {
         
         require_once plugin_dir_path(dirname(__FILE__)) . 'class-reports-dashboard.php';
         
-        $stats = Maneli_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
+        $stats = Autopuzzle_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
         
         wp_send_json_success($stats);
     }
@@ -89,10 +89,10 @@ class Maneli_Reports_Ajax_Handler {
      * دریافت محصولات پرطرفدار
      */
     public function get_popular_products() {
-        check_ajax_referer('maneli_reports_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
@@ -102,7 +102,7 @@ class Maneli_Reports_Ajax_Handler {
         
         require_once plugin_dir_path(dirname(__FILE__)) . 'class-reports-dashboard.php';
         
-        $products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, $limit);
+        $products = Autopuzzle_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, $limit);
         
         wp_send_json_success($products);
     }
@@ -111,10 +111,10 @@ class Maneli_Reports_Ajax_Handler {
      * دریافت عملکرد ماهانه
      */
     public function get_monthly_performance() {
-        check_ajax_referer('maneli_reports_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $months = isset($_POST['months']) ? intval($_POST['months']) : 6;
@@ -122,7 +122,7 @@ class Maneli_Reports_Ajax_Handler {
         
         require_once plugin_dir_path(dirname(__FILE__)) . 'class-reports-dashboard.php';
         
-        $performance = Maneli_Reports_Dashboard::get_monthly_performance($months, $expert_id);
+        $performance = Autopuzzle_Reports_Dashboard::get_monthly_performance($months, $expert_id);
         
         wp_send_json_success($performance);
     }
@@ -131,10 +131,10 @@ class Maneli_Reports_Ajax_Handler {
      * دریافت جزئیات استعلام‌ها
      */
     public function get_inquiries_details() {
-        check_ajax_referer('maneli_reports_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'maneli-car-inquiry')]);
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized access.', 'autopuzzle')]);
         }
         
         $args = [
@@ -151,7 +151,7 @@ class Maneli_Reports_Ajax_Handler {
         
         require_once plugin_dir_path(dirname(__FILE__)) . 'class-reports-dashboard.php';
         
-        $data = Maneli_Reports_Dashboard::get_inquiries_details($args);
+        $data = Autopuzzle_Reports_Dashboard::get_inquiries_details($args);
         
         wp_send_json_success($data);
     }
@@ -160,10 +160,10 @@ class Maneli_Reports_Ajax_Handler {
      * صادرات به CSV
      */
     public function export_inquiries_csv() {
-        check_ajax_referer('maneli_reports_nonce', 'nonce');
+        check_ajax_referer('autopuzzle_reports_nonce', 'nonce');
         
-        if (!current_user_can('manage_maneli_inquiries')) {
-            wp_die(esc_html__('Unauthorized access.', 'maneli-car-inquiry'));
+        if (!current_user_can('manage_autopuzzle_inquiries')) {
+            wp_die(esc_html__('Unauthorized access.', 'autopuzzle'));
         }
         
         $args = [
@@ -177,10 +177,10 @@ class Maneli_Reports_Ajax_Handler {
         
         require_once plugin_dir_path(dirname(__FILE__)) . 'class-reports-dashboard.php';
         
-        Maneli_Reports_Dashboard::export_to_csv($args);
+        Autopuzzle_Reports_Dashboard::export_to_csv($args);
     }
 }
 
 // ایجاد نمونه از کلاس
-new Maneli_Reports_Ajax_Handler();
+new Autopuzzle_Reports_Ajax_Handler();
 

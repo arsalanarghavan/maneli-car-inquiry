@@ -2,7 +2,7 @@
  * Visitor Statistics Dashboard JavaScript
  * مدیریت نمودارها و آمارهای صفحه آمار بازدیدکنندگان
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 (function() {
@@ -196,7 +196,7 @@
             loadOnlineVisitors();
             
             // Convert all numbers on page to Persian
-            $('.maneli-stat-value, .fs-21, .fs-16, td, .badge').each(function() {
+            $('.autopuzzle-stat-value, .fs-21, .fs-16, td, .badge').each(function() {
                 var $el = $(this);
                 var text = $el.text();
                 // Only convert if it's a number (avoid converting already Persian numbers)
@@ -408,7 +408,7 @@
                 url: maneliVisitorStats.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_browser_stats',
+                    action: 'autopuzzle_get_browser_stats',
                     nonce: maneliVisitorStats.nonce,
                     start_date: maneliVisitorStats.startDate,
                     end_date: maneliVisitorStats.endDate
@@ -484,7 +484,7 @@
                 url: maneliVisitorStats.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_os_stats',
+                    action: 'autopuzzle_get_os_stats',
                     nonce: maneliVisitorStats.nonce,
                     start_date: maneliVisitorStats.startDate,
                     end_date: maneliVisitorStats.endDate
@@ -560,7 +560,7 @@
                 url: maneliVisitorStats.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_device_stats',
+                    action: 'autopuzzle_get_device_stats',
                     nonce: maneliVisitorStats.nonce,
                     start_date: maneliVisitorStats.startDate,
                     end_date: maneliVisitorStats.endDate
@@ -636,7 +636,7 @@
                 url: maneliVisitorStats.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_online_visitors',
+                    action: 'autopuzzle_get_online_visitors',
                     nonce: maneliVisitorStats.nonce
                 },
                 success: function(response) {
@@ -690,7 +690,7 @@
                                 
                                 var row = '<tr>' +
                                     '<td>' + escapeHtml(visitor.ip_address) + '</td>' +
-                                    '<td><span class="maneli-emoji-flag me-2">' + escapeHtml(flagIcon) + '</span>' + escapeHtml(countryName) + '</td>' +
+                                    '<td><span class="autopuzzle-emoji-flag me-2">' + escapeHtml(flagIcon) + '</span>' + escapeHtml(countryName) + '</td>' +
                                     '<td>' + escapeHtml(browserName) + '</td>' +
                                     '<td>' + escapeHtml(osName) + '</td>' +
                                     '<td>' + escapeHtml(deviceTypeLabel) + '</td>' +

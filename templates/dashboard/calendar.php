@@ -9,10 +9,10 @@
 
 // Check permission
 $current_user = wp_get_current_user();
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_expert = in_array('maneli_expert', $current_user->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_expert = in_array('autopuzzle_expert', $current_user->roles, true);
 
-$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+$use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 $use_jalali_calendar = $use_persian_digits;
 
 if (!$is_admin && !$is_expert) {
@@ -21,14 +21,14 @@ if (!$is_admin && !$is_expert) {
 }
 
 // Get settings
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $start_hour = $options['meetings_start_hour'] ?? '10:00';
 $end_hour = $options['meetings_end_hour'] ?? '20:00';
 $slot_minutes = max(5, (int)($options['meetings_slot_minutes'] ?? 30));
 
 // Get all meetings (admin sees all, expert sees all but limited customer info)
 $meetings_args = [
-    'post_type' => 'maneli_meeting',
+    'post_type' => 'autopuzzle_meeting',
     'posts_per_page' => 50, // OPTIMIZED: Limit for memory
     'post_status' => 'publish',
     'orderby' => 'meta_value',
@@ -93,51 +93,51 @@ $week_meetings = 0;
 // Jalali month names
 if ($use_jalali_calendar) {
 $jalali_months = [
-    esc_html__('Farvardin', 'maneli-car-inquiry'),
-    esc_html__('Ordibehesht', 'maneli-car-inquiry'),
-    esc_html__('Khordad', 'maneli-car-inquiry'),
-    esc_html__('Tir', 'maneli-car-inquiry'),
-    esc_html__('Mordad', 'maneli-car-inquiry'),
-    esc_html__('Shahrivar', 'maneli-car-inquiry'),
-    esc_html__('Mehr', 'maneli-car-inquiry'),
-    esc_html__('Aban', 'maneli-car-inquiry'),
-    esc_html__('Azar', 'maneli-car-inquiry'),
-    esc_html__('Dey', 'maneli-car-inquiry'),
-    esc_html__('Bahman', 'maneli-car-inquiry'),
-    esc_html__('Esfand', 'maneli-car-inquiry')
+    esc_html__('Farvardin', 'autopuzzle'),
+    esc_html__('Ordibehesht', 'autopuzzle'),
+    esc_html__('Khordad', 'autopuzzle'),
+    esc_html__('Tir', 'autopuzzle'),
+    esc_html__('Mordad', 'autopuzzle'),
+    esc_html__('Shahrivar', 'autopuzzle'),
+    esc_html__('Mehr', 'autopuzzle'),
+    esc_html__('Aban', 'autopuzzle'),
+    esc_html__('Azar', 'autopuzzle'),
+    esc_html__('Dey', 'autopuzzle'),
+    esc_html__('Bahman', 'autopuzzle'),
+    esc_html__('Esfand', 'autopuzzle')
 ];
 $jalali_days = [
-    esc_html__('Saturday', 'maneli-car-inquiry'),
-    esc_html__('Sunday', 'maneli-car-inquiry'),
-    esc_html__('Monday', 'maneli-car-inquiry'),
-    esc_html__('Tuesday', 'maneli-car-inquiry'),
-    esc_html__('Wednesday', 'maneli-car-inquiry'),
-    esc_html__('Thursday', 'maneli-car-inquiry'),
-    esc_html__('Friday', 'maneli-car-inquiry')
+    esc_html__('Saturday', 'autopuzzle'),
+    esc_html__('Sunday', 'autopuzzle'),
+    esc_html__('Monday', 'autopuzzle'),
+    esc_html__('Tuesday', 'autopuzzle'),
+    esc_html__('Wednesday', 'autopuzzle'),
+    esc_html__('Thursday', 'autopuzzle'),
+    esc_html__('Friday', 'autopuzzle')
 ];
 } else {
     $jalali_months = [
-        esc_html__('January', 'maneli-car-inquiry'),
-        esc_html__('February', 'maneli-car-inquiry'),
-        esc_html__('March', 'maneli-car-inquiry'),
-        esc_html__('April', 'maneli-car-inquiry'),
-        esc_html__('May', 'maneli-car-inquiry'),
-        esc_html__('June', 'maneli-car-inquiry'),
-        esc_html__('July', 'maneli-car-inquiry'),
-        esc_html__('August', 'maneli-car-inquiry'),
-        esc_html__('September', 'maneli-car-inquiry'),
-        esc_html__('October', 'maneli-car-inquiry'),
-        esc_html__('November', 'maneli-car-inquiry'),
-        esc_html__('December', 'maneli-car-inquiry')
+        esc_html__('January', 'autopuzzle'),
+        esc_html__('February', 'autopuzzle'),
+        esc_html__('March', 'autopuzzle'),
+        esc_html__('April', 'autopuzzle'),
+        esc_html__('May', 'autopuzzle'),
+        esc_html__('June', 'autopuzzle'),
+        esc_html__('July', 'autopuzzle'),
+        esc_html__('August', 'autopuzzle'),
+        esc_html__('September', 'autopuzzle'),
+        esc_html__('October', 'autopuzzle'),
+        esc_html__('November', 'autopuzzle'),
+        esc_html__('December', 'autopuzzle')
     ];
     $jalali_days = [
-        esc_html__('Sunday', 'maneli-car-inquiry'),
-        esc_html__('Monday', 'maneli-car-inquiry'),
-        esc_html__('Tuesday', 'maneli-car-inquiry'),
-        esc_html__('Wednesday', 'maneli-car-inquiry'),
-        esc_html__('Thursday', 'maneli-car-inquiry'),
-        esc_html__('Friday', 'maneli-car-inquiry'),
-        esc_html__('Saturday', 'maneli-car-inquiry')
+        esc_html__('Sunday', 'autopuzzle'),
+        esc_html__('Monday', 'autopuzzle'),
+        esc_html__('Tuesday', 'autopuzzle'),
+        esc_html__('Wednesday', 'autopuzzle'),
+        esc_html__('Thursday', 'autopuzzle'),
+        esc_html__('Friday', 'autopuzzle'),
+        esc_html__('Saturday', 'autopuzzle')
     ];
 }
 
@@ -151,8 +151,8 @@ $normalize_digits = static function ($value) use ($persian_digit_chars, $english
 };
 
 // Helper function to convert Jalali to Gregorian (based on FullCalendar algorithm)
-if (!function_exists('maneli_jalali_to_gregorian')) {
-    function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+if (!function_exists('autopuzzle_jalali_to_gregorian')) {
+    function autopuzzle_jalali_to_gregorian($j_y, $j_m, $j_d) {
         $j_y = (int)$j_y;
         $j_m = (int)$j_m;
         $j_d = (int)$j_d;
@@ -229,7 +229,7 @@ function convert_date_to_gregorian($date_str) {
         
         // If year is between 1300-1500, it's likely Jalali
         if ($year >= 1300 && $year <= 1500) {
-            list($gy, $gm, $gd) = maneli_jalali_to_gregorian($year, $month, $day);
+            list($gy, $gm, $gd) = autopuzzle_jalali_to_gregorian($year, $month, $day);
             return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
         }
     }
@@ -282,7 +282,7 @@ function process_meeting_data($start, $inquiry_id, $inquiry_type, $is_scheduled_
             $customer_name = trim(get_post_meta($inquiry_id, 'cash_first_name', true) . ' ' . get_post_meta($inquiry_id, 'cash_last_name', true));
             $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
         } else {
-            $customer_name = esc_html__('Reserved', 'maneli-car-inquiry');
+            $customer_name = esc_html__('Reserved', 'autopuzzle');
             $customer_mobile = '---';
         }
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
@@ -293,7 +293,7 @@ function process_meeting_data($start, $inquiry_id, $inquiry_type, $is_scheduled_
             $customer_name = $customer ? $customer->display_name : '';
             $customer_mobile = get_post_meta($inquiry_id, 'mobile_number', true);
         } else {
-            $customer_name = esc_html__('Reserved', 'maneli-car-inquiry');
+            $customer_name = esc_html__('Reserved', 'autopuzzle');
             $customer_mobile = '---';
         }
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
@@ -312,8 +312,8 @@ function process_meeting_data($start, $inquiry_id, $inquiry_type, $is_scheduled_
     $month = (int)date('m', $start_timestamp);
     $day = (int)date('d', $start_timestamp);
     
-    if ($use_jalali_calendar && function_exists('maneli_gregorian_to_jalali')) {
-        $jalali_date = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d', $use_persian_digits);
+    if ($use_jalali_calendar && function_exists('autopuzzle_gregorian_to_jalali')) {
+        $jalali_date = autopuzzle_gregorian_to_jalali($year, $month, $day, 'Y/m/d', $use_persian_digits);
         $jalali_parts = explode('/', $jalali_date);
         $jalali_parts = array_map($normalize_digits, $jalali_parts);
         $jalali_year = (int)$jalali_parts[0];
@@ -462,8 +462,8 @@ while ($current_date <= $end_date) {
     $month = (int)date('m', $current_date);
     $day = (int)date('d', $current_date);
     
-    if ($use_jalali_calendar && function_exists('maneli_gregorian_to_jalali')) {
-        $jalali = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d', $use_persian_digits);
+    if ($use_jalali_calendar && function_exists('autopuzzle_gregorian_to_jalali')) {
+        $jalali = autopuzzle_gregorian_to_jalali($year, $month, $day, 'Y/m/d', $use_persian_digits);
         $jalali_parts = explode('/', $jalali);
         $jalali_parts = array_map($normalize_digits, $jalali_parts);
         $jalali_year = (int)$jalali_parts[0];
@@ -503,12 +503,12 @@ $total_meetings = count($meetings_data);
                 <nav>
                     <ol class="breadcrumb mb-1">
                         <li class="breadcrumb-item">
-                            <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                            <a href="<?php echo home_url('/dashboard'); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Meeting Calendar', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Meeting Calendar', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Meeting Calendar', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Meeting Calendar', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- End::page-header -->
@@ -614,7 +614,7 @@ $total_meetings = count($meetings_data);
 </style>
 
         <!-- Statistics Cards -->
-        <div class="row mb-4 maneli-mobile-card-scroll">
+        <div class="row mb-4 autopuzzle-mobile-card-scroll">
             <div class="col-12 col-md-4 col-lg-4 mb-3">
                 <div class="card custom-card crm-card overflow-hidden">
                     <div class="card-body">
@@ -625,10 +625,10 @@ $total_meetings = count($meetings_data);
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e("Today's Meetings", 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e("Today's Meetings", 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($today_meetings)) : number_format_i18n($today_meetings); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Today', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -643,10 +643,10 @@ $total_meetings = count($meetings_data);
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('This Week', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($week_meetings)) : number_format_i18n($week_meetings); ?></h4>
-                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Week', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Week', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -661,10 +661,10 @@ $total_meetings = count($meetings_data);
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Meetings', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Meetings', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('persian_numbers') ? persian_numbers(number_format_i18n($total_meetings)) : number_format_i18n($total_meetings); ?></h4>
-                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('All', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -676,7 +676,7 @@ $total_meetings = count($meetings_data);
             <div class="card-header">
                 <div class="card-title">
                     <i class="la la-calendar-alt me-2"></i>
-                    <?php esc_html_e('Meeting Calendar', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Meeting Calendar', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
@@ -685,19 +685,19 @@ $total_meetings = count($meetings_data);
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly" type="button" role="tab" aria-controls="monthly" aria-selected="true">
                             <i class="la la-calendar me-1"></i>
-                            <?php esc_html_e('Monthly', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Monthly', 'autopuzzle'); ?>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly" type="button" role="tab" aria-controls="weekly" aria-selected="false">
                             <i class="la la-calendar-week me-1"></i>
-                            <?php esc_html_e('Weekly', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Weekly', 'autopuzzle'); ?>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily" type="button" role="tab" aria-controls="daily" aria-selected="false">
                             <i class="la la-list me-1"></i>
-                            <?php esc_html_e('Daily', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Daily', 'autopuzzle'); ?>
                         </button>
                     </li>
                 </ul>
@@ -712,8 +712,8 @@ $total_meetings = count($meetings_data);
                                 <div class="mb-4">
                                     <i class="la la-calendar-times" style="font-size: 80px; color: #dee2e6;"></i>
                                 </div>
-                                <h5 class="text-muted"><?php esc_html_e('No meetings scheduled', 'maneli-car-inquiry'); ?></h5>
-                                <p class="text-muted"><?php esc_html_e('Future meetings will be displayed here.', 'maneli-car-inquiry'); ?></p>
+                                <h5 class="text-muted"><?php esc_html_e('No meetings scheduled', 'autopuzzle'); ?></h5>
+                                <p class="text-muted"><?php esc_html_e('Future meetings will be displayed here.', 'autopuzzle'); ?></p>
                             </div>
                         <?php else: ?>
                             <div class="timeline-container">
@@ -725,7 +725,7 @@ $total_meetings = count($meetings_data);
                                     $jalali_date_parts = explode('/', $first_meeting['jalali_date']);
                                     $jalali_date_display = '';
                                     if (count($jalali_date_parts) === 3) {
-                                        $conv = function_exists('persian_numbers_no_separator') ? 'persian_numbers_no_separator' : 'maneli_number_format_persian';
+                                        $conv = function_exists('persian_numbers_no_separator') ? 'persian_numbers_no_separator' : 'autopuzzle_number_format_persian';
                                         $jalali_date_display = $conv($jalali_date_parts[0]) . '/' . 
                                                               $conv($jalali_date_parts[1]) . '/' . 
                                                               $conv($jalali_date_parts[2]);
@@ -737,7 +737,7 @@ $total_meetings = count($meetings_data);
                                     <div class="calendar-day-section mb-4">
                                         <div class="day-header d-flex align-items-center mb-3 <?php echo $is_today ? 'today' : ''; ?>">
                                             <div class="day-badge">
-                                                <div class="day-number"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($first_meeting['jalali_day']) : maneli_number_format_persian($first_meeting['jalali_day']); ?></div>
+                                                <div class="day-number"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($first_meeting['jalali_day']) : autopuzzle_number_format_persian($first_meeting['jalali_day']); ?></div>
                                                 <div class="day-month"><?php echo esc_html($first_meeting['jalali_month_name']); ?></div>
                                             </div>
                                             <div class="day-info me-3">
@@ -745,7 +745,7 @@ $total_meetings = count($meetings_data);
                                                 <small class="day-date-display"><?php echo esc_html($jalali_date_display); ?></small>
                                             </div>
                                             <?php if ($is_today): ?>
-                                                <span class="badge bg-danger-gradient"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></span>
+                                                <span class="badge bg-danger-gradient"><?php esc_html_e('Today', 'autopuzzle'); ?></span>
                                             <?php endif; ?>
                                         </div>
                                         
@@ -754,24 +754,24 @@ $total_meetings = count($meetings_data);
                                                 <div class="calendar-event-card">
                                                     <div class="event-time">
                                                         <i class="la la-clock"></i>
-                                                        <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['time']) : maneli_number_format_persian($event['time']); ?>
+                                                        <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['time']) : autopuzzle_number_format_persian($event['time']); ?>
                                                     </div>
                                                     <div class="event-details">
                                                         <?php if ($event['is_scheduled_session'] ?? false): ?>
                                                             <div class="event-scheduled-badge mb-2">
                                                                 <i class="la la-calendar-check text-info me-1"></i>
-                                                                <strong><?php esc_html_e('Scheduled Session:', 'maneli-car-inquiry'); ?></strong>
+                                                                <strong><?php esc_html_e('Scheduled Session:', 'autopuzzle'); ?></strong>
                                                                 <span><?php 
                                                                     $jalali_parts = explode('/', $event['jalali_date']);
                                                                     if (count($jalali_parts) === 3) {
-                                                                        $conv = function_exists('persian_numbers_no_separator') ? 'persian_numbers_no_separator' : 'maneli_number_format_persian';
+                                                                        $conv = function_exists('persian_numbers_no_separator') ? 'persian_numbers_no_separator' : 'autopuzzle_number_format_persian';
                                                                         echo $conv($jalali_parts[0]) . '/' . 
                                                                              $conv($jalali_parts[1]) . '/' . 
                                                                              $conv($jalali_parts[2]);
                                                                     } else {
                                                                         echo esc_html($event['jalali_date']);
                                                                     }
-                                                                ?> - <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['time']) : maneli_number_format_persian($event['time']); ?></span>
+                                                                ?> - <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['time']) : autopuzzle_number_format_persian($event['time']); ?></span>
                                                             </div>
                                                         <?php endif; ?>
                                                         <div class="event-customer">
@@ -781,7 +781,7 @@ $total_meetings = count($meetings_data);
                                                         <?php if ($event['can_view_details']): ?>
                                                             <div class="event-info">
                                                                 <i class="la la-phone text-success me-1"></i>
-                                                                <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['customer_mobile']) : maneli_number_format_persian($event['customer_mobile']); ?>
+                                                                <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator($event['customer_mobile']) : autopuzzle_number_format_persian($event['customer_mobile']); ?>
                                                             </div>
                                                             <div class="event-info">
                                                                 <i class="la la-car text-info me-1"></i>
@@ -794,12 +794,12 @@ $total_meetings = count($meetings_data);
                                                             <a href="<?php echo home_url('/dashboard/inquiries/' . ($event['inquiry_type'] === 'cash' ? 'cash' : 'installment') . '?' . ($event['inquiry_type'] === 'cash' ? 'cash_inquiry_id' : 'inquiry_id') . '=' . (int) $event['inquiry_id']); ?>" 
                                                                class="btn btn-sm btn-primary-light">
                                                                 <i class="la la-eye"></i>
-                                                                <?php esc_html_e('View', 'maneli-car-inquiry'); ?>
+                                                                <?php esc_html_e('View', 'autopuzzle'); ?>
                                                             </a>
                                                         <?php elseif ($event['inquiry_id'] && !$event['can_view_details']): ?>
                                                             <span class="badge bg-secondary-transparent">
                                                                 <i class="la la-lock me-1"></i>
-                                                                <?php esc_html_e('Reserved', 'maneli-car-inquiry'); ?>
+                                                                <?php esc_html_e('Reserved', 'autopuzzle'); ?>
                                                             </span>
                                                         <?php endif; ?>
                                                     </div>
@@ -826,7 +826,7 @@ $total_meetings = count($meetings_data);
                                 </div>
                                 <h5 class="mb-0 fw-semibold" id="week-title"></h5>
                                 <button class="btn btn-sm btn-primary-light" id="today-week">
-                                    <?php esc_html_e('Today', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Today', 'autopuzzle'); ?>
                                 </button>
                             </div>
                             <div id="weekly-calendar-container" class="weekly-calendar-container"></div>
@@ -847,7 +847,7 @@ $total_meetings = count($meetings_data);
                                 </div>
                                 <h5 class="mb-0 fw-semibold" id="month-title"></h5>
                                 <button class="btn btn-sm btn-primary-light" id="today-month">
-                                    <?php esc_html_e('Today', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Today', 'autopuzzle'); ?>
                                 </button>
                             </div>
                             <div id="monthly-calendar-container" class="monthly-calendar-container"></div>
@@ -881,15 +881,15 @@ $total_meetings = count($meetings_data);
     
     // Calendar texts
     const texts = {
-        scheduledSession: '<?php echo esc_js(__('Scheduled Session:', 'maneli-car-inquiry')); ?>',
-        mobile: '<?php echo esc_js(__('Mobile:', 'maneli-car-inquiry')); ?>',
-        car: '<?php echo esc_js(__('Car:', 'maneli-car-inquiry')); ?>',
-        time: '<?php echo esc_js(__('Time:', 'maneli-car-inquiry')); ?>',
-        viewDetails: '<?php echo esc_js(__('View Details', 'maneli-car-inquiry')); ?>',
-        reserved: '<?php echo esc_js(__('Reserved', 'maneli-car-inquiry')); ?>',
-        meetingDetails: '<?php echo esc_js(__('Meeting Details', 'maneli-car-inquiry')); ?>',
-        close: '<?php echo esc_js(__('Close', 'maneli-car-inquiry')); ?>',
-        noMeetings: '<?php echo esc_js(__('No meetings', 'maneli-car-inquiry')); ?>'
+        scheduledSession: '<?php echo esc_js(__('Scheduled Session:', 'autopuzzle')); ?>',
+        mobile: '<?php echo esc_js(__('Mobile:', 'autopuzzle')); ?>',
+        car: '<?php echo esc_js(__('Car:', 'autopuzzle')); ?>',
+        time: '<?php echo esc_js(__('Time:', 'autopuzzle')); ?>',
+        viewDetails: '<?php echo esc_js(__('View Details', 'autopuzzle')); ?>',
+        reserved: '<?php echo esc_js(__('Reserved', 'autopuzzle')); ?>',
+        meetingDetails: '<?php echo esc_js(__('Meeting Details', 'autopuzzle')); ?>',
+        close: '<?php echo esc_js(__('Close', 'autopuzzle')); ?>',
+        noMeetings: '<?php echo esc_js(__('No meetings', 'autopuzzle')); ?>'
     };
     
     // Helper: Convert to Persian digits

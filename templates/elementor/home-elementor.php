@@ -1,12 +1,12 @@
 <?php
 /**
  * Elementor Home Page Template
- * Fully Elementor-based landing page for Maneli Khodro
+ * Fully Elementor-based landing page for AutoPuzzle Khodro
  * 
  * This template is designed ONLY for Elementor editor
  * All sections, header, footer are built with Elementor
  * 
- * @package Maneli_Car_Inquiry/Templates/Elementor
+ * @package Autopuzzle_Car_Inquiry/Templates/Elementor
  */
 
 // Exit if accessed directly

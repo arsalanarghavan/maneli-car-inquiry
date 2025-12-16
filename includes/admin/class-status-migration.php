@@ -3,14 +3,14 @@
  * Status Migration Handler
  * Converts old inquiry statuses to new status structure
  * 
- * @package Maneli_Car_Inquiry/Includes/Admin
+ * @package Autopuzzle_Car_Inquiry/Includes/Admin
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Status_Migration {
+class Autopuzzle_Status_Migration {
 
     /**
      * Valid tracking statuses (new structure)

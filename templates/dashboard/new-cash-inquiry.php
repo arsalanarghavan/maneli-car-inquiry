@@ -5,7 +5,7 @@
  * Customer can create a cash inquiry by selecting a car
  * Shows car image, price, and collects customer information
  * 
- * @package Maneli_Car_Inquiry/Templates/Dashboard
+ * @package AutoPuzzle/Templates/Dashboard
  * @version 1.0.0
  */
 
@@ -14,8 +14,8 @@ if (!defined('ABSPATH')) {
 }
 
 // Permission check - Only customers can create cash inquiries from this page
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_expert = in_array('maneli_expert', wp_get_current_user()->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_expert = in_array('autopuzzle_expert', wp_get_current_user()->roles, true);
 $current_user = wp_get_current_user();
 
 if ($is_admin || $is_expert) {
@@ -24,7 +24,7 @@ if ($is_admin || $is_expert) {
         <div class="col-xl-12">
             <div class="alert alert-info alert-dismissible fade show">
                 <i class="la la-info-circle me-2"></i>
-                <?php echo esc_html__('To submit a cash inquiry, please use the', 'maneli-car-inquiry'); ?> <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="alert-link"><?php esc_html_e('Cash Inquiry List', 'maneli-car-inquiry'); ?></a> <?php esc_html_e('page.', 'maneli-car-inquiry'); ?>
+                <?php echo esc_html__('To submit a cash inquiry, please use the', 'autopuzzle'); ?> <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="alert-link"><?php esc_html_e('Cash Inquiry List', 'autopuzzle'); ?></a> <?php esc_html_e('page.', 'autopuzzle'); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
@@ -43,10 +43,10 @@ if (!wp_script_is('select2', 'enqueued')) {
 
 // Enqueue SweetAlert2 - Use local version if available
 if (!wp_script_is('sweetalert2', 'enqueued')) {
-    $sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+    $sweetalert2_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
     if (file_exists($sweetalert2_path)) {
-        wp_enqueue_style('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
-        wp_enqueue_script('sweetalert2', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+        wp_enqueue_style('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+        wp_enqueue_script('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
     } else {
         // Fallback to CDN
         wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
@@ -54,35 +54,35 @@ if (!wp_script_is('sweetalert2', 'enqueued')) {
 }
 
 // Enqueue CAPTCHA scripts if enabled
-if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) {
-    $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
-    $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+if (class_exists('Autopuzzle_Captcha_Helper') && Autopuzzle_Captcha_Helper::is_enabled()) {
+    $captcha_type = Autopuzzle_Captcha_Helper::get_captcha_type();
+    $site_key = Autopuzzle_Captcha_Helper::get_site_key($captcha_type);
     
     if (!empty($captcha_type) && !empty($site_key)) {
-        Maneli_Captcha_Helper::enqueue_script($captcha_type, $site_key);
+        Autopuzzle_Captcha_Helper::enqueue_script($captcha_type, $site_key);
         
         // Enqueue our CAPTCHA handler script
         wp_enqueue_script(
-            'maneli-captcha',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/captcha.js',
+            'autopuzzle-captcha',
+            AUTOPUZZLE_PLUGIN_URL . 'assets/js/captcha.js',
             ['jquery'],
-            file_exists(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') ? filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/captcha.js') : '1.0.0',
+            file_exists(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/captcha.js') ? filemtime(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/captcha.js') : '1.0.0',
             true
         );
         
         // Localize script with CAPTCHA config and error messages
-        wp_localize_script('maneli-captcha', 'maneliCaptchaConfig', [
+        wp_localize_script('autopuzzle-captcha', 'autopuzzleCaptchaConfig', [
             'enabled' => true,
             'type' => $captcha_type,
             'siteKey' => $site_key,
             'strings' => [
-                'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'maneli-car-inquiry'),
-                'error_title' => esc_html__('Verification Failed', 'maneli-car-inquiry'),
-                'try_again' => esc_html__('Try Again', 'maneli-car-inquiry'),
-                'loading' => esc_html__('Verifying...', 'maneli-car-inquiry'),
-                'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'maneli-car-inquiry'),
-                'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'maneli-car-inquiry'),
-                'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'maneli-car-inquiry')
+                'verification_failed' => esc_html__('CAPTCHA verification failed. Please complete the CAPTCHA challenge and try again.', 'autopuzzle'),
+                'error_title' => esc_html__('Verification Failed', 'autopuzzle'),
+                'try_again' => esc_html__('Try Again', 'autopuzzle'),
+                'loading' => esc_html__('Verifying...', 'autopuzzle'),
+                'network_error' => esc_html__('Network error occurred. Please check your internet connection and try again.', 'autopuzzle'),
+                'script_not_loaded' => esc_html__('CAPTCHA script could not be loaded. Please refresh the page and try again.', 'autopuzzle'),
+                'token_expired' => esc_html__('CAPTCHA token has expired. Please complete the challenge again.', 'autopuzzle')
             ]
         ]);
     }
@@ -116,12 +116,12 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                 <div class="btn-list">
                     <a href="<?php echo esc_url(home_url('/dashboard/inquiries/cash')); ?>" class="btn btn-light btn-wave">
                         <i class="la la-arrow-right me-1"></i>
-                        <?php esc_html_e('Back to List', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('Back to List', 'autopuzzle'); ?>
                     </a>
                 </div>
             </div>
             <div class="card-body">
-                <form id="customer-cash-inquiry-form" method="post"<?php echo (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()) ? ' data-captcha-required="true"' : ''; ?>>
+                <form id="customer-cash-inquiry-form" method="post"<?php echo (class_exists('Autopuzzle_Captcha_Helper') && Autopuzzle_Captcha_Helper::is_enabled()) ? ' data-captcha-required="true"' : ''; ?>>
                     
                     <!-- Step 1: Car Selection -->
                     <div class="mb-4 pb-3 border-bottom">
@@ -149,7 +149,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                     </div>
 
                     <!-- Car Details Display (Hidden by default) -->
-                    <div id="car-details-section" class="maneli-initially-hidden">
+                    <div id="car-details-section" class="autopuzzle-initially-hidden">
                         <div class="mb-4 pb-3 border-bottom">
                             <h5 class="mb-3">
                                 <span class="avatar avatar-sm avatar-rounded bg-success-transparent me-2">
@@ -163,7 +163,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                     <div class="row align-items-center">
                                         <div class="col-md-4 text-center">
                                             <div id="car-image-container" class="mb-3 mb-md-0">
-                                                <img src="" alt="Car Image" id="car-image" class="img-fluid rounded maneli-img-max-height-200">
+                                                <img src="" alt="Car Image" id="car-image" class="img-fluid rounded autopuzzle-img-max-height-200">
                                             </div>
                                         </div>
                                         <div class="col-md-8">
@@ -209,7 +209,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="first_name" class="form-control" value="<?php echo esc_attr($customer_first_name); ?>" placeholder="<?php esc_attr_e('First Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="first_name" class="form-control" value="<?php echo esc_attr($customer_first_name); ?>" placeholder="<?php esc_attr_e('First Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-6">
@@ -217,7 +217,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                                 <i class="la la-user me-1 text-muted"></i>
                                                 نام خانوادگی <span class="text-danger">*</span>
                                             </label>
-                                            <input type="text" name="last_name" class="form-control" value="<?php echo esc_attr($customer_last_name); ?>" placeholder="<?php esc_attr_e('Last Name', 'maneli-car-inquiry'); ?>" required>
+                                            <input type="text" name="last_name" class="form-control" value="<?php echo esc_attr($customer_last_name); ?>" placeholder="<?php esc_attr_e('Last Name', 'autopuzzle'); ?>" required>
                                             <div class="invalid-feedback">لطفاً نام خانوادگی را وارد کنید.</div>
                                         </div>
                                         <div class="col-md-6">
@@ -233,14 +233,14 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                                                 <i class="la la-palette me-1 text-muted"></i>
                                                 رنگ خودرو مورد نظر
                                             </label>
-                                            <input type="text" name="car_color" class="form-control" placeholder="<?php esc_attr_e('Example: White', 'maneli-car-inquiry'); ?>">
+                                            <input type="text" name="car_color" class="form-control" placeholder="<?php esc_attr_e('Example: White', 'autopuzzle'); ?>">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label">
                                                 <i class="la la-comment me-1 text-muted"></i>
                                                 توضیحات اضافی
                                             </label>
-                                            <textarea name="description" class="form-control" rows="3" placeholder="<?php esc_attr_e('Write your description or special request...', 'maneli-car-inquiry'); ?>"></textarea>
+                                            <textarea name="description" class="form-control" rows="3" placeholder="<?php esc_attr_e('Write your description or special request...', 'autopuzzle'); ?>"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -248,17 +248,17 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                         </div>
 
                         <!-- CAPTCHA Widget -->
-                        <?php if (class_exists('Maneli_Captcha_Helper') && Maneli_Captcha_Helper::is_enabled()): 
-                            $captcha_type = Maneli_Captcha_Helper::get_captcha_type();
-                            $site_key = Maneli_Captcha_Helper::get_site_key($captcha_type);
+                        <?php if (class_exists('Autopuzzle_Captcha_Helper') && Autopuzzle_Captcha_Helper::is_enabled()): 
+                            $captcha_type = Autopuzzle_Captcha_Helper::get_captcha_type();
+                            $site_key = Autopuzzle_Captcha_Helper::get_site_key($captcha_type);
                             if (!empty($captcha_type) && !empty($site_key)):
                                 if ($captcha_type === 'recaptcha_v2' || $captcha_type === 'hcaptcha'): ?>
                                     <div class="mt-3 mb-3">
-                                        <?php echo Maneli_Captcha_Helper::render_widget($captcha_type, $site_key, 'maneli-captcha-widget-cash-inquiry'); ?>
+                                        <?php echo Autopuzzle_Captcha_Helper::render_widget($captcha_type, $site_key, 'autopuzzle-captcha-widget-cash-inquiry'); ?>
                                     </div>
                                 <?php elseif ($captcha_type === 'recaptcha_v3'): ?>
                                     <!-- reCAPTCHA v3 badge will be automatically displayed by Google -->
-                                    <div class="maneli-recaptcha-v3-badge" style="display:none;"></div>
+                                    <div class="autopuzzle-recaptcha-v3-badge" style="display:none;"></div>
                                 <?php endif;
                             endif;
                         endif; ?>
@@ -274,7 +274,7 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                             <div class="text-center mt-3">
                                 <a href="<?php echo esc_url(home_url('/dashboard')); ?>" class="btn btn-light btn-sm">
                                     <i class="la la-arrow-right me-1"></i>
-                                    <?php esc_html_e('Back to Dashboard', 'maneli-car-inquiry'); ?>
+                                    <?php esc_html_e('Back to Dashboard', 'autopuzzle'); ?>
                                 </a>
                             </div>
                         </div>
@@ -325,8 +325,8 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                         method: 'POST',
                         data: function(params) {
                             return {
-                                action: 'maneli_search_cars',
-                                nonce: '<?php echo wp_create_nonce('maneli_expert_car_search_nonce'); ?>',
+                                action: 'autopuzzle_search_cars',
+                                nonce: '<?php echo wp_create_nonce('autopuzzle_expert_car_search_nonce'); ?>',
                                 search: params.term
                             };
                         },
@@ -388,26 +388,26 @@ $customer_mobile = get_user_meta($current_user->ID, 'billing_phone', true) ?: $c
                     if (!selectedCarData) {
                         Swal.fire({
                             icon: 'warning',
-                            title: <?php echo wp_json_encode(esc_html__('Attention', 'maneli-car-inquiry')); ?>,
-                            text: <?php echo wp_json_encode(esc_html__('Please select a car', 'maneli-car-inquiry')); ?>,
-                            confirmButtonText: <?php echo wp_json_encode(esc_html__('Got it', 'maneli-car-inquiry')); ?>
+                            title: <?php echo wp_json_encode(esc_html__('Attention', 'autopuzzle')); ?>,
+                            text: <?php echo wp_json_encode(esc_html__('Please select a car', 'autopuzzle')); ?>,
+                            confirmButtonText: <?php echo wp_json_encode(esc_html__('Got it', 'autopuzzle')); ?>
                         });
                         return;
                     }
                     
                     const formData = new FormData(this);
-                    formData.append('action', 'maneli_create_customer_cash_inquiry');
-                    formData.append('nonce', '<?php echo wp_create_nonce('maneli_customer_cash_inquiry'); ?>');
+                    formData.append('action', 'autopuzzle_create_customer_cash_inquiry');
+                    formData.append('nonce', '<?php echo wp_create_nonce('autopuzzle_customer_cash_inquiry'); ?>');
                     
                     // Get CAPTCHA token if enabled
-                    if (typeof maneliCaptcha !== 'undefined' && maneliCaptchaConfig && maneliCaptchaConfig.enabled) {
-                        maneliCaptcha.getToken().then(function(token) {
+                    if (typeof autopuzzleCaptcha !== 'undefined' && autopuzzleCaptchaConfig && autopuzzleCaptchaConfig.enabled) {
+                        autopuzzleCaptcha.getToken().then(function(token) {
                             if (token) {
-                                if (maneliCaptchaConfig.type === 'hcaptcha') {
+                                if (autopuzzleCaptchaConfig.type === 'hcaptcha') {
                                     formData.append('h-captcha-response', token);
-                                } else if (maneliCaptchaConfig.type === 'recaptcha_v2') {
+                                } else if (autopuzzleCaptchaConfig.type === 'recaptcha_v2') {
                                     formData.append('g-recaptcha-response', token);
-                                } else if (maneliCaptchaConfig.type === 'recaptcha_v3') {
+                                } else if (autopuzzleCaptchaConfig.type === 'recaptcha_v3') {
                                     formData.append('captcha_token', token);
                                 }
                             }

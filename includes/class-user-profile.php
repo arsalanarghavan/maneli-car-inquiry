@@ -2,7 +2,7 @@
 /**
  * Adds and manages custom fields on the user profile page in the WordPress admin area.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.2 (Removed inline script for Datepicker initialization)
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_User_Profile {
+class Autopuzzle_User_Profile {
 
     /**
      * An array of custom fields to be added to the user profile.
@@ -39,45 +39,45 @@ class Maneli_User_Profile {
     private function define_custom_fields() {
         $this->custom_fields = [
             'inquiry_info' => [
-                'title' => esc_html__('Inquiry Supplementary Information', 'maneli-car-inquiry'),
+                'title' => esc_html__('Inquiry Supplementary Information', 'autopuzzle'),
                 'fields' => [
-                    'national_code' => ['label' => esc_html__('National Code', 'maneli-car-inquiry'), 'type' => 'text'],
-                    'father_name'   => ['label' => esc_html__('Father\'s Name', 'maneli-car-inquiry'), 'type' => 'text'],
-                    // Note: 'birth_date' uses the class 'maneli-datepicker' which is targeted by the centralized JS file.
-                    'birth_date'    => ['label' => esc_html__('Date of Birth', 'maneli-car-inquiry'), 'type' => 'text', 'class' => 'maneli-datepicker'],
-                    'mobile_number' => ['label' => esc_html__('Mobile Number', 'maneli-car-inquiry'), 'type' => 'tel', 'desc' => esc_html__('Used for SMS notifications and as the username.', 'maneli-car-inquiry')],
-                    'phone_number'  => ['label' => esc_html__('Phone Number', 'maneli-car-inquiry'), 'type' => 'tel'],
-                    'occupation'    => ['label' => esc_html__('Occupation', 'maneli-car-inquiry'), 'type' => 'text'],
-                    'income_level'  => ['label' => esc_html__('Income Level (Toman)', 'maneli-car-inquiry'), 'type' => 'number'],
-                    'address'       => ['label' => esc_html__('Address', 'maneli-car-inquiry'), 'type' => 'textarea'],
+                    'national_code' => ['label' => esc_html__('National Code', 'autopuzzle'), 'type' => 'text'],
+                    'father_name'   => ['label' => esc_html__('Father\'s Name', 'autopuzzle'), 'type' => 'text'],
+                    // Note: 'birth_date' uses the class 'autopuzzle-datepicker' which is targeted by the centralized JS file.
+                    'birth_date'    => ['label' => esc_html__('Date of Birth', 'autopuzzle'), 'type' => 'text', 'class' => 'autopuzzle-datepicker'],
+                    'mobile_number' => ['label' => esc_html__('Mobile Number', 'autopuzzle'), 'type' => 'tel', 'desc' => esc_html__('Used for SMS notifications and as the username.', 'autopuzzle')],
+                    'phone_number'  => ['label' => esc_html__('Phone Number', 'autopuzzle'), 'type' => 'tel'],
+                    'occupation'    => ['label' => esc_html__('Occupation', 'autopuzzle'), 'type' => 'text'],
+                    'income_level'  => ['label' => esc_html__('Income Level (Toman)', 'autopuzzle'), 'type' => 'number'],
+                    'address'       => ['label' => esc_html__('Address', 'autopuzzle'), 'type' => 'textarea'],
                     'residency_status' => [
-                        'label'   => esc_html__('Residency Status', 'maneli-car-inquiry'),
+                        'label'   => esc_html__('Residency Status', 'autopuzzle'),
                         'type'    => 'select',
                         'options' => [
-                            ''       => esc_html__('-- Select --', 'maneli-car-inquiry'),
-                            'owner'  => esc_html__('Owner', 'maneli-car-inquiry'),
-                            'tenant' => esc_html__('Tenant', 'maneli-car-inquiry'),
+                            ''       => esc_html__('-- Select --', 'autopuzzle'),
+                            'owner'  => esc_html__('Owner', 'autopuzzle'),
+                            'tenant' => esc_html__('Tenant', 'autopuzzle'),
                         ]
                     ],
                     'workplace_status' => [
-                        'label'   => esc_html__('Workplace Status', 'maneli-car-inquiry'),
+                        'label'   => esc_html__('Workplace Status', 'autopuzzle'),
                         'type'    => 'select',
                         'options' => [
-                            ''          => esc_html__('-- Select --', 'maneli-car-inquiry'),
-                            'permanent' => esc_html__('Permanent', 'maneli-car-inquiry'),
-                            'contract'  => esc_html__('Contract', 'maneli-car-inquiry'),
-                            'freelance' => esc_html__('Freelance', 'maneli-car-inquiry'),
+                            ''          => esc_html__('-- Select --', 'autopuzzle'),
+                            'permanent' => esc_html__('Permanent', 'autopuzzle'),
+                            'contract'  => esc_html__('Contract', 'autopuzzle'),
+                            'freelance' => esc_html__('Freelance', 'autopuzzle'),
                         ]
                     ],
                 ]
             ],
             'bank_info' => [
-                'title' => esc_html__('Bank Information', 'maneli-car-inquiry'),
+                'title' => esc_html__('Bank Information', 'autopuzzle'),
                 'fields' => [
-                    'bank_name'      => ['label' => esc_html__('Bank Name', 'maneli-car-inquiry'), 'type' => 'text'],
-                    'account_number' => ['label' => esc_html__('Account Number', 'maneli-car-inquiry'), 'type' => 'text'],
-                    'branch_code'    => ['label' => esc_html__('Branch Code', 'maneli-car-inquiry'), 'type' => 'text'],
-                    'branch_name'    => ['label' => esc_html__('Branch Name', 'maneli-car-inquiry'), 'type' => 'text'],
+                    'bank_name'      => ['label' => esc_html__('Bank Name', 'autopuzzle'), 'type' => 'text'],
+                    'account_number' => ['label' => esc_html__('Account Number', 'autopuzzle'), 'type' => 'text'],
+                    'branch_code'    => ['label' => esc_html__('Branch Code', 'autopuzzle'), 'type' => 'text'],
+                    'branch_name'    => ['label' => esc_html__('Branch Name', 'autopuzzle'), 'type' => 'text'],
                 ]
             ]
         ];
@@ -94,22 +94,22 @@ class Maneli_User_Profile {
         }
 
         $datepicker_loaded = false;
-        if (function_exists('maneli_enqueue_persian_datepicker')) {
-            $datepicker_loaded = maneli_enqueue_persian_datepicker();
+        if (function_exists('autopuzzle_enqueue_persian_datepicker')) {
+            $datepicker_loaded = autopuzzle_enqueue_persian_datepicker();
         }
         
         // FIX: Removed the wp_add_inline_script block.
         // The initialization logic is now assumed to be in the centralized JS file.
         $profile_deps = [];
         if ($datepicker_loaded) {
-            $profile_deps[] = 'maneli-persian-datepicker';
+            $profile_deps[] = 'autopuzzle-persian-datepicker';
         }
 
         wp_enqueue_script(
-            'maneli-profile-datepicker-init',
-            MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
+            'autopuzzle-profile-datepicker-init',
+            AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js',
             $profile_deps,
-            filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'),
+            filemtime(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js'),
             true
         );
     }

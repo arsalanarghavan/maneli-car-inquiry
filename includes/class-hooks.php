@@ -3,7 +3,7 @@
  * Manages general WordPress hooks to modify core behaviors.
  * This includes user redirects, query modifications, and price visibility.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.0
  */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Hooks {
+class Autopuzzle_Hooks {
 
     public function __construct() {
         // User profile related hooks
@@ -36,12 +36,12 @@ class Maneli_Hooks {
         add_filter('woocommerce_get_price_html', [$this, 'replace_price_for_unavailable'], 10, 2);
         
         // Schedule followup notification cron job
-        add_action('maneli_daily_followup_notifications', [$this, 'send_followup_notifications']);
+        add_action('autopuzzle_daily_followup_notifications', [$this, 'send_followup_notifications']);
         add_action('init', [$this, 'schedule_followup_notifications_cron']);
         
         // Notification center cron jobs
-        add_action('maneli_send_meeting_reminders', [$this, 'send_meeting_reminders']);
-        add_action('maneli_process_scheduled_notifications', [$this, 'process_scheduled_notifications']);
+        add_action('autopuzzle_send_meeting_reminders', [$this, 'send_meeting_reminders']);
+        add_action('autopuzzle_process_scheduled_notifications', [$this, 'process_scheduled_notifications']);
         
         // Visitor statistics tracking
         add_action('wp_footer', [$this, 'track_visitor_statistics'], 999);
@@ -53,7 +53,7 @@ class Maneli_Hooks {
         add_action('wp_head', [$this, 'output_single_product_year_badge_style'], 50);
         
         // Log cleanup cron job
-        add_action('maneli_cleanup_old_logs', [$this, 'cleanup_old_logs']);
+        add_action('autopuzzle_cleanup_old_logs', [$this, 'cleanup_old_logs']);
         add_action('init', [$this, 'schedule_log_cleanup_cron']);
         
     }
@@ -88,7 +88,7 @@ class Maneli_Hooks {
      * This helps normalize data for users created before the plugin was activated.
      */
     public function run_once_update_all_display_names() {
-        if (get_option('maneli_display_names_updated_v2') === 'yes') {
+        if (get_option('autopuzzle_display_names_updated_v2') === 'yes') {
             return;
         }
 
@@ -97,7 +97,7 @@ class Maneli_Hooks {
             $this->update_display_name_on_event($user_id);
         }
         
-        update_option('maneli_display_names_updated_v2', 'yes');
+        update_option('autopuzzle_display_names_updated_v2', 'yes');
     }
 
     /**
@@ -137,7 +137,7 @@ class Maneli_Hooks {
         $manufacture_year_display = $this->convert_to_persian_digits($manufacture_year_clean);
 
         $badge_html = sprintf(
-            ' <span class="maneli-year-badge maneli-year-badge--single">%s</span>',
+            ' <span class="autopuzzle-year-badge autopuzzle-year-badge--single">%s</span>',
             esc_html($manufacture_year_display)
         );
 
@@ -154,8 +154,8 @@ class Maneli_Hooks {
             return;
         }
 
-        echo '<style id="maneli-single-product-year-badge">
-.single-product .product_title.entry-title .maneli-year-badge {
+        echo '<style id="autopuzzle-single-product-year-badge">
+.single-product .product_title.entry-title .autopuzzle-year-badge {
     display: inline-flex;
     align-items: center;
     padding: 4px 14px;
@@ -169,7 +169,7 @@ class Maneli_Hooks {
     box-shadow: 0 6px 16px rgba(59, 74, 217, 0.18);
 }
 
-.single-product .product_title.entry-title .maneli-year-badge--single {
+.single-product .product_title.entry-title .autopuzzle-year-badge--single {
     letter-spacing: 0.08em;
 }
 </style>';
@@ -218,7 +218,7 @@ class Maneli_Hooks {
     /**
      * Redirects non-administrator users from the WordPress backend (/wp-admin) to the frontend dashboard.
      * تنها مدیرکل (Administrator) به پیشخوان دسترسی دارد.
-     * همه نقش‌های دیگر (maneli_admin, maneli_expert, customer) به داشبورد frontend هدایت می‌شوند.
+     * همه نقش‌های دیگر (autopuzzle_admin, autopuzzle_expert, customer) به داشبورد frontend هدایت می‌شوند.
      */
     public function redirect_non_admins_from_backend() {
         // Do not redirect for AJAX, Cron, or admin-post.php requests
@@ -253,7 +253,7 @@ class Maneli_Hooks {
      */
     public function modify_product_query_for_customers($query) {
         // Only run on the frontend, for product queries, and for non-privileged users.
-        if (is_admin() || current_user_can('manage_maneli_inquiries')) {
+        if (is_admin() || current_user_can('manage_autopuzzle_inquiries')) {
             return;
         }
         
@@ -297,7 +297,7 @@ class Maneli_Hooks {
      */
     public function hide_disabled_products($visible, $product_id) {
         // Allow admins to see all products
-        if (current_user_can('manage_maneli_inquiries')) {
+        if (current_user_can('manage_autopuzzle_inquiries')) {
             return $visible;
         }
         
@@ -314,7 +314,7 @@ class Maneli_Hooks {
      */
     public function exclude_disabled_products_from_query($clauses, $query) {
         // Only run on frontend, for non-admin users
-        if (is_admin() || current_user_can('manage_maneli_inquiries')) {
+        if (is_admin() || current_user_can('manage_autopuzzle_inquiries')) {
             return $clauses;
         }
         
@@ -335,8 +335,8 @@ class Maneli_Hooks {
         }
         
         // Exclude disabled products
-        $clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS maneli_status_meta ON {$wpdb->posts}.ID = maneli_status_meta.post_id AND maneli_status_meta.meta_key = '_maneli_car_status'";
-        $clauses['where'] .= " AND (maneli_status_meta.meta_value != 'disabled' OR maneli_status_meta.meta_value IS NULL)";
+        $clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS autopuzzle_status_meta ON {$wpdb->posts}.ID = autopuzzle_status_meta.post_id AND autopuzzle_status_meta.meta_key = '_maneli_car_status'";
+        $clauses['where'] .= " AND (autopuzzle_status_meta.meta_value != 'disabled' OR autopuzzle_status_meta.meta_value IS NULL)";
         
         return $clauses;
     }
@@ -346,7 +346,7 @@ class Maneli_Hooks {
      */
     public function exclude_disabled_products_from_wc_query($query) {
         // Only run on frontend, for non-admin users
-        if (is_admin() || current_user_can('manage_maneli_inquiries')) {
+        if (is_admin() || current_user_can('manage_autopuzzle_inquiries')) {
             return;
         }
         
@@ -384,7 +384,7 @@ class Maneli_Hooks {
         $car_status = get_post_meta($product_id, '_maneli_car_status', true);
         
         if ($car_status === 'unavailable') {
-            return '<span class="price unavailable-text">' . esc_html__('Unavailable', 'maneli-car-inquiry') . '</span>';
+            return '<span class="price unavailable-text">' . esc_html__('Unavailable', 'autopuzzle') . '</span>';
         }
         
         return $price_html;
@@ -395,9 +395,9 @@ class Maneli_Hooks {
      * This effectively hides prices from non-admin users if the setting is enabled.
      */
     public function conditionally_hide_prices() {
-        $is_price_hidden = Maneli_Options_Helper::is_option_enabled('hide_prices_for_customers', false);
+        $is_price_hidden = Autopuzzle_Options_Helper::is_option_enabled('hide_prices_for_customers', false);
 
-        if ($is_price_hidden && !current_user_can('manage_maneli_inquiries')) {
+        if ($is_price_hidden && !current_user_can('manage_autopuzzle_inquiries')) {
             // Remove prices from shop loop and single product pages
             remove_action('woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10);
             remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
@@ -421,7 +421,7 @@ class Maneli_Hooks {
         
         // Show "ناموجود" for unavailable products
         if ($car_status === 'unavailable') {
-            return '<span class="price unavailable-text">' . esc_html__('Unavailable', 'maneli-car-inquiry') . '</span>';
+            return '<span class="price unavailable-text">' . esc_html__('Unavailable', 'autopuzzle') . '</span>';
         }
         
         // Hide prices for all other products
@@ -432,9 +432,9 @@ class Maneli_Hooks {
      * Schedule the daily followup notifications cron job
      */
     public function schedule_followup_notifications_cron() {
-        if (!wp_next_scheduled('maneli_daily_followup_notifications')) {
+        if (!wp_next_scheduled('autopuzzle_daily_followup_notifications')) {
             // Schedule for 9 AM every day
-            wp_schedule_event(time(), 'daily', 'maneli_daily_followup_notifications');
+            wp_schedule_event(time(), 'daily', 'autopuzzle_daily_followup_notifications');
         }
     }
 
@@ -443,11 +443,11 @@ class Maneli_Hooks {
      * Called daily by WordPress cron
      */
     public function send_followup_notifications() {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
-        $count = Maneli_Notification_Handler::schedule_followup_notifications();
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        $count = Autopuzzle_Notification_Handler::schedule_followup_notifications();
         
         // Log the result
-        error_log(sprintf('Maneli Followup Notifications: %d notifications created', $count));
+        error_log(sprintf('AutoPuzzle Followup Notifications: %d notifications created', $count));
     }
 
     /**
@@ -455,10 +455,10 @@ class Maneli_Hooks {
      * Called hourly by WordPress cron
      */
     public function send_meeting_reminders() {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         
         // Get reminder settings - parse comma-separated values
         $hours_before_raw = $options['meeting_reminder_hours'] ?? '2,6,24';
@@ -503,7 +503,7 @@ class Maneli_Hooks {
         // Get all upcoming meetings
         $now = current_time('mysql');
         $meetings = get_posts([
-            'post_type' => 'maneli_meeting',
+            'post_type' => 'autopuzzle_meeting',
             'posts_per_page' => -1,
             'post_status' => 'publish',
             'meta_query' => [
@@ -538,7 +538,7 @@ class Maneli_Hooks {
                 // Check if reminder should be sent now (within current hour)
                 if ($now_time >= $reminder_time && $now_time < $reminder_time + 3600) {
                     // Check if already sent
-                    $existing_reminder = Maneli_Database::get_notification_logs([
+                    $existing_reminder = Autopuzzle_Database::get_notification_logs([
                         'related_id' => $meeting->ID,
                         'type' => 'sms', // Check for any type
                         'search' => 'meeting_reminder_' . $hours . 'h'
@@ -564,7 +564,7 @@ class Maneli_Hooks {
                         
                         // Prepare message
                         $message = sprintf(
-                            esc_html__('Reminder: You have a meeting scheduled for %s. Car: %s', 'maneli-car-inquiry'),
+                            esc_html__('Reminder: You have a meeting scheduled for %s. Car: %s', 'autopuzzle'),
                             $meeting_date_formatted,
                             $car_name
                         );
@@ -595,13 +595,13 @@ class Maneli_Hooks {
                         // Send reminders
                         foreach ($channels as $channel) {
                             if (isset($recipients[$channel])) {
-                                Maneli_Notification_Center_Handler::send(
+                                Autopuzzle_Notification_Center_Handler::send(
                                     $channel,
                                     $recipients[$channel],
                                     $message,
                                     [
                                         'related_id' => $meeting->ID,
-                                        'title' => esc_html__('Meeting Reminder', 'maneli-car-inquiry'),
+                                        'title' => esc_html__('Meeting Reminder', 'autopuzzle'),
                                     ]
                                 );
                             }
@@ -622,7 +622,7 @@ class Maneli_Hooks {
                 // Check if reminder should be sent today
                 if ($reminder_day === $today) {
                     // Check if already sent
-                    $existing_reminder = Maneli_Database::get_notification_logs([
+                    $existing_reminder = Autopuzzle_Database::get_notification_logs([
                         'related_id' => $meeting->ID,
                         'type' => 'sms',
                         'search' => 'meeting_reminder_' . $days . 'd'
@@ -645,7 +645,7 @@ class Maneli_Hooks {
                         $meeting_date_formatted = date_i18n('Y/m/d H:i', $meeting_time);
                         
                         $message = sprintf(
-                            esc_html__('Reminder: You have a meeting scheduled for %s (%d days). Car: %s', 'maneli-car-inquiry'),
+                            esc_html__('Reminder: You have a meeting scheduled for %s (%d days). Car: %s', 'autopuzzle'),
                             $meeting_date_formatted,
                             $days,
                             $car_name
@@ -675,13 +675,13 @@ class Maneli_Hooks {
                         
                         foreach ($channels as $channel) {
                             if (isset($recipients[$channel])) {
-                                Maneli_Notification_Center_Handler::send(
+                                Autopuzzle_Notification_Center_Handler::send(
                                     $channel,
                                     $recipients[$channel],
                                     $message,
                                     [
                                         'related_id' => $meeting->ID,
-                                        'title' => esc_html__('Meeting Reminder', 'maneli-car-inquiry'),
+                                        'title' => esc_html__('Meeting Reminder', 'autopuzzle'),
                                     ]
                                 );
                             }
@@ -694,7 +694,7 @@ class Maneli_Hooks {
         }
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log(sprintf('Maneli Meeting Reminders: %d reminders sent', $reminders_sent));
+            error_log(sprintf('AutoPuzzle Meeting Reminders: %d reminders sent', $reminders_sent));
         }
     }
 
@@ -703,12 +703,12 @@ class Maneli_Hooks {
      * Called hourly by WordPress cron
      */
     public function process_scheduled_notifications() {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
         
-        $count = Maneli_Notification_Center_Handler::process_scheduled();
+        $count = Autopuzzle_Notification_Center_Handler::process_scheduled();
         
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log(sprintf('Maneli Scheduled Notifications: %d notifications processed', $count));
+            error_log(sprintf('AutoPuzzle Scheduled Notifications: %d notifications processed', $count));
         }
     }
     
@@ -718,7 +718,7 @@ class Maneli_Hooks {
      */
     public function track_visitor_statistics() {
         // Skip tracking on admin pages and dashboard pages
-        if (is_admin() || get_query_var('maneli_dashboard')) {
+        if (is_admin() || get_query_var('autopuzzle_dashboard')) {
             return;
         }
         
@@ -732,7 +732,7 @@ class Maneli_Hooks {
         }
         
         // Check if visitor statistics is enabled (using optimized helper)
-        if (!Maneli_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
             return;
         }
         
@@ -750,7 +750,7 @@ class Maneli_Hooks {
         }
         
         // Get nonce
-        $nonce = wp_create_nonce('maneli_visitor_stats_nonce');
+        $nonce = wp_create_nonce('autopuzzle_visitor_stats_nonce');
         $ajax_url = admin_url('admin-ajax.php');
         
         ?>
@@ -764,7 +764,7 @@ class Maneli_Hooks {
                     url: '<?php echo esc_js($ajax_url); ?>',
                     type: 'POST',
                     data: {
-                        action: 'maneli_track_visit',
+                        action: 'autopuzzle_track_visit',
                         nonce: '<?php echo esc_js($nonce); ?>',
                         page_url: '<?php echo esc_js($page_url); ?>',
                         page_title: <?php echo json_encode($page_title); ?>,
@@ -787,7 +787,7 @@ class Maneli_Hooks {
      */
     public function track_visitor_statistics_server_side() {
         // Skip tracking on admin pages and dashboard pages
-        if (is_admin() || get_query_var('maneli_dashboard')) {
+        if (is_admin() || get_query_var('autopuzzle_dashboard')) {
             return;
         }
         
@@ -806,14 +806,14 @@ class Maneli_Hooks {
         }
         
         // Check if visitor statistics is enabled (using optimized helper)
-        if (!Maneli_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
             return;
         }
         
         // Rate limiting - use transients instead of session to avoid header issues
         $current_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         $ip_address = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '0.0.0.0';
-        $track_key = 'maneli_tracked_' . md5($current_url . $ip_address);
+        $track_key = 'autopuzzle_tracked_' . md5($current_url . $ip_address);
         
         // Check if already tracked in last 5 seconds (rate limiting)
         if (get_transient($track_key)) {
@@ -841,8 +841,8 @@ class Maneli_Hooks {
         }
         
         // Track visit directly (lightweight operation)
-        if (class_exists('Maneli_Visitor_Statistics')) {
-            Maneli_Visitor_Statistics::track_visit($page_url, $page_title, $referrer, $product_id);
+        if (class_exists('Autopuzzle_Visitor_Statistics')) {
+            Autopuzzle_Visitor_Statistics::track_visit($page_url, $page_title, $referrer, $product_id);
         }
     }
     
@@ -851,30 +851,30 @@ class Maneli_Hooks {
      */
     public function enqueue_visitor_tracking_scripts() {
         // Check if visitor statistics is enabled (using optimized helper)
-        if (!Maneli_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
             return;
         }
         
         // Skip on dashboard pages (they use static HTML template, scripts will be injected manually)
-        if (get_query_var('maneli_dashboard')) {
+        if (get_query_var('autopuzzle_dashboard')) {
             return;
         }
         
         // Enqueue visitor tracking script for frontend pages
-        $script_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/visitor-tracking.js';
+        $script_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/frontend/visitor-tracking.js';
         if (file_exists($script_path)) {
             wp_enqueue_script(
-                'maneli-visitor-tracking',
-                MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/visitor-tracking.js',
+                'autopuzzle-visitor-tracking',
+                AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/visitor-tracking.js',
                 ['jquery'],
                 filemtime($script_path),
                 true
             );
             
             // Localize script
-            wp_localize_script('maneli-visitor-tracking', 'maneliVisitorTracking', [
+            wp_localize_script('autopuzzle-visitor-tracking', 'maneliVisitorTracking', [
                 'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
+                'nonce' => wp_create_nonce('autopuzzle_visitor_stats_nonce'),
                 'enabled' => true,
                 'debug' => defined('WP_DEBUG') && WP_DEBUG
             ]);
@@ -886,11 +886,11 @@ class Maneli_Hooks {
      */
     public function schedule_log_cleanup_cron() {
         // Check if auto cleanup is enabled (using optimized helper)
-        if (!Maneli_Options_Helper::is_option_enabled('enable_auto_log_cleanup', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('enable_auto_log_cleanup', false)) {
             // Unschedule if disabled
-            $timestamp = wp_next_scheduled('maneli_cleanup_old_logs');
+            $timestamp = wp_next_scheduled('autopuzzle_cleanup_old_logs');
             if ($timestamp) {
-                wp_unschedule_event($timestamp, 'maneli_cleanup_old_logs');
+                wp_unschedule_event($timestamp, 'autopuzzle_cleanup_old_logs');
             }
             return;
         }
@@ -907,8 +907,8 @@ class Maneli_Hooks {
         $schedule = $schedule_map[$frequency] ?? 'daily';
         
         // Schedule if not already scheduled or schedule changed
-        if (!wp_next_scheduled('maneli_cleanup_old_logs')) {
-            wp_schedule_event(time(), $schedule, 'maneli_cleanup_old_logs');
+        if (!wp_next_scheduled('autopuzzle_cleanup_old_logs')) {
+            wp_schedule_event(time(), $schedule, 'autopuzzle_cleanup_old_logs');
         }
     }
 
@@ -916,15 +916,15 @@ class Maneli_Hooks {
      * Cleanup old logs (called by cron)
      */
     public function cleanup_old_logs() {
-        if (!class_exists('Maneli_Logger')) {
+        if (!class_exists('Autopuzzle_Logger')) {
             return;
         }
         
-        $logger = Maneli_Logger::instance();
+        $logger = Autopuzzle_Logger::instance();
         $deleted_count = $logger->cleanup_old_logs();
         
         if (defined('WP_DEBUG') && WP_DEBUG && $deleted_count > 0) {
-            error_log(sprintf('Maneli Log Cleanup: Deleted %d old log entries', $deleted_count));
+            error_log(sprintf('AutoPuzzle Log Cleanup: Deleted %d old log entries', $deleted_count));
         }
     }
     

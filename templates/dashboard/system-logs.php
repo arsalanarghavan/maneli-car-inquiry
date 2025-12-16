@@ -15,8 +15,8 @@ if (!is_user_logged_in()) {
 }
 
 $current_user = wp_get_current_user();
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_manager = in_array('maneli_manager', $current_user->roles, true) || in_array('maneli_admin', $current_user->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_manager = in_array('autopuzzle_manager', $current_user->roles, true) || in_array('autopuzzle_admin', $current_user->roles, true);
 
 if (!$is_admin && !$is_manager) {
     wp_redirect(home_url('/dashboard'));
@@ -24,16 +24,16 @@ if (!$is_admin && !$is_manager) {
 }
 
 // Load Logger
-$logger = Maneli_Logger::instance();
+$logger = Autopuzzle_Logger::instance();
 
 // Enqueue Persian Datepicker (only for Persian locale)
-if (function_exists('maneli_enqueue_persian_datepicker')) {
-    maneli_enqueue_persian_datepicker();
+if (function_exists('autopuzzle_enqueue_persian_datepicker')) {
+    autopuzzle_enqueue_persian_datepicker();
 }
 
 // Helper function to convert Jalali to Gregorian
-if (!function_exists('maneli_jalali_to_gregorian')) {
-    function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+if (!function_exists('autopuzzle_jalali_to_gregorian')) {
+    function autopuzzle_jalali_to_gregorian($j_y, $j_m, $j_d) {
         $g_days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
         
@@ -88,8 +88,8 @@ if (!function_exists('maneli_jalali_to_gregorian')) {
 function convert_jalali_to_gregorian_date($date_str) {
     if (empty($date_str)) return '';
     
-    if (function_exists('maneli_convert_to_english_digits')) {
-        $date_str = maneli_convert_to_english_digits($date_str);
+    if (function_exists('autopuzzle_convert_to_english_digits')) {
+        $date_str = autopuzzle_convert_to_english_digits($date_str);
     }
 
     // Check if it's already in Gregorian format (YYYY-MM-DD)
@@ -105,8 +105,8 @@ function convert_jalali_to_gregorian_date($date_str) {
         
         // If year is between 1300-1500, it's likely Jalali
         if ($year >= 1300 && $year <= 1500) {
-            if (function_exists('maneli_jalali_to_gregorian')) {
-                list($gy, $gm, $gd) = maneli_jalali_to_gregorian($year, $month, $day);
+            if (function_exists('autopuzzle_jalali_to_gregorian')) {
+                list($gy, $gm, $gd) = autopuzzle_jalali_to_gregorian($year, $month, $day);
                 return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
             }
         }
@@ -115,8 +115,8 @@ function convert_jalali_to_gregorian_date($date_str) {
     return $date_str;
 }
 
-if (!function_exists('maneli_format_relative_path')) {
-    function maneli_format_relative_path($path) {
+if (!function_exists('autopuzzle_format_relative_path')) {
+    function autopuzzle_format_relative_path($path) {
         if (empty($path)) {
             return '';
         }
@@ -129,15 +129,15 @@ if (!function_exists('maneli_format_relative_path')) {
     }
 }
 
-if (!function_exists('maneli_format_localized_digits')) {
-    function maneli_format_localized_digits($value) {
+if (!function_exists('autopuzzle_format_localized_digits')) {
+    function autopuzzle_format_localized_digits($value) {
         static $cache_should_use_persian = null;
 
         $value = (string) $value;
 
         if ($cache_should_use_persian === null) {
-            $cache_should_use_persian = function_exists('maneli_should_use_persian_digits')
-                ? maneli_should_use_persian_digits()
+            $cache_should_use_persian = function_exists('autopuzzle_should_use_persian_digits')
+                ? autopuzzle_should_use_persian_digits()
                 : true;
         }
 
@@ -151,8 +151,8 @@ if (!function_exists('maneli_format_localized_digits')) {
             return $value;
         }
 
-        if (function_exists('maneli_convert_to_english_digits')) {
-            $value = maneli_convert_to_english_digits($value);
+        if (function_exists('autopuzzle_convert_to_english_digits')) {
+            $value = autopuzzle_convert_to_english_digits($value);
         } else {
             $value = str_replace($persian_digits, $english_digits, $value);
             $value = str_replace($arabic_digits, $english_digits, $value);
@@ -162,20 +162,20 @@ if (!function_exists('maneli_format_localized_digits')) {
     }
 }
 
-if (!function_exists('maneli_translate_log_label')) {
-    function maneli_translate_log_label($label, $type = 'severity') {
+if (!function_exists('autopuzzle_translate_log_label')) {
+    function autopuzzle_translate_log_label($label, $type = 'severity') {
         $maps = array(
             'severity' => array(
-                'info' => esc_html__('Info', 'maneli-car-inquiry'),
-                'warning' => esc_html__('Warning', 'maneli-car-inquiry'),
-                'error' => esc_html__('Error', 'maneli-car-inquiry'),
-                'critical' => esc_html__('Critical', 'maneli-car-inquiry'),
+                'info' => esc_html__('Info', 'autopuzzle'),
+                'warning' => esc_html__('Warning', 'autopuzzle'),
+                'error' => esc_html__('Error', 'autopuzzle'),
+                'critical' => esc_html__('Critical', 'autopuzzle'),
             ),
             'type' => array(
-                'error' => esc_html__('Error', 'maneli-car-inquiry'),
-                'debug' => esc_html__('Debug', 'maneli-car-inquiry'),
-                'console' => esc_html__('Console', 'maneli-car-inquiry'),
-                'button_error' => esc_html__('Button Error', 'maneli-car-inquiry'),
+                'error' => esc_html__('Error', 'autopuzzle'),
+                'debug' => esc_html__('Debug', 'autopuzzle'),
+                'console' => esc_html__('Console', 'autopuzzle'),
+                'button_error' => esc_html__('Button Error', 'autopuzzle'),
             ),
         );
         $label = strtolower((string) $label);
@@ -186,8 +186,8 @@ if (!function_exists('maneli_translate_log_label')) {
     }
 }
 
-if (!function_exists('maneli_format_log_datetime')) {
-    function maneli_format_log_datetime($datetime) {
+if (!function_exists('autopuzzle_format_log_datetime')) {
+    function autopuzzle_format_log_datetime($datetime) {
         $timestamp = strtotime($datetime);
         if (!$timestamp) {
             return '';
@@ -197,8 +197,8 @@ if (!function_exists('maneli_format_log_datetime')) {
         $month = date('m', $timestamp);
         $day = date('d', $timestamp);
 
-        if (function_exists('maneli_gregorian_to_jalali')) {
-            $date = maneli_gregorian_to_jalali($year, $month, $day, 'Y/m/d', false);
+        if (function_exists('autopuzzle_gregorian_to_jalali')) {
+            $date = autopuzzle_gregorian_to_jalali($year, $month, $day, 'Y/m/d', false);
         } else {
             $date = function_exists('wp_date') ? wp_date('Y-m-d', $timestamp) : date('Y-m-d', $timestamp);
         }
@@ -209,7 +209,7 @@ if (!function_exists('maneli_format_log_datetime')) {
 
         $time = function_exists('wp_date') ? wp_date('H:i:s', $timestamp) : date('H:i:s', $timestamp);
 
-        return maneli_format_localized_digits(trim($date . ' ' . $time));
+        return autopuzzle_format_localized_digits(trim($date . ' ' . $time));
     }
 }
 
@@ -220,10 +220,10 @@ $date_from_raw = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_fro
 $date_to_raw = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
 $page_num = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $per_page = isset($options['max_logs_per_page']) ? max(10, intval($options['max_logs_per_page'])) : 50;
 $offset = ($page_num - 1) * $per_page;
-$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+$use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 
 // Convert Jalali dates to Gregorian for database query
 $date_from = convert_jalali_to_gregorian_date($date_from_raw);
@@ -243,14 +243,14 @@ $args = array(
 $logs = $logger->get_system_logs($args);
 $total_logs = $logger->get_system_logs_count($args);
 $total_pages = ceil($total_logs / $per_page);
-$total_logs_label = maneli_format_localized_digits(number_format($total_logs));
+$total_logs_label = autopuzzle_format_localized_digits(number_format($total_logs));
 $date_placeholder = $use_persian_digits
-    ? maneli_format_localized_digits(__('YYYY/MM/DD', 'maneli-car-inquiry'))
-    : esc_html__('YYYY-MM-DD', 'maneli-car-inquiry');
-$date_from_display = maneli_format_localized_digits($date_from_raw);
-$date_to_display = maneli_format_localized_digits($date_to_raw);
+    ? autopuzzle_format_localized_digits(__('YYYY/MM/DD', 'autopuzzle'))
+    : esc_html__('YYYY-MM-DD', 'autopuzzle');
+$date_from_display = autopuzzle_format_localized_digits($date_from_raw);
+$date_to_display = autopuzzle_format_localized_digits($date_to_raw);
 $date_input_type = $use_persian_digits ? 'text' : 'date';
-$date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
+$date_input_class = $use_persian_digits ? 'autopuzzle-datepicker' : '';
 ?>
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -260,14 +260,14 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
             <div>
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item">
-                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>"><?php esc_html_e('System Logs', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>"><?php esc_html_e('System Logs', 'autopuzzle'); ?></a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('System Logs', 'maneli-car-inquiry'); ?></li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('System Logs', 'autopuzzle'); ?></li>
                 </ol>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('System Logs', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('System Logs', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- End::page-header -->
@@ -275,65 +275,65 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
         <!-- Filters -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
+                <div class="card custom-card autopuzzle-mobile-filter-card" data-autopuzzle-mobile-filter>
                     <div class="card-header">
                         <h5
-                            class="card-title mb-0 maneli-mobile-filter-toggle d-flex align-items-center gap-2"
-                            data-maneli-filter-toggle
+                            class="card-title mb-0 autopuzzle-mobile-filter-toggle d-flex align-items-center gap-2"
+                            data-autopuzzle-filter-toggle
                             role="button"
                             tabindex="0"
                             aria-expanded="false"
                         >
-                            <?php esc_html_e('Filters', 'maneli-car-inquiry'); ?>
-                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                            <?php esc_html_e('Filters', 'autopuzzle'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto autopuzzle-mobile-filter-arrow d-md-none"></i>
                         </h5>
                     </div>
-                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
+                    <div class="card-body autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                         <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" novalidate>
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
-                                    <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
+                                    <label class="form-label"><?php esc_html_e('Search', 'autopuzzle'); ?></label>
+                                    <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'autopuzzle'); ?>">
                                 </div>
                             </div>
 
                             <div class="row g-3 align-items-end mt-1">
                                 <div class="col-6 col-lg-3">
-                                    <label class="form-label"><?php esc_html_e('Log Type', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Log Type', 'autopuzzle'); ?></label>
                                     <select name="log_type" class="form-select">
-                                        <option value=""><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
-                                        <option value="error" <?php selected($log_type, 'error'); ?>><?php esc_html_e('Error', 'maneli-car-inquiry'); ?></option>
-                                        <option value="debug" <?php selected($log_type, 'debug'); ?>><?php esc_html_e('Debug', 'maneli-car-inquiry'); ?></option>
-                                        <option value="console" <?php selected($log_type, 'console'); ?>><?php esc_html_e('Console', 'maneli-car-inquiry'); ?></option>
-                                        <option value="button_error" <?php selected($log_type, 'button_error'); ?>><?php esc_html_e('Button Error', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Types', 'autopuzzle'); ?></option>
+                                        <option value="error" <?php selected($log_type, 'error'); ?>><?php esc_html_e('Error', 'autopuzzle'); ?></option>
+                                        <option value="debug" <?php selected($log_type, 'debug'); ?>><?php esc_html_e('Debug', 'autopuzzle'); ?></option>
+                                        <option value="console" <?php selected($log_type, 'console'); ?>><?php esc_html_e('Console', 'autopuzzle'); ?></option>
+                                        <option value="button_error" <?php selected($log_type, 'button_error'); ?>><?php esc_html_e('Button Error', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 <div class="col-6 col-lg-3">
-                                    <label class="form-label"><?php esc_html_e('Severity', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Severity', 'autopuzzle'); ?></label>
                                     <select name="severity" class="form-select">
-                                        <option value=""><?php esc_html_e('All Severities', 'maneli-car-inquiry'); ?></option>
-                                        <option value="info" <?php selected($severity, 'info'); ?>><?php esc_html_e('Info', 'maneli-car-inquiry'); ?></option>
-                                        <option value="warning" <?php selected($severity, 'warning'); ?>><?php esc_html_e('Warning', 'maneli-car-inquiry'); ?></option>
-                                        <option value="error" <?php selected($severity, 'error'); ?>><?php esc_html_e('Error', 'maneli-car-inquiry'); ?></option>
-                                        <option value="critical" <?php selected($severity, 'critical'); ?>><?php esc_html_e('Critical', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Severities', 'autopuzzle'); ?></option>
+                                        <option value="info" <?php selected($severity, 'info'); ?>><?php esc_html_e('Info', 'autopuzzle'); ?></option>
+                                        <option value="warning" <?php selected($severity, 'warning'); ?>><?php esc_html_e('Warning', 'autopuzzle'); ?></option>
+                                        <option value="error" <?php selected($severity, 'error'); ?>><?php esc_html_e('Error', 'autopuzzle'); ?></option>
+                                        <option value="critical" <?php selected($severity, 'critical'); ?>><?php esc_html_e('Critical', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 <div class="col-6 col-lg-3">
-                                    <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('From Date', 'autopuzzle'); ?></label>
                                     <input type="<?php echo esc_attr($date_input_type); ?>" name="date_from" id="date-from-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_from_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
                                 </div>
                                 <div class="col-6 col-lg-3">
-                                    <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('To Date', 'autopuzzle'); ?></label>
                                     <input type="<?php echo esc_attr($date_input_type); ?>" name="date_to" id="date-to-picker" class="form-control <?php echo esc_attr($date_input_class); ?>" value="<?php echo esc_attr($date_to_display); ?>" placeholder="<?php echo esc_attr($date_placeholder); ?>">
                                 </div>
                             </div>
 
                             <div class="row g-2 mt-3">
                                 <div class="col-6 col-lg-auto">
-                                    <button type="submit" class="btn btn-primary w-100"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
+                                    <button type="submit" class="btn btn-primary w-100"><?php esc_html_e('Filter', 'autopuzzle'); ?></button>
                                 </div>
                                 <div class="col-6 col-lg-auto">
-                                    <a href="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="btn btn-secondary w-100"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+                                    <a href="<?php echo esc_url(home_url('/dashboard/logs/system')); ?>" class="btn btn-secondary w-100"><?php esc_html_e('Reset', 'autopuzzle'); ?></a>
                                 </div>
                                 <div class="col-6 d-lg-none"></div>
                             </div>
@@ -348,12 +348,12 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
             <div class="col-12">
                 <div class="card custom-card">
                     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <h5 class="card-title mb-0"><?php esc_html_e('System Logs', 'maneli-car-inquiry'); ?></h5>
+                        <h5 class="card-title mb-0"><?php esc_html_e('System Logs', 'autopuzzle'); ?></h5>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="badge bg-primary"><?php echo esc_html($total_logs_label); ?> <?php esc_html_e('Logs', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-primary"><?php echo esc_html($total_logs_label); ?> <?php esc_html_e('Logs', 'autopuzzle'); ?></span>
                             <button id="delete-system-logs-btn" type="button" class="btn btn-outline-danger btn-sm">
                                 <i class="ri-delete-bin-6-line me-1"></i>
-                                <?php esc_html_e('Delete Logs', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('Delete Logs', 'autopuzzle'); ?>
                             </button>
                         </div>
                     </div>
@@ -363,14 +363,14 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                 <table class="table table-hover text-nowrap">
                                     <thead>
                                         <tr>
-                                            <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Type', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Severity', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Message', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('File/Line', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('User', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                            <th><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Type', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Severity', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Message', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('File/Line', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('User', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Date', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -389,13 +389,13 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                             elseif ($log->log_type === 'button_error') $log_type_class = 'bg-warning text-dark';
                                             
                                             $context = $log->context ? json_decode($log->context, true) : null;
-                                            $relative_path = maneli_format_relative_path($log->file);
+                                            $relative_path = autopuzzle_format_relative_path($log->file);
                                             $user_display = '';
                                             $user_title = '';
 
                                             if ($user) {
                                                 $user_display = $user->display_name;
-                                                $user_title = sprintf(__('User ID: %d', 'maneli-car-inquiry'), $user->ID);
+                                                $user_title = sprintf(__('User ID: %d', 'autopuzzle'), $user->ID);
                                             } elseif (!empty($log->ip_address)) {
                                                 $user_display = $log->ip_address;
                                                 $user_title = $log->user_agent ?: '';
@@ -404,23 +404,23 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                                 $user_title = $log->user_agent;
                                             }
                                             if (!empty($user_display)) {
-                                                $user_display = maneli_format_localized_digits($user_display);
+                                                $user_display = autopuzzle_format_localized_digits($user_display);
                                             }
                                             if (!empty($user_title)) {
-                                                $user_title = maneli_format_localized_digits($user_title);
+                                                $user_title = autopuzzle_format_localized_digits($user_title);
                                             }
                                             ?>
                                             <tr>
-                                                <td><?php echo esc_html(maneli_format_localized_digits($log->id)); ?></td>
-                                                <td><span class="badge <?php echo esc_attr($log_type_class); ?>"><?php echo esc_html(maneli_translate_log_label($log->log_type, 'type')); ?></span></td>
-                                                <td><span class="badge <?php echo esc_attr($severity_class); ?>"><?php echo esc_html(maneli_translate_log_label($log->severity, 'severity')); ?></span></td>
+                                                <td><?php echo esc_html(autopuzzle_format_localized_digits($log->id)); ?></td>
+                                                <td><span class="badge <?php echo esc_attr($log_type_class); ?>"><?php echo esc_html(autopuzzle_translate_log_label($log->log_type, 'type')); ?></span></td>
+                                                <td><span class="badge <?php echo esc_attr($severity_class); ?>"><?php echo esc_html(autopuzzle_translate_log_label($log->severity, 'severity')); ?></span></td>
                                                 <td>
                                                     <div class="log-message" title="<?php echo esc_attr($log->message); ?>">
                                                         <?php echo esc_html($log->message); ?>
                                                     </div>
                                                     <?php if ($context): ?>
                                                         <span class="badge bg-light text-dark mt-1" title="<?php echo esc_attr(json_encode($context, JSON_UNESCAPED_UNICODE)); ?>">
-                                                            <?php esc_html_e('Context', 'maneli-car-inquiry'); ?>
+                                                            <?php esc_html_e('Context', 'autopuzzle'); ?>
                                                         </span>
                                                     <?php endif; ?>
                                                 </td>
@@ -430,7 +430,7 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                                         <?php echo esc_html($relative_path); ?>
                                                         </div>
                                                         <?php if ($log->line): ?>
-                                                        <small class="text-muted"><?php echo esc_html(sprintf(__('Line %s', 'maneli-car-inquiry'), maneli_format_localized_digits($log->line))); ?></small>
+                                                        <small class="text-muted"><?php echo esc_html(sprintf(__('Line %s', 'autopuzzle'), autopuzzle_format_localized_digits($log->line))); ?></small>
                                                         <?php endif; ?>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
@@ -446,11 +446,11 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <?php echo esc_html(maneli_format_log_datetime($log->created_at)); ?>
+                                                    <?php echo esc_html(autopuzzle_format_log_datetime($log->created_at)); ?>
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary" onclick="showLogDetails(<?php echo esc_js($log->id); ?>)">
-                                                        <?php esc_html_e('Details', 'maneli-car-inquiry'); ?>
+                                                        <?php esc_html_e('Details', 'autopuzzle'); ?>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -475,14 +475,14 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                         if ($page_num > 1):
                                             ?>
                                             <li class="page-item">
-                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num - 1, $current_url)); ?>"><?php esc_html_e('Previous', 'maneli-car-inquiry'); ?></a>
+                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num - 1, $current_url)); ?>"><?php esc_html_e('Previous', 'autopuzzle'); ?></a>
                                             </li>
                                         <?php endif; ?>
                                         
                                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                             <?php if ($i == 1 || $i == $total_pages || ($i >= $page_num - 2 && $i <= $page_num + 2)): ?>
                                                 <li class="page-item <?php echo $i == $page_num ? 'active' : ''; ?>">
-                                                    <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $i, $current_url)); ?>"><?php echo esc_html(maneli_format_localized_digits($i)); ?></a>
+                                                    <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $i, $current_url)); ?>"><?php echo esc_html(autopuzzle_format_localized_digits($i)); ?></a>
                                                 </li>
                                             <?php elseif ($i == $page_num - 3 || $i == $page_num + 3): ?>
                                                 <li class="page-item disabled">
@@ -493,7 +493,7 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                         
                                         <?php if ($page_num < $total_pages): ?>
                                             <li class="page-item">
-                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num + 1, $current_url)); ?>"><?php esc_html_e('Next', 'maneli-car-inquiry'); ?></a>
+                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num + 1, $current_url)); ?>"><?php esc_html_e('Next', 'autopuzzle'); ?></a>
                                             </li>
                                         <?php endif; ?>
                                     </ul>
@@ -501,7 +501,7 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                             <?php endif; ?>
                         <?php else: ?>
                             <div class="alert alert-info">
-                                <?php esc_html_e('No logs found.', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('No logs found.', 'autopuzzle'); ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -517,7 +517,7 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Log Details', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title"><?php esc_html_e('Log Details', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="logDetailsContent">
@@ -545,10 +545,10 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                 }
             });
 
-            var deleteLogsNonce = '<?php echo esc_js(wp_create_nonce('maneli_log_actions_nonce')); ?>';
-            var deleteLogsConfirm = '<?php echo esc_js(__('Are you sure you want to delete all system logs? This action cannot be undone.', 'maneli-car-inquiry')); ?>';
-            var deleteLogsSuccess = '<?php echo esc_js(__('System logs deleted successfully.', 'maneli-car-inquiry')); ?>';
-            var deleteLogsFailure = '<?php echo esc_js(__('Failed to delete system logs.', 'maneli-car-inquiry')); ?>';
+            var deleteLogsNonce = '<?php echo esc_js(wp_create_nonce('autopuzzle_log_actions_nonce')); ?>';
+            var deleteLogsConfirm = '<?php echo esc_js(__('Are you sure you want to delete all system logs? This action cannot be undone.', 'autopuzzle')); ?>';
+            var deleteLogsSuccess = '<?php echo esc_js(__('System logs deleted successfully.', 'autopuzzle')); ?>';
+            var deleteLogsFailure = '<?php echo esc_js(__('Failed to delete system logs.', 'autopuzzle')); ?>';
 
             $('#delete-system-logs-btn').on('click', function() {
                 var $btn = $(this);
@@ -567,7 +567,7 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                     type: 'POST',
                     dataType: 'json',
                     data: {
-                        action: 'maneli_delete_system_logs',
+                        action: 'autopuzzle_delete_system_logs',
                         nonce: deleteLogsNonce
                     }
                 }).done(function(response) {
@@ -598,7 +598,7 @@ $date_input_class = $use_persian_digits ? 'maneli-datepicker' : '';
                                 ensureDatepickerPlugin(callback);
                             }, 150);
                         } else {
-                            console.warn('<?php echo esc_js(__('The persianDatepicker plugin was not loaded in time on the system logs page.', 'maneli-car-inquiry')); ?>');
+                            console.warn('<?php echo esc_js(__('The persianDatepicker plugin was not loaded in time on the system logs page.', 'autopuzzle')); ?>');
                         }
                         return;
                     }
@@ -657,9 +657,9 @@ function showLogDetails(logId) {
         url: '<?php echo admin_url('admin-ajax.php'); ?>',
         type: 'POST',
         data: {
-            action: 'maneli_get_system_log_details',
+            action: 'autopuzzle_get_system_log_details',
             log_id: logId,
-            security: '<?php echo wp_create_nonce('maneli_log_details_nonce'); ?>'
+            security: '<?php echo wp_create_nonce('autopuzzle_log_details_nonce'); ?>'
         },
         success: function(response) {
             if (response.success) {

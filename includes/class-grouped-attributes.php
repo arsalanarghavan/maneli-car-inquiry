@@ -3,7 +3,7 @@
  * Handles the display of product attributes in custom grouped tables,
  * replacing the default WooCommerce "Additional Information" tab.
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.0
  */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Grouped_Attributes {
+class Autopuzzle_Grouped_Attributes {
 
     public function __construct() {
         // Replace the default "Additional Information" tab callback with our custom function.
@@ -57,7 +57,7 @@ class Maneli_Grouped_Attributes {
         }
         
         // Pass the grouped attributes to a template file for rendering.
-        maneli_get_template_part('public/grouped-attributes-table', ['grouped_attributes' => $grouped_attributes]);
+        autopuzzle_get_template_part('public/grouped-attributes-table', ['grouped_attributes' => $grouped_attributes]);
     }
 
     /**
@@ -69,7 +69,7 @@ class Maneli_Grouped_Attributes {
      */
     private function group_attributes($attributes, $product) {
         $grouped_data = [];
-        $unknown_group_name = esc_html__('Other Specifications', 'maneli-car-inquiry');
+        $unknown_group_name = esc_html__('Other Specifications', 'autopuzzle');
         $delimiter = ' - '; // Delimiter used in attribute names, e.g., "Technical - Engine"
 
         foreach ($attributes as $attribute) {

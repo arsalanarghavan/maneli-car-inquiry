@@ -5,7 +5,7 @@
  */
 
 // Permission check - Only Admin can access
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
@@ -20,22 +20,22 @@ if (!function_exists('persian_numbers')) {
 }
 
 // Get options
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $active_gateway = $options['active_gateway'] ?? 'zarinpal';
 $inquiry_fee = (int)($options['inquiry_fee'] ?? 0);
 
 // Localization helpers for labels
 $payment_type_labels = [
-    'inquiry_fee' => esc_html__('Inquiry Fee Payment', 'maneli-car-inquiry'),
-    'cash_down_payment' => esc_html__('Cash Car Down Payment', 'maneli-car-inquiry'),
+    'inquiry_fee' => esc_html__('Inquiry Fee Payment', 'autopuzzle'),
+    'cash_down_payment' => esc_html__('Cash Car Down Payment', 'autopuzzle'),
 ];
 
 $gateway_labels = [
-    'zarinpal' => esc_html__('Zarinpal Gateway', 'maneli-car-inquiry'),
-    'sadad' => esc_html__('Sadad Gateway', 'maneli-car-inquiry'),
+    'zarinpal' => esc_html__('Zarinpal Gateway', 'autopuzzle'),
+    'sadad' => esc_html__('Sadad Gateway', 'autopuzzle'),
 ];
 
-$default_gateway_label = esc_html__('Bank Gateway', 'maneli-car-inquiry');
+$default_gateway_label = esc_html__('Bank Gateway', 'autopuzzle');
 
 // Get search and filter parameters
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
@@ -78,7 +78,7 @@ foreach ($installment_inquiries as $inquiry) {
     $paid_amount = get_post_meta($inquiry->ID, 'inquiry_paid_amount', true);
     if ($paid_amount === '') {
         // Fallback: if meta doesn't exist, calculate from current settings
-        $discount_applied = get_user_meta($user_id, 'maneli_discount_applied', true) === 'yes';
+        $discount_applied = get_user_meta($user_id, 'autopuzzle_discount_applied', true) === 'yes';
         $paid_amount = ($discount_applied || $inquiry_fee == 0) ? 0 : $inquiry_fee;
     } else {
         $paid_amount = (int)$paid_amount;
@@ -94,7 +94,7 @@ foreach ($installment_inquiries as $inquiry) {
         'inquiry_id' => $inquiry->ID,
         'inquiry_type' => 'installment',
         'payment_type' => 'inquiry_fee',
-        'payment_type_label' => $payment_type_labels['inquiry_fee'] ?? esc_html__('Inquiry Fee Payment', 'maneli-car-inquiry'),
+        'payment_type_label' => $payment_type_labels['inquiry_fee'] ?? esc_html__('Inquiry Fee Payment', 'autopuzzle'),
         'product_id' => $product_id,
         'product_name' => $product ? $product->get_name() : '-',
         'user_id' => $user_id,
@@ -138,7 +138,7 @@ foreach ($cash_inquiries as $inquiry) {
         'inquiry_id' => $inquiry->ID,
         'inquiry_type' => 'cash',
         'payment_type' => 'cash_down_payment',
-        'payment_type_label' => $payment_type_labels['cash_down_payment'] ?? esc_html__('Cash Car Down Payment', 'maneli-car-inquiry'),
+        'payment_type_label' => $payment_type_labels['cash_down_payment'] ?? esc_html__('Cash Car Down Payment', 'autopuzzle'),
         'product_id' => $product_id,
         'product_name' => $product ? $product->get_name() : '-',
         'user_id' => $user_id,
@@ -209,11 +209,11 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Payment Management', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Payment Management', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- Page Header Close -->
@@ -305,7 +305,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
 }
 </style>
 
-<div class="row mb-4 maneli-mobile-card-scroll">
+<div class="row mb-4 autopuzzle-mobile-card-scroll">
     <!-- کارت مجموع پرداخت‌ها -->
     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
         <div class="card custom-card crm-card overflow-hidden">
@@ -317,10 +317,10 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                         </span>
                     </div>
                 </div>
-                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Payments', 'maneli-car-inquiry'); ?></p>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Payments', 'autopuzzle'); ?></p>
                 <div class="d-flex align-items-center justify-content-between mt-1">
                     <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($total_payments_unfiltered)); ?></h4>
-                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></span>
+                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'autopuzzle'); ?></span>
                 </div>
             </div>
         </div>
@@ -337,10 +337,10 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                         </span>
                     </div>
                 </div>
-                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Amount', 'maneli-car-inquiry'); ?></p>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Amount', 'autopuzzle'); ?></p>
                 <div class="d-flex align-items-center justify-content-between mt-1">
                     <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($total_amount_unfiltered)); ?></h4>
-                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Toman', 'autopuzzle'); ?></span>
                 </div>
             </div>
         </div>
@@ -357,10 +357,10 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                         </span>
                     </div>
                 </div>
-                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Inquiry Fee Payments', 'maneli-car-inquiry'); ?></p>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Inquiry Fee Payments', 'autopuzzle'); ?></p>
                 <div class="d-flex align-items-center justify-content-between mt-1">
                     <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($inquiry_fee_count)); ?></h4>
-                    <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></span>
+                    <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Installment', 'autopuzzle'); ?></span>
                 </div>
             </div>
         </div>
@@ -377,10 +377,10 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                         </span>
                     </div>
                 </div>
-                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Down Payments', 'maneli-car-inquiry'); ?></p>
+                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Down Payments', 'autopuzzle'); ?></p>
                 <div class="d-flex align-items-center justify-content-between mt-1">
                     <h4 class="mb-0 d-flex align-items-center"><?php echo persian_numbers(number_format_i18n($cash_downpayment_count)); ?></h4>
-                    <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
+                    <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Cash', 'autopuzzle'); ?></span>
                 </div>
             </div>
         </div>
@@ -393,21 +393,21 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                 <div class="card custom-card">
                     <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                         <div class="card-title">
-                            <?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Payment Management', 'autopuzzle'); ?>
                         </div>
                         <div class="btn-list payments-header-actions">
                             <div class="custom-form-group flex-grow-1 me-2">
-                                <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search payments...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>" id="payment-search-input">
+                                <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search payments...', 'autopuzzle'); ?>" value="<?php echo esc_attr($search); ?>" id="payment-search-input">
                                 <a href="javascript:void(0);" class="text-muted custom-form-btn" onclick="filterPayments()"><i class="ti ti-search"></i></a>
                             </div>
                             <div class="dropdown">
                                 <button type="button" class="btn btn-primary-light btn-sm btn-wave" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="ri-filter-3-line align-middle me-1 d-inline-block"></i><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?>
+                                    <i class="ri-filter-3-line align-middle me-1 d-inline-block"></i><?php esc_html_e('Filter', 'autopuzzle'); ?>
                                 </button>
                                 <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?php echo esc_url(home_url('/dashboard/payments')); ?>"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></a></li>
-                                <li><a class="dropdown-item" href="<?php echo esc_url(add_query_arg(['payment_type' => 'inquiry_fee'], home_url('/dashboard/payments'))); ?>"><?php esc_html_e('Inquiry Fee Payment', 'maneli-car-inquiry'); ?></a></li>
-                                <li><a class="dropdown-item" href="<?php echo esc_url(add_query_arg(['payment_type' => 'cash_down_payment'], home_url('/dashboard/payments'))); ?>"><?php esc_html_e('Cash Car Down Payment', 'maneli-car-inquiry'); ?></a></li>
+                                <li><a class="dropdown-item" href="<?php echo esc_url(home_url('/dashboard/payments')); ?>"><?php esc_html_e('All', 'autopuzzle'); ?></a></li>
+                                <li><a class="dropdown-item" href="<?php echo esc_url(add_query_arg(['payment_type' => 'inquiry_fee'], home_url('/dashboard/payments'))); ?>"><?php esc_html_e('Inquiry Fee Payment', 'autopuzzle'); ?></a></li>
+                                <li><a class="dropdown-item" href="<?php echo esc_url(add_query_arg(['payment_type' => 'cash_down_payment'], home_url('/dashboard/payments'))); ?>"><?php esc_html_e('Cash Car Down Payment', 'autopuzzle'); ?></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -417,15 +417,15 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th scope="col"><?php esc_html_e('Inquiry ID', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Car', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Mobile', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Payment Date', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Payment Type', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Payment Method', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Amount', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Inquiry ID', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Car', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Customer', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Mobile', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Payment Date', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Payment Type', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Payment Method', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Amount', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -468,8 +468,8 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                                                 <td>
                                                     <?php
                                                     $timestamp = strtotime($payment['payment_date']);
-                                                    if (function_exists('maneli_gregorian_to_jalali')) {
-                                                        echo persian_numbers(maneli_gregorian_to_jalali(
+                                                    if (function_exists('autopuzzle_gregorian_to_jalali')) {
+                                                        echo persian_numbers(autopuzzle_gregorian_to_jalali(
                                                             date('Y', $timestamp),
                                                             date('m', $timestamp),
                                                             date('d', $timestamp),
@@ -484,13 +484,13 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                                                 <td><?php echo esc_html($payment['gateway_label']); ?></td>
                                                 <td class="fw-semibold">
                                                     <?php if ($payment['amount'] > 0): ?>
-                                                        <?php echo persian_numbers(number_format_i18n($payment['amount'])); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?>
+                                                        <?php echo persian_numbers(number_format_i18n($payment['amount'])); ?> <?php esc_html_e('Toman', 'autopuzzle'); ?>
                                                     <?php else: ?>
-                                                        <span class="text-success"><?php esc_html_e('Free!', 'maneli-car-inquiry'); ?></span>
+                                                        <span class="text-success"><?php esc_html_e('Free!', 'autopuzzle'); ?></span>
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <a href="<?php echo esc_url(add_query_arg('view_payment', $payment['inquiry_id'], home_url('/dashboard/payments'))); ?>" class="btn btn-icon btn-sm btn-primary-light btn-wave waves-effect waves-light" title="<?php esc_attr_e('View Payment Details', 'maneli-car-inquiry'); ?>">
+                                                    <a href="<?php echo esc_url(add_query_arg('view_payment', $payment['inquiry_id'], home_url('/dashboard/payments'))); ?>" class="btn btn-icon btn-sm btn-primary-light btn-wave waves-effect waves-light" title="<?php esc_attr_e('View Payment Details', 'autopuzzle'); ?>">
                                                         <i class="ri-eye-line"></i>
                                                     </a>
                                                 </td>
@@ -505,7 +505,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                         <div class="card-footer border-top-0">
                             <div class="d-flex align-items-center flex-wrap overflow-auto">
                                 <div class="mb-2 mb-sm-0">
-                                    <?php printf(esc_html__('Showing %1$s to %2$s of %3$s items', 'maneli-car-inquiry'), '<b>' . persian_numbers($offset + 1) . '</b>', '<b>' . persian_numbers(min($offset + $per_page, $total_payments)) . '</b>', '<b>' . persian_numbers($total_payments) . '</b>'); ?> <i class="bi bi-arrow-left ms-2 fw-semibold"></i>
+                                    <?php printf(esc_html__('Showing %1$s to %2$s of %3$s items', 'autopuzzle'), '<b>' . persian_numbers($offset + 1) . '</b>', '<b>' . persian_numbers(min($offset + $per_page, $total_payments)) . '</b>', '<b>' . persian_numbers($total_payments) . '</b>'); ?> <i class="bi bi-arrow-left ms-2 fw-semibold"></i>
                                 </div>
                                 <div class="ms-auto">
                                     <?php
@@ -523,7 +523,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                                         $prev_link = $paged > 1 ? add_query_arg('paged', $paged - 1, $base_url) : 'javascript:void(0);';
                                         $prev_disabled = $paged <= 1 ? ' disabled' : '';
                                         echo '<li class="page-item' . $prev_disabled . '">';
-                                        echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'maneli-car-inquiry') . '</a>';
+                                        echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'autopuzzle') . '</a>';
                                         echo '</li>';
                                         
                                         // Page numbers
@@ -560,7 +560,7 @@ $total_amount = array_sum(array_column($payments_list, 'amount'));
                                         $next_link = $paged < $total_pages ? add_query_arg('paged', $paged + 1, $base_url) : 'javascript:void(0);';
                                         $next_disabled = $paged >= $total_pages ? ' disabled' : '';
                                         echo '<li class="page-item' . $next_disabled . '">';
-                                        echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'maneli-car-inquiry') . '</a>';
+                                        echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'autopuzzle') . '</a>';
                                         echo '</li>';
                                         ?>
                                     </ul>

@@ -1,6 +1,6 @@
 /**
  * Handles all frontend JavaScript logic for the User Management interface,
- * rendered by the [maneli_user_list] shortcode.
+ * rendered by the [autopuzzle_user_list] shortcode.
  *
  * This includes AJAX filtering, pagination, and user deletion with confirmation.
  *
@@ -10,19 +10,19 @@ jQuery(document).ready(function($) {
     'use strict';
 
     // Find the main container for the user list. If it doesn't exist, do nothing.
-    const userListContainer = $('#maneli-user-filter-form');
+    const userListContainer = $('#autopuzzle-user-filter-form');
     if (!userListContainer.length) {
         return;
     }
 
     // Cache frequently used DOM elements
-    const userListBody = $('#maneli-user-list-tbody');
+    const userListBody = $('#autopuzzle-user-list-tbody');
     const searchInput = $('#user-search-input');
     const roleFilter = $('#role-filter');
     const orderbyFilter = $('#orderby-filter');
     const orderFilter = $('#order-filter');
     const loader = $('#user-list-loader');
-    const paginationWrapper = $('.maneli-pagination-wrapper');
+    const paginationWrapper = $('.autopuzzle-pagination-wrapper');
 
     let xhr;
     let searchTimeout;
@@ -45,7 +45,7 @@ jQuery(document).ready(function($) {
         paginationWrapper.css('opacity', 0.5);
 
         const formData = {
-            action: 'maneli_filter_users_ajax',
+            action: 'autopuzzle_filter_users_ajax',
             _ajax_nonce: maneliUserManagement.filter_nonce,
             search: searchInput.val(),
             role: roleFilter.val(),
@@ -146,7 +146,7 @@ jQuery(document).ready(function($) {
                     url: maneliUserManagement.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_delete_user_ajax',
+                        action: 'autopuzzle_delete_user_ajax',
                         user_id: userId,
                         _ajax_nonce: maneliUserManagement.delete_nonce
                     },

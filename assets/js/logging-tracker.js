@@ -69,7 +69,7 @@
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_log_console',
+                    action: 'autopuzzle_log_console',
                     log_type: logType,
                     severity: severity,
                     message: message,
@@ -145,14 +145,14 @@
             var isLoggingAction = false;
             if (options.data) {
                 if (options.data instanceof FormData) {
-                    isLoggingAction = options.data.get('action') === 'maneli_log_user_action' || 
-                                     options.data.get('action') === 'maneli_log_console';
+                    isLoggingAction = options.data.get('action') === 'autopuzzle_log_user_action' || 
+                                     options.data.get('action') === 'autopuzzle_log_console';
                 } else if (typeof options.data === 'object') {
-                    isLoggingAction = options.data.action === 'maneli_log_user_action' || 
-                                     options.data.action === 'maneli_log_console';
+                    isLoggingAction = options.data.action === 'autopuzzle_log_user_action' || 
+                                     options.data.action === 'autopuzzle_log_console';
                 } else if (typeof options.data === 'string') {
-                    isLoggingAction = options.data.indexOf('action=maneli_log_user_action') !== -1 || 
-                                     options.data.indexOf('action=maneli_log_console') !== -1;
+                    isLoggingAction = options.data.indexOf('action=autopuzzle_log_user_action') !== -1 || 
+                                     options.data.indexOf('action=autopuzzle_log_console') !== -1;
                 }
             }
             
@@ -190,7 +190,7 @@
         function logUserAction(actionType, description, targetType, targetId, metadata) {
             if (!ajaxUrl) {
                 if (typeof console !== 'undefined' && console.warn) {
-                    console.warn('Maneli Logging: AJAX URL not available');
+                    console.warn('AutoPuzzle Logging: AJAX URL not available');
                 }
                 return;
             }
@@ -205,7 +205,7 @@
                 url: ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_log_user_action',
+                    action: 'autopuzzle_log_user_action',
                     action_type: actionType,
                     action_description: description,
                     target_type: targetType,
@@ -216,13 +216,13 @@
                 success: function(response) {
                     // Optional: Log success in debug mode
                     if (typeof window !== 'undefined' && window.maneliDebugLogging === true) {
-                        console.log('Maneli Logging: User action logged', actionType, description);
+                        console.log('AutoPuzzle Logging: User action logged', actionType, description);
                     }
                 },
                 error: function(xhr, status, error) {
                     // Log errors only in debug mode to avoid console spam
                     if (typeof window !== 'undefined' && window.maneliDebugLogging === true) {
-                        console.warn('Maneli Logging: Failed to log user action', {
+                        console.warn('AutoPuzzle Logging: Failed to log user action', {
                             actionType: actionType,
                             description: description,
                             status: status,

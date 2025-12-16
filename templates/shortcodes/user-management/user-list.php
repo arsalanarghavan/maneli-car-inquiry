@@ -1,11 +1,11 @@
 <?php
 /**
- * Template for the main User List view, rendered by the [maneli_user_list] shortcode.
+ * Template for the main User List view, rendered by the [autopuzzle_user_list] shortcode.
  *
  * This template displays statistical widgets, filter controls, and the table of users.
  * The table body is populated initially and then updated via AJAX.
  *
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/UserManagement
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/UserManagement
  * @author  Gemini
  * @version 1.0.0
  *
@@ -45,52 +45,52 @@ if (!defined('ABSPATH')) {
 
         <div class="card custom-card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <div class="card-title"><?php esc_html_e('Complete User List', 'maneli-car-inquiry'); ?></div>
+                <div class="card-title"><?php esc_html_e('Complete User List', 'autopuzzle'); ?></div>
                 <a href="<?php echo esc_url(add_query_arg('add_user', 'true', $current_url)); ?>" class="btn btn-primary">
                     <i class="la la-user-plus me-1"></i>
-                    <?php esc_html_e('Add New User', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Add New User', 'autopuzzle'); ?>
                 </a>
             </div>
             
             <div class="card-body">
-                <form id="maneli-user-filter-form" onsubmit="return false;">
+                <form id="autopuzzle-user-filter-form" onsubmit="return false;">
                     <div class="row g-3 mb-3">
                         <div class="col-md-12">
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="la la-search"></i>
                                 </span>
-                                <input type="search" id="user-search-input" name="s" class="form-control" placeholder="<?php esc_attr_e('Search by name, email, mobile, or national ID...', 'maneli-car-inquiry'); ?>">
+                                <input type="search" id="user-search-input" name="s" class="form-control" placeholder="<?php esc_attr_e('Search by name, email, mobile, or national ID...', 'autopuzzle'); ?>">
                             </div>
                         </div>
                     </div>
                     
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
-                            <label for="role-filter" class="form-label"><?php esc_html_e('User Role:', 'maneli-car-inquiry'); ?></label>
+                            <label for="role-filter" class="form-label"><?php esc_html_e('User Role:', 'autopuzzle'); ?></label>
                             <select name="role" id="role-filter" class="form-select">
-                                <option value=""><?php esc_html_e('All Roles', 'maneli-car-inquiry'); ?></option>
-                                <option value="customer"><?php esc_html_e('Customer', 'maneli-car-inquiry'); ?></option>
-                                <option value="maneli_expert"><?php esc_html_e('Maneli Expert', 'maneli-car-inquiry'); ?></option>
-                                <option value="maneli_admin"><?php esc_html_e('Maneli Manager', 'maneli-car-inquiry'); ?></option>
-                                <option value="administrator"><?php esc_html_e('General Manager', 'maneli-car-inquiry'); ?></option>
+                                <option value=""><?php esc_html_e('All Roles', 'autopuzzle'); ?></option>
+                                <option value="customer"><?php esc_html_e('Customer', 'autopuzzle'); ?></option>
+                                <option value="autopuzzle_expert"><?php esc_html_e('AutoPuzzle Expert', 'autopuzzle'); ?></option>
+                                <option value="autopuzzle_admin"><?php esc_html_e('AutoPuzzle Manager', 'autopuzzle'); ?></option>
+                                <option value="administrator"><?php esc_html_e('General Manager', 'autopuzzle'); ?></option>
                             </select>
                         </div>
                         
                         <div class="col-md-4">
-                            <label for="orderby-filter" class="form-label"><?php esc_html_e('Order By:', 'maneli-car-inquiry'); ?></label>
+                            <label for="orderby-filter" class="form-label"><?php esc_html_e('Order By:', 'autopuzzle'); ?></label>
                             <select name="orderby" id="orderby-filter" class="form-select">
-                                <option value="display_name"><?php esc_html_e('Display Name', 'maneli-car-inquiry'); ?></option>
-                                <option value="user_registered"><?php esc_html_e('Registration Date', 'maneli-car-inquiry'); ?></option>
-                                <option value="user_login"><?php esc_html_e('Username', 'maneli-car-inquiry'); ?></option>
+                                <option value="display_name"><?php esc_html_e('Display Name', 'autopuzzle'); ?></option>
+                                <option value="user_registered"><?php esc_html_e('Registration Date', 'autopuzzle'); ?></option>
+                                <option value="user_login"><?php esc_html_e('Username', 'autopuzzle'); ?></option>
                             </select>
                         </div>
                         
                         <div class="col-md-4">
-                            <label for="order-filter" class="form-label"><?php esc_html_e('Order:', 'maneli-car-inquiry'); ?></label>
+                            <label for="order-filter" class="form-label"><?php esc_html_e('Order:', 'autopuzzle'); ?></label>
                             <select name="order" id="order-filter" class="form-select">
-                                <option value="ASC"><?php esc_html_e('Ascending', 'maneli-car-inquiry'); ?></option>
-                                <option value="DESC"><?php esc_html_e('Descending', 'maneli-car-inquiry'); ?></option>
+                                <option value="ASC"><?php esc_html_e('Ascending', 'autopuzzle'); ?></option>
+                                <option value="DESC"><?php esc_html_e('Descending', 'autopuzzle'); ?></option>
                             </select>
                         </div>
                     </div>
@@ -100,24 +100,24 @@ if (!defined('ABSPATH')) {
                     <table class="table table-bordered table-hover text-nowrap">
                         <thead class="table-light">
                             <tr>
-                                <th><?php esc_html_e('Display Name', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Username', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Email', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Role', 'maneli-car-inquiry'); ?></th>
-                                <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                <th><?php esc_html_e('Display Name', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Username', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Email', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Role', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                             </tr>
                         </thead>
-                        <tbody id="maneli-user-list-tbody">
+                        <tbody id="autopuzzle-user-list-tbody">
                             <?php
                             $all_users = $initial_user_query->get_results();
                             if (!empty($all_users)) :
                                 foreach ($all_users as $user) :
                                     if ($user->ID === get_current_user_id()) continue; // Don't show the current user in the list
-                                    Maneli_Render_Helpers::render_user_list_row($user, $current_url);
+                                    Autopuzzle_Render_Helpers::render_user_list_row($user, $current_url);
                                 endforeach;
                             else :
                                 ?>
-                                <tr><td colspan="5" class="text-center"><?php esc_html_e('No users found.', 'maneli-car-inquiry'); ?></td></tr>
+                                <tr><td colspan="5" class="text-center"><?php esc_html_e('No users found.', 'autopuzzle'); ?></td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -125,11 +125,11 @@ if (!defined('ABSPATH')) {
                 
                 <div id="user-list-loader" style="display:none; text-align:center; padding: 40px;">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'maneli-car-inquiry'); ?></span>
+                        <span class="visually-hidden"><?php esc_html_e('Loading...', 'autopuzzle'); ?></span>
                     </div>
                 </div>
                 
-                <div class="maneli-pagination-wrapper mt-3 text-center">
+                <div class="autopuzzle-pagination-wrapper mt-3 text-center">
                     <?php
                     $total_users = $initial_user_query->get_total();
                     $total_pages = ceil($total_users / 50);
@@ -138,8 +138,8 @@ if (!defined('ABSPATH')) {
                         'format'    => '?paged=%#%',
                         'current'   => max(1, get_query_var('paged')),
                         'total'     => $total_pages,
-                        'prev_text' => '&laquo; ' . esc_html__('Previous', 'maneli-car-inquiry'),
-                        'next_text' => esc_html__('Next', 'maneli-car-inquiry') . ' &raquo;',
+                        'prev_text' => '&laquo; ' . esc_html__('Previous', 'autopuzzle'),
+                        'next_text' => esc_html__('Next', 'autopuzzle') . ' &raquo;',
                         'type'      => 'plain',
                     ]);
                     ?>

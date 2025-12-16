@@ -3,7 +3,7 @@
  * Handles the [loan_calculator] shortcode, which displays the installment calculator
  * and the cash purchase request form on the single product page.
  *
- * @package Maneli_Car_Inquiry/Includes/Shortcodes
+ * @package Autopuzzle_Car_Inquiry/Includes/Shortcodes
  * @author  Arsalan Arghavan (Refactored by Gemini)
  * @version 1.0.1 (Added interest rate localization and conditional asset loading)
  */
@@ -12,11 +12,11 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Loan_Calculator_Shortcode {
+class Autopuzzle_Loan_Calculator_Shortcode {
 
     public function __construct() {
         // Check license before registering shortcode (using optimized helper)
-        if (!Maneli_Permission_Helpers::is_license_active() && !Maneli_Permission_Helpers::is_demo_mode()) {
+        if (!Autopuzzle_Permission_Helpers::is_license_active() && !Autopuzzle_Permission_Helpers::is_demo_mode()) {
             // License not active - register shortcode that shows message
             add_shortcode('loan_calculator', [$this, 'render_license_required_message']);
             return;
@@ -48,58 +48,58 @@ class Maneli_Loan_Calculator_Shortcode {
         }
 
         // First, ensure frontend styles are registered/enqueued as dependencies
-        // This is handled by Maneli_Shortcode_Handler, but we need to ensure they're available
-        $frontend_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/frontend.css';
-        if (!wp_style_is('maneli-frontend-styles', 'registered')) {
+        // This is handled by Autopuzzle_Shortcode_Handler, but we need to ensure they're available
+        $frontend_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/frontend.css';
+        if (!wp_style_is('autopuzzle-frontend-styles', 'registered')) {
             if (file_exists($frontend_css_path)) {
                 $css_version = filemtime($frontend_css_path);
-                wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
+                wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
             } else {
-                // Use maneli-shortcode-assets.css as fallback if frontend.css doesn't exist
-                $fallback_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/maneli-shortcode-assets.css';
+                // Use autopuzzle-shortcode-assets.css as fallback if frontend.css doesn't exist
+                $fallback_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-shortcode-assets.css';
                 if (file_exists($fallback_css_path)) {
                     $css_version = filemtime($fallback_css_path);
-                    wp_register_style('maneli-frontend-styles', MANELI_INQUIRY_PLUGIN_URL . 'assets/css/maneli-shortcode-assets.css', [], $css_version);
+                    wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-shortcode-assets.css', [], $css_version);
                 }
             }
         }
 
         // Ensure Bootstrap is registered/enqueued as dependency
-        if (!wp_style_is('maneli-bootstrap-shortcode', 'registered')) {
-            wp_register_style('maneli-bootstrap-shortcode', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        if (!wp_style_is('autopuzzle-bootstrap-shortcode', 'registered')) {
+            wp_register_style('autopuzzle-bootstrap-shortcode', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
         }
 
-        $options = Maneli_Options_Helper::get_all_options();
+        $options = Autopuzzle_Options_Helper::get_all_options();
         
         // Fetch configurable interest rate 
         $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
         
         // Enqueue calculator CSS - check if file exists first
-        $calculator_css_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css';
+        $calculator_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/loan-calculator.css';
         if (file_exists($calculator_css_path)) {
             wp_enqueue_style(
-                'maneli-loan-calculator', 
-                MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css', 
-                ['maneli-frontend-styles', 'maneli-bootstrap-shortcode'],
+                'autopuzzle-loan-calculator', 
+                AUTOPUZZLE_PLUGIN_URL . 'assets/css/loan-calculator.css', 
+                ['autopuzzle-frontend-styles', 'autopuzzle-bootstrap-shortcode'],
                 filemtime($calculator_css_path)
             );
         }
         
         // Register and enqueue calculator JS - this runs only on product pages
         // Note: No jQuery dependency - we use vanilla JavaScript
-        wp_register_script('maneli-calculator-js', MANELI_INQUIRY_PLUGIN_URL . 'assets/js/calculator.js', [], filemtime(MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/calculator.js'), true);
-        wp_enqueue_script('maneli-calculator-js');
+        wp_register_script('autopuzzle-calculator-js', AUTOPUZZLE_PLUGIN_URL . 'assets/js/calculator.js', [], filemtime(AUTOPUZZLE_PLUGIN_PATH . 'assets/js/calculator.js'), true);
+        wp_enqueue_script('autopuzzle-calculator-js');
         
         // Localize script with AJAX info and the configurable rate
         // IMPORTANT: This MUST be called AFTER wp_enqueue_script
         $localize_data = [
             'interestRate' => $interest_rate, // پاس دادن نرخ سود ماهانه
             'text' => [
-                'sending' => esc_html__('Sending information...', 'maneli-car-inquiry'),
-                'error_sending' => esc_html__('Error sending information: ', 'maneli-car-inquiry'),
-                'unknown_error' => esc_html__('Unknown error.', 'maneli-car-inquiry'),
-                'credit_check' => esc_html__('Bank Credit Check for Car Purchase', 'maneli-car-inquiry'),
-                'server_error_connection' => esc_html__('An unknown error occurred while communicating with the server.', 'maneli-car-inquiry'),
+                'sending' => esc_html__('Sending information...', 'autopuzzle'),
+                'error_sending' => esc_html__('Error sending information: ', 'autopuzzle'),
+                'unknown_error' => esc_html__('Unknown error.', 'autopuzzle'),
+                'credit_check' => esc_html__('Bank Credit Check for Car Purchase', 'autopuzzle'),
+                'server_error_connection' => esc_html__('An unknown error occurred while communicating with the server.', 'autopuzzle'),
             ],
             'ajax_url' => '', // Will be set if user is logged in
             'inquiry_page_url' => '',
@@ -107,25 +107,25 @@ class Maneli_Loan_Calculator_Shortcode {
         ];
         
         // Additional texts for calculator.js
-        $localize_data['text']['unavailable_cash_message'] = Maneli_Options_Helper::get_option('unavailable_cash_message', esc_html__('This product is currently unavailable for cash purchase.', 'maneli-car-inquiry'));
-        $localize_data['text']['unknown_server_error'] = esc_html__('An unknown error occurred while communicating with the server.', 'maneli-car-inquiry');
-        $localize_data['text']['please_fill_all_fields'] = esc_html__('Please fill all required fields.', 'maneli-car-inquiry');
-        $localize_data['text']['invalid_mobile_number'] = esc_html__('Please enter a valid mobile number.', 'maneli-car-inquiry');
-        $localize_data['text']['select_car_color'] = esc_html__('Please select a car color.', 'maneli-car-inquiry');
-        $localize_data['text']['enter_car_color'] = esc_html__('Please enter a car color.', 'maneli-car-inquiry');
-        $localize_data['text']['minimum_downpayment'] = esc_html__('Minimum down payment is %s Toman.', 'maneli-car-inquiry');
-        $localize_data['text']['maximum_downpayment'] = esc_html__('Maximum down payment is %s Toman.', 'maneli-car-inquiry');
-        $localize_data['text']['inquiry_sent_success'] = esc_html__('Your inquiry has been sent successfully!', 'maneli-car-inquiry');
-        $localize_data['text']['error_sending_inquiry'] = esc_html__('Error sending inquiry. Please try again.', 'maneli-car-inquiry');
+        $localize_data['text']['unavailable_cash_message'] = Autopuzzle_Options_Helper::get_option('unavailable_cash_message', esc_html__('This product is currently unavailable for cash purchase.', 'autopuzzle'));
+        $localize_data['text']['unknown_server_error'] = esc_html__('An unknown error occurred while communicating with the server.', 'autopuzzle');
+        $localize_data['text']['please_fill_all_fields'] = esc_html__('Please fill all required fields.', 'autopuzzle');
+        $localize_data['text']['invalid_mobile_number'] = esc_html__('Please enter a valid mobile number.', 'autopuzzle');
+        $localize_data['text']['select_car_color'] = esc_html__('Please select a car color.', 'autopuzzle');
+        $localize_data['text']['enter_car_color'] = esc_html__('Please enter a car color.', 'autopuzzle');
+        $localize_data['text']['minimum_downpayment'] = esc_html__('Minimum down payment is %s Toman.', 'autopuzzle');
+        $localize_data['text']['maximum_downpayment'] = esc_html__('Maximum down payment is %s Toman.', 'autopuzzle');
+        $localize_data['text']['inquiry_sent_success'] = esc_html__('Your inquiry has been sent successfully!', 'autopuzzle');
+        $localize_data['text']['error_sending_inquiry'] = esc_html__('Error sending inquiry. Please try again.', 'autopuzzle');
 
         if (is_user_logged_in()) {
             $localize_data['ajax_url'] = admin_url('admin-ajax.php');
             $localize_data['inquiry_page_url'] = home_url('/dashboard/installment-inquiries');
-            $localize_data['nonce'] = wp_create_nonce('maneli_ajax_nonce');
-            $localize_data['cash_inquiry_nonce'] = wp_create_nonce('maneli_customer_cash_inquiry');
+            $localize_data['nonce'] = wp_create_nonce('autopuzzle_ajax_nonce');
+            $localize_data['cash_inquiry_nonce'] = wp_create_nonce('autopuzzle_customer_cash_inquiry');
         }
 
-        wp_localize_script('maneli-calculator-js', 'maneli_ajax_object', $localize_data);
+        wp_localize_script('autopuzzle-calculator-js', 'autopuzzle_ajax_object', $localize_data);
     }
 
     /**
@@ -147,7 +147,7 @@ class Maneli_Loan_Calculator_Shortcode {
 
         // نمایش پیام موفقیت‌آمیز بودن ارسال استعلام نقدی
         if (isset($_GET['cash_inquiry_sent']) && $_GET['cash_inquiry_sent'] === 'true') {
-            maneli_get_template_part('public/cash-inquiry-success-message');
+            autopuzzle_get_template_part('public/cash-inquiry-success-message');
         }
 
         $product_id = $product->get_id();
@@ -160,11 +160,11 @@ class Maneli_Loan_Calculator_Shortcode {
         
         // Debug: Log car status for troubleshooting
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("Maneli Calculator: Product ID {$product_id}, Car Status: " . $car_status);
+            error_log("AutoPuzzle Calculator: Product ID {$product_id}, Car Status: " . $car_status);
         }
 
         // اگر وضعیت خودرو 'disabled' باشد، محصول نباید نمایش داده شود (فقط برای غیر-ادمین)
-        if (!current_user_can('manage_maneli_inquiries') && $car_status === 'disabled') {
+        if (!current_user_can('manage_autopuzzle_inquiries') && $car_status === 'disabled') {
             return ''; // Return empty for disabled products for non-admin users
         }
 
@@ -172,7 +172,7 @@ class Maneli_Loan_Calculator_Shortcode {
         // Check if prices should be hidden
         // NOTE: In calculator form, prices are ALWAYS shown regardless of hide_prices_for_customers setting
         // The hide_prices_for_customers setting only affects catalog and product pages
-        $hide_prices = Maneli_Options_Helper::is_option_enabled('hide_prices_for_customers', false);
+        $hide_prices = Autopuzzle_Options_Helper::is_option_enabled('hide_prices_for_customers', false);
         
         // In calculator form: ALWAYS show prices to everyone
         // In other places (catalog, etc): respect the hide_prices_for_customers setting
@@ -184,7 +184,7 @@ class Maneli_Loan_Calculator_Shortcode {
         
         // Log for debugging
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("Maneli Calculator Cash Price DEBUG:");
+            error_log("AutoPuzzle Calculator Cash Price DEBUG:");
             error_log("  - get_regular_price() returned: " . var_export($cash_price_raw, true));
             error_log("  - cash_price_raw type: " . gettype($cash_price_raw));
         }
@@ -255,7 +255,7 @@ class Maneli_Loan_Calculator_Shortcode {
         // Debug: Log availability status for troubleshooting
         if (defined('WP_DEBUG') && WP_DEBUG) {
             $cash_price_raw_debug = $product->get_regular_price();
-            error_log("Maneli Calculator: Product ID {$product_id}");
+            error_log("AutoPuzzle Calculator: Product ID {$product_id}");
             error_log("  - cash_price_raw: " . var_export($cash_price_raw_debug, true));
             error_log("  - cash_price (after processing): {$cash_price}");
             error_log("  - installment_price_raw: " . var_export(get_post_meta($product_id, 'installment_price', true), true));
@@ -281,7 +281,7 @@ class Maneli_Loan_Calculator_Shortcode {
         ];
         
         // رندر کردن کانتینر اصلی ماشین حساب با تب‌ها و محتوای آن
-        maneli_get_template_part('shortcodes/calculator/main-container', $template_args);
+        autopuzzle_get_template_part('shortcodes/calculator/main-container', $template_args);
 
         return ob_get_clean();
     }

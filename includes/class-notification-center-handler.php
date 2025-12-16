@@ -3,7 +3,7 @@
  * Notification Center Handler
  * Central handler for all notification types (SMS, Telegram, Email, In-app)
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @version 1.0.0
  */
 
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Notification_Center_Handler {
+class Autopuzzle_Notification_Center_Handler {
 
     /**
      * Send notification via specified channel(s)
@@ -66,7 +66,7 @@ class Maneli_Notification_Center_Handler {
             $log_data['error_message'] = $result['error'] ?? null;
             $log_data['sent_at'] = $result['success'] ?? false ? current_time('mysql') : null;
 
-            Maneli_Database::log_notification($log_data);
+            Autopuzzle_Database::log_notification($log_data);
 
             $results[$channel] = $result;
         }
@@ -78,9 +78,9 @@ class Maneli_Notification_Center_Handler {
      * Send SMS
      */
     private static function send_sms($recipient, $message, $options = []) {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-sms-handler.php';
         
-        $sms_handler = new Maneli_SMS_Handler();
+        $sms_handler = new Autopuzzle_SMS_Handler();
         $pattern_id = $options['pattern_id'] ?? null;
         $parameters = $options['pattern_parameters'] ?? [];
 
@@ -118,14 +118,14 @@ class Maneli_Notification_Center_Handler {
         
         if (!$success && $error_code !== null) {
             $error_messages = [
-                1 => esc_html__('Invalid username/password', 'maneli-car-inquiry'),
-                2 => esc_html__('User is restricted/limited', 'maneli-car-inquiry'),
-                3 => esc_html__('Credit insufficient', 'maneli-car-inquiry'),
-                4 => esc_html__('Invalid pattern/bodyId', 'maneli-car-inquiry'),
-                5 => esc_html__('Invalid recipient number', 'maneli-car-inquiry'),
-                11 => esc_html__('Rate limit exceeded or service temporarily unavailable', 'maneli-car-inquiry'),
+                1 => esc_html__('Invalid username/password', 'autopuzzle'),
+                2 => esc_html__('User is restricted/limited', 'autopuzzle'),
+                3 => esc_html__('Credit insufficient', 'autopuzzle'),
+                4 => esc_html__('Invalid pattern/bodyId', 'autopuzzle'),
+                5 => esc_html__('Invalid recipient number', 'autopuzzle'),
+                11 => esc_html__('Rate limit exceeded or service temporarily unavailable', 'autopuzzle'),
             ];
-            $error_message = $error_messages[$error_code] ?? esc_html__('SMS sending failed', 'maneli-car-inquiry') . ' (Error code: ' . $error_code . ')';
+            $error_message = $error_messages[$error_code] ?? esc_html__('SMS sending failed', 'autopuzzle') . ' (Error code: ' . $error_code . ')';
         }
 
         return [
@@ -139,9 +139,9 @@ class Maneli_Notification_Center_Handler {
      * Send Telegram
      */
     private static function send_telegram($recipient, $message, $options = []) {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-telegram-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-telegram-handler.php';
         
-        $telegram_handler = new Maneli_Telegram_Handler();
+        $telegram_handler = new Autopuzzle_Telegram_Handler();
         
         // Get chat IDs from options or use recipient
         $chat_ids = $options['chat_ids'] ?? $recipient;
@@ -168,11 +168,11 @@ class Maneli_Notification_Center_Handler {
      * Send Email
      */
     private static function send_email($recipient, $message, $options = []) {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-email-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-email-handler.php';
         
-        $email_handler = new Maneli_Email_Handler();
+        $email_handler = new Autopuzzle_Email_Handler();
         
-        $subject = $options['subject'] ?? __('Notification', 'maneli-car-inquiry');
+        $subject = $options['subject'] ?? __('Notification', 'autopuzzle');
         $headers = $options['headers'] ?? [];
         
         $result = $email_handler->send_email($recipient, $subject, $message, $headers);
@@ -197,17 +197,17 @@ class Maneli_Notification_Center_Handler {
      * Send in-app notification
      */
     private static function send_in_app_notification($recipient, $message, $options = []) {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-handler.php';
         
         // Recipient should be user_id or array of user_ids
         $user_ids = is_array($recipient) ? $recipient : [$recipient];
         
         $results = [];
         foreach ($user_ids as $user_id) {
-            $notification_id = Maneli_Notification_Handler::create_notification([
+            $notification_id = Autopuzzle_Notification_Handler::create_notification([
                 'user_id' => (int)$user_id,
                 'type' => $options['notification_type'] ?? 'general',
-                'title' => $options['title'] ?? __('Notification', 'maneli-car-inquiry'),
+                'title' => $options['title'] ?? __('Notification', 'autopuzzle'),
                 'message' => $message,
                 'link' => $options['link'] ?? '',
                 'related_id' => $options['related_id'] ?? null,
@@ -265,7 +265,7 @@ class Maneli_Notification_Center_Handler {
         $options['scheduled_at'] = $scheduled_at;
         
         // Log as pending
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         
         $channels_array = is_array($channels) ? $channels : [$channels];
         $log_ids = [];
@@ -281,7 +281,7 @@ class Maneli_Notification_Center_Handler {
                 'user_id' => $options['user_id'] ?? get_current_user_id(),
             ];
             
-            $log_id = Maneli_Database::log_notification($log_data);
+            $log_id = Autopuzzle_Database::log_notification($log_data);
             if ($log_id) {
                 $log_ids[] = $log_id;
             }
@@ -295,10 +295,10 @@ class Maneli_Notification_Center_Handler {
      * Should be called by cron job
      */
     public static function process_scheduled() {
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notification_logs';
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
         
         // Get pending scheduled notifications that are due
         $now = current_time('mysql');
@@ -338,7 +338,7 @@ class Maneli_Notification_Center_Handler {
                 'sent_at' => current_time('mysql'),
             ];
             
-            Maneli_Database::update_notification_log($notification->id, $update_data);
+            Autopuzzle_Database::update_notification_log($notification->id, $update_data);
         }
         
         return count($scheduled);

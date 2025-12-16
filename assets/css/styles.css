@@ -24811,12 +24811,12 @@ a.link-underline-dark {
 }
 
 /* Chart Container */
-[data-theme-mode=dark] .maneli-chart-container {
+[data-theme-mode=dark] .autopuzzle-chart-container {
   background-color: transparent;
   color: var(--default-text-color);
 }
 
-[data-theme-mode=dark] .maneli-chart-container canvas {
+[data-theme-mode=dark] .autopuzzle-chart-container canvas {
   background-color: transparent;
 }
 

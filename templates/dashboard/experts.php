@@ -16,7 +16,7 @@ if (!function_exists('persian_numbers')) {
 }
 
 // Permission check - Only Admin can access
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
@@ -28,7 +28,7 @@ $detail_expert_id = $view_expert_id ?: $edit_expert_id;
 
 if ($detail_expert_id) {
     // Load expert detail page
-    $expert_detail_file = MANELI_INQUIRY_PLUGIN_PATH . 'templates/dashboard/expert-detail.php';
+    $expert_detail_file = AUTOPUZZLE_PLUGIN_PATH . 'templates/dashboard/expert-detail.php';
     if (file_exists($expert_detail_file)) {
         include $expert_detail_file;
         return;
@@ -45,12 +45,12 @@ $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) :
 global $wpdb;
 
 // Total experts
-$total_experts = count(get_users(['role' => 'maneli_expert']));
+$total_experts = count(get_users(['role' => 'autopuzzle_expert']));
 
 // Active/Inactive experts
 $active_experts = 0;
 $inactive_experts = 0;
-$all_experts_list = get_users(['role' => 'maneli_expert']);
+$all_experts_list = get_users(['role' => 'autopuzzle_expert']);
 foreach ($all_experts_list as $exp) {
     $is_active = get_user_meta($exp->ID, 'expert_active', true) !== 'no';
     if ($is_active) {
@@ -62,7 +62,7 @@ foreach ($all_experts_list as $exp) {
 
 // Get experts with pagination
 $user_query_args = [
-    'role' => 'maneli_expert',
+    'role' => 'autopuzzle_expert',
     'number' => $per_page,
     'offset' => ($paged - 1) * $per_page,
     'orderby' => 'display_name',
@@ -204,11 +204,11 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
             <div>
                 <nav>
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'maneli-car-inquiry'); ?></a></li>
-                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Expert Management', 'maneli-car-inquiry'); ?></li>
+                        <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Pages', 'autopuzzle'); ?></a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Expert Management', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Expert Management', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Expert Management', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- Page Header Close -->
@@ -286,7 +286,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                     color: rgba(255, 255, 255, 0.6) !important;
                 }
                 </style>
-                <div class="row mb-4 maneli-mobile-card-scroll">
+                <div class="row mb-4 autopuzzle-mobile-card-scroll">
                     <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6 mb-3">
                         <div class="card custom-card crm-card overflow-hidden">
                             <div class="card-body">
@@ -297,10 +297,10 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Experts', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Experts', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($total_experts) : persian_numbers(number_format_i18n($total_experts)); ?></h4>
-                                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Total Experts', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($total_experts) : persian_numbers(number_format_i18n($total_experts)); ?></h4>
+                                    <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('Total Experts', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -316,10 +316,10 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Active', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Active', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($active_experts) : persian_numbers(number_format_i18n($active_experts)); ?></h4>
-                                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Active', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($active_experts) : persian_numbers(number_format_i18n($active_experts)); ?></h4>
+                                    <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Active', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -335,10 +335,10 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Inactive', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Inactive', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($inactive_experts) : persian_numbers(number_format_i18n($inactive_experts)); ?></h4>
-                                    <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Inactive', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($inactive_experts) : persian_numbers(number_format_i18n($inactive_experts)); ?></h4>
+                                    <span class="badge bg-danger-transparent rounded-pill fs-11"><?php esc_html_e('Inactive', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -354,10 +354,10 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                         </span>
                                     </div>
                                 </div>
-                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Referrals', 'maneli-car-inquiry'); ?></p>
+                                <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Referrals', 'autopuzzle'); ?></p>
                                 <div class="d-flex align-items-center justify-content-between mt-1">
-                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('maneli_number_format_persian') ? maneli_number_format_persian($total_assigned) : persian_numbers(number_format_i18n($total_assigned)); ?></h4>
-                                    <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Total Referrals', 'maneli-car-inquiry'); ?></span>
+                                    <h4 class="mb-0 d-flex align-items-center"><?php echo function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($total_assigned) : persian_numbers(number_format_i18n($total_assigned)); ?></h4>
+                                    <span class="badge bg-info-transparent rounded-pill fs-11"><?php esc_html_e('Total Referrals', 'autopuzzle'); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -369,28 +369,28 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                     <div class="card-header d-flex justify-content-between align-items-center border-block-end">
                 <div class="card-title">
                     <i class="la la-user-tie me-2"></i>
-                    <?php esc_html_e('Expert Management', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Expert Management', 'autopuzzle'); ?>
                 </div>
                         <div class="btn-list">
                             <button class="btn btn-primary btn-wave" data-bs-toggle="modal" data-bs-target="#addExpertModal">
                         <i class="la la-user-plus me-1"></i>
-                        <?php esc_html_e('Add New Expert', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('Add New Expert', 'autopuzzle'); ?>
                     </button>
                 </div>
             </div>
             <div class="card-body">
                         <!-- Filters -->
-                        <div class="maneli-mobile-filter mb-3" data-maneli-mobile-filter>
+                        <div class="autopuzzle-mobile-filter mb-3" data-autopuzzle-mobile-filter>
                             <button
                                 type="button"
-                                class="maneli-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
-                                data-maneli-filter-toggle
+                                class="autopuzzle-mobile-filter-toggle-btn d-flex align-items-center justify-content-between w-100 d-md-none"
+                                data-autopuzzle-filter-toggle
                                 aria-expanded="false"
                             >
-                                <span class="fw-semibold"><?php esc_html_e('Filters', 'maneli-car-inquiry'); ?></span>
-                                <i class="ri-arrow-down-s-line maneli-mobile-filter-arrow"></i>
+                                <span class="fw-semibold"><?php esc_html_e('Filters', 'autopuzzle'); ?></span>
+                                <i class="ri-arrow-down-s-line autopuzzle-mobile-filter-arrow"></i>
                             </button>
-                            <div class="maneli-mobile-filter-body" data-maneli-filter-body>
+                            <div class="autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                         <form method="get" action="" class="mb-3">
                             <div class="row g-3 mb-0">
                     <div class="col-md-4">
@@ -398,7 +398,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                         <span class="input-group-text bg-light">
                                 <i class="la la-search"></i>
                             </span>
-                                        <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search name, mobile...', 'maneli-car-inquiry'); ?>" value="<?php echo esc_attr($search); ?>">
+                                        <input type="search" name="search" class="form-control" placeholder="<?php esc_attr_e('Search name, mobile...', 'autopuzzle'); ?>" value="<?php echo esc_attr($search); ?>">
                                         <?php 
                                         // Preserve page parameter if exists
                                         if (isset($_GET['page'])): 
@@ -417,20 +417,20 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                     </div>
                     <div class="col-md-3">
                                     <select class="form-select" name="status">
-                            <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
-                                        <option value="active" <?php selected($status_filter, 'active'); ?>><?php esc_html_e('Active', 'maneli-car-inquiry'); ?></option>
-                                        <option value="inactive" <?php selected($status_filter, 'inactive'); ?>><?php esc_html_e('Inactive', 'maneli-car-inquiry'); ?></option>
+                            <option value=""><?php esc_html_e('All Statuses', 'autopuzzle'); ?></option>
+                                        <option value="active" <?php selected($status_filter, 'active'); ?>><?php esc_html_e('Active', 'autopuzzle'); ?></option>
+                                        <option value="inactive" <?php selected($status_filter, 'inactive'); ?>><?php esc_html_e('Inactive', 'autopuzzle'); ?></option>
                         </select>
                     </div>
                                 <div class="col-md-3">
                                     <button type="submit" class="btn btn-primary btn-wave">
                                         <i class="la la-search me-1"></i>
-                                        <?php esc_html_e('Search', 'maneli-car-inquiry'); ?>
+                                        <?php esc_html_e('Search', 'autopuzzle'); ?>
                                     </button>
                                     <?php if (!empty($search) || !empty($status_filter)): ?>
                                         <a href="?" class="btn btn-light">
                                             <i class="la la-times me-1"></i>
-                                            <?php esc_html_e('Clear', 'maneli-car-inquiry'); ?>
+                                            <?php esc_html_e('Clear', 'autopuzzle'); ?>
                                         </a>
                                     <?php endif; ?>
                     </div>
@@ -444,12 +444,12 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                             <table class="table text-nowrap table-hover table-bordered">
                         <thead class="table-light">
                             <tr>
-                                        <th><?php esc_html_e('Expert Name', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Mobile', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Status', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Expert Name', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Mobile', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Installment Inquiries', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Cash Inquiries', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -472,7 +472,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                                         </div>
                                                         <div>
                                                             <span class="fw-medium d-block"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($expert->display_name)) : esc_html($expert->display_name); ?></span>
-                                                            <small class="text-muted"><?php esc_html_e('Expert', 'maneli-car-inquiry'); ?></small>
+                                                            <small class="text-muted"><?php esc_html_e('Expert', 'autopuzzle'); ?></small>
                                                         </div>
                                             </div>
                                         </td>
@@ -493,26 +493,26 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                         </td>
                                         <td>
                                                     <?php if ($is_active): ?>
-                                                <span class="badge bg-success"><?php esc_html_e('Active', 'maneli-car-inquiry'); ?></span>
+                                                <span class="badge bg-success"><?php esc_html_e('Active', 'autopuzzle'); ?></span>
                                                     <?php else: ?>
-                                                <span class="badge bg-danger"><?php esc_html_e('Inactive', 'maneli-car-inquiry'); ?></span>
+                                                <span class="badge bg-danger"><?php esc_html_e('Inactive', 'autopuzzle'); ?></span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
                                                     <div class="btn-list">
-                                                        <button class="btn btn-sm btn-primary-light" onclick="viewExpert(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('View', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-primary-light" onclick="viewExpert(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('View', 'autopuzzle'); ?>">
                                                             <i class="la la-eye"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-info-light" onclick="editExpert(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('Edit', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-info-light" onclick="editExpert(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('Edit', 'autopuzzle'); ?>">
                                                             <i class="la la-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-secondary-light" onclick="editExpertPermissions(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('Permission Level', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-secondary-light" onclick="editExpertPermissions(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('Permission Level', 'autopuzzle'); ?>">
                                                             <i class="la la-key"></i>
                                                 </button>
-                                                        <button class="btn btn-sm btn-<?php echo $is_active ? 'warning' : 'success'; ?>-light" onclick="toggleExpertStatus(<?php echo $expert->ID; ?>, <?php echo $is_active ? 'false' : 'true'; ?>)" title="<?php echo $is_active ? esc_attr__('Deactivate', 'maneli-car-inquiry') : esc_attr__('Activate', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-<?php echo $is_active ? 'warning' : 'success'; ?>-light" onclick="toggleExpertStatus(<?php echo $expert->ID; ?>, <?php echo $is_active ? 'false' : 'true'; ?>)" title="<?php echo $is_active ? esc_attr__('Deactivate', 'autopuzzle') : esc_attr__('Activate', 'autopuzzle'); ?>">
                                                     <i class="la la-toggle-<?php echo $is_active ? 'on' : 'off'; ?>"></i>
                                                 </button>
-                                                        <button class="btn btn-sm btn-danger-light" onclick="deleteExpert(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('Delete', 'maneli-car-inquiry'); ?>">
+                                                        <button class="btn btn-sm btn-danger-light" onclick="deleteExpert(<?php echo $expert->ID; ?>)" title="<?php esc_attr_e('Delete', 'autopuzzle'); ?>">
                                                             <i class="la la-trash"></i>
                                                 </button>
                                             </div>
@@ -524,7 +524,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                             <td colspan="6" class="text-center">
                                         <div class="alert alert-info mb-0">
                                             <i class="la la-info-circle me-2"></i>
-                                                    <?php esc_html_e('No experts found.', 'maneli-car-inquiry'); ?>
+                                                    <?php esc_html_e('No experts found.', 'autopuzzle'); ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -538,7 +538,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                             <div class="card-footer border-top-0">
                                 <div class="d-flex align-items-center">
                                     <div>
-                                        <?php printf(esc_html__('Showing %s items', 'maneli-car-inquiry'), persian_numbers(number_format_i18n(count($experts)))); ?> <i class="bi bi-arrow-left ms-2 fw-medium"></i>
+                                        <?php printf(esc_html__('Showing %s items', 'autopuzzle'), persian_numbers(number_format_i18n(count($experts)))); ?> <i class="bi bi-arrow-left ms-2 fw-medium"></i>
                                     </div>
                                     <div class="ms-auto">
                                         <nav aria-label="Page navigation" class="pagination-style-4">
@@ -551,7 +551,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                                 $prev_link = $paged > 1 ? add_query_arg('paged', $paged - 1, $base_url) : 'javascript:void(0);';
                                                 $prev_disabled = $paged <= 1 ? ' disabled' : '';
                                                 echo '<li class="page-item' . $prev_disabled . '">';
-                                                echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'maneli-car-inquiry') . '</a>';
+                                                echo '<a class="page-link" href="' . esc_url($prev_link) . '">' . esc_html__('Previous', 'autopuzzle') . '</a>';
                                                 echo '</li>';
                                                 
                                                 // Page numbers - show limited pages
@@ -588,7 +588,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                                                 $next_link = $paged < $total_pages ? add_query_arg('paged', $paged + 1, $base_url) : 'javascript:void(0);';
                                                 $next_disabled = $paged >= $total_pages ? ' disabled' : '';
                                                 echo '<li class="page-item' . $next_disabled . '">';
-                                                echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'maneli-car-inquiry') . '</a>';
+                                                echo '<a class="page-link text-primary" href="' . esc_url($next_link) . '">' . esc_html__('Next', 'autopuzzle') . '</a>';
                                                 echo '</li>';
                                                 ?>
                                             </ul>
@@ -609,7 +609,7 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
             <div class="modal-header bg-primary-transparent">
                 <h5 class="modal-title">
                     <i class="la la-user-plus me-2"></i>
-                    <?php esc_html_e('Add New Expert', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Add New Expert', 'autopuzzle'); ?>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -617,32 +617,32 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                 <form id="add-expert-form">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold"><?php esc_html_e('First Name', 'maneli-car-inquiry'); ?> *</label>
+                            <label class="form-label fw-semibold"><?php esc_html_e('First Name', 'autopuzzle'); ?> *</label>
                             <input type="text" class="form-control" id="expert-first-name" required>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold"><?php esc_html_e('Last Name', 'maneli-car-inquiry'); ?> *</label>
+                            <label class="form-label fw-semibold"><?php esc_html_e('Last Name', 'autopuzzle'); ?> *</label>
                             <input type="text" class="form-control" id="expert-last-name" required>
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label fw-semibold"><?php esc_html_e('Mobile Number', 'maneli-car-inquiry'); ?> *</label>
+                            <label class="form-label fw-semibold"><?php esc_html_e('Mobile Number', 'autopuzzle'); ?> *</label>
                             <input type="tel" class="form-control" id="expert-mobile" placeholder="09123456789" required>
-                            <small class="text-muted"><?php esc_html_e('Password will be automatically generated. The expert can set their password through the forgot password option.', 'maneli-car-inquiry'); ?></small>
+                            <small class="text-muted"><?php esc_html_e('Password will be automatically generated. The expert can set their password through the forgot password option.', 'autopuzzle'); ?></small>
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label fw-semibold mb-3"><?php esc_html_e('Permissions:', 'maneli-car-inquiry'); ?></label>
+                            <label class="form-label fw-semibold mb-3"><?php esc_html_e('Permissions:', 'autopuzzle'); ?></label>
                             <div class="d-flex flex-column gap-2">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="expert-cash-inquiry" checked>
-                                    <label class="form-check-label" for="expert-cash-inquiry"><?php esc_html_e('Cash Inquiry', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-check-label" for="expert-cash-inquiry"><?php esc_html_e('Cash Inquiry', 'autopuzzle'); ?></label>
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="expert-installment-inquiry" checked>
-                                    <label class="form-check-label" for="expert-installment-inquiry"><?php esc_html_e('Installment Inquiry', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-check-label" for="expert-installment-inquiry"><?php esc_html_e('Installment Inquiry', 'autopuzzle'); ?></label>
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="expert-calendar" checked>
-                                    <label class="form-check-label" for="expert-calendar"><?php esc_html_e('Meeting Calendar', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-check-label" for="expert-calendar"><?php esc_html_e('Meeting Calendar', 'autopuzzle'); ?></label>
                         </div>
                             </div>
                         </div>
@@ -650,10 +650,10 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'maneli-car-inquiry'); ?></button>
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal"><?php esc_html_e('Cancel', 'autopuzzle'); ?></button>
                 <button type="button" class="btn btn-primary" onclick="saveExpert()">
                     <i class="la la-save me-1"></i>
-                    <?php esc_html_e('Save Expert', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Save Expert', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -661,43 +661,43 @@ $today_assigned = $wpdb->get_var($wpdb->prepare("
 </div>
 
 <script>
-var maneliAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+var autopuzzleAjaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 // Translation object
-const maneliTranslations = {
-    loading: <?php echo wp_json_encode(esc_html__('Loading...', 'maneli-car-inquiry')); ?>,
-    editExpert: <?php echo wp_json_encode(esc_html__('Edit Expert', 'maneli-car-inquiry')); ?>,
-    editPermissions: <?php echo wp_json_encode(esc_html__('Edit Permissions', 'maneli-car-inquiry')); ?>,
-    firstName: <?php echo wp_json_encode(esc_html__('First Name', 'maneli-car-inquiry')); ?>,
-    lastName: <?php echo wp_json_encode(esc_html__('Last Name', 'maneli-car-inquiry')); ?>,
-    mobileNumber: <?php echo wp_json_encode(esc_html__('Mobile Number', 'maneli-car-inquiry')); ?>,
-    save: <?php echo wp_json_encode(esc_html__('Save', 'maneli-car-inquiry')); ?>,
-    cancel: <?php echo wp_json_encode(esc_html__('Cancel', 'maneli-car-inquiry')); ?>,
-    saving: <?php echo wp_json_encode(esc_html__('Saving...', 'maneli-car-inquiry')); ?>,
-    success: <?php echo wp_json_encode(esc_html__('Success!', 'maneli-car-inquiry')); ?>,
-    error: <?php echo wp_json_encode(esc_html__('Error!', 'maneli-car-inquiry')); ?>,
-    expertUpdated: <?php echo wp_json_encode(esc_html__('Expert updated successfully.', 'maneli-car-inquiry')); ?>,
-    permissionsUpdated: <?php echo wp_json_encode(esc_html__('Permissions updated successfully.', 'maneli-car-inquiry')); ?>,
-    expertAdded: <?php echo wp_json_encode(esc_html__('Expert added successfully.', 'maneli-car-inquiry')); ?>,
-    updateError: <?php echo wp_json_encode(esc_html__('Error updating', 'maneli-car-inquiry')); ?>,
-    serverError: <?php echo wp_json_encode(esc_html__('Server connection error', 'maneli-car-inquiry')); ?>,
-    serverErrorRetry: <?php echo wp_json_encode(esc_html__('Server connection error. Please try again.', 'maneli-car-inquiry')); ?>,
-    loadError: <?php echo wp_json_encode(esc_html__('Error loading data', 'maneli-car-inquiry')); ?>,
-    loadPermissionsError: <?php echo wp_json_encode(esc_html__('Error loading permissions', 'maneli-car-inquiry')); ?>,
-    fillFields: <?php echo wp_json_encode(esc_html__('Please fill all required fields.', 'maneli-car-inquiry')); ?>,
-    activateExpert: <?php echo wp_json_encode(esc_html__('Activate Expert?', 'maneli-car-inquiry')); ?>,
-    deactivateExpert: <?php echo wp_json_encode(esc_html__('Deactivate Expert?', 'maneli-car-inquiry')); ?>,
-    expertWillActivate: <?php echo wp_json_encode(esc_html__('Expert will be activated', 'maneli-car-inquiry')); ?>,
-    expertWillDeactivate: <?php echo wp_json_encode(esc_html__('Expert will be deactivated', 'maneli-car-inquiry')); ?>,
-    yes: <?php echo wp_json_encode(esc_html__('Yes', 'maneli-car-inquiry')); ?>,
-    no: <?php echo wp_json_encode(esc_html__('No', 'maneli-car-inquiry')); ?>,
-    updating: <?php echo wp_json_encode(esc_html__('Updating...', 'maneli-car-inquiry')); ?>,
-    deleteExpert: <?php echo wp_json_encode(esc_html__('Delete Expert?', 'maneli-car-inquiry')); ?>,
-    deleteIrreversible: <?php echo wp_json_encode(esc_html__('This action cannot be undone!', 'maneli-car-inquiry')); ?>,
-    confirmDelete: <?php echo wp_json_encode(esc_html__('Yes, Delete', 'maneli-car-inquiry')); ?>,
-    deleting: <?php echo wp_json_encode(esc_html__('Deleting...', 'maneli-car-inquiry')); ?>,
-    deleted: <?php echo wp_json_encode(esc_html__('Deleted!', 'maneli-car-inquiry')); ?>,
-    expertDeleted: <?php echo wp_json_encode(esc_html__('Expert deleted successfully.', 'maneli-car-inquiry')); ?>,
-    addExpertError: <?php echo wp_json_encode(esc_html__('Error adding expert', 'maneli-car-inquiry')); ?>
+const autopuzzleTranslations = {
+    loading: <?php echo wp_json_encode(esc_html__('Loading...', 'autopuzzle')); ?>,
+    editExpert: <?php echo wp_json_encode(esc_html__('Edit Expert', 'autopuzzle')); ?>,
+    editPermissions: <?php echo wp_json_encode(esc_html__('Edit Permissions', 'autopuzzle')); ?>,
+    firstName: <?php echo wp_json_encode(esc_html__('First Name', 'autopuzzle')); ?>,
+    lastName: <?php echo wp_json_encode(esc_html__('Last Name', 'autopuzzle')); ?>,
+    mobileNumber: <?php echo wp_json_encode(esc_html__('Mobile Number', 'autopuzzle')); ?>,
+    save: <?php echo wp_json_encode(esc_html__('Save', 'autopuzzle')); ?>,
+    cancel: <?php echo wp_json_encode(esc_html__('Cancel', 'autopuzzle')); ?>,
+    saving: <?php echo wp_json_encode(esc_html__('Saving...', 'autopuzzle')); ?>,
+    success: <?php echo wp_json_encode(esc_html__('Success!', 'autopuzzle')); ?>,
+    error: <?php echo wp_json_encode(esc_html__('Error!', 'autopuzzle')); ?>,
+    expertUpdated: <?php echo wp_json_encode(esc_html__('Expert updated successfully.', 'autopuzzle')); ?>,
+    permissionsUpdated: <?php echo wp_json_encode(esc_html__('Permissions updated successfully.', 'autopuzzle')); ?>,
+    expertAdded: <?php echo wp_json_encode(esc_html__('Expert added successfully.', 'autopuzzle')); ?>,
+    updateError: <?php echo wp_json_encode(esc_html__('Error updating', 'autopuzzle')); ?>,
+    serverError: <?php echo wp_json_encode(esc_html__('Server connection error', 'autopuzzle')); ?>,
+    serverErrorRetry: <?php echo wp_json_encode(esc_html__('Server connection error. Please try again.', 'autopuzzle')); ?>,
+    loadError: <?php echo wp_json_encode(esc_html__('Error loading data', 'autopuzzle')); ?>,
+    loadPermissionsError: <?php echo wp_json_encode(esc_html__('Error loading permissions', 'autopuzzle')); ?>,
+    fillFields: <?php echo wp_json_encode(esc_html__('Please fill all required fields.', 'autopuzzle')); ?>,
+    activateExpert: <?php echo wp_json_encode(esc_html__('Activate Expert?', 'autopuzzle')); ?>,
+    deactivateExpert: <?php echo wp_json_encode(esc_html__('Deactivate Expert?', 'autopuzzle')); ?>,
+    expertWillActivate: <?php echo wp_json_encode(esc_html__('Expert will be activated', 'autopuzzle')); ?>,
+    expertWillDeactivate: <?php echo wp_json_encode(esc_html__('Expert will be deactivated', 'autopuzzle')); ?>,
+    yes: <?php echo wp_json_encode(esc_html__('Yes', 'autopuzzle')); ?>,
+    no: <?php echo wp_json_encode(esc_html__('No', 'autopuzzle')); ?>,
+    updating: <?php echo wp_json_encode(esc_html__('Updating...', 'autopuzzle')); ?>,
+    deleteExpert: <?php echo wp_json_encode(esc_html__('Delete Expert?', 'autopuzzle')); ?>,
+    deleteIrreversible: <?php echo wp_json_encode(esc_html__('This action cannot be undone!', 'autopuzzle')); ?>,
+    confirmDelete: <?php echo wp_json_encode(esc_html__('Yes, Delete', 'autopuzzle')); ?>,
+    deleting: <?php echo wp_json_encode(esc_html__('Deleting...', 'autopuzzle')); ?>,
+    deleted: <?php echo wp_json_encode(esc_html__('Deleted!', 'autopuzzle')); ?>,
+    expertDeleted: <?php echo wp_json_encode(esc_html__('Expert deleted successfully.', 'autopuzzle')); ?>,
+    addExpertError: <?php echo wp_json_encode(esc_html__('Error adding expert', 'autopuzzle')); ?>
 };
 
 // View Expert Details - Redirect to expert detail page
@@ -708,23 +708,23 @@ function viewExpert(userId) {
 
 // Helper function to generate email from mobile
 function generateEmailFromMobile(mobile) {
-    return mobile + '@manelikhodro.com';
+    return mobile + '@' + (window.autopuzzleEmailDomain || 'system.local');
 }
 
 // Edit Expert
 function editExpert(userId) {
     // Load expert data first
     jQuery.ajax({
-        url: maneliAjaxUrl,
+        url: autopuzzleAjaxUrl,
         type: 'POST',
         data: {
-            action: 'maneli_get_expert_data',
+            action: 'autopuzzle_get_expert_data',
             user_id: userId,
-            nonce: '<?php echo wp_create_nonce('maneli_expert_data_nonce'); ?>'
+            nonce: '<?php echo wp_create_nonce('autopuzzle_expert_data_nonce'); ?>'
         },
         beforeSend: function() {
             Swal.fire({
-                title: maneliTranslations.loading,
+                title: autopuzzleTranslations.loading,
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -737,31 +737,31 @@ function editExpert(userId) {
             if (response.success) {
                 const data = response.data;
                 Swal.fire({
-                    title: maneliTranslations.editExpert,
+                    title: autopuzzleTranslations.editExpert,
                     html: `
                         <div class="mb-3">
-                            <label class="form-label">${maneliTranslations.firstName} *</label>
-                            <input type="text" id="edit-first-name" class="form-control" value="${data.first_name || ''}" placeholder="${maneliTranslations.firstName}">
+                            <label class="form-label">${autopuzzleTranslations.firstName} *</label>
+                            <input type="text" id="edit-first-name" class="form-control" value="${data.first_name || ''}" placeholder="${autopuzzleTranslations.firstName}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">${maneliTranslations.lastName} *</label>
-                            <input type="text" id="edit-last-name" class="form-control" value="${data.last_name || ''}" placeholder="${maneliTranslations.lastName}">
+                            <label class="form-label">${autopuzzleTranslations.lastName} *</label>
+                            <input type="text" id="edit-last-name" class="form-control" value="${data.last_name || ''}" placeholder="${autopuzzleTranslations.lastName}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">${maneliTranslations.mobileNumber} *</label>
+                            <label class="form-label">${autopuzzleTranslations.mobileNumber} *</label>
                             <input type="tel" id="edit-mobile" class="form-control" value="${data.mobile || ''}" placeholder="09123456789">
                         </div>
                     `,
                     showCancelButton: true,
-                    confirmButtonText: maneliTranslations.save,
-                    cancelButtonText: maneliTranslations.cancel,
+                    confirmButtonText: autopuzzleTranslations.save,
+                    cancelButtonText: autopuzzleTranslations.cancel,
                     preConfirm: () => {
                         const firstName = document.getElementById('edit-first-name').value;
                         const lastName = document.getElementById('edit-last-name').value;
                         const mobile = document.getElementById('edit-mobile').value;
                         
                         if (!firstName || !lastName || !mobile) {
-                            Swal.showValidationMessage(maneliTranslations.fillFields);
+                            Swal.showValidationMessage(autopuzzleTranslations.fillFields);
                             return false;
                         }
                         
@@ -771,7 +771,7 @@ function editExpert(userId) {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Swal.fire({
-                            title: maneliTranslations.saving,
+                            title: autopuzzleTranslations.saving,
                             allowOutsideClick: false,
                             showConfirmButton: false,
                             didOpen: () => {
@@ -780,43 +780,43 @@ function editExpert(userId) {
                         });
                         
                         jQuery.ajax({
-                            url: maneliAjaxUrl,
+                            url: autopuzzleAjaxUrl,
                             type: 'POST',
                             data: {
-                                action: 'maneli_update_expert',
+                                action: 'autopuzzle_update_expert',
                                 user_id: userId,
                                 first_name: result.value.firstName,
                                 last_name: result.value.lastName,
                                 display_name: result.value.firstName + ' ' + result.value.lastName,
                                 mobile_number: result.value.mobile,
                                 email: result.value.email,
-                                nonce: '<?php echo wp_create_nonce('maneli_update_expert_nonce'); ?>'
+                                nonce: '<?php echo wp_create_nonce('autopuzzle_update_expert_nonce'); ?>'
                             },
                             success: function(response) {
                                 Swal.close();
                                 if (response.success) {
-                                    Swal.fire(maneliTranslations.success, maneliTranslations.expertUpdated, 'success').then(() => {
+                                    Swal.fire(autopuzzleTranslations.success, autopuzzleTranslations.expertUpdated, 'success').then(() => {
                                         location.reload();
                                     });
                                 } else {
-                                    Swal.fire(maneliTranslations.error, response.data.message || maneliTranslations.updateError, 'error');
+                                    Swal.fire(autopuzzleTranslations.error, response.data.message || autopuzzleTranslations.updateError, 'error');
                                 }
                             },
                             error: function() {
                                 Swal.close();
-                                Swal.fire(maneliTranslations.error, maneliTranslations.serverError, 'error');
+                                Swal.fire(autopuzzleTranslations.error, autopuzzleTranslations.serverError, 'error');
                             }
                         });
                     }
                 });
             } else {
-                Swal.fire(maneliTranslations.error, response.data?.message || maneliTranslations.loadError, 'error');
+                Swal.fire(autopuzzleTranslations.error, response.data?.message || autopuzzleTranslations.loadError, 'error');
             }
         },
         error: function(xhr, status, error) {
             Swal.close();
             console.error('AJAX Error:', error);
-            Swal.fire(maneliTranslations.error, maneliTranslations.serverErrorRetry, 'error');
+            Swal.fire(autopuzzleTranslations.error, autopuzzleTranslations.serverErrorRetry, 'error');
         }
     });
 }
@@ -831,16 +831,16 @@ function editExpertPermissions(userId) {
 function editExpertPermissionsOld(userId) {
     // Load expert permissions
     jQuery.ajax({
-        url: maneliAjaxUrl,
+        url: autopuzzleAjaxUrl,
         type: 'POST',
         data: {
-            action: 'maneli_get_expert_permissions',
+            action: 'autopuzzle_get_expert_permissions',
             user_id: userId,
-            nonce: '<?php echo wp_create_nonce('maneli_expert_permissions_nonce'); ?>'
+            nonce: '<?php echo wp_create_nonce('autopuzzle_expert_permissions_nonce'); ?>'
         },
         beforeSend: function() {
             Swal.fire({
-                title: maneliTranslations.loading,
+                title: autopuzzleTranslations.loading,
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -853,26 +853,26 @@ function editExpertPermissionsOld(userId) {
             if (response.success) {
                 const perms = response.data.permissions || {};
                 Swal.fire({
-                    title: maneliTranslations.editPermissions,
+                    title: autopuzzleTranslations.editPermissions,
                     html: `
                         <div class="d-flex flex-column gap-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="edit-cash-inquiry" ${perms.cash_inquiry ? 'checked' : ''}>
-                                <label class="form-check-label" for="edit-cash-inquiry">${<?php echo wp_json_encode(esc_html__('Cash Inquiry', 'maneli-car-inquiry')); ?>}</label>
+                                <label class="form-check-label" for="edit-cash-inquiry">${<?php echo wp_json_encode(esc_html__('Cash Inquiry', 'autopuzzle')); ?>}</label>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="edit-installment-inquiry" ${perms.installment_inquiry ? 'checked' : ''}>
-                                <label class="form-check-label" for="edit-installment-inquiry">${<?php echo wp_json_encode(esc_html__('Installment Inquiry', 'maneli-car-inquiry')); ?>}</label>
+                                <label class="form-check-label" for="edit-installment-inquiry">${<?php echo wp_json_encode(esc_html__('Installment Inquiry', 'autopuzzle')); ?>}</label>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="edit-calendar" ${perms.calendar ? 'checked' : ''}>
-                                <label class="form-check-label" for="edit-calendar">${<?php echo wp_json_encode(esc_html__('Meeting Calendar', 'maneli-car-inquiry')); ?>}</label>
+                                <label class="form-check-label" for="edit-calendar">${<?php echo wp_json_encode(esc_html__('Meeting Calendar', 'autopuzzle')); ?>}</label>
                             </div>
                         </div>
                     `,
                     showCancelButton: true,
-                    confirmButtonText: maneliTranslations.save,
-                    cancelButtonText: maneliTranslations.cancel,
+                    confirmButtonText: autopuzzleTranslations.save,
+                    cancelButtonText: autopuzzleTranslations.cancel,
                     preConfirm: () => {
                         return {
                             cash_inquiry: document.getElementById('edit-cash-inquiry').checked,
@@ -883,7 +883,7 @@ function editExpertPermissionsOld(userId) {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Swal.fire({
-                            title: maneliTranslations.saving,
+                            title: autopuzzleTranslations.saving,
                             allowOutsideClick: false,
                             showConfirmButton: false,
                             didOpen: () => {
@@ -892,41 +892,41 @@ function editExpertPermissionsOld(userId) {
                         });
                         
                         jQuery.ajax({
-                            url: maneliAjaxUrl,
+                            url: autopuzzleAjaxUrl,
                             type: 'POST',
                             data: {
-                                action: 'maneli_update_expert_permissions',
+                                action: 'autopuzzle_update_expert_permissions',
                                 user_id: userId,
                                 'permissions[cash_inquiry]': result.value.cash_inquiry ? 1 : 0,
                                 'permissions[installment_inquiry]': result.value.installment_inquiry ? 1 : 0,
                                 'permissions[calendar]': result.value.calendar ? 1 : 0,
-                                nonce: '<?php echo wp_create_nonce('maneli_update_expert_permissions_nonce'); ?>'
+                                nonce: '<?php echo wp_create_nonce('autopuzzle_update_expert_permissions_nonce'); ?>'
                             },
                             success: function(response) {
                                 Swal.close();
                                 if (response.success) {
-                                    Swal.fire(maneliTranslations.success, maneliTranslations.permissionsUpdated, 'success').then(() => {
+                                    Swal.fire(autopuzzleTranslations.success, autopuzzleTranslations.permissionsUpdated, 'success').then(() => {
                                         location.reload();
                                     });
                                 } else {
-                                    Swal.fire(maneliTranslations.error, response.data.message || maneliTranslations.updateError, 'error');
+                                    Swal.fire(autopuzzleTranslations.error, response.data.message || autopuzzleTranslations.updateError, 'error');
                                 }
                             },
                             error: function() {
                                 Swal.close();
-                                Swal.fire(maneliTranslations.error, maneliTranslations.serverError, 'error');
+                                Swal.fire(autopuzzleTranslations.error, autopuzzleTranslations.serverError, 'error');
                             }
                         });
                     }
                 });
             } else {
-                Swal.fire(maneliTranslations.error, response.data?.message || maneliTranslations.loadPermissionsError, 'error');
+                Swal.fire(autopuzzleTranslations.error, response.data?.message || autopuzzleTranslations.loadPermissionsError, 'error');
             }
         },
         error: function(xhr, status, error) {
             Swal.close();
             console.error('AJAX Error:', error);
-            Swal.fire(maneliTranslations.error, maneliTranslations.serverErrorRetry, 'error');
+            Swal.fire(autopuzzleTranslations.error, autopuzzleTranslations.serverErrorRetry, 'error');
         }
     });
 }
@@ -953,8 +953,8 @@ function saveExpert() {
     if (!firstName || !lastName || !mobile) {
         Swal.fire({
             icon: 'error',
-            title: maneliTranslations.error,
-            text: maneliTranslations.fillFields
+            title: autopuzzleTranslations.error,
+            text: autopuzzleTranslations.fillFields
         });
         return;
     }
@@ -964,7 +964,7 @@ function saveExpert() {
     const password = generateRandomPassword();
 
     Swal.fire({
-        title: maneliTranslations.saving,
+        title: autopuzzleTranslations.saving,
         allowOutsideClick: false,
         showConfirmButton: false,
         didOpen: () => {
@@ -973,10 +973,10 @@ function saveExpert() {
     });
 
     jQuery.ajax({
-        url: maneliAjaxUrl,
+        url: autopuzzleAjaxUrl,
         type: 'POST',
         data: {
-            action: 'maneli_add_expert',
+            action: 'autopuzzle_add_expert',
             first_name: firstName,
             last_name: lastName,
             display_name: firstName + ' ' + lastName,
@@ -986,22 +986,22 @@ function saveExpert() {
             'permissions[cash_inquiry]': cashInquiry ? 1 : 0,
             'permissions[installment_inquiry]': installmentInquiry ? 1 : 0,
             'permissions[calendar]': calendar ? 1 : 0,
-            nonce: '<?php echo wp_create_nonce('maneli_add_expert_nonce'); ?>'
+            nonce: '<?php echo wp_create_nonce('autopuzzle_add_expert_nonce'); ?>'
         },
         success: function(response) {
             Swal.close();
             if (response.success) {
-                Swal.fire(maneliTranslations.success, maneliTranslations.expertAdded, 'success').then(() => {
+                Swal.fire(autopuzzleTranslations.success, autopuzzleTranslations.expertAdded, 'success').then(() => {
                     location.reload();
                 });
             } else {
-                Swal.fire(maneliTranslations.error, response.data.message || maneliTranslations.addExpertError, 'error');
+                Swal.fire(autopuzzleTranslations.error, response.data.message || autopuzzleTranslations.addExpertError, 'error');
             }
         },
         error: function(xhr, status, error) {
             Swal.close();
             console.error('AJAX Error:', error, xhr.responseText);
-            Swal.fire(maneliTranslations.error, maneliTranslations.serverErrorRetry, 'error');
+            Swal.fire(autopuzzleTranslations.error, autopuzzleTranslations.serverErrorRetry, 'error');
         }
     });
 }
@@ -1009,16 +1009,16 @@ function saveExpert() {
 // Toggle Expert Status
 function toggleExpertStatus(userId, activate) {
     Swal.fire({
-        title: activate ? maneliTranslations.activateExpert : maneliTranslations.deactivateExpert,
-        text: activate ? maneliTranslations.expertWillActivate : maneliTranslations.expertWillDeactivate,
+        title: activate ? autopuzzleTranslations.activateExpert : autopuzzleTranslations.deactivateExpert,
+        text: activate ? autopuzzleTranslations.expertWillActivate : autopuzzleTranslations.expertWillDeactivate,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: maneliTranslations.yes,
-        cancelButtonText: maneliTranslations.no
+        confirmButtonText: autopuzzleTranslations.yes,
+        cancelButtonText: autopuzzleTranslations.no
     }).then((result) => {
         if (result.isConfirmed) {
             Swal.fire({
-                title: maneliTranslations.updating,
+                title: autopuzzleTranslations.updating,
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -1027,27 +1027,27 @@ function toggleExpertStatus(userId, activate) {
             });
             
             jQuery.ajax({
-                url: maneliAjaxUrl,
+                url: autopuzzleAjaxUrl,
                 type: 'POST',
                 data: {
-                action: 'maneli_toggle_expert_status',
+                action: 'autopuzzle_toggle_expert_status',
                 user_id: userId,
                     active: activate === true || activate === 'true',
-                    nonce: '<?php echo wp_create_nonce('maneli_toggle_expert_nonce'); ?>'
+                    nonce: '<?php echo wp_create_nonce('autopuzzle_toggle_expert_nonce'); ?>'
                 },
                 success: function(response) {
                     Swal.close();
                 if (response.success) {
-                        Swal.fire(maneliTranslations.success, response.data.message, 'success').then(() => {
+                        Swal.fire(autopuzzleTranslations.success, response.data.message, 'success').then(() => {
                             location.reload();
                         });
                     } else {
-                        Swal.fire(maneliTranslations.error, response.data.message, 'error');
+                        Swal.fire(autopuzzleTranslations.error, response.data.message, 'error');
                     }
                 },
                 error: function() {
                     Swal.close();
-                    Swal.fire(maneliTranslations.error, maneliTranslations.serverError, 'error');
+                    Swal.fire(autopuzzleTranslations.error, autopuzzleTranslations.serverError, 'error');
                 }
             });
         }
@@ -1057,17 +1057,17 @@ function toggleExpertStatus(userId, activate) {
 // Delete Expert
 function deleteExpert(userId) {
     Swal.fire({
-        title: maneliTranslations.deleteExpert,
-        text: maneliTranslations.deleteIrreversible,
+        title: autopuzzleTranslations.deleteExpert,
+        text: autopuzzleTranslations.deleteIrreversible,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: maneliTranslations.confirmDelete,
-        cancelButtonText: maneliTranslations.cancel,
+        confirmButtonText: autopuzzleTranslations.confirmDelete,
+        cancelButtonText: autopuzzleTranslations.cancel,
         confirmButtonColor: '#dc3545'
     }).then((result) => {
         if (result.isConfirmed) {
             Swal.fire({
-                title: maneliTranslations.deleting,
+                title: autopuzzleTranslations.deleting,
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -1076,26 +1076,26 @@ function deleteExpert(userId) {
             });
 
             jQuery.ajax({
-                url: maneliAjaxUrl,
+                url: autopuzzleAjaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'maneli_delete_user',
+                    action: 'autopuzzle_delete_user',
         user_id: userId,
-                    nonce: '<?php echo wp_create_nonce('maneli_delete_user_nonce'); ?>'
+                    nonce: '<?php echo wp_create_nonce('autopuzzle_delete_user_nonce'); ?>'
                 },
                 success: function(response) {
                     Swal.close();
         if (response.success) {
-                        Swal.fire(maneliTranslations.deleted, maneliTranslations.expertDeleted, 'success').then(() => {
+                        Swal.fire(autopuzzleTranslations.deleted, autopuzzleTranslations.expertDeleted, 'success').then(() => {
                             location.reload();
                         });
                     } else {
-                        Swal.fire(maneliTranslations.error, response.data.message, 'error');
+                        Swal.fire(autopuzzleTranslations.error, response.data.message, 'error');
                     }
                 },
                 error: function() {
                     Swal.close();
-                    Swal.fire(maneliTranslations.error, maneliTranslations.serverError, 'error');
+                    Swal.fire(autopuzzleTranslations.error, autopuzzleTranslations.serverError, 'error');
                 }
             });
         }

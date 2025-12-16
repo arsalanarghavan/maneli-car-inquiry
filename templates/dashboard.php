@@ -1,7 +1,9 @@
 <?php
 /**
  * Dashboard Template
- * مانلی خودرو - داشبورد سیستم استعلام خودرو
+ * AutoPuzzle - Dashboard for Inquiry System
+ * 
+ * Dynamic branding support through Autopuzzle_Branding_Helper
  */
 
 if (!defined('ABSPATH')) {
@@ -9,7 +11,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Get current user from handler
-$handler = Maneli_Dashboard_Handler::instance();
+$handler = Autopuzzle_Dashboard_Handler::instance();
 $user_data = $handler->get_current_user_for_template();
 $current_user = $user_data['wp_user'];
 $user_role = $user_data['role'];
@@ -18,33 +20,33 @@ $user_phone = $user_data['phone'];
 $role_display = $user_data['role_display'];
 
 // Get current page
-$dashboard_page = get_query_var('maneli_dashboard_page');
+$dashboard_page = get_query_var('autopuzzle_dashboard_page');
 if (empty($dashboard_page)) {
     $dashboard_page = 'home';
 }
 
 // Define AJAX URL and nonce
 $ajax_url = admin_url('admin-ajax.php');
-$ajax_nonce = wp_create_nonce('maneli_ajax_nonce'); // Match the action name used in handler
+$ajax_nonce = wp_create_nonce('autopuzzle_ajax_nonce'); // Match the action name used in handler
 
 // Render dynamic sidebar menu
 ob_start();
-include MANELI_PLUGIN_DIR . 'templates/dashboard/sidebar-menu.php';
+include AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/sidebar-menu.php';
 $sidebar_menu = ob_get_clean();
 
 // Get the dashboard HTML content - validate file path to prevent path traversal
-$dashboard_html_file = MANELI_PLUGIN_DIR . 'templates/dashboard-base.html';
+$dashboard_html_file = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard-base.html';
 $dashboard_html_realpath = realpath($dashboard_html_file);
-$plugin_dir_realpath = realpath(MANELI_PLUGIN_DIR);
+$plugin_dir_realpath = realpath(AUTOPUZZLE_PLUGIN_DIR);
 
 // Verify the file is within the plugin directory
 if ($dashboard_html_realpath === false || strpos($dashboard_html_realpath, $plugin_dir_realpath) !== 0) {
-    wp_die(esc_html__('Invalid file path detected.', 'maneli-car-inquiry'));
+    wp_die(esc_html__('Invalid file path detected.', 'autopuzzle'));
 }
 
 $dashboard_html = file_get_contents($dashboard_html_file);
 if ($dashboard_html === false) {
-    wp_die(esc_html__('Failed to load dashboard template.', 'maneli-car-inquiry'));
+    wp_die(esc_html__('Failed to load dashboard template.', 'autopuzzle'));
 }
 
 $preferred_language = method_exists($handler, 'get_preferred_language_slug')
@@ -80,14 +82,14 @@ $replacement = '$1' . PHP_EOL . $sidebar_menu . PHP_EOL . '$3';
 $dashboard_html = preg_replace($pattern, $replacement, $dashboard_html);
 
 // Replace asset paths to use WordPress URLs
-$dashboard_html = str_replace('./assets/', MANELI_PLUGIN_URL . 'assets/', $dashboard_html);
+$dashboard_html = str_replace('./assets/', AUTOPUZZLE_PLUGIN_URL . 'assets/', $dashboard_html);
 
 // Ensure sidebar fixes stylesheet busts cache after updates
 $sidebar_fixes_paths = [];
-if (defined('MANELI_INQUIRY_PLUGIN_PATH')) {
-    $sidebar_fixes_paths[] = trailingslashit(MANELI_INQUIRY_PLUGIN_PATH) . 'assets/css/sidebar-fixes.css';
+if (defined('AUTOPUZZLE_PLUGIN_PATH')) {
+    $sidebar_fixes_paths[] = trailingslashit(AUTOPUZZLE_PLUGIN_PATH) . 'assets/css/sidebar-fixes.css';
 }
-$sidebar_fixes_paths[] = MANELI_PLUGIN_DIR . 'assets/css/sidebar-fixes.css';
+$sidebar_fixes_paths[] = AUTOPUZZLE_PLUGIN_DIR . 'assets/css/sidebar-fixes.css';
 
 $sidebar_fixes_version = null;
 foreach ($sidebar_fixes_paths as $sidebar_path) {
@@ -108,34 +110,34 @@ if ($sidebar_fixes_version) {
 
 // Inject translated header text
 $header_replacements = [
-    '%%MANELI_HEADER_SIDEBAR_TOGGLE_LABEL%%' => esc_attr__('Hide Sidebar', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_SEARCH_PLACEHOLDER%%' => esc_attr__('Search...', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_LANGUAGE_FA%%' => esc_html__('Persian', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_LANGUAGE_EN%%' => esc_html__('English', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATIONS_TITLE%%' => esc_html__('Alerts', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATIONS_UNREAD%%' => esc_html__('5 unread', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TITLE%%' => esc_html__('Message title', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_DESCRIPTION%%' => esc_html__('Description', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_NOW%%' => esc_html__('Just now', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_TWO_HOURS%%' => esc_html__('2 hours ago', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_ONE_DAY%%' => esc_html__('1 day ago', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NOTIFICATION_SAMPLE_TIME_FIVE_HOURS%%' => esc_html__('5 hours ago', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_VIEW_ALL%%' => esc_html__('View all', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NO_NOTIFICATIONS%%' => esc_html__('No alerts available', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_NAME%%' => esc_html__('User name', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_ROLE%%' => esc_html__('Role', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_VIEW_SITE_LABEL%%' => esc_html__('View site', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_VIEW_SITE_URL%%' => esc_url(home_url('/')),
-    '%%MANELI_HEADER_MODAL_SEARCH_PLACEHOLDER%%' => esc_attr__('Search', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_MODAL_SEARCH_ARIA%%' => esc_attr__('Search', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_UNREAD_BADGE%%' => esc_html__('%s unread', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_NO_UNREAD%%' => esc_html__('No unread', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_ACCOUNT%%' => esc_html__('Account', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_EMAIL%%' => esc_html__('Email', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_FILE_MANAGER%%' => esc_html__('File manager', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_SETTINGS%%' => esc_html__('Settings', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_SUPPORT%%' => esc_html__('Support', 'maneli-car-inquiry'),
-    '%%MANELI_HEADER_PROFILE_LOGOUT%%' => esc_html__('Log out', 'maneli-car-inquiry'),
+    '%%AUTOPUZZLE_HEADER_SIDEBAR_TOGGLE_LABEL%%' => esc_attr__('Hide Sidebar', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_SEARCH_PLACEHOLDER%%' => esc_attr__('Search...', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_LANGUAGE_FA%%' => esc_html__('Persian', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_LANGUAGE_EN%%' => esc_html__('English', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATIONS_TITLE%%' => esc_html__('Alerts', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATIONS_UNREAD%%' => esc_html__('5 unread', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATION_SAMPLE_TITLE%%' => esc_html__('Message title', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATION_SAMPLE_DESCRIPTION%%' => esc_html__('Description', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATION_SAMPLE_TIME_NOW%%' => esc_html__('Just now', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATION_SAMPLE_TIME_TWO_HOURS%%' => esc_html__('2 hours ago', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATION_SAMPLE_TIME_ONE_DAY%%' => esc_html__('1 day ago', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NOTIFICATION_SAMPLE_TIME_FIVE_HOURS%%' => esc_html__('5 hours ago', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_VIEW_ALL%%' => esc_html__('View all', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NO_NOTIFICATIONS%%' => esc_html__('No alerts available', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_NAME%%' => esc_html__('User name', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_ROLE%%' => esc_html__('Role', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_VIEW_SITE_LABEL%%' => esc_html__('View site', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_VIEW_SITE_URL%%' => esc_url(home_url('/')),
+    '%%AUTOPUZZLE_HEADER_MODAL_SEARCH_PLACEHOLDER%%' => esc_attr__('Search', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_MODAL_SEARCH_ARIA%%' => esc_attr__('Search', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_UNREAD_BADGE%%' => esc_html__('%s unread', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_NO_UNREAD%%' => esc_html__('No unread', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_ACCOUNT%%' => esc_html__('Account', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_EMAIL%%' => esc_html__('Email', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_FILE_MANAGER%%' => esc_html__('File manager', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_SETTINGS%%' => esc_html__('Settings', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_SUPPORT%%' => esc_html__('Support', 'autopuzzle'),
+    '%%AUTOPUZZLE_HEADER_PROFILE_LOGOUT%%' => esc_html__('Log out', 'autopuzzle'),
 ];
 
 $dashboard_html = str_replace(
@@ -144,27 +146,44 @@ $dashboard_html = str_replace(
     $dashboard_html
 );
 
-// Inject translated footer text
-$company_name = __('Puzzling Institute', 'maneli-car-inquiry');
-$company_link = sprintf(
-    '<a href="%1$s" target="_blank" rel="noopener"><span class="fw-medium text-primary">%2$s</span></a>',
-    esc_url('https://puzzlingco.com'),
-    esc_html($company_name)
-);
+// Inject translated footer text with white-label support
+$branding = Autopuzzle_Branding_Helper::get_branding_config();
+$company_name = isset($branding['company_name']) && !empty($branding['company_name'])
+    ? $branding['company_name']
+    : __('Puzzling Institute', 'autopuzzle');
+
+$company_link = isset($branding['company_website']) && !empty($branding['company_website'])
+    ? sprintf(
+        '<a href="%1$s" target="_blank" rel="noopener"><span class="fw-medium text-primary">%2$s</span></a>',
+        esc_url($branding['company_website']),
+        esc_html($company_name)
+    )
+    : sprintf(
+        '<a href="%1$s" target="_blank" rel="noopener"><span class="fw-medium text-primary">%2$s</span></a>',
+        esc_url('https://puzzlingco.com'),
+        esc_html($company_name)
+    );
 
 /* translators: 1: year span HTML, 2: heart icon HTML, 3: linked company name */
 $footer_text = sprintf(
-    __('%1$s Designed with %2$s by %3$s', 'maneli-car-inquiry'),
+    __('%1$s Designed with %2$s by %3$s', 'autopuzzle'),
     '<span id="year"></span>',
     '<span class="bi bi-heart-fill text-danger" aria-hidden="true"></span>',
     $company_link
 );
 
 $dashboard_html = str_replace(
-    '%%MANELI_DASHBOARD_FOOTER%%',
+    '%%AUTOPUZZLE_DASHBOARD_FOOTER%%',
     wp_kses_post($footer_text),
     $dashboard_html
 );
+
+// Replace footer placeholders in dashboard-temp.html
+$dashboard_html = str_replace('%%COMPANY_NAME%%', esc_html($company_name), $dashboard_html);
+$website = isset($branding['company_website']) && !empty($branding['company_website'])
+    ? esc_url($branding['company_website'])
+    : esc_url('https://puzzlingco.com');
+$dashboard_html = str_replace('%%COMPANY_WEBSITE%%', $website, $dashboard_html);
 
 // Replace jQuery CDN with WordPress jQuery (more reliable)
 // CRITICAL: jQuery must load first for everything to work
@@ -285,10 +304,10 @@ $dashboard_html = preg_replace(
 );
 
 // Also update font paths in inline styles
-$dashboard_html = str_replace('src: url(\'./font/', 'src: url(\'' . MANELI_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
-$dashboard_html = str_replace('src: url("./font/', 'src: url("' . MANELI_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
-$dashboard_html = str_replace('url(\'../fonts/', 'url(\'' . MANELI_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
-$dashboard_html = str_replace('url("../fonts/', 'url("' . MANELI_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
+$dashboard_html = str_replace('src: url(\'./font/', 'src: url(\'' . AUTOPUZZLE_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
+$dashboard_html = str_replace('src: url("./font/', 'src: url("' . AUTOPUZZLE_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
+$dashboard_html = str_replace('url(\'../fonts/', 'url(\'' . AUTOPUZZLE_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
+$dashboard_html = str_replace('url("../fonts/', 'url("' . AUTOPUZZLE_PLUGIN_URL . 'assets/fonts/', $dashboard_html);
 
 // Remove sales-dashboard.js and apexcharts when we're not on the home or visitor statistics pages
 if ($dashboard_page !== 'home' && $dashboard_page !== 'visitor-statistics') {
@@ -300,11 +319,30 @@ if ($dashboard_page !== 'home' && $dashboard_page !== 'visitor-statistics') {
     $dashboard_html = preg_replace('/<!-- Sales Dashboard -->\s*/', '', $dashboard_html);
 }
 
-// Replace title and meta
-// Replace xintra branding with مانلی خودرو
-$dashboard_html = str_replace('قالب HTML داشبورد مدیریتی xintra', 'Car Inquiry System Dashboard', $dashboard_html);
-$dashboard_html = str_replace('Xintra', 'Maneli Khodro', $dashboard_html);
-$dashboard_html = str_replace('استعلام خودرو منلی', 'Maneli Khodro', $dashboard_html);
+// Replace title and meta with white-label support
+$branding = Autopuzzle_Branding_Helper::get_branding_config();
+$system_name = isset($branding['system_name']) && !empty($branding['system_name'])
+    ? $branding['system_name']
+    : __('AutoPuzzle Dashboard', 'autopuzzle');
+
+$dashboard_html = str_replace('داشبورد مدیریتی %%COMPANY_NAME%%', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('داشبورد مدیریتی اتوپازل', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('داشبورد مدیریتی منلی خودرو', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('قالب HTML داشبورد مدیریتی xintra', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('Xintra', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('AutoPuzzle Khodro', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('استعلام خودرو %%COMPANY_NAME%%', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('استعلام خودرو اتوپازل', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('استعلام خودرو اتوپازل', esc_html($system_name), $dashboard_html);
+
+// Replace meta tags with white-label support
+$description = sprintf(__('داشبورد مدیریتی %s', 'autopuzzle'), esc_html($system_name));
+$keywords = sprintf(__('داشبورد، %s، مدیریت', 'autopuzzle'), esc_html($system_name));
+
+$dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_TITLE%%', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_DESCRIPTION%%', esc_html($description), $dashboard_html);
+$dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_AUTHOR%%', esc_html($system_name), $dashboard_html);
+$dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_KEYWORDS%%', esc_html($keywords), $dashboard_html);
 
 // Fix: Replace the problematic language switching script that causes infinite refresh
 $pattern = '/(<!-- Language Switching Function -->)(.*?)(Load saved language preference on page load)(.*?)(<\/script>)/s';
@@ -312,7 +350,7 @@ $fixed_script = <<<'HTML'
 <!-- Language Switching Function -->
 <script>
     (function() {
-        const COOKIE_NAME = 'maneli_language';
+        const COOKIE_NAME = 'autopuzzle_language';
         const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
         const SERVER_LANGUAGE = <?php echo wp_json_encode($preferred_language === 'fa' ? 'fa' : 'en'); ?>;
 
@@ -320,7 +358,7 @@ $fixed_script = <<<'HTML'
             return document.documentElement && document.documentElement.lang === 'fa';
         }
 
-        window.maneliShouldUsePersianDates = shouldUsePersianDates;
+        window.autopuzzleShouldUsePersianDates = shouldUsePersianDates;
 
         function normalizeLanguage(lang) {
             const serverNormalized = (SERVER_LANGUAGE === 'en') ? 'en' : 'fa';
@@ -345,7 +383,7 @@ $fixed_script = <<<'HTML'
                 const normalized = normalizeLanguage(lang);
                 document.cookie = COOKIE_NAME + '=' + normalized + '; path=/; max-age=' + COOKIE_MAX_AGE + '; SameSite=Lax';
             } catch (error) {
-                console.warn('[Maneli] Unable to persist language cookie', error);
+                console.warn('[AutoPuzzle] Unable to persist language cookie', error);
             }
         }
 
@@ -383,14 +421,14 @@ $fixed_script = <<<'HTML'
             return normalized;
         }
 
-        window.maneliServerLanguage = SERVER_LANGUAGE;
+        window.autopuzzleServerLanguage = SERVER_LANGUAGE;
 
         window.changeLanguage = function(lang) {
             const normalized = normalizeLanguage(lang);
             const currentLang = normalizeLanguage(document.documentElement.lang);
             const currentDir = (document.documentElement.dir || 'rtl').toLowerCase();
 
-            localStorage.setItem('maneli_language', normalized);
+            localStorage.setItem('autopuzzle_language', normalized);
             setLanguageCookie(normalized);
 
             // Apply immediately for visual feedback
@@ -401,18 +439,18 @@ $fixed_script = <<<'HTML'
                 (normalized !== 'fa' && currentDir !== 'ltr');
 
             if (requiresReload) {
-                localStorage.setItem('maneli_language_changing', 'true');
+                localStorage.setItem('autopuzzle_language_changing', 'true');
                 window.location.reload();
             }
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-            const savedLang = normalizeLanguage(localStorage.getItem('maneli_language'));
+            const savedLang = normalizeLanguage(localStorage.getItem('autopuzzle_language'));
             const appliedLang = applyLanguage(savedLang);
             setLanguageCookie(appliedLang);
 
-            if (localStorage.getItem('maneli_language_changing') === 'true') {
-                localStorage.removeItem('maneli_language_changing');
+            if (localStorage.getItem('autopuzzle_language_changing') === 'true') {
+                localStorage.removeItem('autopuzzle_language_changing');
                 return;
             }
 
@@ -424,7 +462,7 @@ $fixed_script = <<<'HTML'
                 (appliedLang !== 'fa' && currentDir !== 'ltr');
 
             if (needsReload) {
-                localStorage.setItem('maneli_language_changing', 'true');
+                localStorage.setItem('autopuzzle_language_changing', 'true');
                 window.location.reload();
             }
         });
@@ -433,7 +471,7 @@ $fixed_script = <<<'HTML'
 <!-- Digit & Locale Utilities -->
 <script>
     (function(window, document) {
-        const SERVER_LANGUAGE = (typeof window !== 'undefined' && window.maneliServerLanguage) ? String(window.maneliServerLanguage).toLowerCase() : '';
+        const SERVER_LANGUAGE = (typeof window !== 'undefined' && window.autopuzzleServerLanguage) ? String(window.autopuzzleServerLanguage).toLowerCase() : '';
         const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         const ARABIC_DIGITS = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
         const ENGLISH_DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -535,9 +573,9 @@ $fixed_script = <<<'HTML'
                     return '';
                 }
                 try {
-                    return normalizeLanguage(window.localStorage.getItem('maneli_language'));
+                    return normalizeLanguage(window.localStorage.getItem('autopuzzle_language'));
                 } catch (error) {
-                    console.warn('[Maneli] Unable to read language from localStorage', error);
+                    console.warn('[AutoPuzzle] Unable to read language from localStorage', error);
                     return '';
                 }
             };
@@ -547,12 +585,12 @@ $fixed_script = <<<'HTML'
                     return '';
                 }
                 try {
-                    const match = document.cookie.match(/(?:^|;\s*)maneli_language=([^;]+)/);
+                    const match = document.cookie.match(/(?:^|;\s*)autopuzzle_language=([^;]+)/);
                     if (match && match[1]) {
                         return normalizeLanguage(decodeURIComponent(match[1]));
                     }
                 } catch (error) {
-                    console.warn('[Maneli] Unable to read language cookie', error);
+                    console.warn('[AutoPuzzle] Unable to read language cookie', error);
                 }
                 return '';
             };
@@ -628,7 +666,7 @@ $fixed_script = <<<'HTML'
             return targetLocale === 'fa' ? toPersianDigits(formatted) : toEnglishDigits(formatted);
         }
 
-        window.maneliLocale = Object.assign({}, window.maneliLocale || {}, {
+        window.autopuzzleLocale = Object.assign({}, window.autopuzzleLocale || {}, {
             normalizeLanguage,
             detectLanguage,
             shouldUsePersianDigits,
@@ -639,8 +677,8 @@ $fixed_script = <<<'HTML'
             formatNumber
         });
 
-        window.maneliDigits = window.maneliLocale;
-        window.maneliShouldUsePersianDates = shouldUsePersianDigits;
+        window.autopuzzleDigits = window.autopuzzleLocale;
+        window.autopuzzleShouldUsePersianDates = shouldUsePersianDigits;
 
         window.Apex = window.Apex || {};
         window.Apex.chart = window.Apex.chart || {};
@@ -765,7 +803,7 @@ if ($current_user && !empty($current_user->ID)) {
 if (empty($profile_image)) {
     $profile_image = get_avatar_url($current_user ? $current_user->ID : 0, ['size' => 32]);
     if (empty($profile_image) || strpos($profile_image, 'gravatar.com') !== false) {
-        $profile_image = MANELI_PLUGIN_URL . 'assets/images/faces/15.jpg';
+        $profile_image = AUTOPUZZLE_PLUGIN_URL . 'assets/images/faces/15.jpg';
     }
 }
 
@@ -792,8 +830,8 @@ if (!empty($profile_image) && !empty($profile_name)) {
 											<span class="d-block fs-12 text-muted">' . esc_html($profile_role) . '</span>
 										</div>
 									</li>
-									<li><a class="dropdown-item d-flex align-items-center" href="' . home_url('/dashboard/profile-settings') . '"><i class="fe fe-user p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>' . __('My Account', 'maneli-car-inquiry') . '</a></li>
-									<li class="border-top bg-light"><a class="dropdown-item d-flex align-items-center" href="' . $logout_url . '"><i class="fe fe-log-out p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>' . __('Logout', 'maneli-car-inquiry') . '</a></li>
+									<li><a class="dropdown-item d-flex align-items-center" href="' . home_url('/dashboard/profile-settings') . '"><i class="fe fe-user p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>' . __('My Account', 'autopuzzle') . '</a></li>
+									<li class="border-top bg-light"><a class="dropdown-item d-flex align-items-center" href="' . $logout_url . '"><i class="fe fe-log-out p-1 rounded-circle bg-primary-transparent me-2 fs-16"></i>' . __('Logout', 'autopuzzle') . '</a></li>
 								</ul>
 							</li>';
 }
@@ -805,7 +843,7 @@ $page_slug = $dashboard_page ?: 'home';
 // Check for view_payment query var
 $view_payment = get_query_var('view_payment');
 if (!empty($view_payment)) {
-    $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/payment-details.php';
+    $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/payment-details.php';
     if (file_exists($page_template)) {
         ob_start();
         include $page_template;
@@ -815,7 +853,7 @@ if (!empty($view_payment)) {
     // Check for add-product page or edit_product query var
     $edit_product = isset($_GET['edit_product']) ? absint($_GET['edit_product']) : 0;
     if ($page_slug === 'add-product' || $edit_product > 0) {
-        $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/add-edit-product.php';
+        $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/add-edit-product.php';
         if (file_exists($page_template)) {
             ob_start();
             include $page_template;
@@ -823,12 +861,12 @@ if (!empty($view_payment)) {
         }
     } else {
         // Handle unified inquiry pages: inquiries/cash and inquiries/installment
-        $subpage = get_query_var('maneli_dashboard_subpage');
+        $subpage = get_query_var('autopuzzle_dashboard_subpage');
         if ($page_slug === 'inquiries' && !empty($subpage)) {
             if ($subpage === 'cash') {
-                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/cash-inquiries.php';
+                $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/cash-inquiries.php';
             } elseif ($subpage === 'installment') {
-                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/installment-inquiries.php';
+                $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/installment-inquiries.php';
             } else {
                 // Invalid subpage, redirect to home
                 wp_redirect(home_url('/dashboard'));
@@ -844,7 +882,7 @@ if (!empty($view_payment)) {
             // Handle notification sub-pages: notifications/sms, notifications/email, etc.
             $valid_subpages = ['sms', 'email', 'telegram', 'app'];
             if (in_array($subpage, $valid_subpages)) {
-                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/notifications/' . $subpage . '-notifications.php';
+                $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/notifications/' . $subpage . '-notifications.php';
                 if (file_exists($page_template)) {
                     ob_start();
                     include $page_template;
@@ -859,7 +897,7 @@ if (!empty($view_payment)) {
             // Handle logs sub-pages: logs/system and logs/user
             $valid_subpages = ['system', 'user'];
             if (in_array($subpage, $valid_subpages)) {
-                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/' . $subpage . '-logs.php';
+                $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/' . $subpage . '-logs.php';
                 if (file_exists($page_template)) {
                     ob_start();
                     include $page_template;
@@ -874,7 +912,7 @@ if (!empty($view_payment)) {
             // Check for license-activation page via GET parameter
             $get_page = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';
             if ($get_page === 'license-activation') {
-                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/license-activation.php';
+                $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/license-activation.php';
                 if (file_exists($page_template)) {
                     ob_start();
                     include $page_template;
@@ -882,7 +920,7 @@ if (!empty($view_payment)) {
                 }
             } else {
                 // Try to load page-specific content
-                $page_template = MANELI_PLUGIN_DIR . 'templates/dashboard/' . $page_slug . '.php';
+                $page_template = AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/' . $page_slug . '.php';
                 if (file_exists($page_template)) {
                     ob_start();
                     include $page_template;
@@ -906,9 +944,9 @@ if (!empty($profile_html)) {
 }
 
 // Replace notifications dropdown - Remove demo notifications and make it load real notifications
-$alerts_text = esc_html__('Alerts', 'maneli-car-inquiry');
-$unread_text = esc_html__('unread', 'maneli-car-inquiry');
-$view_all_text = esc_html__('View All', 'maneli-car-inquiry');
+$alerts_text = esc_html__('Alerts', 'autopuzzle');
+$unread_text = esc_html__('unread', 'autopuzzle');
+$view_all_text = esc_html__('View All', 'autopuzzle');
 
 $notifications_html = '
 							<li class="header-element notifications-dropdown d-xl-block d-none dropdown">
@@ -917,7 +955,7 @@ $notifications_html = '
 									<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 header-link-icon" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
 										<path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"></path>
 									</svg>
-									<span class="header-icon-pulse bg-primary2 rounded pulse pulse-secondary maneli-initially-hidden" id="header-notification-count"></span>
+									<span class="header-icon-pulse bg-primary2 rounded pulse pulse-secondary autopuzzle-initially-hidden" id="header-notification-count"></span>
 								</a>
 								<!-- End::header-link|dropdown-toggle -->
 								<!-- Start::main-header-dropdown -->
@@ -960,7 +998,7 @@ if (!empty($page_content)) {
 } else {
     // If no content found, show 404 error page
     ob_start();
-    include MANELI_PLUGIN_DIR . 'templates/dashboard/error-404.php';
+    include AUTOPUZZLE_PLUGIN_DIR . 'templates/dashboard/error-404.php';
     $error_content = ob_get_clean();
     
     $pattern = '/(<!-- Start::app-content -->)(.*?)(<!-- End::app-content -->)/s';
@@ -977,7 +1015,7 @@ if (is_user_logged_in()) {
 // Add Chart.js for home page (needed for daily trend chart)
 // Insert Chart.js after jQuery but before other scripts
 if ($dashboard_page === 'home') {
-    $chart_js_path = MANELI_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js';
+    $chart_js_path = AUTOPUZZLE_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js';
     // Insert Chart.js script after jQuery loading
     $chart_script = '<script src="' . esc_url($chart_js_path) . '"></script>' . PHP_EOL;
     
@@ -999,36 +1037,36 @@ if ($dashboard_page === 'home') {
     $dashboard_html = str_replace('</body>', $fallback_script . PHP_EOL . '</body>', $dashboard_html);
 }
 
-$dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/notifications.js"></script>';
-$dashboard_html .= '<script src="' . MANELI_PLUGIN_URL . 'assets/js/global-search.js"></script>';
+$dashboard_html .= '<script src="' . AUTOPUZZLE_PLUGIN_URL . 'assets/js/notifications.js"></script>';
+$dashboard_html .= '<script src="' . AUTOPUZZLE_PLUGIN_URL . 'assets/js/global-search.js"></script>';
 
 // Visitor Tracking Script - For all dashboard pages (to track dashboard visits)
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $tracking_enabled = isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] == '1';
 if ($tracking_enabled) {
-    $tracking_script_path = MANELI_PLUGIN_DIR . 'assets/js/frontend/visitor-tracking.js';
+    $tracking_script_path = AUTOPUZZLE_PLUGIN_DIR . 'assets/js/frontend/visitor-tracking.js';
     if (file_exists($tracking_script_path)) {
         $dashboard_html .= '<script>
-var maneliVisitorTracking = {
+var autopuzzleVisitorTracking = {
     ajaxUrl: "' . esc_js(admin_url('admin-ajax.php')) . '",
-    nonce: "' . esc_js(wp_create_nonce('maneli_visitor_stats_nonce')) . '",
+    nonce: "' . esc_js(wp_create_nonce('autopuzzle_visitor_stats_nonce')) . '",
     enabled: true,
     debug: ' . (defined('WP_DEBUG') && WP_DEBUG ? 'true' : 'false') . '
 };
 </script>' . PHP_EOL;
-        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/frontend/visitor-tracking.js?v=' . filemtime($tracking_script_path)) . '"></script>' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/visitor-tracking.js?v=' . filemtime($tracking_script_path)) . '"></script>' . PHP_EOL;
     }
 }
 
 // Visitor Statistics Scripts - Direct Injection (for visitor-statistics page only)
 if ($dashboard_page === 'visitor-statistics') {
-    require_once MANELI_PLUGIN_DIR . 'includes/functions.php';
+    require_once AUTOPUZZLE_PLUGIN_DIR . 'includes/functions.php';
     
     // ApexCharts
-    $apexcharts_path = MANELI_PLUGIN_DIR . 'assets/libs/apexcharts/apexcharts.min.js';
+    $apexcharts_path = AUTOPUZZLE_PLUGIN_DIR . 'assets/libs/apexcharts/apexcharts.min.js';
     if (file_exists($apexcharts_path)) {
-        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.css') . '">' . PHP_EOL;
-        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js') . '"></script>' . PHP_EOL;
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.css') . '">' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/apexcharts/apexcharts.min.js') . '"></script>' . PHP_EOL;
     } else {
         // Fallback to CDN
         $dashboard_html .= '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.44.0/dist/apexcharts.css">' . PHP_EOL;
@@ -1036,19 +1074,19 @@ if ($dashboard_page === 'visitor-statistics') {
     }
     
     // Persian Datepicker
-    $datepicker_css = MANELI_PLUGIN_DIR . 'assets/css/persianDatepicker-default.css';
-    $datepicker_js = MANELI_PLUGIN_DIR . 'assets/js/persianDatepicker.min.js';
+    $datepicker_css = AUTOPUZZLE_PLUGIN_DIR . 'assets/css/persianDatepicker-default.css';
+    $datepicker_js = AUTOPUZZLE_PLUGIN_DIR . 'assets/js/persianDatepicker.min.js';
     if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
-        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
-        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
     }
     if ($preferred_language !== 'fa') {
-        $dashboard_html = str_replace('<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL, '', $dashboard_html);
-        $dashboard_html = str_replace('<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL, '', $dashboard_html);
+        $dashboard_html = str_replace('<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL, '', $dashboard_html);
+        $dashboard_html = str_replace('<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL, '', $dashboard_html);
     }
     
     // Visitor Statistics Dashboard Script
-    $dashboard_js_path = MANELI_PLUGIN_DIR . 'assets/js/admin/visitor-statistics-dashboard.js';
+    $dashboard_js_path = AUTOPUZZLE_PLUGIN_DIR . 'assets/js/admin/visitor-statistics-dashboard.js';
     if (file_exists($dashboard_js_path)) {
         // Get date range from query parameters
         $start_date_input = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_date']) : null;
@@ -1059,29 +1097,29 @@ if ($dashboard_page === 'visitor-statistics') {
         $end_date = $end_date_input ?: date('Y-m-d');
         
         if ($start_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $start_date_input, $matches)) {
-            if (!function_exists('maneli_jalali_to_gregorian')) {
-                require_once MANELI_PLUGIN_DIR . 'includes/functions.php';
+            if (!function_exists('autopuzzle_jalali_to_gregorian')) {
+                require_once AUTOPUZZLE_PLUGIN_DIR . 'includes/functions.php';
             }
-            $start_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+            $start_date = autopuzzle_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
         }
         
         if ($end_date_input && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $end_date_input, $matches)) {
-            if (!function_exists('maneli_jalali_to_gregorian')) {
-                require_once MANELI_PLUGIN_DIR . 'includes/functions.php';
+            if (!function_exists('autopuzzle_jalali_to_gregorian')) {
+                require_once AUTOPUZZLE_PLUGIN_DIR . 'includes/functions.php';
             }
-            $end_date = maneli_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
+            $end_date = autopuzzle_jalali_to_gregorian($matches[1], $matches[2], $matches[3]);
         }
         
         // Get daily stats
-        require_once MANELI_PLUGIN_DIR . 'includes/class-visitor-statistics.php';
-        $daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
+        require_once AUTOPUZZLE_PLUGIN_DIR . 'includes/class-visitor-statistics.php';
+        $daily_stats = Autopuzzle_Visitor_Statistics::get_daily_visits($start_date, $end_date);
         
         // Convert dates to Jalali format
-        if (function_exists('maneli_gregorian_to_jalali')) {
+        if (function_exists('autopuzzle_gregorian_to_jalali')) {
             foreach ($daily_stats as &$stat) {
                 if (isset($stat->date) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $stat->date)) {
                     $date_parts = explode('-', $stat->date);
-                    $stat->date = maneli_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
+                    $stat->date = autopuzzle_gregorian_to_jalali($date_parts[0], $date_parts[1], $date_parts[2], 'Y/m/d');
                 }
             }
             unset($stat);
@@ -1090,60 +1128,60 @@ if ($dashboard_page === 'visitor-statistics') {
         // Localize script
         $dashboard_html .= '<script>
 console.log("Visitor Statistics: Script block executed");
-var maneliVisitorStats = ' . wp_json_encode([
+var autopuzzleVisitorStats = ' . wp_json_encode([
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('maneli_visitor_stats_nonce'),
+            'nonce' => wp_create_nonce('autopuzzle_visitor_stats_nonce'),
             'startDate' => $start_date,
             'endDate' => $end_date,
             'dailyStats' => $daily_stats,
             'translations' => [
-                'loading' => esc_html__('Loading...', 'maneli-car-inquiry'),
-                'error' => esc_html__('Error loading data', 'maneli-car-inquiry'),
-                'noData' => esc_html__('No data available', 'maneli-car-inquiry'),
-                'visits' => esc_html__('Visits', 'maneli-car-inquiry'),
-                'uniqueVisitors' => esc_html__('Unique Visitors', 'maneli-car-inquiry'),
-                'pages' => esc_html__('Pages', 'maneli-car-inquiry'),
-                'date' => esc_html__('Date', 'maneli-car-inquiry'),
+                'loading' => esc_html__('Loading...', 'autopuzzle'),
+                'error' => esc_html__('Error loading data', 'autopuzzle'),
+                'noData' => esc_html__('No data available', 'autopuzzle'),
+                'visits' => esc_html__('Visits', 'autopuzzle'),
+                'uniqueVisitors' => esc_html__('Unique Visitors', 'autopuzzle'),
+                'pages' => esc_html__('Pages', 'autopuzzle'),
+                'date' => esc_html__('Date', 'autopuzzle'),
             ]
         ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';
-console.log("maneliVisitorStats object:", maneliVisitorStats);
+console.log("autopuzzleVisitorStats object:", autopuzzleVisitorStats);
 </script>' . PHP_EOL;
         
-        $dashboard_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/admin/visitor-statistics-dashboard.js?v=' . filemtime($dashboard_js_path)) . '"></script>' . PHP_EOL;
+        $dashboard_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/admin/visitor-statistics-dashboard.js?v=' . filemtime($dashboard_js_path)) . '"></script>' . PHP_EOL;
     }
     
     // Visitor Statistics CSS
-    $dashboard_css_path = MANELI_PLUGIN_DIR . 'assets/css/visitor-statistics.css';
+    $dashboard_css_path = AUTOPUZZLE_PLUGIN_DIR . 'assets/css/visitor-statistics.css';
     if (file_exists($dashboard_css_path)) {
-        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/visitor-statistics.css?v=' . filemtime($dashboard_css_path)) . '">' . PHP_EOL;
+        $dashboard_html .= '<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/visitor-statistics.css?v=' . filemtime($dashboard_css_path)) . '">' . PHP_EOL;
     }
 }
 $dashboard_html .= '<script>
-var maneli_current_user = ' . json_encode(array(
+var autopuzzle_current_user = ' . json_encode(array(
     'user_id' => $user_id,
     'role' => $user_role
 )) . ';
-var maneli_ajax = {
+var autopuzzle_ajax = {
     url: "' . $ajax_url . '",
     nonce: "' . $ajax_nonce . '",
-    plugin_url: "' . MANELI_PLUGIN_URL . '",
-    notifications_nonce: "' . wp_create_nonce('maneli_notifications_nonce') . '"
+    plugin_url: "' . AUTOPUZZLE_PLUGIN_URL . '",
+    notifications_nonce: "' . wp_create_nonce('autopuzzle_notifications_nonce') . '"
 };
-var maneliGlobalSearch = {
+var autopuzzleGlobalSearch = {
     texts: {
-        users: "' . esc_js(__('Users', 'maneli-car-inquiry')) . '",
-        cash_inquiries: "' . esc_js(__('Cash Inquiries', 'maneli-car-inquiry')) . '",
-        installment_inquiries: "' . esc_js(__('Installment Inquiries', 'maneli-car-inquiry')) . '",
-        no_results: "' . esc_js(__('No results found', 'maneli-car-inquiry')) . '"
+        users: "' . esc_js(__('Users', 'autopuzzle')) . '",
+        cash_inquiries: "' . esc_js(__('Cash Inquiries', 'autopuzzle')) . '",
+        installment_inquiries: "' . esc_js(__('Installment Inquiries', 'autopuzzle')) . '",
+        no_results: "' . esc_js(__('No results found', 'autopuzzle')) . '"
     }
 };
 
 // Initialize notifications
 (function() {
     function waitForJQueryAndInit() {
-        if (typeof jQuery !== "undefined" && typeof maneliNotifications !== "undefined") {
+        if (typeof jQuery !== "undefined" && typeof autopuzzleNotifications !== "undefined") {
             jQuery(document).ready(function($) {
-                maneliNotifications.init();
+                autopuzzleNotifications.init();
             });
         } else {
             setTimeout(waitForJQueryAndInit, 100);
@@ -1171,9 +1209,9 @@ window.addEventListener("error", function(e) {
 // This ensures it runs even if custom.js has issues
 $dark_mode_toggle_script = '<script>
 (function() {
-    console.log("Maneli: Initializing dark mode toggle from dashboard.php");
+    console.log("AutoPuzzle: Initializing dark mode toggle from dashboard.php");
     
-    function maneliToggleTheme() {
+    function autopuzzleToggleTheme() {
         var html = document.querySelector("html");
         if (!html) return;
         
@@ -1194,7 +1232,7 @@ $dark_mode_toggle_script = '<script>
             localStorage.removeItem("xintraHeader");
             localStorage.removeItem("bodylightRGB");
             localStorage.removeItem("bodyBgRGB");
-            console.log("Maneli: Switched to light mode");
+            console.log("AutoPuzzle: Switched to light mode");
         } else {
             html.setAttribute("data-theme-mode", "dark");
             html.setAttribute("data-header-styles", "dark");
@@ -1222,18 +1260,18 @@ $dark_mode_toggle_script = '<script>
             localStorage.setItem("xintraHeader", "dark");
             localStorage.removeItem("bodylightRGB");
             localStorage.removeItem("bodyBgRGB");
-            console.log("Maneli: Switched to dark mode");
+            console.log("AutoPuzzle: Switched to dark mode");
         }
 
-        if (window.maneliUpdateHeaderIcons) {
-            window.maneliUpdateHeaderIcons();
+        if (window.autopuzzleUpdateHeaderIcons) {
+            window.autopuzzleUpdateHeaderIcons();
         }
     }
     
-    function initManeliDarkModeToggle() {
+    function initAutoPuzzleDarkModeToggle() {
         var layoutSetting = document.querySelector(".layout-setting");
         if (layoutSetting) {
-            console.log("Maneli: Found .layout-setting element");
+            console.log("AutoPuzzle: Found .layout-setting element");
             
             // Clone to remove existing listeners
             var parent = layoutSetting.parentNode;
@@ -1244,31 +1282,31 @@ $dark_mode_toggle_script = '<script>
                 newLayoutSetting.addEventListener("click", function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log("Maneli: Dark mode toggle button clicked");
-                    maneliToggleTheme();
+                    console.log("AutoPuzzle: Dark mode toggle button clicked");
+                    autopuzzleToggleTheme();
                     return false;
                 });
                 
-                console.log("Maneli: Dark mode toggle initialized successfully");
+                console.log("AutoPuzzle: Dark mode toggle initialized successfully");
             }
         } else {
-            console.warn("Maneli: .layout-setting element not found, will retry");
-            setTimeout(initManeliDarkModeToggle, 100);
+            console.warn("AutoPuzzle: .layout-setting element not found, will retry");
+            setTimeout(initAutoPuzzleDarkModeToggle, 100);
         }
     }
     
     // Try multiple times to ensure it works
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", function() {
-            setTimeout(initManeliDarkModeToggle, 100);
+            setTimeout(initAutoPuzzleDarkModeToggle, 100);
         });
     } else {
-        setTimeout(initManeliDarkModeToggle, 100);
+        setTimeout(initAutoPuzzleDarkModeToggle, 100);
     }
     
     // Also try after window load
     window.addEventListener("load", function() {
-        setTimeout(initManeliDarkModeToggle, 200);
+        setTimeout(initAutoPuzzleDarkModeToggle, 200);
     });
 })();
 </script>';
@@ -1276,8 +1314,8 @@ $dashboard_html .= $dark_mode_toggle_script;
 
 // CRITICAL FIX: Print scripts manually since wp_footer is not called
 // This ensures inquiry scripts are loaded on inquiry pages
-$page = get_query_var('maneli_dashboard_page');
-$subpage = get_query_var('maneli_dashboard_subpage');
+$page = get_query_var('autopuzzle_dashboard_page');
+$subpage = get_query_var('autopuzzle_dashboard_subpage');
 $inquiry_id = isset($_GET['inquiry_id']) ? intval($_GET['inquiry_id']) : 0;
 $cash_inquiry_id = isset($_GET['cash_inquiry_id']) ? intval($_GET['cash_inquiry_id']) : 0;
 
@@ -1299,10 +1337,10 @@ if ($need_inquiry_scripts) {
     // CRITICAL: wp_print_scripts doesn't work, inject scripts directly
     $scripts_html = PHP_EOL . '<!-- Inquiry Scripts Direct Injection -->' . PHP_EOL;
     // Use local SweetAlert2 if available
-    $sweetalert2_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+    $sweetalert2_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
     if (file_exists($sweetalert2_path)) {
-        $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css') . '">' . PHP_EOL;
-        $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js') . '"></script>' . PHP_EOL;
+        $scripts_html .= '<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css') . '">' . PHP_EOL;
+        $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js') . '"></script>' . PHP_EOL;
     } else {
         // Fallback to CDN
         $scripts_html .= '<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>' . PHP_EOL;
@@ -1313,211 +1351,211 @@ if ($need_inquiry_scripts) {
     
     // Add wizard scripts for new-inquiry page
     if ($page === 'new-inquiry') {
-        $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/vanilla-wizard/js/wizard.min.js') . '"></script>' . PHP_EOL;
-        $form_wizard_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/form-wizard.js';
+        $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/vanilla-wizard/js/wizard.min.js') . '"></script>' . PHP_EOL;
+        $form_wizard_file = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/form-wizard.js';
         if (file_exists($form_wizard_file)) {
-            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/form-wizard.js?v=' . filemtime($form_wizard_file)) . '"></script>' . PHP_EOL;
+            $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/form-wizard.js?v=' . filemtime($form_wizard_file)) . '"></script>' . PHP_EOL;
         }
         // Persian Datepicker
         if ($preferred_language === 'fa') {
-            $datepicker_css = MANELI_PLUGIN_DIR . 'assets/css/persianDatepicker-default.css';
-            $datepicker_js = MANELI_PLUGIN_DIR . 'assets/js/persianDatepicker.min.js';
+            $datepicker_css = AUTOPUZZLE_PLUGIN_DIR . 'assets/css/persianDatepicker-default.css';
+            $datepicker_js = AUTOPUZZLE_PLUGIN_DIR . 'assets/js/persianDatepicker.min.js';
         if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
-                $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
-                $scripts_html .= '<script src="' . esc_url(MANELI_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+                $scripts_html .= '<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+                $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
             }
         }
         // Inquiry form JS
-        $inquiry_form_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';
+        $inquiry_form_file = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';
         if (file_exists($inquiry_form_file)) {
-            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js?v=' . filemtime($inquiry_form_file)) . '"></script>' . PHP_EOL;
+            $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js?v=' . filemtime($inquiry_form_file)) . '"></script>' . PHP_EOL;
         }
         
         // Add modal calculator for step 3 (car replacement)
         $current_step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
         if ($current_step === 3) {
             // Modal calculator CSS (reuse loan-calculator.css)
-            $calculator_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/loan-calculator.css';
+            $calculator_css = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/loan-calculator.css';
             if (file_exists($calculator_css)) {
-                $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/loan-calculator.css?v=' . filemtime($calculator_css)) . '">' . PHP_EOL;
+                $scripts_html .= '<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/loan-calculator.css?v=' . filemtime($calculator_css)) . '">' . PHP_EOL;
             }
             // Modal calculator JS
-            $modal_calculator_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/modal-calculator.js';
+            $modal_calculator_js = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/modal-calculator.js';
             if (file_exists($modal_calculator_js)) {
-                $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/modal-calculator.js?v=' . filemtime($modal_calculator_js)) . '"></script>' . PHP_EOL;
+                $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/modal-calculator.js?v=' . filemtime($modal_calculator_js)) . '"></script>' . PHP_EOL;
             }
             // Localize modal calculator
-            $options = get_option('maneli_inquiry_all_options', []);
+            $options = get_option('autopuzzle_inquiry_all_options', []);
             $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
-            $scripts_html .= '<script>window.maneli_ajax_object={interestRate:' . esc_js($interest_rate) . ',ajax_url:"' . admin_url('admin-ajax.php') . '",nonce:"' . wp_create_nonce('maneli_ajax_nonce') . '"};</script>' . PHP_EOL;
+            $scripts_html .= '<script>window.autopuzzle_ajax_object={interestRate:' . esc_js($interest_rate) . ',ajax_url:"' . admin_url('admin-ajax.php') . '",nonce:"' . wp_create_nonce('autopuzzle_ajax_nonce') . '"};</script>' . PHP_EOL;
         }
     }
     
     // Add datepicker scripts for profile-settings page
     if ($page === 'profile-settings') {
-        $datepicker_css = MANELI_INQUIRY_PLUGIN_PATH . 'assets/css/persianDatepicker-default.css';
-        $datepicker_js = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/persianDatepicker.min.js';
+        $datepicker_css = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/persianDatepicker-default.css';
+        $datepicker_js = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/persianDatepicker.min.js';
         if (file_exists($datepicker_css) && file_exists($datepicker_js)) {
-            $scripts_html .= '<link rel="stylesheet" href="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
-            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
+            $scripts_html .= '<link rel="stylesheet" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/persianDatepicker-default.css') . '">' . PHP_EOL;
+            $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/persianDatepicker.min.js') . '"></script>' . PHP_EOL;
         }
         // Inquiry form JS for Persian numbers
-        $inquiry_form_file = MANELI_INQUIRY_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';
+        $inquiry_form_file = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/frontend/inquiry-form.js';
         if (file_exists($inquiry_form_file)) {
-            $scripts_html .= '<script src="' . esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js?v=' . filemtime($inquiry_form_file)) . '"></script>' . PHP_EOL;
+            $scripts_html .= '<script src="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/inquiry-form.js?v=' . filemtime($inquiry_form_file)) . '"></script>' . PHP_EOL;
         }
     }
     
-    $scripts_html .= '<script src="' . MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js?v=' . time() . '"></script>' . PHP_EOL;
+    $scripts_html .= '<script src="' . AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/inquiry-lists.js?v=' . time() . '"></script>' . PHP_EOL;
     if ($inquiry_id > 0) {
-        $scripts_html .= '<script src="' . MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/installment-report.js?v=' . time() . '"></script>' . PHP_EOL;
+        $scripts_html .= '<script src="' . AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/installment-report.js?v=' . time() . '"></script>' . PHP_EOL;
     }
     if ($cash_inquiry_id > 0) {
-        $scripts_html .= '<script src="' . MANELI_INQUIRY_PLUGIN_URL . 'assets/js/frontend/cash-report.js?v=' . time() . '"></script>' . PHP_EOL;
+        $scripts_html .= '<script src="' . AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/cash-report.js?v=' . time() . '"></script>' . PHP_EOL;
     }
     
-    $experts = get_users(['role' => 'maneli_expert']);
+    $experts = get_users(['role' => 'autopuzzle_expert']);
     $experts_list = array_map(function($e) { return ['id' => $e->ID, 'name' => $e->display_name ?: $e->user_login]; }, $experts);
-    $options = get_option('maneli_inquiry_all_options', []);
+    $options = get_option('autopuzzle_inquiry_all_options', []);
     
     $localize_data = [
         'ajax_url' => admin_url('admin-ajax.php'),
         'experts' => $experts_list,
         'nonces' => [
-            'assign_expert' => wp_create_nonce('maneli_inquiry_assign_expert_nonce'),
-            'cash_assign_expert' => wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce'),
-            'installment_status' => wp_create_nonce('maneli_installment_status'),
-            'cash_filter' => wp_create_nonce('maneli_cash_inquiry_filter_nonce'),
-            'inquiry_filter' => wp_create_nonce('maneli_inquiry_filter_nonce'),
-            'details' => wp_create_nonce('maneli_inquiry_details_nonce'),
-            'tracking_status' => wp_create_nonce('maneli_tracking_status_nonce'),
-            'update_cash_status' => wp_create_nonce('maneli_update_cash_status'),
+            'assign_expert' => wp_create_nonce('autopuzzle_inquiry_assign_expert_nonce'),
+            'cash_assign_expert' => wp_create_nonce('autopuzzle_cash_inquiry_assign_expert_nonce'),
+            'installment_status' => wp_create_nonce('autopuzzle_installment_status'),
+            'cash_filter' => wp_create_nonce('autopuzzle_cash_inquiry_filter_nonce'),
+            'inquiry_filter' => wp_create_nonce('autopuzzle_inquiry_filter_nonce'),
+            'details' => wp_create_nonce('autopuzzle_inquiry_details_nonce'),
+            'tracking_status' => wp_create_nonce('autopuzzle_tracking_status_nonce'),
+            'update_cash_status' => wp_create_nonce('autopuzzle_update_cash_status'),
         ],
         'text' => [
-            'error' => esc_html__('Error!', 'maneli-car-inquiry'),
-            'success' => esc_html__('Success!', 'maneli-car-inquiry'),
-            'server_error' => esc_html__('Server error. Please try again.', 'maneli-car-inquiry'),
-            'unknown_error' => esc_html__('Unknown error', 'maneli-car-inquiry'),
-            'no_experts_available' => esc_html__('No experts available.', 'maneli-car-inquiry'),
-            'select_expert_required' => esc_html__('Please select an expert.', 'maneli-car-inquiry'),
-            'select_expert_placeholder' => esc_html__('Select Expert', 'maneli-car-inquiry'),
-            'auto_assign' => esc_html__('-- Auto Assign (Round Robin) --', 'maneli-car-inquiry'),
-            'assign_title' => esc_html__('Assign to Expert', 'maneli-car-inquiry'),
-            'assign_label' => esc_html__('Select Expert:', 'maneli-car-inquiry'),
-            'assign_button' => esc_html__('Assign', 'maneli-car-inquiry'),
-            'assign_text' => esc_html__('Select an expert for this inquiry:', 'maneli-car-inquiry'),
-            'assign_success' => esc_html__('Expert assigned successfully.', 'maneli-car-inquiry'),
-            'assign_failed' => esc_html__('Error assigning expert.', 'maneli-car-inquiry'),
-            'confirm_button' => esc_html__('Yes', 'maneli-car-inquiry'),
-            'cancel_button' => esc_html__('Cancel', 'maneli-car-inquiry'),
-            'edit_title' => esc_html__('Edit Inquiry', 'maneli-car-inquiry'),
-            'placeholder_name' => esc_html__('First Name', 'maneli-car-inquiry'),
-            'placeholder_last_name' => esc_html__('Last Name', 'maneli-car-inquiry'),
-            'placeholder_mobile' => esc_html__('Mobile Number', 'maneli-car-inquiry'),
-            'placeholder_color' => esc_html__('Color', 'maneli-car-inquiry'),
-            'save_button' => esc_html__('Save', 'maneli-car-inquiry'),
-            'downpayment_title' => esc_html__('Set Down Payment', 'maneli-car-inquiry'),
-            'downpayment_placeholder' => esc_html__('Down Payment Amount', 'maneli-car-inquiry'),
-            'downpayment_button' => esc_html__('Submit Down Payment', 'maneli-car-inquiry'),
-            'reject_title' => esc_html__('Reject Inquiry', 'maneli-car-inquiry'),
-            'reject_label' => esc_html__('Rejection Reason:', 'maneli-car-inquiry'),
-            'reject_placeholder_custom' => esc_html__('Enter custom reason...', 'maneli-car-inquiry'),
-            'reject_option_default' => esc_html__('-- Select Reason --', 'maneli-car-inquiry'),
-            'reject_option_custom' => esc_html__('-- Custom Reason --', 'maneli-car-inquiry'),
-            'reject_submit_button' => esc_html__('Reject Inquiry', 'maneli-car-inquiry'),
-            'rejection_reason_required' => esc_html__('Please select or enter a rejection reason.', 'maneli-car-inquiry'),
+            'error' => esc_html__('Error!', 'autopuzzle'),
+            'success' => esc_html__('Success!', 'autopuzzle'),
+            'server_error' => esc_html__('Server error. Please try again.', 'autopuzzle'),
+            'unknown_error' => esc_html__('Unknown error', 'autopuzzle'),
+            'no_experts_available' => esc_html__('No experts available.', 'autopuzzle'),
+            'select_expert_required' => esc_html__('Please select an expert.', 'autopuzzle'),
+            'select_expert_placeholder' => esc_html__('Select Expert', 'autopuzzle'),
+            'auto_assign' => esc_html__('-- Auto Assign (Round Robin) --', 'autopuzzle'),
+            'assign_title' => esc_html__('Assign to Expert', 'autopuzzle'),
+            'assign_label' => esc_html__('Select Expert:', 'autopuzzle'),
+            'assign_button' => esc_html__('Assign', 'autopuzzle'),
+            'assign_text' => esc_html__('Select an expert for this inquiry:', 'autopuzzle'),
+            'assign_success' => esc_html__('Expert assigned successfully.', 'autopuzzle'),
+            'assign_failed' => esc_html__('Error assigning expert.', 'autopuzzle'),
+            'confirm_button' => esc_html__('Yes', 'autopuzzle'),
+            'cancel_button' => esc_html__('Cancel', 'autopuzzle'),
+            'edit_title' => esc_html__('Edit Inquiry', 'autopuzzle'),
+            'placeholder_name' => esc_html__('First Name', 'autopuzzle'),
+            'placeholder_last_name' => esc_html__('Last Name', 'autopuzzle'),
+            'placeholder_mobile' => esc_html__('Mobile Number', 'autopuzzle'),
+            'placeholder_color' => esc_html__('Color', 'autopuzzle'),
+            'save_button' => esc_html__('Save', 'autopuzzle'),
+            'downpayment_title' => esc_html__('Set Down Payment', 'autopuzzle'),
+            'downpayment_placeholder' => esc_html__('Down Payment Amount', 'autopuzzle'),
+            'downpayment_button' => esc_html__('Submit Down Payment', 'autopuzzle'),
+            'reject_title' => esc_html__('Reject Inquiry', 'autopuzzle'),
+            'reject_label' => esc_html__('Rejection Reason:', 'autopuzzle'),
+            'reject_placeholder_custom' => esc_html__('Enter custom reason...', 'autopuzzle'),
+            'reject_option_default' => esc_html__('-- Select Reason --', 'autopuzzle'),
+            'reject_option_custom' => esc_html__('-- Custom Reason --', 'autopuzzle'),
+            'reject_submit_button' => esc_html__('Reject Inquiry', 'autopuzzle'),
+            'rejection_reason_required' => esc_html__('Please select or enter a rejection reason.', 'autopuzzle'),
             // Cash inquiry specific text
-            'start_progress_title' => esc_html__('Start Progress', 'maneli-car-inquiry'),
-            'start_progress_confirm' => esc_html__('Are you sure you want to start follow-up for this inquiry?', 'maneli-car-inquiry'),
-            'approve_title' => esc_html__('Approve Inquiry', 'maneli-car-inquiry'),
-            'approve_confirm' => esc_html__('Are you sure you want to approve this inquiry?', 'maneli-car-inquiry'),
-            'approve_button' => esc_html__('Approve', 'maneli-car-inquiry'),
-            'schedule_meeting_title' => esc_html__('Schedule Meeting', 'maneli-car-inquiry'),
-            'meeting_date_label' => esc_html__('Meeting Date', 'maneli-car-inquiry'),
-            'meeting_time_label' => esc_html__('Meeting Time', 'maneli-car-inquiry'),
-            'select_date' => esc_html__('Select Date', 'maneli-car-inquiry'),
-            'meeting_required' => esc_html__('Please enter meeting date and time', 'maneli-car-inquiry'),
-            'schedule_button' => esc_html__('Schedule', 'maneli-car-inquiry'),
-            'schedule_followup_title' => esc_html__('Schedule Follow-up', 'maneli-car-inquiry'),
-            'followup_date_label' => esc_html__('Follow-up Date', 'maneli-car-inquiry'),
-            'note_label_optional' => esc_html__('Note (Optional)', 'maneli-car-inquiry'),
-            'enter_note' => esc_html__('Enter your note...', 'maneli-car-inquiry'),
-            'schedule_followup_button' => esc_html__('Schedule Follow-up', 'maneli-car-inquiry'),
-            'set_downpayment_title' => esc_html__('Set Down Payment Amount', 'maneli-car-inquiry'),
-            'downpayment_amount_label' => esc_html__('Down Payment Amount (Toman):', 'maneli-car-inquiry'),
-            'downpayment_amount_required' => esc_html__('Please enter down payment amount', 'maneli-car-inquiry'),
-            'request_downpayment_title' => esc_html__('Request Down Payment?', 'maneli-car-inquiry'),
-            'amount' => esc_html__('Amount', 'maneli-car-inquiry'),
-            'toman' => esc_html__('Toman', 'maneli-car-inquiry'),
-            'send_button' => esc_html__('Send', 'maneli-car-inquiry'),
-            'ok_button' => esc_html__('OK', 'maneli-car-inquiry'),
-            'status_updated' => esc_html__('Status updated successfully', 'maneli-car-inquiry'),
-            'status_update_error' => esc_html__('Error updating status', 'maneli-car-inquiry'),
+            'start_progress_title' => esc_html__('Start Progress', 'autopuzzle'),
+            'start_progress_confirm' => esc_html__('Are you sure you want to start follow-up for this inquiry?', 'autopuzzle'),
+            'approve_title' => esc_html__('Approve Inquiry', 'autopuzzle'),
+            'approve_confirm' => esc_html__('Are you sure you want to approve this inquiry?', 'autopuzzle'),
+            'approve_button' => esc_html__('Approve', 'autopuzzle'),
+            'schedule_meeting_title' => esc_html__('Schedule Meeting', 'autopuzzle'),
+            'meeting_date_label' => esc_html__('Meeting Date', 'autopuzzle'),
+            'meeting_time_label' => esc_html__('Meeting Time', 'autopuzzle'),
+            'select_date' => esc_html__('Select Date', 'autopuzzle'),
+            'meeting_required' => esc_html__('Please enter meeting date and time', 'autopuzzle'),
+            'schedule_button' => esc_html__('Schedule', 'autopuzzle'),
+            'schedule_followup_title' => esc_html__('Schedule Follow-up', 'autopuzzle'),
+            'followup_date_label' => esc_html__('Follow-up Date', 'autopuzzle'),
+            'note_label_optional' => esc_html__('Note (Optional)', 'autopuzzle'),
+            'enter_note' => esc_html__('Enter your note...', 'autopuzzle'),
+            'schedule_followup_button' => esc_html__('Schedule Follow-up', 'autopuzzle'),
+            'set_downpayment_title' => esc_html__('Set Down Payment Amount', 'autopuzzle'),
+            'downpayment_amount_label' => esc_html__('Down Payment Amount (Toman):', 'autopuzzle'),
+            'downpayment_amount_required' => esc_html__('Please enter down payment amount', 'autopuzzle'),
+            'request_downpayment_title' => esc_html__('Request Down Payment?', 'autopuzzle'),
+            'amount' => esc_html__('Amount', 'autopuzzle'),
+            'toman' => esc_html__('Toman', 'autopuzzle'),
+            'send_button' => esc_html__('Send', 'autopuzzle'),
+            'ok_button' => esc_html__('OK', 'autopuzzle'),
+            'status_updated' => esc_html__('Status updated successfully', 'autopuzzle'),
+            'status_update_error' => esc_html__('Error updating status', 'autopuzzle'),
             // SMS Related Translations
-            'send_sms' => esc_html__('Send SMS', 'maneli-car-inquiry'),
-            'recipient' => esc_html__('Recipient:', 'maneli-car-inquiry'),
-            'message' => esc_html__('Message:', 'maneli-car-inquiry'),
-            'enter_message' => esc_html__('Enter your message...', 'maneli-car-inquiry'),
-            'please_enter_message' => esc_html__('Please enter a message', 'maneli-car-inquiry'),
-            'sending' => esc_html__('Sending...', 'maneli-car-inquiry'),
-            'please_wait' => esc_html__('Please wait', 'maneli-car-inquiry'),
-            'sms_sent_successfully' => esc_html__('SMS sent successfully!', 'maneli-car-inquiry'),
-            'failed_to_send_sms' => esc_html__('Failed to send SMS', 'maneli-car-inquiry'),
-            'invalid_inquiry_id' => esc_html__('Invalid inquiry ID.', 'maneli-car-inquiry'),
-            'sms_history_modal_not_found' => esc_html__('SMS history modal not found.', 'maneli-car-inquiry'),
-            'no_sms_history' => esc_html__('No SMS messages have been sent for this inquiry yet.', 'maneli-car-inquiry'),
-            'error_loading_history' => esc_html__('Error loading SMS history.', 'maneli-car-inquiry'),
-            'missing_required_info' => esc_html__('Missing required information.', 'maneli-car-inquiry'),
-            'resend_sms' => esc_html__('Resend SMS?', 'maneli-car-inquiry'),
-            'resend_confirm' => esc_html__('Are you sure you want to resend this SMS?', 'maneli-car-inquiry'),
-            'yes_resend' => esc_html__('Yes, Resend', 'maneli-car-inquiry'),
-            'resend' => esc_html__('Resend', 'maneli-car-inquiry'),
-            'sms_resent_successfully' => esc_html__('SMS resent successfully.', 'maneli-car-inquiry'),
-            'failed_to_resend_sms' => esc_html__('Failed to resend SMS.', 'maneli-car-inquiry'),
-            'check_status' => esc_html__('Check Status', 'maneli-car-inquiry'),
-            'checking' => esc_html__('Checking...', 'maneli-car-inquiry'),
-            'checking_status' => esc_html__('Checking status...', 'maneli-car-inquiry'),
-            'failed_to_get_status' => esc_html__('Failed to get status.', 'maneli-car-inquiry'),
-            'error_checking_status' => esc_html__('Error checking status.', 'maneli-car-inquiry'),
-            'status_unavailable' => esc_html__('Status unavailable', 'maneli-car-inquiry'),
-            'check_failed' => esc_html__('Check failed', 'maneli-car-inquiry'),
-            'rate_limit_exceeded' => esc_html__('Rate limit exceeded or service temporarily unavailable', 'maneli-car-inquiry'),
-            'delivered' => esc_html__('Delivered', 'maneli-car-inquiry'),
-            'failed' => esc_html__('Failed', 'maneli-car-inquiry'),
-            'pending' => esc_html__('Pending', 'maneli-car-inquiry'),
-            'blocked' => esc_html__('Blocked', 'maneli-car-inquiry'),
-            'rejected' => esc_html__('Rejected', 'maneli-car-inquiry'),
-            'unknown_status' => esc_html__('Unknown status', 'maneli-car-inquiry'),
-            'sent_by' => esc_html__('Sent By', 'maneli-car-inquiry'),
-            'loading_sms_history' => esc_html__('Loading SMS history...', 'maneli-car-inquiry'),
-            'no_sms_messages_sent_yet' => esc_html__('No SMS messages have been sent yet.', 'maneli-car-inquiry'),
-            'date_time' => esc_html__('Date & Time', 'maneli-car-inquiry'),
-            'sent' => esc_html__('Sent', 'maneli-car-inquiry'),
-            'security_verification_failed' => esc_html__('Security verification failed. Please refresh the page and try again.', 'maneli-car-inquiry'),
-            'unauthorized_access' => esc_html__('Unauthorized access.', 'maneli-car-inquiry'),
+            'send_sms' => esc_html__('Send SMS', 'autopuzzle'),
+            'recipient' => esc_html__('Recipient:', 'autopuzzle'),
+            'message' => esc_html__('Message:', 'autopuzzle'),
+            'enter_message' => esc_html__('Enter your message...', 'autopuzzle'),
+            'please_enter_message' => esc_html__('Please enter a message', 'autopuzzle'),
+            'sending' => esc_html__('Sending...', 'autopuzzle'),
+            'please_wait' => esc_html__('Please wait', 'autopuzzle'),
+            'sms_sent_successfully' => esc_html__('SMS sent successfully!', 'autopuzzle'),
+            'failed_to_send_sms' => esc_html__('Failed to send SMS', 'autopuzzle'),
+            'invalid_inquiry_id' => esc_html__('Invalid inquiry ID.', 'autopuzzle'),
+            'sms_history_modal_not_found' => esc_html__('SMS history modal not found.', 'autopuzzle'),
+            'no_sms_history' => esc_html__('No SMS messages have been sent for this inquiry yet.', 'autopuzzle'),
+            'error_loading_history' => esc_html__('Error loading SMS history.', 'autopuzzle'),
+            'missing_required_info' => esc_html__('Missing required information.', 'autopuzzle'),
+            'resend_sms' => esc_html__('Resend SMS?', 'autopuzzle'),
+            'resend_confirm' => esc_html__('Are you sure you want to resend this SMS?', 'autopuzzle'),
+            'yes_resend' => esc_html__('Yes, Resend', 'autopuzzle'),
+            'resend' => esc_html__('Resend', 'autopuzzle'),
+            'sms_resent_successfully' => esc_html__('SMS resent successfully.', 'autopuzzle'),
+            'failed_to_resend_sms' => esc_html__('Failed to resend SMS.', 'autopuzzle'),
+            'check_status' => esc_html__('Check Status', 'autopuzzle'),
+            'checking' => esc_html__('Checking...', 'autopuzzle'),
+            'checking_status' => esc_html__('Checking status...', 'autopuzzle'),
+            'failed_to_get_status' => esc_html__('Failed to get status.', 'autopuzzle'),
+            'error_checking_status' => esc_html__('Error checking status.', 'autopuzzle'),
+            'status_unavailable' => esc_html__('Status unavailable', 'autopuzzle'),
+            'check_failed' => esc_html__('Check failed', 'autopuzzle'),
+            'rate_limit_exceeded' => esc_html__('Rate limit exceeded or service temporarily unavailable', 'autopuzzle'),
+            'delivered' => esc_html__('Delivered', 'autopuzzle'),
+            'failed' => esc_html__('Failed', 'autopuzzle'),
+            'pending' => esc_html__('Pending', 'autopuzzle'),
+            'blocked' => esc_html__('Blocked', 'autopuzzle'),
+            'rejected' => esc_html__('Rejected', 'autopuzzle'),
+            'unknown_status' => esc_html__('Unknown status', 'autopuzzle'),
+            'sent_by' => esc_html__('Sent By', 'autopuzzle'),
+            'loading_sms_history' => esc_html__('Loading SMS history...', 'autopuzzle'),
+            'no_sms_messages_sent_yet' => esc_html__('No SMS messages have been sent yet.', 'autopuzzle'),
+            'date_time' => esc_html__('Date & Time', 'autopuzzle'),
+            'sent' => esc_html__('Sent', 'autopuzzle'),
+            'security_verification_failed' => esc_html__('Security verification failed. Please refresh the page and try again.', 'autopuzzle'),
+            'unauthorized_access' => esc_html__('Unauthorized access.', 'autopuzzle'),
         ]
     ];
     
     // Add AJAX nonce for SMS
-    $localize_data['nonces']['ajax'] = wp_create_nonce('maneli-ajax-nonce');
+    $localize_data['nonces']['ajax'] = wp_create_nonce('autopuzzle-ajax-nonce');
     
     // Update nonces based on page type (cash vs installment, including followups)
     if ($page === 'cash-inquiries' || $page === 'cash-followups' || ($page === 'inquiries' && $subpage === 'cash')) {
         // Cash inquiries and followups
-        $localize_data['nonces']['cash_filter'] = wp_create_nonce('maneli_cash_inquiry_filter_nonce');
-        $localize_data['nonces']['cash_details'] = wp_create_nonce('maneli_cash_inquiry_details_nonce');
-        $localize_data['nonces']['cash_update'] = wp_create_nonce('maneli_cash_inquiry_update_nonce');
-        $localize_data['nonces']['cash_assign_expert'] = wp_create_nonce('maneli_cash_inquiry_assign_expert_nonce');
-        $localize_data['nonces']['save_expert_note'] = wp_create_nonce('maneli_save_expert_note');
-        $localize_data['nonces']['update_cash_status'] = wp_create_nonce('maneli_update_cash_status');
+        $localize_data['nonces']['cash_filter'] = wp_create_nonce('autopuzzle_cash_inquiry_filter_nonce');
+        $localize_data['nonces']['cash_details'] = wp_create_nonce('autopuzzle_cash_inquiry_details_nonce');
+        $localize_data['nonces']['cash_update'] = wp_create_nonce('autopuzzle_cash_inquiry_update_nonce');
+        $localize_data['nonces']['cash_assign_expert'] = wp_create_nonce('autopuzzle_cash_inquiry_assign_expert_nonce');
+        $localize_data['nonces']['save_expert_note'] = wp_create_nonce('autopuzzle_save_expert_note');
+        $localize_data['nonces']['update_cash_status'] = wp_create_nonce('autopuzzle_update_cash_status');
     } else if ($page === 'installment-inquiries' || $page === 'installment-followups' || ($page === 'inquiries' && $subpage === 'installment')) {
         // Installment inquiries and followups
-        $localize_data['nonces']['inquiry_filter'] = wp_create_nonce('maneli_inquiry_filter_nonce');
-        $localize_data['nonces']['details'] = wp_create_nonce('maneli_inquiry_details_nonce');
-        $localize_data['nonces']['assign_expert'] = wp_create_nonce('maneli_inquiry_assign_expert_nonce');
-        $localize_data['nonces']['tracking_status'] = wp_create_nonce('maneli_tracking_status_nonce');
-        $localize_data['nonces']['save_installment_note'] = wp_create_nonce('maneli_installment_note');
-        $localize_data['nonces']['update_installment_status'] = wp_create_nonce('maneli_installment_status');
+        $localize_data['nonces']['inquiry_filter'] = wp_create_nonce('autopuzzle_inquiry_filter_nonce');
+        $localize_data['nonces']['details'] = wp_create_nonce('autopuzzle_inquiry_details_nonce');
+        $localize_data['nonces']['assign_expert'] = wp_create_nonce('autopuzzle_inquiry_assign_expert_nonce');
+        $localize_data['nonces']['tracking_status'] = wp_create_nonce('autopuzzle_tracking_status_nonce');
+        $localize_data['nonces']['save_installment_note'] = wp_create_nonce('autopuzzle_installment_note');
+        $localize_data['nonces']['update_installment_status'] = wp_create_nonce('autopuzzle_installment_status');
     }
     
     // Add cash rejection reasons if we're on cash inquiries page
@@ -1526,36 +1564,36 @@ if ($need_inquiry_scripts) {
         $localize_data['cash_rejection_reasons'] = $cash_rejection_reasons;
     }
     
-    $scripts_html .= '<script>window.maneliInquiryLists=' . json_encode($localize_data, JSON_UNESCAPED_UNICODE) . ';';
+    $scripts_html .= '<script>window.autopuzzleInquiryLists=' . json_encode($localize_data, JSON_UNESCAPED_UNICODE) . ';';
     if ($inquiry_id > 0) {
-        $scripts_html .= 'window.maneliInstallmentReport={ajax_url:"' . admin_url('admin-ajax.php') . '",nonces:{update_status:"' . wp_create_nonce('maneli_installment_status') . '"}};';
+        $scripts_html .= 'window.autopuzzleInstallmentReport={ajax_url:"' . admin_url('admin-ajax.php') . '",nonces:{update_status:"' . wp_create_nonce('autopuzzle_installment_status') . '"}};';
     }
     if ($cash_inquiry_id > 0) {
-        $scripts_html .= 'window.maneliCashReport={ajax_url:"' . admin_url('admin-ajax.php') . '",nonces:{update_status:"' . wp_create_nonce('maneli_update_cash_status') . '"}};';
+        $scripts_html .= 'window.autopuzzleCashReport={ajax_url:"' . admin_url('admin-ajax.php') . '",nonces:{update_status:"' . wp_create_nonce('autopuzzle_update_cash_status') . '"}};';
     }
     
     // Add localization for new-inquiry wizard
     if ($page === 'new-inquiry') {
-        $select_car_nonce = wp_create_nonce('maneli_ajax_nonce');
+        $select_car_nonce = wp_create_nonce('autopuzzle_ajax_nonce');
         $inquiry_form_localize = [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonces' => [
-                'confirm_catalog' => wp_create_nonce('maneli_confirm_car_catalog_nonce'),
+                'confirm_catalog' => wp_create_nonce('autopuzzle_confirm_car_catalog_nonce'),
                 'select_car' => $select_car_nonce,
             ],
             'texts' => [
-                'replace_car_confirm' => esc_html__('Are you sure you want to replace the current car with this one?', 'maneli-car-inquiry'),
-                'car_replaced_success' => esc_html__('Car replaced successfully. Page is being refreshed...', 'maneli-car-inquiry'),
-                'error_replacing_car' => esc_html__('Error replacing car', 'maneli-car-inquiry'),
-                'server_error' => esc_html__('Server connection error. Please try again.', 'maneli-car-inquiry'),
-                'confirm' => esc_html__('Yes', 'maneli-car-inquiry'),
-                'cancel' => esc_html__('Cancel', 'maneli-car-inquiry'),
-                'invalid_request' => esc_html__('Invalid security token. Please refresh the page and try again.', 'maneli-car-inquiry'),
-                'please_login' => esc_html__('Please log in to continue.', 'maneli-car-inquiry'),
-                'product_id_required' => esc_html__('Product ID is required.', 'maneli-car-inquiry'),
+                'replace_car_confirm' => esc_html__('Are you sure you want to replace the current car with this one?', 'autopuzzle'),
+                'car_replaced_success' => esc_html__('Car replaced successfully. Page is being refreshed...', 'autopuzzle'),
+                'error_replacing_car' => esc_html__('Error replacing car', 'autopuzzle'),
+                'server_error' => esc_html__('Server connection error. Please try again.', 'autopuzzle'),
+                'confirm' => esc_html__('Yes', 'autopuzzle'),
+                'cancel' => esc_html__('Cancel', 'autopuzzle'),
+                'invalid_request' => esc_html__('Invalid security token. Please refresh the page and try again.', 'autopuzzle'),
+                'please_login' => esc_html__('Please log in to continue.', 'autopuzzle'),
+                'product_id_required' => esc_html__('Product ID is required.', 'autopuzzle'),
             ],
         ];
-        $scripts_html .= 'window.maneliInquiryForm=' . json_encode($inquiry_form_localize, JSON_UNESCAPED_UNICODE) . ';';
+        $scripts_html .= 'window.autopuzzleInquiryForm=' . json_encode($inquiry_form_localize, JSON_UNESCAPED_UNICODE) . ';';
     }
     
     $scripts_html .= 'console.log("✅ Inquiry scripts loaded");</script>' . PHP_EOL;
@@ -1625,7 +1663,7 @@ if ($need_inquiry_scripts) {
 }
 
 // Add global search styles
-$global_search_styles = '<style id="maneli-global-search-styles">
+$global_search_styles = '<style id="autopuzzle-global-search-styles">
 .global-search-dropdown {
     position: absolute;
     top: 100%;
@@ -1728,7 +1766,7 @@ $global_search_styles = '<style id="maneli-global-search-styles">
 $dashboard_html = str_replace('</head>', $global_search_styles . PHP_EOL . '</head>', $dashboard_html);
 
 // CRITICAL: Add inline CSS at the end to force dark mode text colors - Highest priority
-$dark_mode_text_fix = '<style id="maneli-dark-mode-text-force">
+$dark_mode_text_fix = '<style id="autopuzzle-dark-mode-text-force">
 /* Force all text colors in dark mode - Highest priority inline styles */
 [data-theme-mode=dark] {
     --default-text-color: rgba(255, 255, 255, 0.9) !important;

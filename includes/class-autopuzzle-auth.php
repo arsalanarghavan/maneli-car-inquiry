@@ -2,14 +2,14 @@
 /**
  * Authentication handling
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Auth {
+class Autopuzzle_Auth {
 
     /**
      * Session instance
@@ -20,7 +20,7 @@ class Maneli_Auth {
      * Constructor
      */
     public function __construct() {
-        $this->session = new Maneli_Session();
+        $this->session = new Autopuzzle_Session();
     }
 
     /**
@@ -58,7 +58,7 @@ class Maneli_Auth {
     public function has_capability($required_role) {
         $user_role = $this->session->get_user_role();
         
-        $roles = array('administrator' => 4, 'maneli_manager' => 3, 'maneli_expert' => 2, 'maneli_customer' => 1);
+        $roles = array('administrator' => 4, 'autopuzzle_manager' => 3, 'autopuzzle_expert' => 2, 'autopuzzle_customer' => 1);
         
         $user_level = isset($roles[$user_role]) ? $roles[$user_role] : 0;
         $required_level = isset($roles[$required_role]) ? $roles[$required_role] : 99;

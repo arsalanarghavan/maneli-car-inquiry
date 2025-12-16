@@ -1,17 +1,17 @@
 <?php
 /**
- * Maneli License Management
+ * AutoPuzzle License Management
  *
  * Handles license validation, activation, and checking
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_License {
+class Autopuzzle_License {
 
     private static $instance = null;
     private $license_key = null;
@@ -60,7 +60,7 @@ class Maneli_License {
         
         // For development/local, check for explicit setting
         // Default to true for security, but allow override via filter
-        return apply_filters('maneli_license_verify_ssl', defined('WP_DEBUG') ? false : true);
+        return apply_filters('autopuzzle_license_verify_ssl', defined('WP_DEBUG') ? false : true);
     }
 
     /**
@@ -77,9 +77,9 @@ class Maneli_License {
         add_filter('cron_schedules', [$this, 'add_custom_cron_schedule']);
         
         // Schedule license check every 12 hours
-        add_action('maneli_license_check', [$this, 'daily_license_check']);
-        if (!wp_next_scheduled('maneli_license_check')) {
-            wp_schedule_event(time(), 'maneli_every_12_hours', 'maneli_license_check');
+        add_action('autopuzzle_license_check', [$this, 'daily_license_check']);
+        if (!wp_next_scheduled('autopuzzle_license_check')) {
+            wp_schedule_event(time(), 'autopuzzle_every_12_hours', 'autopuzzle_license_check');
         }
         
         // Listen for real-time license deactivation webhook
@@ -93,7 +93,7 @@ class Maneli_License {
     public function add_custom_cron_schedule($schedules) {
         // Use simple string to avoid translation loading before init hook
         // This prevents WordPress 6.7+ warning about early translation loading
-        $schedules['maneli_every_12_hours'] = [
+        $schedules['autopuzzle_every_12_hours'] = [
             'interval' => 12 * 60 * 60, // 12 hours in seconds
             'display' => 'Every 12 hours'
         ];
@@ -151,7 +151,7 @@ class Maneli_License {
         }
         
         global $wpdb;
-        $table_name = $wpdb->prefix . 'maneli_license';
+        $table_name = $wpdb->prefix . 'autopuzzle_license';
         $result = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table_name));
         $this->table_exists_cache = ($result === $table_name);
         return $this->table_exists_cache;
@@ -168,8 +168,8 @@ class Maneli_License {
         }
         
         // Try to create table if it doesn't exist
-        if (class_exists('Maneli_Activator')) {
-            Maneli_Activator::ensure_tables();
+        if (class_exists('Autopuzzle_Activator')) {
+            Autopuzzle_Activator::ensure_tables();
             // Clear cache and check again after table creation attempt
             $this->table_exists_cache = null;
             return $this->table_exists();
@@ -217,7 +217,7 @@ class Maneli_License {
             return;
         }
         
-        $table_name = $wpdb->prefix . 'maneli_license';
+        $table_name = $wpdb->prefix . 'autopuzzle_license';
         $license = $wpdb->get_row("SELECT * FROM $table_name ORDER BY id DESC LIMIT 1", ARRAY_A);
         
         // Check for database errors
@@ -350,7 +350,7 @@ class Maneli_License {
         if (empty($domain)) {
             return [
                 'success' => false,
-                'message' => __('Domain not found', 'maneli-car-inquiry')
+                'message' => __('Domain not found', 'autopuzzle')
             ];
         }
 
@@ -390,14 +390,14 @@ class Maneli_License {
 
                     return [
                         'success' => true,
-                        'message' => __('License activated successfully', 'maneli-car-inquiry'),
+                        'message' => __('License activated successfully', 'autopuzzle'),
                         'expiry_date' => $body['expiry_date'] ?? null
                     ];
                 } else {
                     // License activation failed
                     return [
                         'success' => false,
-                        'message' => $body['message'] ?? __('License is not valid', 'maneli-car-inquiry')
+                        'message' => $body['message'] ?? __('License is not valid', 'autopuzzle')
                     ];
                 }
             }
@@ -406,7 +406,7 @@ class Maneli_License {
         // If both URLs failed
         return [
             'success' => false,
-            'message' => __('Error connecting to license server. Please try again.', 'maneli-car-inquiry')
+            'message' => __('Error connecting to license server. Please try again.', 'autopuzzle')
         ];
     }
 
@@ -423,7 +423,7 @@ class Maneli_License {
      * Deactivate plugin functionality
      */
     private function deactivate_plugin() {
-        update_option('maneli_plugin_disabled', true);
+        update_option('autopuzzle_plugin_disabled', true);
     }
 
     /**
@@ -438,7 +438,7 @@ class Maneli_License {
             return false;
         }
         
-        $table_name = $wpdb->prefix . 'maneli_license';
+        $table_name = $wpdb->prefix . 'autopuzzle_license';
         
         // Check if license exists
         $existing = $wpdb->get_row("SELECT id FROM $table_name LIMIT 1", ARRAY_A);
@@ -508,7 +508,7 @@ class Maneli_License {
             return;
         }
         
-        $table_name = $wpdb->prefix . 'maneli_license';
+        $table_name = $wpdb->prefix . 'autopuzzle_license';
         
         // Check if any record exists before updating
         $existing = $wpdb->get_var("SELECT COUNT(*) FROM $table_name LIMIT 1");
@@ -553,7 +553,7 @@ class Maneli_License {
             return;
         }
         
-        $table_name = $wpdb->prefix . 'maneli_license';
+        $table_name = $wpdb->prefix . 'autopuzzle_license';
         $update_data = [];
         $format = [];
         
@@ -684,7 +684,7 @@ class Maneli_License {
      */
     public function set_license_server_url($url) {
         $this->license_server_url = $url;
-        update_option('maneli_license_server_url', $url);
+        update_option('autopuzzle_license_server_url', $url);
     }
 }
 

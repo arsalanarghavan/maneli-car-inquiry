@@ -7,7 +7,7 @@
  */
 
 /* === Calculator Container - Match Dashboard Card Style === */
-.maneli-calculator-container {
+.autopuzzle-calculator-container {
     width: 100%;
     max-width: 900px;
     margin: 1.5rem auto;
@@ -21,7 +21,7 @@
 }
 
 /* === Tab Navigation - Match Dashboard Tab Style === */
-.maneli-calculator-container .calculator-tabs {
+.autopuzzle-calculator-container .calculator-tabs {
     display: flex;
     border-bottom: 1px solid #e2e6f1;
     background: #fff;
@@ -29,7 +29,7 @@
     padding: 0;
 }
 
-.maneli-calculator-container .calculator-tabs .tab-link {
+.autopuzzle-calculator-container .calculator-tabs .tab-link {
     flex: 1;
     padding: 0.875rem 1rem;
     text-align: center;
@@ -46,12 +46,12 @@
     display: block;
 }
 
-.maneli-calculator-container .calculator-tabs .tab-link:hover {
+.autopuzzle-calculator-container .calculator-tabs .tab-link:hover {
     color: #2D89BE;
     background: rgba(45, 137, 190, 0.05);
 }
 
-.maneli-calculator-container .calculator-tabs .tab-link.active {
+.autopuzzle-calculator-container .calculator-tabs .tab-link.active {
     color: #2D89BE;
     background: transparent;
     border-bottom-color: #2D89BE;
@@ -59,32 +59,32 @@
 }
 
 /* === Tab Content === */
-.maneli-calculator-container .tabs-content-wrapper {
+.autopuzzle-calculator-container .tabs-content-wrapper {
     padding: 1.5rem;
     position: relative;
 }
 
-.maneli-calculator-container .tab-content {
+.autopuzzle-calculator-container .tab-content {
     display: none;
     position: relative;
 }
 
-.maneli-calculator-container .tab-content.active {
+.autopuzzle-calculator-container .tab-content.active {
     display: block;
 }
 
 /* Unavailable tab styling */
-.maneli-calculator-container .tab-content.unavailable-tab {
+.autopuzzle-calculator-container .tab-content.unavailable-tab {
     position: relative;
 }
 
 /* === Form Elements === */
-.maneli-calculator-container .loan-calculator-form {
+.autopuzzle-calculator-container .loan-calculator-form {
     font-family: 'Peyda', 'Tahoma', sans-serif;
     position: relative;
 }
 
-.maneli-calculator-container .tabs-content-wrapper .loan-title {
+.autopuzzle-calculator-container .tabs-content-wrapper .loan-title {
     font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 1.25rem;
@@ -95,19 +95,19 @@
     border-bottom: 1px solid #e2e6f1;
 }
 
-.maneli-calculator-container .loan-section {
+.autopuzzle-calculator-container .loan-section {
     margin-bottom: 1.25rem;
 }
 
-.maneli-calculator-container .loan-section:last-child {
+.autopuzzle-calculator-container .loan-section:last-child {
     margin-bottom: 0;
 }
 
-.maneli-calculator-container .loan-row {
+.autopuzzle-calculator-container .loan-row {
     margin-bottom: 0.875rem;
 }
 
-.maneli-calculator-container .loan-label {
+.autopuzzle-calculator-container .loan-label {
     display: block;
     font-weight: 500;
     margin-bottom: 0.5rem;
@@ -116,11 +116,11 @@
 }
 
 /* === Input Fields === */
-.maneli-calculator-container .loan-calculator-form input[type="text"],
-.maneli-calculator-container .loan-calculator-form input[type="tel"],
-.maneli-calculator-container .loan-calculator-form input[type="number"],
-.maneli-calculator-container .loan-calculator-form select,
-.maneli-calculator-container .loan-calculator-form textarea {
+.autopuzzle-calculator-container .loan-calculator-form input[type="text"],
+.autopuzzle-calculator-container .loan-calculator-form input[type="tel"],
+.autopuzzle-calculator-container .loan-calculator-form input[type="number"],
+.autopuzzle-calculator-container .loan-calculator-form select,
+.autopuzzle-calculator-container .loan-calculator-form textarea {
     width: 100%;
     padding: 0.375rem 0.75rem;
     border: 1px solid #dee7f1;
@@ -134,11 +134,11 @@
     box-sizing: border-box;
 }
 
-.maneli-calculator-container .loan-calculator-form input[type="text"]:focus,
-.maneli-calculator-container .loan-calculator-form input[type="tel"]:focus,
-.maneli-calculator-container .loan-calculator-form input[type="number"]:focus,
-.maneli-calculator-container .loan-calculator-form select:focus,
-.maneli-calculator-container .loan-calculator-form textarea:focus {
+.autopuzzle-calculator-container .loan-calculator-form input[type="text"]:focus,
+.autopuzzle-calculator-container .loan-calculator-form input[type="tel"]:focus,
+.autopuzzle-calculator-container .loan-calculator-form input[type="number"]:focus,
+.autopuzzle-calculator-container .loan-calculator-form select:focus,
+.autopuzzle-calculator-container .loan-calculator-form textarea:focus {
     border-color: rgba(45, 137, 190, 0.5);
     background-color: #fff;
     box-shadow: 0 0 4px rgba(45, 137, 190, 0.5);
@@ -147,7 +147,7 @@
 }
 
 /* === Range Slider === */
-.maneli-calculator-container input[type="range"] {
+.autopuzzle-calculator-container input[type="range"] {
     padding: 0 !important;
     height: 10px !important;
     background: #e2e6f1 !important;
@@ -163,7 +163,7 @@
 }
 
 /* Slider track background and fill - Webkit (Chrome, Safari, Edge) */
-.maneli-calculator-container input[type="range"]::-webkit-slider-runnable-track {
+.autopuzzle-calculator-container input[type="range"]::-webkit-slider-runnable-track {
     height: 10px !important;
     background: inherit !important;
     border-radius: 5px !important;
@@ -171,7 +171,7 @@
 }
 
 /* Slider track background - Firefox */
-.maneli-calculator-container input[type="range"]::-moz-range-track {
+.autopuzzle-calculator-container input[type="range"]::-moz-range-track {
     height: 10px !important;
     background: #e2e6f1 !important;
     border-radius: 5px !important;
@@ -179,14 +179,14 @@
 }
 
 /* Slider fill with gradient - Firefox */
-.maneli-calculator-container input[type="range"]::-moz-range-progress {
+.autopuzzle-calculator-container input[type="range"]::-moz-range-progress {
     height: 10px !important;
     background: linear-gradient(90deg, #2D89BE 0%, #4a54e5 100%) !important;
     border-radius: 5px 0 0 5px !important;
     border: none !important;
 }
 
-.maneli-calculator-container input[type="range"]::-webkit-slider-thumb {
+.autopuzzle-calculator-container input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none !important;
     appearance: none !important;
     width: 18px !important;
@@ -198,7 +198,7 @@
     border: 2px solid #fff !important;
 }
 
-.maneli-calculator-container input[type="range"]::-moz-range-thumb {
+.autopuzzle-calculator-container input[type="range"]::-moz-range-thumb {
     width: 18px !important;
     height: 18px !important;
     border-radius: 50% !important;
@@ -209,7 +209,7 @@
 }
 
 /* === Installment Calculator Specific === */
-.maneli-calculator-container .loan-section .loan-note {
+.autopuzzle-calculator-container .loan-section .loan-note {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -219,20 +219,20 @@
     padding: 0.5rem 0;
 }
 
-.maneli-calculator-container .loan-section .loan-subtitle {
+.autopuzzle-calculator-container .loan-section .loan-subtitle {
     font-size: 0.9375rem;
     font-weight: 600;
     color: #212b37;
     margin-bottom: 0.875rem;
 }
 
-.maneli-calculator-container .loan-section .loan-requirements {
+.autopuzzle-calculator-container .loan-section .loan-requirements {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.maneli-calculator-container .loan-section .loan-requirements li {
+.autopuzzle-calculator-container .loan-section .loan-requirements li {
     padding: 0.75rem 1rem;
     margin-bottom: 0.5rem;
     background: #f9fafb;
@@ -244,24 +244,24 @@
     color: #212b37;
 }
 
-.maneli-calculator-container .loan-section .loan-requirements li:hover {
+.autopuzzle-calculator-container .loan-section .loan-requirements li:hover {
     background: rgba(45, 137, 190, 0.1);
     transform: translateX(-2px);
     border-right-color: #2D89BE;
 }
 
-.maneli-calculator-container .loan-section .loan-requirements li:last-child {
+.autopuzzle-calculator-container .loan-section .loan-requirements li:last-child {
     margin-bottom: 0;
 }
 
 /* === Term Buttons === */
-.maneli-calculator-container .loan-section .loan-buttons {
+.autopuzzle-calculator-container .loan-section .loan-buttons {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
 }
 
-.maneli-calculator-container .loan-section .loan-buttons .term-btn {
+.autopuzzle-calculator-container .loan-section .loan-buttons .term-btn {
     flex: 1;
     min-width: 80px;
     padding: 0.5rem 1rem;
@@ -275,26 +275,26 @@
     color: #212b37;
 }
 
-.maneli-calculator-container .loan-section .loan-buttons .term-btn:hover:not(.active) {
+.autopuzzle-calculator-container .loan-section .loan-buttons .term-btn:hover:not(.active) {
     border-color: #2D89BE;
     color: #2D89BE;
     background: rgba(45, 137, 190, 0.05);
 }
 
-.maneli-calculator-container .loan-section .loan-buttons .term-btn.active {
+.autopuzzle-calculator-container .loan-section .loan-buttons .term-btn.active {
     background: #2D89BE;
     color: #fff;
     border-color: #2D89BE;
     box-shadow: 0 2px 4px rgba(45, 137, 190, 0.2);
 }
 
-.maneli-calculator-container .loan-section .loan-buttons .term-btn:disabled {
+.autopuzzle-calculator-container .loan-section .loan-buttons .term-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
 /* === Result Section === */
-.maneli-calculator-container .loan-section.result-section {
+.autopuzzle-calculator-container .loan-section.result-section {
     background: rgba(45, 137, 190, 0.1);
     padding: 1.25rem;
     border-radius: 0.5rem;
@@ -303,7 +303,7 @@
     margin-top: 1rem;
 }
 
-.maneli-calculator-container .loan-section.result-section strong {
+.autopuzzle-calculator-container .loan-section.result-section strong {
     display: block;
     margin-bottom: 0.5rem;
     font-size: 0.875rem;
@@ -311,7 +311,7 @@
     font-weight: 600;
 }
 
-.maneli-calculator-container .loan-section.result-section span {
+.autopuzzle-calculator-container .loan-section.result-section span {
     font-size: 1.5rem;
     font-weight: 700;
     color: #2D89BE;
@@ -321,14 +321,14 @@
 }
 
 /* === Action Button === */
-.maneli-calculator-container .loan-action-wrapper {
+.autopuzzle-calculator-container .loan-action-wrapper {
     text-align: center;
     margin-top: 1.5rem;
     padding-top: 1.25rem;
     border-top: 1px solid #e2e6f1;
 }
 
-.maneli-calculator-container .loan-action-wrapper .loan-action-btn {
+.autopuzzle-calculator-container .loan-action-wrapper .loan-action-btn {
     background: #2D89BE;
     color: #fff;
     border: none;
@@ -343,40 +343,40 @@
     line-height: 1.5;
 }
 
-.maneli-calculator-container .loan-action-wrapper .loan-action-btn:hover:not(:disabled) {
+.autopuzzle-calculator-container .loan-action-wrapper .loan-action-btn:hover:not(:disabled) {
     background: #4a54e5;
     box-shadow: 0 4px 8px rgba(45, 137, 190, 0.3);
     transform: translateY(-1px);
 }
 
-.maneli-calculator-container .loan-action-wrapper .loan-action-btn:disabled {
+.autopuzzle-calculator-container .loan-action-wrapper .loan-action-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
 }
 
-.maneli-calculator-container .loan-action-wrapper .loan-action-btn:active:not(:disabled) {
+.autopuzzle-calculator-container .loan-action-wrapper .loan-action-btn:active:not(:disabled) {
     transform: translateY(0);
 }
 
 /* === Cash Request Form === */
-.maneli-calculator-container .cash-request-form .form-grid {
+.autopuzzle-calculator-container .cash-request-form .form-grid {
     display: grid !important;
     gap: 1rem !important;
 }
 
-.maneli-calculator-container .cash-request-form .form-row {
+.autopuzzle-calculator-container .cash-request-form .form-row {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 1rem !important;
 }
 
-.maneli-calculator-container .cash-request-form .form-group {
+.autopuzzle-calculator-container .cash-request-form .form-group {
     margin-bottom: 0 !important;
     display: block !important;
 }
 
-.maneli-calculator-container .cash-request-form .form-group label {
+.autopuzzle-calculator-container .cash-request-form .form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
@@ -384,42 +384,42 @@
     color: #4d5875;
 }
 
-.maneli-calculator-container .cash-request-form .form-group input,
-.maneli-calculator-container .cash-request-form .form-group select {
+.autopuzzle-calculator-container .cash-request-form .form-group input,
+.autopuzzle-calculator-container .cash-request-form .form-group select {
     display: block !important;
     width: 100% !important;
 }
 
 /* Remove any ::before and ::after pseudo-elements from form elements */
-.maneli-calculator-container .cash-request-form .form-group::before,
-.maneli-calculator-container .cash-request-form .form-group::after,
-.maneli-calculator-container .cash-request-form .form-row::before,
-.maneli-calculator-container .cash-request-form .form-row::after,
-.maneli-calculator-container .cash-request-form .form-grid::before,
-.maneli-calculator-container .cash-request-form .form-grid::after,
-.maneli-calculator-container .cash-request-form .form-group label::before,
-.maneli-calculator-container .cash-request-form .form-group label::after,
-.maneli-calculator-container .cash-request-form .form-group input::before,
-.maneli-calculator-container .cash-request-form .form-group input::after,
-.maneli-calculator-container .cash-request-form .form-group select::before,
-.maneli-calculator-container .cash-request-form .form-group select::after {
+.autopuzzle-calculator-container .cash-request-form .form-group::before,
+.autopuzzle-calculator-container .cash-request-form .form-group::after,
+.autopuzzle-calculator-container .cash-request-form .form-row::before,
+.autopuzzle-calculator-container .cash-request-form .form-row::after,
+.autopuzzle-calculator-container .cash-request-form .form-grid::before,
+.autopuzzle-calculator-container .cash-request-form .form-grid::after,
+.autopuzzle-calculator-container .cash-request-form .form-group label::before,
+.autopuzzle-calculator-container .cash-request-form .form-group label::after,
+.autopuzzle-calculator-container .cash-request-form .form-group input::before,
+.autopuzzle-calculator-container .cash-request-form .form-group input::after,
+.autopuzzle-calculator-container .cash-request-form .form-group select::before,
+.autopuzzle-calculator-container .cash-request-form .form-group select::after {
     display: none !important;
     content: none !important;
 }
 
 /* === Price Hidden/Unavailable Styles === */
-.maneli-calculator-container .result-section .unavailable-text {
+.autopuzzle-calculator-container .result-section .unavailable-text {
     color: #fb4242;
     font-weight: 600;
 }
 
-.maneli-calculator-container .result-section .price-hidden {
+.autopuzzle-calculator-container .result-section .price-hidden {
     color: #9ca3af;
     font-weight: 500;
 }
 
 /* === Unavailable Form Blur and Overlay === */
-.maneli-calculator-container .loan-calculator-form.unavailable-form {
+.autopuzzle-calculator-container .loan-calculator-form.unavailable-form {
     position: relative;
     filter: blur(4px);
     pointer-events: none;
@@ -429,16 +429,16 @@
     isolation: isolate;
 }
 
-.maneli-calculator-container .loan-calculator-form.unavailable-form * {
+.autopuzzle-calculator-container .loan-calculator-form.unavailable-form * {
     pointer-events: none;
 }
 
 /* Overlay is outside form, so no need for special handling */
-.maneli-calculator-container .tab-content.unavailable-tab {
+.autopuzzle-calculator-container .tab-content.unavailable-tab {
     isolation: isolate;
 }
 
-.maneli-calculator-container .unavailable-overlay-message {
+.autopuzzle-calculator-container .unavailable-overlay-message {
     position: absolute;
     top: 0;
     left: 0;
@@ -457,7 +457,7 @@
     isolation: isolate;
 }
 
-.maneli-calculator-container .unavailable-message-content {
+.autopuzzle-calculator-container .unavailable-message-content {
     text-align: center;
     max-width: 400px;
     padding: 1.5rem;
@@ -468,7 +468,7 @@
     animation: fadeInUp 0.4s ease-out;
 }
 
-.maneli-calculator-container .unavailable-message-content i {
+.autopuzzle-calculator-container .unavailable-message-content i {
     font-size: 3rem;
     color: #ef4444;
     margin-bottom: 1rem;
@@ -476,7 +476,7 @@
     animation: pulse 2s infinite;
 }
 
-.maneli-calculator-container .unavailable-message-content p {
+.autopuzzle-calculator-container .unavailable-message-content p {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
@@ -509,64 +509,64 @@
 
 /* === Responsive Design === */
 @media (max-width: 768px) {
-    .maneli-calculator-container {
+    .autopuzzle-calculator-container {
         margin: 1rem auto !important;
         border-radius: 0.375rem !important;
     }
     
-    .maneli-calculator-container .tabs-content-wrapper {
+    .autopuzzle-calculator-container .tabs-content-wrapper {
         padding: 1rem !important;
     }
     
-    .maneli-calculator-container .cash-request-form .form-row {
+    .autopuzzle-calculator-container .cash-request-form .form-row {
         grid-template-columns: 1fr !important;
     }
     
-    .maneli-calculator-container .calculator-tabs .tab-link {
+    .autopuzzle-calculator-container .calculator-tabs .tab-link {
         padding: 0.75rem 0.5rem !important;
         font-size: 0.8125rem !important;
     }
     
-    .maneli-calculator-container .loan-title {
+    .autopuzzle-calculator-container .loan-title {
         font-size: 1rem !important;
         margin-bottom: 1rem !important;
         padding-bottom: 0.75rem !important;
     }
     
-    .maneli-calculator-container .loan-buttons {
+    .autopuzzle-calculator-container .loan-buttons {
         gap: 0.375rem !important;
     }
     
-    .maneli-calculator-container .term-btn {
+    .autopuzzle-calculator-container .term-btn {
         min-width: 70px !important;
         padding: 0.5rem 0.75rem !important;
         font-size: 0.75rem !important;
     }
     
-    .maneli-calculator-container .loan-section.result-section {
+    .autopuzzle-calculator-container .loan-section.result-section {
         padding: 1rem;
     }
     
-    .maneli-calculator-container .loan-section.result-section span {
+    .autopuzzle-calculator-container .loan-section.result-section span {
         font-size: 1.25rem;
     }
     
     /* Unavailable overlay responsive */
-    .maneli-calculator-container .unavailable-overlay-message {
+    .autopuzzle-calculator-container .unavailable-overlay-message {
         padding: 1.5rem 1rem;
     }
     
-    .maneli-calculator-container .unavailable-message-content {
+    .autopuzzle-calculator-container .unavailable-message-content {
         padding: 1.25rem;
         max-width: 100%;
     }
     
-    .maneli-calculator-container .unavailable-message-content i {
+    .autopuzzle-calculator-container .unavailable-message-content i {
         font-size: 2.5rem;
         margin-bottom: 0.75rem;
     }
     
-    .maneli-calculator-container .unavailable-message-content p {
+    .autopuzzle-calculator-container .unavailable-message-content p {
         font-size: 0.9375rem;
     }
 }

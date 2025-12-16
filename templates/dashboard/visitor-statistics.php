@@ -3,7 +3,7 @@
  * Visitor Statistics Dashboard Page
  * صفحه کامل آمار بازدیدکنندگان - مشابه WP Statistics
  * 
- * @package Maneli_Car_Inquiry
+ * @package AutoPuzzle
  */
 
 // CRITICAL: Always get fresh role from WordPress user object
@@ -13,8 +13,8 @@ if (!is_user_logged_in()) {
 }
 
 $current_user = wp_get_current_user();
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_manager = in_array('maneli_manager', $current_user->roles, true) || in_array('maneli_admin', $current_user->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_manager = in_array('autopuzzle_manager', $current_user->roles, true) || in_array('autopuzzle_admin', $current_user->roles, true);
 
 // Only admin and manager can access visitor statistics
 if (!$is_admin && !$is_manager) {
@@ -23,21 +23,21 @@ if (!$is_admin && !$is_manager) {
 }
 
 // Load visitor statistics class
-require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
+require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
 
 // Check if visitor statistics tracking is enabled
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $tracking_enabled = isset($options['enable_visitor_statistics']) && $options['enable_visitor_statistics'] == '1';
 
-$use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+$use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 
 $visitor_stats_format_number = static function($value, $decimals = 0) use ($use_persian_digits) {
     if ($use_persian_digits) {
-        return maneli_number_format_persian($value, $decimals);
+        return autopuzzle_number_format_persian($value, $decimals);
     }
     $formatted = number_format_i18n((float) $value, $decimals);
-    if (function_exists('maneli_convert_to_english_digits')) {
-        return maneli_convert_to_english_digits($formatted);
+    if (function_exists('autopuzzle_convert_to_english_digits')) {
+        return autopuzzle_convert_to_english_digits($formatted);
     }
     return $formatted;
 };
@@ -46,15 +46,15 @@ $visitor_stats_convert_digits = static function($value) use ($use_persian_digits
     if ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
         return persian_numbers_no_separator($value);
     }
-    if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
-        return maneli_convert_to_english_digits($value);
+    if (!$use_persian_digits && function_exists('autopuzzle_convert_to_english_digits')) {
+        return autopuzzle_convert_to_english_digits($value);
     }
     return $value;
 };
 
 // Helper function to convert Jalali to Gregorian
-if (!function_exists('maneli_jalali_to_gregorian')) {
-    function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+if (!function_exists('autopuzzle_jalali_to_gregorian')) {
+    function autopuzzle_jalali_to_gregorian($j_y, $j_m, $j_d) {
         $j_y = (int)$j_y;
         $j_m = (int)$j_m;
         $j_d = (int)$j_d;
@@ -159,16 +159,16 @@ if ($calculated_start && $calculated_end) {
     if ($use_persian_digits) {
         $start_parts = explode('-', $calculated_start);
         $end_parts = explode('-', $calculated_end);
-        $default_start_display = maneli_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d', false);
-        $default_end_display = maneli_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d', false);
+        $default_start_display = autopuzzle_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d', false);
+        $default_end_display = autopuzzle_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d', false);
     } else {
         $default_start_display = date_i18n('Y-m-d', strtotime($calculated_start));
         $default_end_display = date_i18n('Y-m-d', strtotime($calculated_end));
     }
 } else {
     if ($use_persian_digits) {
-        $default_start_display = maneli_gregorian_to_jalali(date('Y', strtotime($thirty_days_ago_gregorian)), date('m', strtotime($thirty_days_ago_gregorian)), date('d', strtotime($thirty_days_ago_gregorian)), 'Y/m/d', false);
-        $default_end_display   = maneli_gregorian_to_jalali(date('Y', strtotime($today_gregorian)), date('m', strtotime($today_gregorian)), date('d', strtotime($today_gregorian)), 'Y/m/d', false);
+        $default_start_display = autopuzzle_gregorian_to_jalali(date('Y', strtotime($thirty_days_ago_gregorian)), date('m', strtotime($thirty_days_ago_gregorian)), date('d', strtotime($thirty_days_ago_gregorian)), 'Y/m/d', false);
+        $default_end_display   = autopuzzle_gregorian_to_jalali(date('Y', strtotime($today_gregorian)), date('m', strtotime($today_gregorian)), date('d', strtotime($today_gregorian)), 'Y/m/d', false);
     } else {
         $default_start_display = date_i18n('Y-m-d', strtotime($thirty_days_ago_gregorian));
         $default_end_display   = date_i18n('Y-m-d', strtotime($today_gregorian));
@@ -179,20 +179,20 @@ $start_date_input_raw = isset($_GET['start_date']) ? sanitize_text_field($_GET['
 $end_date_input_raw   = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : $default_end_display;
 
 if ($use_persian_digits) {
-    $start_date_normalized = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($start_date_input_raw) : null;
+    $start_date_normalized = function_exists('autopuzzle_normalize_jalali_date') ? autopuzzle_normalize_jalali_date($start_date_input_raw) : null;
     if ($start_date_normalized) {
         $start_parts = explode('/', $start_date_normalized);
-        $start_date = maneli_jalali_to_gregorian($start_parts[0], $start_parts[1], $start_parts[2]);
+        $start_date = autopuzzle_jalali_to_gregorian($start_parts[0], $start_parts[1], $start_parts[2]);
         $start_date_display = $visitor_stats_convert_digits($start_date_normalized);
     } else {
         $start_date = $thirty_days_ago_gregorian;
         $start_date_display = $visitor_stats_convert_digits($default_start_display);
     }
 
-    $end_date_normalized = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($end_date_input_raw) : null;
+    $end_date_normalized = function_exists('autopuzzle_normalize_jalali_date') ? autopuzzle_normalize_jalali_date($end_date_input_raw) : null;
     if ($end_date_normalized) {
         $end_parts = explode('/', $end_date_normalized);
-        $end_date = maneli_jalali_to_gregorian($end_parts[0], $end_parts[1], $end_parts[2]);
+        $end_date = autopuzzle_jalali_to_gregorian($end_parts[0], $end_parts[1], $end_parts[2]);
         $end_date_display = $visitor_stats_convert_digits($end_date_normalized);
     } else {
         $end_date = $today_gregorian;
@@ -205,8 +205,8 @@ if ($use_persian_digits) {
     }
     $start_date = date('Y-m-d', $start_timestamp);
     $start_date_display = date_i18n('Y-m-d', $start_timestamp);
-    if (function_exists('maneli_convert_to_english_digits')) {
-        $start_date_display = maneli_convert_to_english_digits($start_date_display);
+    if (function_exists('autopuzzle_convert_to_english_digits')) {
+        $start_date_display = autopuzzle_convert_to_english_digits($start_date_display);
     }
 
     $end_timestamp = strtotime($end_date_input_raw);
@@ -215,8 +215,8 @@ if ($use_persian_digits) {
     }
     $end_date = date('Y-m-d', $end_timestamp);
     $end_date_display = date_i18n('Y-m-d', $end_timestamp);
-    if (function_exists('maneli_convert_to_english_digits')) {
-        $end_date_display = maneli_convert_to_english_digits($end_date_display);
+    if (function_exists('autopuzzle_convert_to_english_digits')) {
+        $end_date_display = autopuzzle_convert_to_english_digits($end_date_display);
     }
 }
 
@@ -232,27 +232,27 @@ if (strtotime($start_date) > strtotime($end_date)) {
 }
 
 // Get overall statistics
-$overall_stats = Maneli_Visitor_Statistics::get_overall_stats($start_date, $end_date);
-$daily_stats = Maneli_Visitor_Statistics::get_daily_visits($start_date, $end_date);
+$overall_stats = Autopuzzle_Visitor_Statistics::get_overall_stats($start_date, $end_date);
+$daily_stats = Autopuzzle_Visitor_Statistics::get_daily_visits($start_date, $end_date);
 
 // Calculate previous period for comparison
 $days_diff = (strtotime($end_date) - strtotime($start_date)) / (60 * 60 * 24);
 $prev_start_date = date('Y-m-d', strtotime($start_date . ' -' . ($days_diff + 1) . ' days'));
 $prev_end_date = date('Y-m-d', strtotime($start_date . ' -1 day'));
-$prev_stats = Maneli_Visitor_Statistics::get_overall_stats($prev_start_date, $prev_end_date);
-$prev_daily_stats = Maneli_Visitor_Statistics::get_daily_visits($prev_start_date, $prev_end_date);
-$top_pages = Maneli_Visitor_Statistics::get_top_pages(10, $start_date, $end_date);
-$top_products = Maneli_Visitor_Statistics::get_top_products(10, $start_date, $end_date);
-$browser_stats = Maneli_Visitor_Statistics::get_browser_stats($start_date, $end_date);
-$os_stats = Maneli_Visitor_Statistics::get_os_stats($start_date, $end_date);
-$device_stats = Maneli_Visitor_Statistics::get_device_stats($start_date, $end_date);
-$country_stats = Maneli_Visitor_Statistics::get_country_stats($start_date, $end_date);
-$search_engine_stats = Maneli_Visitor_Statistics::get_search_engine_stats($start_date, $end_date);
-$referrer_stats = Maneli_Visitor_Statistics::get_referrer_stats(10, $start_date, $end_date);
-$recent_visitors = Maneli_Visitor_Statistics::get_recent_visitors(50, $start_date, $end_date);
-$online_visitors = Maneli_Visitor_Statistics::get_online_visitors();
-$most_active_visitors = Maneli_Visitor_Statistics::get_most_active_visitors(10, $start_date, $end_date);
-$period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
+$prev_stats = Autopuzzle_Visitor_Statistics::get_overall_stats($prev_start_date, $prev_end_date);
+$prev_daily_stats = Autopuzzle_Visitor_Statistics::get_daily_visits($prev_start_date, $prev_end_date);
+$top_pages = Autopuzzle_Visitor_Statistics::get_top_pages(10, $start_date, $end_date);
+$top_products = Autopuzzle_Visitor_Statistics::get_top_products(10, $start_date, $end_date);
+$browser_stats = Autopuzzle_Visitor_Statistics::get_browser_stats($start_date, $end_date);
+$os_stats = Autopuzzle_Visitor_Statistics::get_os_stats($start_date, $end_date);
+$device_stats = Autopuzzle_Visitor_Statistics::get_device_stats($start_date, $end_date);
+$country_stats = Autopuzzle_Visitor_Statistics::get_country_stats($start_date, $end_date);
+$search_engine_stats = Autopuzzle_Visitor_Statistics::get_search_engine_stats($start_date, $end_date);
+$referrer_stats = Autopuzzle_Visitor_Statistics::get_referrer_stats(10, $start_date, $end_date);
+$recent_visitors = Autopuzzle_Visitor_Statistics::get_recent_visitors(50, $start_date, $end_date);
+$online_visitors = Autopuzzle_Visitor_Statistics::get_online_visitors();
+$most_active_visitors = Autopuzzle_Visitor_Statistics::get_most_active_visitors(10, $start_date, $end_date);
+$period_statistics = Autopuzzle_Visitor_Statistics::get_period_statistics();
 
 // Scripts and styles are enqueued in class-dashboard-handler.php
 // Localize script (will be done in dashboard handler if needed)
@@ -266,20 +266,20 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
             <div>
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item">
-                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Visitor Statistics', 'maneli-car-inquiry'); ?></li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Visitor Statistics', 'autopuzzle'); ?></li>
                 </ol>
                 <h1 class="page-title fw-medium fs-18 mb-0">
-                    <?php esc_html_e('Visitor Statistics', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Visitor Statistics', 'autopuzzle'); ?>
                 </h1>
             </div>
             <div class="btn-list">
                 <button class="btn btn-sm btn-primary-light" onclick="window.print()">
-                    <i class="ri-printer-line me-1"></i><?php esc_html_e('Print', 'maneli-car-inquiry'); ?>
+                    <i class="ri-printer-line me-1"></i><?php esc_html_e('Print', 'autopuzzle'); ?>
                 </button>
                 <button class="btn btn-sm btn-success-light" onclick="exportStatistics()">
-                    <i class="ri-file-excel-line me-1"></i><?php esc_html_e('Export Excel', 'maneli-car-inquiry'); ?>
+                    <i class="ri-file-excel-line me-1"></i><?php esc_html_e('Export Excel', 'autopuzzle'); ?>
                 </button>
             </div>
         </div>
@@ -288,39 +288,39 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
         <!-- Date Range Filter -->
         <div class="row mb-4">
             <div class="col-xl-12">
-                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
+                <div class="card custom-card autopuzzle-mobile-filter-card" data-autopuzzle-mobile-filter>
                     <div class="card-header bg-light">
                         <div
-                            class="card-title d-flex align-items-center gap-2 maneli-mobile-filter-toggle"
-                            data-maneli-filter-toggle
+                            class="card-title d-flex align-items-center gap-2 autopuzzle-mobile-filter-toggle"
+                            data-autopuzzle-filter-toggle
                             role="button"
                             tabindex="0"
                             aria-expanded="false"
                         >
                             <i class="ri-calendar-line"></i>
-                            <?php esc_html_e('Date Range Filter', 'maneli-car-inquiry'); ?>
-                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                            <?php esc_html_e('Date Range Filter', 'autopuzzle'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto autopuzzle-mobile-filter-arrow d-md-none"></i>
                         </div>
                     </div>
-                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
+                    <div class="card-body autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                         <form id="visitor-stats-filter-form" method="get">
                             <div class="row g-3 align-items-end">
                                 <div class="col-12 col-lg-3">
-                                    <label class="form-label"><?php esc_html_e('Period:', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Period:', 'autopuzzle'); ?></label>
                                     <select name="period" id="period-filter" class="form-select">
-                                        <option value="today"><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
-                                        <option value="yesterday"><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
-                                        <option value="week" <?php selected($start_date, date('Y-m-d', strtotime('-7 days'))); ?>><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
-                                        <option value="month" <?php selected($start_date, date('Y-m-d', strtotime('-30 days'))); ?>><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
-                                        <option value="3months"><?php esc_html_e('Last 3 Months', 'maneli-car-inquiry'); ?></option>
-                                        <option value="6months"><?php esc_html_e('Last 6 Months', 'maneli-car-inquiry'); ?></option>
-                                        <option value="year"><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
-                                        <option value="custom"><?php esc_html_e('Custom Range', 'maneli-car-inquiry'); ?></option>
+                                        <option value="today"><?php esc_html_e('Today', 'autopuzzle'); ?></option>
+                                        <option value="yesterday"><?php esc_html_e('Yesterday', 'autopuzzle'); ?></option>
+                                        <option value="week" <?php selected($start_date, date('Y-m-d', strtotime('-7 days'))); ?>><?php esc_html_e('Last Week', 'autopuzzle'); ?></option>
+                                        <option value="month" <?php selected($start_date, date('Y-m-d', strtotime('-30 days'))); ?>><?php esc_html_e('Last Month', 'autopuzzle'); ?></option>
+                                        <option value="3months"><?php esc_html_e('Last 3 Months', 'autopuzzle'); ?></option>
+                                        <option value="6months"><?php esc_html_e('Last 6 Months', 'autopuzzle'); ?></option>
+                                        <option value="year"><?php esc_html_e('Last Year', 'autopuzzle'); ?></option>
+                                        <option value="custom"><?php esc_html_e('Custom Range', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
-                                <div class="col-6 col-lg-3 maneli-initially-hidden" id="custom-start-date">
+                                <div class="col-6 col-lg-3 autopuzzle-initially-hidden" id="custom-start-date">
                                     <label class="form-label">
-                                        <?php echo esc_html($use_persian_digits ? __('From Date (Solar):', 'maneli-car-inquiry') : __('From Date:', 'maneli-car-inquiry')); ?>
+                                        <?php echo esc_html($use_persian_digits ? __('From Date (Solar):', 'autopuzzle') : __('From Date:', 'autopuzzle')); ?>
                                     </label>
                                     <input
                                         <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
@@ -332,9 +332,9 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         <?php echo $use_persian_digits ? '' : 'pattern="\d{4}-\d{2}-\d{2}"'; ?>
                                     >
                                 </div>
-                                <div class="col-6 col-lg-3 maneli-initially-hidden" id="custom-end-date">
+                                <div class="col-6 col-lg-3 autopuzzle-initially-hidden" id="custom-end-date">
                                     <label class="form-label">
-                                        <?php echo esc_html($use_persian_digits ? __('To Date (Solar):', 'maneli-car-inquiry') : __('To Date:', 'maneli-car-inquiry')); ?>
+                                        <?php echo esc_html($use_persian_digits ? __('To Date (Solar):', 'autopuzzle') : __('To Date:', 'autopuzzle')); ?>
                                     </label>
                                     <input
                                         <?php echo $use_persian_digits ? 'type="text"' : 'type="date"'; ?>
@@ -350,7 +350,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     <div class="row g-2">
                                         <div class="col-6 col-lg-12">
                                             <button type="submit" class="btn btn-primary btn-wave w-100">
-                                                <i class="ri-filter-line me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
+                                                <i class="ri-filter-line me-1"></i><?php esc_html_e('Apply Filters', 'autopuzzle'); ?>
                                             </button>
                                         </div>
                                         <div class="col-6 d-lg-none"></div>
@@ -369,13 +369,13 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
             <div class="col-xl-12">
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
                     <i class="ri-alert-line me-2"></i>
-                    <strong><?php esc_html_e('Visitor Statistics Tracking is Disabled', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('Visitor Statistics Tracking is Disabled', 'autopuzzle'); ?></strong>
                     <p class="mb-0 mt-2">
-                        <?php esc_html_e('Visitor statistics tracking is currently disabled. Please enable it in', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('Visitor statistics tracking is currently disabled. Please enable it in', 'autopuzzle'); ?>
                         <a href="<?php echo esc_url(home_url('/dashboard/settings?tab=visitor_statistics')); ?>" class="alert-link">
-                            <?php esc_html_e('Settings > Visitor Statistics', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Settings > Visitor Statistics', 'autopuzzle'); ?>
                         </a>
-                        <?php esc_html_e('to start collecting visitor data.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('to start collecting visitor data.', 'autopuzzle'); ?>
                     </p>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -387,9 +387,9 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
             <div class="col-xl-12">
                 <div class="alert alert-info alert-dismissible fade show" role="alert">
                     <i class="ri-information-line me-2"></i>
-                    <strong><?php esc_html_e('No Visitor Data Yet', 'maneli-car-inquiry'); ?></strong>
+                    <strong><?php esc_html_e('No Visitor Data Yet', 'autopuzzle'); ?></strong>
                     <p class="mb-0 mt-2">
-                        <?php esc_html_e('No visitor data has been collected yet for the selected date range. Statistics will appear here once visitors start browsing your site.', 'maneli-car-inquiry'); ?>
+                        <?php esc_html_e('No visitor data has been collected yet for the selected date range. Statistics will appear here once visitors start browsing your site.', 'autopuzzle'); ?>
                     </p>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -400,7 +400,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
         <!-- Overall Statistics Cards -->
         <div class="row">
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
-                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
+                <div class="card custom-card crm-card overflow-hidden autopuzzle-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-3">
@@ -410,8 +410,8 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Visits', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 maneli-stat-value" id="total-visits"><?php echo esc_html($visitor_stats_format_number($overall_stats['total_visits'])); ?></h4>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Visits', 'autopuzzle'); ?></p>
+                                    <h4 class="fw-semibold mb-0 autopuzzle-stat-value" id="total-visits"><?php echo esc_html($visitor_stats_format_number($overall_stats['total_visits'])); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -419,7 +419,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
-                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
+                <div class="card custom-card crm-card overflow-hidden autopuzzle-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-3">
@@ -429,8 +429,8 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Unique Visitors', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 text-success maneli-stat-value" id="unique-visitors"><?php echo esc_html($visitor_stats_format_number($overall_stats['unique_visitors'])); ?></h4>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Unique Visitors', 'autopuzzle'); ?></p>
+                                    <h4 class="fw-semibold mb-0 text-success autopuzzle-stat-value" id="unique-visitors"><?php echo esc_html($visitor_stats_format_number($overall_stats['unique_visitors'])); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -438,7 +438,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
-                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
+                <div class="card custom-card crm-card overflow-hidden autopuzzle-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-3">
@@ -448,8 +448,8 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Pages', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 text-info maneli-stat-value" id="total-pages"><?php echo esc_html($visitor_stats_format_number($overall_stats['total_pages'])); ?></h4>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Total Pages', 'autopuzzle'); ?></p>
+                                    <h4 class="fw-semibold mb-0 text-info autopuzzle-stat-value" id="total-pages"><?php echo esc_html($visitor_stats_format_number($overall_stats['total_pages'])); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -457,7 +457,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 </div>
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6 col-sm-6 col-6">
-                <div class="card custom-card crm-card overflow-hidden maneli-stat-card">
+                <div class="card custom-card crm-card overflow-hidden autopuzzle-stat-card">
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center gap-3">
@@ -467,8 +467,8 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     </span>
                                 </div>
                                 <div>
-                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Online Now', 'maneli-car-inquiry'); ?></p>
-                                    <h4 class="fw-semibold mb-0 text-warning maneli-stat-value" id="online-visitors"><?php echo esc_html($visitor_stats_format_number(count($online_visitors))); ?></h4>
+                                    <p class="text-muted fs-14 mb-1"><?php esc_html_e('Online Now', 'autopuzzle'); ?></p>
+                                    <h4 class="fw-semibold mb-0 text-warning autopuzzle-stat-value" id="online-visitors"><?php echo esc_html($visitor_stats_format_number(count($online_visitors))); ?></h4>
                                 </div>
                             </div>
                         </div>
@@ -483,14 +483,14 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-file-list-line me-2"></i><?php esc_html_e('Summary', 'maneli-car-inquiry'); ?>
+                            <i class="ri-file-list-line me-2"></i><?php esc_html_e('Summary', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
                             <div class="d-flex align-items-center gap-2">
                                 <i class="ri-user-heart-line me-2"></i>
-                                <span class="fw-bold"><?php esc_html_e('Online Visitors', 'maneli-car-inquiry'); ?></span>
+                                <span class="fw-bold"><?php esc_html_e('Online Visitors', 'autopuzzle'); ?></span>
                                 <span class="fw-bold text-primary"><?php echo esc_html($visitor_stats_format_number(count($online_visitors))); ?></span>
                             </div>
                         </div>
@@ -498,44 +498,44 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Time', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Visitors', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Time', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Visitors', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('Today', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['today']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['today']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('Yesterday', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['yesterday']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['yesterday']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('This Week', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('This Week', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['this_week']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['this_week']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('Last Week', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_week']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_week']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('This Month', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('This Month', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['this_month']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['this_month']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('Last Month', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_month']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_month']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('Last 7 Days', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('Last 7 Days', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_7_days']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_7_days']['visits'])); ?></td>
                                     </tr>
@@ -544,17 +544,17 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             <?php 
                                             $days_diff = (strtotime($end_date) - strtotime($start_date)) / (60 * 60 * 24);
                                             if ($days_diff == 0) {
-                                                esc_html_e('Today', 'maneli-car-inquiry');
+                                                esc_html_e('Today', 'autopuzzle');
                                             } elseif ($days_diff == 1) {
-                                                esc_html_e('Yesterday', 'maneli-car-inquiry');
+                                                esc_html_e('Yesterday', 'autopuzzle');
                                             } elseif ($days_diff <= 7) {
-                                                printf(esc_html__('Last %d Days', 'maneli-car-inquiry'), (int)$days_diff + 1);
+                                                printf(esc_html__('Last %d Days', 'autopuzzle'), (int)$days_diff + 1);
                                             } elseif ($days_diff <= 30) {
-                                                printf(esc_html__('Last %d Days', 'maneli-car-inquiry'), (int)$days_diff + 1);
+                                                printf(esc_html__('Last %d Days', 'autopuzzle'), (int)$days_diff + 1);
                                             } elseif ($days_diff <= 90) {
-                                                printf(esc_html__('Last %d Days', 'maneli-car-inquiry'), (int)$days_diff + 1);
+                                                printf(esc_html__('Last %d Days', 'autopuzzle'), (int)$days_diff + 1);
                                             } else {
-                                                printf(esc_html__('Selected Period (%d Days)', 'maneli-car-inquiry'), (int)$days_diff + 1);
+                                                printf(esc_html__('Selected Period (%d Days)', 'autopuzzle'), (int)$days_diff + 1);
                                             }
                                             ?>
                                         </td>
@@ -562,22 +562,22 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         <td><?php echo esc_html($visitor_stats_format_number($overall_stats['total_visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('Last 90 Days', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('Last 90 Days', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_90_days']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_90_days']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('Last 6 Months', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('Last 6 Months', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_6_months']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['last_6_months']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('This Year (January to Today)', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('This Year (January to Today)', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['this_year']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['this_year']['visits'])); ?></td>
                                     </tr>
                                     <tr>
-                                        <td><?php esc_html_e('All Time', 'maneli-car-inquiry'); ?></td>
+                                        <td><?php esc_html_e('All Time', 'autopuzzle'); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['all_time']['visitors'])); ?></td>
                                         <td><?php echo esc_html($visitor_stats_format_number($period_statistics['all_time']['visits'])); ?></td>
                                     </tr>
@@ -595,7 +595,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card overflow-hidden">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-line-chart-line me-2"></i><?php esc_html_e('Traffic Trend Report', 'maneli-car-inquiry'); ?>
+                            <i class="ri-line-chart-line me-2"></i><?php esc_html_e('Traffic Trend Report', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -613,7 +613,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-file-list-line me-2"></i><?php esc_html_e('Top Pages', 'maneli-car-inquiry'); ?>
+                            <i class="ri-file-list-line me-2"></i><?php esc_html_e('Top Pages', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -621,9 +621,9 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Page', 'maneli-car-inquiry'); ?></th>
-                                        <th class="text-end"><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                        <th class="text-center"><?php esc_html_e('View Content', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Page', 'autopuzzle'); ?></th>
+                                        <th class="text-end"><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                        <th class="text-center"><?php esc_html_e('View Content', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -637,7 +637,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $path = isset($url_parts['path']) ? trim($url_parts['path'], '/') : '';
                                             
                                             if (empty($path) || $path === '/') {
-                                                $page_display_title = esc_html__('Home Page', 'maneli-car-inquiry');
+                                                $page_display_title = esc_html__('Home Page', 'autopuzzle');
                                             } else {
                                                 // Convert URL path to readable title
                                                 $path_parts = explode('/', $path);
@@ -659,8 +659,8 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         </td>
                                         <td class="text-end"><?php echo esc_html($visitor_stats_format_number($page->visit_count)); ?></td>
                                         <td class="text-center">
-                                            <a href="<?php echo $page_url; ?>" target="_blank" class="btn btn-sm btn-primary-light" title="<?php esc_attr_e('View Content', 'maneli-car-inquiry'); ?>">
-                                                <i class="ri-eye-line me-1"></i><?php esc_html_e('View Content', 'maneli-car-inquiry'); ?>
+                                            <a href="<?php echo $page_url; ?>" target="_blank" class="btn btn-sm btn-primary-light" title="<?php esc_attr_e('View Content', 'autopuzzle'); ?>">
+                                                <i class="ri-eye-line me-1"></i><?php esc_html_e('View Content', 'autopuzzle'); ?>
                                             </a>
                                         </td>
                                     </tr>
@@ -677,7 +677,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-car-line me-2"></i><?php esc_html_e('Most Viewed Cars', 'maneli-car-inquiry'); ?>
+                            <i class="ri-car-line me-2"></i><?php esc_html_e('Most Viewed Cars', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -685,9 +685,9 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Product', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Unique', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Product', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Unique', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -707,7 +707,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $product_label = $product_obj->get_name();
                                         }
                                         if (empty($product_label)) {
-                                            $product_label = sprintf(esc_html__('Product #%s', 'maneli-car-inquiry'), $visitor_stats_format_number($product_id));
+                                            $product_label = sprintf(esc_html__('Product #%s', 'autopuzzle'), $visitor_stats_format_number($product_id));
                                         }
                                         
                                         // Get product URL
@@ -769,7 +769,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-global-line me-2"></i><?php esc_html_e('Browsers', 'maneli-car-inquiry'); ?>
+                            <i class="ri-global-line me-2"></i><?php esc_html_e('Browsers', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -786,15 +786,15 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th><?php esc_html_e('Browser', 'maneli-car-inquiry'); ?></th>
-                                                <th class="text-end"><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                                <th class="text-end"><?php esc_html_e('Percentage', 'maneli-car-inquiry'); ?></th>
+                                                <th><?php esc_html_e('Browser', 'autopuzzle'); ?></th>
+                                                <th class="text-end"><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                                <th class="text-end"><?php esc_html_e('Percentage', 'autopuzzle'); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php foreach ($top_browsers as $browser): 
                                                 $percentage = $total_browser_visits > 0 ? round(($browser['visit_count'] / $total_browser_visits) * 100, 1) : 0;
-                                                $browser_icon = Maneli_Visitor_Statistics::get_browser_icon($browser['browser']);
+                                                $browser_icon = Autopuzzle_Visitor_Statistics::get_browser_icon($browser['browser']);
                                                 $browser_label = $browser['browser_label'];
                                             ?>
                                             <tr>
@@ -815,7 +815,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                                 <td>
                                                     <div class="d-flex align-items-center gap-2">
                                                         <span><i class="ri-more-line fs-18 text-secondary"></i></span>
-                                                        <span><?php esc_html_e('Others', 'maneli-car-inquiry'); ?></span>
+                                                        <span><?php esc_html_e('Others', 'autopuzzle'); ?></span>
                                                     </div>
                                                 </td>
                                                 <td class="text-end"><?php echo esc_html($visitor_stats_format_number($other_visits)); ?></td>
@@ -841,7 +841,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-computer-line me-2"></i><?php esc_html_e('Operating Systems', 'maneli-car-inquiry'); ?>
+                            <i class="ri-computer-line me-2"></i><?php esc_html_e('Operating Systems', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -858,15 +858,15 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th><?php esc_html_e('Operating System', 'maneli-car-inquiry'); ?></th>
-                                                <th class="text-end"><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                                <th class="text-end"><?php esc_html_e('Percentage', 'maneli-car-inquiry'); ?></th>
+                                                <th><?php esc_html_e('Operating System', 'autopuzzle'); ?></th>
+                                                <th class="text-end"><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                                <th class="text-end"><?php esc_html_e('Percentage', 'autopuzzle'); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php foreach ($top_os as $os): 
                                                 $percentage = $total_os_visits > 0 ? round(($os['visit_count'] / $total_os_visits) * 100, 1) : 0;
-                                                $os_icon = Maneli_Visitor_Statistics::get_os_icon($os['os']);
+                                                $os_icon = Autopuzzle_Visitor_Statistics::get_os_icon($os['os']);
                                                 $os_label = $os['os_label'];
                                             ?>
                                             <tr>
@@ -887,7 +887,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                                 <td>
                                                     <div class="d-flex align-items-center gap-2">
                                                         <span><i class="ri-more-line fs-18 text-secondary"></i></span>
-                                                        <span><?php esc_html_e('Others', 'maneli-car-inquiry'); ?></span>
+                                                        <span><?php esc_html_e('Others', 'autopuzzle'); ?></span>
                                                     </div>
                                                 </td>
                                                 <td class="text-end"><?php echo esc_html($visitor_stats_format_number($other_os_visits)); ?></td>
@@ -913,7 +913,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-smartphone-line me-2"></i><?php esc_html_e('Device Types', 'maneli-car-inquiry'); ?>
+                            <i class="ri-smartphone-line me-2"></i><?php esc_html_e('Device Types', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -963,16 +963,16 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                     <table class="table table-hover">
                                         <thead>
                                             <tr>
-                                                <th><?php esc_html_e('Device Type', 'maneli-car-inquiry'); ?></th>
-                                                <th class="text-end"><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                                <th class="text-end"><?php esc_html_e('Percentage', 'maneli-car-inquiry'); ?></th>
+                                                <th><?php esc_html_e('Device Type', 'autopuzzle'); ?></th>
+                                                <th class="text-end"><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                                <th class="text-end"><?php esc_html_e('Percentage', 'autopuzzle'); ?></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php foreach ($top_device_groups as $device): 
                                                 $percentage = $total_device_group_visits > 0 ? round(($device['visit_count'] / $total_device_group_visits) * 100, 1) : 0;
-                                                $device_icon = Maneli_Visitor_Statistics::get_device_type_icon($device['device_type']);
-                                                $device_label = Maneli_Visitor_Statistics::translate_device_type($device['device_type']);
+                                                $device_icon = Autopuzzle_Visitor_Statistics::get_device_type_icon($device['device_type']);
+                                                $device_label = Autopuzzle_Visitor_Statistics::translate_device_type($device['device_type']);
                                             ?>
                                             <tr>
                                                 <td>
@@ -992,7 +992,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                                 <td>
                                                     <div class="d-flex align-items-center gap-2">
                                                         <span><i class="ri-more-line fs-18 text-secondary"></i></span>
-                                                        <span><?php esc_html_e('Others', 'maneli-car-inquiry'); ?></span>
+                                                        <span><?php esc_html_e('Others', 'autopuzzle'); ?></span>
                                                     </div>
                                                 </td>
                                                 <td class="text-end"><?php echo esc_html($visitor_stats_format_number($other_device_group_visits)); ?></td>
@@ -1018,7 +1018,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-search-line me-2"></i><?php esc_html_e('Search Engines', 'maneli-car-inquiry'); ?>
+                            <i class="ri-search-line me-2"></i><?php esc_html_e('Search Engines', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1026,14 +1026,14 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Search Engine', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Unique', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Search Engine', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Unique', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($search_engine_stats as $engine): 
-                                        $engine_icon = Maneli_Visitor_Statistics::get_search_engine_icon($engine->search_engine);
+                                        $engine_icon = Autopuzzle_Visitor_Statistics::get_search_engine_icon($engine->search_engine);
                                         $engine_name = ucfirst($engine->search_engine);
                                     ?>
                                     <tr>
@@ -1057,7 +1057,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-links-line me-2"></i><?php esc_html_e('Top Referrers', 'maneli-car-inquiry'); ?>
+                            <i class="ri-links-line me-2"></i><?php esc_html_e('Top Referrers', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1065,14 +1065,14 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Referrer', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Unique Visitors', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Referrer', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Unique Visitors', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($referrer_stats as $referrer): 
-                                        $referrer_icon = Maneli_Visitor_Statistics::get_referrer_icon($referrer->referrer_domain);
+                                        $referrer_icon = Autopuzzle_Visitor_Statistics::get_referrer_icon($referrer->referrer_domain);
                                     ?>
                                     <tr>
                                         <td>
@@ -1101,7 +1101,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-map-line me-2"></i><?php esc_html_e('Global Visitor Distribution', 'maneli-car-inquiry'); ?>
+                            <i class="ri-map-line me-2"></i><?php esc_html_e('Global Visitor Distribution', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1118,7 +1118,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-user-star-line me-2"></i><?php esc_html_e('Most Active Visitors', 'maneli-car-inquiry'); ?>
+                            <i class="ri-user-star-line me-2"></i><?php esc_html_e('Most Active Visitors', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1126,12 +1126,12 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th class="text-end"><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Visitor Information', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Referrer', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Entry Page', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Exit Page', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Last Visit', 'maneli-car-inquiry'); ?></th>
+                                        <th class="text-end"><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Visitor Information', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Referrer', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Entry Page', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Exit Page', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Last Visit', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1173,14 +1173,14 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         }
                                         
                                         // Visitor info
-                                        $active_country = Maneli_Visitor_Statistics::translate_country_name($visitor->country_code ?? '', $visitor->country ?? '');
-                                        $active_flag = Maneli_Visitor_Statistics::get_country_flag_icon($visitor->country_code ?? '', $visitor->country ?? '');
-                                        $os_label = Maneli_Visitor_Statistics::translate_os_name($visitor->os ?? '');
-                                        $os_icon = Maneli_Visitor_Statistics::get_os_icon($visitor->os ?? '');
-                                        $device_type_label = Maneli_Visitor_Statistics::translate_device_type($visitor->device_type ?? '');
-                                        $device_type_icon = Maneli_Visitor_Statistics::get_device_type_icon($visitor->device_type ?? '');
-                                        $browser_label = Maneli_Visitor_Statistics::translate_browser_name($visitor->browser ?? '');
-                                        $browser_icon = Maneli_Visitor_Statistics::get_browser_icon($visitor->browser ?? '');
+                                        $active_country = Autopuzzle_Visitor_Statistics::translate_country_name($visitor->country_code ?? '', $visitor->country ?? '');
+                                        $active_flag = Autopuzzle_Visitor_Statistics::get_country_flag_icon($visitor->country_code ?? '', $visitor->country ?? '');
+                                        $os_label = Autopuzzle_Visitor_Statistics::translate_os_name($visitor->os ?? '');
+                                        $os_icon = Autopuzzle_Visitor_Statistics::get_os_icon($visitor->os ?? '');
+                                        $device_type_label = Autopuzzle_Visitor_Statistics::translate_device_type($visitor->device_type ?? '');
+                                        $device_type_icon = Autopuzzle_Visitor_Statistics::get_device_type_icon($visitor->device_type ?? '');
+                                        $browser_label = Autopuzzle_Visitor_Statistics::translate_browser_name($visitor->browser ?? '');
+                                        $browser_icon = Autopuzzle_Visitor_Statistics::get_browser_icon($visitor->browser ?? '');
                                         
                                         // Referrer - filter self-referrals
                                         $referrer_domain = $visitor->referrer_domain ?? '';
@@ -1191,7 +1191,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $visitor->referrer_url = '';
                                         }
                                         
-                                        $referrer_type = Maneli_Visitor_Statistics::get_referrer_type_label($visitor->referrer_url ?? '', $referrer_domain);
+                                        $referrer_type = Autopuzzle_Visitor_Statistics::get_referrer_type_label($visitor->referrer_url ?? '', $referrer_domain);
                                         $referrer_display = $referrer_domain;
                                         
                                         // Entry page
@@ -1200,7 +1200,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $entry_url_parts = parse_url($visitor->entry_page_url ?? '');
                                             $entry_path = isset($entry_url_parts['path']) ? trim($entry_url_parts['path'], '/') : '';
                                             if (empty($entry_path) || $entry_path === '/') {
-                                                $entry_page_title = esc_html__('Home Page', 'maneli-car-inquiry');
+                                                $entry_page_title = esc_html__('Home Page', 'autopuzzle');
                                             } else {
                                                 $entry_path_parts = explode('/', $entry_path);
                                                 $entry_last_part = urldecode(end($entry_path_parts));
@@ -1214,7 +1214,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $exit_url_parts = parse_url($visitor->exit_page_url ?? '');
                                             $exit_path = isset($exit_url_parts['path']) ? trim($exit_url_parts['path'], '/') : '';
                                             if (empty($exit_path) || $exit_path === '/') {
-                                                $exit_page_title = esc_html__('Home Page', 'maneli-car-inquiry');
+                                                $exit_page_title = esc_html__('Home Page', 'autopuzzle');
                                             } else {
                                                 $exit_path_parts = explode('/', $exit_path);
                                                 $exit_last_part = urldecode(end($exit_path_parts));
@@ -1227,8 +1227,8 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         if (!empty($visitor->last_visit_date)) {
                                             $last_visit_timestamp = strtotime($visitor->last_visit_date);
                                             if ($last_visit_timestamp !== false) {
-                                                if ($use_persian_digits && function_exists('maneli_gregorian_to_jalali')) {
-                                                    $jalali = maneli_gregorian_to_jalali(
+                                                if ($use_persian_digits && function_exists('autopuzzle_gregorian_to_jalali')) {
+                                                    $jalali = autopuzzle_gregorian_to_jalali(
                                                         date('Y', $last_visit_timestamp),
                                                         date('m', $last_visit_timestamp),
                                                         date('d', $last_visit_timestamp),
@@ -1248,7 +1248,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <span class="maneli-emoji-flag" title="<?php echo esc_attr($active_country); ?>" style="cursor: help;"><?php echo esc_html($active_flag); ?></span>
+                                                <span class="autopuzzle-emoji-flag" title="<?php echo esc_attr($active_country); ?>" style="cursor: help;"><?php echo esc_html($active_flag); ?></span>
                                                 <span title="<?php echo esc_attr($os_label); ?>" style="cursor: help;"><?php echo $os_icon; ?></span>
                                                 <span title="<?php echo esc_attr($device_type_label); ?>" style="cursor: help;"><?php echo $device_type_icon; ?></span>
                                                 <span title="<?php echo esc_attr($browser_label); ?>" style="cursor: help;"><?php echo $browser_icon; ?></span>
@@ -1313,7 +1313,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-time-line me-2"></i><?php esc_html_e('Recent Visitors', 'maneli-car-inquiry'); ?>
+                            <i class="ri-time-line me-2"></i><?php esc_html_e('Recent Visitors', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1321,11 +1321,11 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Last Visit', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Visitor Information', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Referrer', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Last Page', 'maneli-car-inquiry'); ?></th>
-                                        <th class="text-end"><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Last Visit', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Visitor Information', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Referrer', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Last Page', 'autopuzzle'); ?></th>
+                                        <th class="text-end"><?php esc_html_e('Visits', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1364,11 +1364,11 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $parts = preg_split('/\s+/', $visit->visit_date);
                                             $date_part = $parts[0] ?? '';
                                             $time_part = $parts[1] ?? '00:00';
-                                            $normalized_jalali = function_exists('maneli_normalize_jalali_date') ? maneli_normalize_jalali_date($date_part) : null;
+                                            $normalized_jalali = function_exists('autopuzzle_normalize_jalali_date') ? autopuzzle_normalize_jalali_date($date_part) : null;
                                             if ($normalized_jalali) {
                                                 $jalali_segments = explode('/', $normalized_jalali);
                                                 if (count($jalali_segments) === 3) {
-                                                    $gregorian_date = maneli_jalali_to_gregorian($jalali_segments[0], $jalali_segments[1], $jalali_segments[2]);
+                                                    $gregorian_date = autopuzzle_jalali_to_gregorian($jalali_segments[0], $jalali_segments[1], $jalali_segments[2]);
                                                     $visit_timestamp = strtotime(trim($gregorian_date . ' ' . $time_part));
                                                 }
                                             }
@@ -1377,8 +1377,8 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $visit_timestamp = current_time('timestamp');
                                         }
                                         
-                                        if ($use_persian_digits && function_exists('maneli_gregorian_to_jalali')) {
-                                            $jalali = maneli_gregorian_to_jalali(
+                                        if ($use_persian_digits && function_exists('autopuzzle_gregorian_to_jalali')) {
+                                            $jalali = autopuzzle_gregorian_to_jalali(
                                                 date('Y', $visit_timestamp),
                                                 date('m', $visit_timestamp),
                                                 date('d', $visit_timestamp),
@@ -1391,14 +1391,14 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         }
                                         
                                         // Visitor info
-                                        $recent_country = Maneli_Visitor_Statistics::translate_country_name($visit->country_code ?? '', $visit->country ?? '');
-                                        $recent_flag = Maneli_Visitor_Statistics::get_country_flag_icon($visit->country_code ?? '', $visit->country ?? '');
-                                        $recent_os_label = Maneli_Visitor_Statistics::translate_os_name($visit->os ?? '');
-                                        $recent_os_icon = Maneli_Visitor_Statistics::get_os_icon($visit->os ?? '');
-                                        $recent_device_type_label = Maneli_Visitor_Statistics::translate_device_type($visit->device_type ?? '');
-                                        $recent_device_type_icon = Maneli_Visitor_Statistics::get_device_type_icon($visit->device_type ?? '');
-                                        $recent_browser_label = Maneli_Visitor_Statistics::translate_browser_name($visit->browser ?? '');
-                                        $recent_browser_icon = Maneli_Visitor_Statistics::get_browser_icon($visit->browser ?? '');
+                                        $recent_country = Autopuzzle_Visitor_Statistics::translate_country_name($visit->country_code ?? '', $visit->country ?? '');
+                                        $recent_flag = Autopuzzle_Visitor_Statistics::get_country_flag_icon($visit->country_code ?? '', $visit->country ?? '');
+                                        $recent_os_label = Autopuzzle_Visitor_Statistics::translate_os_name($visit->os ?? '');
+                                        $recent_os_icon = Autopuzzle_Visitor_Statistics::get_os_icon($visit->os ?? '');
+                                        $recent_device_type_label = Autopuzzle_Visitor_Statistics::translate_device_type($visit->device_type ?? '');
+                                        $recent_device_type_icon = Autopuzzle_Visitor_Statistics::get_device_type_icon($visit->device_type ?? '');
+                                        $recent_browser_label = Autopuzzle_Visitor_Statistics::translate_browser_name($visit->browser ?? '');
+                                        $recent_browser_icon = Autopuzzle_Visitor_Statistics::get_browser_icon($visit->browser ?? '');
                                         
                                         // Referrer - filter self-referrals
                                         $recent_referrer_domain = $visit->referrer_domain ?? '';
@@ -1409,7 +1409,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $visit->referrer_url = '';
                                         }
                                         
-                                        $recent_referrer_type = Maneli_Visitor_Statistics::get_referrer_type_label($visit->referrer_url ?? '', $recent_referrer_domain);
+                                        $recent_referrer_type = Autopuzzle_Visitor_Statistics::get_referrer_type_label($visit->referrer_url ?? '', $recent_referrer_domain);
                                         $recent_referrer_display = $recent_referrer_domain;
                                         
                                         // Last page
@@ -1418,7 +1418,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             $last_url_parts = parse_url($visit->page_url ?? '');
                                             $last_path = isset($last_url_parts['path']) ? trim($last_url_parts['path'], '/') : '';
                                             if (empty($last_path) || $last_path === '/') {
-                                                $last_page_title = esc_html__('Home Page', 'maneli-car-inquiry');
+                                                $last_page_title = esc_html__('Home Page', 'autopuzzle');
                                             } else {
                                                 $last_path_parts = explode('/', $last_path);
                                                 $last_last_part = urldecode(end($last_path_parts));
@@ -1435,7 +1435,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2">
-                                                <span class="maneli-emoji-flag" title="<?php echo esc_attr($recent_country); ?>" style="cursor: help;"><?php echo esc_html($recent_flag); ?></span>
+                                                <span class="autopuzzle-emoji-flag" title="<?php echo esc_attr($recent_country); ?>" style="cursor: help;"><?php echo esc_html($recent_flag); ?></span>
                                                 <span title="<?php echo esc_attr($recent_os_label); ?>" style="cursor: help;"><?php echo $recent_os_icon; ?></span>
                                                 <span title="<?php echo esc_attr($recent_device_type_label); ?>" style="cursor: help;"><?php echo $recent_device_type_icon; ?></span>
                                                 <span title="<?php echo esc_attr($recent_browser_label); ?>" style="cursor: help;"><?php echo $recent_browser_icon; ?></span>
@@ -1484,7 +1484,7 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                 <div class="card custom-card">
                     <div class="card-header">
                         <div class="card-title">
-                            <i class="ri-user-heart-line me-2"></i><?php esc_html_e('Online Visitors', 'maneli-car-inquiry'); ?>
+                            <i class="ri-user-heart-line me-2"></i><?php esc_html_e('Online Visitors', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1492,13 +1492,13 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('IP Address', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Country', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Browser', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('OS', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Device', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Current Page', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Last Activity', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('IP Address', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Country', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Browser', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('OS', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Device', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Current Page', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Last Activity', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody id="online-visitors-table">
@@ -1531,25 +1531,25 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
                                             continue;
                                         }
                                         
-                                        $country_display = $visitor->country ?: esc_html__('Unknown', 'maneli-car-inquiry');
-                                        $country_flag_icon = $visitor->country_flag_icon ?? $visitor->country_flag ?? Maneli_Visitor_Statistics::get_country_flag_icon($visitor->country_code ?? '', $visitor->country ?? '');
-                                        $browser_display = $visitor->browser ?: esc_html__('Unknown', 'maneli-car-inquiry');
-                                        $os_display = $visitor->os ?: esc_html__('Unknown', 'maneli-car-inquiry');
-                                        $device_display = $visitor->device_type_label ?? Maneli_Visitor_Statistics::translate_device_type($visitor->device_type ?? '');
+                                        $country_display = $visitor->country ?: esc_html__('Unknown', 'autopuzzle');
+                                        $country_flag_icon = $visitor->country_flag_icon ?? $visitor->country_flag ?? Autopuzzle_Visitor_Statistics::get_country_flag_icon($visitor->country_code ?? '', $visitor->country ?? '');
+                                        $browser_display = $visitor->browser ?: esc_html__('Unknown', 'autopuzzle');
+                                        $os_display = $visitor->os ?: esc_html__('Unknown', 'autopuzzle');
+                                        $device_display = $visitor->device_type_label ?? Autopuzzle_Visitor_Statistics::translate_device_type($visitor->device_type ?? '');
                                         if ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
                                             $device_display = persian_numbers_no_separator($device_display);
-                                        } elseif (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
-                                            $device_display = maneli_convert_to_english_digits($device_display);
+                                        } elseif (!$use_persian_digits && function_exists('autopuzzle_convert_to_english_digits')) {
+                                            $device_display = autopuzzle_convert_to_english_digits($device_display);
                                         }
                                         $time_ago_display = $visitor->time_ago ?? '';
-                                        if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
-                                            $time_ago_display = maneli_convert_to_english_digits($time_ago_display);
+                                        if (!$use_persian_digits && function_exists('autopuzzle_convert_to_english_digits')) {
+                                            $time_ago_display = autopuzzle_convert_to_english_digits($time_ago_display);
                                         }
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($visitor->ip_address); ?></td>
                                         <td>
-                                            <span class="maneli-emoji-flag me-2"><?php echo esc_html($country_flag_icon); ?></span>
+                                            <span class="autopuzzle-emoji-flag me-2"><?php echo esc_html($country_flag_icon); ?></span>
                                             <?php echo esc_html($country_display); ?>
                                         </td>
                                         <td><?php echo esc_html($browser_display); ?></td>
@@ -1587,14 +1587,14 @@ $period_statistics = Maneli_Visitor_Statistics::get_period_statistics();
 </div>
 
 <script type="text/javascript">
-window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
+window.autopuzzleVisitorStatsConfig = <?php echo wp_json_encode([
     'usePersianDatepicker' => $use_persian_digits,
     'usePersianDigits' => $use_persian_digits,
 ]); ?>;
 </script>
 <script type="text/javascript">
 (function() {
-    var config = window.maneliVisitorStatsConfig || {};
+    var config = window.autopuzzleVisitorStatsConfig || {};
     // Wait for jQuery to be available
     function initDatePickers() {
         if (typeof jQuery === 'undefined') {
@@ -1674,9 +1674,9 @@ window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
             $('#period-filter').on('change', function() {
                 var period = $(this).val();
                 if (period === 'custom') {
-                    $('#custom-start-date, #custom-end-date').removeClass('maneli-initially-hidden').show();
+                    $('#custom-start-date, #custom-end-date').removeClass('autopuzzle-initially-hidden').show();
                 } else {
-                    $('#custom-start-date, #custom-end-date').addClass('maneli-initially-hidden').hide();
+                    $('#custom-start-date, #custom-end-date').addClass('autopuzzle-initially-hidden').hide();
                     
                     // Calculate and set dates
                     var dates = calculatePeriodDates(period);
@@ -1691,7 +1691,7 @@ window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
             });
 
             if ($('#period-filter').val() === 'custom') {
-                $('#custom-start-date, #custom-end-date').removeClass('maneli-initially-hidden').show();
+                $('#custom-start-date, #custom-end-date').removeClass('autopuzzle-initially-hidden').show();
             }
 
             if (!config.usePersianDatepicker || typeof $.fn.persianDatepicker === 'undefined') {
@@ -1709,7 +1709,7 @@ window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
                 autoClose: true
             });
 
-            function maneliConvertDigitsToEnglish(str) {
+            function autopuzzleConvertDigitsToEnglish(str) {
                 var persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
                 var arabic  = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
                 for (var i = 0; i < 10; i++) {
@@ -1719,30 +1719,30 @@ window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
                 return str;
             }
 
-            function maneliConvertDigitsToPersian(str) {
+            function autopuzzleConvertDigitsToPersian(str) {
                 var persian = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
                 return str.replace(/\d/g, function(digit) {
                     return persian[parseInt(digit, 10)] || digit;
                 });
             }
 
-            function maneliNormalizeDateValue(value) {
+            function autopuzzleNormalizeDateValue(value) {
                 if (!value) {
                     return value;
                 }
-                var normalized = maneliConvertDigitsToEnglish(value).replace(/[-.]/g, '/');
+                var normalized = autopuzzleConvertDigitsToEnglish(value).replace(/[-.]/g, '/');
                 var parts = normalized.split('/');
                 if (parts.length !== 3) {
                     return value;
                 }
                 parts[1] = parts[1].padStart(2, '0');
                 parts[2] = parts[2].padStart(2, '0');
-                return maneliConvertDigitsToPersian(parts.join('/'));
+                return autopuzzleConvertDigitsToPersian(parts.join('/'));
             }
 
             $('#start-date-picker, #end-date-picker').on('change', function() {
                 var currentValue = $(this).val();
-                var normalizedValue = maneliNormalizeDateValue(currentValue);
+                var normalizedValue = autopuzzleNormalizeDateValue(currentValue);
                 $(this).val(normalizedValue);
             });
         });
@@ -1758,11 +1758,11 @@ window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
 </script>
 
 <!-- JSVectorMap CSS -->
-<link rel="stylesheet" href="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/jsvectormap/jsvectormap.min.css'); ?>">
+<link rel="stylesheet" href="<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/jsvectormap/jsvectormap.min.css'); ?>">
 
 <!-- JSVectorMap JS -->
-<script src="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/jsvectormap/jsvectormap.min.js'); ?>"></script>
-<script src="<?php echo esc_url(MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/jsvectormap/maps/world-merc.js'); ?>"></script>
+<script src="<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/jsvectormap/jsvectormap.min.js'); ?>"></script>
+<script src="<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/libs/jsvectormap/maps/world-merc.js'); ?>"></script>
 
 <script type="text/javascript">
 (function() {
@@ -1799,8 +1799,8 @@ window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
             $code = strtoupper(trim($country->country_code ?? ''));
             $code_lower = strtolower($code);
             if (!empty($code) && strlen($code) === 2) {
-                $country_name = Maneli_Visitor_Statistics::translate_country_name($country->country_code, $country->country);
-                $flag_icon = Maneli_Visitor_Statistics::get_country_flag_icon($country->country_code, $country->country);
+                $country_name = Autopuzzle_Visitor_Statistics::translate_country_name($country->country_code, $country->country);
+                $flag_icon = Autopuzzle_Visitor_Statistics::get_country_flag_icon($country->country_code, $country->country);
                 // Store with multiple key formats for maximum compatibility
                 $info_entry = [
                     'name' => $country_name,
@@ -1930,11 +1930,11 @@ window.maneliVisitorStatsConfig = <?php echo wp_json_encode([
                 '<div style="font-weight: bold; margin-bottom: 12px; font-size: 17px; color: #1a1a1a;">' + countryName + '</div>' +
                 '<div style="font-size: 13px; color: #555; line-height: 2; border-top: 1px solid #e8e8e8; padding-top: 10px; margin-top: 10px;">' +
                 '<div style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">' +
-                '<span style="color: #666; font-weight: 500;"><?php esc_html_e('Visitors', 'maneli-car-inquiry'); ?>:</span> ' +
+                '<span style="color: #666; font-weight: 500;"><?php esc_html_e('Visitors', 'autopuzzle'); ?>:</span> ' +
                 '<span style="color: #0066cc; font-weight: bold; font-size: 15px;">' + visitorCount.toLocaleString() + '</span>' +
                 '</div>' +
                 '<div style="display: flex; justify-content: space-between; align-items: center;">' +
-                '<span style="color: #666; font-weight: 500;"><?php esc_html_e('Visits', 'maneli-car-inquiry'); ?>:</span> ' +
+                '<span style="color: #666; font-weight: 500;"><?php esc_html_e('Visits', 'autopuzzle'); ?>:</span> ' +
                 '<span style="color: #0066cc; font-weight: bold; font-size: 15px;">' + visitCount.toLocaleString() + '</span>' +
                 '</div>' +
                 '</div>' +

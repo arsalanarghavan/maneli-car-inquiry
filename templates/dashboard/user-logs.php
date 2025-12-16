@@ -15,8 +15,8 @@ if (!is_user_logged_in()) {
 }
 
 $current_user = wp_get_current_user();
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_manager = in_array('maneli_manager', $current_user->roles, true) || in_array('maneli_admin', $current_user->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_manager = in_array('autopuzzle_manager', $current_user->roles, true) || in_array('autopuzzle_admin', $current_user->roles, true);
 
 if (!$is_admin && !$is_manager) {
     wp_redirect(home_url('/dashboard'));
@@ -24,16 +24,16 @@ if (!$is_admin && !$is_manager) {
 }
 
 // Load Logger
-$logger = Maneli_Logger::instance();
+$logger = Autopuzzle_Logger::instance();
 
 // Enqueue Persian Datepicker (only for Persian locale)
-if (function_exists('maneli_enqueue_persian_datepicker')) {
-    maneli_enqueue_persian_datepicker();
+if (function_exists('autopuzzle_enqueue_persian_datepicker')) {
+    autopuzzle_enqueue_persian_datepicker();
 }
 
 // Helper function to convert Jalali to Gregorian
-if (!function_exists('maneli_jalali_to_gregorian')) {
-    function maneli_jalali_to_gregorian($j_y, $j_m, $j_d) {
+if (!function_exists('autopuzzle_jalali_to_gregorian')) {
+    function autopuzzle_jalali_to_gregorian($j_y, $j_m, $j_d) {
         $g_days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
         
@@ -101,8 +101,8 @@ function convert_jalali_to_gregorian_date($date_str) {
         
         // If year is between 1300-1500, it's likely Jalali
         if ($year >= 1300 && $year <= 1500) {
-            if (function_exists('maneli_jalali_to_gregorian')) {
-                list($gy, $gm, $gd) = maneli_jalali_to_gregorian($year, $month, $day);
+            if (function_exists('autopuzzle_jalali_to_gregorian')) {
+                list($gy, $gm, $gd) = autopuzzle_jalali_to_gregorian($year, $month, $day);
                 return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
             }
         }
@@ -119,7 +119,7 @@ $date_from_raw = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_fro
 $date_to_raw = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
 $page_num = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
-$options = get_option('maneli_inquiry_all_options', []);
+$options = get_option('autopuzzle_inquiry_all_options', []);
 $per_page = isset($options['max_logs_per_page']) ? max(10, intval($options['max_logs_per_page'])) : 50;
 $offset = ($page_num - 1) * $per_page;
 
@@ -154,14 +154,14 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
             <div>
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item">
-                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>"><?php esc_html_e('User Logs', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>"><?php esc_html_e('User Logs', 'autopuzzle'); ?></a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('User Logs', 'maneli-car-inquiry'); ?></li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('User Logs', 'autopuzzle'); ?></li>
                 </ol>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('User Logs', 'maneli-car-inquiry'); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('User Logs', 'autopuzzle'); ?></h1>
             </div>
         </div>
         <!-- End::page-header -->
@@ -169,33 +169,33 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
         <!-- Filters -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
+                <div class="card custom-card autopuzzle-mobile-filter-card" data-autopuzzle-mobile-filter>
                     <div class="card-header">
                         <h5
-                            class="card-title mb-0 maneli-mobile-filter-toggle d-flex align-items-center gap-2"
-                            data-maneli-filter-toggle
+                            class="card-title mb-0 autopuzzle-mobile-filter-toggle d-flex align-items-center gap-2"
+                            data-autopuzzle-filter-toggle
                             role="button"
                             tabindex="0"
                             aria-expanded="false"
                         >
-                            <?php esc_html_e('Filters', 'maneli-car-inquiry'); ?>
-                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                            <?php esc_html_e('Filters', 'autopuzzle'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto autopuzzle-mobile-filter-arrow d-md-none"></i>
                         </h5>
                     </div>
-                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
+                    <div class="card-body autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                         <form method="get" action="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>">
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label class="form-label"><?php esc_html_e('Search', 'maneli-car-inquiry'); ?></label>
-                                    <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'maneli-car-inquiry'); ?>">
+                                    <label class="form-label"><?php esc_html_e('Search', 'autopuzzle'); ?></label>
+                                    <input type="text" name="search" class="form-control" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('Search...', 'autopuzzle'); ?>">
                                 </div>
                             </div>
 
                             <div class="row g-3 align-items-end mt-1">
                                 <div class="col-6 col-lg-2">
-                                    <label class="form-label"><?php esc_html_e('User', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('User', 'autopuzzle'); ?></label>
                                     <select name="user_id" class="form-select">
-                                        <option value=""><?php esc_html_e('All Users', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Users', 'autopuzzle'); ?></option>
                                         <?php foreach ($users as $user): ?>
                                             <option value="<?php echo esc_attr($user->ID); ?>" <?php selected($user_id_filter, $user->ID); ?>>
                                                 <?php echo esc_html($user->display_name); ?>
@@ -204,39 +204,39 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
                                     </select>
                                 </div>
                                 <div class="col-6 col-lg-2">
-                                    <label class="form-label"><?php esc_html_e('Action Type', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Action Type', 'autopuzzle'); ?></label>
                                     <select name="action_type" class="form-select">
-                                        <option value=""><?php esc_html_e('All Actions', 'maneli-car-inquiry'); ?></option>
-                                        <option value="button_click" <?php selected($action_type, 'button_click'); ?>><?php esc_html_e('Button Click', 'maneli-car-inquiry'); ?></option>
-                                        <option value="form_submit" <?php selected($action_type, 'form_submit'); ?>><?php esc_html_e('Form Submit', 'maneli-car-inquiry'); ?></option>
-                                        <option value="ajax_call" <?php selected($action_type, 'ajax_call'); ?>><?php esc_html_e('AJAX Call', 'maneli-car-inquiry'); ?></option>
-                                        <option value="page_view" <?php selected($action_type, 'page_view'); ?>><?php esc_html_e('Page View', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Actions', 'autopuzzle'); ?></option>
+                                        <option value="button_click" <?php selected($action_type, 'button_click'); ?>><?php esc_html_e('Button Click', 'autopuzzle'); ?></option>
+                                        <option value="form_submit" <?php selected($action_type, 'form_submit'); ?>><?php esc_html_e('Form Submit', 'autopuzzle'); ?></option>
+                                        <option value="ajax_call" <?php selected($action_type, 'ajax_call'); ?>><?php esc_html_e('AJAX Call', 'autopuzzle'); ?></option>
+                                        <option value="page_view" <?php selected($action_type, 'page_view'); ?>><?php esc_html_e('Page View', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 <div class="col-6 col-lg-2">
-                                    <label class="form-label"><?php esc_html_e('Target Type', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Target Type', 'autopuzzle'); ?></label>
                                     <select name="target_type" class="form-select">
-                                        <option value=""><?php esc_html_e('All Types', 'maneli-car-inquiry'); ?></option>
-                                        <option value="inquiry" <?php selected($target_type, 'inquiry'); ?>><?php esc_html_e('Inquiry', 'maneli-car-inquiry'); ?></option>
-                                        <option value="user" <?php selected($target_type, 'user'); ?>><?php esc_html_e('User', 'maneli-car-inquiry'); ?></option>
-                                        <option value="product" <?php selected($target_type, 'product'); ?>><?php esc_html_e('Product', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Types', 'autopuzzle'); ?></option>
+                                        <option value="inquiry" <?php selected($target_type, 'inquiry'); ?>><?php esc_html_e('Inquiry', 'autopuzzle'); ?></option>
+                                        <option value="user" <?php selected($target_type, 'user'); ?>><?php esc_html_e('User', 'autopuzzle'); ?></option>
+                                        <option value="product" <?php selected($target_type, 'product'); ?>><?php esc_html_e('Product', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
                                 <div class="col-6 col-lg-2">
-                                    <label class="form-label"><?php esc_html_e('From Date', 'maneli-car-inquiry'); ?></label>
-                                    <input type="text" name="date_from" id="date-from-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_from_raw); ?>" placeholder="1403/01/01">
+                                    <label class="form-label"><?php esc_html_e('From Date', 'autopuzzle'); ?></label>
+                                    <input type="text" name="date_from" id="date-from-picker" class="form-control autopuzzle-datepicker" value="<?php echo esc_attr($date_from_raw); ?>" placeholder="1403/01/01">
                                 </div>
                                 <div class="col-6 col-lg-2">
-                                    <label class="form-label"><?php esc_html_e('To Date', 'maneli-car-inquiry'); ?></label>
-                                    <input type="text" name="date_to" id="date-to-picker" class="form-control maneli-datepicker" value="<?php echo esc_attr($date_to_raw); ?>" placeholder="1403/01/01">
+                                    <label class="form-label"><?php esc_html_e('To Date', 'autopuzzle'); ?></label>
+                                    <input type="text" name="date_to" id="date-to-picker" class="form-control autopuzzle-datepicker" value="<?php echo esc_attr($date_to_raw); ?>" placeholder="1403/01/01">
                                 </div>
                                 <div class="col-12 col-lg-2">
                                     <div class="row g-2">
                                         <div class="col-6 col-lg-6">
-                                            <button type="submit" class="btn btn-primary w-100"><?php esc_html_e('Filter', 'maneli-car-inquiry'); ?></button>
+                                            <button type="submit" class="btn btn-primary w-100"><?php esc_html_e('Filter', 'autopuzzle'); ?></button>
                                         </div>
                                         <div class="col-6 col-lg-6">
-                                            <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>" class="btn btn-secondary w-100"><?php esc_html_e('Reset', 'maneli-car-inquiry'); ?></a>
+                                            <a href="<?php echo esc_url(home_url('/dashboard/logs/user')); ?>" class="btn btn-secondary w-100"><?php esc_html_e('Reset', 'autopuzzle'); ?></a>
                                         </div>
                                     </div>
                                 </div>
@@ -252,8 +252,8 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
             <div class="col-12">
                 <div class="card custom-card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0"><?php esc_html_e('User Activity Logs', 'maneli-car-inquiry'); ?></h5>
-                        <span class="badge bg-primary"><?php echo number_format($total_logs); ?> <?php esc_html_e('Logs', 'maneli-car-inquiry'); ?></span>
+                        <h5 class="card-title mb-0"><?php esc_html_e('User Activity Logs', 'autopuzzle'); ?></h5>
+                        <span class="badge bg-primary"><?php echo number_format($total_logs); ?> <?php esc_html_e('Logs', 'autopuzzle'); ?></span>
                     </div>
                     <div class="card-body">
                         <?php if (!empty($logs)): ?>
@@ -261,14 +261,14 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
                                 <table class="table table-hover text-nowrap">
                                     <thead>
                                         <tr>
-                                            <th><?php esc_html_e('ID', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('User', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Action Type', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Description', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Target', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('IP Address', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Date', 'maneli-car-inquiry'); ?></th>
-                                            <th><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                            <th><?php esc_html_e('ID', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('User', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Action Type', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Description', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Target', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('IP Address', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Date', 'autopuzzle'); ?></th>
+                                            <th><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -312,13 +312,13 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
                                                     $date_parts = explode(' ', $greg_date);
                                                     $date_part = explode('-', $date_parts[0]);
                                                     $time_part = $date_parts[1] ?? '00:00:00';
-                                                    $jalali_date = maneli_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
+                                                    $jalali_date = autopuzzle_gregorian_to_jalali($date_part[0], $date_part[1], $date_part[2], 'Y/m/d');
                                                     echo esc_html($jalali_date . ' ' . $time_part);
                                                     ?>
                                                 </td>
                                                 <td>
                                                     <button class="btn btn-sm btn-primary" onclick="showLogDetails(<?php echo esc_js($log->id); ?>)">
-                                                        <?php esc_html_e('Details', 'maneli-car-inquiry'); ?>
+                                                        <?php esc_html_e('Details', 'autopuzzle'); ?>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -344,7 +344,7 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
                                         if ($page_num > 1):
                                             ?>
                                             <li class="page-item">
-                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num - 1, $current_url)); ?>"><?php esc_html_e('Previous', 'maneli-car-inquiry'); ?></a>
+                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num - 1, $current_url)); ?>"><?php esc_html_e('Previous', 'autopuzzle'); ?></a>
                                             </li>
                                         <?php endif; ?>
                                         
@@ -362,7 +362,7 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
                                         
                                         <?php if ($page_num < $total_pages): ?>
                                             <li class="page-item">
-                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num + 1, $current_url)); ?>"><?php esc_html_e('Next', 'maneli-car-inquiry'); ?></a>
+                                                <a class="page-link" href="<?php echo esc_url(add_query_arg('paged', $page_num + 1, $current_url)); ?>"><?php esc_html_e('Next', 'autopuzzle'); ?></a>
                                             </li>
                                         <?php endif; ?>
                                     </ul>
@@ -370,7 +370,7 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
                             <?php endif; ?>
                         <?php else: ?>
                             <div class="alert alert-info">
-                                <?php esc_html_e('No logs found.', 'maneli-car-inquiry'); ?>
+                                <?php esc_html_e('No logs found.', 'autopuzzle'); ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -386,7 +386,7 @@ $users = get_users(array('fields' => array('ID', 'display_name')));
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><?php esc_html_e('Log Details', 'maneli-car-inquiry'); ?></h5>
+                <h5 class="modal-title"><?php esc_html_e('Log Details', 'autopuzzle'); ?></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="logDetailsContent">
@@ -475,9 +475,9 @@ function showLogDetails(logId) {
         url: '<?php echo admin_url('admin-ajax.php'); ?>',
         type: 'POST',
         data: {
-            action: 'maneli_get_user_log_details',
+            action: 'autopuzzle_get_user_log_details',
             log_id: logId,
-            security: '<?php echo wp_create_nonce('maneli_log_details_nonce'); ?>'
+            security: '<?php echo wp_create_nonce('autopuzzle_log_details_nonce'); ?>'
         },
         success: function(response) {
             if (response.success) {

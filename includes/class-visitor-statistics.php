@@ -3,14 +3,14 @@
  * Visitor Statistics Class
  * مدیریت آمار بازدیدکنندگان و ردیابی بازدیدها
  * 
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Visitor_Statistics {
+class Autopuzzle_Visitor_Statistics {
     
     /**
      * Cached lookup tables for country metadata.
@@ -116,7 +116,7 @@ class Maneli_Visitor_Statistics {
         $api_url = 'http://useragentapi.com/api/v3/json/' . urlencode($user_agent);
         
         // Try to get cached result first
-        $cache_key = 'maneli_ua_' . md5($user_agent);
+        $cache_key = 'autopuzzle_ua_' . md5($user_agent);
         $cached = get_transient($cache_key);
         if ($cached !== false) {
             return $cached;
@@ -538,7 +538,7 @@ class Maneli_Visitor_Statistics {
         ];
 
         // Allow site owners to disable GeoIP lookup if desired.
-        $geoip_enabled = apply_filters('maneli_enable_geoip_lookup', true, $ip);
+        $geoip_enabled = apply_filters('autopuzzle_enable_geoip_lookup', true, $ip);
         if (!$geoip_enabled) {
             return $default_location;
         }
@@ -547,20 +547,20 @@ class Maneli_Visitor_Statistics {
             return ['country' => 'Local', 'country_code' => 'LOC'];
         }
 
-        $transient_key = 'maneli_geoip_' . md5($ip);
+        $transient_key = 'autopuzzle_geoip_' . md5($ip);
         $cached_value = get_transient($transient_key);
         if ($cached_value !== false && is_array($cached_value)) {
             return $cached_value;
         }
 
         $geoip_endpoint = apply_filters(
-            'maneli_geoip_endpoint',
+            'autopuzzle_geoip_endpoint',
             sprintf('https://ipwho.is/%s?output=json', rawurlencode($ip)),
             $ip
         );
 
         $request_args = apply_filters(
-            'maneli_geoip_request_args',
+            'autopuzzle_geoip_request_args',
             [
                 'timeout' => 5,
                 'redirection' => 2,
@@ -751,14 +751,14 @@ class Maneli_Visitor_Statistics {
         }
         
         // Skip admin IPs (optional)
-        $admin_ips = apply_filters('maneli_skip_tracking_ips', ['127.0.0.1', '::1']);
+        $admin_ips = apply_filters('autopuzzle_skip_tracking_ips', ['127.0.0.1', '::1']);
         if (in_array($ip, $admin_ips)) {
             return false;
         }
         
         // Rate limiting: Check if this page was already tracked in this session (within last 30 seconds)
         $session_id = self::get_session_id();
-        $rate_limit_key = 'maneli_track_' . md5($session_id . $page_url);
+        $rate_limit_key = 'autopuzzle_track_' . md5($session_id . $page_url);
         if (get_transient($rate_limit_key)) {
             return false; // Already tracked this page in this session recently
         }
@@ -774,7 +774,7 @@ class Maneli_Visitor_Statistics {
         $search_info = self::parse_search_engine($referrer);
         
         // Get or create visitor
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         $visitor = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $visitors_table WHERE ip_address = %s AND user_agent = %s LIMIT 1",
             $ip,
@@ -842,7 +842,7 @@ class Maneli_Visitor_Statistics {
         }
         
         // Check if this exact visit was already recorded in the last 30 seconds (duplicate prevention)
-        $visits_table = $wpdb->prefix . 'maneli_visits';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
         $recent_visit = $wpdb->get_var($wpdb->prepare(
             "SELECT id FROM $visits_table 
             WHERE visitor_id = %d 
@@ -900,10 +900,10 @@ class Maneli_Visitor_Statistics {
         if (!session_id()) {
             session_start();
         }
-        if (!isset($_SESSION['maneli_session_id'])) {
-            $_SESSION['maneli_session_id'] = wp_generate_password(32, false);
+        if (!isset($_SESSION['autopuzzle_session_id'])) {
+            $_SESSION['autopuzzle_session_id'] = wp_generate_password(32, false);
         }
-        return $_SESSION['maneli_session_id'];
+        return $_SESSION['autopuzzle_session_id'];
     }
     
     /**
@@ -911,7 +911,7 @@ class Maneli_Visitor_Statistics {
      */
     private static function update_page_stats($page_url, $page_title) {
         global $wpdb;
-        $pages_table = $wpdb->prefix . 'maneli_pages';
+        $pages_table = $wpdb->prefix . 'autopuzzle_pages';
         
         $existing = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $pages_table WHERE page_url = %s LIMIT 1",
@@ -950,7 +950,7 @@ class Maneli_Visitor_Statistics {
      */
     private static function update_search_engine_stats($engine_name, $keyword) {
         global $wpdb;
-        $search_table = $wpdb->prefix . 'maneli_search_engines';
+        $search_table = $wpdb->prefix . 'autopuzzle_search_engines';
         
         $existing = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $search_table WHERE engine_name = %s AND keyword = %s LIMIT 1",
@@ -988,7 +988,7 @@ class Maneli_Visitor_Statistics {
      */
     private static function update_referrer_stats($referrer_url, $referrer_domain) {
         global $wpdb;
-        $referrers_table = $wpdb->prefix . 'maneli_referrers';
+        $referrers_table = $wpdb->prefix . 'autopuzzle_referrers';
         
         $existing = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $referrers_table WHERE referrer_domain = %s LIMIT 1",
@@ -1035,8 +1035,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $stats = $wpdb->get_row($wpdb->prepare(
             "SELECT 
@@ -1072,8 +1072,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1107,8 +1107,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1153,8 +1153,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1194,8 +1194,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $raw_results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1243,8 +1243,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $raw_results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1292,8 +1292,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $raw_results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1342,8 +1342,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1382,8 +1382,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         // Get device models
         $device_models = $wpdb->get_results($wpdb->prepare(
@@ -1468,8 +1468,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1505,8 +1505,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1541,7 +1541,7 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $referrers_table = $wpdb->prefix . 'maneli_referrers';
+        $referrers_table = $wpdb->prefix . 'autopuzzle_referrers';
         
         $results = $wpdb->get_results($wpdb->prepare(
             "SELECT 
@@ -1569,8 +1569,8 @@ class Maneli_Visitor_Statistics {
     public static function get_recent_visitors($limit = 50, $start_date = null, $end_date = null) {
         global $wpdb;
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $where_clause = "WHERE vis.is_bot = 0";
         $params = [];
@@ -1766,8 +1766,8 @@ class Maneli_Visitor_Statistics {
     public static function get_online_visitors() {
         global $wpdb;
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $results = $wpdb->get_results(
             "SELECT 
@@ -1814,8 +1814,8 @@ class Maneli_Visitor_Statistics {
             $end_date = date('Y-m-d');
         }
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         // Get site domain for filtering self-referrals
         $site_domain = parse_url(home_url(), PHP_URL_HOST);
@@ -1914,15 +1914,15 @@ class Maneli_Visitor_Statistics {
             // If both entry and exit pages are empty/null, set default values
             if (empty($result->entry_page_url) && empty($result->exit_page_url)) {
                 $result->entry_page_url = home_url('/');
-                $result->entry_page_title = esc_html__('Home Page', 'maneli-car-inquiry');
+                $result->entry_page_title = esc_html__('Home Page', 'autopuzzle');
                 $result->exit_page_url = home_url('/');
-                $result->exit_page_title = esc_html__('Home Page', 'maneli-car-inquiry');
+                $result->exit_page_title = esc_html__('Home Page', 'autopuzzle');
             } elseif (empty($result->entry_page_url)) {
                 $result->entry_page_url = $result->exit_page_url ?? home_url('/');
-                $result->entry_page_title = $result->exit_page_title ?? esc_html__('Home Page', 'maneli-car-inquiry');
+                $result->entry_page_title = $result->exit_page_title ?? esc_html__('Home Page', 'autopuzzle');
             } elseif (empty($result->exit_page_url)) {
                 $result->exit_page_url = $result->entry_page_url ?? home_url('/');
-                $result->exit_page_title = $result->entry_page_title ?? esc_html__('Home Page', 'maneli-car-inquiry');
+                $result->exit_page_title = $result->entry_page_title ?? esc_html__('Home Page', 'autopuzzle');
             }
             
             // Clear self-referrals
@@ -1947,7 +1947,7 @@ class Maneli_Visitor_Statistics {
      */
     public static function get_referrer_type_label($referrer_url, $referrer_domain) {
         if (empty($referrer_url) && empty($referrer_domain)) {
-            return esc_html__('Direct Traffic', 'maneli-car-inquiry');
+            return esc_html__('Direct Traffic', 'autopuzzle');
         }
         
         $domain = strtolower($referrer_domain ?? '');
@@ -1957,7 +1957,7 @@ class Maneli_Visitor_Statistics {
         $search_engines = ['google', 'bing', 'yahoo', 'yandex', 'duckduckgo', 'baidu'];
         foreach ($search_engines as $engine) {
             if (strpos($domain, $engine) !== false || strpos($url, $engine) !== false) {
-                return esc_html__('Organic Search', 'maneli-car-inquiry');
+                return esc_html__('Organic Search', 'autopuzzle');
             }
         }
         
@@ -1965,7 +1965,7 @@ class Maneli_Visitor_Statistics {
         $social_networks = ['instagram', 'facebook', 'twitter', 'linkedin', 'telegram', 'whatsapp', 'youtube', 'tiktok', 'pinterest', 'snapchat'];
         foreach ($social_networks as $social) {
             if (strpos($domain, $social) !== false || strpos($url, $social) !== false) {
-                return esc_html__('Organic Social Networks', 'maneli-car-inquiry');
+                return esc_html__('Organic Social Networks', 'autopuzzle');
             }
         }
         
@@ -1974,7 +1974,7 @@ class Maneli_Visitor_Statistics {
             return $referrer_domain;
         }
         
-        return esc_html__('Direct Traffic', 'maneli-car-inquiry');
+        return esc_html__('Direct Traffic', 'autopuzzle');
     }
     
     /**
@@ -1991,12 +1991,12 @@ class Maneli_Visitor_Statistics {
      */
     public static function get_device_type_translation_map() {
         return [
-            'desktop' => esc_html__('Desktop', 'maneli-car-inquiry'),
-            'mobile' => esc_html__('Smartphone', 'maneli-car-inquiry'),
-            'smartphone' => esc_html__('Smartphone', 'maneli-car-inquiry'),
-            'phablet' => esc_html__('Phablet', 'maneli-car-inquiry'),
-            'tablet' => esc_html__('Tablet', 'maneli-car-inquiry'),
-            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+            'desktop' => esc_html__('Desktop', 'autopuzzle'),
+            'mobile' => esc_html__('Smartphone', 'autopuzzle'),
+            'smartphone' => esc_html__('Smartphone', 'autopuzzle'),
+            'phablet' => esc_html__('Phablet', 'autopuzzle'),
+            'tablet' => esc_html__('Tablet', 'autopuzzle'),
+            'unknown' => esc_html__('Unknown', 'autopuzzle'),
         ];
     }
 
@@ -2006,7 +2006,7 @@ class Maneli_Visitor_Statistics {
     public static function translate_device_model($device_model) {
         $device_model = trim((string) $device_model);
         if ($device_model === '' || strtolower($device_model) === 'desktop') {
-            return esc_html__('(Not Set)', 'maneli-car-inquiry');
+            return esc_html__('(Not Set)', 'autopuzzle');
         }
         
         $lookup = strtolower($device_model);
@@ -2016,14 +2016,14 @@ class Maneli_Visitor_Statistics {
             // Extract iPhone model if available (e.g., "iPhone 13", "iPhone 14 Pro")
             if (preg_match('/iphone\s*(\d+|xr|xs|se|pro|max|plus)/i', $device_model, $matches)) {
                 $model_num = ucwords($matches[1]);
-                return esc_html__('Apple iPhone', 'maneli-car-inquiry') . ' ' . $model_num;
+                return esc_html__('Apple iPhone', 'autopuzzle') . ' ' . $model_num;
             }
-            return esc_html__('Apple iPhone', 'maneli-car-inquiry');
+            return esc_html__('Apple iPhone', 'autopuzzle');
         }
         
         // Check for iPad
         if (strpos($lookup, 'ipad') !== false) {
-            return esc_html__('iPad', 'maneli-car-inquiry');
+            return esc_html__('iPad', 'autopuzzle');
         }
         
         // Check for Samsung
@@ -2032,10 +2032,10 @@ class Maneli_Visitor_Statistics {
             if (preg_match('/galaxy\s*([a-z0-9\s]+)/i', $device_model, $matches)) {
                 $model = trim($matches[1]);
                 if (!empty($model)) {
-                    return esc_html__('Samsung Galaxy', 'maneli-car-inquiry') . ' ' . ucwords($model);
+                    return esc_html__('Samsung Galaxy', 'autopuzzle') . ' ' . ucwords($model);
                 }
             }
-            return esc_html__('Samsung Galaxy', 'maneli-car-inquiry');
+            return esc_html__('Samsung Galaxy', 'autopuzzle');
         }
         
         // Check for Xiaomi/Redmi
@@ -2044,41 +2044,41 @@ class Maneli_Visitor_Statistics {
             if (preg_match('/redmi\s*([a-z0-9\s]+)/i', $device_model, $matches)) {
                 $model = trim($matches[1]);
                 if (!empty($model)) {
-                    return esc_html__('Xiaomi Redmi', 'maneli-car-inquiry') . ' ' . ucwords($model);
+                    return esc_html__('Xiaomi Redmi', 'autopuzzle') . ' ' . ucwords($model);
                 }
             }
-            return esc_html__('Xiaomi Redmi', 'maneli-car-inquiry');
+            return esc_html__('Xiaomi Redmi', 'autopuzzle');
         }
         
         // Check for other common brands
         if (strpos($lookup, 'huawei') !== false || strpos($lookup, 'honor') !== false) {
-            return esc_html__('Huawei', 'maneli-car-inquiry');
+            return esc_html__('Huawei', 'autopuzzle');
         }
         
         if (strpos($lookup, 'oppo') !== false) {
-            return esc_html__('OPPO', 'maneli-car-inquiry');
+            return esc_html__('OPPO', 'autopuzzle');
         }
         
         if (strpos($lookup, 'vivo') !== false) {
-            return esc_html__('Vivo', 'maneli-car-inquiry');
+            return esc_html__('Vivo', 'autopuzzle');
         }
         
         if (strpos($lookup, 'oneplus') !== false) {
-            return esc_html__('OnePlus', 'maneli-car-inquiry');
+            return esc_html__('OnePlus', 'autopuzzle');
         }
         
         if (strpos($lookup, 'realme') !== false) {
-            return esc_html__('Realme', 'maneli-car-inquiry');
+            return esc_html__('Realme', 'autopuzzle');
         }
         
         // Generic device types - keep them as is, don't convert to "(Not Set)"
         // This way we can see all device models, even generic ones
         $generic_map = [
-            'desktop' => esc_html__('Desktop', 'maneli-car-inquiry'),
-            'android device' => esc_html__('Android Device', 'maneli-car-inquiry'),
-            'mobile device' => esc_html__('Mobile Device', 'maneli-car-inquiry'),
-            'tablet device' => esc_html__('Tablet Device', 'maneli-car-inquiry'),
-            'unknown' => esc_html__('Unknown Device', 'maneli-car-inquiry'),
+            'desktop' => esc_html__('Desktop', 'autopuzzle'),
+            'android device' => esc_html__('Android Device', 'autopuzzle'),
+            'mobile device' => esc_html__('Mobile Device', 'autopuzzle'),
+            'tablet device' => esc_html__('Tablet Device', 'autopuzzle'),
+            'unknown' => esc_html__('Unknown Device', 'autopuzzle'),
         ];
         
         if (isset($generic_map[$lookup])) {
@@ -2096,7 +2096,7 @@ class Maneli_Visitor_Statistics {
     public static function translate_browser_name($browser) {
         $browser = trim((string) $browser);
         if ($browser === '') {
-            return esc_html__('Unknown', 'maneli-car-inquiry');
+            return esc_html__('Unknown', 'autopuzzle');
         }
         $lookup = strtolower($browser);
         $map = self::get_browser_translation_map();
@@ -2108,17 +2108,17 @@ class Maneli_Visitor_Statistics {
      */
     public static function get_browser_translation_map() {
         return [
-            'chrome' => esc_html__('Chrome', 'maneli-car-inquiry'),
-            'chrome mobile' => esc_html__('Chrome Mobile', 'maneli-car-inquiry'),
-            'firefox' => esc_html__('Firefox', 'maneli-car-inquiry'),
-            'safari' => esc_html__('Safari', 'maneli-car-inquiry'),
-            'mobile safari' => esc_html__('Mobile Safari', 'maneli-car-inquiry'),
-            'edge' => esc_html__('Edge', 'maneli-car-inquiry'),
-            'ie' => esc_html__('Internet Explorer', 'maneli-car-inquiry'),
-            'opera' => esc_html__('Opera', 'maneli-car-inquiry'),
-            'chromium' => esc_html__('Chromium', 'maneli-car-inquiry'),
-            'instagram' => esc_html__('Instagram', 'maneli-car-inquiry'),
-            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+            'chrome' => esc_html__('Chrome', 'autopuzzle'),
+            'chrome mobile' => esc_html__('Chrome Mobile', 'autopuzzle'),
+            'firefox' => esc_html__('Firefox', 'autopuzzle'),
+            'safari' => esc_html__('Safari', 'autopuzzle'),
+            'mobile safari' => esc_html__('Mobile Safari', 'autopuzzle'),
+            'edge' => esc_html__('Edge', 'autopuzzle'),
+            'ie' => esc_html__('Internet Explorer', 'autopuzzle'),
+            'opera' => esc_html__('Opera', 'autopuzzle'),
+            'chromium' => esc_html__('Chromium', 'autopuzzle'),
+            'instagram' => esc_html__('Instagram', 'autopuzzle'),
+            'unknown' => esc_html__('Unknown', 'autopuzzle'),
         ];
     }
     
@@ -2190,7 +2190,7 @@ class Maneli_Visitor_Statistics {
     public static function translate_os_name($os) {
         $os = trim((string) $os);
         if ($os === '') {
-            return esc_html__('Unknown', 'maneli-car-inquiry');
+            return esc_html__('Unknown', 'autopuzzle');
         }
         $lookup = strtolower($os);
         $map = self::get_os_translation_map();
@@ -2202,13 +2202,13 @@ class Maneli_Visitor_Statistics {
      */
     public static function get_os_translation_map() {
         return [
-            'windows' => esc_html__('Windows', 'maneli-car-inquiry'),
-            'macos' => esc_html__('macOS', 'maneli-car-inquiry'),
-            'linux' => esc_html__('GNU/Linux', 'maneli-car-inquiry'),
-            'android' => esc_html__('Android', 'maneli-car-inquiry'),
-            'ios' => esc_html__('iOS', 'maneli-car-inquiry'),
-            'ipados' => esc_html__('iPadOS', 'maneli-car-inquiry'),
-            'unknown' => esc_html__('Unknown', 'maneli-car-inquiry'),
+            'windows' => esc_html__('Windows', 'autopuzzle'),
+            'macos' => esc_html__('macOS', 'autopuzzle'),
+            'linux' => esc_html__('GNU/Linux', 'autopuzzle'),
+            'android' => esc_html__('Android', 'autopuzzle'),
+            'ios' => esc_html__('iOS', 'autopuzzle'),
+            'ipados' => esc_html__('iPadOS', 'autopuzzle'),
+            'unknown' => esc_html__('Unknown', 'autopuzzle'),
         ];
     }
     
@@ -2420,10 +2420,10 @@ class Maneli_Visitor_Statistics {
             return self::localize_country_label($entry['names']);
         }
 
-        $fallback_label = $fallback !== '' ? $fallback : esc_html__('Unknown', 'maneli-car-inquiry');
-        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
-        if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
-            $fallback_label = maneli_convert_to_english_digits($fallback_label);
+        $fallback_label = $fallback !== '' ? $fallback : esc_html__('Unknown', 'autopuzzle');
+        $use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
+        if (!$use_persian_digits && function_exists('autopuzzle_convert_to_english_digits')) {
+            $fallback_label = autopuzzle_convert_to_english_digits($fallback_label);
         } elseif ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
             $fallback_label = persian_numbers_no_separator($fallback_label);
         }
@@ -2441,7 +2441,7 @@ class Maneli_Visitor_Statistics {
         }
         
         $translated = [];
-        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        $use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 
         if (function_exists('WC') && WC()->countries) {
             $countries = WC()->countries->get_countries();
@@ -2452,9 +2452,9 @@ class Maneli_Visitor_Statistics {
                     if ($entry) {
                         $translated[$upper_code] = self::localize_country_label($entry['names']);
                     } else {
-                        $base_label = $use_persian_digits ? $name : _x($name, 'country name', 'maneli-car-inquiry');
-                        if (!$use_persian_digits && function_exists('maneli_convert_to_english_digits')) {
-                            $base_label = maneli_convert_to_english_digits($base_label);
+                        $base_label = $use_persian_digits ? $name : _x($name, 'country name', 'autopuzzle');
+                        if (!$use_persian_digits && function_exists('autopuzzle_convert_to_english_digits')) {
+                            $base_label = autopuzzle_convert_to_english_digits($base_label);
                         } elseif ($use_persian_digits && function_exists('persian_numbers_no_separator')) {
                             $base_label = persian_numbers_no_separator($base_label);
                         }
@@ -2523,8 +2523,8 @@ class Maneli_Visitor_Statistics {
         }
         
         $unknown_names = [
-            'en' => esc_html__('Unknown', 'maneli-car-inquiry'),
-            'fa' => esc_html__('نامشخص', 'maneli-car-inquiry'),
+            'en' => esc_html__('Unknown', 'autopuzzle'),
+            'fa' => esc_html__('نامشخص', 'autopuzzle'),
         ];
         $by_code['UNKNOWN'] = $unknown_names;
         $by_name['unknown'] = [
@@ -2640,8 +2640,8 @@ class Maneli_Visitor_Statistics {
         }
         
         $unknown_label = self::localize_country_label([
-            'en' => esc_html__('Unknown', 'maneli-car-inquiry'),
-            'fa' => esc_html__('نامشخص', 'maneli-car-inquiry'),
+            'en' => esc_html__('Unknown', 'autopuzzle'),
+            'fa' => esc_html__('نامشخص', 'autopuzzle'),
         ]);
         $map['unknown'] = $unknown_label;
         $map['UNKNOWN'] = $unknown_label;
@@ -2660,262 +2660,262 @@ class Maneli_Visitor_Statistics {
         $registered = true;
 
         /* translators: country name */
-        _x('Local', 'country name', 'maneli-car-inquiry');
-        _x('Afghanistan', 'country name', 'maneli-car-inquiry');
-        _x('Åland Islands', 'country name', 'maneli-car-inquiry');
-        _x('Albania', 'country name', 'maneli-car-inquiry');
-        _x('Algeria', 'country name', 'maneli-car-inquiry');
-        _x('American Samoa', 'country name', 'maneli-car-inquiry');
-        _x('Andorra', 'country name', 'maneli-car-inquiry');
-        _x('Angola', 'country name', 'maneli-car-inquiry');
-        _x('Anguilla', 'country name', 'maneli-car-inquiry');
-        _x('Antarctica', 'country name', 'maneli-car-inquiry');
-        _x('Antigua and Barbuda', 'country name', 'maneli-car-inquiry');
-        _x('Argentina', 'country name', 'maneli-car-inquiry');
-        _x('Armenia', 'country name', 'maneli-car-inquiry');
-        _x('Aruba', 'country name', 'maneli-car-inquiry');
-        _x('Australia', 'country name', 'maneli-car-inquiry');
-        _x('Austria', 'country name', 'maneli-car-inquiry');
-        _x('Azerbaijan', 'country name', 'maneli-car-inquiry');
-        _x('Bahamas', 'country name', 'maneli-car-inquiry');
-        _x('Bahrain', 'country name', 'maneli-car-inquiry');
-        _x('Bangladesh', 'country name', 'maneli-car-inquiry');
-        _x('Barbados', 'country name', 'maneli-car-inquiry');
-        _x('Belarus', 'country name', 'maneli-car-inquiry');
-        _x('Belgium', 'country name', 'maneli-car-inquiry');
-        _x('Belize', 'country name', 'maneli-car-inquiry');
-        _x('Benin', 'country name', 'maneli-car-inquiry');
-        _x('Bermuda', 'country name', 'maneli-car-inquiry');
-        _x('Bhutan', 'country name', 'maneli-car-inquiry');
-        _x('Bolivia', 'country name', 'maneli-car-inquiry');
-        _x('Bonaire, Sint Eustatius and Saba', 'country name', 'maneli-car-inquiry');
-        _x('Bosnia and Herzegovina', 'country name', 'maneli-car-inquiry');
-        _x('Botswana', 'country name', 'maneli-car-inquiry');
-        _x('Bouvet Island', 'country name', 'maneli-car-inquiry');
-        _x('Brazil', 'country name', 'maneli-car-inquiry');
-        _x('British Indian Ocean Territory', 'country name', 'maneli-car-inquiry');
-        _x('Brunei Darussalam', 'country name', 'maneli-car-inquiry');
-        _x('Bulgaria', 'country name', 'maneli-car-inquiry');
-        _x('Burkina Faso', 'country name', 'maneli-car-inquiry');
-        _x('Burundi', 'country name', 'maneli-car-inquiry');
-        _x('Cabo Verde', 'country name', 'maneli-car-inquiry');
-        _x('Cambodia', 'country name', 'maneli-car-inquiry');
-        _x('Cameroon', 'country name', 'maneli-car-inquiry');
-        _x('Canada', 'country name', 'maneli-car-inquiry');
-        _x('Cayman Islands', 'country name', 'maneli-car-inquiry');
-        _x('Central African Republic', 'country name', 'maneli-car-inquiry');
-        _x('Chad', 'country name', 'maneli-car-inquiry');
-        _x('Chile', 'country name', 'maneli-car-inquiry');
-        _x('China', 'country name', 'maneli-car-inquiry');
-        _x('Christmas Island', 'country name', 'maneli-car-inquiry');
-        _x('Cocos (Keeling) Islands', 'country name', 'maneli-car-inquiry');
-        _x('Colombia', 'country name', 'maneli-car-inquiry');
-        _x('Comoros', 'country name', 'maneli-car-inquiry');
-        _x('Congo', 'country name', 'maneli-car-inquiry');
-        _x('Congo, Democratic Republic of the', 'country name', 'maneli-car-inquiry');
-        _x('Cook Islands', 'country name', 'maneli-car-inquiry');
-        _x('Costa Rica', 'country name', 'maneli-car-inquiry');
-        _x('Croatia', 'country name', 'maneli-car-inquiry');
-        _x('Cuba', 'country name', 'maneli-car-inquiry');
-        _x('Curaçao', 'country name', 'maneli-car-inquiry');
-        _x('Cyprus', 'country name', 'maneli-car-inquiry');
-        _x('Czechia', 'country name', 'maneli-car-inquiry');
-        _x('Denmark', 'country name', 'maneli-car-inquiry');
-        _x('Djibouti', 'country name', 'maneli-car-inquiry');
-        _x('Dominica', 'country name', 'maneli-car-inquiry');
-        _x('Dominican Republic', 'country name', 'maneli-car-inquiry');
-        _x('Ecuador', 'country name', 'maneli-car-inquiry');
-        _x('Egypt', 'country name', 'maneli-car-inquiry');
-        _x('El Salvador', 'country name', 'maneli-car-inquiry');
-        _x('Equatorial Guinea', 'country name', 'maneli-car-inquiry');
-        _x('Eritrea', 'country name', 'maneli-car-inquiry');
-        _x('Estonia', 'country name', 'maneli-car-inquiry');
-        _x('Eswatini', 'country name', 'maneli-car-inquiry');
-        _x('Ethiopia', 'country name', 'maneli-car-inquiry');
-        _x('Falkland Islands', 'country name', 'maneli-car-inquiry');
-        _x('Faroe Islands', 'country name', 'maneli-car-inquiry');
-        _x('Fiji', 'country name', 'maneli-car-inquiry');
-        _x('Finland', 'country name', 'maneli-car-inquiry');
-        _x('France', 'country name', 'maneli-car-inquiry');
-        _x('French Guiana', 'country name', 'maneli-car-inquiry');
-        _x('French Polynesia', 'country name', 'maneli-car-inquiry');
-        _x('French Southern Territories', 'country name', 'maneli-car-inquiry');
-        _x('Gabon', 'country name', 'maneli-car-inquiry');
-        _x('Gambia', 'country name', 'maneli-car-inquiry');
-        _x('Georgia', 'country name', 'maneli-car-inquiry');
-        _x('Germany', 'country name', 'maneli-car-inquiry');
-        _x('Ghana', 'country name', 'maneli-car-inquiry');
-        _x('Gibraltar', 'country name', 'maneli-car-inquiry');
-        _x('Greece', 'country name', 'maneli-car-inquiry');
-        _x('Greenland', 'country name', 'maneli-car-inquiry');
-        _x('Grenada', 'country name', 'maneli-car-inquiry');
-        _x('Guadeloupe', 'country name', 'maneli-car-inquiry');
-        _x('Guam', 'country name', 'maneli-car-inquiry');
-        _x('Guatemala', 'country name', 'maneli-car-inquiry');
-        _x('Guernsey', 'country name', 'maneli-car-inquiry');
-        _x('Guinea', 'country name', 'maneli-car-inquiry');
-        _x('Guinea-Bissau', 'country name', 'maneli-car-inquiry');
-        _x('Guyana', 'country name', 'maneli-car-inquiry');
-        _x('Haiti', 'country name', 'maneli-car-inquiry');
-        _x('Heard Island and McDonald Islands', 'country name', 'maneli-car-inquiry');
-        _x('Holy See', 'country name', 'maneli-car-inquiry');
-        _x('Honduras', 'country name', 'maneli-car-inquiry');
-        _x('Hong Kong', 'country name', 'maneli-car-inquiry');
-        _x('Hungary', 'country name', 'maneli-car-inquiry');
-        _x('Iceland', 'country name', 'maneli-car-inquiry');
-        _x('India', 'country name', 'maneli-car-inquiry');
-        _x('Indonesia', 'country name', 'maneli-car-inquiry');
-        _x('Iran', 'country name', 'maneli-car-inquiry');
-        _x('Iraq', 'country name', 'maneli-car-inquiry');
-        _x('Ireland', 'country name', 'maneli-car-inquiry');
-        _x('Isle of Man', 'country name', 'maneli-car-inquiry');
-        _x('Israel', 'country name', 'maneli-car-inquiry');
-        _x('Italy', 'country name', 'maneli-car-inquiry');
-        _x('Jamaica', 'country name', 'maneli-car-inquiry');
-        _x('Japan', 'country name', 'maneli-car-inquiry');
-        _x('Jersey', 'country name', 'maneli-car-inquiry');
-        _x('Jordan', 'country name', 'maneli-car-inquiry');
-        _x('Kazakhstan', 'country name', 'maneli-car-inquiry');
-        _x('Kenya', 'country name', 'maneli-car-inquiry');
-        _x('Kiribati', 'country name', 'maneli-car-inquiry');
-        _x('Korea (North)', 'country name', 'maneli-car-inquiry');
-        _x('Korea (South)', 'country name', 'maneli-car-inquiry');
-        _x('Kuwait', 'country name', 'maneli-car-inquiry');
-        _x('Kyrgyzstan', 'country name', 'maneli-car-inquiry');
-        _x('Lao People’s Democratic Republic', 'country name', 'maneli-car-inquiry');
-        _x('Latvia', 'country name', 'maneli-car-inquiry');
-        _x('Lebanon', 'country name', 'maneli-car-inquiry');
-        _x('Lesotho', 'country name', 'maneli-car-inquiry');
-        _x('Liberia', 'country name', 'maneli-car-inquiry');
-        _x('Libya', 'country name', 'maneli-car-inquiry');
-        _x('Liechtenstein', 'country name', 'maneli-car-inquiry');
-        _x('Lithuania', 'country name', 'maneli-car-inquiry');
-        _x('Luxembourg', 'country name', 'maneli-car-inquiry');
-        _x('Macao', 'country name', 'maneli-car-inquiry');
-        _x('Madagascar', 'country name', 'maneli-car-inquiry');
-        _x('Malawi', 'country name', 'maneli-car-inquiry');
-        _x('Malaysia', 'country name', 'maneli-car-inquiry');
-        _x('Maldives', 'country name', 'maneli-car-inquiry');
-        _x('Mali', 'country name', 'maneli-car-inquiry');
-        _x('Malta', 'country name', 'maneli-car-inquiry');
-        _x('Marshall Islands', 'country name', 'maneli-car-inquiry');
-        _x('Martinique', 'country name', 'maneli-car-inquiry');
-        _x('Mauritania', 'country name', 'maneli-car-inquiry');
-        _x('Mauritius', 'country name', 'maneli-car-inquiry');
-        _x('Mayotte', 'country name', 'maneli-car-inquiry');
-        _x('Mexico', 'country name', 'maneli-car-inquiry');
-        _x('Micronesia', 'country name', 'maneli-car-inquiry');
-        _x('Moldova', 'country name', 'maneli-car-inquiry');
-        _x('Monaco', 'country name', 'maneli-car-inquiry');
-        _x('Mongolia', 'country name', 'maneli-car-inquiry');
-        _x('Montenegro', 'country name', 'maneli-car-inquiry');
-        _x('Montserrat', 'country name', 'maneli-car-inquiry');
-        _x('Morocco', 'country name', 'maneli-car-inquiry');
-        _x('Mozambique', 'country name', 'maneli-car-inquiry');
-        _x('Myanmar', 'country name', 'maneli-car-inquiry');
-        _x('Namibia', 'country name', 'maneli-car-inquiry');
-        _x('Nauru', 'country name', 'maneli-car-inquiry');
-        _x('Nepal', 'country name', 'maneli-car-inquiry');
-        _x('Netherlands', 'country name', 'maneli-car-inquiry');
-        _x('New Caledonia', 'country name', 'maneli-car-inquiry');
-        _x('New Zealand', 'country name', 'maneli-car-inquiry');
-        _x('Nicaragua', 'country name', 'maneli-car-inquiry');
-        _x('Niger', 'country name', 'maneli-car-inquiry');
-        _x('Nigeria', 'country name', 'maneli-car-inquiry');
-        _x('Niue', 'country name', 'maneli-car-inquiry');
-        _x('Norfolk Island', 'country name', 'maneli-car-inquiry');
-        _x('Northern Mariana Islands', 'country name', 'maneli-car-inquiry');
-        _x('Norway', 'country name', 'maneli-car-inquiry');
-        _x('Oman', 'country name', 'maneli-car-inquiry');
-        _x('Pakistan', 'country name', 'maneli-car-inquiry');
-        _x('Palau', 'country name', 'maneli-car-inquiry');
-        _x('Palestine, State of', 'country name', 'maneli-car-inquiry');
-        _x('Panama', 'country name', 'maneli-car-inquiry');
-        _x('Papua New Guinea', 'country name', 'maneli-car-inquiry');
-        _x('Paraguay', 'country name', 'maneli-car-inquiry');
-        _x('Peru', 'country name', 'maneli-car-inquiry');
-        _x('Philippines', 'country name', 'maneli-car-inquiry');
-        _x('Pitcairn', 'country name', 'maneli-car-inquiry');
-        _x('Poland', 'country name', 'maneli-car-inquiry');
-        _x('Portugal', 'country name', 'maneli-car-inquiry');
-        _x('Puerto Rico', 'country name', 'maneli-car-inquiry');
-        _x('Qatar', 'country name', 'maneli-car-inquiry');
-        _x('Réunion', 'country name', 'maneli-car-inquiry');
-        _x('Romania', 'country name', 'maneli-car-inquiry');
-        _x('Russia', 'country name', 'maneli-car-inquiry');
-        _x('Rwanda', 'country name', 'maneli-car-inquiry');
-        _x('Saint Barthélemy', 'country name', 'maneli-car-inquiry');
-        _x('Saint Helena, Ascension and Tristan da Cunha', 'country name', 'maneli-car-inquiry');
-        _x('Saint Kitts and Nevis', 'country name', 'maneli-car-inquiry');
-        _x('Saint Lucia', 'country name', 'maneli-car-inquiry');
-        _x('Saint Martin (French part)', 'country name', 'maneli-car-inquiry');
-        _x('Saint Pierre and Miquelon', 'country name', 'maneli-car-inquiry');
-        _x('Saint Vincent and the Grenadines', 'country name', 'maneli-car-inquiry');
-        _x('Samoa', 'country name', 'maneli-car-inquiry');
-        _x('San Marino', 'country name', 'maneli-car-inquiry');
-        _x('Sao Tome and Principe', 'country name', 'maneli-car-inquiry');
-        _x('Saudi Arabia', 'country name', 'maneli-car-inquiry');
-        _x('Senegal', 'country name', 'maneli-car-inquiry');
-        _x('Serbia', 'country name', 'maneli-car-inquiry');
-        _x('Seychelles', 'country name', 'maneli-car-inquiry');
-        _x('Sierra Leone', 'country name', 'maneli-car-inquiry');
-        _x('Singapore', 'country name', 'maneli-car-inquiry');
-        _x('Sint Maarten (Dutch part)', 'country name', 'maneli-car-inquiry');
-        _x('Slovakia', 'country name', 'maneli-car-inquiry');
-        _x('Slovenia', 'country name', 'maneli-car-inquiry');
-        _x('Solomon Islands', 'country name', 'maneli-car-inquiry');
-        _x('Somalia', 'country name', 'maneli-car-inquiry');
-        _x('South Africa', 'country name', 'maneli-car-inquiry');
-        _x('South Georgia and the South Sandwich Islands', 'country name', 'maneli-car-inquiry');
-        _x('South Sudan', 'country name', 'maneli-car-inquiry');
-        _x('Spain', 'country name', 'maneli-car-inquiry');
-        _x('Sri Lanka', 'country name', 'maneli-car-inquiry');
-        _x('Sudan', 'country name', 'maneli-car-inquiry');
-        _x('Suriname', 'country name', 'maneli-car-inquiry');
-        _x('Svalbard and Jan Mayen', 'country name', 'maneli-car-inquiry');
-        _x('Sweden', 'country name', 'maneli-car-inquiry');
-        _x('Switzerland', 'country name', 'maneli-car-inquiry');
-        _x('Syrian Arab Republic', 'country name', 'maneli-car-inquiry');
-        _x('Taiwan', 'country name', 'maneli-car-inquiry');
-        _x('Tajikistan', 'country name', 'maneli-car-inquiry');
-        _x('Tanzania, United Republic of', 'country name', 'maneli-car-inquiry');
-        _x('Thailand', 'country name', 'maneli-car-inquiry');
-        _x('Timor-Leste', 'country name', 'maneli-car-inquiry');
-        _x('Togo', 'country name', 'maneli-car-inquiry');
-        _x('Tokelau', 'country name', 'maneli-car-inquiry');
-        _x('Tonga', 'country name', 'maneli-car-inquiry');
-        _x('Trinidad and Tobago', 'country name', 'maneli-car-inquiry');
-        _x('Tunisia', 'country name', 'maneli-car-inquiry');
-        _x('Turkey', 'country name', 'maneli-car-inquiry');
-        _x('Turkmenistan', 'country name', 'maneli-car-inquiry');
-        _x('Turks and Caicos Islands', 'country name', 'maneli-car-inquiry');
-        _x('Tuvalu', 'country name', 'maneli-car-inquiry');
-        _x('Uganda', 'country name', 'maneli-car-inquiry');
-        _x('Ukraine', 'country name', 'maneli-car-inquiry');
-        _x('United Arab Emirates', 'country name', 'maneli-car-inquiry');
-        _x('United Kingdom', 'country name', 'maneli-car-inquiry');
-        _x('United States', 'country name', 'maneli-car-inquiry');
-        _x('United States Minor Outlying Islands', 'country name', 'maneli-car-inquiry');
-        _x('Uruguay', 'country name', 'maneli-car-inquiry');
-        _x('Uzbekistan', 'country name', 'maneli-car-inquiry');
-        _x('Vanuatu', 'country name', 'maneli-car-inquiry');
-        _x('Venezuela', 'country name', 'maneli-car-inquiry');
-        _x('Viet Nam', 'country name', 'maneli-car-inquiry');
-        _x('Virgin Islands (British)', 'country name', 'maneli-car-inquiry');
-        _x('Virgin Islands (U.S.)', 'country name', 'maneli-car-inquiry');
-        _x('Wallis and Futuna', 'country name', 'maneli-car-inquiry');
-        _x('Western Sahara', 'country name', 'maneli-car-inquiry');
-        _x('Yemen', 'country name', 'maneli-car-inquiry');
-        _x('Zambia', 'country name', 'maneli-car-inquiry');
-        _x('Zimbabwe', 'country name', 'maneli-car-inquiry');
-        _x('Kosovo', 'country name', 'maneli-car-inquiry');
+        _x('Local', 'country name', 'autopuzzle');
+        _x('Afghanistan', 'country name', 'autopuzzle');
+        _x('Åland Islands', 'country name', 'autopuzzle');
+        _x('Albania', 'country name', 'autopuzzle');
+        _x('Algeria', 'country name', 'autopuzzle');
+        _x('American Samoa', 'country name', 'autopuzzle');
+        _x('Andorra', 'country name', 'autopuzzle');
+        _x('Angola', 'country name', 'autopuzzle');
+        _x('Anguilla', 'country name', 'autopuzzle');
+        _x('Antarctica', 'country name', 'autopuzzle');
+        _x('Antigua and Barbuda', 'country name', 'autopuzzle');
+        _x('Argentina', 'country name', 'autopuzzle');
+        _x('Armenia', 'country name', 'autopuzzle');
+        _x('Aruba', 'country name', 'autopuzzle');
+        _x('Australia', 'country name', 'autopuzzle');
+        _x('Austria', 'country name', 'autopuzzle');
+        _x('Azerbaijan', 'country name', 'autopuzzle');
+        _x('Bahamas', 'country name', 'autopuzzle');
+        _x('Bahrain', 'country name', 'autopuzzle');
+        _x('Bangladesh', 'country name', 'autopuzzle');
+        _x('Barbados', 'country name', 'autopuzzle');
+        _x('Belarus', 'country name', 'autopuzzle');
+        _x('Belgium', 'country name', 'autopuzzle');
+        _x('Belize', 'country name', 'autopuzzle');
+        _x('Benin', 'country name', 'autopuzzle');
+        _x('Bermuda', 'country name', 'autopuzzle');
+        _x('Bhutan', 'country name', 'autopuzzle');
+        _x('Bolivia', 'country name', 'autopuzzle');
+        _x('Bonaire, Sint Eustatius and Saba', 'country name', 'autopuzzle');
+        _x('Bosnia and Herzegovina', 'country name', 'autopuzzle');
+        _x('Botswana', 'country name', 'autopuzzle');
+        _x('Bouvet Island', 'country name', 'autopuzzle');
+        _x('Brazil', 'country name', 'autopuzzle');
+        _x('British Indian Ocean Territory', 'country name', 'autopuzzle');
+        _x('Brunei Darussalam', 'country name', 'autopuzzle');
+        _x('Bulgaria', 'country name', 'autopuzzle');
+        _x('Burkina Faso', 'country name', 'autopuzzle');
+        _x('Burundi', 'country name', 'autopuzzle');
+        _x('Cabo Verde', 'country name', 'autopuzzle');
+        _x('Cambodia', 'country name', 'autopuzzle');
+        _x('Cameroon', 'country name', 'autopuzzle');
+        _x('Canada', 'country name', 'autopuzzle');
+        _x('Cayman Islands', 'country name', 'autopuzzle');
+        _x('Central African Republic', 'country name', 'autopuzzle');
+        _x('Chad', 'country name', 'autopuzzle');
+        _x('Chile', 'country name', 'autopuzzle');
+        _x('China', 'country name', 'autopuzzle');
+        _x('Christmas Island', 'country name', 'autopuzzle');
+        _x('Cocos (Keeling) Islands', 'country name', 'autopuzzle');
+        _x('Colombia', 'country name', 'autopuzzle');
+        _x('Comoros', 'country name', 'autopuzzle');
+        _x('Congo', 'country name', 'autopuzzle');
+        _x('Congo, Democratic Republic of the', 'country name', 'autopuzzle');
+        _x('Cook Islands', 'country name', 'autopuzzle');
+        _x('Costa Rica', 'country name', 'autopuzzle');
+        _x('Croatia', 'country name', 'autopuzzle');
+        _x('Cuba', 'country name', 'autopuzzle');
+        _x('Curaçao', 'country name', 'autopuzzle');
+        _x('Cyprus', 'country name', 'autopuzzle');
+        _x('Czechia', 'country name', 'autopuzzle');
+        _x('Denmark', 'country name', 'autopuzzle');
+        _x('Djibouti', 'country name', 'autopuzzle');
+        _x('Dominica', 'country name', 'autopuzzle');
+        _x('Dominican Republic', 'country name', 'autopuzzle');
+        _x('Ecuador', 'country name', 'autopuzzle');
+        _x('Egypt', 'country name', 'autopuzzle');
+        _x('El Salvador', 'country name', 'autopuzzle');
+        _x('Equatorial Guinea', 'country name', 'autopuzzle');
+        _x('Eritrea', 'country name', 'autopuzzle');
+        _x('Estonia', 'country name', 'autopuzzle');
+        _x('Eswatini', 'country name', 'autopuzzle');
+        _x('Ethiopia', 'country name', 'autopuzzle');
+        _x('Falkland Islands', 'country name', 'autopuzzle');
+        _x('Faroe Islands', 'country name', 'autopuzzle');
+        _x('Fiji', 'country name', 'autopuzzle');
+        _x('Finland', 'country name', 'autopuzzle');
+        _x('France', 'country name', 'autopuzzle');
+        _x('French Guiana', 'country name', 'autopuzzle');
+        _x('French Polynesia', 'country name', 'autopuzzle');
+        _x('French Southern Territories', 'country name', 'autopuzzle');
+        _x('Gabon', 'country name', 'autopuzzle');
+        _x('Gambia', 'country name', 'autopuzzle');
+        _x('Georgia', 'country name', 'autopuzzle');
+        _x('Germany', 'country name', 'autopuzzle');
+        _x('Ghana', 'country name', 'autopuzzle');
+        _x('Gibraltar', 'country name', 'autopuzzle');
+        _x('Greece', 'country name', 'autopuzzle');
+        _x('Greenland', 'country name', 'autopuzzle');
+        _x('Grenada', 'country name', 'autopuzzle');
+        _x('Guadeloupe', 'country name', 'autopuzzle');
+        _x('Guam', 'country name', 'autopuzzle');
+        _x('Guatemala', 'country name', 'autopuzzle');
+        _x('Guernsey', 'country name', 'autopuzzle');
+        _x('Guinea', 'country name', 'autopuzzle');
+        _x('Guinea-Bissau', 'country name', 'autopuzzle');
+        _x('Guyana', 'country name', 'autopuzzle');
+        _x('Haiti', 'country name', 'autopuzzle');
+        _x('Heard Island and McDonald Islands', 'country name', 'autopuzzle');
+        _x('Holy See', 'country name', 'autopuzzle');
+        _x('Honduras', 'country name', 'autopuzzle');
+        _x('Hong Kong', 'country name', 'autopuzzle');
+        _x('Hungary', 'country name', 'autopuzzle');
+        _x('Iceland', 'country name', 'autopuzzle');
+        _x('India', 'country name', 'autopuzzle');
+        _x('Indonesia', 'country name', 'autopuzzle');
+        _x('Iran', 'country name', 'autopuzzle');
+        _x('Iraq', 'country name', 'autopuzzle');
+        _x('Ireland', 'country name', 'autopuzzle');
+        _x('Isle of Man', 'country name', 'autopuzzle');
+        _x('Israel', 'country name', 'autopuzzle');
+        _x('Italy', 'country name', 'autopuzzle');
+        _x('Jamaica', 'country name', 'autopuzzle');
+        _x('Japan', 'country name', 'autopuzzle');
+        _x('Jersey', 'country name', 'autopuzzle');
+        _x('Jordan', 'country name', 'autopuzzle');
+        _x('Kazakhstan', 'country name', 'autopuzzle');
+        _x('Kenya', 'country name', 'autopuzzle');
+        _x('Kiribati', 'country name', 'autopuzzle');
+        _x('Korea (North)', 'country name', 'autopuzzle');
+        _x('Korea (South)', 'country name', 'autopuzzle');
+        _x('Kuwait', 'country name', 'autopuzzle');
+        _x('Kyrgyzstan', 'country name', 'autopuzzle');
+        _x('Lao People’s Democratic Republic', 'country name', 'autopuzzle');
+        _x('Latvia', 'country name', 'autopuzzle');
+        _x('Lebanon', 'country name', 'autopuzzle');
+        _x('Lesotho', 'country name', 'autopuzzle');
+        _x('Liberia', 'country name', 'autopuzzle');
+        _x('Libya', 'country name', 'autopuzzle');
+        _x('Liechtenstein', 'country name', 'autopuzzle');
+        _x('Lithuania', 'country name', 'autopuzzle');
+        _x('Luxembourg', 'country name', 'autopuzzle');
+        _x('Macao', 'country name', 'autopuzzle');
+        _x('Madagascar', 'country name', 'autopuzzle');
+        _x('Malawi', 'country name', 'autopuzzle');
+        _x('Malaysia', 'country name', 'autopuzzle');
+        _x('Maldives', 'country name', 'autopuzzle');
+        _x('Mali', 'country name', 'autopuzzle');
+        _x('Malta', 'country name', 'autopuzzle');
+        _x('Marshall Islands', 'country name', 'autopuzzle');
+        _x('Martinique', 'country name', 'autopuzzle');
+        _x('Mauritania', 'country name', 'autopuzzle');
+        _x('Mauritius', 'country name', 'autopuzzle');
+        _x('Mayotte', 'country name', 'autopuzzle');
+        _x('Mexico', 'country name', 'autopuzzle');
+        _x('Micronesia', 'country name', 'autopuzzle');
+        _x('Moldova', 'country name', 'autopuzzle');
+        _x('Monaco', 'country name', 'autopuzzle');
+        _x('Mongolia', 'country name', 'autopuzzle');
+        _x('Montenegro', 'country name', 'autopuzzle');
+        _x('Montserrat', 'country name', 'autopuzzle');
+        _x('Morocco', 'country name', 'autopuzzle');
+        _x('Mozambique', 'country name', 'autopuzzle');
+        _x('Myanmar', 'country name', 'autopuzzle');
+        _x('Namibia', 'country name', 'autopuzzle');
+        _x('Nauru', 'country name', 'autopuzzle');
+        _x('Nepal', 'country name', 'autopuzzle');
+        _x('Netherlands', 'country name', 'autopuzzle');
+        _x('New Caledonia', 'country name', 'autopuzzle');
+        _x('New Zealand', 'country name', 'autopuzzle');
+        _x('Nicaragua', 'country name', 'autopuzzle');
+        _x('Niger', 'country name', 'autopuzzle');
+        _x('Nigeria', 'country name', 'autopuzzle');
+        _x('Niue', 'country name', 'autopuzzle');
+        _x('Norfolk Island', 'country name', 'autopuzzle');
+        _x('Northern Mariana Islands', 'country name', 'autopuzzle');
+        _x('Norway', 'country name', 'autopuzzle');
+        _x('Oman', 'country name', 'autopuzzle');
+        _x('Pakistan', 'country name', 'autopuzzle');
+        _x('Palau', 'country name', 'autopuzzle');
+        _x('Palestine, State of', 'country name', 'autopuzzle');
+        _x('Panama', 'country name', 'autopuzzle');
+        _x('Papua New Guinea', 'country name', 'autopuzzle');
+        _x('Paraguay', 'country name', 'autopuzzle');
+        _x('Peru', 'country name', 'autopuzzle');
+        _x('Philippines', 'country name', 'autopuzzle');
+        _x('Pitcairn', 'country name', 'autopuzzle');
+        _x('Poland', 'country name', 'autopuzzle');
+        _x('Portugal', 'country name', 'autopuzzle');
+        _x('Puerto Rico', 'country name', 'autopuzzle');
+        _x('Qatar', 'country name', 'autopuzzle');
+        _x('Réunion', 'country name', 'autopuzzle');
+        _x('Romania', 'country name', 'autopuzzle');
+        _x('Russia', 'country name', 'autopuzzle');
+        _x('Rwanda', 'country name', 'autopuzzle');
+        _x('Saint Barthélemy', 'country name', 'autopuzzle');
+        _x('Saint Helena, Ascension and Tristan da Cunha', 'country name', 'autopuzzle');
+        _x('Saint Kitts and Nevis', 'country name', 'autopuzzle');
+        _x('Saint Lucia', 'country name', 'autopuzzle');
+        _x('Saint Martin (French part)', 'country name', 'autopuzzle');
+        _x('Saint Pierre and Miquelon', 'country name', 'autopuzzle');
+        _x('Saint Vincent and the Grenadines', 'country name', 'autopuzzle');
+        _x('Samoa', 'country name', 'autopuzzle');
+        _x('San Marino', 'country name', 'autopuzzle');
+        _x('Sao Tome and Principe', 'country name', 'autopuzzle');
+        _x('Saudi Arabia', 'country name', 'autopuzzle');
+        _x('Senegal', 'country name', 'autopuzzle');
+        _x('Serbia', 'country name', 'autopuzzle');
+        _x('Seychelles', 'country name', 'autopuzzle');
+        _x('Sierra Leone', 'country name', 'autopuzzle');
+        _x('Singapore', 'country name', 'autopuzzle');
+        _x('Sint Maarten (Dutch part)', 'country name', 'autopuzzle');
+        _x('Slovakia', 'country name', 'autopuzzle');
+        _x('Slovenia', 'country name', 'autopuzzle');
+        _x('Solomon Islands', 'country name', 'autopuzzle');
+        _x('Somalia', 'country name', 'autopuzzle');
+        _x('South Africa', 'country name', 'autopuzzle');
+        _x('South Georgia and the South Sandwich Islands', 'country name', 'autopuzzle');
+        _x('South Sudan', 'country name', 'autopuzzle');
+        _x('Spain', 'country name', 'autopuzzle');
+        _x('Sri Lanka', 'country name', 'autopuzzle');
+        _x('Sudan', 'country name', 'autopuzzle');
+        _x('Suriname', 'country name', 'autopuzzle');
+        _x('Svalbard and Jan Mayen', 'country name', 'autopuzzle');
+        _x('Sweden', 'country name', 'autopuzzle');
+        _x('Switzerland', 'country name', 'autopuzzle');
+        _x('Syrian Arab Republic', 'country name', 'autopuzzle');
+        _x('Taiwan', 'country name', 'autopuzzle');
+        _x('Tajikistan', 'country name', 'autopuzzle');
+        _x('Tanzania, United Republic of', 'country name', 'autopuzzle');
+        _x('Thailand', 'country name', 'autopuzzle');
+        _x('Timor-Leste', 'country name', 'autopuzzle');
+        _x('Togo', 'country name', 'autopuzzle');
+        _x('Tokelau', 'country name', 'autopuzzle');
+        _x('Tonga', 'country name', 'autopuzzle');
+        _x('Trinidad and Tobago', 'country name', 'autopuzzle');
+        _x('Tunisia', 'country name', 'autopuzzle');
+        _x('Turkey', 'country name', 'autopuzzle');
+        _x('Turkmenistan', 'country name', 'autopuzzle');
+        _x('Turks and Caicos Islands', 'country name', 'autopuzzle');
+        _x('Tuvalu', 'country name', 'autopuzzle');
+        _x('Uganda', 'country name', 'autopuzzle');
+        _x('Ukraine', 'country name', 'autopuzzle');
+        _x('United Arab Emirates', 'country name', 'autopuzzle');
+        _x('United Kingdom', 'country name', 'autopuzzle');
+        _x('United States', 'country name', 'autopuzzle');
+        _x('United States Minor Outlying Islands', 'country name', 'autopuzzle');
+        _x('Uruguay', 'country name', 'autopuzzle');
+        _x('Uzbekistan', 'country name', 'autopuzzle');
+        _x('Vanuatu', 'country name', 'autopuzzle');
+        _x('Venezuela', 'country name', 'autopuzzle');
+        _x('Viet Nam', 'country name', 'autopuzzle');
+        _x('Virgin Islands (British)', 'country name', 'autopuzzle');
+        _x('Virgin Islands (U.S.)', 'country name', 'autopuzzle');
+        _x('Wallis and Futuna', 'country name', 'autopuzzle');
+        _x('Western Sahara', 'country name', 'autopuzzle');
+        _x('Yemen', 'country name', 'autopuzzle');
+        _x('Zambia', 'country name', 'autopuzzle');
+        _x('Zimbabwe', 'country name', 'autopuzzle');
+        _x('Kosovo', 'country name', 'autopuzzle');
     }
     
     /**
      * Localize country label based on active locale (Persian vs English)
      */
     private static function localize_country_label(array $names) {
-        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        $use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
         $english_base = $names['en'] ?? '';
         $persian_base = $names['fa'] ?? $english_base;
         
@@ -2927,9 +2927,9 @@ class Maneli_Visitor_Statistics {
             return esc_html($label);
         }
         
-        $label = $english_base !== '' ? _x($english_base, 'country name', 'maneli-car-inquiry') : esc_html__('Unknown', 'maneli-car-inquiry');
-        if (function_exists('maneli_convert_to_english_digits')) {
-            $label = maneli_convert_to_english_digits($label);
+        $label = $english_base !== '' ? _x($english_base, 'country name', 'autopuzzle') : esc_html__('Unknown', 'autopuzzle');
+        if (function_exists('autopuzzle_convert_to_english_digits')) {
+            $label = autopuzzle_convert_to_english_digits($label);
         }
         return esc_html($label);
     }
@@ -3204,8 +3204,8 @@ class Maneli_Visitor_Statistics {
         }
         
         $unknown_label = self::localize_country_label([
-            'en' => esc_html__('Unknown', 'maneli-car-inquiry'),
-            'fa' => esc_html__('نامشخص', 'maneli-car-inquiry'),
+            'en' => esc_html__('Unknown', 'autopuzzle'),
+            'fa' => esc_html__('نامشخص', 'autopuzzle'),
         ]);
         $map['unknown'] = $unknown_label;
         $map['UNKNOWN'] = $unknown_label;
@@ -3267,17 +3267,17 @@ class Maneli_Visitor_Statistics {
         
         $diff_seconds = abs($current_timestamp - $timestamp);
         if ($diff_seconds < 5) {
-            return esc_html__('Moments ago', 'maneli-car-inquiry');
+            return esc_html__('Moments ago', 'autopuzzle');
         }
         
         $diff_text = human_time_diff($timestamp, $current_timestamp);
-        $use_persian_digits = function_exists('maneli_should_use_persian_digits') ? maneli_should_use_persian_digits() : true;
+        $use_persian_digits = function_exists('autopuzzle_should_use_persian_digits') ? autopuzzle_should_use_persian_digits() : true;
 
         if (!$use_persian_digits) {
-            if (function_exists('maneli_convert_to_english_digits')) {
-                $diff_text = maneli_convert_to_english_digits($diff_text);
+            if (function_exists('autopuzzle_convert_to_english_digits')) {
+                $diff_text = autopuzzle_convert_to_english_digits($diff_text);
             }
-            return trim($diff_text . ' ' . esc_html__('ago', 'maneli-car-inquiry'));
+            return trim($diff_text . ' ' . esc_html__('ago', 'autopuzzle'));
         }
         
         $replacements = [
@@ -3308,7 +3308,7 @@ class Maneli_Visitor_Statistics {
             $translated = persian_numbers($translated);
         }
         
-        return trim($translated . ' ' . esc_html__('ago', 'maneli-car-inquiry'));
+        return trim($translated . ' ' . esc_html__('ago', 'autopuzzle'));
     }
     
     /**
@@ -3318,8 +3318,8 @@ class Maneli_Visitor_Statistics {
     public static function get_period_statistics() {
         global $wpdb;
         
-        $visits_table = $wpdb->prefix . 'maneli_visits';
-        $visitors_table = $wpdb->prefix . 'maneli_visitors';
+        $visits_table = $wpdb->prefix . 'autopuzzle_visits';
+        $visitors_table = $wpdb->prefix . 'autopuzzle_visitors';
         
         $today = date('Y-m-d');
         $yesterday = date('Y-m-d', strtotime('-1 day'));

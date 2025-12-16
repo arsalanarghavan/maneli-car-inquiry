@@ -14,17 +14,17 @@
     function initializeCalculator() {
         // Prevent multiple initializations
         if (initialized) {
-            console.log('Maneli Calculator: Already initialized, skipping...');
+            console.log('AutoPuzzle Calculator: Already initialized, skipping...');
             return;
         }
 
-        const calcContainer = document.querySelector(".maneli-calculator-container");
+        const calcContainer = document.querySelector(".autopuzzle-calculator-container");
         if (!calcContainer) {
-            console.log('Maneli Calculator: Container not found yet, will retry...');
+            console.log('AutoPuzzle Calculator: Container not found yet, will retry...');
             return false;
         }
 
-        console.log('Maneli Calculator: Container found, initializing...');
+        console.log('AutoPuzzle Calculator: Container found, initializing...');
 
         try {
             // Initialize tab switching
@@ -38,12 +38,12 @@
             
             if (success) {
                 initialized = true;
-                console.log('Maneli Calculator: Successfully initialized!');
+                console.log('AutoPuzzle Calculator: Successfully initialized!');
             }
             
             return success;
         } catch (error) {
-            console.error('Maneli Calculator: Error during initialization', error);
+            console.error('AutoPuzzle Calculator: Error during initialization', error);
             return false;
         }
     }
@@ -67,7 +67,7 @@
         window.addEventListener('load', function() {
             setTimeout(function() {
                 if (!initialized) {
-                    console.warn('Maneli Calculator: Final retry after window load');
+                    console.warn('AutoPuzzle Calculator: Final retry after window load');
                     initializeCalculator();
                 }
             }, 300);
@@ -83,7 +83,7 @@
         const contents = container.querySelectorAll('.tabs-content-wrapper .tab-content');
 
         if (tabs.length === 0 || contents.length === 0) {
-            console.warn('Maneli Calculator: Tabs or contents not found');
+            console.warn('AutoPuzzle Calculator: Tabs or contents not found');
             return;
         }
 
@@ -104,7 +104,7 @@
             });
         });
 
-        console.log('Maneli Calculator: Tab switching initialized');
+        console.log('AutoPuzzle Calculator: Tab switching initialized');
     }
 
     // === CASH TAB ===
@@ -125,12 +125,12 @@
             const isUnavailable = cashForm.getAttribute('data-is-unavailable') === 'true';
             
             if (isUnavailable) {
-                console.log('Maneli Cash Form: Product unavailable - form disabled');
+                console.log('AutoPuzzle Cash Form: Product unavailable - form disabled');
                 
                 // Add unavailable-form class if not already added
                 if (!cashForm.classList.contains('unavailable-form')) {
                     cashForm.classList.add('unavailable-form');
-                    console.log('Maneli Cash Form: Added unavailable-form class to form');
+                    console.log('AutoPuzzle Cash Form: Added unavailable-form class to form');
                 }
                 
                 // Ensure overlay message is visible (should be in tab-content, not form)
@@ -147,7 +147,7 @@
                     `;
                     cashTab.style.position = 'relative';
                     cashTab.insertBefore(overlayMessage, cashForm);
-                    console.log('Maneli Cash Form: Created unavailable overlay message');
+                    console.log('AutoPuzzle Cash Form: Created unavailable overlay message');
                 }
                 
                 // Add unavailable-tab class to tab-content
@@ -175,17 +175,17 @@
                     e.preventDefault();
                     
                     // Check if user is logged in
-                    const isLoggedIn = typeof maneli_ajax_object !== 'undefined' && 
-                                      maneli_ajax_object.ajax_url && 
-                                      maneli_ajax_object.ajax_url !== '' &&
-                                      maneli_ajax_object.nonce && 
-                                      maneli_ajax_object.nonce !== '';
+                    const isLoggedIn = typeof autopuzzle_ajax_object !== 'undefined' && 
+                                      autopuzzle_ajax_object.ajax_url && 
+                                      autopuzzle_ajax_object.ajax_url !== '' &&
+                                      autopuzzle_ajax_object.nonce && 
+                                      autopuzzle_ajax_object.nonce !== '';
                     
                     // Check if cash tab is unavailable (prevent submission)
                     const isUnavailable = cashForm.getAttribute('data-is-unavailable') === 'true';
                     if (isUnavailable) {
-                        console.log('Maneli Cash Form: Cannot submit - cash tab unavailable');
-                        alert(maneli_ajax_object.text.unavailable_cash_message || 'این محصول در حال حاضر برای خرید نقدی در دسترس نیست.');
+                        console.log('AutoPuzzle Cash Form: Cannot submit - cash tab unavailable');
+                        alert(autopuzzle_ajax_object.text.unavailable_cash_message || 'این محصول در حال حاضر برای خرید نقدی در دسترس نیست.');
                         return;
                     }
                     
@@ -200,8 +200,8 @@
                             timestamp: Date.now()
                         };
                         
-                        localStorage.setItem('maneli_pending_cash_inquiry', JSON.stringify(formData));
-                        console.log('Maneli Cash Form: Saved form data to localStorage');
+                        localStorage.setItem('autopuzzle_pending_cash_inquiry', JSON.stringify(formData));
+                        console.log('AutoPuzzle Cash Form: Saved form data to localStorage');
                         
                         // Redirect to login with redirect_to parameter pointing to current product page
                         const currentUrl = window.location.href;
@@ -213,20 +213,20 @@
                     // User is logged in, submit via AJAX
                     const originalText = submitBtn.textContent;
                     submitBtn.disabled = true;
-                    submitBtn.textContent = (maneli_ajax_object.text && maneli_ajax_object.text.sending) 
-                                         ? maneli_ajax_object.text.sending 
+                    submitBtn.textContent = (autopuzzle_ajax_object.text && autopuzzle_ajax_object.text.sending) 
+                                         ? autopuzzle_ajax_object.text.sending 
                                          : "Submitting...";
                     
                     const formDataObj = new FormData();
-                    formDataObj.append('action', 'maneli_create_customer_cash_inquiry');
-                    formDataObj.append('nonce', maneli_ajax_object.cash_inquiry_nonce || maneli_ajax_object.nonce);
+                    formDataObj.append('action', 'autopuzzle_create_customer_cash_inquiry');
+                    formDataObj.append('nonce', autopuzzle_ajax_object.cash_inquiry_nonce || autopuzzle_ajax_object.nonce);
                     formDataObj.append('product_id', cashForm.querySelector('input[name="product_id"]').value);
                     formDataObj.append('first_name', cashForm.querySelector('#cash_first_name')?.value || '');
                     formDataObj.append('last_name', cashForm.querySelector('#cash_last_name')?.value || '');
                     formDataObj.append('mobile_number', cashForm.querySelector('#cash_mobile_number')?.value || '');
                     formDataObj.append('car_color', cashForm.querySelector('#cash_car_color')?.value || '');
                     
-                    fetch(maneli_ajax_object.ajax_url, {
+                    fetch(autopuzzle_ajax_object.ajax_url, {
                         method: 'POST',
                         body: formDataObj
                     })
@@ -242,8 +242,8 @@
                                 window.location.href = '/dashboard/inquiries/cash';
                             }
                         } else {
-                            const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.error_sending) 
-                                           ? maneli_ajax_object.text.error_sending 
+                            const errorMsg = (autopuzzle_ajax_object.text && autopuzzle_ajax_object.text.error_sending) 
+                                           ? autopuzzle_ajax_object.text.error_sending 
                                            : "Error: ";
                             alert(errorMsg + (data.data && data.data.message ? data.data.message : "Unknown error."));
                             submitBtn.disabled = false;
@@ -251,9 +251,9 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Maneli Cash Form: AJAX Error:', error);
-                        const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
-                                       ? maneli_ajax_object.text.server_error_connection 
+                        console.error('AutoPuzzle Cash Form: AJAX Error:', error);
+                        const errorMsg = (autopuzzle_ajax_object.text && autopuzzle_ajax_object.text.server_error_connection) 
+                                       ? autopuzzle_ajax_object.text.server_error_connection 
                                        : "An unknown error occurred while communicating with the server.";
                         alert(errorMsg);
                         submitBtn.disabled = false;
@@ -268,13 +268,13 @@
     function initInstallmentCalculator(container) {
         const installmentTab = document.getElementById("installment-tab");
         if (!installmentTab) {
-            console.error('Maneli Calculator: installment-tab not found');
+            console.error('AutoPuzzle Calculator: installment-tab not found');
             return false;
         }
 
         const calc = document.getElementById("loan-calculator");
         if (!calc) {
-            console.error('Maneli Calculator: loan-calculator element not found');
+            console.error('AutoPuzzle Calculator: loan-calculator element not found');
             return false;
         }
 
@@ -283,7 +283,7 @@
         const minDownAttr = calc.getAttribute('data-min-down');
         const maxDownAttr = calc.getAttribute('data-max-down');
         
-        console.log('Maneli Calculator: Data attributes:', {
+        console.log('AutoPuzzle Calculator: Data attributes:', {
             price: priceAttr,
             minDown: minDownAttr,
             maxDown: maxDownAttr
@@ -316,7 +316,7 @@
             }
         }
 
-        console.log('Maneli Calculator: Parsed values:', {
+        console.log('AutoPuzzle Calculator: Parsed values:', {
             productPrice,
             minDown,
             maxDown
@@ -330,11 +330,11 @@
         const actionBtn = installmentTab.querySelector(".loan-action-btn");
 
         if (!input) {
-            console.error('Maneli Calculator: downPaymentInput not found');
+            console.error('AutoPuzzle Calculator: downPaymentInput not found');
             return false;
         }
         if (!slider) {
-            console.error('Maneli Calculator: downPaymentSlider not found');
+            console.error('AutoPuzzle Calculator: downPaymentSlider not found');
             return false;
         }
         if (!installmentEl) {
@@ -342,16 +342,16 @@
             installmentEl = installmentTab.querySelector('span#installmentAmount[style*="display:none"]') || 
                             installmentTab.querySelector('span#installmentAmount');
             if (!installmentEl) {
-                console.error('Maneli Calculator: installmentAmount not found anywhere');
+                console.error('AutoPuzzle Calculator: installmentAmount not found anywhere');
                 return false;
             }
-            console.warn('Maneli Calculator: Found hidden installmentAmount element');
+            console.warn('AutoPuzzle Calculator: Found hidden installmentAmount element');
         }
         
         // If installmentEl is hidden (via style), make it visible so calculations show
         if (installmentEl && installmentEl.style.display === 'none') {
             installmentEl.style.display = '';
-            console.log('Maneli Calculator: Made installmentAmount visible (was hidden)');
+            console.log('AutoPuzzle Calculator: Made installmentAmount visible (was hidden)');
         }
         
         // Hide price-hidden span if installmentAmount is being shown (to remove the "-" sign)
@@ -363,7 +363,7 @@
         // Also check and show minDisplay if it was hidden
         if (minDisplay && minDisplay.style.display === 'none' && minDown > 0) {
             minDisplay.style.display = '';
-            console.log('Maneli Calculator: Made minDownDisplay visible (was hidden)');
+            console.log('AutoPuzzle Calculator: Made minDownDisplay visible (was hidden)');
         }
         
         // Hide price-hidden span near minDisplay (to remove the "-" sign)
@@ -377,7 +377,7 @@
         const isUnavailable = calc.getAttribute('data-is-unavailable') === 'true';
         const canSeePricesAttr = calc.getAttribute('data-can-see-prices');
 
-        console.log('Maneli Calculator: Availability check:', {
+        console.log('AutoPuzzle Calculator: Availability check:', {
             isUnavailable: isUnavailable,
             canSeePricesAttr: canSeePricesAttr,
             productPrice: productPrice
@@ -386,13 +386,13 @@
         // ONLY disable if product is unavailable
         // If prices are hidden, calculator should still work, just hide the display
         if (isUnavailable) {
-            console.log('Maneli Calculator: Product unavailable - calculator disabled');
+            console.log('AutoPuzzle Calculator: Product unavailable - calculator disabled');
             
             // Add unavailable-form class to the form if not already added
             const form = installmentTab.querySelector('.loan-calculator-form');
             if (form && !form.classList.contains('unavailable-form')) {
                 form.classList.add('unavailable-form');
-                console.log('Maneli Calculator: Added unavailable-form class to form');
+                console.log('AutoPuzzle Calculator: Added unavailable-form class to form');
             }
             
             // Ensure overlay message is visible (should be in tab-content, not form)
@@ -413,7 +413,7 @@
                 } else {
                     installmentTab.appendChild(overlayMessage);
                 }
-                console.log('Maneli Calculator: Created unavailable overlay message');
+                console.log('AutoPuzzle Calculator: Created unavailable overlay message');
             }
             
             // Add unavailable-tab class to tab-content
@@ -434,14 +434,14 @@
             return true; // Initialized but disabled
         }
 
-        console.log('Maneli Calculator: Calculator enabled and ready to use');
+        console.log('AutoPuzzle Calculator: Calculator enabled and ready to use');
 
         // Get interest rate
-        const interestRate = (typeof maneli_ajax_object !== 'undefined' && maneli_ajax_object.interestRate)
-                           ? parseFloat(maneli_ajax_object.interestRate) 
+        const interestRate = (typeof autopuzzle_ajax_object !== 'undefined' && autopuzzle_ajax_object.interestRate)
+                           ? parseFloat(autopuzzle_ajax_object.interestRate) 
                            : 0.035;
 
-        console.log('Maneli Calculator: Interest rate:', interestRate);
+        console.log('AutoPuzzle Calculator: Interest rate:', interestRate);
 
         // Helper: Update slider visual fill
         function updateSliderVisual() {
@@ -504,14 +504,14 @@
                 if (parent && parent.style.display === 'none') {
                     parent.style.display = '';
                 }
-                console.log('Maneli Calculator: Calculated installment:', formatted, 'for', months, 'months');
+                console.log('AutoPuzzle Calculator: Calculated installment:', formatted, 'for', months, 'months');
             }
         }
 
         // Initialize calculator state
         function initializeCalculatorState() {
             if (!slider || !input) {
-                console.warn('Maneli Calculator: Cannot initialize state - slider or input missing');
+                console.warn('AutoPuzzle Calculator: Cannot initialize state - slider or input missing');
                 return;
             }
 
@@ -537,9 +537,9 @@
                 updateSliderVisual();
                 calculateInstallment();
 
-                console.log('Maneli Calculator: State initialized successfully');
+                console.log('AutoPuzzle Calculator: State initialized successfully');
             } catch (error) {
-                console.error('Maneli Calculator: Error initializing state', error);
+                console.error('AutoPuzzle Calculator: Error initializing state', error);
             }
         }
 
@@ -619,15 +619,15 @@
                 e.preventDefault();
 
                 // Check if user is logged in - check both ajax_url and nonce
-                const isLoggedIn = typeof maneli_ajax_object !== 'undefined' && 
-                                  maneli_ajax_object.ajax_url && 
-                                  maneli_ajax_object.ajax_url !== '' &&
-                                  maneli_ajax_object.nonce && 
-                                  maneli_ajax_object.nonce !== '';
+                const isLoggedIn = typeof autopuzzle_ajax_object !== 'undefined' && 
+                                  autopuzzle_ajax_object.ajax_url && 
+                                  autopuzzle_ajax_object.ajax_url !== '' &&
+                                  autopuzzle_ajax_object.nonce && 
+                                  autopuzzle_ajax_object.nonce !== '';
                 
-                console.log('Maneli Calculator: Login check:', {
-                    ajax_url: typeof maneli_ajax_object !== 'undefined' ? maneli_ajax_object.ajax_url : 'undefined',
-                    nonce: typeof maneli_ajax_object !== 'undefined' ? maneli_ajax_object.nonce : 'undefined',
+                console.log('AutoPuzzle Calculator: Login check:', {
+                    ajax_url: typeof autopuzzle_ajax_object !== 'undefined' ? autopuzzle_ajax_object.ajax_url : 'undefined',
+                    nonce: typeof autopuzzle_ajax_object !== 'undefined' ? autopuzzle_ajax_object.nonce : 'undefined',
                     isLoggedIn: isLoggedIn
                 });
                 
@@ -650,8 +650,8 @@
                         };
                         
                         // Save to localStorage
-                        localStorage.setItem('maneli_pending_calculator_data', JSON.stringify(calculatorData));
-                        console.log('Maneli Calculator: Saved calculator data to localStorage:', calculatorData);
+                        localStorage.setItem('autopuzzle_pending_calculator_data', JSON.stringify(calculatorData));
+                        console.log('AutoPuzzle Calculator: Saved calculator data to localStorage:', calculatorData);
                     }
                     
                     // Redirect to login page
@@ -659,13 +659,13 @@
                     if (loginWrapper) {
                         const loginLink = loginWrapper.querySelector('a.loan-action-btn');
                         if (loginLink && loginLink.href) {
-                            console.log('Maneli Calculator: Redirecting to login:', loginLink.href);
+                            console.log('AutoPuzzle Calculator: Redirecting to login:', loginLink.href);
                             window.location.href = loginLink.href;
                             return;
                         }
                     }
                     // Fallback to dashboard login
-                    console.log('Maneli Calculator: Redirecting to dashboard login');
+                    console.log('AutoPuzzle Calculator: Redirecting to dashboard login');
                     window.location.href = '/dashboard/';
                     return;
                 }
@@ -673,8 +673,8 @@
                 // Disable button and show loading
                 const originalText = this.textContent;
                 this.disabled = true;
-                this.textContent = (maneli_ajax_object.text && maneli_ajax_object.text.sending) 
-                                 ? maneli_ajax_object.text.sending 
+                this.textContent = (autopuzzle_ajax_object.text && autopuzzle_ajax_object.text.sending) 
+                                 ? autopuzzle_ajax_object.text.sending 
                                  : "Sending information...";
 
                 // Get values
@@ -683,7 +683,7 @@
                 const productIdInput = installmentTab.querySelector('input[name="product_id"]');
                 
                 if (!downPaymentInput || !installmentAmountEl || !productIdInput) {
-                    console.error('Maneli Calculator: Required elements not found for submission');
+                    console.error('AutoPuzzle Calculator: Required elements not found for submission');
                     this.disabled = false;
                     this.textContent = originalText;
                     return;
@@ -696,13 +696,13 @@
                 const productId = productIdInput.value;
 
                 if (!productId) {
-                    console.error('Maneli Calculator: Product ID not found');
+                    console.error('AutoPuzzle Calculator: Product ID not found');
                     this.disabled = false;
                     this.textContent = originalText;
                     return;
                 }
 
-                console.log('Maneli Calculator: Submitting inquiry:', {
+                console.log('AutoPuzzle Calculator: Submitting inquiry:', {
                     productId,
                     downPayment,
                     termMonths,
@@ -712,9 +712,9 @@
 
                 // Prepare form data
                 const formData = new FormData();
-                formData.append('action', 'maneli_select_car_ajax');
+                formData.append('action', 'autopuzzle_select_car_ajax');
                 formData.append('product_id', productId);
-                formData.append('nonce', maneli_ajax_object.nonce);
+                formData.append('nonce', autopuzzle_ajax_object.nonce);
                 formData.append('down_payment', downPayment);
                 formData.append('term_months', termMonths);
                 formData.append('installment_amount', installmentAmount);
@@ -741,7 +741,7 @@
                 }
                 
                 function sendAjaxRequest() {
-                    fetch(maneli_ajax_object.ajax_url, {
+                    fetch(autopuzzle_ajax_object.ajax_url, {
                         method: 'POST',
                         body: formData
                     })
@@ -752,18 +752,18 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Maneli Calculator: AJAX response:', data);
+                    console.log('AutoPuzzle Calculator: AJAX response:', data);
                     if (data.success) {
                         // Redirect to wizard form step 2 (identity form)
                         const redirectUrl = '/dashboard/new-inquiry?step=2';
-                        console.log('Maneli Calculator: Redirecting to wizard:', redirectUrl);
+                        console.log('AutoPuzzle Calculator: Redirecting to wizard:', redirectUrl);
                         window.location.href = redirectUrl;
                     } else {
-                        const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.error_sending) 
-                                       ? maneli_ajax_object.text.error_sending 
+                        const errorMsg = (autopuzzle_ajax_object.text && autopuzzle_ajax_object.text.error_sending) 
+                                       ? autopuzzle_ajax_object.text.error_sending 
                                        : "Error sending information: ";
-                        const unknownError = (maneli_ajax_object.text && maneli_ajax_object.text.unknown_error) 
-                                           ? maneli_ajax_object.text.unknown_error 
+                        const unknownError = (autopuzzle_ajax_object.text && autopuzzle_ajax_object.text.unknown_error) 
+                                           ? autopuzzle_ajax_object.text.unknown_error 
                                            : "Unknown error.";
                         alert(errorMsg + (data.data && data.data.message ? data.data.message : unknownError));
                         this.disabled = false;
@@ -771,10 +771,10 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Maneli Calculator: AJAX Error:', error);
-                    const errorMsg = (maneli_ajax_object.text && maneli_ajax_object.text.server_error_connection) 
-                                   ? maneli_ajax_object.text.server_error_connection 
-                                   : maneli_ajax_object.text.unknown_server_error || "An unknown error occurred while communicating with the server.";
+                    console.error('AutoPuzzle Calculator: AJAX Error:', error);
+                    const errorMsg = (autopuzzle_ajax_object.text && autopuzzle_ajax_object.text.server_error_connection) 
+                                   ? autopuzzle_ajax_object.text.server_error_connection 
+                                   : autopuzzle_ajax_object.text.unknown_server_error || "An unknown error occurred while communicating with the server.";
                     alert(errorMsg);
                     this.disabled = false;
                     this.textContent = originalText;
@@ -782,7 +782,7 @@
                 }
             });
         } else {
-            console.warn('Maneli Calculator: Action button not found');
+            console.warn('AutoPuzzle Calculator: Action button not found');
         }
 
         // Initialize calculator state after a short delay to ensure DOM is ready

@@ -37,7 +37,7 @@ final class Maneli_Car_Inquiry_Plugin {
      */
     private function __construct() {
         // Load Maneli_Session class early before any hooks that might use it
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-session.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-maneli-session.php';
         $this->define_hooks();
     }
 
@@ -59,19 +59,19 @@ final class Maneli_Car_Inquiry_Plugin {
      * Load the plugin text domain for translation.
      */
     public function load_plugin_textdomain() {
-        $locale = apply_filters('plugin_locale', determine_locale(), 'maneli-car-inquiry');
-        $mofile = 'maneli-car-inquiry-' . $locale . '.mo';
+        $locale = apply_filters('plugin_locale', determine_locale(), 'autopuzzle');
+        $mofile = 'autopuzzle-' . $locale . '.mo';
         
         // Only try to load from WP_LANG_DIR if it's within allowed paths
         // This prevents realpath() errors with open_basedir restrictions
         $wp_lang_file = WP_LANG_DIR . '/plugins/' . $mofile;
         if (@file_exists($wp_lang_file)) {
-            load_textdomain('maneli-car-inquiry', $wp_lang_file);
+            load_textdomain('autopuzzle', $wp_lang_file);
         }
         
         // Load from plugin's languages directory
-        $plugin_rel_path = dirname(plugin_basename(MANELI_INQUIRY_PLUGIN_PATH)) . '/languages/';
-        load_plugin_textdomain('maneli-car-inquiry', false, $plugin_rel_path);
+        $plugin_rel_path = dirname(plugin_basename(AUTOPUZZLE_PLUGIN_PATH)) . '/languages/';
+        load_plugin_textdomain('autopuzzle', false, $plugin_rel_path);
     }
 
     /**
@@ -93,58 +93,61 @@ final class Maneli_Car_Inquiry_Plugin {
      */
     private function includes() {
         // Core Functionality & Helpers
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/functions.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-options-helper.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-encryption-helper.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/helpers/class-maneli-captcha-helper.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-activator.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-database.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-roles-caps.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-hooks.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/functions.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-maneli-options-helper.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-maneli-encryption-helper.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-maneli-render-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-maneli-permission-helpers.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-maneli-captcha-helper.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-maneli-activator.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-maneli-database.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-roles-caps.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-hooks.php';
         
         // Demo Data Generator
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-demo-data-generator.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-demo-data-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-demo-data-generator.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-demo-data-handler.php';
         
         // Handlers
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-sms-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-telegram-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-email-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-form-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-shortcode-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/public/class-finnotech-api-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-sms-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-telegram-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-email-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-notification-center-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-cpt-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-form-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-shortcode-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/public/class-finnotech-api-handler.php';
 
         // Admin & Settings
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-settings-page.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-expert-panel.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-user-profile.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-admin-dashboard-widgets.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-product-editor-page.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-credit-report-page.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-settings-page.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-branding-helper.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-autopuzzle-white-label-settings.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-autopuzzle-settings-menu.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-expert-panel.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-user-profile.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-admin-dashboard-widgets.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-product-editor-page.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-credit-report-page.php';
         
         // Reports & Analytics
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-reports-dashboard.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-reports-page.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-reports-ajax-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-reports-dashboard.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-reports-page.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-reports-ajax-handler.php';
         
         // Visitor Statistics
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/admin/class-visitor-statistics-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-visitor-statistics.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-visitor-statistics-handler.php';
         
         // Logger (Maneli_Session already loaded in __construct)
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-logger.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-maneli-logger.php';
         
         // License Management
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-license.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-maneli-license.php';
         
         // Frontend Features
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
         
         // Elementor Integration
         // Elementor Integration - Temporarily disabled for custom theme design
@@ -195,7 +198,7 @@ final class Maneli_Car_Inquiry_Plugin {
      */
     private function maybe_run_database_updates() {
         if (!class_exists('Maneli_Activator')) {
-            require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-maneli-activator.php';
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-maneli-activator.php';
         }
 
         if (method_exists('Maneli_Activator', 'maybe_run_updates')) {

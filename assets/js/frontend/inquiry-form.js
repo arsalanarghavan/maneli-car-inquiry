@@ -15,13 +15,13 @@ document.addEventListener('DOMContentLoaded', function() {
      * Dynamically retrieves the datepicker placeholder text from available localization objects.
      *
      * این تابع فرض می‌کند که رشته‌ی محلی‌سازی شده با کلید 'datepicker_placeholder' 
-     * در آبجکت maneli_expert_ajax.text قرار داده شده است.
+     * در آبجکت autopuzzle_expert_ajax.text قرار داده شده است.
      *
      * @return {string} The localized placeholder text or a default.
      */
     function getDatepickerPlaceholder() {
-        if (typeof maneli_expert_ajax !== 'undefined' && maneli_expert_ajax.text && maneli_expert_ajax.text.datepicker_placeholder) {
-            return maneli_expert_ajax.text.datepicker_placeholder;
+        if (typeof autopuzzle_expert_ajax !== 'undefined' && autopuzzle_expert_ajax.text && autopuzzle_expert_ajax.text.datepicker_placeholder) {
+            return autopuzzle_expert_ajax.text.datepicker_placeholder;
         }
         // Fallback to a generic, non-hardcoded value to maintain the datepicker's function.
         return 'YYYY/MM/DD'; 
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Profile settings page
                     '#profile-birth-date',
                     // Target used generally in class-user-profile.php
-                    '.maneli-datepicker'
+                    '.autopuzzle-datepicker'
                 ];
 
                 datepickerSelectors.forEach(selector => {
@@ -305,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function fetchCatalog(page=1){
             console.log('🔵 fetchCatalog called with page:', page);
             const params = new URLSearchParams();
-            params.append('action', 'maneli_confirm_car_catalog');
+            params.append('action', 'autopuzzle_confirm_car_catalog');
             const shared = (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) ? window.maneliInquiryForm.nonces.confirm_catalog : '';
             params.append('nonce', shared);
             params.append('page', String(page));
@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('🔵 Sending catalog request:', {
                 ajaxUrl: ajaxUrl,
-                action: 'maneli_confirm_car_catalog',
+                action: 'autopuzzle_confirm_car_catalog',
                 nonce: shared ? shared.substring(0, 10) + '...' : 'MISSING',
                 page: page,
                 maneliInquiryForm: window.maneliInquiryForm
@@ -430,8 +430,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Debug: log available nonces
                         console.log('Available nonces:', {
                             maneliInquiryForm: window.maneliInquiryForm?.nonces,
-                            maneli_ajax: window.maneli_ajax?.nonce,
-                            maneli_ajax_object: window.maneli_ajax_object?.nonce,
+                            autopuzzle_ajax: window.autopuzzle_ajax?.nonce,
+                            autopuzzle_ajax_object: window.autopuzzle_ajax_object?.nonce,
                             shared: shared
                         });
                         
@@ -468,10 +468,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             // Get AJAX URL from various sources (must be defined before params)
                             let ajaxUrl = '';
-                            if (window.maneli_ajax && window.maneli_ajax.url) {
-                                ajaxUrl = window.maneli_ajax.url;
-                            } else if (window.maneli_ajax_object && window.maneli_ajax_object.ajax_url) {
-                                ajaxUrl = window.maneli_ajax_object.ajax_url;
+                            if (window.autopuzzle_ajax && window.autopuzzle_ajax.url) {
+                                ajaxUrl = window.autopuzzle_ajax.url;
+                            } else if (window.autopuzzle_ajax_object && window.autopuzzle_ajax_object.ajax_url) {
+                                ajaxUrl = window.autopuzzle_ajax_object.ajax_url;
                             } else if (window.maneliInquiryForm && window.maneliInquiryForm.ajax_url) {
                                 ajaxUrl = window.maneliInquiryForm.ajax_url;
                             } else if (window.ajaxurl) {
@@ -482,15 +482,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             // Call AJAX to replace selected car using existing handler
                             const params = new URLSearchParams();
-                            params.append('action', 'maneli_select_car_ajax');
-                            // Try to get nonce from various sources (priority: select_car > maneli_ajax > maneli_ajax_object > confirm_catalog)
+                            params.append('action', 'autopuzzle_select_car_ajax');
+                            // Try to get nonce from various sources (priority: select_car > autopuzzle_ajax > autopuzzle_ajax_object > confirm_catalog)
                             let ajaxNonce = '';
                             if (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.select_car) {
                                 ajaxNonce = window.maneliInquiryForm.nonces.select_car;
-                            } else if (window.maneli_ajax && window.maneli_ajax.nonce) {
-                                ajaxNonce = window.maneli_ajax.nonce;
-                            } else if (window.maneli_ajax_object && window.maneli_ajax_object.nonce) {
-                                ajaxNonce = window.maneli_ajax_object.nonce;
+                            } else if (window.autopuzzle_ajax && window.autopuzzle_ajax.nonce) {
+                                ajaxNonce = window.autopuzzle_ajax.nonce;
+                            } else if (window.autopuzzle_ajax_object && window.autopuzzle_ajax_object.nonce) {
+                                ajaxNonce = window.autopuzzle_ajax_object.nonce;
                             } else if (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) {
                                 ajaxNonce = window.maneliInquiryForm.nonces.confirm_catalog;
                             } else {
@@ -504,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             
                             // Debug: log request parameters
                             console.log('=== CAR REPLACEMENT AJAX REQUEST ===');
-                            console.log('Action: maneli_select_car_ajax');
+                            console.log('Action: autopuzzle_select_car_ajax');
                             console.log('AJAX URL:', ajaxUrl);
                             console.log('Nonce:', ajaxNonce ? ajaxNonce.substring(0, 10) + '...' : 'MISSING');
                             console.log('Product ID:', productId);
@@ -610,8 +610,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                         response: res,
                                         nonce: ajaxNonce,
                                         nonceSource: window.maneliInquiryForm?.nonces?.select_car ? 'maneliInquiryForm.nonces.select_car' : 
-                                                    window.maneli_ajax?.nonce ? 'maneli_ajax.nonce' :
-                                                    window.maneli_ajax_object?.nonce ? 'maneli_ajax_object.nonce' : 'other',
+                                                    window.autopuzzle_ajax?.nonce ? 'autopuzzle_ajax.nonce' :
+                                                    window.autopuzzle_ajax_object?.nonce ? 'autopuzzle_ajax_object.nonce' : 'other',
                                         ajaxUrl: ajaxUrl
                                     });
                                 }
@@ -876,10 +876,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Get AJAX URL and nonce
         let ajaxUrl = '';
-        if (window.maneli_ajax && window.maneli_ajax.url) {
-            ajaxUrl = window.maneli_ajax.url;
-        } else if (window.maneli_ajax_object && window.maneli_ajax_object.ajax_url) {
-            ajaxUrl = window.maneli_ajax_object.ajax_url;
+        if (window.autopuzzle_ajax && window.autopuzzle_ajax.url) {
+            ajaxUrl = window.autopuzzle_ajax.url;
+        } else if (window.autopuzzle_ajax_object && window.autopuzzle_ajax_object.ajax_url) {
+            ajaxUrl = window.autopuzzle_ajax_object.ajax_url;
         } else if (window.maneliInquiryForm && window.maneliInquiryForm.ajax_url) {
             ajaxUrl = window.maneliInquiryForm.ajax_url;
         } else {
@@ -889,15 +889,15 @@ document.addEventListener('DOMContentLoaded', function() {
         let ajaxNonce = '';
         if (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.select_car) {
             ajaxNonce = window.maneliInquiryForm.nonces.select_car;
-        } else if (window.maneli_ajax && window.maneli_ajax.nonce) {
-            ajaxNonce = window.maneli_ajax.nonce;
-        } else if (window.maneli_ajax_object && window.maneli_ajax_object.nonce) {
-            ajaxNonce = window.maneli_ajax_object.nonce;
+        } else if (window.autopuzzle_ajax && window.autopuzzle_ajax.nonce) {
+            ajaxNonce = window.autopuzzle_ajax.nonce;
+        } else if (window.autopuzzle_ajax_object && window.autopuzzle_ajax_object.nonce) {
+            ajaxNonce = window.autopuzzle_ajax_object.nonce;
         }
 
         // Call AJAX to replace car
         const params = new URLSearchParams();
-        params.append('action', 'maneli_select_car_ajax');
+        params.append('action', 'autopuzzle_select_car_ajax');
         params.append('nonce', ajaxNonce);
         params.append('product_id', productId);
         params.append('total_price', totalPrice);
@@ -905,7 +905,7 @@ document.addEventListener('DOMContentLoaded', function() {
         params.append('term_months', termMonths);
 
         console.log('🔵 Sending AJAX request with params:', {
-            action: 'maneli_select_car_ajax',
+            action: 'autopuzzle_select_car_ajax',
             product_id: productId,
             total_price: totalPrice,
             down_payment: downPayment,
@@ -1047,7 +1047,7 @@ document.addEventListener('DOMContentLoaded', function() {
             slotsWrap.innerHTML = '<div class="spinner is-active"></div>';
             
             const params = new URLSearchParams();
-            params.append('action', 'maneli_get_meeting_slots');
+            params.append('action', 'autopuzzle_get_meeting_slots');
             params.append('nonce', (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) || '');
             params.append('date', dateInput.value);
             
@@ -1056,8 +1056,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, 
                 body: params.toString()
             }).then(r=>r.json()).then(res=>{
-                const errorMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.error_retrieving) 
-                                 ? maneli_meetings.text.error_retrieving 
+                const errorMsg = (typeof autopuzzle_meetings !== 'undefined' && autopuzzle_meetings.text && autopuzzle_meetings.text.error_retrieving) 
+                                 ? autopuzzle_meetings.text.error_retrieving 
                                  : 'خطا در دریافت اطلاعات';
                 if (!res.success) { 
                     slotsWrap.innerHTML = '<div class="status-box status-error"><p>'+(res.data && res.data.message || errorMsg)+'</p></div>'; 
@@ -1083,8 +1083,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
             }).catch(err => {
-                const serverError = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.server_error) 
-                                    ? maneli_meetings.text.server_error 
+                const serverError = (typeof autopuzzle_meetings !== 'undefined' && autopuzzle_meetings.text && autopuzzle_meetings.text.server_error) 
+                                    ? autopuzzle_meetings.text.server_error 
                                     : 'خطا در ارتباط با سرور';
                 slotsWrap.innerHTML = '<div class="status-box status-error"><p>'+serverError+'</p></div>';
             });
@@ -1099,8 +1099,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 const start = document.getElementById('meeting_start').value;
                 if (!start) {
-                    const selectTimeMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.select_time) 
-                                          ? maneli_meetings.text.select_time 
+                    const selectTimeMsg = (typeof autopuzzle_meetings !== 'undefined' && autopuzzle_meetings.text && autopuzzle_meetings.text.select_time) 
+                                          ? autopuzzle_meetings.text.select_time 
                                           : 'لطفاً یک زمان را انتخاب کنید';
                     alert(selectTimeMsg);
                     return;
@@ -1108,14 +1108,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const submitBtn = form.querySelector('button[type="submit"]');
                 const originalText = submitBtn.textContent;
-                const bookingText = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.booking) 
-                                    ? maneli_meetings.text.booking 
+                const bookingText = (typeof autopuzzle_meetings !== 'undefined' && autopuzzle_meetings.text && autopuzzle_meetings.text.booking) 
+                                    ? autopuzzle_meetings.text.booking 
                                     : 'در حال رزرو...';
                 submitBtn.textContent = bookingText;
                 submitBtn.disabled = true;
                 
                 const params = new URLSearchParams();
-                params.append('action', 'maneli_book_meeting');
+                params.append('action', 'autopuzzle_book_meeting');
                 params.append('nonce', (window.maneliInquiryForm && window.maneliInquiryForm.nonces && window.maneliInquiryForm.nonces.confirm_catalog) || '');
                 params.append('start', start);
                 params.append('inquiry_id', form.getAttribute('data-inquiry-id'));
@@ -1126,14 +1126,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers:{'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}, 
                     body: params.toString()
                 }).then(r=>r.json()).then(res=>{
-                    const successMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.success) 
-                                       ? maneli_meetings.text.success 
+                    const successMsg = (typeof autopuzzle_meetings !== 'undefined' && autopuzzle_meetings.text && autopuzzle_meetings.text.success) 
+                                       ? autopuzzle_meetings.text.success 
                                        : 'رزرو با موفقیت انجام شد';
-                    const errorMsg = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.error_booking) 
-                                     ? maneli_meetings.text.error_booking 
+                    const errorMsg = (typeof autopuzzle_meetings !== 'undefined' && autopuzzle_meetings.text && autopuzzle_meetings.text.error_booking) 
+                                     ? autopuzzle_meetings.text.error_booking 
                                      : 'خطا در رزرو';
-                    const serverError = (typeof maneli_meetings !== 'undefined' && maneli_meetings.text && maneli_meetings.text.server_error) 
-                                        ? maneli_meetings.text.server_error 
+                    const serverError = (typeof autopuzzle_meetings !== 'undefined' && autopuzzle_meetings.text && autopuzzle_meetings.text.server_error) 
+                                        ? autopuzzle_meetings.text.server_error 
                                         : 'خطا در ارتباط با سرور';
                     if (res.success) { 
                         form.reset(); 

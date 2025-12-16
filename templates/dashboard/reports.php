@@ -15,9 +15,9 @@ if (!is_user_logged_in()) {
 
 $current_user = wp_get_current_user();
 // Always check fresh roles from database
-$is_admin = current_user_can('manage_maneli_inquiries');
-$is_manager = in_array('maneli_manager', $current_user->roles, true) || in_array('maneli_admin', $current_user->roles, true);
-$is_expert = in_array('maneli_expert', $current_user->roles, true);
+$is_admin = current_user_can('manage_autopuzzle_inquiries');
+$is_manager = in_array('autopuzzle_manager', $current_user->roles, true) || in_array('autopuzzle_admin', $current_user->roles, true);
+$is_expert = in_array('autopuzzle_expert', $current_user->roles, true);
 
 // Only admin, manager, and expert can access reports
 if (!$is_admin && !$is_manager && !$is_expert) {
@@ -26,7 +26,7 @@ if (!$is_admin && !$is_manager && !$is_expert) {
 }
 
 // Load reports class
-require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-reports-dashboard.php';
+require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-reports-dashboard.php';
 
 // Get period from query parameter
 $period = isset($_GET['period']) ? sanitize_text_field($_GET['period']) : 'monthly';
@@ -34,7 +34,7 @@ $custom_start = isset($_GET['start_date']) ? sanitize_text_field($_GET['start_da
 $custom_end = isset($_GET['end_date']) ? sanitize_text_field($_GET['end_date']) : null;
 
 // Get period dates
-$period_data = Maneli_Reports_Dashboard::get_period_dates($period, $custom_start, $custom_end);
+$period_data = Autopuzzle_Reports_Dashboard::get_period_dates($period, $custom_start, $custom_end);
 $start_date = $period_data['start_date'];
 $end_date = $period_data['end_date'];
 $period_label = $period_data['label'];
@@ -70,7 +70,7 @@ $status_distribution = [];
 $attention_required = null;
 
 // Get statistics with all filters applied
-$stats = Maneli_Reports_Dashboard::get_overall_statistics_with_filters(
+$stats = Autopuzzle_Reports_Dashboard::get_overall_statistics_with_filters(
     $start_date, 
     $end_date, 
     $expert_id, 
@@ -80,37 +80,37 @@ $stats = Maneli_Reports_Dashboard::get_overall_statistics_with_filters(
 );
 
 if (($is_admin || $is_manager) && !$expert_id) {
-    // آمار کامل کسب و کار (فقط برای ادمین و مدیر مانلی)
+    // آمار کامل کسب و کار (فقط برای ادمین و مدیر سیستم)
     // Note: For business stats, we use unfiltered stats to show overall system status
-    $business_stats_unfiltered = Maneli_Reports_Dashboard::get_business_statistics($start_date, $end_date);
+    $business_stats_unfiltered = Autopuzzle_Reports_Dashboard::get_business_statistics($start_date, $end_date);
     $experts_detailed = $business_stats_unfiltered['experts'];
-    $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
-    $daily_stats = Maneli_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
+    $popular_products = Autopuzzle_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
+    $daily_stats = Autopuzzle_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
     $monthly_stats = $business_stats_unfiltered['monthly'];
     
     // آمارهای جدید (با فیلترها)
-    $growth_stats = Maneli_Reports_Dashboard::get_growth_statistics($start_date, $end_date, $expert_id);
-    $top_experts = Maneli_Reports_Dashboard::get_top_experts($start_date, $end_date, 5, 'completed');
-    $vip_customers = Maneli_Reports_Dashboard::get_vip_customers($start_date, $end_date, 10);
-    $status_distribution = Maneli_Reports_Dashboard::get_status_distribution($start_date, $end_date, $expert_id);
-    $attention_required = Maneli_Reports_Dashboard::get_attention_required_inquiries();
+    $growth_stats = Autopuzzle_Reports_Dashboard::get_growth_statistics($start_date, $end_date, $expert_id);
+    $top_experts = Autopuzzle_Reports_Dashboard::get_top_experts($start_date, $end_date, 5, 'completed');
+    $vip_customers = Autopuzzle_Reports_Dashboard::get_vip_customers($start_date, $end_date, 10);
+    $status_distribution = Autopuzzle_Reports_Dashboard::get_status_distribution($start_date, $end_date, $expert_id);
+    $attention_required = Autopuzzle_Reports_Dashboard::get_attention_required_inquiries();
 } else {
     // آمار یک کارشناس
-    $expert_detailed = Maneli_Reports_Dashboard::get_expert_detailed_statistics($expert_id, $start_date, $end_date);
+    $expert_detailed = Autopuzzle_Reports_Dashboard::get_expert_detailed_statistics($expert_id, $start_date, $end_date);
     $profit = $expert_detailed['profit'];
     $success_rate = $expert_detailed['success_rate'];
-    $daily_stats = Maneli_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
-    $popular_products = Maneli_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
-    $growth_stats = Maneli_Reports_Dashboard::get_growth_statistics($start_date, $end_date, $expert_id);
-    $status_distribution = Maneli_Reports_Dashboard::get_status_distribution($start_date, $end_date, $expert_id);
+    $daily_stats = Autopuzzle_Reports_Dashboard::get_daily_statistics($start_date, $end_date, $expert_id);
+    $popular_products = Autopuzzle_Reports_Dashboard::get_popular_products($start_date, $end_date, $expert_id, 5);
+    $growth_stats = Autopuzzle_Reports_Dashboard::get_growth_statistics($start_date, $end_date, $expert_id);
+    $status_distribution = Autopuzzle_Reports_Dashboard::get_status_distribution($start_date, $end_date, $expert_id);
 }
 
 // Chart.js is enqueued in class-dashboard-handler.php for reports page
 // Make sure it's loaded before our script
 if (!wp_script_is('chartjs', 'enqueued')) {
-    $chartjs_path = MANELI_INQUIRY_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
+    $chartjs_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/chart.js/chart.umd.js';
     if (file_exists($chartjs_path)) {
-        wp_enqueue_script('chartjs', MANELI_INQUIRY_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', ['jquery'], '4.4.0', false);
+        wp_enqueue_script('chartjs', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/chart.js/chart.umd.js', ['jquery'], '4.4.0', false);
     } else {
         // Fallback to CDN
         wp_enqueue_script('chartjs', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', ['jquery'], '4.4.0', false);
@@ -125,21 +125,21 @@ if (!wp_script_is('chartjs', 'enqueued')) {
             <div>
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item">
-                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'maneli-car-inquiry'); ?></a>
+                        <a href="<?php echo esc_url(home_url('/dashboard')); ?>"><?php esc_html_e('Dashboard', 'autopuzzle'); ?></a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Reports', 'maneli-car-inquiry'); ?></li>
+                    <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Reports', 'autopuzzle'); ?></li>
                 </ol>
                 <h1 class="page-title fw-medium fs-18 mb-0">
-                    <?php echo esc_html($is_expert && !$is_admin ? esc_html__('My Performance Report', 'maneli-car-inquiry') : esc_html__('Complete System Reports', 'maneli-car-inquiry')); ?>
+                    <?php echo esc_html($is_expert && !$is_admin ? esc_html__('My Performance Report', 'autopuzzle') : esc_html__('Complete System Reports', 'autopuzzle')); ?>
                 </h1>
             </div>
             <div class="btn-list">
                 <button class="btn btn-sm btn-primary-light" onclick="window.print()">
-                    <i class="la la-print me-1"></i><?php esc_html_e('Print', 'maneli-car-inquiry'); ?>
+                    <i class="la la-print me-1"></i><?php esc_html_e('Print', 'autopuzzle'); ?>
                 </button>
                 <?php if (($is_admin || $is_manager) && !$expert_id): ?>
                 <button class="btn btn-sm btn-success-light" onclick="exportToPDF()">
-                    <i class="la la-file-pdf me-1"></i><?php esc_html_e('Export PDF', 'maneli-car-inquiry'); ?>
+                    <i class="la la-file-pdf me-1"></i><?php esc_html_e('Export PDF', 'autopuzzle'); ?>
                 </button>
                 <?php endif; ?>
             </div>
@@ -149,85 +149,85 @@ if (!wp_script_is('chartjs', 'enqueued')) {
         <!-- Advanced Filters -->
         <div class="row mb-4">
     <div class="col-xl-12">
-                <div class="card custom-card maneli-mobile-filter-card" data-maneli-mobile-filter>
+                <div class="card custom-card autopuzzle-mobile-filter-card" data-autopuzzle-mobile-filter>
                     <div class="card-header bg-light">
                 <div
-                    class="card-title d-flex align-items-center gap-2 maneli-mobile-filter-toggle"
-                    data-maneli-filter-toggle
+                    class="card-title d-flex align-items-center gap-2 autopuzzle-mobile-filter-toggle"
+                    data-autopuzzle-filter-toggle
                     role="button"
                     tabindex="0"
                     aria-expanded="false"
                 >
-                            <i class="la la-filter"></i><?php esc_html_e('Advanced Filters', 'maneli-car-inquiry'); ?>
-                            <i class="ri-arrow-down-s-line ms-auto maneli-mobile-filter-arrow d-md-none"></i>
+                            <i class="la la-filter"></i><?php esc_html_e('Advanced Filters', 'autopuzzle'); ?>
+                            <i class="ri-arrow-down-s-line ms-auto autopuzzle-mobile-filter-arrow d-md-none"></i>
                 </div>
                         <button class="btn btn-sm btn-outline-secondary d-none d-lg-inline-flex" onclick="resetFilters()" data-ignore-filter-toggle>
-                            <i class="la la-refresh me-1"></i><?php esc_html_e('Reset Filters', 'maneli-car-inquiry'); ?>
+                            <i class="la la-refresh me-1"></i><?php esc_html_e('Reset Filters', 'autopuzzle'); ?>
                         </button>
                     </div>
-                    <div class="card-body maneli-mobile-filter-body" data-maneli-filter-body>
+                    <div class="card-body autopuzzle-mobile-filter-body" data-autopuzzle-filter-body>
                         <form id="reports-filter-form" method="get">
                             <div class="row g-3 align-items-end">
                                 <div class="col-6 col-xl-2">
-                                    <label class="form-label"><?php esc_html_e('Time Period:', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Time Period:', 'autopuzzle'); ?></label>
                                     <select name="period" id="period-filter" class="form-select">
-                                        <option value="today" <?php selected($period, 'today'); ?>><?php esc_html_e('Today', 'maneli-car-inquiry'); ?></option>
-                                        <option value="yesterday" <?php selected($period, 'yesterday'); ?>><?php esc_html_e('Yesterday', 'maneli-car-inquiry'); ?></option>
-                                        <option value="weekly" <?php selected($period, 'weekly'); ?>><?php esc_html_e('Last Week', 'maneli-car-inquiry'); ?></option>
-                                        <option value="monthly" <?php selected($period, 'monthly'); ?>><?php esc_html_e('Last Month', 'maneli-car-inquiry'); ?></option>
-                                        <option value="yearly" <?php selected($period, 'yearly'); ?>><?php esc_html_e('Last Year', 'maneli-car-inquiry'); ?></option>
-                                        <option value="all" <?php selected($period, 'all'); ?>><?php esc_html_e('All', 'maneli-car-inquiry'); ?></option>
-                                        <option value="custom" <?php selected($period, 'custom'); ?>><?php esc_html_e('Custom Range', 'maneli-car-inquiry'); ?></option>
+                                        <option value="today" <?php selected($period, 'today'); ?>><?php esc_html_e('Today', 'autopuzzle'); ?></option>
+                                        <option value="yesterday" <?php selected($period, 'yesterday'); ?>><?php esc_html_e('Yesterday', 'autopuzzle'); ?></option>
+                                        <option value="weekly" <?php selected($period, 'weekly'); ?>><?php esc_html_e('Last Week', 'autopuzzle'); ?></option>
+                                        <option value="monthly" <?php selected($period, 'monthly'); ?>><?php esc_html_e('Last Month', 'autopuzzle'); ?></option>
+                                        <option value="yearly" <?php selected($period, 'yearly'); ?>><?php esc_html_e('Last Year', 'autopuzzle'); ?></option>
+                                        <option value="all" <?php selected($period, 'all'); ?>><?php esc_html_e('All', 'autopuzzle'); ?></option>
+                                        <option value="custom" <?php selected($period, 'custom'); ?>><?php esc_html_e('Custom Range', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
 
                                 <!-- Custom Date Range (shown when custom is selected) -->
-                                <div class="col-6 col-xl-2 maneli-initially-hidden" id="custom-date-start" <?php echo $period === 'custom' ? '' : 'style="display: none;"'; ?>>
-                                    <label class="form-label"><?php esc_html_e('From Date:', 'maneli-car-inquiry'); ?></label>
+                                <div class="col-6 col-xl-2 autopuzzle-initially-hidden" id="custom-date-start" <?php echo $period === 'custom' ? '' : 'style="display: none;"'; ?>>
+                                    <label class="form-label"><?php esc_html_e('From Date:', 'autopuzzle'); ?></label>
                                     <?php 
                                     $start_jalali = '';
                                     if ($custom_start) {
                                         $start_parts = explode('-', $custom_start);
                                         if (count($start_parts) == 3) {
-                                            $start_jalali = maneli_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
+                                            $start_jalali = autopuzzle_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
                                         }
                                     } elseif ($start_date) {
                                         $start_parts = explode('-', $start_date);
                                         if (count($start_parts) == 3) {
-                                            $start_jalali = maneli_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
+                                            $start_jalali = autopuzzle_gregorian_to_jalali($start_parts[0], $start_parts[1], $start_parts[2], 'Y/m/d');
                                         }
                                     }
                                     ?>
-                                    <input type="text" id="start-date-filter-jalali" class="form-control maneli-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($start_jalali); ?>" autocomplete="off">
+                                    <input type="text" id="start-date-filter-jalali" class="form-control autopuzzle-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($start_jalali); ?>" autocomplete="off">
                                     <input type="hidden" name="start_date" id="start-date-filter" value="<?php echo esc_attr($custom_start ?: $start_date); ?>">
                                 </div>
-                                <div class="col-6 col-xl-2 maneli-initially-hidden" id="custom-date-end"<?php echo $period === 'custom' ? '' : ' style="display: none;"'; ?>>
-                                    <label class="form-label"><?php esc_html_e('To Date:', 'maneli-car-inquiry'); ?></label>
+                                <div class="col-6 col-xl-2 autopuzzle-initially-hidden" id="custom-date-end"<?php echo $period === 'custom' ? '' : ' style="display: none;"'; ?>>
+                                    <label class="form-label"><?php esc_html_e('To Date:', 'autopuzzle'); ?></label>
                                     <?php 
                                     $end_jalali = '';
                                     if ($custom_end) {
                                         $end_parts = explode('-', $custom_end);
                                         if (count($end_parts) == 3) {
-                                            $end_jalali = maneli_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
+                                            $end_jalali = autopuzzle_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
                                         }
                                     } elseif ($end_date) {
                                         $end_parts = explode('-', $end_date);
                                         if (count($end_parts) == 3) {
-                                            $end_jalali = maneli_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
+                                            $end_jalali = autopuzzle_gregorian_to_jalali($end_parts[0], $end_parts[1], $end_parts[2], 'Y/m/d');
                                         }
                                     }
                                     ?>
-                                    <input type="text" id="end-date-filter-jalali" class="form-control maneli-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($end_jalali); ?>" autocomplete="off">
+                                    <input type="text" id="end-date-filter-jalali" class="form-control autopuzzle-datepicker" placeholder="YYYY/MM/DD" value="<?php echo esc_attr($end_jalali); ?>" autocomplete="off">
                                     <input type="hidden" name="end_date" id="end-date-filter" value="<?php echo esc_attr($custom_end ?: $end_date); ?>">
                                 </div>
 
                                 <?php if (($is_admin || $is_manager) && !$filter_expert): ?>
                                 <div class="col-6 col-xl-2">
-                                    <label class="form-label"><?php esc_html_e('Expert:', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Expert:', 'autopuzzle'); ?></label>
                                     <select name="filter_expert" id="expert-filter" class="form-select">
-                                        <option value=""><?php esc_html_e('All Experts', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Experts', 'autopuzzle'); ?></option>
                                         <?php
-                                        $all_experts = get_users(['role__in' => ['maneli_expert', 'maneli_admin', 'administrator'], 'orderby' => 'display_name']);
+                                        $all_experts = get_users(['role__in' => ['autopuzzle_expert', 'autopuzzle_admin', 'administrator'], 'orderby' => 'display_name']);
                                         foreach ($all_experts as $expert):
                                         ?>
                                             <option value="<?php echo esc_attr($expert->ID); ?>" <?php selected($filter_expert, $expert->ID); ?>>
@@ -239,12 +239,12 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 <?php endif; ?>
 
                                 <div class="col-6 col-xl-2">
-                                    <label class="form-label"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Status:', 'autopuzzle'); ?></label>
                                     <select name="filter_status" id="status-filter" class="form-select">
-                                        <option value=""><?php esc_html_e('All Statuses', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Statuses', 'autopuzzle'); ?></option>
                                         <?php
-                                        if (class_exists('Maneli_CPT_Handler')) {
-                                            $cash_statuses = Maneli_CPT_Handler::get_all_cash_inquiry_statuses();
+                                        if (class_exists('Autopuzzle_CPT_Handler')) {
+                                            $cash_statuses = Autopuzzle_CPT_Handler::get_all_cash_inquiry_statuses();
                                             foreach ($cash_statuses as $key => $label):
                                         ?>
                                             <option value="<?php echo esc_attr($key); ?>" <?php selected($filter_status, $key); ?>>
@@ -258,18 +258,18 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </div>
 
                                 <div class="col-6 col-xl-2">
-                                    <label class="form-label"><?php esc_html_e('Type:', 'maneli-car-inquiry'); ?></label>
+                                    <label class="form-label"><?php esc_html_e('Type:', 'autopuzzle'); ?></label>
                                     <select name="filter_type" id="type-filter" class="form-select">
-                                        <option value="all" <?php selected($filter_type, 'all'); ?>><?php esc_html_e('All', 'maneli-car-inquiry'); ?></option>
-                                        <option value="cash" <?php selected($filter_type, 'cash'); ?>><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></option>
-                                        <option value="installment" <?php selected($filter_type, 'installment'); ?>><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></option>
+                                        <option value="all" <?php selected($filter_type, 'all'); ?>><?php esc_html_e('All', 'autopuzzle'); ?></option>
+                                        <option value="cash" <?php selected($filter_type, 'cash'); ?>><?php esc_html_e('Cash', 'autopuzzle'); ?></option>
+                                        <option value="installment" <?php selected($filter_type, 'installment'); ?>><?php esc_html_e('Installment', 'autopuzzle'); ?></option>
                                     </select>
                                 </div>
 
                                 <div class="col-6 col-xl-2">
-                                    <label class="form-label"><?php esc_html_e('Product', 'maneli-car-inquiry'); ?>:</label>
+                                    <label class="form-label"><?php esc_html_e('Product', 'autopuzzle'); ?>:</label>
                                     <select name="filter_product" id="product-filter" class="form-select">
-                                        <option value=""><?php esc_html_e('All Products', 'maneli-car-inquiry'); ?></option>
+                                        <option value=""><?php esc_html_e('All Products', 'autopuzzle'); ?></option>
                                         <?php
                                         $products = get_posts(['post_type' => 'product', 'posts_per_page' => 100, 'orderby' => 'title', 'order' => 'ASC']);
                                         foreach ($products as $product):
@@ -285,12 +285,12 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                     <div class="row g-2">
                                         <div class="col-6 col-xl-6">
                                             <button type="submit" class="btn btn-primary w-100">
-                                                <i class="la la-filter me-1"></i><?php esc_html_e('Apply Filters', 'maneli-car-inquiry'); ?>
+                                                <i class="la la-filter me-1"></i><?php esc_html_e('Apply Filters', 'autopuzzle'); ?>
                                             </button>
                                         </div>
                                         <div class="col-6 col-xl-6">
                                             <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilters()">
-                                                <i class="la la-refresh me-1"></i><?php esc_html_e('Reset Filters', 'maneli-car-inquiry'); ?>
+                                                <i class="la la-refresh me-1"></i><?php esc_html_e('Reset Filters', 'autopuzzle'); ?>
                                             </button>
                                         </div>
                                     </div>
@@ -299,18 +299,18 @@ if (!wp_script_is('chartjs', 'enqueued')) {
 
                             <?php
                             $selected_range_text = '';
-                            if (function_exists('maneli_gregorian_to_jalali')) {
-                                $start_display = maneli_gregorian_to_jalali(date('Y', strtotime($start_date)), date('m', strtotime($start_date)), date('d', strtotime($start_date)), 'Y/m/d');
-                                $end_display = maneli_gregorian_to_jalali(date('Y', strtotime($end_date)), date('m', strtotime($end_date)), date('d', strtotime($end_date)), 'Y/m/d');
-                                $selected_range_text = sprintf(esc_html__('%1$s to %2$s', 'maneli-car-inquiry'), $start_display, $end_display);
+                            if (function_exists('autopuzzle_gregorian_to_jalali')) {
+                                $start_display = autopuzzle_gregorian_to_jalali(date('Y', strtotime($start_date)), date('m', strtotime($start_date)), date('d', strtotime($start_date)), 'Y/m/d');
+                                $end_display = autopuzzle_gregorian_to_jalali(date('Y', strtotime($end_date)), date('m', strtotime($end_date)), date('d', strtotime($end_date)), 'Y/m/d');
+                                $selected_range_text = sprintf(esc_html__('%1$s to %2$s', 'autopuzzle'), $start_display, $end_display);
                             } else {
-                                $selected_range_text = sprintf(esc_html__('%1$s to %2$s', 'maneli-car-inquiry'), $start_date, $end_date);
+                                $selected_range_text = sprintf(esc_html__('%1$s to %2$s', 'autopuzzle'), $start_date, $end_date);
                             }
                             ?>
                             <div class="row g-2 mt-3 align-items-center">
                                 <div class="col-12 col-lg-auto">
                                     <span class="text-muted d-block d-lg-inline mt-2 mt-lg-0">
-                                        <?php esc_html_e('Selected Range:', 'maneli-car-inquiry'); ?> <strong><?php echo esc_html($period_label); ?></strong>
+                                        <?php esc_html_e('Selected Range:', 'autopuzzle'); ?> <strong><?php echo esc_html($period_label); ?></strong>
                                         (<?php echo esc_html($selected_range_text); ?>)
                                     </span>
                                 </div>
@@ -368,16 +368,16 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stats['total_inquiries']); ?></h4>
                             <?php if (isset($growth_stats['total_inquiries_growth'])): ?>
                             <span class="badge <?php echo esc_attr($growth_stats['total_inquiries_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> rounded-pill fs-11">
                                 <i class="la la-arrow-<?php echo esc_attr($growth_stats['total_inquiries_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
-                                <?php echo esc_html($growth_stats['total_inquiries_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['total_inquiries_growth'], 1)); ?>%
+                                <?php echo esc_html($growth_stats['total_inquiries_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(autopuzzle_number_format_persian($growth_stats['total_inquiries_growth'], 1)); ?>%
                             </span>
                             <?php else: ?>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo maneli_number_format_persian($stats['cash_inquiries']); ?> <?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo autopuzzle_number_format_persian($stats['cash_inquiries']); ?> <?php esc_html_e('Cash', 'autopuzzle'); ?></span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -395,9 +395,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('New Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('New Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['new']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stats['new']); ?></h4>
                             <span class="badge bg-secondary-transparent text-secondary rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-clock fs-11"></i>
                             </span>
@@ -417,9 +417,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Referred', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Referred', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo maneli_number_format_persian($stats['referred']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo autopuzzle_number_format_persian($stats['referred']); ?></h4>
                             <span class="badge bg-info-transparent text-info rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-user-tie fs-11"></i>
                             </span>
@@ -439,9 +439,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('In Progress', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('In Progress', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo maneli_number_format_persian($stats['in_progress']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo autopuzzle_number_format_persian($stats['in_progress']); ?></h4>
                             <span class="text-warning badge bg-warning-transparent rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-hourglass-half fs-11"></i>
                             </span>
@@ -465,13 +465,13 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Completed', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo maneli_number_format_persian($stats['completed']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo autopuzzle_number_format_persian($stats['completed']); ?></h4>
                             <?php if (isset($growth_stats['completed_growth'])): ?>
                             <span class="badge <?php echo esc_attr($growth_stats['completed_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> rounded-pill fs-11">
                                 <i class="la la-arrow-<?php echo esc_attr($growth_stats['completed_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
-                                <?php echo esc_html($growth_stats['completed_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['completed_growth'], 1)); ?>%
+                                <?php echo esc_html($growth_stats['completed_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(autopuzzle_number_format_persian($growth_stats['completed_growth'], 1)); ?>%
                             </span>
                             <?php else: ?>
                             <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
@@ -494,9 +494,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Rejected', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo maneli_number_format_persian($stats['rejected']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo autopuzzle_number_format_persian($stats['rejected']); ?></h4>
                             <span class="text-danger badge bg-danger-transparent rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-ban fs-11"></i>
                             </span>
@@ -516,10 +516,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['cash_inquiries']); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? maneli_number_format_persian(round(($stats['cash_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stats['cash_inquiries']); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? autopuzzle_number_format_persian(round(($stats['cash_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
                         </div>
                     </div>
                 </div>
@@ -536,10 +536,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo maneli_number_format_persian($stats['installment_inquiries']); ?></h4>
-                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? maneli_number_format_persian(round(($stats['installment_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo autopuzzle_number_format_persian($stats['installment_inquiries']); ?></h4>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? autopuzzle_number_format_persian(round(($stats['installment_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
                         </div>
                     </div>
                 </div>
@@ -554,10 +554,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-3">
                         <div class="card-title">
                             <i class="la la-users me-2"></i>
-                            <?php esc_html_e('Expert Performance Report', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Expert Performance Report', 'autopuzzle'); ?>
                             </div>
                         <button class="btn btn-sm btn-success-light" onclick="exportExpertsCSV()">
-                            <i class="la la-download me-1"></i><?php esc_html_e('Export CSV', 'maneli-car-inquiry'); ?>
+                            <i class="la la-download me-1"></i><?php esc_html_e('Export CSV', 'autopuzzle'); ?>
                         </button>
                                 </div>
                     <div class="card-body p-0">
@@ -565,16 +565,16 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <table class="table text-nowrap table-hover">
                                 <thead>
                                     <tr>
-                                        <th scope="col"><?php esc_html_e('Expert Name', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Total Inquiries', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Installment', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Pending', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Success Rate', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Customers', 'maneli-car-inquiry'); ?></th>
-                                        <th scope="col"><?php esc_html_e('Actions', 'maneli-car-inquiry'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Expert Name', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Total Inquiries', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Cash', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Installment', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Completed', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Rejected', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Pending', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Success Rate', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Customers', 'autopuzzle'); ?></th>
+                                        <th scope="col"><?php esc_html_e('Actions', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -592,29 +592,29 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                                     <span class="fw-medium"><?php echo esc_html($expert['name']); ?></span>
                             </div>
                                             </td>
-                                            <td><span class="badge bg-primary-transparent"><?php echo maneli_number_format_persian($expert['total_inquiries']); ?></span></td>
-                                            <td><?php echo maneli_number_format_persian($expert['cash_inquiries']); ?></td>
-                                            <td><?php echo maneli_number_format_persian($expert['installment_inquiries']); ?></td>
-                                            <td><span class="badge bg-success-transparent"><?php echo maneli_number_format_persian($expert['completed']); ?></span></td>
-                                            <td><span class="badge bg-danger-transparent"><?php echo maneli_number_format_persian($expert['rejected']); ?></span></td>
-                                            <td><span class="badge bg-warning-transparent"><?php echo maneli_number_format_persian($expert['pending']); ?></span></td>
+                                            <td><span class="badge bg-primary-transparent"><?php echo autopuzzle_number_format_persian($expert['total_inquiries']); ?></span></td>
+                                            <td><?php echo autopuzzle_number_format_persian($expert['cash_inquiries']); ?></td>
+                                            <td><?php echo autopuzzle_number_format_persian($expert['installment_inquiries']); ?></td>
+                                            <td><span class="badge bg-success-transparent"><?php echo autopuzzle_number_format_persian($expert['completed']); ?></span></td>
+                                            <td><span class="badge bg-danger-transparent"><?php echo autopuzzle_number_format_persian($expert['rejected']); ?></span></td>
+                                            <td><span class="badge bg-warning-transparent"><?php echo autopuzzle_number_format_persian($expert['pending']); ?></span></td>
                                             <td>
-                                                <div class="progress maneli-progress">
+                                                <div class="progress autopuzzle-progress">
                                                     <?php $success_rate_val = floatval($expert['success_rate']); ?>
                                                     <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo esc_attr($success_rate_val); ?>%">
-                                                        <?php echo maneli_number_format_persian($success_rate_val, 1); ?>%
+                                                        <?php echo autopuzzle_number_format_persian($success_rate_val, 1); ?>%
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
                                                 <span class="badge bg-info-transparent">
-                                                    <?php esc_html_e('Total Customers', 'maneli-car-inquiry'); ?>: <?php echo maneli_number_format_persian($expert['total_customers']); ?><br>
-                                                    <?php esc_html_e('New Customers', 'maneli-car-inquiry'); ?>: <?php echo maneli_number_format_persian($expert['new_customers']); ?>
+                                                    <?php esc_html_e('Total Customers', 'autopuzzle'); ?>: <?php echo autopuzzle_number_format_persian($expert['total_customers']); ?><br>
+                                                    <?php esc_html_e('New Customers', 'autopuzzle'); ?>: <?php echo autopuzzle_number_format_persian($expert['new_customers']); ?>
                                                 </span>
                                             </td>
                                             <td>
                                                 <a href="<?php echo esc_url(add_query_arg(['period' => $period, 'filter_expert' => $expert['id']], home_url('/dashboard/reports'))); ?>" 
-                                                   class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'maneli-car-inquiry'); ?>">
+                                                   class="btn btn-sm btn-primary-light btn-icon" title="<?php esc_attr_e('View Details', 'autopuzzle'); ?>">
                                                     <i class="la la-eye"></i>
                                                 </a>
                                             </td>
@@ -675,10 +675,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('My Total Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('My Total Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['total_inquiries']); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo maneli_number_format_persian($stats['cash_inquiries']); ?> <?php esc_html_e('Cash', 'maneli-car-inquiry'); ?></span>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stats['total_inquiries']); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo autopuzzle_number_format_persian($stats['cash_inquiries']); ?> <?php esc_html_e('Cash', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -695,9 +695,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('New Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('New Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['new']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stats['new']); ?></h4>
                             <span class="badge bg-secondary-transparent text-secondary rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-clock fs-11"></i>
                             </span>
@@ -717,9 +717,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Referred', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Referred', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo maneli_number_format_persian($stats['referred']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo autopuzzle_number_format_persian($stats['referred']); ?></h4>
                             <span class="badge bg-info-transparent text-info rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-user-tie fs-11"></i>
                             </span>
@@ -739,9 +739,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('In Progress', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('In Progress', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo maneli_number_format_persian($stats['in_progress']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-warning"><?php echo autopuzzle_number_format_persian($stats['in_progress']); ?></h4>
                             <span class="text-warning badge bg-warning-transparent rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-hourglass-half fs-11"></i>
                             </span>
@@ -765,13 +765,13 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Completed', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo maneli_number_format_persian($stats['completed']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-success"><?php echo autopuzzle_number_format_persian($stats['completed']); ?></h4>
                             <?php if (isset($growth_stats['completed_growth'])): ?>
                             <span class="badge <?php echo esc_attr($growth_stats['completed_growth'] >= 0 ? 'bg-success-transparent text-success' : 'bg-danger-transparent text-danger'); ?> rounded-pill fs-11">
                                 <i class="la la-arrow-<?php echo esc_attr($growth_stats['completed_growth'] >= 0 ? 'up' : 'down'); ?> fs-11"></i>
-                                <?php echo esc_html($growth_stats['completed_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(maneli_number_format_persian($growth_stats['completed_growth'], 1)); ?>%
+                                <?php echo esc_html($growth_stats['completed_growth'] >= 0 ? '+' : ''); ?><?php echo esc_html(autopuzzle_number_format_persian($growth_stats['completed_growth'], 1)); ?>%
                             </span>
                             <?php else: ?>
                             <span class="text-success badge bg-success-transparent rounded-pill d-flex align-items-center fs-11">
@@ -794,9 +794,9 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Rejected', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Rejected', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo maneli_number_format_persian($stats['rejected']); ?></h4>
+                            <h4 class="mb-0 d-flex align-items-center text-danger"><?php echo autopuzzle_number_format_persian($stats['rejected']); ?></h4>
                             <span class="text-danger badge bg-danger-transparent rounded-pill d-flex align-items-center fs-11">
                                 <i class="la la-ban fs-11"></i>
                             </span>
@@ -816,10 +816,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Cash Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center"><?php echo maneli_number_format_persian($stats['cash_inquiries']); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? maneli_number_format_persian(round(($stats['cash_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
+                            <h4 class="mb-0 d-flex align-items-center"><?php echo autopuzzle_number_format_persian($stats['cash_inquiries']); ?></h4>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? autopuzzle_number_format_persian(round(($stats['cash_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
                         </div>
                     </div>
                 </div>
@@ -836,10 +836,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Installment Inquiries', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
-                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo maneli_number_format_persian($stats['installment_inquiries']); ?></h4>
-                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? maneli_number_format_persian(round(($stats['installment_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
+                            <h4 class="mb-0 d-flex align-items-center text-info"><?php echo autopuzzle_number_format_persian($stats['installment_inquiries']); ?></h4>
+                            <span class="badge bg-info-transparent rounded-pill fs-11"><?php echo $stats['total_inquiries'] > 0 ? autopuzzle_number_format_persian(round(($stats['installment_inquiries'] / $stats['total_inquiries']) * 100), 1) : '۰'; ?>%</span>
                         </div>
                     </div>
                 </div>
@@ -856,7 +856,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-chart-line me-2"></i>
-                            <?php esc_html_e('Daily Inquiry Trend', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Daily Inquiry Trend', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -875,7 +875,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-pie-chart me-2"></i>
-                            <?php esc_html_e('Inquiry Status Distribution', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Inquiry Status Distribution', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -890,7 +890,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-chart-bar me-2"></i>
-                            <?php esc_html_e('Monthly Performance (Last 6 Months)', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Monthly Performance (Last 6 Months)', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -910,7 +910,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-chart-bar me-2"></i>
-                            <?php esc_html_e('Expert Performance Comparison', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Expert Performance Comparison', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -929,7 +929,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-trophy me-2"></i>
-                            <?php esc_html_e('Top Experts (Based on Activity)', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Top Experts (Based on Activity)', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -941,23 +941,23 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 <li class="list-group-item">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div class="d-flex align-items-center gap-3">
-                                            <span class="badge <?php echo esc_attr($rank == 1 ? 'bg-warning' : ($rank == 2 ? 'bg-secondary' : ($rank == 3 ? 'bg-info' : 'bg-primary-transparent'))); ?> fs-16 maneli-rank-badge">
-                                                <?php echo maneli_number_format_persian($rank); ?>
+                                            <span class="badge <?php echo esc_attr($rank == 1 ? 'bg-warning' : ($rank == 2 ? 'bg-secondary' : ($rank == 3 ? 'bg-info' : 'bg-primary-transparent'))); ?> fs-16 autopuzzle-rank-badge">
+                                                <?php echo autopuzzle_number_format_persian($rank); ?>
                                             </span>
                                             <div>
                                                 <h6 class="mb-0"><?php echo esc_html($expert['name']); ?></h6>
                                                 <small class="text-muted">
-                                                    <?php printf(esc_html__('%s completed', 'maneli-car-inquiry'), maneli_number_format_persian($expert['completed'])); ?> • 
-                                                    <?php printf(esc_html__('%s total', 'maneli-car-inquiry'), maneli_number_format_persian($expert['total_inquiries'])); ?>
+                                                    <?php printf(esc_html__('%s completed', 'autopuzzle'), autopuzzle_number_format_persian($expert['completed'])); ?> • 
+                                                    <?php printf(esc_html__('%s total', 'autopuzzle'), autopuzzle_number_format_persian($expert['total_inquiries'])); ?>
                                                 </small>
                                             </div>
                                         </div>
                                         <div class="text-end">
-                                            <strong class="text-success"><?php echo maneli_number_format_persian($expert['completed']); ?></strong>
-                                            <small class="d-block text-muted"><?php esc_html_e('Completed', 'maneli-car-inquiry'); ?></small>
+                                            <strong class="text-success"><?php echo autopuzzle_number_format_persian($expert['completed']); ?></strong>
+                                            <small class="d-block text-muted"><?php esc_html_e('Completed', 'autopuzzle'); ?></small>
                                             <?php if ($expert['total_inquiries'] > 0): ?>
                                                 <small class="d-block text-muted mt-1">
-                                                    <?php echo maneli_number_format_persian(round(($expert['completed'] / $expert['total_inquiries']) * 100, 1)); ?>% <?php esc_html_e('Success Rate', 'maneli-car-inquiry'); ?>
+                                                    <?php echo autopuzzle_number_format_persian(round(($expert['completed'] / $expert['total_inquiries']) * 100, 1)); ?>% <?php esc_html_e('Success Rate', 'autopuzzle'); ?>
                                                 </small>
                                             <?php endif; ?>
                                         </div>
@@ -977,7 +977,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-star me-2"></i>
-                            <?php esc_html_e('VIP Customers', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('VIP Customers', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -985,10 +985,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Rank', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('National ID', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Inquiry Count', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Total Amount', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Rank', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('National ID', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Inquiry Count', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Total Amount', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -997,10 +997,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                     foreach ($vip_customers as $customer): 
                                     ?>
                                         <tr>
-                                            <td><span class="badge bg-primary"><?php echo maneli_number_format_persian($rank++); ?></span></td>
+                                            <td><span class="badge bg-primary"><?php echo autopuzzle_number_format_persian($rank++); ?></span></td>
                                             <td><code><?php echo esc_html(substr($customer->national_id, 0, 3) . '***' . substr($customer->national_id, -2)); ?></code></td>
-                                            <td><strong><?php echo maneli_number_format_persian($customer->inquiry_count); ?></strong></td>
-                                            <td><span class="text-success"><?php echo maneli_number_format_persian($customer->total_amount); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span></td>
+                                            <td><strong><?php echo autopuzzle_number_format_persian($customer->inquiry_count); ?></strong></td>
+                                            <td><span class="text-success"><?php echo autopuzzle_number_format_persian($customer->total_amount); ?> <?php esc_html_e('Toman', 'autopuzzle'); ?></span></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -1020,7 +1020,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header bg-warning-transparent">
                         <div class="card-title">
                             <i class="la la-exclamation-triangle me-2"></i>
-                            <?php esc_html_e('Attention Required', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Attention Required', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1029,19 +1029,19 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <div class="col-md-6">
                                 <h6 class="text-danger mb-3">
                                     <i class="la la-clock me-1"></i>
-                                    <?php printf(esc_html__('Overdue Inquiries (%s)', 'maneli-car-inquiry'), maneli_number_format_persian(count($attention_required['overdue']))); ?>
+                                    <?php printf(esc_html__('Overdue Inquiries (%s)', 'autopuzzle'), autopuzzle_number_format_persian(count($attention_required['overdue']))); ?>
                                 </h6>
                                 <ul class="list-group list-group-flush">
                                     <?php foreach (array_slice($attention_required['overdue'], 0, 5) as $inq): 
-                                        $inquiry_number_display = maneli_should_use_persian_digits()
+                                        $inquiry_number_display = autopuzzle_should_use_persian_digits()
                                             ? persian_numbers_no_separator($inq->ID)
                                             : (string) absint($inq->ID);
                                     ?>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="text-decoration-none">
-                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), $inquiry_number_display); ?></span>
+                                                <span><?php printf(esc_html__('Inquiry #%s', 'autopuzzle'), $inquiry_number_display); ?></span>
                                             </a>
-                                                <span class="badge bg-danger"><?php esc_html_e('Overdue', 'maneli-car-inquiry'); ?></span>
+                                                <span class="badge bg-danger"><?php esc_html_e('Overdue', 'autopuzzle'); ?></span>
                                         </li>
                                     <?php endforeach; ?>
                                 </ul>
@@ -1052,19 +1052,19 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <div class="col-md-6">
                                 <h6 class="text-warning mb-3">
                                     <i class="la la-user-times me-1"></i>
-                                    <?php printf(esc_html__('Unassigned Inquiries (%s)', 'maneli-car-inquiry'), maneli_number_format_persian(count($attention_required['unassigned']))); ?>
+                                    <?php printf(esc_html__('Unassigned Inquiries (%s)', 'autopuzzle'), autopuzzle_number_format_persian(count($attention_required['unassigned']))); ?>
                                 </h6>
                                 <ul class="list-group list-group-flush">
                                     <?php foreach (array_slice($attention_required['unassigned'], 0, 5) as $inq): 
-                                        $inquiry_number_display = maneli_should_use_persian_digits()
+                                        $inquiry_number_display = autopuzzle_should_use_persian_digits()
                                             ? persian_numbers_no_separator($inq->ID)
                                             : (string) absint($inq->ID);
                                     ?>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <a href="<?php echo esc_url($inq->post_type === 'cash_inquiry' ? add_query_arg('cash_inquiry_id', $inq->ID, home_url('/dashboard/inquiries/cash')) : add_query_arg('inquiry_id', $inq->ID, home_url('/dashboard/installment-inquiries'))); ?>" class="text-decoration-none">
-                                                <span><?php printf(esc_html__('Inquiry #%s', 'maneli-car-inquiry'), $inquiry_number_display); ?></span>
+                                                <span><?php printf(esc_html__('Inquiry #%s', 'autopuzzle'), $inquiry_number_display); ?></span>
                                             </a>
-                                            <span class="badge bg-warning"><?php esc_html_e('Not Assigned', 'maneli-car-inquiry'); ?></span>
+                                            <span class="badge bg-warning"><?php esc_html_e('Not Assigned', 'autopuzzle'); ?></span>
                                         </li>
                                     <?php endforeach; ?>
                                 </ul>
@@ -1085,7 +1085,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                     <div class="card-header">
                         <div class="card-title">
                             <i class="la la-car me-2"></i>
-                            <?php esc_html_e('Popular Products', 'maneli-car-inquiry'); ?>
+                            <?php esc_html_e('Popular Products', 'autopuzzle'); ?>
                         </div>
                     </div>
                     <div class="card-body">
@@ -1093,10 +1093,10 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th><?php esc_html_e('Rank', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Product Name', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Inquiry Count', 'maneli-car-inquiry'); ?></th>
-                                        <th><?php esc_html_e('Percentage', 'maneli-car-inquiry'); ?></th>
+                                        <th><?php esc_html_e('Rank', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Product Name', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Inquiry Count', 'autopuzzle'); ?></th>
+                                        <th><?php esc_html_e('Percentage', 'autopuzzle'); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1106,13 +1106,13 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                         $percentage = $stats['total_inquiries'] > 0 ? round(($product['count'] / $stats['total_inquiries']) * 100, 1) : 0;
                                     ?>
                                         <tr>
-                                            <td><span class="badge bg-primary"><?php echo maneli_number_format_persian($rank++); ?></span></td>
+                                            <td><span class="badge bg-primary"><?php echo autopuzzle_number_format_persian($rank++); ?></span></td>
                                             <td><?php echo esc_html($product['name']); ?></td>
-                                            <td><strong><?php echo maneli_number_format_persian($product['count']); ?></strong></td>
+                                            <td><strong><?php echo autopuzzle_number_format_persian($product['count']); ?></strong></td>
                                             <td>
-                                                <div class="progress maneli-progress">
+                                                <div class="progress autopuzzle-progress">
                                                     <div class="progress-bar" role="progressbar" style="width: <?php echo esc_attr($percentage); ?>%">
-                                                        <?php echo maneli_number_format_persian($percentage, 1); ?>%
+                                                        <?php echo autopuzzle_number_format_persian($percentage, 1); ?>%
                                                     </div>
                                                 </div>
                                             </td>
@@ -1142,8 +1142,8 @@ function convertToJalali(dateString) {
         const day = date.getDate();
         
         // Convert to Jalali (simplified - using Persian Date library if available)
-        if (typeof maneli_gregorian_to_jalali === 'function') {
-            return maneli_gregorian_to_jalali(year, month, day, 'Y/m/d');
+        if (typeof autopuzzle_gregorian_to_jalali === 'function') {
+            return autopuzzle_gregorian_to_jalali(year, month, day, 'Y/m/d');
         }
         // Fallback: simple conversion
         return dateString;
@@ -1204,7 +1204,7 @@ function initCharts() {
         console.log('Initializing reports charts...');
         console.log('Chart.js available:', typeof Chart !== 'undefined');
         
-        const digitsHelper = window.maneliLocale || window.maneliDigits || {};
+        const digitsHelper = window.autopuzzleLocale || window.autopuzzleDigits || {};
 
         const toPersianNumber = (num, options = {}) => {
             if (digitsHelper && typeof digitsHelper.formatNumber === 'function') {
@@ -1220,11 +1220,11 @@ function initCharts() {
         
         // Translation object for charts
         const chartTexts = {
-            totalInquiries: <?php echo wp_json_encode(esc_html__('Total Inquiries', 'maneli-car-inquiry')); ?>,
-            cash: <?php echo wp_json_encode(esc_html__('Cash', 'maneli-car-inquiry')); ?>,
-            installment: <?php echo wp_json_encode(esc_html__('Installment', 'maneli-car-inquiry')); ?>,
-            inquiryCount: <?php echo wp_json_encode(esc_html__('Inquiry Count', 'maneli-car-inquiry')); ?>,
-            completed: <?php echo wp_json_encode(esc_html__('Completed', 'maneli-car-inquiry')); ?>
+            totalInquiries: <?php echo wp_json_encode(esc_html__('Total Inquiries', 'autopuzzle')); ?>,
+            cash: <?php echo wp_json_encode(esc_html__('Cash', 'autopuzzle')); ?>,
+            installment: <?php echo wp_json_encode(esc_html__('Installment', 'autopuzzle')); ?>,
+            inquiryCount: <?php echo wp_json_encode(esc_html__('Inquiry Count', 'autopuzzle')); ?>,
+            completed: <?php echo wp_json_encode(esc_html__('Completed', 'autopuzzle')); ?>
         };
         
         console.log('Chart initialization started. Chart.js loaded:', typeof Chart !== 'undefined');
@@ -1235,8 +1235,8 @@ function initCharts() {
             $daily_stats_jalali = [];
             foreach ($daily_stats as $key => $stat) {
                 $jalali_date = $stat['date'];
-                if (function_exists('maneli_gregorian_to_jalali') && isset($stat['date']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $stat['date'], $matches)) {
-                    $jalali_date = maneli_gregorian_to_jalali($matches[1], $matches[2], $matches[3], 'Y/m/d');
+                if (function_exists('autopuzzle_gregorian_to_jalali') && isset($stat['date']) && preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $stat['date'], $matches)) {
+                    $jalali_date = autopuzzle_gregorian_to_jalali($matches[1], $matches[2], $matches[3], 'Y/m/d');
                 }
                 // Ensure all values are integers (convert from any format including Persian numbers)
                 $daily_stats_jalali[] = [
@@ -1488,7 +1488,7 @@ function initCharts() {
                 if (!expertsData || expertsData.length === 0) {
                     console.warn('Experts data is empty!');
                 }
-                const expertNames = expertsData.map(e => String(e.name || <?php echo wp_json_encode(esc_html__('Unknown', 'maneli-car-inquiry')); ?>));
+                const expertNames = expertsData.map(e => String(e.name || <?php echo wp_json_encode(esc_html__('Unknown', 'autopuzzle')); ?>));
                 const expertCompleted = expertsData.map(e => {
                     const val = e.completed || e['completed'] || 0;
                     return typeof val === 'string' ? parseInt(val.replace(/[^0-9]/g, '')) || 0 : Number(val) || 0;
@@ -1705,11 +1705,11 @@ function exportToPDF() {
     // Print page with better styling for PDF
     window.print();
     // Alternative: Use server-side PDF generation
-    // window.location.href = '<?php echo admin_url('admin-ajax.php?action=maneli_export_reports_pdf'); ?>';
+    // window.location.href = '<?php echo admin_url('admin-ajax.php?action=autopuzzle_export_reports_pdf'); ?>';
 }
 
 function exportExpertsCSV() {
-    window.location.href = <?php echo wp_json_encode(admin_url('admin-ajax.php?action=maneli_export_reports_csv')); ?>;
+    window.location.href = <?php echo wp_json_encode(admin_url('admin-ajax.php?action=autopuzzle_export_reports_csv')); ?>;
 }
 </script>
 

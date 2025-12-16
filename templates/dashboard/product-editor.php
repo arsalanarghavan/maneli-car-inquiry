@@ -6,14 +6,14 @@
  */
 
 // Permission check - Only Admin can access
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
 
 // استفاده از همان لاجیک shortcode قدیمی
-if (class_exists('Maneli_Product_Editor_Shortcode')) {
-    $shortcode_handler = new Maneli_Product_Editor_Shortcode();
+if (class_exists('Autopuzzle_Product_Editor_Shortcode')) {
+    $shortcode_handler = new Autopuzzle_Product_Editor_Shortcode();
     
     // دریافت محصولات با استفاده از متد موجود
     $paged = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
@@ -38,7 +38,7 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
         $active_products = wc_get_products([
             'limit' => -1,
             'status' => 'publish',
-            'meta_key' => '_maneli_car_status',
+            'meta_key' => '_autopuzzle_car_status',
             'meta_value' => 'special_sale',
             'return' => 'ids'
         ]);
@@ -47,7 +47,7 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
         $unavailable_products = wc_get_products([
             'limit' => -1,
             'status' => 'publish',
-            'meta_key' => '_maneli_car_status',
+            'meta_key' => '_autopuzzle_car_status',
             'meta_value' => 'unavailable',
             'return' => 'ids'
         ]);
@@ -56,7 +56,7 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
         $disabled_products = wc_get_products([
             'limit' => -1,
             'status' => 'publish',
-            'meta_key' => '_maneli_car_status',
+            'meta_key' => '_autopuzzle_car_status',
             'meta_value' => 'disabled',
             'return' => 'ids'
         ]);
@@ -164,10 +164,10 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Products', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Total Products', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo number_format_i18n($published_count); ?></h4>
-                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-primary-transparent rounded-pill fs-11"><?php esc_html_e('All', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -184,10 +184,10 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Active for Sale', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Active for Sale', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo number_format_i18n($active_products_count); ?></h4>
-                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Available', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-success-transparent rounded-pill fs-11"><?php esc_html_e('Available', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -204,10 +204,10 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Unavailable', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Unavailable', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo number_format_i18n($unavailable_products_count); ?></h4>
-                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Out of Stock', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-warning-transparent rounded-pill fs-11"><?php esc_html_e('Out of Stock', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -224,10 +224,10 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                                 </span>
                             </div>
                         </div>
-                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Hidden Products', 'maneli-car-inquiry'); ?></p>
+                        <p class="flex-fill text-muted fs-14 mb-1"><?php esc_html_e('Hidden Products', 'autopuzzle'); ?></p>
                         <div class="d-flex align-items-center justify-content-between mt-1">
                             <h4 class="mb-0 d-flex align-items-center"><?php echo number_format_i18n($disabled_products_count); ?></h4>
-                            <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Hidden', 'maneli-car-inquiry'); ?></span>
+                            <span class="badge bg-secondary-transparent rounded-pill fs-11"><?php esc_html_e('Hidden', 'autopuzzle'); ?></span>
                         </div>
                     </div>
                 </div>
@@ -245,13 +245,13 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                             <span class="input-group-text">
                                 <i class="la la-search"></i>
                             </span>
-                            <input type="search" id="product-search-input" class="form-control" placeholder="<?php esc_attr_e('Search car name...', 'maneli-car-inquiry'); ?>">
+                            <input type="search" id="product-search-input" class="form-control" placeholder="<?php esc_attr_e('Search car name...', 'autopuzzle'); ?>">
                         </div>
                     </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover text-nowrap" id="maneli-product-list-tbody-table">
+                    <table class="table table-bordered table-hover text-nowrap" id="autopuzzle-product-list-tbody-table">
                         <thead class="table-light">
                             <tr>
                                 <th style="width:25%;">نام خودرو</th>
@@ -262,15 +262,15 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                                 <th style="width:15%;">وضعیت فروش</th>
                             </tr>
                         </thead>
-                        <tbody id="maneli-product-list-tbody">
+                        <tbody id="autopuzzle-product-list-tbody">
                             <?php
                             if (!empty($initial_products_query)) {
                                 foreach ($initial_products_query as $product) {
                                     // استفاده از همان helper قدیمی
-                                    Maneli_Render_Helpers::render_product_editor_row($product);
+                                    Autopuzzle_Render_Helpers::render_product_editor_row($product);
                                 }
                             } else {
-                                echo '<tr><td colspan="6" style="text-align:center;">' . esc_html__('محصولی یافت نشد.', 'maneli-car-inquiry') . '</td></tr>';
+                                echo '<tr><td colspan="6" style="text-align:center;">' . esc_html__('محصولی یافت نشد.', 'autopuzzle') . '</td></tr>';
                             }
                             ?>
                         </tbody>
@@ -283,7 +283,7 @@ if (class_exists('Maneli_Product_Editor_Shortcode')) {
                     </div>
                 </div>
 
-                <div class="maneli-pagination-wrapper mt-3 text-center">
+                <div class="autopuzzle-pagination-wrapper mt-3 text-center">
                     <?php
                     // محاسبه تعداد کل صفحات
                     $total_products_count = count(wc_get_products(['limit' => -1, 'return' => 'ids']));

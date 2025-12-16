@@ -5,7 +5,7 @@
  * This template is shown when a guest user tries to access the inquiry form.
  * It prompts them to log in first before starting the inquiry process.
  *
- * @package Maneli_Car_Inquiry/Templates/Shortcodes/InquiryForm
+ * @package Autopuzzle_Car_Inquiry/Templates/Shortcodes/InquiryForm
  * @author  Arsalan Arghavan
  * @version 1.0.0
  */
@@ -31,11 +31,11 @@ $login_url = add_query_arg('redirect_to', urlencode($return_url), home_url('/das
                         <i class="la la-lock fs-1"></i>
                     </span>
                 </div>
-                <h3 class="mb-3"><?php esc_html_e('Login Required', 'maneli-car-inquiry'); ?></h3>
-                <p class="text-muted mb-4"><?php esc_html_e('Please log in to start your inquiry.', 'maneli-car-inquiry'); ?></p>
+                <h3 class="mb-3"><?php esc_html_e('Login Required', 'autopuzzle'); ?></h3>
+                <p class="text-muted mb-4"><?php esc_html_e('Please log in to start your inquiry.', 'autopuzzle'); ?></p>
                 <a href="<?php echo esc_url($login_url); ?>" class="btn btn-primary btn-wave">
                     <i class="la la-sign-in-alt me-1"></i>
-                    <?php esc_html_e('Log In', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Log In', 'autopuzzle'); ?>
                 </a>
             </div>
         </div>

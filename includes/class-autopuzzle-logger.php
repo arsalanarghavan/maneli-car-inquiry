@@ -2,14 +2,14 @@
 /**
  * Logger class for system and user logs
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Logger {
+class Autopuzzle_Logger {
 
     /**
      * Instance
@@ -65,8 +65,8 @@ class Maneli_Logger {
 
         if (!$user_id) {
             // Attempt to use the plugin session if available
-            if (class_exists('Maneli_Session')) {
-                $session = new Maneli_Session();
+            if (class_exists('Autopuzzle_Session')) {
+                $session = new Autopuzzle_Session();
                 if (session_status() === PHP_SESSION_NONE) {
                     $session->start_session();
                 }
@@ -89,7 +89,7 @@ class Maneli_Logger {
      */
     private function get_logging_options() {
         if ($this->options_cache === null) {
-            $this->options_cache = Maneli_Options_Helper::get_all_options();
+            $this->options_cache = Autopuzzle_Options_Helper::get_all_options();
         }
 
         return $this->options_cache;
@@ -244,7 +244,7 @@ class Maneli_Logger {
 
         $user_id = $this->get_active_user_id();
 
-        return Maneli_Database::log_system_log(array(
+        return Autopuzzle_Database::log_system_log(array(
             'log_type' => $log_type,
             'severity' => $severity,
             'message' => $message,
@@ -272,7 +272,7 @@ class Maneli_Logger {
         // Truncate description if needed
         $action_description = $this->truncate_message($action_description);
 
-        return Maneli_Database::log_user_log(array(
+        return Autopuzzle_Database::log_user_log(array(
             'user_id' => $user_id,
             'action_type' => $action_type,
             'action_description' => $action_description,
@@ -322,28 +322,28 @@ class Maneli_Logger {
      * Get system logs
      */
     public function get_system_logs($args = array()) {
-        return Maneli_Database::get_system_logs($args);
+        return Autopuzzle_Database::get_system_logs($args);
     }
 
     /**
      * Get system logs count
      */
     public function get_system_logs_count($args = array()) {
-        return Maneli_Database::get_system_logs_count($args);
+        return Autopuzzle_Database::get_system_logs_count($args);
     }
 
     /**
      * Get user logs
      */
     public function get_user_logs($args = array()) {
-        return Maneli_Database::get_user_logs($args);
+        return Autopuzzle_Database::get_user_logs($args);
     }
 
     /**
      * Get user logs count
      */
     public function get_user_logs_count($args = array()) {
-        return Maneli_Database::get_user_logs_count($args);
+        return Autopuzzle_Database::get_user_logs_count($args);
     }
 
     /**
@@ -351,7 +351,7 @@ class Maneli_Logger {
      */
     public function cleanup_old_logs() {
         // Check if auto cleanup is enabled (using optimized helper)
-        if (!Maneli_Options_Helper::is_option_enabled('enable_auto_log_cleanup', false)) {
+        if (!Autopuzzle_Options_Helper::is_option_enabled('enable_auto_log_cleanup', false)) {
             return 0;
         }
         
@@ -363,7 +363,7 @@ class Maneli_Logger {
         $deleted_count = 0;
         
         // Delete old system logs
-        $system_logs_table = $wpdb->prefix . 'maneli_system_logs';
+        $system_logs_table = $wpdb->prefix . 'autopuzzle_system_logs';
         $deleted_system = $wpdb->query($wpdb->prepare(
             "DELETE FROM {$system_logs_table} WHERE created_at < %s",
             $cutoff_date
@@ -371,7 +371,7 @@ class Maneli_Logger {
         $deleted_count += $deleted_system ? $deleted_system : 0;
         
         // Delete old user logs
-        $user_logs_table = $wpdb->prefix . 'maneli_user_logs';
+        $user_logs_table = $wpdb->prefix . 'autopuzzle_user_logs';
         $deleted_user = $wpdb->query($wpdb->prepare(
             "DELETE FROM {$user_logs_table} WHERE created_at < %s",
             $cutoff_date
@@ -385,7 +385,7 @@ class Maneli_Logger {
      * Delete all system logs
      */
     public function delete_all_system_logs() {
-        return Maneli_Database::delete_system_logs();
+        return Autopuzzle_Database::delete_system_logs();
     }
 }
 

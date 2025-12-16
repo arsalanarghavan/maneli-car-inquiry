@@ -9,14 +9,14 @@
  */
 
 // OPTIMIZED: Disable debug logs in production (only log if WP_DEBUG is true)
-const MANELI_DEBUG = typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.debug === true;
+const AUTOPUZZLE_DEBUG = typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.debug === true;
 const debugLog = function(...args) {
-    if (MANELI_DEBUG) {
+    if (AUTOPUZZLE_DEBUG) {
         console.log(...args);
     }
 };
 const debugError = function(...args) {
-    if (MANELI_DEBUG) {
+    if (AUTOPUZZLE_DEBUG) {
         console.error(...args);
     }
 };
@@ -194,7 +194,7 @@ function formatNumberForActiveLocale(num) {
         });
         const expertOptionsHTML = `<select id="swal-expert-filter" class="swal2-input" style="width: 100%; padding: 10px; font-size: 14px; border: 1px solid #ddd; border-radius: 4px;">${optionsHtml}</select>`;
 
-        const ajaxAction = (inquiryType === 'cash') ? 'maneli_assign_expert_to_cash_inquiry' : 'maneli_assign_expert_to_inquiry';
+        const ajaxAction = (inquiryType === 'cash') ? 'autopuzzle_assign_expert_to_cash_inquiry' : 'autopuzzle_assign_expert_to_inquiry';
         const nonce = (inquiryType === 'cash') ? maneliInquiryLists.nonces.cash_assign_expert : maneliInquiryLists.nonces.assign_expert;
 
         Swal.fire({
@@ -280,7 +280,7 @@ function formatNumberForActiveLocale(num) {
         button.prop('disabled', true).text('...');
 
         $.post(maneliInquiryLists.ajax_url, {
-            action: 'maneli_get_cash_inquiry_details',
+            action: 'autopuzzle_get_cash_inquiry_details',
             nonce: maneliInquiryLists.nonces.cash_details,
             inquiry_id: inquiryId
         }, function(response) {
@@ -305,7 +305,7 @@ function formatNumberForActiveLocale(num) {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.post(maneliInquiryLists.ajax_url, {
-                            action: 'maneli_update_cash_inquiry',
+                            action: 'autopuzzle_update_cash_inquiry',
                             nonce: maneliInquiryLists.nonces.cash_update,
                             inquiry_id: inquiryId,
                             ...result.value
@@ -345,7 +345,7 @@ function formatNumberForActiveLocale(num) {
             if (result.isConfirmed && result.value) {
                 button.prop('disabled', true).text('...');
                 $.post(maneliInquiryLists.ajax_url, {
-                    action: 'maneli_set_down_payment',
+                    action: 'autopuzzle_set_down_payment',
                     nonce: maneliInquiryLists.nonces.cash_set_downpayment,
                     inquiry_id: inquiryId,
                     status: 'awaiting_payment',
@@ -409,7 +409,7 @@ function formatNumberForActiveLocale(num) {
             if (result.isConfirmed && result.value) {
                 button.prop('disabled', true).text('...');
                 $.post(maneliInquiryLists.ajax_url, {
-                    action: 'maneli_set_down_payment',
+                    action: 'autopuzzle_set_down_payment',
                     nonce: maneliInquiryLists.nonces.cash_set_downpayment,
                     inquiry_id: inquiryId,
                     status: 'rejected',
@@ -579,7 +579,7 @@ function formatNumberForActiveLocale(num) {
                 
                 // Submit via AJAX
                 $.post(maneliInquiryLists.ajax_url, {
-                    action: 'maneli_request_more_documents',
+                    action: 'autopuzzle_request_more_documents',
                     nonce: maneliInquiryLists.nonces.tracking_status || '',
                     inquiry_id: inquiryId,
                     documents: result.value,
@@ -604,21 +604,21 @@ function formatNumberForActiveLocale(num) {
     //======================================================================
     
     // Determine which list is present - declare at function scope
-    const installmentFilterForm = $('#maneli-inquiry-filter-form');
-    let cashFilterForm = $('#maneli-cash-inquiry-filter-form');
+    const installmentFilterForm = $('#autopuzzle-inquiry-filter-form');
+    let cashFilterForm = $('#autopuzzle-cash-inquiry-filter-form');
     
     let listType = installmentFilterForm.length ? 'installment' : (cashFilterForm.length ? 'cash' : null);
 
     // Only set up filter handlers if listType is determined and not cash (cash uses auto-load)
     // For cash inquiries, filters will be attached after auto-load completes
     if (listType && listType === 'installment') {
-        const listBody = (listType === 'installment') ? $('#maneli-inquiry-list-tbody') : $('#maneli-cash-inquiry-list-tbody');
+        const listBody = (listType === 'installment') ? $('#autopuzzle-inquiry-list-tbody') : $('#autopuzzle-cash-inquiry-list-tbody');
         const searchInput = (listType === 'installment') ? $('#inquiry-search-input') : $('#cash-inquiry-search-input');
         const statusFilter = (listType === 'installment') ? $('#status-filter') : $('#cash-inquiry-status-filter');
         const expertFilter = (listType === 'installment') ? $('#expert-filter') : $('#cash-expert-filter');
         const sortFilter = (listType === 'installment') ? $('#inquiry-sort-filter') : $('#cash-inquiry-sort-filter');
         const loader = (listType === 'installment') ? $('#inquiry-list-loader') : $('#cash-inquiry-loading, #cash-inquiry-list-loader');
-        const paginationWrapper = (listType === 'installment') ? $('.maneli-pagination-wrapper') : $('#cash-inquiry-pagination');
+        const paginationWrapper = (listType === 'installment') ? $('.autopuzzle-pagination-wrapper') : $('#cash-inquiry-pagination');
         const resetButton = (listType === 'installment') ? $('#inquiry-reset-filters') : $('#cash-inquiry-reset-filters');
         const applyButton = (listType === 'installment') ? $('#inquiry-apply-filters') : $('#cash-inquiry-apply-filters');
 
@@ -646,7 +646,7 @@ function formatNumberForActiveLocale(num) {
                 }
             }
 
-            const ajaxAction = (listType === 'installment') ? 'maneli_filter_inquiries_ajax' : 'maneli_filter_cash_inquiries_ajax';
+            const ajaxAction = (listType === 'installment') ? 'autopuzzle_filter_inquiries_ajax' : 'autopuzzle_filter_cash_inquiries_ajax';
             const nonce = (listType === 'installment') ? maneliInquiryLists.nonces.inquiry_filter : maneliInquiryLists.nonces.cash_filter;
             
             // Build base URL preserving important query parameters (like 'endp')
@@ -897,7 +897,7 @@ function formatNumberForActiveLocale(num) {
                 : '';
             
             $.post(ajaxUrl, {
-                action: 'maneli_update_tracking_status',
+                action: 'autopuzzle_update_tracking_status',
                 nonce: ajaxNonce,
                 inquiry_id: inquiryId,
                 tracking_status: selectedStatus,
@@ -939,13 +939,13 @@ function formatNumberForActiveLocale(num) {
     /**
      * Wait for maneliInquiryLists to be available
      */
-    function waitForManeliInquiryLists(callback, maxAttempts = 50, attempt = 0) {
+    function waitForAutoPuzzleInquiryLists(callback, maxAttempts = 50, attempt = 0) {
         // Check if maneliInquiryLists is available with either cash_filter or inquiry_filter
         const hasNonces = typeof maneliInquiryLists !== 'undefined' && 
                           maneliInquiryLists.nonces && 
                           (maneliInquiryLists.nonces.cash_filter || maneliInquiryLists.nonces.inquiry_filter);
         
-        console.log('waitForManeliInquiryLists attempt #' + (attempt + 1) + '/' + maxAttempts);
+        console.log('waitForAutoPuzzleInquiryLists attempt #' + (attempt + 1) + '/' + maxAttempts);
         console.log('maneliInquiryLists defined:', typeof maneliInquiryLists !== 'undefined');
         if (typeof maneliInquiryLists !== 'undefined') {
             console.log('maneliInquiryLists.nonces:', maneliInquiryLists.nonces);
@@ -958,7 +958,7 @@ function formatNumberForActiveLocale(num) {
             callback();
         } else if (attempt < maxAttempts) {
             setTimeout(function() {
-                waitForManeliInquiryLists(callback, maxAttempts, attempt + 1);
+                waitForAutoPuzzleInquiryLists(callback, maxAttempts, attempt + 1);
             }, 100);
         } else {
             console.error('✗ maneliInquiryLists not available after', maxAttempts, 'attempts');
@@ -992,21 +992,21 @@ function formatNumberForActiveLocale(num) {
      * Auto-load cash inquiry list on page load
      */
     console.log('=== CHECKING FOR TABLES ===');
-    console.log('Cash inquiry table exists:', $('#maneli-cash-inquiry-list-tbody').length > 0);
-    console.log('Installment inquiry table exists:', $('#maneli-inquiry-list-tbody').length > 0);
+    console.log('Cash inquiry table exists:', $('#autopuzzle-cash-inquiry-list-tbody').length > 0);
+    console.log('Installment inquiry table exists:', $('#autopuzzle-inquiry-list-tbody').length > 0);
     console.log('maneliInquiryLists exists:', typeof maneliInquiryLists !== 'undefined');
     if (typeof maneliInquiryLists !== 'undefined') {
         console.log('maneliInquiryLists:', maneliInquiryLists);
     }
     
-    if ($('#maneli-cash-inquiry-list-tbody').length > 0) {
+    if ($('#autopuzzle-cash-inquiry-list-tbody').length > 0) {
         console.log('✓ Cash inquiry table found. Starting wait for maneliInquiryLists...');
         
-        waitForManeliInquiryLists(function() {
+        waitForAutoPuzzleInquiryLists(function() {
             console.log('=== Cash Inquiry Auto-Load Debug ===');
             console.log('AJAX URL:', typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.ajax_url ? maneliInquiryLists.ajax_url : 'NOT DEFINED');
             console.log('AJAX Nonce:', typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces && maneliInquiryLists.nonces.cash_filter ? 'Present (' + maneliInquiryLists.nonces.cash_filter.substring(0, 10) + '...)' : 'Missing');
-            console.log('ManeliInquiryLists object:', typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists : 'NOT DEFINED');
+            console.log('AutoPuzzleInquiryLists object:', typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists : 'NOT DEFINED');
             console.log('jQuery version:', typeof $ !== 'undefined' ? $.fn.jquery : 'Not loaded');
             
             loadCashInquiriesList();
@@ -1021,7 +1021,7 @@ function formatNumberForActiveLocale(num) {
         // Validate maneliInquiryLists is available
         if (typeof maneliInquiryLists === 'undefined') {
             console.error('maneliInquiryLists is undefined in loadCashInquiriesList');
-            $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': maneliInquiryLists is not defined. Please refresh the page.</td></tr>');
+            $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': maneliInquiryLists is not defined. Please refresh the page.</td></tr>');
             return;
         }
         
@@ -1033,7 +1033,7 @@ function formatNumberForActiveLocale(num) {
         
         if (!ajaxNonce || ajaxNonce === '') {
             console.error('Nonce is missing or empty in loadCashInquiriesList');
-            $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': nonce is not available. Please refresh the page.</td></tr>');
+            $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': nonce is not available. Please refresh the page.</td></tr>');
             return;
         }
         
@@ -1052,12 +1052,12 @@ function formatNumberForActiveLocale(num) {
         
         console.log('Sending AJAX request:', {
             url: ajaxUrl,
-            action: 'maneli_filter_cash_inquiries_ajax',
+            action: 'autopuzzle_filter_cash_inquiries_ajax',
             nonce_present: ajaxNonce ? 'Yes (' + ajaxNonce.substring(0, 10) + '...)' : 'No'
         });
         
         // Hide initial loading state in tbody
-        $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center py-2 text-muted">' + getText('loading', 'Loading...') + '</td></tr>');
+        $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center py-2 text-muted">' + getText('loading', 'Loading...') + '</td></tr>');
         
         // Load initial list - Check for status query parameter
         const urlParams = new URLSearchParams(window.location.search);
@@ -1071,7 +1071,7 @@ function formatNumberForActiveLocale(num) {
                 // Re-read value from DOM to ensure it's set correctly
                 const statusFromDOM = $('#cash-inquiry-status-filter').val();
                 const requestData = {
-                    action: 'maneli_filter_cash_inquiries_ajax',
+                    action: 'autopuzzle_filter_cash_inquiries_ajax',
                     nonce: ajaxNonce,
                     _ajax_nonce: ajaxNonce, // Fallback for compatibility
                     page: 1,
@@ -1084,7 +1084,7 @@ function formatNumberForActiveLocale(num) {
         } else {
             // No status parameter, use default values from DOM
             const requestData = {
-                action: 'maneli_filter_cash_inquiries_ajax',
+                action: 'autopuzzle_filter_cash_inquiries_ajax',
                 nonce: ajaxNonce,
                 _ajax_nonce: ajaxNonce, // Fallback for compatibility
                 page: 1,
@@ -1112,7 +1112,7 @@ function formatNumberForActiveLocale(num) {
             beforeSend: function() {
                 $('#cash-inquiry-loading').show();
                 $('#cash-inquiry-list-loader').show();
-                $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center py-2"><i class="la la-spinner la-spin fs-24 text-muted"></i><p class="mt-2 text-muted">' + getText('loading', 'Loading...') + '</p></td></tr>');
+                $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center py-2"><i class="la la-spinner la-spin fs-24 text-muted"></i><p class="mt-2 text-muted">' + getText('loading', 'Loading...') + '</p></td></tr>');
             },
             success: function(response) {
                 console.log('=== Cash Inquiry AJAX SUCCESS ===');
@@ -1126,13 +1126,13 @@ function formatNumberForActiveLocale(num) {
                 
                 if (!response) {
                     console.error('ERROR: No response received');
-                    $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': No response received from server.</td></tr>');
+                    $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': No response received from server.</td></tr>');
                     return;
                 }
                 
                 if (typeof response !== 'object') {
                     console.error('ERROR: Response is not an object:', typeof response, response);
-                    $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': Invalid response format.</td></tr>');
+                    $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + getText('error', 'Error') + ': Invalid response format.</td></tr>');
                     return;
                 }
                 
@@ -1142,14 +1142,14 @@ function formatNumberForActiveLocale(num) {
                     console.log('HTML preview:', response.data.html ? response.data.html.substring(0, 200) + '...' : 'EMPTY');
                     
                     if (response.data.html && response.data.html.trim() !== '') {
-                        $('#maneli-cash-inquiry-list-tbody').html(response.data.html);
+                        $('#autopuzzle-cash-inquiry-list-tbody').html(response.data.html);
                         // Update count badge
-                        const rowCount = $('#maneli-cash-inquiry-list-tbody tr.crm-contact').length;
+                        const rowCount = $('#autopuzzle-cash-inquiry-list-tbody tr.crm-contact').length;
                         $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(rowCount));
                         console.log('✓ Table rows inserted:', rowCount);
                     } else {
                         console.log('⚠ No HTML content - showing empty message');
-                        $('#maneli-cash-inquiry-list-tbody').html(`<tr><td colspan="8" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
+                        $('#autopuzzle-cash-inquiry-list-tbody').html(`<tr><td colspan="8" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
                         $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(0));
                     }
                     if (response.data.pagination_html) {
@@ -1164,7 +1164,7 @@ function formatNumberForActiveLocale(num) {
                     console.error('Response.success:', response.success);
                     console.error('Response.data:', response.data);
                     const errorMsg = (response.data && response.data.message) ? response.data.message : getText('loading_inquiries_error', 'Error loading list');
-                    $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + errorMsg + '</td></tr>');
+                    $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + errorMsg + '</td></tr>');
                     $('#cash-inquiry-count-badge').text(formatNumberForActiveLocale(0));
                 }
             },
@@ -1206,7 +1206,7 @@ function formatNumberForActiveLocale(num) {
                     }
                 }
                 
-                $('#maneli-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + errorMessage + '<br><small>' + getText('please_refresh', 'Please refresh the page.') + '</small></td></tr>');
+                $('#autopuzzle-cash-inquiry-list-tbody').html('<tr><td colspan="8" class="text-center text-danger py-4">' + errorMessage + '<br><small>' + getText('please_refresh', 'Please refresh the page.') + '</small></td></tr>');
             }
             });
         }
@@ -1215,14 +1215,14 @@ function formatNumberForActiveLocale(num) {
     // Make function globally accessible for template fallback
     window.loadCashInquiriesList = loadCashInquiriesList;
     
-    if ($('#maneli-cash-inquiry-list-tbody').length === 0) {
+    if ($('#autopuzzle-cash-inquiry-list-tbody').length === 0) {
         console.log('Cash inquiry table not found. Skipping auto-load.');
     }
     
     // Setup filter handlers for cash inquiries - wait for everything to be ready
     console.log('Setting up cash inquiry filter handlers...');
     // Re-initialize cashFilterForm to ensure it's available
-    cashFilterForm = $('#maneli-cash-inquiry-filter-form');
+    cashFilterForm = $('#autopuzzle-cash-inquiry-filter-form');
     console.log('cashFilterForm found:', cashFilterForm.length > 0);
     
     if (cashFilterForm.length > 0) {
@@ -1233,7 +1233,7 @@ function formatNumberForActiveLocale(num) {
         const cashSortFilter = $('#cash-inquiry-sort-filter');
         const cashResetButton = $('#cash-inquiry-reset-filters');
         const cashApplyButton = $('#cash-inquiry-apply-filters');
-        const cashListBody = $('#maneli-cash-inquiry-list-tbody');
+        const cashListBody = $('#autopuzzle-cash-inquiry-list-tbody');
         const cashPaginationWrapper = $('#cash-inquiry-pagination');
         const cashLoader = $('#cash-inquiry-loading, #cash-inquiry-list-loader');
         
@@ -1265,7 +1265,7 @@ function formatNumberForActiveLocale(num) {
             window.maneliCashXhr = null;
             
             // Get references again to ensure they exist
-            const $listBody = $('#maneli-cash-inquiry-list-tbody');
+            const $listBody = $('#autopuzzle-cash-inquiry-list-tbody');
             const $paginationWrapper = $('#cash-inquiry-pagination');
             const $loader = $('#cash-inquiry-loading, #cash-inquiry-list-loader');
             
@@ -1315,7 +1315,7 @@ function formatNumberForActiveLocale(num) {
                 url: maneliInquiryLists.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'maneli_filter_cash_inquiries_ajax',
+                    action: 'autopuzzle_filter_cash_inquiries_ajax',
                     nonce: maneliInquiryLists.nonces.cash_filter,
                     _ajax_nonce: maneliInquiryLists.nonces.cash_filter,
                     search: searchVal,
@@ -1469,20 +1469,20 @@ function formatNumberForActiveLocale(num) {
         
         console.log('Cash inquiry filter setup complete!');
     } else {
-        console.warn('Cash filter form not found! (#maneli-cash-inquiry-filter-form)');
+        console.warn('Cash filter form not found! (#autopuzzle-cash-inquiry-filter-form)');
     }
     
     /**
      * Auto-load installment inquiry list on page load
      */
-    if ($('#maneli-inquiry-list-tbody').length > 0) {
+    if ($('#autopuzzle-inquiry-list-tbody').length > 0) {
         console.log('✓ Installment inquiry table found. Starting wait for maneliInquiryLists...');
         
-        waitForManeliInquiryLists(function() {
+        waitForAutoPuzzleInquiryLists(function() {
             console.log('=== Installment Inquiry Auto-Load Debug ===');
             console.log('AJAX URL:', typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.ajax_url ? maneliInquiryLists.ajax_url : 'NOT DEFINED');
             console.log('AJAX Nonce:', typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces && maneliInquiryLists.nonces.inquiry_filter ? 'Present (' + maneliInquiryLists.nonces.inquiry_filter.substring(0, 10) + '...)' : 'Missing');
-            console.log('ManeliInquiryLists object:', typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists : 'NOT DEFINED');
+            console.log('AutoPuzzleInquiryLists object:', typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists : 'NOT DEFINED');
             console.log('jQuery version:', typeof $ !== 'undefined' ? $.fn.jquery : 'Not loaded');
             
             loadInstallmentInquiriesList();
@@ -1495,7 +1495,7 @@ function formatNumberForActiveLocale(num) {
         // Validate maneliInquiryLists is available
         if (typeof maneliInquiryLists === 'undefined') {
             console.error('maneliInquiryLists is undefined in loadInstallmentInquiriesList');
-            $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': maneliInquiryLists is not defined. Please refresh the page.</td></tr>');
+            $('#autopuzzle-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': maneliInquiryLists is not defined. Please refresh the page.</td></tr>');
             return;
         }
         
@@ -1507,7 +1507,7 @@ function formatNumberForActiveLocale(num) {
         
         if (!ajaxNonce || ajaxNonce === '') {
             console.error('Nonce is missing or empty in loadInstallmentInquiriesList');
-            $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': nonce is not available. Please refresh the page.</td></tr>');
+            $('#autopuzzle-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': nonce is not available. Please refresh the page.</td></tr>');
             return;
         }
         
@@ -1526,7 +1526,7 @@ function formatNumberForActiveLocale(num) {
         
         console.log('Sending AJAX request for installment inquiries:', {
             url: ajaxUrl,
-            action: 'maneli_filter_inquiries_ajax',
+            action: 'autopuzzle_filter_inquiries_ajax',
             nonce_present: ajaxNonce ? 'Yes (' + ajaxNonce.substring(0, 10) + '...)' : 'No'
         });
         
@@ -1599,7 +1599,7 @@ function formatNumberForActiveLocale(num) {
                     // Fallback to original method
                     console.log('⚠ fetchInstallmentInquiries not available after ' + maxAttempts + ' attempts, using original method');
                     const installmentRequestData = {
-                    action: 'maneli_filter_inquiries_ajax',
+                    action: 'autopuzzle_filter_inquiries_ajax',
                     nonce: ajaxNonce,
                     _ajax_nonce: ajaxNonce,  // Also send as _ajax_nonce for compatibility
                     page: 1,
@@ -1646,13 +1646,13 @@ function formatNumberForActiveLocale(num) {
                 
                 if (!response) {
                     console.error('ERROR: No response received');
-                    $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': No response received from server.</td></tr>');
+                    $('#autopuzzle-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': No response received from server.</td></tr>');
                     return;
                 }
                 
                 if (typeof response !== 'object') {
                     console.error('ERROR: Response is not an object:', typeof response, response);
-                    $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': Invalid response format.</td></tr>');
+                    $('#autopuzzle-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + getText('error', 'Error') + ': Invalid response format.</td></tr>');
                     return;
                 }
                 
@@ -1662,12 +1662,12 @@ function formatNumberForActiveLocale(num) {
                     console.log('HTML preview:', response.data.html ? response.data.html.substring(0, 200) + '...' : 'EMPTY');
                     
                     if (response.data.html && response.data.html.trim() !== '') {
-                        $('#maneli-inquiry-list-tbody').html(response.data.html);
+                        $('#autopuzzle-inquiry-list-tbody').html(response.data.html);
                         // Update count badge - count actual rows (not loading messages)
-                        const rowCount = $('#maneli-inquiry-list-tbody tr.crm-contact').length;
+                        const rowCount = $('#autopuzzle-inquiry-list-tbody tr.crm-contact').length;
                         const hasContent = rowCount > 0;
                         console.log('✓ HTML received, checking for rows...');
-                        console.log('✓ Total tr elements:', $('#maneli-inquiry-list-tbody tr').length);
+                        console.log('✓ Total tr elements:', $('#autopuzzle-inquiry-list-tbody tr').length);
                         console.log('✓ Rows with crm-contact class:', rowCount);
                         console.log('✓ HTML preview:', response.data.html.substring(0, 500));
                         
@@ -1682,16 +1682,16 @@ function formatNumberForActiveLocale(num) {
                         }
                     } else {
                         console.log('⚠ No HTML content - showing empty message');
-                        $('#maneli-inquiry-list-tbody').html(`<tr><td colspan="7" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
+                        $('#autopuzzle-inquiry-list-tbody').html(`<tr><td colspan="7" class="text-center text-muted py-4">${getText('no_inquiries_found', 'No inquiries found.')}</td></tr>`);
                         $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                     }
                     if (response.data.pagination_html) {
                         $('#inquiry-pagination').html(response.data.pagination_html);
-                        $('.maneli-pagination-wrapper').html(response.data.pagination_html);
+                        $('.autopuzzle-pagination-wrapper').html(response.data.pagination_html);
                         console.log('✓ Pagination HTML inserted');
                     } else {
                         $('#inquiry-pagination').html('');
-                        $('.maneli-pagination-wrapper').html('');
+                        $('.autopuzzle-pagination-wrapper').html('');
                         console.log('⚠ No pagination HTML');
                     }
                 } else {
@@ -1699,7 +1699,7 @@ function formatNumberForActiveLocale(num) {
                     console.error('Response.success:', response.success);
                     console.error('Response.data:', response.data);
                     const errorMsg = (response.data && response.data.message) ? response.data.message : getText('loading_inquiries_error', 'Error loading list');
-                    $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + errorMsg + '</td></tr>');
+                    $('#autopuzzle-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + errorMsg + '</td></tr>');
                     $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
                 }
             },
@@ -1738,7 +1738,7 @@ function formatNumberForActiveLocale(num) {
                     }
                 }
                 
-                $('#maneli-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + errorMessage + '<br><small>' + getText('please_refresh', 'Please refresh the page.') + '</small></td></tr>');
+                $('#autopuzzle-inquiry-list-tbody').html('<tr><td colspan="7" class="text-center text-danger py-4">' + errorMessage + '<br><small>' + getText('please_refresh', 'Please refresh the page.') + '</small></td></tr>');
                 $('#inquiry-count-badge').text(formatNumberForActiveLocale(0));
             }
             });
@@ -1750,7 +1750,7 @@ function formatNumberForActiveLocale(num) {
     
     // Setup filter handlers for installment inquiries - wait for everything to be ready
     console.log('Setting up installment inquiry filter handlers...');
-    const installmentFilterFormSetup = $('#maneli-inquiry-filter-form');
+    const installmentFilterFormSetup = $('#autopuzzle-inquiry-filter-form');
     
     if (installmentFilterFormSetup.length > 0) {
         console.log('Installment filter form found, attaching handlers...');
@@ -1760,8 +1760,8 @@ function formatNumberForActiveLocale(num) {
         const installmentSortFilter = $('#inquiry-sort-filter');
         const installmentResetButton = $('#inquiry-reset-filters');
         const installmentApplyButton = $('#inquiry-apply-filters');
-        const installmentListBody = $('#maneli-inquiry-list-tbody');
-        const installmentPaginationWrapper = $('.maneli-pagination-wrapper');
+        const installmentListBody = $('#autopuzzle-inquiry-list-tbody');
+        const installmentPaginationWrapper = $('.autopuzzle-pagination-wrapper');
         const installmentLoader = $('#inquiry-list-loader');
         
         // Store references globally for debugging
@@ -1787,8 +1787,8 @@ function formatNumberForActiveLocale(num) {
             window.maneliInstallmentXhr = null;
             
             // Get references again to ensure they exist
-            const $listBody = $('#maneli-inquiry-list-tbody');
-            const $paginationWrapper = $('.maneli-pagination-wrapper');
+            const $listBody = $('#autopuzzle-inquiry-list-tbody');
+            const $paginationWrapper = $('.autopuzzle-pagination-wrapper');
             const $loader = $('#inquiry-list-loader');
             
             // Check if maneliInquiryLists is available
@@ -1873,7 +1873,7 @@ function formatNumberForActiveLocale(num) {
                 url: maneliInquiryLists.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'maneli_filter_inquiries_ajax',
+                    action: 'autopuzzle_filter_inquiries_ajax',
                     nonce: maneliInquiryLists.nonces.inquiry_filter,
                     _ajax_nonce: maneliInquiryLists.nonces.inquiry_filter,
                     search: searchVal,
@@ -1994,7 +1994,7 @@ function formatNumberForActiveLocale(num) {
         });
         
         // Handle pagination using event delegation
-        $(document).off('click', '.maneli-pagination-wrapper a.page-numbers').on('click', '.maneli-pagination-wrapper a.page-numbers', function(e) {
+        $(document).off('click', '.autopuzzle-pagination-wrapper a.page-numbers').on('click', '.autopuzzle-pagination-wrapper a.page-numbers', function(e) {
             e.preventDefault();
             console.log('Pagination clicked');
             const pageUrl = $(this).attr('href');
@@ -2281,7 +2281,7 @@ function formatNumberForActiveLocale(num) {
         
         console.log('Installment inquiry filter setup complete!');
     } else {
-        console.warn('Installment filter form not found! (#maneli-inquiry-filter-form)');
+        console.warn('Installment filter form not found! (#autopuzzle-inquiry-filter-form)');
     }
 
     //======================================================================
@@ -2329,16 +2329,16 @@ function formatNumberForActiveLocale(num) {
         // Try global variables first (same as users.php)
         if (typeof maneliAjaxUrl !== 'undefined' && maneliAjaxUrl) {
             ajaxUrl = maneliAjaxUrl;
-        } else if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
-            ajaxUrl = maneli_ajax.ajax_url || maneli_ajax.url || '';
+        } else if (typeof autopuzzle_ajax !== 'undefined' && autopuzzle_ajax) {
+            ajaxUrl = autopuzzle_ajax.ajax_url || autopuzzle_ajax.url || '';
         } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
             ajaxUrl = maneliInquiryLists.ajax_url || '';
         }
         
         if (typeof maneliAjaxNonce !== 'undefined' && maneliAjaxNonce) {
             ajaxNonce = maneliAjaxNonce;
-        } else if (typeof maneli_ajax !== 'undefined' && maneli_ajax) {
-            ajaxNonce = maneli_ajax.nonce || '';
+        } else if (typeof autopuzzle_ajax !== 'undefined' && autopuzzle_ajax) {
+            ajaxNonce = autopuzzle_ajax.nonce || '';
         } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
             ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
         }
@@ -2392,7 +2392,7 @@ function formatNumberForActiveLocale(num) {
                 console.log('🔵 SMS Send Debug:', {
                     ajaxUrl: ajaxUrl,
                     ajaxNonce: ajaxNonce ? (ajaxNonce.substring(0, 10) + '...') : 'MISSING',
-                    action: 'maneli_send_single_sms',
+                    action: 'autopuzzle_send_single_sms',
                     recipient: phone,
                     inquiryId: inquiryId
                 });
@@ -2412,7 +2412,7 @@ function formatNumberForActiveLocale(num) {
                     url: ajaxUrl,
                     type: 'POST',
                     data: {
-                        action: 'maneli_send_single_sms',
+                        action: 'autopuzzle_send_single_sms',
                         nonce: ajaxNonce,
                         recipient: phone,
                         message: result.value.message,
@@ -2497,7 +2497,7 @@ function formatNumberForActiveLocale(num) {
             url: maneliInquiryLists.ajax_url,
             type: 'POST',
             data: {
-                action: 'maneli_save_installment_note',
+                action: 'autopuzzle_save_installment_note',
                 nonce: nonce,
                 inquiry_id: inquiryId,
                 note: note
@@ -2568,7 +2568,7 @@ function formatNumberForActiveLocale(num) {
             url: maneliInquiryLists.ajax_url,
             type: 'POST',
             data: {
-                action: 'maneli_save_expert_note',
+                action: 'autopuzzle_save_expert_note',
                 inquiry_id: inquiryId,
                 note: note,
                 nonce: maneliInquiryLists.nonces.save_expert_note || maneliInquiryLists.nonces.cash_update || ''
@@ -2661,7 +2661,7 @@ function formatNumberForActiveLocale(num) {
                 url: maneliInquiryLists.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_meeting_settings'
+                    action: 'autopuzzle_get_meeting_settings'
                 },
                 success: function(response) {
                     if (response.success) {
@@ -2674,7 +2674,7 @@ function formatNumberForActiveLocale(num) {
                             html: `
                                 <div class="text-start">
                                     <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
-                                    <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                    <input type="text" id="swal-meeting-date" class="form-control mb-3 autopuzzle-datepicker" placeholder="${getText('select_date', 'Select Date')}">
                                     <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
                                     <input type="time" id="swal-meeting-time" class="form-control" min="${startHour}" max="${endHour}" step="1800">
                                     <small class="text-muted d-block mt-1">${getText('time_range_hint', 'Time must be between')} ${startHour} ${getText('and', 'and')} ${endHour}</small>
@@ -2744,7 +2744,7 @@ function formatNumberForActiveLocale(num) {
                         html: `
                             <div class="text-start">
                                 <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
-                                <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                <input type="text" id="swal-meeting-date" class="form-control mb-3 autopuzzle-datepicker" placeholder="${getText('select_date', 'Select Date')}">
                                 <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
                                 <input type="time" id="swal-meeting-time" class="form-control">
                             </div>
@@ -2784,7 +2784,7 @@ function formatNumberForActiveLocale(num) {
                 html: `
                     <div class="text-start">
                         <label class="form-label">${getText('followup_date_label', 'Follow-up Date')}:</label>
-                        <input type="text" id="swal-followup-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                        <input type="text" id="swal-followup-date" class="form-control mb-3 autopuzzle-datepicker" placeholder="${getText('select_date', 'Select Date')}">
                         <label class="form-label">${getText('note_label_optional', 'Note (Optional)')}:</label>
                         <textarea id="swal-followup-note" class="form-control" rows="3" placeholder="${getText('enter_note', 'Enter your note...')}"></textarea>
                     </div>
@@ -2931,7 +2931,7 @@ function formatNumberForActiveLocale(num) {
                 }
                 
                 console.log('🔵 Sending cancel meeting AJAX request:', {
-                    action: 'maneli_cancel_meeting',
+                    action: 'autopuzzle_cancel_meeting',
                     inquiryId: inquiryId,
                     inquiryType: inquiryType,
                     hasNonce: !!nonce
@@ -2941,7 +2941,7 @@ function formatNumberForActiveLocale(num) {
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_cancel_meeting',
+                        action: 'autopuzzle_cancel_meeting',
                         nonce: nonce,
                         inquiry_id: inquiryId,
                         inquiry_type: inquiryType
@@ -3035,7 +3035,7 @@ function formatNumberForActiveLocale(num) {
         }
         
         console.log('🔵 Sending AJAX request:', {
-            action: 'maneli_update_installment_status',
+            action: 'autopuzzle_update_installment_status',
             inquiryId: inquiryId,
             actionType: actionType,
             hasNonce: !!nonce,
@@ -3047,7 +3047,7 @@ function formatNumberForActiveLocale(num) {
         });
         
         const ajaxData = {
-            action: 'maneli_update_installment_status',
+            action: 'autopuzzle_update_installment_status',
             nonce: nonce,
             inquiry_id: inquiryId,
             action_type: actionType,
@@ -3328,7 +3328,7 @@ function formatNumberForActiveLocale(num) {
                 url: maneliInquiryLists.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'maneli_get_meeting_settings'
+                    action: 'autopuzzle_get_meeting_settings'
                 },
                 success: function(response) {
                     if (response.success) {
@@ -3341,7 +3341,7 @@ function formatNumberForActiveLocale(num) {
                             html: `
                                 <div class="text-start">
                                     <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
-                                    <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                    <input type="text" id="swal-meeting-date" class="form-control mb-3 autopuzzle-datepicker" placeholder="${getText('select_date', 'Select Date')}">
                                     <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
                                     <input type="time" id="swal-meeting-time" class="form-control" min="${startHour}" max="${endHour}" step="1800">
                                     <small class="text-muted d-block mt-1">${getText('time_range_hint', 'Time must be between')} ${startHour} ${getText('and', 'and')} ${endHour}</small>
@@ -3404,7 +3404,7 @@ function formatNumberForActiveLocale(num) {
                         html: `
                             <div class="text-start">
                                 <label class="form-label">${getText('meeting_date_label', 'Meeting Date')}:</label>
-                                <input type="text" id="swal-meeting-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                                <input type="text" id="swal-meeting-date" class="form-control mb-3 autopuzzle-datepicker" placeholder="${getText('select_date', 'Select Date')}">
                                 <label class="form-label">${getText('meeting_time_label', 'Meeting Time')}:</label>
                                 <input type="time" id="swal-meeting-time" class="form-control">
                             </div>
@@ -3488,7 +3488,7 @@ function formatNumberForActiveLocale(num) {
                 html: `
                     <div class="text-start">
                         <label class="form-label">${getText('followup_date_label', 'Follow-up Date')}:</label>
-                        <input type="text" id="swal-cash-followup-date" class="form-control mb-3 maneli-datepicker" placeholder="${getText('select_date', 'Select Date')}">
+                        <input type="text" id="swal-cash-followup-date" class="form-control mb-3 autopuzzle-datepicker" placeholder="${getText('select_date', 'Select Date')}">
                         <label class="form-label">${getText('note_label_optional', 'Note (Optional)')}:</label>
                         <textarea id="swal-cash-followup-note" class="form-control" rows="3" placeholder="${getText('enter_note', 'Enter your note...')}"></textarea>
                     </div>
@@ -3589,7 +3589,7 @@ function formatNumberForActiveLocale(num) {
                 }
                 
                 console.log('🔵 Sending cancel meeting AJAX request (cash):', {
-                    action: 'maneli_cancel_meeting',
+                    action: 'autopuzzle_cancel_meeting',
                     inquiryId: inquiryId,
                     inquiryType: inquiryType,
                     hasNonce: !!nonce
@@ -3599,7 +3599,7 @@ function formatNumberForActiveLocale(num) {
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_cancel_meeting',
+                        action: 'autopuzzle_cancel_meeting',
                         nonce: nonce,
                         inquiry_id: inquiryId,
                         inquiry_type: inquiryType
@@ -3661,7 +3661,7 @@ function formatNumberForActiveLocale(num) {
             url: maneliInquiryLists.ajax_url,
             type: 'POST',
             data: {
-                action: 'maneli_update_cash_status',
+                action: 'autopuzzle_update_cash_status',
                 inquiry_id: inquiryId,
                 action_type: actionType,
                 nonce: maneliInquiryLists.nonces.update_cash_status || maneliInquiryLists.nonces.cash_update || '',
@@ -3701,7 +3701,7 @@ function formatNumberForActiveLocale(num) {
             url: maneliInquiryLists.ajax_url,
             type: 'POST',
             data: {
-                action: 'maneli_update_cash_status',
+                action: 'autopuzzle_update_cash_status',
                 inquiry_id: inquiryId,
                 new_status: newStatus,
                 nonce: maneliInquiryLists.nonces.update_cash_status || maneliInquiryLists.nonces.cash_update || '',
@@ -3755,7 +3755,7 @@ function formatNumberForActiveLocale(num) {
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_approve_customer_document',
+                        action: 'autopuzzle_approve_customer_document',
                         security: maneliInquiryLists.nonces.ajax || '',
                         user_id: userId,
                         document_name: docName,
@@ -3839,7 +3839,7 @@ function formatNumberForActiveLocale(num) {
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_reject_customer_document',
+                        action: 'autopuzzle_reject_customer_document',
                         security: maneliInquiryLists.nonces.ajax || '',
                         user_id: userId,
                         document_name: docName,
@@ -3895,7 +3895,7 @@ function formatNumberForActiveLocale(num) {
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_request_customer_document',
+                        action: 'autopuzzle_request_customer_document',
                         security: maneliInquiryLists.nonces.ajax || '',
                         user_id: userId,
                         document_name: docName,
@@ -4050,7 +4050,7 @@ function formatNumberForActiveLocale(num) {
                     url: maneliInquiryLists.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_request_customer_documents_bulk',
+                        action: 'autopuzzle_request_customer_documents_bulk',
                         security: maneliInquiryLists.nonces.ajax || '',
                         user_id: userId,
                         documents: result.value,
@@ -4139,8 +4139,8 @@ function formatNumberForActiveLocale(num) {
         }
         
         // Reset modal content
-        $('#sms-history-loading').removeClass('maneli-initially-hidden').show();
-        $('#sms-history-content').addClass('maneli-initially-hidden').hide();
+        $('#sms-history-loading').removeClass('autopuzzle-initially-hidden').show();
+        $('#sms-history-content').addClass('autopuzzle-initially-hidden').hide();
         $('#sms-history-table-container').empty();
         
         // Get AJAX URL and nonce - try multiple sources (same as send SMS)
@@ -4171,15 +4171,15 @@ function formatNumberForActiveLocale(num) {
         console.log('🔵 SMS History Debug:', {
             ajaxUrl: ajaxUrl,
             ajaxNonce: ajaxNonce ? (ajaxNonce.substring(0, 10) + '...') : 'MISSING',
-            action: 'maneli_get_sms_history',
+            action: 'autopuzzle_get_sms_history',
             inquiryId: inquiryId,
             inquiryType: inquiryType
         });
         
         if (!ajaxNonce) {
             console.error('❌ Nonce is missing for SMS history!');
-            $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-            $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+            $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+            $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
             $('#sms-history-table-container').html(
                 '<div class="alert alert-danger">' +
                 '<i class="la la-exclamation-triangle me-2"></i>' +
@@ -4194,15 +4194,15 @@ function formatNumberForActiveLocale(num) {
             url: ajaxUrl,
             type: 'POST',
             data: {
-                action: 'maneli_get_sms_history',
+                action: 'autopuzzle_get_sms_history',
                 nonce: ajaxNonce,
                 inquiry_id: inquiryId,
                 inquiry_type: inquiryType
             },
             success: function(response) {
                 // Hide loading and show content
-                $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                 
                 // Use HTML if available (includes buttons and JavaScript), otherwise build table from history
                 if (response.success && response.data && response.data.html) {
@@ -4277,8 +4277,8 @@ function formatNumberForActiveLocale(num) {
                 }
             },
             error: function(xhr, status, error) {
-                $('#sms-history-loading').addClass('maneli-initially-hidden').hide();
-                $('#sms-history-content').removeClass('maneli-initially-hidden').show();
+                $('#sms-history-loading').addClass('autopuzzle-initially-hidden').hide();
+                $('#sms-history-content').removeClass('autopuzzle-initially-hidden').show();
                 
                 console.error('SMS History error:', {xhr: xhr, status: status, error: error, responseText: xhr.responseText});
                 
@@ -4411,7 +4411,7 @@ function formatNumberForActiveLocale(num) {
                                 url: ajaxUrl,
                                 type: 'POST',
                                 data: {
-                                    action: 'maneli_resend_sms',
+                                    action: 'autopuzzle_resend_sms',
                                     nonce: ajaxNonce,
                                     phone: phone,
                                     message: message,
@@ -4538,7 +4538,7 @@ function formatNumberForActiveLocale(num) {
                         url: ajaxUrl,
                         type: 'POST',
                         data: {
-                            action: 'maneli_get_sms_status',
+                            action: 'autopuzzle_get_sms_status',
                             nonce: ajaxNonce,
                             message_id: messageId
                         },
@@ -4662,7 +4662,7 @@ function formatNumberForActiveLocale(num) {
                             url: ajaxUrl,
                             type: 'POST',
                             data: {
-                                action: 'maneli_get_sms_status',
+                                action: 'autopuzzle_get_sms_status',
                                 nonce: ajaxNonce,
                                 message_id: messageId
                             },

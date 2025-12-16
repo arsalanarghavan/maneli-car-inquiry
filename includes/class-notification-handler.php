@@ -4,14 +4,14 @@
  *
  * Handles creating, reading, and managing notifications for users
  *
- * @package Maneli_Car_Inquiry
+ * @package Autopuzzle_Car_Inquiry
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Notification_Handler {
+class Autopuzzle_Notification_Handler {
 
     /**
      * Create a notification
@@ -21,7 +21,7 @@ class Maneli_Notification_Handler {
      */
     public static function create_notification($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
 
         $defaults = array(
             'user_id' => 0,
@@ -38,7 +38,7 @@ class Maneli_Notification_Handler {
         // Validate required fields
         if (empty($data['user_id']) || empty($data['type']) || empty($data['title'])) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Notification: Missing required fields. user_id: ' . $data['user_id'] . ', type: ' . $data['type'] . ', title: ' . $data['title']);
+                error_log('AutoPuzzle Notification: Missing required fields. user_id: ' . $data['user_id'] . ', type: ' . $data['type'] . ', title: ' . $data['title']);
             }
             return false;
         }
@@ -47,7 +47,7 @@ class Maneli_Notification_Handler {
         $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
         if (!$table_exists) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Notification: Table does not exist: ' . $table);
+                error_log('AutoPuzzle Notification: Table does not exist: ' . $table);
             }
             return false;
         }
@@ -64,7 +64,7 @@ class Maneli_Notification_Handler {
 
         if ($result === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Notification: Insert failed. Error: ' . $wpdb->last_error);
+                error_log('AutoPuzzle Notification: Insert failed. Error: ' . $wpdb->last_error);
             }
             return false;
         }
@@ -84,7 +84,7 @@ class Maneli_Notification_Handler {
      */
     public static function get_notifications($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
 
         $defaults = array(
             'user_id' => get_current_user_id(),
@@ -101,7 +101,7 @@ class Maneli_Notification_Handler {
         // Validate user_id
         if (empty($args['user_id']) || $args['user_id'] <= 0) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Notification: get_notifications called with invalid user_id: ' . $args['user_id']);
+                error_log('AutoPuzzle Notification: get_notifications called with invalid user_id: ' . $args['user_id']);
             }
             return array();
         }
@@ -110,7 +110,7 @@ class Maneli_Notification_Handler {
         $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
         if (!$table_exists) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Notification: Table does not exist: ' . $table);
+                error_log('AutoPuzzle Notification: Table does not exist: ' . $table);
             }
             return array();
         }
@@ -142,7 +142,7 @@ class Maneli_Notification_Handler {
         $results = $wpdb->get_results($wpdb->prepare($query, $prepare));
         
         if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Maneli Notification: get_notifications query error: ' . $wpdb->last_error);
+            error_log('AutoPuzzle Notification: get_notifications query error: ' . $wpdb->last_error);
         }
 
         return $results ? $results : array();
@@ -164,13 +164,13 @@ class Maneli_Notification_Handler {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
 
         // Check if table exists
         $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table}'");
         if (!$table_exists) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Notification: Table does not exist for unread count: ' . $table);
+                error_log('AutoPuzzle Notification: Table does not exist for unread count: ' . $table);
             }
             return 0;
         }
@@ -181,7 +181,7 @@ class Maneli_Notification_Handler {
         ));
 
         if ($wpdb->last_error && defined('WP_DEBUG') && WP_DEBUG) {
-            error_log('Maneli Notification: get_unread_count query error: ' . $wpdb->last_error);
+            error_log('AutoPuzzle Notification: get_unread_count query error: ' . $wpdb->last_error);
         }
 
         return intval($count);
@@ -204,7 +204,7 @@ class Maneli_Notification_Handler {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
 
         return $wpdb->update(
             $table,
@@ -234,7 +234,7 @@ class Maneli_Notification_Handler {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
 
         return $wpdb->update(
             $table,
@@ -262,7 +262,7 @@ class Maneli_Notification_Handler {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
 
         return $wpdb->delete(
             $table,
@@ -290,7 +290,7 @@ class Maneli_Notification_Handler {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
 
         return $wpdb->delete(
             $table,
@@ -309,26 +309,26 @@ class Maneli_Notification_Handler {
      * @return int|bool Notification ID or false
      */
     public static function notify_new_inquiry($inquiry_id) {
-        $inquiry = Maneli_Database::get_inquiry($inquiry_id);
+        $inquiry = Autopuzzle_Database::get_inquiry($inquiry_id);
         if (!$inquiry) {
             return false;
         }
 
         // Get all managers and admins
         $managers = get_users(array(
-            'role__in' => array('administrator', 'maneli_admin'),
+            'role__in' => array('administrator', 'autopuzzle_admin'),
             'fields' => 'ids'
         ));
 
         foreach ($managers as $manager_id) {
-            $inquiry_type_label = $inquiry->type === 'cash' ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry');
+            $inquiry_type_label = $inquiry->type === 'cash' ? esc_html__('Cash', 'autopuzzle') : esc_html__('Installment', 'autopuzzle');
             
             self::create_notification(array(
                 'user_id' => $manager_id,
                 'type' => 'inquiry_new',
-                'title' => sprintf(esc_html__('New %s inquiry', 'maneli-car-inquiry'), $inquiry_type_label),
-                'message' => sprintf(esc_html__('A new %s inquiry has been registered', 'maneli-car-inquiry'), $inquiry_type_label),
-                'link' => admin_url('admin.php?page=maneli_inquiries&inquiry_id=' . $inquiry_id),
+                'title' => sprintf(esc_html__('New %s inquiry', 'autopuzzle'), $inquiry_type_label),
+                'message' => sprintf(esc_html__('A new %s inquiry has been registered', 'autopuzzle'), $inquiry_type_label),
+                'link' => admin_url('admin.php?page=autopuzzle_inquiries&inquiry_id=' . $inquiry_id),
                 'related_id' => $inquiry_id,
             ));
         }
@@ -344,19 +344,19 @@ class Maneli_Notification_Handler {
      * @return int|bool Notification ID or false
      */
     public static function notify_inquiry_assigned($inquiry_id, $expert_id) {
-        $inquiry = Maneli_Database::get_inquiry($inquiry_id);
+        $inquiry = Autopuzzle_Database::get_inquiry($inquiry_id);
         if (!$inquiry) {
             return false;
         }
 
-        $inquiry_type_label = $inquiry->type === 'cash' ? esc_html__('Cash', 'maneli-car-inquiry') : esc_html__('Installment', 'maneli-car-inquiry');
+        $inquiry_type_label = $inquiry->type === 'cash' ? esc_html__('Cash', 'autopuzzle') : esc_html__('Installment', 'autopuzzle');
 
         return self::create_notification(array(
             'user_id' => $expert_id,
             'type' => 'inquiry_assigned',
-            'title' => sprintf(esc_html__('%s inquiry has been assigned to you', 'maneli-car-inquiry'), $inquiry_type_label),
-            'message' => sprintf(esc_html__('A %s inquiry has been assigned to you. Please review it.', 'maneli-car-inquiry'), $inquiry_type_label),
-            'link' => admin_url('admin.php?page=maneli_inquiries&inquiry_id=' . $inquiry_id),
+            'title' => sprintf(esc_html__('%s inquiry has been assigned to you', 'autopuzzle'), $inquiry_type_label),
+            'message' => sprintf(esc_html__('A %s inquiry has been assigned to you. Please review it.', 'autopuzzle'), $inquiry_type_label),
+            'link' => admin_url('admin.php?page=autopuzzle_inquiries&inquiry_id=' . $inquiry_id),
             'related_id' => $inquiry_id,
         ));
     }
@@ -370,18 +370,18 @@ class Maneli_Notification_Handler {
      * @return int|bool Notification ID or false
      */
     public static function notify_status_change($inquiry_id, $old_status, $new_status) {
-        $inquiry = Maneli_Database::get_inquiry($inquiry_id);
+        $inquiry = Autopuzzle_Database::get_inquiry($inquiry_id);
         if (!$inquiry) {
             return false;
         }
 
         $status_labels = array(
-            'pending' => esc_html__('Pending', 'maneli-car-inquiry'),
-            'under_review' => esc_html__('Under Review', 'maneli-car-inquiry'),
-            'approved' => esc_html__('Approved', 'maneli-car-inquiry'),
-            'rejected' => esc_html__('Rejected', 'maneli-car-inquiry'),
-            'completed' => esc_html__('Completed', 'maneli-car-inquiry'),
-            'cancelled' => esc_html__('Cancelled', 'maneli-car-inquiry'),
+            'pending' => esc_html__('Pending', 'autopuzzle'),
+            'under_review' => esc_html__('Under Review', 'autopuzzle'),
+            'approved' => esc_html__('Approved', 'autopuzzle'),
+            'rejected' => esc_html__('Rejected', 'autopuzzle'),
+            'completed' => esc_html__('Completed', 'autopuzzle'),
+            'cancelled' => esc_html__('Cancelled', 'autopuzzle'),
         );
 
         $old_label = isset($status_labels[$old_status]) ? $status_labels[$old_status] : $old_status;
@@ -390,8 +390,8 @@ class Maneli_Notification_Handler {
         return self::create_notification(array(
             'user_id' => $inquiry->user_id,
             'type' => 'inquiry_status_changed',
-            'title' => esc_html__('Your request status has changed', 'maneli-car-inquiry'),
-            'message' => sprintf(esc_html__('Your request status has changed from "%s" to "%s".', 'maneli-car-inquiry'), $old_label, $new_label),
+            'title' => esc_html__('Your request status has changed', 'autopuzzle'),
+            'message' => sprintf(esc_html__('Your request status has changed from "%s" to "%s".', 'autopuzzle'), $old_label, $new_label),
             'link' => home_url('/dashboard?page=my-inquiries&inquiry_id=' . $inquiry_id),
             'related_id' => $inquiry_id,
         ));
@@ -467,7 +467,7 @@ class Maneli_Notification_Handler {
             
             $title = self::get_followup_title($days_diff);
             $message = sprintf(
-                esc_html__('Follow-up for %s inquiry is due in %d day(s)', 'maneli-car-inquiry'),
+                esc_html__('Follow-up for %s inquiry is due in %d day(s)', 'autopuzzle'),
                 $product_name,
                 abs($days_diff)
             );
@@ -525,7 +525,7 @@ class Maneli_Notification_Handler {
      */
     private static function notification_already_sent($inquiry_id, $expert_id, $type) {
         global $wpdb;
-        $table = $wpdb->prefix . 'maneli_notifications';
+        $table = $wpdb->prefix . 'autopuzzle_notifications';
         
         // Check if notification was created today
         $today = current_time('Y-m-d 00:00:00');
@@ -553,18 +553,18 @@ class Maneli_Notification_Handler {
      */
     private static function get_followup_title($days_diff) {
         if ($days_diff < 0) {
-            return esc_html__('⚠️ Overdue Follow-up', 'maneli-car-inquiry');
+            return esc_html__('⚠️ Overdue Follow-up', 'autopuzzle');
         } elseif ($days_diff === 0) {
-            return esc_html__('🔥 Follow-up Due Today', 'maneli-car-inquiry');
+            return esc_html__('🔥 Follow-up Due Today', 'autopuzzle');
         } elseif ($days_diff === 1) {
-            return esc_html__('⚠️ Follow-up Tomorrow', 'maneli-car-inquiry');
+            return esc_html__('⚠️ Follow-up Tomorrow', 'autopuzzle');
         } elseif ($days_diff === 2) {
-            return esc_html__('⚠️ Follow-up in 2 Days', 'maneli-car-inquiry');
+            return esc_html__('⚠️ Follow-up in 2 Days', 'autopuzzle');
         } elseif ($days_diff === 3) {
-            return esc_html__('ℹ️ Follow-up in 3 Days', 'maneli-car-inquiry');
+            return esc_html__('ℹ️ Follow-up in 3 Days', 'autopuzzle');
         }
         
-        return esc_html__('Follow-up Reminder', 'maneli-car-inquiry');
+        return esc_html__('Follow-up Reminder', 'autopuzzle');
     }
 
     /**
@@ -580,7 +580,7 @@ class Maneli_Notification_Handler {
             return false;
         }
 
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-cpt-handler.php';
         
         $post = get_post($inquiry_id);
         if (!$post) {
@@ -595,8 +595,8 @@ class Maneli_Notification_Handler {
         $customer_last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
         $customer_name = trim($customer_first_name . ' ' . $customer_last_name);
 
-        $old_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($old_status);
-        $new_label = Maneli_CPT_Handler::get_cash_inquiry_status_label($new_status);
+        $old_label = Autopuzzle_CPT_Handler::get_cash_inquiry_status_label($old_status);
+        $new_label = Autopuzzle_CPT_Handler::get_cash_inquiry_status_label($new_status);
         
         $cash_inquiry_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
 
@@ -605,9 +605,9 @@ class Maneli_Notification_Handler {
             self::create_notification([
                 'user_id' => $customer_id,
                 'type' => 'cash_status_changed',
-                'title' => esc_html__('Your cash request status has changed', 'maneli-car-inquiry'),
+                'title' => esc_html__('Your cash request status has changed', 'autopuzzle'),
                 'message' => sprintf(
-                    esc_html__('Your cash request for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    esc_html__('Your cash request for %s status changed from "%s" to "%s"', 'autopuzzle'),
                     $product_name,
                     $old_label,
                     $new_label
@@ -622,9 +622,9 @@ class Maneli_Notification_Handler {
             self::create_notification([
                 'user_id' => $assigned_expert_id,
                 'type' => 'cash_status_changed',
-                'title' => sprintf(esc_html__('Cash request status changed', 'maneli-car-inquiry')),
+                'title' => sprintf(esc_html__('Cash request status changed', 'autopuzzle')),
                 'message' => sprintf(
-                    esc_html__('Cash request from %s for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    esc_html__('Cash request from %s for %s status changed from "%s" to "%s"', 'autopuzzle'),
                     $customer_name,
                     $product_name,
                     $old_label,
@@ -639,7 +639,7 @@ class Maneli_Notification_Handler {
         $important_statuses = ['approved', 'rejected', 'completed'];
         if (in_array($new_status, $important_statuses, true)) {
             $managers = get_users([
-                'role__in' => ['administrator', 'maneli_admin'],
+                'role__in' => ['administrator', 'autopuzzle_admin'],
                 'fields' => 'ids'
             ]);
 
@@ -647,9 +647,9 @@ class Maneli_Notification_Handler {
                 self::create_notification([
                     'user_id' => $manager_id,
                     'type' => 'cash_status_changed',
-                    'title' => sprintf(esc_html__('Cash request status changed', 'maneli-car-inquiry')),
+                    'title' => sprintf(esc_html__('Cash request status changed', 'autopuzzle')),
                     'message' => sprintf(
-                        esc_html__('Cash request from %s for %s status changed to "%s"', 'maneli-car-inquiry'),
+                        esc_html__('Cash request from %s for %s status changed to "%s"', 'autopuzzle'),
                         $customer_name,
                         $product_name,
                         $new_label
@@ -677,7 +677,7 @@ class Maneli_Notification_Handler {
             return false;
         }
 
-        require_once MANELI_INQUIRY_PLUGIN_PATH . 'includes/class-cpt-handler.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-cpt-handler.php';
         
         $post = get_post($inquiry_id);
         if (!$post) {
@@ -702,12 +702,12 @@ class Maneli_Notification_Handler {
 
         // Get appropriate status labels based on status type
         if ($status_type === 'tracking_status') {
-            $old_label = Maneli_CPT_Handler::get_tracking_status_label($old_status);
-            $new_label = Maneli_CPT_Handler::get_tracking_status_label($new_status);
+            $old_label = Autopuzzle_CPT_Handler::get_tracking_status_label($old_status);
+            $new_label = Autopuzzle_CPT_Handler::get_tracking_status_label($new_status);
             $notification_type = 'installment_tracking_changed';
         } else {
-            $old_label = Maneli_CPT_Handler::get_status_label($old_status);
-            $new_label = Maneli_CPT_Handler::get_status_label($new_status);
+            $old_label = Autopuzzle_CPT_Handler::get_status_label($old_status);
+            $new_label = Autopuzzle_CPT_Handler::get_status_label($new_status);
             $notification_type = 'installment_status_changed';
         }
         
@@ -718,9 +718,9 @@ class Maneli_Notification_Handler {
             self::create_notification([
                 'user_id' => $customer_id,
                 'type' => $notification_type,
-                'title' => esc_html__('Your installment request status has changed', 'maneli-car-inquiry'),
+                'title' => esc_html__('Your installment request status has changed', 'autopuzzle'),
                 'message' => sprintf(
-                    esc_html__('Your installment request for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    esc_html__('Your installment request for %s status changed from "%s" to "%s"', 'autopuzzle'),
                     $product_name,
                     $old_label,
                     $new_label
@@ -735,9 +735,9 @@ class Maneli_Notification_Handler {
             self::create_notification([
                 'user_id' => $assigned_expert_id,
                 'type' => $notification_type,
-                'title' => sprintf(esc_html__('Installment request status changed', 'maneli-car-inquiry')),
+                'title' => sprintf(esc_html__('Installment request status changed', 'autopuzzle')),
                 'message' => sprintf(
-                    esc_html__('Installment request from %s for %s status changed from "%s" to "%s"', 'maneli-car-inquiry'),
+                    esc_html__('Installment request from %s for %s status changed from "%s" to "%s"', 'autopuzzle'),
                     $customer_name,
                     $product_name,
                     $old_label,
@@ -752,7 +752,7 @@ class Maneli_Notification_Handler {
         $important_statuses = ['approved', 'rejected', 'completed', 'user_confirmed'];
         if (in_array($new_status, $important_statuses, true)) {
             $managers = get_users([
-                'role__in' => ['administrator', 'maneli_admin'],
+                'role__in' => ['administrator', 'autopuzzle_admin'],
                 'fields' => 'ids'
             ]);
 
@@ -760,9 +760,9 @@ class Maneli_Notification_Handler {
                 self::create_notification([
                     'user_id' => $manager_id,
                     'type' => $notification_type,
-                    'title' => sprintf(esc_html__('Installment request status changed', 'maneli-car-inquiry')),
+                    'title' => sprintf(esc_html__('Installment request status changed', 'autopuzzle')),
                     'message' => sprintf(
-                        esc_html__('Installment request from %s for %s status changed to "%s"', 'maneli-car-inquiry'),
+                        esc_html__('Installment request from %s for %s status changed to "%s"', 'autopuzzle'),
                         $customer_name,
                         $product_name,
                         $new_label
@@ -808,7 +808,7 @@ class Maneli_Notification_Handler {
             $customer_first_name = get_post_meta($inquiry_id, 'cash_first_name', true);
             $customer_last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
             $inquiry_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
-            $inquiry_type = esc_html__('Cash', 'maneli-car-inquiry');
+            $inquiry_type = esc_html__('Cash', 'autopuzzle');
         } else {
             $customer_first_name = get_post_meta($inquiry_id, 'first_name', true);
             $customer_last_name = get_post_meta($inquiry_id, 'last_name', true);
@@ -820,7 +820,7 @@ class Maneli_Notification_Handler {
                 }
             }
             $inquiry_url = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
-            $inquiry_type = esc_html__('Installment', 'maneli-car-inquiry');
+            $inquiry_type = esc_html__('Installment', 'autopuzzle');
         }
         $customer_name = trim($customer_first_name . ' ' . $customer_last_name);
 
@@ -829,9 +829,9 @@ class Maneli_Notification_Handler {
             self::create_notification([
                 'user_id' => $assigned_expert_id,
                 'type' => 'document_uploaded',
-                'title' => sprintf(esc_html__('New document uploaded', 'maneli-car-inquiry')),
+                'title' => sprintf(esc_html__('New document uploaded', 'autopuzzle')),
                 'message' => sprintf(
-                    esc_html__('%s request from %s: Document "%s" has been uploaded', 'maneli-car-inquiry'),
+                    esc_html__('%s request from %s: Document "%s" has been uploaded', 'autopuzzle'),
                     $inquiry_type,
                     $customer_name,
                     $document_name
@@ -843,7 +843,7 @@ class Maneli_Notification_Handler {
 
         // Notify all admins and managers
         $managers = get_users([
-            'role__in' => ['administrator', 'maneli_admin'],
+            'role__in' => ['administrator', 'autopuzzle_admin'],
             'fields' => 'ids'
         ]);
 
@@ -851,9 +851,9 @@ class Maneli_Notification_Handler {
             self::create_notification([
                 'user_id' => $manager_id,
                 'type' => 'document_uploaded',
-                'title' => sprintf(esc_html__('New document uploaded', 'maneli-car-inquiry')),
+                'title' => sprintf(esc_html__('New document uploaded', 'autopuzzle')),
                 'message' => sprintf(
-                    esc_html__('%s request from %s: Document "%s" has been uploaded', 'maneli-car-inquiry'),
+                    esc_html__('%s request from %s: Document "%s" has been uploaded', 'autopuzzle'),
                     $inquiry_type,
                     $customer_name,
                     $document_name
@@ -892,9 +892,9 @@ class Maneli_Notification_Handler {
         return self::create_notification([
             'user_id' => $user_id,
             'type' => 'document_approved',
-            'title' => esc_html__('Document approved', 'maneli-car-inquiry'),
+            'title' => esc_html__('Document approved', 'autopuzzle'),
             'message' => sprintf(
-                esc_html__('Your document "%s" has been approved', 'maneli-car-inquiry'),
+                esc_html__('Your document "%s" has been approved', 'autopuzzle'),
                 $document_name
             ),
             'link' => $link,
@@ -927,18 +927,18 @@ class Maneli_Notification_Handler {
         }
 
         $message = sprintf(
-            esc_html__('Your document "%s" has been rejected', 'maneli-car-inquiry'),
+            esc_html__('Your document "%s" has been rejected', 'autopuzzle'),
             $document_name
         );
         
         if ($rejection_reason) {
-            $message .= '. ' . esc_html__('Reason:', 'maneli-car-inquiry') . ' ' . esc_html($rejection_reason);
+            $message .= '. ' . esc_html__('Reason:', 'autopuzzle') . ' ' . esc_html($rejection_reason);
         }
 
         return self::create_notification([
             'user_id' => $user_id,
             'type' => 'document_rejected',
-            'title' => esc_html__('Document rejected', 'maneli-car-inquiry'),
+            'title' => esc_html__('Document rejected', 'autopuzzle'),
             'message' => $message,
             'link' => $link,
             'related_id' => $inquiry_id ? $inquiry_id : 0,
@@ -981,7 +981,7 @@ class Maneli_Notification_Handler {
 
         // Send SMS notification
         $message = sprintf(
-            esc_html__('Please upload the document "%s" in your profile.', 'maneli-car-inquiry'),
+            esc_html__('Please upload the document "%s" in your profile.', 'autopuzzle'),
             $document_name
         );
         self::send_sms_notification($mobile, $message);
@@ -989,9 +989,9 @@ class Maneli_Notification_Handler {
         // Create in-app notification
         self::create_notification($user_id, [
             'type' => 'document_requested',
-            'title' => esc_html__('Document requested', 'maneli-car-inquiry'),
+            'title' => esc_html__('Document requested', 'autopuzzle'),
             'message' => sprintf(
-                esc_html__('Please upload the document "%s".', 'maneli-car-inquiry'),
+                esc_html__('Please upload the document "%s".', 'autopuzzle'),
                 $document_name
             ),
             'link' => $link,
@@ -1025,7 +1025,7 @@ class Maneli_Notification_Handler {
         $product_id = get_post_meta($inquiry_id, 'product_id', true);
         $product_name = get_the_title($product_id);
         $expert = get_userdata($expert_id);
-        $expert_name = $expert ? $expert->display_name : esc_html__('Expert', 'maneli-car-inquiry');
+        $expert_name = $expert ? $expert->display_name : esc_html__('Expert', 'autopuzzle');
 
         // Get customer name
         if ($post_type === 'cash_inquiry') {
@@ -1033,7 +1033,7 @@ class Maneli_Notification_Handler {
             $customer_last_name = get_post_meta($inquiry_id, 'cash_last_name', true);
             $expert_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
             $customer_url = add_query_arg('cash_inquiry_id', $inquiry_id, home_url('/dashboard/cash-inquiries'));
-            $inquiry_type = esc_html__('Cash', 'maneli-car-inquiry');
+            $inquiry_type = esc_html__('Cash', 'autopuzzle');
         } else {
             $customer_first_name = get_post_meta($inquiry_id, 'first_name', true);
             $customer_last_name = get_post_meta($inquiry_id, 'last_name', true);
@@ -1046,7 +1046,7 @@ class Maneli_Notification_Handler {
             }
             $expert_url = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
             $customer_url = add_query_arg('inquiry_id', $inquiry_id, home_url('/dashboard/installment-inquiries'));
-            $inquiry_type = esc_html__('Installment', 'maneli-car-inquiry');
+            $inquiry_type = esc_html__('Installment', 'autopuzzle');
         }
         $customer_name = trim($customer_first_name . ' ' . $customer_last_name);
 
@@ -1054,9 +1054,9 @@ class Maneli_Notification_Handler {
         self::create_notification([
             'user_id' => $expert_id,
             'type' => 'inquiry_assigned',
-            'title' => sprintf(esc_html__('%s request assigned to you', 'maneli-car-inquiry'), $inquiry_type),
+            'title' => sprintf(esc_html__('%s request assigned to you', 'autopuzzle'), $inquiry_type),
             'message' => sprintf(
-                esc_html__('A %s request from %s for %s has been assigned to you', 'maneli-car-inquiry'),
+                esc_html__('A %s request from %s for %s has been assigned to you', 'autopuzzle'),
                 $inquiry_type,
                 $customer_name,
                 $product_name
@@ -1070,9 +1070,9 @@ class Maneli_Notification_Handler {
             self::create_notification([
                 'user_id' => $customer_id,
                 'type' => 'expert_assigned',
-                'title' => esc_html__('Expert assigned to your request', 'maneli-car-inquiry'),
+                'title' => esc_html__('Expert assigned to your request', 'autopuzzle'),
                 'message' => sprintf(
-                    esc_html__('Expert %s has been assigned to your %s request for %s', 'maneli-car-inquiry'),
+                    esc_html__('Expert %s has been assigned to your %s request for %s', 'autopuzzle'),
                     $expert_name,
                     strtolower($inquiry_type),
                     $product_name

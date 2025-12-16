@@ -3,7 +3,7 @@
  * Telegram Handler
  * Handles sending messages via Telegram Bot API
  *
- * @package Maneli_Car_Inquiry/Includes
+ * @package Autopuzzle_Car_Inquiry/Includes
  * @version 1.0.0
  */
 
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Telegram_Handler {
+class Autopuzzle_Telegram_Handler {
 
     /**
      * Plugin options array.
@@ -20,7 +20,7 @@ class Maneli_Telegram_Handler {
     private $options;
 
     public function __construct() {
-        $this->options = Maneli_Options_Helper::get_all_options();
+        $this->options = Autopuzzle_Options_Helper::get_all_options();
     }
 
     /**
@@ -35,14 +35,14 @@ class Maneli_Telegram_Handler {
         
         if (empty($bot_token)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Telegram Error: Bot token is not configured.');
+                error_log('AutoPuzzle Telegram Error: Bot token is not configured.');
             }
             return false;
         }
 
         if (empty($message)) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Telegram Error: Message is empty.');
+                error_log('AutoPuzzle Telegram Error: Message is empty.');
             }
             return false;
         }
@@ -75,7 +75,7 @@ class Maneli_Telegram_Handler {
                 if (is_wp_error($response)) {
                     $error_message = $response->get_error_message();
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli Telegram Error: ' . $error_message);
+                        error_log('AutoPuzzle Telegram Error: ' . $error_message);
                     }
                     $results[$chat_id] = [
                         'success' => false,
@@ -96,7 +96,7 @@ class Maneli_Telegram_Handler {
                 } else {
                     $error_msg = $response_data['description'] ?? 'Unknown error';
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        error_log('Maneli Telegram API Error: ' . $error_msg);
+                        error_log('AutoPuzzle Telegram API Error: ' . $error_msg);
                     }
                     $results[$chat_id] = [
                         'success' => false,
@@ -105,7 +105,7 @@ class Maneli_Telegram_Handler {
                 }
             } catch (Exception $e) {
                 if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Maneli Telegram Exception: ' . $e->getMessage());
+                    error_log('AutoPuzzle Telegram Exception: ' . $e->getMessage());
                 }
                 $results[$chat_id] = [
                     'success' => false,
@@ -159,7 +159,7 @@ class Maneli_Telegram_Handler {
             return false;
         } catch (Exception $e) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Telegram Exception (getBotInfo): ' . $e->getMessage());
+                error_log('AutoPuzzle Telegram Exception (getBotInfo): ' . $e->getMessage());
             }
             return false;
         }

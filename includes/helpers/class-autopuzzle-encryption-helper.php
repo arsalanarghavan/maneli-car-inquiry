@@ -5,8 +5,8 @@
  * Provides centralized encryption and decryption functionality using AES-256-CBC.
  * This class eliminates code duplication across the plugin.
  * 
- * @package Maneli_Car_Inquiry/Includes/Helpers
- * @author  Maneli Car Inquiry Team
+ * @package Autopuzzle_Car_Inquiry/Includes/Helpers
+ * @author  AutoPuzzle Car Inquiry Team
  * @version 1.0.0
  */
 
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Encryption_Helper {
+class Autopuzzle_Encryption_Helper {
 
     /**
      * Retrieves a unique, site-specific key for encryption, ensuring it's 32 bytes long.
@@ -45,7 +45,7 @@ class Maneli_Encryption_Helper {
         
         if ($iv_length === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Encryption Error: Invalid cipher algorithm.');
+                error_log('AutoPuzzle Encryption Error: Invalid cipher algorithm.');
             }
             return '';
         }
@@ -54,7 +54,7 @@ class Maneli_Encryption_Helper {
         $iv = openssl_random_pseudo_bytes($iv_length);
         if ($iv === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Encryption Error: Failed to generate IV.');
+                error_log('AutoPuzzle Encryption Error: Failed to generate IV.');
             }
             return '';
         }
@@ -63,7 +63,7 @@ class Maneli_Encryption_Helper {
         
         if ($encrypted === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Encryption Error: Encryption failed. Error: ' . openssl_error_string());
+                error_log('AutoPuzzle Encryption Error: Encryption failed. Error: ' . openssl_error_string());
             }
             return '';
         }
@@ -90,7 +90,7 @@ class Maneli_Encryption_Helper {
         $decoded = base64_decode($encrypted_data, true);
         if ($decoded === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Decryption Error: Failed to decode base64 data.');
+                error_log('AutoPuzzle Decryption Error: Failed to decode base64 data.');
             }
             return '';
         }
@@ -99,7 +99,7 @@ class Maneli_Encryption_Helper {
         
         if (count($parts) !== 2) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Decryption Error: Invalid encrypted data format.');
+                error_log('AutoPuzzle Decryption Error: Invalid encrypted data format.');
             }
             return ''; // Invalid format
         }
@@ -111,7 +111,7 @@ class Maneli_Encryption_Helper {
         $iv_length = openssl_cipher_iv_length($cipher);
         if ($iv_length === false || strlen($iv) !== $iv_length) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Maneli Decryption Error: Invalid IV length.');
+                error_log('AutoPuzzle Decryption Error: Invalid IV length.');
             }
             return '';
         }
@@ -122,7 +122,7 @@ class Maneli_Encryption_Helper {
         if ($decrypted === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 $error_string = openssl_error_string();
-                error_log('Maneli Decryption Error: Decryption failed. Error: ' . ($error_string ?: 'Unknown error'));
+                error_log('AutoPuzzle Decryption Error: Decryption failed. Error: ' . ($error_string ?: 'Unknown error'));
             }
             return '';
         }

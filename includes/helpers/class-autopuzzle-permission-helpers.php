@@ -5,7 +5,7 @@
  * This centralizes the logic for determining if a user can view or interact with specific
  * plugin-related posts (like inquiries), making the code cleaner and more secure.
  *
- * @package Maneli_Car_Inquiry/Includes/Helpers
+ * @package Autopuzzle_Car_Inquiry/Includes/Helpers
  * @author  Gemini
  * @version 1.0.0
  */
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Maneli_Permission_Helpers {
+class Autopuzzle_Permission_Helpers {
 
     /**
      * Cache for license status checks in same request
@@ -30,13 +30,13 @@ class Maneli_Permission_Helpers {
     /**
      * Get license instance with caching
      *
-     * @return Maneli_License|null
+     * @return Autopuzzle_License|null
      */
     private static function get_license() {
-        if (!class_exists('Maneli_License')) {
+        if (!class_exists('Autopuzzle_License')) {
             return null;
         }
-        return Maneli_License::instance();
+        return Autopuzzle_License::instance();
     }
 
     /**
@@ -44,7 +44,7 @@ class Maneli_Permission_Helpers {
      *
      * A user can view an inquiry if they are:
      * 1. The author (customer) of the inquiry.
-     * 2. An administrator or Maneli Manager (with 'manage_maneli_inquiries' capability).
+     * 2. An administrator or AutoPuzzle Manager (with 'manage_autopuzzle_inquiries' capability).
      * 3. The expert specifically assigned to that inquiry.
      *
      * @param int $post_id   The ID of the inquiry or cash_inquiry post.
@@ -52,8 +52,8 @@ class Maneli_Permission_Helpers {
      * @return bool True if the user has permission, false otherwise.
      */
     public static function can_user_view_inquiry($post_id, $user_id) {
-        // Rule 2: Admins and Maneli Managers can view everything.
-        if (user_can($user_id, 'manage_maneli_inquiries')) {
+        // Rule 2: Admins and AutoPuzzle Managers can view everything.
+        if (user_can($user_id, 'manage_autopuzzle_inquiries')) {
             return true;
         }
 
@@ -84,7 +84,7 @@ class Maneli_Permission_Helpers {
      */
     public static function is_assigned_expert($post_id, $user_id) {
         $user = get_userdata($user_id);
-        if (!$user || !in_array('maneli_expert', $user->roles, true)) {
+        if (!$user || !in_array('autopuzzle_expert', $user->roles, true)) {
             return false; // User is not an expert, so they can't be the assigned one.
         }
 
@@ -112,7 +112,7 @@ class Maneli_Permission_Helpers {
         }
         
         // Check user capability
-        if (user_can($user_id, 'manage_maneli_inquiries')) {
+        if (user_can($user_id, 'manage_autopuzzle_inquiries')) {
             return true;
         }
         
@@ -138,7 +138,7 @@ class Maneli_Permission_Helpers {
         }
         
         // Check user capability
-        if (user_can($user_id, 'manage_maneli_inquiries') || user_can($user_id, 'edit_posts')) {
+        if (user_can($user_id, 'manage_autopuzzle_inquiries') || user_can($user_id, 'edit_posts')) {
             return true;
         }
         

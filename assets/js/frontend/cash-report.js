@@ -43,8 +43,8 @@
             console.log('✅ maneliCashReport:', maneliCashReport);
     
             // Initialize datepicker
-            if ($('.maneli-datepicker').length && typeof $.fn.persianDatepicker !== 'undefined') {
-                $('.maneli-datepicker').each(function() {
+            if ($('.autopuzzle-datepicker').length && typeof $.fn.persianDatepicker !== 'undefined') {
+                $('.autopuzzle-datepicker').each(function() {
                     var $el = $(this);
                     if (!$el.attr('data-pdp-init')) {
                         $el.persianDatepicker({
@@ -67,7 +67,7 @@
                     url: maneliCashReport.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_update_cash_status',
+                        action: 'autopuzzle_update_cash_status',
                         inquiry_id: inquiryId,
                         new_status: newStatus,
                         nonce: maneliCashReport.nonces.update_status,
@@ -327,7 +327,7 @@
                     html: `
                         <div class="text-start">
                             <label class="form-label">تاریخ پیگیری بعدی:</label>
-                            <input type="text" id="swal-cash-followup-date" class="form-control mb-3 maneli-datepicker" placeholder="انتخاب تاریخ">
+                            <input type="text" id="swal-cash-followup-date" class="form-control mb-3 autopuzzle-datepicker" placeholder="انتخاب تاریخ">
                             
                             <label class="form-label">یادداشت (اختیاری):</label>
                             <textarea id="swal-cash-followup-note" class="form-control" rows="3" placeholder="یادداشت خود را وارد کنید..."></textarea>
@@ -403,7 +403,7 @@
                     url: maneliCashReport.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_save_expert_note',
+                        action: 'autopuzzle_save_expert_note',
                         inquiry_id:inquiryId,
                         note: note,
                         nonce: maneliCashReport.nonces.save_note
@@ -446,7 +446,7 @@
                     url: maneliCashReport.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_save_meeting_schedule',
+                        action: 'autopuzzle_save_meeting_schedule',
                         inquiry_id: inquiryId,
                         inquiry_type: 'cash',
                         meeting_date: date,
@@ -510,7 +510,7 @@
                     url: maneliCashReport.ajax_url,
                     type: 'POST',
                     data: {
-                        action: 'maneli_save_expert_decision_cash',
+                        action: 'autopuzzle_save_expert_decision_cash',
                         inquiry_id: inquiryId,
                         decision: decision,
                         downpayment: downpayment,
@@ -574,7 +574,7 @@
                             url: maneliCashReport.ajax_url,
                             type: 'POST',
                             data: {
-                                action: 'maneli_admin_approve_cash',
+                                action: 'autopuzzle_admin_approve_cash',
                                 inquiry_id: inquiryId,
                                 nonce: maneliCashReport.nonces.admin_approve
                             },

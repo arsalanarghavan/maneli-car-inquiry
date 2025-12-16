@@ -1,8 +1,8 @@
 /**
  * Handles the tab switching functionality for the frontend settings panel
- * rendered by the [maneli_settings] shortcode.
+ * rendered by the [autopuzzle_settings] shortcode.
  *
- * This script is enqueued by the Maneli_Admin_Shortcodes class.
+ * This script is enqueued by the Autopuzzle_Admin_Shortcodes class.
  *
  * @version 1.0.0
  */
@@ -11,15 +11,15 @@
 
     $(document).ready(function() {
         // Find the main container for the settings panel.
-        const settingsContainer = $('.maneli-settings-container');
+        const settingsContainer = $('.autopuzzle-settings-container');
         
         // If the container doesn't exist on the page, do nothing.
         if (!settingsContainer.length) {
             return;
         }
 
-        const tabLinks = settingsContainer.find('.maneli-tab-link');
-        const tabPanes = settingsContainer.find('.maneli-tab-pane');
+        const tabLinks = settingsContainer.find('.autopuzzle-tab-link');
+        const tabPanes = settingsContainer.find('.autopuzzle-tab-pane');
 
         /**
          * Handles the click event on a tab link.

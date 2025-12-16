@@ -29,7 +29,7 @@ if (empty($payment_id)) {
                 <div class="col-xl-12">
                     <div class="alert alert-danger alert-dismissible fade show">
                         <i class="la la-exclamation-triangle me-2"></i>
-                        <strong><?php esc_html_e('Error!', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('Payment ID is not specified.', 'maneli-car-inquiry'); ?>
+                        <strong><?php esc_html_e('Error!', 'autopuzzle'); ?></strong> <?php esc_html_e('Payment ID is not specified.', 'autopuzzle'); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </div>
@@ -41,7 +41,7 @@ if (empty($payment_id)) {
 }
 
 // Permission check
-if (!current_user_can('manage_maneli_inquiries')) {
+if (!current_user_can('manage_autopuzzle_inquiries')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }
@@ -56,7 +56,7 @@ if (!$inquiry) {
                 <div class="col-xl-12">
                     <div class="alert alert-danger alert-dismissible fade show">
                         <i class="la la-exclamation-triangle me-2"></i>
-                        <strong><?php esc_html_e('Error!', 'maneli-car-inquiry'); ?></strong> <?php esc_html_e('Inquiry not found.', 'maneli-car-inquiry'); ?>
+                        <strong><?php esc_html_e('Error!', 'autopuzzle'); ?></strong> <?php esc_html_e('Inquiry not found.', 'autopuzzle'); ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 </div>
@@ -92,29 +92,29 @@ if (empty($payment_date)) {
 }
 
 // Get gateway label
-$gateway_label = esc_html__('Unknown', 'maneli-car-inquiry');
+$gateway_label = esc_html__('Unknown', 'autopuzzle');
 if ($payment_gateway === 'zarinpal') {
-    $gateway_label = esc_html__('Zarinpal Gateway', 'maneli-car-inquiry');
+    $gateway_label = esc_html__('Zarinpal Gateway', 'autopuzzle');
 } elseif ($payment_gateway === 'sadad') {
-    $gateway_label = esc_html__('Sadad Gateway', 'maneli-car-inquiry');
+    $gateway_label = esc_html__('Sadad Gateway', 'autopuzzle');
 } else {
-    $gateway_label = esc_html__('Bank Gateway', 'maneli-car-inquiry');
+    $gateway_label = esc_html__('Bank Gateway', 'autopuzzle');
 }
 
 // Get payment type label
-$payment_type_label = esc_html__('Unknown', 'maneli-car-inquiry');
+$payment_type_label = esc_html__('Unknown', 'autopuzzle');
 if ($is_installment) {
-    $payment_type_label = esc_html__('Inquiry Payment Fee', 'maneli-car-inquiry');
+    $payment_type_label = esc_html__('Inquiry Payment Fee', 'autopuzzle');
 } elseif ($is_cash) {
-    $payment_type_label = esc_html__('Cash Car Down Payment', 'maneli-car-inquiry');
+    $payment_type_label = esc_html__('Cash Car Down Payment', 'autopuzzle');
 }
 
 // Format payment date to Jalali
 $payment_date_formatted = '';
 if (!empty($payment_date)) {
     $timestamp = strtotime($payment_date);
-    if (function_exists('maneli_gregorian_to_jalali')) {
-        $jalali_date = maneli_gregorian_to_jalali(
+    if (function_exists('autopuzzle_gregorian_to_jalali')) {
+        $jalali_date = autopuzzle_gregorian_to_jalali(
             date('Y', $timestamp),
             date('m', $timestamp),
             date('d', $timestamp),
@@ -158,15 +158,15 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
     <div>
         <nav>
             <ol class="breadcrumb mb-1">
-                <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard/payments')); ?>"><?php esc_html_e('Payment Management', 'maneli-car-inquiry'); ?></a></li>
-                <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Payment Details', 'maneli-car-inquiry'); ?></li>
+                <li class="breadcrumb-item"><a href="<?php echo esc_url(home_url('/dashboard/payments')); ?>"><?php esc_html_e('Payment Management', 'autopuzzle'); ?></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('Payment Details', 'autopuzzle'); ?></li>
             </ol>
         </nav>
-        <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Payment Details', 'maneli-car-inquiry'); ?></h1>
+        <h1 class="page-title fw-medium fs-18 mb-0"><?php esc_html_e('Payment Details', 'autopuzzle'); ?></h1>
     </div>
     <div class="btn-list">
         <a href="<?php echo esc_url(home_url('/dashboard/payments')); ?>" class="btn btn-white btn-wave">
-            <i class="ri-arrow-right-line align-middle me-1 lh-1"></i> <?php esc_html_e('Back', 'maneli-car-inquiry'); ?>
+            <i class="ri-arrow-right-line align-middle me-1 lh-1"></i> <?php esc_html_e('Back', 'autopuzzle'); ?>
         </a>
     </div>
 </div>
@@ -176,7 +176,7 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
         <div class="card custom-card">
             <div class="card-header d-flex justify-content-between">
                 <div class="card-title">
-                    <?php esc_html_e('Payment Number', 'maneli-car-inquiry'); ?> - <span class="text-primary">#<?php echo persian_numbers($payment_id); ?></span>
+                    <?php esc_html_e('Payment Number', 'autopuzzle'); ?> - <span class="text-primary">#<?php echo persian_numbers($payment_id); ?></span>
                 </div>
                 <div>
                     <span class="badge bg-success-transparent">
@@ -187,36 +187,36 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
             <div class="card-body">
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3">
-                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Type:', 'maneli-car-inquiry'); ?></div>
+                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Type:', 'autopuzzle'); ?></div>
                         <div class="text-muted"><?php echo esc_html($payment_type_label); ?></div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Method:', 'maneli-car-inquiry'); ?></div>
+                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Method:', 'autopuzzle'); ?></div>
                         <div class="text-muted"><?php echo esc_html($gateway_label); ?></div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Amount:', 'maneli-car-inquiry'); ?></div>
+                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Amount:', 'autopuzzle'); ?></div>
                         <div class="fs-15 fw-semibold">
                             <?php if ($payment_amount > 0): ?>
-                                <?php echo persian_numbers(number_format_i18n($payment_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?>
+                                <?php echo persian_numbers(number_format_i18n($payment_amount)); ?> <?php esc_html_e('Toman', 'autopuzzle'); ?>
                             <?php else: ?>
-                                <span class="text-success"><?php esc_html_e('Free!', 'maneli-car-inquiry'); ?></span>
+                                <span class="text-success"><?php esc_html_e('Free!', 'autopuzzle'); ?></span>
                             <?php endif; ?>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Date:', 'maneli-car-inquiry'); ?></div>
+                        <div class="fw-semibold mb-2"><?php esc_html_e('Payment Date:', 'autopuzzle'); ?></div>
                         <div class="text-muted"><?php echo esc_html($payment_date_formatted); ?></div>
                     </div>
                 </div>
 
                 <?php if (!empty($tracking_code) || !empty($transaction_id)): ?>
                 <div class="border-top pt-4">
-                    <h5 class="mb-3"><?php esc_html_e('Transaction Information', 'maneli-car-inquiry'); ?></h5>
+                    <h5 class="mb-3"><?php esc_html_e('Transaction Information', 'autopuzzle'); ?></h5>
                     <div class="row">
                         <?php if (!empty($tracking_code)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2"><?php esc_html_e('Tracking Code:', 'maneli-car-inquiry'); ?></div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Tracking Code:', 'autopuzzle'); ?></div>
                             <div class="text-primary fw-medium">
                                 <?php if ($payment_gateway === 'zarinpal'): ?>
                                     <a href="javascript:void(0);" class="text-primary"><?php echo persian_numbers(esc_html($tracking_code)); ?></a>
@@ -228,7 +228,7 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                         <?php endif; ?>
                         <?php if (!empty($transaction_id)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2"><?php esc_html_e('Transaction ID:', 'maneli-car-inquiry'); ?></div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Transaction ID:', 'autopuzzle'); ?></div>
                             <div class="text-primary fw-medium">
                                 <?php echo persian_numbers(esc_html($transaction_id)); ?>
                             </div>
@@ -236,13 +236,13 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                         <?php endif; ?>
                         <?php if ($payment_gateway === 'zarinpal' && !empty($payment_authority)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2"><?php esc_html_e('Authority Code:', 'maneli-car-inquiry'); ?></div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Authority Code:', 'autopuzzle'); ?></div>
                             <div class="text-muted"><?php echo esc_html($payment_authority); ?></div>
                         </div>
                         <?php endif; ?>
                         <?php if ($payment_gateway === 'sadad' && !empty($payment_order_id)): ?>
                         <div class="col-md-6 mb-3">
-                            <div class="fw-semibold mb-2"><?php esc_html_e('Order ID:', 'maneli-car-inquiry'); ?></div>
+                            <div class="fw-semibold mb-2"><?php esc_html_e('Order ID:', 'autopuzzle'); ?></div>
                             <div class="text-muted"><?php echo esc_html($payment_order_id); ?></div>
                         </div>
                         <?php endif; ?>
@@ -251,14 +251,14 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                 <?php endif; ?>
 
                 <div class="border-top pt-4">
-                    <h5 class="mb-3"><?php esc_html_e('Inquiry Information', 'maneli-car-inquiry'); ?></h5>
+                    <h5 class="mb-3"><?php esc_html_e('Inquiry Information', 'autopuzzle'); ?></h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                    <div class="fw-semibold mb-2"><?php esc_html_e('Inquiry ID:', 'maneli-car-inquiry'); ?></div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Inquiry ID:', 'autopuzzle'); ?></div>
                     <div class="text-muted">#<?php echo persian_numbers($payment_id); ?></div>
                         </div>
                         <div class="col-md-6 mb-3">
-                    <div class="fw-semibold mb-2"><?php esc_html_e('Car:', 'maneli-car-inquiry'); ?></div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Car:', 'autopuzzle'); ?></div>
                             <div class="text-muted">
                                 <?php if ($product): ?>
                                     <?php echo persian_numbers(esc_html($product->get_name())); ?>
@@ -272,15 +272,15 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
             </div>
             <div class="card-footer border-top-0 d-flex align-items-center justify-content-between gap-2">
                 <a href="<?php echo esc_url(home_url('/dashboard/payments')); ?>" class="btn btn-primary-light btn-wave">
-                    <i class="ri-arrow-right-line me-1 align-middle d-inline-block"></i><?php esc_html_e('Back to Payments', 'maneli-car-inquiry'); ?>
+                    <i class="ri-arrow-right-line me-1 align-middle d-inline-block"></i><?php esc_html_e('Back to Payments', 'autopuzzle'); ?>
                 </a>
                 <?php if ($is_installment): ?>
                     <a href="<?php echo esc_url(home_url('/dashboard/installment-inquiries?view_inquiry=' . $payment_id)); ?>" class="btn btn-primary btn-wave">
-                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i><?php esc_html_e('View Inquiry', 'maneli-car-inquiry'); ?>
+                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i><?php esc_html_e('View Inquiry', 'autopuzzle'); ?>
                     </a>
                 <?php elseif ($is_cash): ?>
                     <a href="<?php echo esc_url(home_url('/dashboard/cash-inquiries?view_inquiry=' . $payment_id)); ?>" class="btn btn-primary btn-wave">
-                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i><?php esc_html_e('View Inquiry', 'maneli-car-inquiry'); ?>
+                        <i class="ri-eye-line me-1 align-middle d-inline-block"></i><?php esc_html_e('View Inquiry', 'autopuzzle'); ?>
                     </a>
                 <?php endif; ?>
             </div>
@@ -291,16 +291,16 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
         <div class="card custom-card">
                 <div class="card-header justify-content-between">
                 <div class="card-title">
-                    <?php esc_html_e('Customer Information', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Customer Information', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <div class="fw-semibold mb-2"><?php esc_html_e('Full Name:', 'maneli-car-inquiry'); ?></div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Full Name:', 'autopuzzle'); ?></div>
                     <div class="text-muted"><?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($user_display_name)) : esc_html($user_display_name); ?></div>
                 </div>
                 <div class="mb-3">
-                    <div class="fw-semibold mb-2"><?php esc_html_e('Mobile Number:', 'maneli-car-inquiry'); ?></div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('Mobile Number:', 'autopuzzle'); ?></div>
                     <div class="text-muted">
                         <a href="tel:<?php echo esc_attr($user_mobile); ?>" class="text-primary">
                             <?php echo function_exists('persian_numbers_no_separator') ? persian_numbers_no_separator(esc_html($user_mobile)) : esc_html($user_mobile); ?>
@@ -308,7 +308,7 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                     </div>
                 </div>
                 <div class="mb-3">
-                    <div class="fw-semibold mb-2"><?php esc_html_e('User ID:', 'maneli-car-inquiry'); ?></div>
+                    <div class="fw-semibold mb-2"><?php esc_html_e('User ID:', 'autopuzzle'); ?></div>
                     <div class="text-muted">#<?php echo persian_numbers($user_id); ?></div>
                 </div>
             </div>
@@ -317,7 +317,7 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
         <div class="card custom-card">
                 <div class="card-header justify-content-between">
                 <div class="card-title">
-                    <?php esc_html_e('Payment Summary', 'maneli-car-inquiry'); ?>
+                    <?php esc_html_e('Payment Summary', 'autopuzzle'); ?>
                 </div>
             </div>
             <div class="card-body p-0 table-responsive">
@@ -325,22 +325,22 @@ if ($payment_gateway === 'zarinpal' && !empty($payment_authority)) {
                     <tbody>
                         <tr>
                             <td>
-                                <div class="fw-semibold"><?php esc_html_e('Total Amount:', 'maneli-car-inquiry'); ?></div>
+                                <div class="fw-semibold"><?php esc_html_e('Total Amount:', 'autopuzzle'); ?></div>
                             </td>
                             <td>
                                 <?php if ($payment_amount > 0): ?>
-                                    <span class="fs-15 fw-medium"><?php echo persian_numbers(number_format_i18n($payment_amount)); ?> <?php esc_html_e('Toman', 'maneli-car-inquiry'); ?></span>
+                                    <span class="fs-15 fw-medium"><?php echo persian_numbers(number_format_i18n($payment_amount)); ?> <?php esc_html_e('Toman', 'autopuzzle'); ?></span>
                                 <?php else: ?>
-                                    <span class="text-success"><?php esc_html_e('Free!', 'maneli-car-inquiry'); ?></span>
+                                    <span class="text-success"><?php esc_html_e('Free!', 'autopuzzle'); ?></span>
                                 <?php endif; ?>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <div class="fw-semibold"><?php esc_html_e('Status:', 'maneli-car-inquiry'); ?></div>
+                                <div class="fw-semibold"><?php esc_html_e('Status:', 'autopuzzle'); ?></div>
                             </td>
                             <td>
-                                <span class="badge bg-success-transparent"><?php esc_html_e('Payment Successful', 'maneli-car-inquiry'); ?></span>
+                                <span class="badge bg-success-transparent"><?php esc_html_e('Payment Successful', 'autopuzzle'); ?></span>
                             </td>
                         </tr>
                     </tbody>
