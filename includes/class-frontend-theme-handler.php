@@ -97,13 +97,21 @@ class Autopuzzle_Frontend_Theme_Handler {
     }
     
     /**
-     * Get favicon URL from WordPress
+     * Get favicon URL from WordPress or white-label settings
      */
     public function get_favicon() {
-        // Try to get WordPress site icon (favicon) first
+        // Try to get favicon from white-label branding first
+        if ( class_exists( 'Autopuzzle_Branding_Helper' ) ) {
+            $favicon_url = Autopuzzle_Branding_Helper::get_favicon();
+            if ( ! empty( $favicon_url ) ) {
+                return esc_url( $favicon_url );
+            }
+        }
+        
+        // Try to get WordPress site icon (favicon)
         $site_icon_url = get_site_icon_url();
-        if ($site_icon_url) {
-            return esc_url($site_icon_url);
+        if ( $site_icon_url ) {
+            return esc_url( $site_icon_url );
         }
         
         // Fallback to default favicon

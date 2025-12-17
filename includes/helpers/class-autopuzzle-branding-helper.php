@@ -360,18 +360,19 @@ class Autopuzzle_Branding_Helper {
      */
     public static function get_branding_config() {
         return [
-            'system_name'       => self::get_brand_name_localized(),
-            'company_name'      => self::get_company_name(),
-            'company_website'   => self::get_website(),
-            'support_email'     => self::get_support_email(),
-            'support_phone'     => self::get_support_phone(),
-            'logo_url'          => self::get_logo( 'main' ),
-            'logo_light_url'    => self::get_logo( 'light' ),
-            'logo_dark_url'     => self::get_logo( 'dark' ),
-            'favicon_url'       => self::get_favicon(),
-            'primary_color'     => self::get_primary_color(),
-            'secondary_color'   => self::get_secondary_color(),
-            'accent_color'      => self::get_accent_color(),
+            'system_name'           => self::get_brand_name_localized(),
+            'company_name'          => self::get_company_name(),
+            'company_name_persian'  => self::get_company_name_persian(),
+            'company_website'       => self::get_website(),
+            'support_email'         => self::get_support_email(),
+            'support_phone'         => self::get_support_phone(),
+            'logo_url'              => self::get_logo( 'main' ),
+            'logo_light_url'        => self::get_logo( 'light' ),
+            'logo_dark_url'         => self::get_logo( 'dark' ),
+            'favicon_url'           => self::get_favicon(),
+            'primary_color'         => self::get_primary_color(),
+            'secondary_color'       => self::get_secondary_color(),
+            'accent_color'          => self::get_accent_color(),
         ];
     }
     

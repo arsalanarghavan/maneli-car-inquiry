@@ -10329,6 +10329,10 @@ msgid "%1$s Designed with %2$s by %3$s"
 msgstr "%1$s طراحی با %2$s توسط %3$s"
 
 #: templates/dashboard.php
+msgid "© %1$s Designed with %2$s by %3$s"
+msgstr "© %1$s طراحی با %2$s توسط %3$s"
+
+#: templates/dashboard.php
 msgid "Puzzling Institute"
 msgstr "موسسه پازلینگ"
 

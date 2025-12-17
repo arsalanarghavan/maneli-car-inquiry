@@ -147,10 +147,23 @@ $dashboard_html = str_replace(
 );
 
 // Inject translated footer text with white-label support
+// Get locale to determine which branding name to use
+$current_locale = get_locale();
+$is_rtl = ( strpos( $current_locale, 'fa' ) === 0 || strpos( $current_locale, 'ar' ) === 0 );
+
 $branding = Autopuzzle_Branding_Helper::get_branding_config();
-$company_name = isset($branding['company_name']) && !empty($branding['company_name'])
-    ? $branding['company_name']
-    : __('Puzzling Institute', 'autopuzzle');
+
+// Use Persian or English company name based on locale
+$company_name = '';
+if ( $is_rtl ) {
+    $company_name = isset( $branding['company_name_persian'] ) && !empty( $branding['company_name_persian'] )
+        ? $branding['company_name_persian']
+        : __('شرکت اتوپازل', 'autopuzzle');
+} else {
+    $company_name = isset( $branding['company_name'] ) && !empty( $branding['company_name'] )
+        ? $branding['company_name']
+        : __('Puzzling Institute', 'autopuzzle');
+}
 
 $company_link = isset($branding['company_website']) && !empty($branding['company_website'])
     ? sprintf(
@@ -343,6 +356,16 @@ $dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_TITLE%%', esc_html($system
 $dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_DESCRIPTION%%', esc_html($description), $dashboard_html);
 $dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_AUTHOR%%', esc_html($system_name), $dashboard_html);
 $dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_KEYWORDS%%', esc_html($keywords), $dashboard_html);
+
+// Replace favicon URL with white-label support
+$favicon_url = AUTOPUZZLE_PLUGIN_URL . 'assets/images/brand-logos/favicon.ico'; // Default
+if ( class_exists( 'Autopuzzle_Branding_Helper' ) ) {
+    $branding_favicon = Autopuzzle_Branding_Helper::get_favicon();
+    if ( ! empty( $branding_favicon ) ) {
+        $favicon_url = esc_url( $branding_favicon );
+    }
+}
+$dashboard_html = str_replace('%%AUTOPUZZLE_DASHBOARD_FAVICON%%', esc_url($favicon_url), $dashboard_html);
 
 // Fix: Replace the problematic language switching script that causes infinite refresh
 $pattern = '/(<!-- Language Switching Function -->)(.*?)(Load saved language preference on page load)(.*?)(<\/script>)/s';

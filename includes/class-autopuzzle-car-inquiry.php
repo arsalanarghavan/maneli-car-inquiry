@@ -147,6 +147,7 @@ final class Autopuzzle_Car_Inquiry_Plugin {
         
         // Frontend Features
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-grouped-attributes.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-favicon-handler.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
         
