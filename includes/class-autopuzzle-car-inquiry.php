@@ -123,6 +123,7 @@ final class Autopuzzle_Car_Inquiry_Plugin {
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/helpers/class-autopuzzle-branding-helper.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-autopuzzle-white-label-settings.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-autopuzzle-settings-menu.php';
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/admin/class-wordpress-admin-branding.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-expert-panel.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-user-profile.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-admin-dashboard-widgets.php';

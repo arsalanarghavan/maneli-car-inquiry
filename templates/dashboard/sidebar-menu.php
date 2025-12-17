@@ -85,12 +85,12 @@ function render_menu_items($menu_items, $level = 0) {
     <!-- Start::main-sidebar-header -->
     <div class="main-sidebar-header">
         <a href="<?php echo home_url('/dashboard'); ?>" class="header-logo">
-            <img src="<?php echo autopuzzle_logo('main'); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="desktop-logo">
-            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/toggle-dark.ico" alt="logo" class="toggle-dark">
-            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
-            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
-            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/toggle-white.ico" alt="logo" class="toggle-white">
-            <img src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/images/brand-logos/desktop-white.png" alt="logo" class="desktop-white">
+            <img src="<?php echo esc_url(autopuzzle_logo('main')); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="desktop-logo">
+            <img src="<?php echo esc_url(autopuzzle_logo('dark')); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="toggle-dark">
+            <img src="<?php echo esc_url(autopuzzle_logo('dark')); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="desktop-dark">
+            <img src="<?php echo esc_url(autopuzzle_logo('main')); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="toggle-logo">
+            <img src="<?php echo esc_url(autopuzzle_logo('light')); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="toggle-white">
+            <img src="<?php echo esc_url(autopuzzle_logo('light')); ?>" alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" class="desktop-white">
         </a>
     </div>
     <!-- End::main-sidebar-header -->

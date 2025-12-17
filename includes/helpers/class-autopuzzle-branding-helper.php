@@ -166,13 +166,17 @@ class Autopuzzle_Branding_Helper {
      * @return string
      */
     public static function get_logo( $type = 'main' ) {
+        $main = self::get( 'logo_url', '' );
+
         switch ( $type ) {
             case 'light':
-                return self::get( 'logo_light_url', '' );
+                $light = self::get( 'logo_light_url', '' );
+                return ! empty( $light ) ? $light : $main;
             case 'dark':
-                return self::get( 'logo_dark_url', '' );
+                $dark = self::get( 'logo_dark_url', '' );
+                return ! empty( $dark ) ? $dark : $main;
             default:
-                return self::get( 'logo_url', '' );
+                return $main;
         }
     }
     
@@ -315,14 +319,19 @@ class Autopuzzle_Branding_Helper {
         // Merge with existing settings
         $current = self::get_all_settings();
         $updated = wp_parse_args( $settings, $current );
-        
+
+        // No changes: treat as success to avoid false negatives on update_option()
+        if ( $updated === $current ) {
+            return true;
+        }
+
         // Save to database
         $result = update_option( self::OPTION_KEY, $updated );
-        
+
         // Clear cache
         self::clear_cache();
         
-        return $result;
+        return (bool) $result;
     }
     
     /**

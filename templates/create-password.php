@@ -36,8 +36,8 @@ if ($custom_logo_id) {
     <meta charset="UTF-8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><?php echo esc_html(__('Create Password - AutoPuzzle Car Inquiry', 'autopuzzle')); ?></title>
-    <link rel="icon" href="<?php echo $theme_handler->get_favicon(); ?>" type="image/x-icon">
+    <title><?php echo esc_html( sprintf( __('Create Password - %s', 'autopuzzle'), autopuzzle_brand_name() ) ); ?></title>
+    <link rel="icon" href="<?php echo esc_url( $theme_handler->get_favicon() ); ?>" type="image/x-icon">
     
     <!-- Authentication Main JS -->
     <script src="<?php echo AUTOPUZZLE_PLUGIN_URL; ?>assets/js/authentication-main.js"></script>

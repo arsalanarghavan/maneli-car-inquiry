@@ -166,7 +166,7 @@ $company_link = isset($branding['company_website']) && !empty($branding['company
 
 /* translators: 1: year span HTML, 2: heart icon HTML, 3: linked company name */
 $footer_text = sprintf(
-    __('%1$s Designed with %2$s by %3$s', 'autopuzzle'),
+    __('© %1$s Designed with %2$s by %3$s', 'autopuzzle'),
     '<span id="year"></span>',
     '<span class="bi bi-heart-fill text-danger" aria-hidden="true"></span>',
     $company_link

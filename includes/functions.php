@@ -404,8 +404,15 @@ if (!function_exists('autopuzzle_logo')) {
         if (!class_exists('Autopuzzle_Branding_Helper')) {
             return AUTOPUZZLE_PLUGIN_URL . 'assets/images/logo.png'; // Fallback
         }
-        
-        return Autopuzzle_Branding_Helper::get_logo($type);
+
+        $logo = Autopuzzle_Branding_Helper::get_logo($type);
+        $logo = esc_url_raw($logo);
+
+        if (empty($logo)) {
+            return AUTOPUZZLE_PLUGIN_URL . 'assets/images/logo.png';
+        }
+
+        return $logo;
     }
 }
 

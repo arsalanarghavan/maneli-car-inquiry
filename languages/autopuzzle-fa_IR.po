@@ -78,6 +78,194 @@ msgstr "نام"
 msgid "Last Name"
 msgstr "نام خانوادگی"
 
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "White Label & Branding"
+msgstr "برندینگ و وایت‌لیبل"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Design how your brand appears across dashboard, auth pages, and public templates."
+msgstr "نحوه نمایش برند خود در داشبورد، صفحات احراز هویت و قالب‌های عمومی را طراحی کنید."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Applies to dashboard & auth headers"
+msgstr "در هدرهای داشبورد و احراز هویت اعمال می‌شود"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Multi-language ready via translation files"
+msgstr "آماده چندزبانه از طریق فایل‌های ترجمه"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Logo variants: main, light, dark, favicon"
+msgstr "واریانت‌های لوگو: اصلی، روشن، تیره، فاویکن"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Branding settings have been reset to defaults."
+msgstr "تنظیمات برندینگ به حالت پیش‌فرض بازنشانی شد."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Brand name is required."
+msgstr "نام برند الزامی است."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Network error while saving settings."
+msgstr "خطای شبکه هنگام ذخیره تنظیمات."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Settings saved successfully"
+msgstr "تنظیمات با موفقیت ذخیره شد"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Error saving settings"
+msgstr "خطا در ذخیره تنظیمات"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Insufficient permissions"
+msgstr "دسترسی کافی وجود ندارد"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "No file uploaded"
+msgstr "فایلی آپلود نشد"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "White Label Settings"
+msgstr "تنظیمات وایت‌لیبل"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Customize your branding and appearance"
+msgstr "برند و ظاهر خود را سفارشی کنید"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "General"
+msgstr "عمومی"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Branding"
+msgstr "برندینگ"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Logos & Images"
+msgstr "لوگوها و تصاویر"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Contact Info"
+msgstr "اطلاعات تماس"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Save Settings"
+msgstr "ذخیره تنظیمات"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Reset to Defaults"
+msgstr "بازنشانی به حالت پیش‌فرض"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Are you sure you want to reset to default settings?"
+msgstr "آیا می‌خواهید تنظیمات را به حالت پیش‌فرض بازنشانی کنید؟"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Brand Name (English)"
+msgstr "نام برند (انگلیسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Used throughout the plugin interface"
+msgstr "در کل رابط پلاگین استفاده می‌شود"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Brand Name (Persian)"
+msgstr "نام برند (فارسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Used in Persian/RTL interfaces"
+msgstr "در رابط‌های فارسی/RTL استفاده می‌شود"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Tagline (English)"
+msgstr "شعار (انگلیسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Tagline (Persian)"
+msgstr "شعار (فارسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Company Name (English)"
+msgstr "نام شرکت (انگلیسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Company Name (Persian)"
+msgstr "نام شرکت (فارسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Primary Color"
+msgstr "رنگ اصلی"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Secondary Color"
+msgstr "رنگ ثانویه"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Accent Color"
+msgstr "رنگ تأکید"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Copyright Text (English)"
+msgstr "متن حق نشر (انگلیسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Copyright Text (Persian)"
+msgstr "متن حق نشر (فارسی)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Main Logo"
+msgstr "لوگوی اصلی"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Upload"
+msgstr "آپلود"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Light Logo"
+msgstr "لوگوی روشن"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Dark Logo"
+msgstr "لوگوی تیره"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Favicon"
+msgstr "فاویکن"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Email Address"
+msgstr "آدرس ایمیل"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Support Email"
+msgstr "ایمیل پشتیبانی"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Support Phone"
+msgstr "تلفن پشتیبانی"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Website URL"
+msgstr "آدرس وب‌سایت"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Select or Upload Logo"
+msgstr "انتخاب یا آپلود لوگو"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Use this logo"
+msgstr "استفاده از این لوگو"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "File is too large. Max size: %s MB"
+msgstr "فایل بیش‌ازحد بزرگ است. حداکثر اندازه: %s مگابایت"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Invalid file type. Allowed: jpg, png, gif, svg, ico, webp."
+msgstr "نوع فایل نامعتبر است. انواع مجاز: jpg, png, gif, svg, ico, webp."
+
 
 msgid "Father's Name"
 msgstr "نام پدر"

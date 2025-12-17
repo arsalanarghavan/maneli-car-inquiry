@@ -20,6 +20,14 @@ class Autopuzzle_Settings_Menu {
      */
     public static function init() {
         add_action( 'admin_menu', [ __CLASS__, 'register_settings_menu' ] );
+
+        // Ensure white-label hooks (AJAX, uploads) are registered
+        if ( class_exists( 'Autopuzzle_White_Label_Settings' ) ) {
+            new Autopuzzle_White_Label_Settings();
+        }
+
+        // Handle reset-to-defaults action
+        add_action( 'admin_action_autopuzzle_reset_branding', [ __CLASS__, 'handle_reset_branding' ] );
     }
     
     /**
@@ -78,6 +86,29 @@ class Autopuzzle_Settings_Menu {
             <?php Autopuzzle_White_Label_Settings::render(); ?>
         </div>
         <?php
+    }
+
+    /**
+     * Handle reset branding action with nonce and capability checks
+     */
+    public static function handle_reset_branding() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'You do not have permission to perform this action.', 'autopuzzle' ) );
+        }
+
+        $nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+
+        if ( ! wp_verify_nonce( $nonce, 'autopuzzle_reset_branding_nonce' ) ) {
+            wp_die( esc_html__( 'Security check failed.', 'autopuzzle' ) );
+        }
+
+        if ( class_exists( 'Autopuzzle_Branding_Helper' ) ) {
+            Autopuzzle_Branding_Helper::reset_to_defaults();
+            Autopuzzle_Branding_Helper::init();
+        }
+
+        wp_safe_redirect( admin_url( 'admin.php?page=autopuzzle-white-label&reset=1' ) );
+        exit;
     }
 }
 

@@ -79,6 +79,194 @@ msgstr "Phone Number"
 msgid "Email"
 msgstr "Email"
 
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "White Label & Branding"
+msgstr "White Label & Branding"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Design how your brand appears across dashboard, auth pages, and public templates."
+msgstr "Design how your brand appears across dashboard, auth pages, and public templates."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Applies to dashboard & auth headers"
+msgstr "Applies to dashboard & auth headers"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Multi-language ready via translation files"
+msgstr "Multi-language ready via translation files"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Logo variants: main, light, dark, favicon"
+msgstr "Logo variants: main, light, dark, favicon"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Branding settings have been reset to defaults."
+msgstr "Branding settings have been reset to defaults."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Brand name is required."
+msgstr "Brand name is required."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Network error while saving settings."
+msgstr "Network error while saving settings."
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Settings saved successfully"
+msgstr "Settings saved successfully"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Error saving settings"
+msgstr "Error saving settings"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Insufficient permissions"
+msgstr "Insufficient permissions"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "No file uploaded"
+msgstr "No file uploaded"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "White Label Settings"
+msgstr "White Label Settings"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Customize your branding and appearance"
+msgstr "Customize your branding and appearance"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "General"
+msgstr "General"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Branding"
+msgstr "Branding"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Logos & Images"
+msgstr "Logos & Images"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Contact Info"
+msgstr "Contact Info"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Save Settings"
+msgstr "Save Settings"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Reset to Defaults"
+msgstr "Reset to Defaults"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Are you sure you want to reset to default settings?"
+msgstr "Are you sure you want to reset to default settings?"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Brand Name (English)"
+msgstr "Brand Name (English)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Used throughout the plugin interface"
+msgstr "Used throughout the plugin interface"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Brand Name (Persian)"
+msgstr "Brand Name (Persian)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Used in Persian/RTL interfaces"
+msgstr "Used in Persian/RTL interfaces"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Tagline (English)"
+msgstr "Tagline (English)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Tagline (Persian)"
+msgstr "Tagline (Persian)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Company Name (English)"
+msgstr "Company Name (English)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Company Name (Persian)"
+msgstr "Company Name (Persian)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Primary Color"
+msgstr "Primary Color"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Secondary Color"
+msgstr "Secondary Color"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Accent Color"
+msgstr "Accent Color"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Copyright Text (English)"
+msgstr "Copyright Text (English)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Copyright Text (Persian)"
+msgstr "Copyright Text (Persian)"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Main Logo"
+msgstr "Main Logo"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Upload"
+msgstr "Upload"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Light Logo"
+msgstr "Light Logo"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Dark Logo"
+msgstr "Dark Logo"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Favicon"
+msgstr "Favicon"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Email Address"
+msgstr "Email Address"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Support Email"
+msgstr "Support Email"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Support Phone"
+msgstr "Support Phone"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Website URL"
+msgstr "Website URL"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Select or Upload Logo"
+msgstr "Select or Upload Logo"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Use this logo"
+msgstr "Use this logo"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "File is too large. Max size: %s MB"
+msgstr "File is too large. Max size: %s MB"
+
+#: includes/admin/class-autopuzzle-white-label-settings.php
+msgid "Invalid file type. Allowed: jpg, png, gif, svg, ico, webp."
+msgstr "Invalid file type. Allowed: jpg, png, gif, svg, ico, webp."
+
 msgid "Address"
 msgstr "Address"
 

@@ -74,8 +74,8 @@ $elementor_home_content = get_post_meta(get_the_ID(), '_elementor_data', true);
                     <!-- Center: Logo -->
                     <div class="logo-section">
                         <a href="<?php echo esc_url(home_url('/')); ?>" class="logo-link">
-                            <img src="<?php echo esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/images/logo.png'); ?>" 
-                                 alt="<?php echo esc_attr(get_bloginfo('name')); ?>" 
+                            <img src="<?php echo esc_url(autopuzzle_logo('main')); ?>" 
+                                 alt="<?php echo esc_attr(autopuzzle_brand_name()); ?>" 
                                  class="logo-img">
                             <div class="logo-text">
                                 <div class="logo-fa"><?php echo esc_html(autopuzzle_brand_name('fa_IR')); ?></div>
