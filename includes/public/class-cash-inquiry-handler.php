@@ -23,10 +23,14 @@ class Autopuzzle_Cash_Inquiry_Handler {
         // Hooks for handling the cash inquiry form submission.
         add_action('admin_post_nopriv_maneli_submit_cash_inquiry', '__return_false');
         add_action('admin_post_maneli_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
+        add_action('admin_post_nopriv_autopuzzle_submit_cash_inquiry', '__return_false');
+        add_action('admin_post_autopuzzle_submit_cash_inquiry', [$this, 'handle_cash_inquiry_submission']);
         
         // AJAX handler for customer cash inquiry creation
         add_action('wp_ajax_maneli_create_customer_cash_inquiry', [$this, 'ajax_create_customer_cash_inquiry']);
         add_action('wp_ajax_nopriv_maneli_create_customer_cash_inquiry', '__return_false');
+        add_action('wp_ajax_autopuzzle_create_customer_cash_inquiry', [$this, 'ajax_create_customer_cash_inquiry']);
+        add_action('wp_ajax_nopriv_autopuzzle_create_customer_cash_inquiry', '__return_false');
     }
     
     /**

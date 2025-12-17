@@ -476,127 +476,210 @@ class Autopuzzle_Ajax_Handler {
         
         // Meeting Settings
         add_action('wp_ajax_maneli_get_meeting_settings', [$this, 'ajax_get_meeting_settings']);
+        add_action('wp_ajax_autopuzzle_get_meeting_settings', [$this, 'ajax_get_meeting_settings']);
         
         // Global Search
         add_action('wp_ajax_maneli_global_search', [$this, 'ajax_global_search']);
+        add_action('wp_ajax_autopuzzle_global_search', [$this, 'ajax_global_search']);
         
         // Inquiry Details, List Filtering & Actions (Installment)
         add_action('wp_ajax_maneli_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
+        add_action('wp_ajax_autopuzzle_get_inquiry_details', [$this, 'ajax_get_inquiry_details']);
         add_action('wp_ajax_maneli_filter_inquiries_ajax', [$this, 'ajax_filter_inquiries']);
+        add_action('wp_ajax_autopuzzle_filter_inquiries_ajax', [$this, 'ajax_filter_inquiries']);
         add_action('wp_ajax_maneli_delete_inquiry', [$this, 'ajax_delete_inquiry']); // ADDED: Installment Inquiry Delete
+        add_action('wp_ajax_autopuzzle_delete_inquiry', [$this, 'ajax_delete_inquiry']);
         add_action('wp_ajax_maneli_update_tracking_status', [$this, 'ajax_update_tracking_status']); // ADDED: Tracking Status Update
+        add_action('wp_ajax_autopuzzle_update_tracking_status', [$this, 'ajax_update_tracking_status']);
         add_action('wp_ajax_maneli_filter_followup_inquiries', [$this, 'ajax_filter_followup_inquiries']); // ADDED: Follow-up List Filter
+        add_action('wp_ajax_autopuzzle_filter_followup_inquiries', [$this, 'ajax_filter_followup_inquiries']);
         add_action('wp_ajax_maneli_cancel_meeting', [$this, 'ajax_cancel_meeting']); // ADDED: Cancel Meeting
+        add_action('wp_ajax_autopuzzle_cancel_meeting', [$this, 'ajax_cancel_meeting']);
 
         // Cash Inquiry Actions & List Filtering
         add_action('wp_ajax_maneli_get_cash_inquiry_details', [$this, 'ajax_get_cash_inquiry_details']);
+        add_action('wp_ajax_autopuzzle_get_cash_inquiry_details', [$this, 'ajax_get_cash_inquiry_details']);
         add_action('wp_ajax_maneli_update_cash_inquiry', [$this, 'ajax_update_cash_inquiry']);
+        add_action('wp_ajax_autopuzzle_update_cash_inquiry', [$this, 'ajax_update_cash_inquiry']);
         add_action('wp_ajax_maneli_delete_cash_inquiry', [$this, 'ajax_delete_cash_inquiry']);
+        add_action('wp_ajax_autopuzzle_delete_cash_inquiry', [$this, 'ajax_delete_cash_inquiry']);
         add_action('wp_ajax_maneli_set_down_payment', [$this, 'ajax_set_down_payment']);
+        add_action('wp_ajax_autopuzzle_set_down_payment', [$this, 'ajax_set_down_payment']);
         add_action('wp_ajax_maneli_filter_cash_inquiries_ajax', [$this, 'ajax_filter_cash_inquiries']);
+        add_action('wp_ajax_autopuzzle_filter_cash_inquiries_ajax', [$this, 'ajax_filter_cash_inquiries']);
         
         // Expert Assignment Actions
         add_action('wp_ajax_maneli_assign_expert_to_cash_inquiry', [$this, 'ajax_assign_expert_to_cash_inquiry']);
+        add_action('wp_ajax_autopuzzle_assign_expert_to_cash_inquiry', [$this, 'ajax_assign_expert_to_cash_inquiry']);
         add_action('wp_ajax_maneli_assign_expert_to_inquiry', [$this, 'ajax_assign_expert_to_inquiry']);
+        add_action('wp_ajax_autopuzzle_assign_expert_to_inquiry', [$this, 'ajax_assign_expert_to_inquiry']);
 
         // User Management (from class-user-management-shortcodes.php)
         add_action('wp_ajax_maneli_filter_users_ajax', [$this, 'ajax_filter_users']);
+        add_action('wp_ajax_autopuzzle_filter_users_ajax', [$this, 'ajax_filter_users']);
         add_action('wp_ajax_maneli_delete_user_ajax', [$this, 'ajax_delete_user']);
+        add_action('wp_ajax_autopuzzle_delete_user_ajax', [$this, 'ajax_delete_user']);
         add_action('wp_ajax_maneli_get_user_details', [$this, 'ajax_get_user_details']);
+        add_action('wp_ajax_autopuzzle_get_user_details', [$this, 'ajax_get_user_details']);
         add_action('wp_ajax_maneli_get_user_data', [$this, 'ajax_get_user_data']);
+        add_action('wp_ajax_autopuzzle_get_user_data', [$this, 'ajax_get_user_data']);
         add_action('wp_ajax_maneli_update_user', [$this, 'ajax_update_user']);
+        add_action('wp_ajax_autopuzzle_update_user', [$this, 'ajax_update_user']);
         add_action('wp_ajax_maneli_update_user_full', [$this, 'ajax_update_user_full']);
+        add_action('wp_ajax_autopuzzle_update_user_full', [$this, 'ajax_update_user_full']);
         add_action('wp_ajax_maneli_add_user', [$this, 'ajax_add_user']);
+        add_action('wp_ajax_autopuzzle_add_user', [$this, 'ajax_add_user']);
 
         // Product Editor (from class-product-editor-shortcode.php & class-hooks.php)
         add_action('wp_ajax_maneli_filter_products_ajax', [$this, 'ajax_filter_products']);
+        add_action('wp_ajax_autopuzzle_filter_products_ajax', [$this, 'ajax_filter_products']);
         add_action('wp_ajax_maneli_update_product_data', [$this, 'ajax_update_product_data']);
+        add_action('wp_ajax_autopuzzle_update_product_data', [$this, 'ajax_update_product_data']);
         
         // Bulk Product Update (Dashboard)
         add_action('wp_ajax_maneli_save_products_bulk', [$this, 'ajax_save_products_bulk']);
+        add_action('wp_ajax_autopuzzle_save_products_bulk', [$this, 'ajax_save_products_bulk']);
         
         // Full Product Save (Add/Edit Product Page)
         add_action('wp_ajax_maneli_save_product_full', [$this, 'ajax_save_product_full']);
+        add_action('wp_ajax_autopuzzle_save_product_full', [$this, 'ajax_save_product_full']);
         
         // Image Upload Handler
         add_action('wp_ajax_maneli_upload_image', [$this, 'ajax_upload_image']);
+        add_action('wp_ajax_autopuzzle_upload_image', [$this, 'ajax_upload_image']);
         
         // Expert Management (Dashboard)
         add_action('wp_ajax_maneli_add_expert', [$this, 'ajax_add_expert']);
+        add_action('wp_ajax_autopuzzle_add_expert', [$this, 'ajax_add_expert']);
         add_action('wp_ajax_maneli_toggle_expert_status', [$this, 'ajax_toggle_expert_status']);
+        add_action('wp_ajax_autopuzzle_toggle_expert_status', [$this, 'ajax_toggle_expert_status']);
         add_action('wp_ajax_maneli_get_expert_stats', [$this, 'ajax_get_expert_stats']);
+        add_action('wp_ajax_autopuzzle_get_expert_stats', [$this, 'ajax_get_expert_stats']);
         add_action('wp_ajax_maneli_get_expert_details', [$this, 'ajax_get_expert_details']);
+        add_action('wp_ajax_autopuzzle_get_expert_details', [$this, 'ajax_get_expert_details']);
         add_action('wp_ajax_maneli_get_expert_data', [$this, 'ajax_get_expert_data']);
+        add_action('wp_ajax_autopuzzle_get_expert_data', [$this, 'ajax_get_expert_data']);
         add_action('wp_ajax_maneli_update_expert', [$this, 'ajax_update_expert']);
+        add_action('wp_ajax_autopuzzle_update_expert', [$this, 'ajax_update_expert']);
         add_action('wp_ajax_maneli_get_expert_permissions', [$this, 'ajax_get_expert_permissions']);
+        add_action('wp_ajax_autopuzzle_get_expert_permissions', [$this, 'ajax_get_expert_permissions']);
         add_action('wp_ajax_maneli_update_expert_permissions', [$this, 'ajax_update_expert_permissions']);
+        add_action('wp_ajax_autopuzzle_update_expert_permissions', [$this, 'ajax_update_expert_permissions']);
         add_action('wp_ajax_maneli_delete_user', [$this, 'ajax_delete_user_from_experts']);
+        add_action('wp_ajax_autopuzzle_delete_user', [$this, 'ajax_delete_user_from_experts']);
         
         // Cash Inquiry Expert Actions
         add_action('wp_ajax_maneli_save_meeting_schedule', [$this, 'ajax_save_meeting_schedule']);
+        add_action('wp_ajax_autopuzzle_save_meeting_schedule', [$this, 'ajax_save_meeting_schedule']);
         add_action('wp_ajax_maneli_save_expert_decision_cash', [$this, 'ajax_save_expert_decision_cash']);
+        add_action('wp_ajax_autopuzzle_save_expert_decision_cash', [$this, 'ajax_save_expert_decision_cash']);
         add_action('wp_ajax_maneli_admin_approve_cash', [$this, 'ajax_admin_approve_cash']);
+        add_action('wp_ajax_autopuzzle_admin_approve_cash', [$this, 'ajax_admin_approve_cash']);
         add_action('wp_ajax_maneli_update_cash_status', [$this, 'ajax_update_cash_status']);
+        add_action('wp_ajax_autopuzzle_update_cash_status', [$this, 'ajax_update_cash_status']);
         add_action('wp_ajax_maneli_save_expert_note', [$this, 'ajax_save_expert_note']);
+        add_action('wp_ajax_autopuzzle_save_expert_note', [$this, 'ajax_save_expert_note']);
         
         // Hook for when cash down payment is successfully received
         add_action('autopuzzle_cash_inquiry_payment_successful', [$this, 'handle_downpayment_received'], 10, 2);
         
         // Create cash inquiry from dashboard (admin/expert)
         add_action('wp_ajax_maneli_create_cash_inquiry', [$this, 'ajax_create_cash_inquiry']);
+        add_action('wp_ajax_autopuzzle_create_cash_inquiry', [$this, 'ajax_create_cash_inquiry']);
         add_action('wp_ajax_maneli_get_products_for_cash', [$this, 'ajax_get_products_for_cash']);
+        add_action('wp_ajax_autopuzzle_get_products_for_cash', [$this, 'ajax_get_products_for_cash']);
         
         // Installment inquiry status management
         add_action('wp_ajax_maneli_update_installment_status', [$this, 'ajax_update_installment_status']);
+        add_action('wp_ajax_autopuzzle_update_installment_status', [$this, 'ajax_update_installment_status']);
         add_action('wp_ajax_maneli_save_installment_note', [$this, 'ajax_save_installment_note']);
+        add_action('wp_ajax_autopuzzle_save_installment_note', [$this, 'ajax_save_installment_note']);
         add_action('wp_ajax_maneli_request_more_documents', [$this, 'ajax_request_more_documents']);
+        add_action('wp_ajax_autopuzzle_request_more_documents', [$this, 'ajax_request_more_documents']);
         add_action('wp_ajax_maneli_upload_document', [$this, 'ajax_upload_document']);
+        add_action('wp_ajax_autopuzzle_upload_document', [$this, 'ajax_upload_document']);
         
         // Notification handlers
         add_action('wp_ajax_maneli_get_notifications', [$this, 'ajax_get_notifications']);
         add_action('wp_ajax_nopriv_maneli_get_notifications', [$this, 'ajax_get_notifications']);
+        add_action('wp_ajax_autopuzzle_get_notifications', [$this, 'ajax_get_notifications']);
+        add_action('wp_ajax_nopriv_autopuzzle_get_notifications', [$this, 'ajax_get_notifications']);
         add_action('wp_ajax_maneli_get_unread_count', [$this, 'ajax_get_unread_count']);
         add_action('wp_ajax_nopriv_maneli_get_unread_count', [$this, 'ajax_get_unread_count']);
+        add_action('wp_ajax_autopuzzle_get_unread_count', [$this, 'ajax_get_unread_count']);
+        add_action('wp_ajax_nopriv_autopuzzle_get_unread_count', [$this, 'ajax_get_unread_count']);
         add_action('wp_ajax_maneli_mark_notification_read', [$this, 'ajax_mark_notification_read']);
         add_action('wp_ajax_nopriv_maneli_mark_notification_read', [$this, 'ajax_mark_notification_read']);
+        add_action('wp_ajax_autopuzzle_mark_notification_read', [$this, 'ajax_mark_notification_read']);
+        add_action('wp_ajax_nopriv_autopuzzle_mark_notification_read', [$this, 'ajax_mark_notification_read']);
         add_action('wp_ajax_maneli_mark_all_notifications_read', [$this, 'ajax_mark_all_notifications_read']);
         add_action('wp_ajax_nopriv_maneli_mark_all_notifications_read', [$this, 'ajax_mark_all_notifications_read']);
+        add_action('wp_ajax_autopuzzle_mark_all_notifications_read', [$this, 'ajax_mark_all_notifications_read']);
+        add_action('wp_ajax_nopriv_autopuzzle_mark_all_notifications_read', [$this, 'ajax_mark_all_notifications_read']);
         add_action('wp_ajax_maneli_delete_notification', [$this, 'ajax_delete_notification']);
         add_action('wp_ajax_nopriv_maneli_delete_notification', [$this, 'ajax_delete_notification']);
+        add_action('wp_ajax_autopuzzle_delete_notification', [$this, 'ajax_delete_notification']);
+        add_action('wp_ajax_nopriv_autopuzzle_delete_notification', [$this, 'ajax_delete_notification']);
         add_action('wp_ajax_maneli_delete_all_read_notifications', [$this, 'ajax_delete_all_read_notifications']);
         add_action('wp_ajax_nopriv_maneli_delete_all_read_notifications', [$this, 'ajax_delete_all_read_notifications']);
+        add_action('wp_ajax_autopuzzle_delete_all_read_notifications', [$this, 'ajax_delete_all_read_notifications']);
+        add_action('wp_ajax_nopriv_autopuzzle_delete_all_read_notifications', [$this, 'ajax_delete_all_read_notifications']);
         
         // Profile settings handlers
         add_action('wp_ajax_maneli_upload_profile_image', [$this, 'ajax_upload_profile_image']);
+        add_action('wp_ajax_autopuzzle_upload_profile_image', [$this, 'ajax_upload_profile_image']);
         add_action('wp_ajax_maneli_delete_profile_image', [$this, 'ajax_delete_profile_image']);
+        add_action('wp_ajax_autopuzzle_delete_profile_image', [$this, 'ajax_delete_profile_image']);
         add_action('wp_ajax_maneli_update_profile', [$this, 'ajax_update_profile']);
+        add_action('wp_ajax_autopuzzle_update_profile', [$this, 'ajax_update_profile']);
         add_action('wp_ajax_maneli_upload_customer_document', [$this, 'ajax_upload_customer_document']);
+        add_action('wp_ajax_autopuzzle_upload_customer_document', [$this, 'ajax_upload_customer_document']);
         add_action('wp_ajax_maneli_approve_customer_document', [$this, 'ajax_approve_customer_document']);
+        add_action('wp_ajax_autopuzzle_approve_customer_document', [$this, 'ajax_approve_customer_document']);
         add_action('wp_ajax_maneli_reject_customer_document', [$this, 'ajax_reject_customer_document']);
+        add_action('wp_ajax_autopuzzle_reject_customer_document', [$this, 'ajax_reject_customer_document']);
         add_action('wp_ajax_maneli_request_customer_document', [$this, 'ajax_request_customer_document']);
+        add_action('wp_ajax_autopuzzle_request_customer_document', [$this, 'ajax_request_customer_document']);
         add_action('wp_ajax_maneli_request_customer_documents_bulk', [$this, 'ajax_request_customer_documents_bulk']);
+        add_action('wp_ajax_autopuzzle_request_customer_documents_bulk', [$this, 'ajax_request_customer_documents_bulk']);
         
         // License handlers
         add_action('wp_ajax_maneli_activate_license', [$this, 'ajax_activate_license']);
+        add_action('wp_ajax_autopuzzle_activate_license', [$this, 'ajax_activate_license']);
         add_action('wp_ajax_maneli_check_license', [$this, 'ajax_check_license']);
+        add_action('wp_ajax_autopuzzle_check_license', [$this, 'ajax_check_license']);
         add_action('wp_ajax_maneli_deactivate_license', [$this, 'ajax_deactivate_license']);
+        add_action('wp_ajax_autopuzzle_deactivate_license', [$this, 'ajax_deactivate_license']);
         
         // SMS Credit
         add_action('wp_ajax_maneli_get_sms_credit', [$this, 'ajax_get_sms_credit']);
+        add_action('wp_ajax_autopuzzle_get_sms_credit', [$this, 'ajax_get_sms_credit']);
         
         // Notification Center AJAX Handlers
         add_action('wp_ajax_maneli_send_bulk_notification', [$this, 'ajax_send_bulk_notification']);
+        add_action('wp_ajax_autopuzzle_send_bulk_notification', [$this, 'ajax_send_bulk_notification']);
         add_action('wp_ajax_maneli_schedule_notification', [$this, 'ajax_schedule_notification']);
+        add_action('wp_ajax_autopuzzle_schedule_notification', [$this, 'ajax_schedule_notification']);
         add_action('wp_ajax_maneli_schedule_notification_by_type', [$this, 'ajax_schedule_notification_by_type']);
+        add_action('wp_ajax_autopuzzle_schedule_notification_by_type', [$this, 'ajax_schedule_notification_by_type']);
         add_action('wp_ajax_maneli_send_single_notification', [$this, 'ajax_send_single_notification']);
+        add_action('wp_ajax_autopuzzle_send_single_notification', [$this, 'ajax_send_single_notification']);
         add_action('wp_ajax_maneli_send_bulk_notification_by_type', [$this, 'ajax_send_bulk_notification_by_type']);
+        add_action('wp_ajax_autopuzzle_send_bulk_notification_by_type', [$this, 'ajax_send_bulk_notification_by_type']);
         add_action('wp_ajax_maneli_get_notification_logs', [$this, 'ajax_get_notification_logs']);
+        add_action('wp_ajax_autopuzzle_get_notification_logs', [$this, 'ajax_get_notification_logs']);
         add_action('wp_ajax_maneli_get_notification_stats', [$this, 'ajax_get_notification_stats']);
+        add_action('wp_ajax_autopuzzle_get_notification_stats', [$this, 'ajax_get_notification_stats']);
         add_action('wp_ajax_maneli_get_notification_timeline', [$this, 'ajax_get_notification_timeline']);
+        add_action('wp_ajax_autopuzzle_get_notification_timeline', [$this, 'ajax_get_notification_timeline']);
         add_action('wp_ajax_maneli_retry_notification', [$this, 'ajax_retry_notification']);
+        add_action('wp_ajax_autopuzzle_retry_notification', [$this, 'ajax_retry_notification']);
         add_action('wp_ajax_maneli_send_single_sms', [$this, 'ajax_send_single_sms']);
+        add_action('wp_ajax_autopuzzle_send_single_sms', [$this, 'ajax_send_single_sms']);
         add_action('wp_ajax_maneli_get_sms_history', [$this, 'ajax_get_sms_history']);
+        add_action('wp_ajax_autopuzzle_get_sms_history', [$this, 'ajax_get_sms_history']);
         add_action('wp_ajax_maneli_get_sms_status', [$this, 'ajax_get_sms_status']);
+        add_action('wp_ajax_autopuzzle_get_sms_status', [$this, 'ajax_get_sms_status']);
         add_action('wp_ajax_maneli_resend_sms', [$this, 'ajax_resend_sms']);
         
         // Status Migration Handlers

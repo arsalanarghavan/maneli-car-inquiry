@@ -23,15 +23,21 @@ class Autopuzzle_Installment_Inquiry_Handler {
         
         // Step 1: Handle car selection from the product page calculator.
         add_action('wp_ajax_maneli_select_car_ajax', [$this, 'handle_car_selection_ajax']);
+        add_action('wp_ajax_autopuzzle_select_car_ajax', [$this, 'handle_car_selection_ajax']);
         add_action('wp_ajax_nopriv_maneli_select_car_ajax', '__return_false'); // Must be logged in
+        add_action('wp_ajax_nopriv_autopuzzle_select_car_ajax', '__return_false');
 
         // Step 2: Handle identity form submission.
         add_action('admin_post_nopriv_maneli_submit_identity', '__return_false');
         add_action('admin_post_maneli_submit_identity', [$this, 'handle_identity_submission']);
+        add_action('admin_post_nopriv_autopuzzle_submit_identity', '__return_false');
+        add_action('admin_post_autopuzzle_submit_identity', [$this, 'handle_identity_submission']);
 
         // New Step 3: Confirm car step submission
         add_action('admin_post_nopriv_maneli_confirm_car_step', '__return_false');
         add_action('admin_post_maneli_confirm_car_step', [$this, 'handle_confirm_car_step']);
+        add_action('admin_post_nopriv_autopuzzle_confirm_car_step', '__return_false');
+        add_action('admin_post_autopuzzle_confirm_car_step', [$this, 'handle_confirm_car_step']);
 
         // Step 3 (Implicit): Listens for a successful payment hook to finalize the installment inquiry.
         add_action('autopuzzle_inquiry_payment_successful', [$this, 'finalize_inquiry_from_hook']);
@@ -41,14 +47,19 @@ class Autopuzzle_Installment_Inquiry_Handler {
 
         // Handle re-try logic for failed inquiries.
         add_action('admin_post_maneli_retry_inquiry', [$this, 'handle_inquiry_retry']);
+        add_action('admin_post_autopuzzle_retry_inquiry', [$this, 'handle_inquiry_retry']);
 
         // Public AJAX: Confirm car catalog (customers)
         add_action('wp_ajax_maneli_confirm_car_catalog', [$this, 'ajax_confirm_car_catalog']);
         add_action('wp_ajax_nopriv_maneli_confirm_car_catalog', '__return_false');
+        add_action('wp_ajax_autopuzzle_confirm_car_catalog', [$this, 'ajax_confirm_car_catalog']);
+        add_action('wp_ajax_nopriv_autopuzzle_confirm_car_catalog', '__return_false');
 
         // Meetings AJAX
         add_action('wp_ajax_maneli_get_meeting_slots', [$this, 'ajax_get_meeting_slots']);
         add_action('wp_ajax_maneli_book_meeting', [$this, 'ajax_book_meeting']);
+        add_action('wp_ajax_autopuzzle_get_meeting_slots', [$this, 'ajax_get_meeting_slots']);
+        add_action('wp_ajax_autopuzzle_book_meeting', [$this, 'ajax_book_meeting']);
     }
     
     // =======================================================

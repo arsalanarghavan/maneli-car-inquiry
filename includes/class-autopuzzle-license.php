@@ -85,6 +85,8 @@ class Autopuzzle_License {
         // Listen for real-time license deactivation webhook
         add_action('wp_ajax_nopriv_maneli_license_webhook', [$this, 'handle_license_webhook']);
         add_action('wp_ajax_maneli_license_webhook', [$this, 'handle_license_webhook']);
+        add_action('wp_ajax_nopriv_autopuzzle_license_webhook', [$this, 'handle_license_webhook']);
+        add_action('wp_ajax_autopuzzle_license_webhook', [$this, 'handle_license_webhook']);
     }
 
     /**

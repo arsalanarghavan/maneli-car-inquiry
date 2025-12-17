@@ -64,10 +64,10 @@ if ($inquiry_id > 0) {
     var autopuzzleAjaxNonce = '<?php echo wp_create_nonce('autopuzzle-ajax-nonce'); ?>';
     
     // CRITICAL: Ensure nonces are set BEFORE loading report template
-    // Ensure autopuzzleInquiryLists has update_installment_status nonce for single report view
+    // Ensure maneliInquiryLists has update_installment_status nonce for single report view
     (function() {
-        if (typeof autopuzzleInquiryLists === 'undefined') {
-            window.autopuzzleInquiryLists = {
+        if (typeof maneliInquiryLists === 'undefined') {
+            window.maneliInquiryLists = {
                 ajax_url: '<?php echo esc_js(admin_url("admin-ajax.php")); ?>',
                 nonces: {
                     ajax: '<?php echo esc_js(wp_create_nonce("autopuzzle-ajax-nonce")); ?>'
@@ -75,21 +75,21 @@ if ($inquiry_id > 0) {
                 text: {}
             };
         }
-        if (!autopuzzleInquiryLists.nonces) {
-            autopuzzleInquiryLists.nonces = {};
+        if (!maneliInquiryLists.nonces) {
+            maneliInquiryLists.nonces = {};
         }
-        if (!autopuzzleInquiryLists.nonces.ajax) {
-            autopuzzleInquiryLists.nonces.ajax = '<?php echo esc_js(wp_create_nonce("autopuzzle-ajax-nonce")); ?>';
+        if (!maneliInquiryLists.nonces.ajax) {
+            maneliInquiryLists.nonces.ajax = '<?php echo esc_js(wp_create_nonce("autopuzzle-ajax-nonce")); ?>';
         }
-        if (!autopuzzleInquiryLists.nonces.update_installment_status) {
-            autopuzzleInquiryLists.nonces.update_installment_status = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_status")); ?>';
-            console.log('🟢 REPORT: Added update_installment_status nonce to autopuzzleInquiryLists');
+        if (!maneliInquiryLists.nonces.update_installment_status) {
+            maneliInquiryLists.nonces.update_installment_status = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_status")); ?>';
+            console.log('🟢 REPORT: Added update_installment_status nonce to maneliInquiryLists');
         }
-        if (!autopuzzleInquiryLists.nonces.save_installment_note) {
-            autopuzzleInquiryLists.nonces.save_installment_note = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_note")); ?>';
-            console.log('🟢 REPORT: Added save_installment_note nonce to autopuzzleInquiryLists');
+        if (!maneliInquiryLists.nonces.save_installment_note) {
+            maneliInquiryLists.nonces.save_installment_note = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_note")); ?>';
+            console.log('🟢 REPORT: Added save_installment_note nonce to maneliInquiryLists');
         }
-        console.log('🟢 REPORT: autopuzzleInquiryLists nonces:', autopuzzleInquiryLists.nonces);
+        console.log('🟢 REPORT: maneliInquiryLists nonces:', maneliInquiryLists.nonces);
     })();
     </script>
     <?php
@@ -361,11 +361,11 @@ function formatNumberForLocale(num) {
     });
 }
 
-// CRITICAL: Initialize autopuzzleInquiryLists immediately if not already set
+// CRITICAL: Initialize maneliInquiryLists immediately if not already set
 // Also ensure update_installment_status nonce exists even if object already exists
-if (typeof autopuzzleInquiryLists === 'undefined') {
-    console.warn('🟢 TEMPLATE: autopuzzleInquiryLists is undefined! Creating fallback...');
-    window.autopuzzleInquiryLists = {
+if (typeof maneliInquiryLists === 'undefined') {
+    console.warn('🔵 TEMPLATE: maneliInquiryLists is undefined! Creating fallback...');
+    window.maneliInquiryLists = {
         ajax_url: '<?php echo esc_js(admin_url("admin-ajax.php")); ?>',
         nonces: {
             inquiry_filter: '<?php echo esc_js(wp_create_nonce("autopuzzle_inquiry_filter_nonce")); ?>',
@@ -466,20 +466,20 @@ if (typeof autopuzzleInquiryLists === 'undefined') {
             echo json_encode(array_values($reasons)); 
         ?>
     };
-    console.log('🟢 TEMPLATE: autopuzzleInquiryLists fallback created:', window.autopuzzleInquiryLists);
+    console.log('🔵 TEMPLATE: maneliInquiryLists fallback created:', window.maneliInquiryLists);
 } else {
-    console.log('🟢 TEMPLATE: autopuzzleInquiryLists already exists:', autopuzzleInquiryLists);
+    console.log('🔵 TEMPLATE: maneliInquiryLists already exists:', maneliInquiryLists);
     // Ensure update_installment_status nonce exists even if object already exists
-    if (!autopuzzleInquiryLists.nonces || !autopuzzleInquiryLists.nonces.update_installment_status) {
-        console.warn('🟢 TEMPLATE: Adding missing update_installment_status nonce to existing autopuzzleInquiryLists');
-        if (!autopuzzleInquiryLists.nonces) {
-            autopuzzleInquiryLists.nonces = {};
+    if (!maneliInquiryLists.nonces || !maneliInquiryLists.nonces.update_installment_status) {
+        console.warn('🔵 TEMPLATE: Adding missing update_installment_status nonce to existing maneliInquiryLists');
+        if (!maneliInquiryLists.nonces) {
+            maneliInquiryLists.nonces = {};
         }
-        autopuzzleInquiryLists.nonces.update_installment_status = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_status")); ?>';
-        if (!autopuzzleInquiryLists.nonces.save_installment_note) {
-            autopuzzleInquiryLists.nonces.save_installment_note = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_note")); ?>';
+        maneliInquiryLists.nonces.update_installment_status = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_status")); ?>';
+        if (!maneliInquiryLists.nonces.save_installment_note) {
+            maneliInquiryLists.nonces.save_installment_note = '<?php echo esc_js(wp_create_nonce("autopuzzle_installment_note")); ?>';
         }
-        console.log('🟢 TEMPLATE: Updated autopuzzleInquiryLists with missing nonces:', autopuzzleInquiryLists);
+        console.log('🟢 TEMPLATE: Updated maneliInquiryLists with missing nonces:', maneliInquiryLists);
     }
 }
 
@@ -487,42 +487,42 @@ const htmlLangAttr = (document.documentElement.getAttribute('lang') || '').toLow
 const htmlDirAttr = (document.documentElement.getAttribute('dir') || '').toLowerCase();
 const fallbackLocale = htmlLangAttr || (htmlDirAttr === 'rtl' ? 'fa' : (htmlDirAttr === 'ltr' ? 'en' : ''));
 
-if (typeof autopuzzleInquiryLists.locale === 'undefined' && fallbackLocale) {
-    autopuzzleInquiryLists.locale = fallbackLocale;
+if (typeof maneliInquiryLists.locale === 'undefined' && fallbackLocale) {
+    maneliInquiryLists.locale = fallbackLocale;
 }
 
-if (typeof autopuzzleInquiryLists.use_persian_digits === 'undefined') {
-    const localeSource = autopuzzleInquiryLists.locale || fallbackLocale || '';
-    autopuzzleInquiryLists.use_persian_digits = localeSource.toLowerCase().indexOf('fa') === 0;
+if (typeof maneliInquiryLists.use_persian_digits === 'undefined') {
+    const localeSource = maneliInquiryLists.locale || fallbackLocale || '';
+    maneliInquiryLists.use_persian_digits = localeSource.toLowerCase().indexOf('fa') === 0;
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🟢 TEMPLATE: DOM ready for installment inquiries');
     console.log('Table exists:', document.getElementById('autopuzzle-inquiry-list-tbody') !== null);
-    console.log('autopuzzleInquiryLists exists:', typeof autopuzzleInquiryLists !== 'undefined');
-    if (typeof autopuzzleInquiryLists !== 'undefined') {
-        console.log('autopuzzleInquiryLists:', autopuzzleInquiryLists);
-        console.log('inquiry_filter nonce:', autopuzzleInquiryLists.nonces?.inquiry_filter);
+    console.log('maneliInquiryLists exists:', typeof maneliInquiryLists !== 'undefined');
+    if (typeof maneliInquiryLists !== 'undefined') {
+        console.log('maneliInquiryLists:', maneliInquiryLists);
+        console.log('inquiry_filter nonce:', maneliInquiryLists.nonces?.inquiry_filter);
     }
     
     // Force trigger if script not loading
     setTimeout(function() {
         if (typeof jQuery !== 'undefined' && jQuery('#autopuzzle-inquiry-list-tbody').length > 0) {
             var currentHtml = jQuery('#autopuzzle-inquiry-list-tbody').html();
-            if (currentHtml && (currentHtml.indexOf('<?php echo esc_js(__('Loading...', 'autopuzzle')); ?>') > -1 || currentHtml.indexOf(autopuzzleInquiryLists?.text?.loading || 'Loading...') > -1) && typeof autopuzzleInquiryLists !== 'undefined') {
+            if (currentHtml && (currentHtml.indexOf('<?php echo esc_js(__('Loading...', 'autopuzzle')); ?>') > -1 || currentHtml.indexOf(maneliInquiryLists?.text?.loading || 'Loading...') > -1) && typeof maneliInquiryLists !== 'undefined') {
                 console.log('🟢 TEMPLATE: Force triggering manual load after 2 seconds');
                 if (typeof window.loadInstallmentInquiriesList === 'function') {
                     window.loadInstallmentInquiriesList();
-                } else if (typeof autopuzzleInquiryLists !== 'undefined' && autopuzzleInquiryLists.nonces && autopuzzleInquiryLists.nonces.inquiry_filter) {
+                } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists.nonces && maneliInquiryLists.nonces.inquiry_filter) {
                     // Direct AJAX call as last resort
                     console.log('🟢 TEMPLATE: Making direct AJAX call');
                     jQuery.ajax({
-                        url: autopuzzleInquiryLists.ajax_url,
+                        url: maneliInquiryLists.ajax_url,
                         type: 'POST',
                         data: {
                             action: 'autopuzzle_filter_inquiries_ajax',
-                            nonce: autopuzzleInquiryLists.nonces.inquiry_filter,
-                            _ajax_nonce: autopuzzleInquiryLists.nonces.inquiry_filter,
+                            nonce: maneliInquiryLists.nonces.inquiry_filter,
+                            _ajax_nonce: maneliInquiryLists.nonces.inquiry_filter,
                             page: 1,
                             search: '',
                             status: '',

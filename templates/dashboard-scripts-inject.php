@@ -50,6 +50,10 @@ function autopuzzle_inject_inquiry_scripts($dashboard_html, $page, $inquiry_id, 
         ]
     ];
     
-    $scripts_html .= '<script>window.autopuzzleInquiryLists = ' . json_encode($localize_data, JSON_UNESCAPED_UNICODE) . ';console.log("✅ Loaded");</script>' . PHP_EOL;
+    $scripts_html .= '<script>'
+        . 'window.autopuzzleInquiryLists = ' . json_encode($localize_data, JSON_UNESCAPED_UNICODE) . ';'
+        . 'window.maneliInquiryLists = window.autopuzzleInquiryLists;'
+        . 'console.log("✅ Loaded");'
+        . '</script>' . PHP_EOL;
     return str_replace('</body>', $scripts_html . '</body>', $dashboard_html);
 }

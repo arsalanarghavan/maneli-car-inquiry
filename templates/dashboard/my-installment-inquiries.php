@@ -231,10 +231,10 @@ $current_url = home_url('/dashboard/my-installment-inquiries');
             });
         }
 
-        // CRITICAL: Initialize autopuzzleInquiryLists immediately if not already set
-        if (typeof autopuzzleInquiryLists === 'undefined') {
-            console.warn('🟢 TEMPLATE: autopuzzleInquiryLists is undefined! Creating fallback...');
-            window.autopuzzleInquiryLists = {
+        // CRITICAL: Initialize maneliInquiryLists immediately if not already set
+        if (typeof maneliInquiryLists === 'undefined') {
+            console.warn('🟢 TEMPLATE: maneliInquiryLists is undefined! Creating fallback...');
+            window.maneliInquiryLists = {
                 ajax_url: '<?php echo esc_js(admin_url("admin-ajax.php")); ?>',
                 nonces: {
                     inquiry_filter: '<?php echo esc_js(wp_create_nonce("autopuzzle_inquiry_filter_nonce")); ?>',
@@ -262,28 +262,28 @@ $current_url = home_url('/dashboard/my-installment-inquiries');
         const htmlDirAttr = (document.documentElement.getAttribute('dir') || '').toLowerCase();
         const fallbackLocale = htmlLangAttr || (htmlDirAttr === 'rtl' ? 'fa' : (htmlDirAttr === 'ltr' ? 'en' : ''));
 
-        if (typeof autopuzzleInquiryLists.locale === 'undefined' && fallbackLocale) {
-            autopuzzleInquiryLists.locale = fallbackLocale;
+        if (typeof maneliInquiryLists.locale === 'undefined' && fallbackLocale) {
+            maneliInquiryLists.locale = fallbackLocale;
         }
 
-        if (typeof autopuzzleInquiryLists.use_persian_digits === 'undefined') {
-            const localeSource = autopuzzleInquiryLists.locale || fallbackLocale || '';
-            autopuzzleInquiryLists.use_persian_digits = localeSource.toLowerCase().indexOf('fa') === 0;
+        if (typeof maneliInquiryLists.use_persian_digits === 'undefined') {
+            const localeSource = maneliInquiryLists.locale || fallbackLocale || '';
+            maneliInquiryLists.use_persian_digits = localeSource.toLowerCase().indexOf('fa') === 0;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🟢 TEMPLATE: DOM ready for customer installment inquiries');
             // Auto-load list after 500ms
             setTimeout(function() {
-                if (typeof jQuery !== 'undefined' && jQuery('#autopuzzle-inquiry-list-tbody').length > 0 && typeof autopuzzleInquiryLists !== 'undefined') {
+                if (typeof jQuery !== 'undefined' && jQuery('#autopuzzle-inquiry-list-tbody').length > 0 && typeof maneliInquiryLists !== 'undefined') {
                     console.log('🟢 TEMPLATE: Auto-loading customer inquiries list');
                     jQuery.ajax({
-                        url: autopuzzleInquiryLists.ajax_url,
+                        url: maneliInquiryLists.ajax_url,
                         type: 'POST',
                         data: {
-                            action: 'autopuzzle_filter_inquiries_ajax',
-                            nonce: autopuzzleInquiryLists.nonces.inquiry_filter,
-                            _ajax_nonce: autopuzzleInquiryLists.nonces.inquiry_filter,
+                            action: 'maneli_filter_inquiries_ajax',
+                            nonce: maneliInquiryLists.nonces.inquiry_filter,
+                            _ajax_nonce: maneliInquiryLists.nonces.inquiry_filter,
                             page: 1,
                             search: '',
                             status: '',

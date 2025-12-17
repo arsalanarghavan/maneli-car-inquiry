@@ -56,19 +56,32 @@ class Autopuzzle_Dashboard_Handler {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_global_fonts'], 1);
         add_action('wp_ajax_maneli_dashboard_login', [$this, 'handle_dashboard_login']);
         add_action('wp_ajax_nopriv_maneli_dashboard_login', [$this, 'handle_dashboard_login']);
+        add_action('wp_ajax_autopuzzle_dashboard_login', [$this, 'handle_dashboard_login']);
+        add_action('wp_ajax_nopriv_autopuzzle_dashboard_login', [$this, 'handle_dashboard_login']);
         add_action('wp_ajax_maneli_dashboard_logout', [$this, 'handle_dashboard_logout']);
+        add_action('wp_ajax_autopuzzle_dashboard_logout', [$this, 'handle_dashboard_logout']);
         add_action('wp_ajax_maneli_send_sms_code', [$this, 'handle_send_sms_code']);
         add_action('wp_ajax_nopriv_maneli_send_sms_code', [$this, 'handle_send_sms_code']);
+        add_action('wp_ajax_autopuzzle_send_sms_code', [$this, 'handle_send_sms_code']);
+        add_action('wp_ajax_nopriv_autopuzzle_send_sms_code', [$this, 'handle_send_sms_code']);
         
         // New unified login/registration AJAX handlers
         add_action('wp_ajax_maneli_send_otp', [$this, 'handle_send_otp']);
         add_action('wp_ajax_nopriv_maneli_send_otp', [$this, 'handle_send_otp']);
+        add_action('wp_ajax_autopuzzle_send_otp', [$this, 'handle_send_otp']);
+        add_action('wp_ajax_nopriv_autopuzzle_send_otp', [$this, 'handle_send_otp']);
         add_action('wp_ajax_maneli_verify_otp', [$this, 'handle_verify_otp']);
         add_action('wp_ajax_nopriv_maneli_verify_otp', [$this, 'handle_verify_otp']);
+        add_action('wp_ajax_autopuzzle_verify_otp', [$this, 'handle_verify_otp']);
+        add_action('wp_ajax_nopriv_autopuzzle_verify_otp', [$this, 'handle_verify_otp']);
         add_action('wp_ajax_maneli_create_password', [$this, 'handle_create_password']);
         add_action('wp_ajax_nopriv_maneli_create_password', [$this, 'handle_create_password']);
+        add_action('wp_ajax_autopuzzle_create_password', [$this, 'handle_create_password']);
+        add_action('wp_ajax_nopriv_autopuzzle_create_password', [$this, 'handle_create_password']);
         add_action('wp_ajax_maneli_password_login', [$this, 'handle_password_login']);
         add_action('wp_ajax_nopriv_maneli_password_login', [$this, 'handle_password_login']);
+        add_action('wp_ajax_autopuzzle_password_login', [$this, 'handle_password_login']);
+        add_action('wp_ajax_nopriv_autopuzzle_password_login', [$this, 'handle_password_login']);
         
         // مخفی کردن Admin Bar برای همه نقش‌های افزونه در همه صفحات
         add_action('init', [$this, 'hide_admin_bar_for_plugin_roles'], 999);

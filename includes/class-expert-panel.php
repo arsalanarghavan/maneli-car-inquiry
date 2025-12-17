@@ -16,6 +16,7 @@ class Autopuzzle_Expert_Panel {
 
     public function __construct() {
         add_action('wp_ajax_maneli_search_cars', [$this, 'handle_car_search_ajax']);
+        add_action('wp_ajax_autopuzzle_search_cars', [$this, 'handle_car_search_ajax']);
         // Since expert-panel.js is needed for the inquiry creation form:
         add_action('wp_enqueue_scripts', [$this, 'enqueue_expert_panel_assets']);
     }

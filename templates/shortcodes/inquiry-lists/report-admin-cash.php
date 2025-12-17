@@ -1299,9 +1299,11 @@ if (typeof jQuery !== 'undefined') {
             $('#sms-history-table-container').empty();
             
             var ajaxUrl = typeof autopuzzleAjaxUrl !== 'undefined' ? autopuzzleAjaxUrl : 
-                         (typeof autopuzzleInquiryLists !== 'undefined' ? autopuzzleInquiryLists.ajax_url : '');
+                         (typeof maneliInquiryLists !== 'undefined' ? maneliInquiryLists.ajax_url : 
+                         (typeof autopuzzleInquiryLists !== 'undefined' ? autopuzzleInquiryLists.ajax_url : ''));
             var ajaxNonce = typeof autopuzzleAjaxNonce !== 'undefined' ? autopuzzleAjaxNonce :
-                           (typeof autopuzzleInquiryLists !== 'undefined' ? (autopuzzleInquiryLists.nonces?.ajax || autopuzzleInquiryLists.nonce || '') : '');
+                           (typeof maneliInquiryLists !== 'undefined' ? (maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '') :
+                           (typeof autopuzzleInquiryLists !== 'undefined' ? (autopuzzleInquiryLists.nonces?.ajax || autopuzzleInquiryLists.nonce || '') : ''));
             
             if (!ajaxUrl) {
                 ajaxUrl = typeof adminAjax !== 'undefined' ? adminAjax.url : '';

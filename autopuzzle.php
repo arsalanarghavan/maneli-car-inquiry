@@ -156,6 +156,7 @@ if (!defined('AUTOPUZZLE_SADAD_PURCHASE_URL')) {
  * The main file that bootstraps the plugin.
  */
 require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-car-inquiry.php';
+require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-migration.php';
 
 /**
  * Begins execution of the plugin.
@@ -166,6 +167,10 @@ require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-car-inquiry.php
  * @since 1.0.0
  */
 function run_autopuzzle_plugin() {
+    // Run lightweight migration/aliasing to ensure backward compatibility
+    if (class_exists('Autopuzzle_Migration')) {
+        Autopuzzle_Migration::run();
+    }
     $plugin = Autopuzzle_Car_Inquiry_Plugin::instance();
     $plugin->run();
 }

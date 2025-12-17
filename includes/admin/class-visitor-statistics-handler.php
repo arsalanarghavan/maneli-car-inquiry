@@ -19,25 +19,42 @@ class Autopuzzle_Visitor_Statistics_Handler {
         // Track visit via AJAX (client-side)
         add_action('wp_ajax_maneli_track_visit', [$this, 'ajax_track_visit']);
         add_action('wp_ajax_nopriv_maneli_track_visit', [$this, 'ajax_track_visit']);
+        add_action('wp_ajax_autopuzzle_track_visit', [$this, 'ajax_track_visit']);
+        add_action('wp_ajax_nopriv_autopuzzle_track_visit', [$this, 'ajax_track_visit']);
         
         // Get statistics via AJAX
         add_action('wp_ajax_maneli_get_statistics', [$this, 'ajax_get_statistics']);
         add_action('wp_ajax_nopriv_maneli_get_statistics', [$this, 'ajax_get_statistics']);
+        add_action('wp_ajax_autopuzzle_get_statistics', [$this, 'ajax_get_statistics']);
+        add_action('wp_ajax_nopriv_autopuzzle_get_statistics', [$this, 'ajax_get_statistics']);
         
         // Get specific stats
         add_action('wp_ajax_maneli_get_daily_stats', [$this, 'ajax_get_daily_stats']);
+        add_action('wp_ajax_autopuzzle_get_daily_stats', [$this, 'ajax_get_daily_stats']);
         add_action('wp_ajax_maneli_get_top_pages', [$this, 'ajax_get_top_pages']);
+        add_action('wp_ajax_autopuzzle_get_top_pages', [$this, 'ajax_get_top_pages']);
         add_action('wp_ajax_maneli_get_browser_stats', [$this, 'ajax_get_browser_stats']);
+        add_action('wp_ajax_autopuzzle_get_browser_stats', [$this, 'ajax_get_browser_stats']);
         add_action('wp_ajax_maneli_get_os_stats', [$this, 'ajax_get_os_stats']);
+        add_action('wp_ajax_autopuzzle_get_os_stats', [$this, 'ajax_get_os_stats']);
         add_action('wp_ajax_maneli_get_device_stats', [$this, 'ajax_get_device_stats']);
+        add_action('wp_ajax_autopuzzle_get_device_stats', [$this, 'ajax_get_device_stats']);
         add_action('wp_ajax_maneli_get_country_stats', [$this, 'ajax_get_country_stats']);
+        add_action('wp_ajax_autopuzzle_get_country_stats', [$this, 'ajax_get_country_stats']);
         add_action('wp_ajax_maneli_get_search_engine_stats', [$this, 'ajax_get_search_engine_stats']);
+        add_action('wp_ajax_autopuzzle_get_search_engine_stats', [$this, 'ajax_get_search_engine_stats']);
         add_action('wp_ajax_maneli_get_referrer_stats', [$this, 'ajax_get_referrer_stats']);
+        add_action('wp_ajax_autopuzzle_get_referrer_stats', [$this, 'ajax_get_referrer_stats']);
         add_action('wp_ajax_maneli_get_top_products', [$this, 'ajax_get_top_products']);
+        add_action('wp_ajax_autopuzzle_get_top_products', [$this, 'ajax_get_top_products']);
         add_action('wp_ajax_maneli_get_recent_visitors', [$this, 'ajax_get_recent_visitors']);
+        add_action('wp_ajax_autopuzzle_get_recent_visitors', [$this, 'ajax_get_recent_visitors']);
         add_action('wp_ajax_maneli_get_online_visitors', [$this, 'ajax_get_online_visitors']);
+        add_action('wp_ajax_autopuzzle_get_online_visitors', [$this, 'ajax_get_online_visitors']);
         add_action('wp_ajax_maneli_get_most_active_visitors', [$this, 'ajax_get_most_active_visitors']);
+        add_action('wp_ajax_autopuzzle_get_most_active_visitors', [$this, 'ajax_get_most_active_visitors']);
         add_action('wp_ajax_maneli_get_device_model_stats', [$this, 'ajax_get_device_model_stats']);
+        add_action('wp_ajax_autopuzzle_get_device_model_stats', [$this, 'ajax_get_device_model_stats']);
     }
     
     /**

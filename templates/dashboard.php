@@ -1445,14 +1445,24 @@ if ($need_inquiry_scripts) {
         'ajax_url' => admin_url('admin-ajax.php'),
         'experts' => $experts_list,
         'nonces' => [
+            // Installment inquiry nonces
             'assign_expert' => wp_create_nonce('autopuzzle_inquiry_assign_expert_nonce'),
-            'cash_assign_expert' => wp_create_nonce('autopuzzle_cash_inquiry_assign_expert_nonce'),
             'installment_status' => wp_create_nonce('autopuzzle_installment_status'),
-            'cash_filter' => wp_create_nonce('autopuzzle_cash_inquiry_filter_nonce'),
             'inquiry_filter' => wp_create_nonce('autopuzzle_inquiry_filter_nonce'),
             'details' => wp_create_nonce('autopuzzle_inquiry_details_nonce'),
             'tracking_status' => wp_create_nonce('autopuzzle_tracking_status_nonce'),
+            'save_installment_note' => wp_create_nonce('autopuzzle_installment_note'),
+            'update_installment_status' => wp_create_nonce('autopuzzle_installment_status'),
+            // Cash inquiry nonces
+            'cash_assign_expert' => wp_create_nonce('autopuzzle_cash_inquiry_assign_expert_nonce'),
+            'cash_filter' => wp_create_nonce('autopuzzle_cash_inquiry_filter_nonce'),
+            'cash_details' => wp_create_nonce('autopuzzle_cash_inquiry_details_nonce'),
+            'cash_update' => wp_create_nonce('autopuzzle_cash_inquiry_update_nonce'),
             'update_cash_status' => wp_create_nonce('autopuzzle_update_cash_status'),
+            'cash_set_downpayment' => wp_create_nonce('autopuzzle_cash_set_downpayment_nonce'),
+            'save_expert_note' => wp_create_nonce('autopuzzle_save_expert_note'),
+            // Common nonces
+            'ajax' => wp_create_nonce('autopuzzle-ajax-nonce'),
         ],
         'text' => [
             'error' => esc_html__('Error!', 'autopuzzle'),
@@ -1559,35 +1569,16 @@ if ($need_inquiry_scripts) {
         ]
     ];
     
-    // Add AJAX nonce for SMS
-    $localize_data['nonces']['ajax'] = wp_create_nonce('autopuzzle-ajax-nonce');
-    
-    // Update nonces based on page type (cash vs installment, including followups)
-    if ($page === 'cash-inquiries' || $page === 'cash-followups' || ($page === 'inquiries' && $subpage === 'cash')) {
-        // Cash inquiries and followups
-        $localize_data['nonces']['cash_filter'] = wp_create_nonce('autopuzzle_cash_inquiry_filter_nonce');
-        $localize_data['nonces']['cash_details'] = wp_create_nonce('autopuzzle_cash_inquiry_details_nonce');
-        $localize_data['nonces']['cash_update'] = wp_create_nonce('autopuzzle_cash_inquiry_update_nonce');
-        $localize_data['nonces']['cash_assign_expert'] = wp_create_nonce('autopuzzle_cash_inquiry_assign_expert_nonce');
-        $localize_data['nonces']['save_expert_note'] = wp_create_nonce('autopuzzle_save_expert_note');
-        $localize_data['nonces']['update_cash_status'] = wp_create_nonce('autopuzzle_update_cash_status');
-    } else if ($page === 'installment-inquiries' || $page === 'installment-followups' || ($page === 'inquiries' && $subpage === 'installment')) {
-        // Installment inquiries and followups
-        $localize_data['nonces']['inquiry_filter'] = wp_create_nonce('autopuzzle_inquiry_filter_nonce');
-        $localize_data['nonces']['details'] = wp_create_nonce('autopuzzle_inquiry_details_nonce');
-        $localize_data['nonces']['assign_expert'] = wp_create_nonce('autopuzzle_inquiry_assign_expert_nonce');
-        $localize_data['nonces']['tracking_status'] = wp_create_nonce('autopuzzle_tracking_status_nonce');
-        $localize_data['nonces']['save_installment_note'] = wp_create_nonce('autopuzzle_installment_note');
-        $localize_data['nonces']['update_installment_status'] = wp_create_nonce('autopuzzle_installment_status');
-    }
-    
     // Add cash rejection reasons if we're on cash inquiries page
     if ($page === 'cash-inquiries' || $page === 'cash-followups' || ($page === 'inquiries' && $subpage === 'cash')) {
         $cash_rejection_reasons = array_filter(array_map('trim', explode("\n", $options['cash_inquiry_rejection_reasons'] ?? '')));
         $localize_data['cash_rejection_reasons'] = $cash_rejection_reasons;
     }
     
-    $scripts_html .= '<script>window.autopuzzleInquiryLists=' . json_encode($localize_data, JSON_UNESCAPED_UNICODE) . ';';
+    $scripts_html .= '<script>'
+        . 'window.autopuzzleInquiryLists=' . json_encode($localize_data, JSON_UNESCAPED_UNICODE) . ';'
+        . 'window.maneliInquiryLists=window.autopuzzleInquiryLists;'
+        . '</script>';
     if ($inquiry_id > 0) {
         $scripts_html .= 'window.autopuzzleInstallmentReport={ajax_url:"' . admin_url('admin-ajax.php') . '",nonces:{update_status:"' . wp_create_nonce('autopuzzle_installment_status') . '"}};';
     }

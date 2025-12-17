@@ -15,12 +15,19 @@ class Autopuzzle_Reports_Ajax_Handler {
     public function __construct() {
         // Ajax برای یوزرهای لاگین شده
         add_action('wp_ajax_maneli_get_overall_stats', [$this, 'get_overall_stats']);
+        add_action('wp_ajax_autopuzzle_get_overall_stats', [$this, 'get_overall_stats']);
         add_action('wp_ajax_maneli_get_experts_stats', [$this, 'get_experts_stats']);
+        add_action('wp_ajax_autopuzzle_get_experts_stats', [$this, 'get_experts_stats']);
         add_action('wp_ajax_maneli_get_daily_stats', [$this, 'get_daily_stats']);
+        add_action('wp_ajax_autopuzzle_get_daily_stats', [$this, 'get_daily_stats']);
         add_action('wp_ajax_maneli_get_popular_products', [$this, 'get_popular_products']);
+        add_action('wp_ajax_autopuzzle_get_popular_products', [$this, 'get_popular_products']);
         add_action('wp_ajax_maneli_get_monthly_performance', [$this, 'get_monthly_performance']);
+        add_action('wp_ajax_autopuzzle_get_monthly_performance', [$this, 'get_monthly_performance']);
         add_action('wp_ajax_maneli_get_inquiries_details', [$this, 'get_inquiries_details']);
+        add_action('wp_ajax_autopuzzle_get_inquiries_details', [$this, 'get_inquiries_details']);
         add_action('wp_ajax_maneli_export_inquiries_csv', [$this, 'export_inquiries_csv']);
+        add_action('wp_ajax_autopuzzle_export_inquiries_csv', [$this, 'export_inquiries_csv']);
     }
     
     /**

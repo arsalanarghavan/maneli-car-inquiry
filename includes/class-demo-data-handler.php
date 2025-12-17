@@ -13,6 +13,8 @@ class Autopuzzle_Demo_Data_Handler {
     public function __construct() {
         add_action( 'wp_ajax_maneli_import_demo_data', [ $this, 'handle_import_demo_data' ] );
         add_action( 'wp_ajax_maneli_delete_demo_data', [ $this, 'handle_delete_demo_data' ] );
+        add_action( 'wp_ajax_autopuzzle_import_demo_data', [ $this, 'handle_import_demo_data' ] );
+        add_action( 'wp_ajax_autopuzzle_delete_demo_data', [ $this, 'handle_delete_demo_data' ] );
     }
 
     /**

@@ -25,6 +25,7 @@ class Autopuzzle_Settings_Page {
     public function __construct() {
         // تنها هوک لازم برای ذخیره تنظیمات از طریق فرم فرانت‌اند (شورت‌کد) نگهداری شده است.
         add_action('admin_post_maneli_save_frontend_settings', [$this, 'handle_frontend_settings_save']);
+        add_action('admin_post_autopuzzle_save_frontend_settings', [$this, 'handle_frontend_settings_save']);
     }
 
     /**

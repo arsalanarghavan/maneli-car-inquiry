@@ -1988,7 +1988,8 @@ if (typeof jQuery !== 'undefined') {
         console.log('🚨 EMERGENCY HANDLERS LOADED IN TEMPLATE');
         
         // Check if objects exist
-        console.log('autopuzzleInquiryLists:', typeof window.autopuzzleInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
+        console.log('maneliInquiryLists:', typeof window.maneliInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
+        console.log('autopuzzleInquiryLists (legacy):', typeof window.autopuzzleInquiryLists !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
         console.log('Swal:', typeof Swal !== 'undefined' ? 'DEFINED' : 'UNDEFINED');
         
         // Direct handler for assign expert button
@@ -2001,11 +2002,14 @@ if (typeof jQuery !== 'undefined') {
             var inquiryType = btn.data('inquiry-type');
             console.log('Inquiry ID:', inquiryId, 'Type:', inquiryType);
             
-            if (typeof window.autopuzzleInquiryLists === 'undefined') {
-                alert(autopuzzleInquiryLists?.text?.error || 'Error: autopuzzleInquiryLists is not defined!');
-                console.error('autopuzzleInquiryLists is undefined!');
+            if (typeof window.maneliInquiryLists === 'undefined' && typeof window.autopuzzleInquiryLists === 'undefined') {
+                alert('Error: Required JavaScript objects are not defined!');
+                console.error('Both maneliInquiryLists and autopuzzleInquiryLists are undefined!');
                 return;
             }
+            
+            // Use maneliInquiryLists if available, fallback to autopuzzleInquiryLists for backward compatibility
+            var inquiryListsObj = typeof window.maneliInquiryLists !== 'undefined' ? window.maneliInquiryLists : window.autopuzzleInquiryLists;
             
             if (typeof Swal === 'undefined') {
                 alert(autopuzzleInquiryLists?.text?.error || 'Error: SweetAlert2 is not loaded!');
@@ -2085,6 +2089,8 @@ if (typeof jQuery !== 'undefined') {
                         ajaxUrl = autopuzzleAjaxUrl;
                     } else if (typeof autopuzzle_ajax !== 'undefined' && autopuzzle_ajax) {
                         ajaxUrl = autopuzzle_ajax.ajax_url || autopuzzle_ajax.url || '';
+                    } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                        ajaxUrl = maneliInquiryLists.ajax_url || '';
                     } else if (typeof autopuzzleInquiryLists !== 'undefined' && autopuzzleInquiryLists) {
                         ajaxUrl = autopuzzleInquiryLists.ajax_url || '';
                     }
@@ -2093,6 +2099,8 @@ if (typeof jQuery !== 'undefined') {
                         ajaxNonce = autopuzzleAjaxNonce;
                     } else if (typeof autopuzzle_ajax !== 'undefined' && autopuzzle_ajax) {
                         ajaxNonce = autopuzzle_ajax.nonce || '';
+                    } else if (typeof maneliInquiryLists !== 'undefined' && maneliInquiryLists) {
+                        ajaxNonce = maneliInquiryLists.nonces?.ajax || maneliInquiryLists.nonce || '';
                     } else if (typeof autopuzzleInquiryLists !== 'undefined' && autopuzzleInquiryLists) {
                         ajaxNonce = autopuzzleInquiryLists.nonces?.ajax || autopuzzleInquiryLists.nonce || '';
                     }

@@ -27,9 +27,13 @@ class Autopuzzle_Payment_Handler {
         // Hooks for starting payment processes.
         add_action('admin_post_nopriv_maneli_start_payment', '__return_false');
         add_action('admin_post_maneli_start_payment', [$this, 'handle_inquiry_fee_submission']);
+        add_action('admin_post_nopriv_autopuzzle_start_payment', '__return_false');
+        add_action('admin_post_autopuzzle_start_payment', [$this, 'handle_inquiry_fee_submission']);
         
         add_action('admin_post_nopriv_maneli_start_cash_payment', '__return_false');
         add_action('admin_post_maneli_start_cash_payment', [$this, 'handle_cash_down_payment_submission']);
+        add_action('admin_post_nopriv_autopuzzle_start_cash_payment', '__return_false');
+        add_action('admin_post_autopuzzle_start_cash_payment', [$this, 'handle_cash_down_payment_submission']);
     }
     
     // =======================================================
