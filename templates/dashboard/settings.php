@@ -56,7 +56,7 @@ $tab_persian_names = [
                         <li class="breadcrumb-item active" aria-current="page"><?php esc_html_e('System Settings', 'autopuzzle'); ?></li>
                     </ol>
                 </nav>
-                <h1 class="page-title fw-medium fs-18 mb-0"><?php printf(esc_html__('%s System Settings', 'autopuzzle'), esc_html(Autopuzzle_Branding_Helper::get_brand_name())); ?></h1>
+                <h1 class="page-title fw-medium fs-18 mb-0"><?php printf(esc_html__('%s System Settings', 'autopuzzle'), esc_html(Autopuzzle_Branding_Helper::get_brand_name_localized())); ?></h1>
             </div>
         </div>
         <!-- Page Header Close -->

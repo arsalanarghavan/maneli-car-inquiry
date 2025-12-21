@@ -2970,24 +2970,28 @@ class Autopuzzle_Dashboard_Handler {
     public function handle_password_login() {
         check_ajax_referer('autopuzzle-ajax-nonce', 'nonce');
         
-        $phone = sanitize_text_field($_POST['phone'] ?? '');
+        $login_field = sanitize_text_field($_POST['phone'] ?? '');
         $password = isset($_POST['password']) ? trim($_POST['password']) : '';
         
-        if (empty($phone) || empty($password)) {
-            wp_send_json_error(['message' => esc_html__('Phone number and password are required.', 'autopuzzle')]);
+        if (empty($login_field) || empty($password)) {
+            wp_send_json_error(['message' => esc_html__('Username/Phone and password are required.', 'autopuzzle')]);
             return;
         }
         
-        // Get user
-        $user_login = $phone;
-        $user = get_user_by('login', $user_login);
+        // Get user - try username first, then phone, then email
+        $user = get_user_by('login', $login_field);
+        
         if (!$user) {
-            $email = $phone . '@manelikhodro.com';
-            $user = get_user_by('email', $email);
+            // Try phone number
+            $user = get_user_by('login', $login_field);
+            if (!$user) {
+                $email = $login_field . '@manelikhodro.com';
+                $user = get_user_by('email', $email);
+            }
         }
         
         if (!$user) {
-            wp_send_json_error(['message' => esc_html__('Invalid phone number or password.', 'autopuzzle')]);
+            wp_send_json_error(['message' => esc_html__('Invalid username/phone or password.', 'autopuzzle')]);
             return;
         }
         
@@ -3003,9 +3007,9 @@ class Autopuzzle_Dashboard_Handler {
         if (!wp_check_password($password, $user->user_pass, $user->ID)) {
             // Log failed attempt for debugging (only in debug mode)
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('AutoPuzzle Login: Password verification failed for user ID: ' . $user->ID . ' (Phone: ' . substr($phone, 0, 4) . '****)');
+                error_log('AutoPuzzle Login: Password verification failed for user ID: ' . $user->ID . ' (Login: ' . substr($login_field, 0, 4) . '****)');
             }
-            wp_send_json_error(['message' => esc_html__('Invalid phone number or password.', 'autopuzzle')]);
+            wp_send_json_error(['message' => esc_html__('Invalid username/phone or password.', 'autopuzzle')]);
             return;
         }
         
@@ -3018,7 +3022,7 @@ class Autopuzzle_Dashboard_Handler {
         $_SESSION['autopuzzle_dashboard_logged_in'] = true;
         $_SESSION['autopuzzle_user_id'] = $user->ID;
         $_SESSION['autopuzzle_user_role'] = 'customer';
-        $_SESSION['autopuzzle_user_phone'] = $phone;
+        $_SESSION['autopuzzle_user_phone'] = $user->user_login;
         
         // Update last login
         update_user_meta($user->ID, 'autopuzzle_last_login', time());

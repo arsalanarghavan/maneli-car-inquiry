@@ -45,8 +45,8 @@ msgstr "Log In"
 msgid "Customer"
 msgstr "Customer"
 
-msgid "Maneli Expert"
-msgstr "Maneli Expert"
+msgid "AutoPuzzle Expert"
+msgstr "AutoPuzzle Expert"
 
 msgid "Maneli Manager"
 msgstr "Maneli Manager"
@@ -1442,8 +1442,8 @@ msgstr "Total Cash Requests"
 msgid "Total Users"
 msgstr "Total Users"
 
-msgid "Maneli Experts"
-msgstr "Maneli Experts"
+msgid "AutoPuzzle Experts"
+msgstr "AutoPuzzle Experts"
 
 #: includes/public/class-cash-inquiry-handler.php
 msgid "New Cash Inquiry"
@@ -1830,16 +1830,16 @@ msgid "Expert Management"
 msgstr "Expert Management"
 
 msgid ""
-"The system automatically identifies all users with the <strong>\"Maneli "
+"The system automatically identifies all users with the <strong>\"AutoPuzzle "
 "Expert\"</strong> role. Requests are assigned to them in a round-robin "
 "fashion.<br>To add a new expert, simply create a new user from the "
-"<strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and "
+"<strong>Users > Add New</strong> menu with the \"AutoPuzzle Expert\" role and "
 "enter their mobile number in their profile."
 msgstr ""
-"The system automatically identifies all users with the <strong>\"Maneli "
+"The system automatically identifies all users with the <strong>\"AutoPuzzle "
 "Expert\"</strong> role. Requests are assigned to them in a round-robin "
 "fashion.<br>To add a new expert, simply create a new user from the "
-"<strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and "
+"<strong>Users > Add New</strong> menu with the \"AutoPuzzle Expert\" role and "
 "enter their mobile number in their profile."
 
 msgid "Finotex"
@@ -2561,6 +2561,10 @@ msgstr "System Settings"
 
 msgid "Maneli Car System Settings"
 msgstr "Maneli Car System Settings"
+
+#: templates/dashboard/settings.php
+msgid "%s System Settings"
+msgstr "%s System Settings"
 
 msgid "Success!"
 msgstr "Success!"
@@ -5452,6 +5456,18 @@ msgstr "Login with SMS"
 
 msgid "Login with password"
 msgstr "Login with password"
+
+msgid "Username or Phone Number"
+msgstr "Username or Phone Number"
+
+msgid "e.g., username or 09123456789"
+msgstr "e.g., username or 09123456789"
+
+msgid "Username/Phone and password are required."
+msgstr "Username/Phone and password are required."
+
+msgid "Invalid username/phone or password."
+msgstr "Invalid username/phone or password."
 
 msgid "Select login method"
 msgstr "Select login method"

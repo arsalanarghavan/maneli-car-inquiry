@@ -184,8 +184,8 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['autopuzzle_creat
                                     <div class="tab-pane fade" id="password-panel" role="tabpanel">
                                         <div class="row gy-3">
                                             <div class="col-xl-12">
-                                                <label for="password-phone" class="form-label text-default"><?php echo esc_html(__('Mobile Number', 'autopuzzle')); ?><sup class="fs-12 text-danger">*</sup></label>
-                                                <input type="tel" class="form-control" id="password-phone" placeholder="<?php echo esc_attr(__('e.g., 09123456789', 'autopuzzle')); ?>" maxlength="11">
+                                                <label for="password-phone" class="form-label text-default"><?php echo esc_html(__('Username or Phone Number', 'autopuzzle')); ?><sup class="fs-12 text-danger">*</sup></label>
+                                                <input type="text" class="form-control" id="password-phone" placeholder="<?php echo esc_attr(__('e.g., username or 09123456789', 'autopuzzle')); ?>">
                                             </div>
                                             <div class="col-xl-12 mb-2">
                                                 <label for="password-pass" class="form-label text-default"><?php echo esc_html(__('Password', 'autopuzzle')); ?><sup class="fs-12 text-danger">*</sup></label>
@@ -729,9 +729,7 @@ if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['autopuzzle_creat
             this.value = this.value.replace(/\D/g, '').substring(0, 11);
         });
         
-        document.getElementById('password-phone').addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '').substring(0, 11);
-        });
+        // No format restriction for password login field - allows both username and phone
         
         // Format OTP input
         document.getElementById('otp-code').addEventListener('input', function() {

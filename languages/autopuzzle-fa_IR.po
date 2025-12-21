@@ -56,8 +56,8 @@ msgid "Customer"
 msgstr "مشتری"
 
 
-msgid "Maneli Expert"
-msgstr "کارشناس سیستم"
+msgid "AutoPuzzle Expert"
+msgstr "کارشناس اتوپازل"
 
 
 msgid "Maneli Manager"
@@ -1830,8 +1830,8 @@ msgid "Total Users"
 msgstr "کل کاربران"
 
 
-msgid "Maneli Experts"
-msgstr "کارشناسان سیستم"
+msgid "AutoPuzzle Experts"
+msgstr "کارشناسان اتوپازل"
 
 #: includes/public/class-cash-inquiry-handler.php
 msgid "New Cash Inquiry"
@@ -2271,8 +2271,8 @@ msgid "Expert Management"
 msgstr "مدیریت کارشناسان"
 
 
-msgid "The system automatically identifies all users with the <strong>\"Maneli Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"Maneli Expert\" role and enter their mobile number in their profile."
-msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس سیستم\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس سیستم» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
+msgid "The system automatically identifies all users with the <strong>\"AutoPuzzle Expert\"</strong> role. Requests are assigned to them in a round-robin fashion.<br>To add a new expert, simply create a new user from the <strong>Users > Add New</strong> menu with the \"AutoPuzzle Expert\" role and enter their mobile number in their profile."
+msgstr "سیستم به صورت خودکار تمام کاربرانی که نقش <strong>\"کارشناس اتوپازل\"</strong> دارند را شناسایی می‌کند. درخواست‌ها به صورت گردشی به آن‌ها تخصیص داده میشود.<br>برای افزودن کارشناس جدید، کافیست از طریق منوی <strong>کاربران > افزودن</strong>، یک کاربر جدید با نقش «کارشناس اتوپازل» ایجاد کرده و شماره موبایل او را در پروفایلش وارد کنید."
 
 
 msgid "Finotex"
@@ -3214,6 +3214,10 @@ msgstr "تنظیمات سیستم"
 
 msgid "Maneli Car System Settings"
 msgstr "تنظیمات سیستم"
+
+#: templates/dashboard/settings.php
+msgid "%s System Settings"
+msgstr "تنظیمات سیستم %s"
 
 
 msgid "Success!"
@@ -6209,6 +6213,22 @@ msgid "Login with password"
 msgstr "ورود با رمز عبور"
 
 
+msgid "Username or Phone Number"
+msgstr "نام کاربری یا شماره موبایل"
+
+
+msgid "e.g., username or 09123456789"
+msgstr "مثال: نام کاربری یا 09123456789"
+
+
+msgid "Username/Phone and password are required."
+msgstr "نام کاربری/شماره موبایل و رمز عبور الزامی است."
+
+
+msgid "Invalid username/phone or password."
+msgstr "نام کاربری/شماره موبایل یا رمز عبور نامعتبر است."
+
+
 msgid "Select login method"
 msgstr "انتخاب روش ورود"
 
@@ -7860,214 +7880,214 @@ msgid "SMS Pattern Codes - Installment Inquiry (Customer)"
 msgstr "کدهای الگوی پیامک - استعلام اقساطی (مشتری)"
 
 msgid "Pattern: \"New\" (Installment - Customer)"
-msgstr "الگو: \"New\" (Installment - Customer)"
+msgstr "الگو: \"جدید\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Pending Review\" (Installment - Customer)"
-msgstr "الگو: \"Pending Review\" (Installment - Customer)"
+msgstr "الگو: \"منتظر بررسی\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Approved and Referred\" (Installment - Customer)"
-msgstr "الگو: \"Approved and Referred\" (Installment - Customer)"
+msgstr "الگو: \"تایید و ارجاع شده\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"More Documents Required\" (Installment - Customer)"
-msgstr "الگو: \"More Documents Required\" (Installment - Customer)"
+msgstr "الگو: \"نیاز به مستندات بیشتر\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Rejected\" (Installment - Customer)"
-msgstr "الگو: \"Rejected\" (Installment - Customer)"
+msgstr "الگو: \"رد شده\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Inquiry Failed\" (Installment - Customer)"
-msgstr "الگو: \"Inquiry Failed\" (Installment - Customer)"
+msgstr "الگو: \"استعلام ناموفق\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Referred to Expert\" (Installment - Customer)"
-msgstr "الگو: \"Referred to Expert\" (Installment - Customer)"
+msgstr "الگو: \"ارجاع شده به کارشناس\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"In Progress\" (Installment - Customer)"
-msgstr "الگو: \"In Progress\" (Installment - Customer)"
+msgstr "الگو: \"در حال انجام\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Follow Up Scheduled\" (Installment - Customer)"
-msgstr "الگو: \"Follow Up Scheduled\" (Installment - Customer)"
+msgstr "الگو: \"پیگیری برنامه‌ریزی شده\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Meeting Scheduled\" (Installment - Customer)"
-msgstr "الگو: \"Meeting Scheduled\" (Installment - Customer)"
+msgstr "الگو: \"جلسه برنامه‌ریزی شده\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Awaiting Documents\" (Installment - Customer)"
-msgstr "الگو: \"Awaiting Documents\" (Installment - Customer)"
+msgstr "الگو: \"منتظر مستندات\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Awaiting Down Payment\" (Installment - Customer)"
-msgstr "الگو: \"Awaiting Down Payment\" (Installment - Customer)"
+msgstr "الگو: \"منتظر پیش‌پرداخت\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Down Payment Received\" (Installment - Customer)"
-msgstr "الگو: \"Down Payment Received\" (Installment - Customer)"
+msgstr "الگو: \"پیش‌پرداخت دریافت شد\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Approved\" (Installment - Customer)"
-msgstr "الگو: \"Approved\" (Installment - Customer)"
+msgstr "الگو: \"تایید شده\" (استعلام اقساطی - مشتری)"
 
 msgid "Pattern: \"Completed\" (Installment - Customer)"
-msgstr "الگو: \"Completed\" (Installment - Customer)"
+msgstr "الگو: \"تکمیل شده\" (استعلام اقساطی - مشتری)"
 
 msgid "SMS Pattern Codes - Installment Inquiry (Expert)"
 msgstr "کدهای الگوی پیامک - استعلام اقساطی (کارشناس)"
 
 msgid "Pattern: \"New\" (Installment - Expert)"
-msgstr "الگو: \"New\" (Installment - Expert)"
+msgstr "الگو: \"جدید\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"Rejected\" (Installment - Expert)"
-msgstr "الگو: \"Rejected\" (Installment - Expert)"
+msgstr "الگو: \"رد شده\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"Referred to Expert\" (Installment - Expert)"
-msgstr "الگو: \"Referred to Expert\" (Installment - Expert)"
+msgstr "الگو: \"ارجاع شده به کارشناس\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"In Progress\" (Installment - Expert)"
-msgstr "الگو: \"In Progress\" (Installment - Expert)"
+msgstr "الگو: \"در حال انجام\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"Follow Up Scheduled\" (Installment - Expert)"
-msgstr "الگو: \"Follow Up Scheduled\" (Installment - Expert)"
+msgstr "الگو: \"پیگیری برنامه‌ریزی شده\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"Meeting Scheduled\" (Installment - Expert)"
-msgstr "الگو: \"Meeting Scheduled\" (Installment - Expert)"
+msgstr "الگو: \"جلسه برنامه‌ریزی شده\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"Awaiting Documents\" (Installment - Expert)"
-msgstr "الگو: \"Awaiting Documents\" (Installment - Expert)"
+msgstr "الگو: \"منتظر مستندات\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"Approved\" (Installment - Expert)"
-msgstr "الگو: \"Approved\" (Installment - Expert)"
+msgstr "الگو: \"تایید شده\" (استعلام اقساطی - کارشناس)"
 
 msgid "Pattern: \"Completed\" (Installment - Expert)"
-msgstr "الگو: \"Completed\" (Installment - Expert)"
+msgstr "الگو: \"تکمیل شده\" (استعلام اقساطی - کارشناس)"
 
 msgid "SMS Pattern Codes - Installment Inquiry (Admin)"
 msgstr "کدهای الگوی پیامک - استعلام اقساطی (مدیر)"
 
 msgid "Pattern: \"New\" (Installment - Admin)"
-msgstr "الگو: \"New\" (Installment - Admin)"
+msgstr "الگو: \"جدید\" (استعلام اقساطی - مدیر)"
 
 msgid "Pattern: \"Pending Review\" (Installment - Admin)"
-msgstr "الگو: \"Pending Review\" (Installment - Admin)"
+msgstr "الگو: \"منتظر بررسی\" (استعلام اقساطی - مدیر)"
 
 msgid "Pattern: \"Approved and Referred\" (Installment - Admin)"
-msgstr "الگو: \"Approved and Referred\" (Installment - Admin)"
+msgstr "الگو: \"تایید و ارجاع شده\" (استعلام اقساطی - مدیر)"
 
 msgid "Pattern: \"Rejected\" (Installment - Admin)"
-msgstr "الگو: \"Rejected\" (Installment - Admin)"
+msgstr "الگو: \"رد شده\" (استعلام اقساطی - مدیر)"
 
 msgid "Pattern: \"Inquiry Failed\" (Installment - Admin)"
-msgstr "الگو: \"Inquiry Failed\" (Installment - Admin)"
+msgstr "الگو: \"استعلام ناموفق\" (استعلام اقساطی - مدیر)"
 
 msgid "Pattern: \"Referred to Expert\" (Installment - Admin)"
-msgstr "الگو: \"Referred to Expert\" (Installment - Admin)"
+msgstr "الگو: \"ارجاع شده به کارشناس\" (استعلام اقساطی - مدیر)"
 
 msgid "Pattern: \"Approved\" (Installment - Admin)"
-msgstr "الگو: \"Approved\" (Installment - Admin)"
+msgstr "الگو: \"تایید شده\" (استعلام اقساطی - مدیر)"
 
 msgid "Pattern: \"Completed\" (Installment - Admin)"
-msgstr "الگو: \"Completed\" (Installment - Admin)"
+msgstr "الگو: \"تکمیل شده\" (استعلام اقساطی - مدیر)"
 
 msgid "SMS Pattern Codes - Cash Inquiry (Customer)"
 msgstr "کدهای الگوی پیامک - استعلام نقدی (مشتری)"
 
 msgid "Pattern: \"New\" (Cash - Customer)"
-msgstr "الگو: \"New\" (Cash - Customer)"
+msgstr "الگو: \"جدید\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Rejected\" (Cash - Customer)"
-msgstr "الگو: \"Rejected\" (Cash - Customer)"
+msgstr "الگو: \"رد شده\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Referred to Expert\" (Cash - Customer)"
-msgstr "الگو: \"Referred to Expert\" (Cash - Customer)"
+msgstr "الگو: \"ارجاع شده به کارشناس\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"In Progress\" (Cash - Customer)"
-msgstr "الگو: \"In Progress\" (Cash - Customer)"
+msgstr "الگو: \"در حال انجام\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Follow Up Scheduled\" (Cash - Customer)"
-msgstr "الگو: \"Follow Up Scheduled\" (Cash - Customer)"
+msgstr "الگو: \"پیگیری برنامه‌ریزی شده\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Meeting Scheduled\" (Cash - Customer)"
-msgstr "الگو: \"Meeting Scheduled\" (Cash - Customer)"
+msgstr "الگو: \"جلسه برنامه‌ریزی شده\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Awaiting Documents\" (Cash - Customer)"
-msgstr "الگو: \"Awaiting Documents\" (Cash - Customer)"
+msgstr "الگو: \"منتظر مستندات\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Awaiting Down Payment\" (Cash - Customer)"
-msgstr "الگو: \"Awaiting Down Payment\" (Cash - Customer)"
+msgstr "الگو: \"منتظر پیش‌پرداخت\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Down Payment Received\" (Cash - Customer)"
-msgstr "الگو: \"Down Payment Received\" (Cash - Customer)"
+msgstr "الگو: \"پیش‌پرداخت دریافت شد\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Approved\" (Cash - Customer)"
-msgstr "الگو: \"Approved\" (Cash - Customer)"
+msgstr "الگو: \"تایید شده\" (استعلام نقدی - مشتری)"
 
 msgid "Pattern: \"Completed\" (Cash - Customer)"
-msgstr "الگو: \"Completed\" (Cash - Customer)"
+msgstr "الگو: \"تکمیل شده\" (استعلام نقدی - مشتری)"
 
 msgid "SMS Pattern Codes - Cash Inquiry (Expert)"
 msgstr "کدهای الگوی پیامک - استعلام نقدی (کارشناس)"
 
 msgid "Pattern: \"New\" (Cash - Expert)"
-msgstr "الگو: \"New\" (Cash - Expert)"
+msgstr "الگو: \"جدید\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Rejected\" (Cash - Expert)"
-msgstr "الگو: \"Rejected\" (Cash - Expert)"
+msgstr "الگو: \"رد شده\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Referred to Expert\" (Cash - Expert)"
-msgstr "الگو: \"Referred to Expert\" (Cash - Expert)"
+msgstr "الگو: \"ارجاع شده به کارشناس\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"In Progress\" (Cash - Expert)"
-msgstr "الگو: \"In Progress\" (Cash - Expert)"
+msgstr "الگو: \"در حال انجام\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Follow Up Scheduled\" (Cash - Expert)"
-msgstr "الگو: \"Follow Up Scheduled\" (Cash - Expert)"
+msgstr "الگو: \"پیگیری برنامه‌ریزی شده\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Meeting Scheduled\" (Cash - Expert)"
-msgstr "الگو: \"Meeting Scheduled\" (Cash - Expert)"
+msgstr "الگو: \"جلسه برنامه‌ریزی شده\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Awaiting Documents\" (Cash - Expert)"
-msgstr "الگو: \"Awaiting Documents\" (Cash - Expert)"
+msgstr "الگو: \"منتظر مستندات\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Awaiting Down Payment\" (Cash - Expert)"
-msgstr "الگو: \"Awaiting Down Payment\" (Cash - Expert)"
+msgstr "الگو: \"منتظر پیش‌پرداخت\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Down Payment Received\" (Cash - Expert)"
-msgstr "الگو: \"Down Payment Received\" (Cash - Expert)"
+msgstr "الگو: \"پیش‌پرداخت دریافت شد\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Approved\" (Cash - Expert)"
-msgstr "الگو: \"Approved\" (Cash - Expert)"
+msgstr "الگو: \"تایید شده\" (استعلام نقدی - کارشناس)"
 
 msgid "Pattern: \"Completed\" (Cash - Expert)"
-msgstr "الگو: \"Completed\" (Cash - Expert)"
+msgstr "الگو: \"تکمیل شده\" (استعلام نقدی - کارشناس)"
 
 msgid "SMS Pattern Codes - Cash Inquiry (Admin)"
 msgstr "کدهای الگوی پیامک - استعلام نقدی (مدیر)"
 
 msgid "Pattern: \"New\" (Cash - Admin)"
-msgstr "الگو: \"New\" (Cash - Admin)"
+msgstr "الگو: \"جدید\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Rejected\" (Cash - Admin)"
-msgstr "الگو: \"Rejected\" (Cash - Admin)"
+msgstr "الگو: \"رد شده\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Referred to Expert\" (Cash - Admin)"
-msgstr "الگو: \"Referred to Expert\" (Cash - Admin)"
+msgstr "الگو: \"ارجاع شده به کارشناس\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"In Progress\" (Cash - Admin)"
-msgstr "الگو: \"In Progress\" (Cash - Admin)"
+msgstr "الگو: \"در حال انجام\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Follow Up Scheduled\" (Cash - Admin)"
-msgstr "الگو: \"Follow Up Scheduled\" (Cash - Admin)"
+msgstr "الگو: \"پیگیری برنامه‌ریزی شده\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Meeting Scheduled\" (Cash - Admin)"
-msgstr "الگو: \"Meeting Scheduled\" (Cash - Admin)"
+msgstr "الگو: \"جلسه برنامه‌ریزی شده\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Awaiting Documents\" (Cash - Admin)"
-msgstr "الگو: \"Awaiting Documents\" (Cash - Admin)"
+msgstr "الگو: \"منتظر مستندات\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Awaiting Down Payment\" (Cash - Admin)"
-msgstr "الگو: \"Awaiting Down Payment\" (Cash - Admin)"
+msgstr "الگو: \"منتظر پیش‌پرداخت\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Down Payment Received\" (Cash - Admin)"
-msgstr "الگو: \"Down Payment Received\" (Cash - Admin)"
+msgstr "الگو: \"پیش‌پرداخت دریافت شد\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Approved\" (Cash - Admin)"
-msgstr "الگو: \"Approved\" (Cash - Admin)"
+msgstr "الگو: \"تایید شده\" (استعلام نقدی - مدیر)"
 
 msgid "Pattern: \"Completed\" (Cash - Admin)"
-msgstr "الگو: \"Completed\" (Cash - Admin)"
+msgstr "الگو: \"تکمیل شده\" (استعلام نقدی - مدیر)"
 
 msgid "Installment Inquiry Status Notifications - Customer"
 msgstr "اعلان‌های وضعیت استعلام اقساطی - Customer"

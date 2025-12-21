@@ -19,6 +19,14 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
  "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
+#: includes/class-dashboard-handler.php
+msgid "System Settings"
+msgstr ""
+
+#: templates/dashboard/settings.php
+msgid "%s System Settings"
+msgstr ""
+
 #: includes/admin/class-autopuzzle-white-label-settings.php
 msgid "White Label & Branding"
 msgstr ""
