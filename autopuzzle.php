@@ -3,7 +3,7 @@
  * Plugin Name:       AutoPuzzle
  * Plugin URI:        https://puzzlinco.com
  * Description:       A plugin for car purchase inquiries using Finotex API and managing them in WordPress.
- * Version:           1.2.0
+ * Version:           1.2.01
  * Author:            ArsalanArghavan
  * Author URI:        https://arsalanarghavan.ir
  * License:           GPL v2 or later

@@ -49,12 +49,48 @@ $notification_type = 'sms';
 
 // Handle CSV Export
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+    // Get filter values for export
+    $export_status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+    $export_category = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : '';
+    $export_related_id = isset($_GET['related_id']) ? intval($_GET['related_id']) : 0;
+    $export_date_from = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '';
+    $export_date_to = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
+    $export_search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
+    
+    // Convert Jalali dates to Gregorian for export if Persian
+    $export_date_from_gregorian = $export_date_from;
+    $export_date_to_gregorian = $export_date_to;
+    
+    if ($is_persian && function_exists('autopuzzle_jalali_to_gregorian')) {
+        if (!empty($export_date_from)) {
+            $normalized_date = function_exists('autopuzzle_normalize_jalali_date') ? autopuzzle_normalize_jalali_date($export_date_from) : $export_date_from;
+            if ($normalized_date && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $normalized_date, $matches)) {
+                $gregorian = autopuzzle_jalali_to_gregorian((int)$matches[1], (int)$matches[2], (int)$matches[3]);
+                if ($gregorian) {
+                    $export_date_from_gregorian = date('Y-m-d', strtotime($gregorian));
+                }
+            }
+        }
+        
+        if (!empty($export_date_to)) {
+            $normalized_date = function_exists('autopuzzle_normalize_jalali_date') ? autopuzzle_normalize_jalali_date($export_date_to) : $export_date_to;
+            if ($normalized_date && preg_match('/^(\d{4})\/(\d{2})\/(\d{2})$/', $normalized_date, $matches)) {
+                $gregorian = autopuzzle_jalali_to_gregorian((int)$matches[1], (int)$matches[2], (int)$matches[3]);
+                if ($gregorian) {
+                    $export_date_to_gregorian = date('Y-m-d', strtotime($gregorian));
+                }
+            }
+        }
+    }
+    
     $export_logs = Autopuzzle_Database::get_notification_logs([
         'type' => $notification_type,
-        'status' => isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '',
-        'date_from' => isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '',
-        'date_to' => isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '',
-        'search' => isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '',
+        'category' => $export_category,
+        'status' => $export_status,
+        'related_id' => $export_related_id > 0 ? $export_related_id : '',
+        'date_from' => $export_date_from_gregorian,
+        'date_to' => $export_date_to_gregorian,
+        'search' => $export_search,
         'limit' => 10000,
         'offset' => 0,
     ]);
@@ -69,6 +105,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         esc_html__('ID', 'autopuzzle'),
         esc_html__('Recipient', 'autopuzzle'),
         esc_html__('Message', 'autopuzzle'),
+        esc_html__('Category', 'autopuzzle'),
+        esc_html__('Related ID', 'autopuzzle'),
+        esc_html__('Related Type', 'autopuzzle'),
         esc_html__('Status', 'autopuzzle'),
         esc_html__('Created At', 'autopuzzle'),
         esc_html__('Sent At', 'autopuzzle'),
@@ -76,10 +115,27 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     ]);
     
     foreach ($export_logs as $log) {
+        $related_id = $log->related_id ?? 0;
+        $related_type = '';
+        if ($related_id > 0) {
+            $post_type = get_post_type($related_id);
+            if ($post_type) {
+                $related_type = $post_type === 'inquiry' ? esc_html__('Installment Inquiry', 'autopuzzle') : ($post_type === 'cash_inquiry' ? esc_html__('Cash Inquiry', 'autopuzzle') : ucfirst($post_type));
+            } else {
+                $user = get_user_by('ID', $related_id);
+                if ($user) {
+                    $related_type = esc_html__('User', 'autopuzzle');
+                }
+            }
+        }
+        
         fputcsv($output, [
             $log->id,
             $log->recipient,
             $log->message,
+            $log->category ?? '',
+            $related_id > 0 ? $related_id : '-',
+            $related_type ?: '-',
             $log->status,
             $log->created_at,
             $log->sent_at ?: '-',
@@ -93,6 +149,8 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 
 // Get filters
 $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+$category_filter = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : '';
+$related_id_filter = isset($_GET['related_id']) ? intval($_GET['related_id']) : 0;
 $date_from = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '';
 $date_to = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
 $search = isset($_GET['search']) ? sanitize_text_field($_GET['search']) : '';
@@ -157,7 +215,9 @@ if ($is_persian && function_exists('autopuzzle_gregorian_to_jalali')) {
 // Get SMS notification logs (use Gregorian dates for database queries)
 $logs = Autopuzzle_Database::get_notification_logs([
     'type' => $notification_type,
+    'category' => $category_filter,
     'status' => $status_filter,
+    'related_id' => $related_id_filter > 0 ? $related_id_filter : '',
     'date_from' => $date_from_gregorian,
     'date_to' => $date_to_gregorian,
     'search' => $search,
@@ -167,7 +227,9 @@ $logs = Autopuzzle_Database::get_notification_logs([
 
 $total_logs = Autopuzzle_Database::get_notification_logs_count([
     'type' => $notification_type,
+    'category' => $category_filter,
     'status' => $status_filter,
+    'related_id' => $related_id_filter > 0 ? $related_id_filter : '',
     'date_from' => $date_from_gregorian,
     'date_to' => $date_to_gregorian,
     'search' => $search,
@@ -474,6 +536,24 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             </select>
                         </div>
                         <div class="col-6 col-lg-3">
+                            <label class="form-label"><?php esc_html_e('Category', 'autopuzzle'); ?></label>
+                            <select name="category" class="form-control form-select">
+                                <option value=""><?php esc_html_e('All Categories', 'autopuzzle'); ?></option>
+                                <option value="login" <?php selected($category_filter, 'login'); ?>><?php esc_html_e('Login OTP', 'autopuzzle'); ?></option>
+                                <option value="inquiry_new" <?php selected($category_filter, 'inquiry_new'); ?>><?php esc_html_e('New Inquiry', 'autopuzzle'); ?></option>
+                                <option value="inquiry_status" <?php selected($category_filter, 'inquiry_status'); ?>><?php esc_html_e('Status Change', 'autopuzzle'); ?></option>
+                                <option value="inquiry_followup" <?php selected($category_filter, 'inquiry_followup'); ?>><?php esc_html_e('Follow-up', 'autopuzzle'); ?></option>
+                                <option value="expert_assignment" <?php selected($category_filter, 'expert_assignment'); ?>><?php esc_html_e('Expert Assignment', 'autopuzzle'); ?></option>
+                                <option value="admin_notification" <?php selected($category_filter, 'admin_notification'); ?>><?php esc_html_e('Admin Notification', 'autopuzzle'); ?></option>
+                                <option value="meeting_reminder" <?php selected($category_filter, 'meeting_reminder'); ?>><?php esc_html_e('Meeting Reminder', 'autopuzzle'); ?></option>
+                                <option value="other" <?php selected($category_filter, 'other'); ?>><?php esc_html_e('Other', 'autopuzzle'); ?></option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <label class="form-label"><?php esc_html_e('Related ID', 'autopuzzle'); ?></label>
+                            <input type="number" name="related_id" class="form-control" placeholder="<?php esc_attr_e('Inquiry/User ID', 'autopuzzle'); ?>" value="<?php echo $related_id_filter > 0 ? esc_attr($related_id_filter) : ''; ?>">
+                        </div>
+                        <div class="col-6 col-lg-3">
                             <label class="form-label"><?php esc_html_e('Date From', 'autopuzzle'); ?></label>
                             <?php if ($is_persian): ?>
                                 <?php 
@@ -570,6 +650,8 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                 <th><?php esc_html_e('ID', 'autopuzzle'); ?></th>
                                 <th><?php esc_html_e('Recipient', 'autopuzzle'); ?></th>
                                 <th><?php esc_html_e('Message', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Category', 'autopuzzle'); ?></th>
+                                <th><?php esc_html_e('Related To', 'autopuzzle'); ?></th>
                                 <th><?php esc_html_e('Status', 'autopuzzle'); ?></th>
                                 <th><?php esc_html_e('Created', 'autopuzzle'); ?></th>
                                 <th><?php esc_html_e('Sent', 'autopuzzle'); ?></th>
@@ -579,7 +661,7 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                         <tbody>
                             <?php if (empty($logs)): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">
+                                    <td colspan="9" class="text-center py-4">
                                         <p class="text-muted mb-0"><?php esc_html_e('No SMS notifications found.', 'autopuzzle'); ?></p>
                                     </td>
                                 </tr>
@@ -592,6 +674,53 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                                             <span class="text-truncate d-inline-block" style="max-width: 200px;" title="<?php echo esc_attr($log->message); ?>">
                                                 <?php echo esc_html(wp_trim_words($log->message, 10)); ?>
                                             </span>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $category = $log->category ?? '';
+                                            $category_labels = [
+                                                'login' => esc_html__('Login OTP', 'autopuzzle'),
+                                                'inquiry_new' => esc_html__('New Inquiry', 'autopuzzle'),
+                                                'inquiry_status' => esc_html__('Status Change', 'autopuzzle'),
+                                                'inquiry_followup' => esc_html__('Follow-up', 'autopuzzle'),
+                                                'expert_assignment' => esc_html__('Expert Assignment', 'autopuzzle'),
+                                                'admin_notification' => esc_html__('Admin Notification', 'autopuzzle'),
+                                                'meeting_reminder' => esc_html__('Meeting Reminder', 'autopuzzle'),
+                                                'other' => esc_html__('Other', 'autopuzzle'),
+                                            ];
+                                            $category_label = $category_labels[$category] ?? ($category ? ucfirst($category) : esc_html__('N/A', 'autopuzzle'));
+                                            ?>
+                                            <span class="badge bg-info-transparent"><?php echo esc_html($category_label); ?></span>
+                                        </td>
+                                        <td>
+                                            <?php
+                                            $related_id = $log->related_id ?? 0;
+                                            if ($related_id > 0) {
+                                                $post_type = get_post_type($related_id);
+                                                if ($post_type) {
+                                                    $post_title = get_the_title($related_id);
+                                                    $post_type_label = $post_type === 'inquiry' ? esc_html__('Installment Inquiry', 'autopuzzle') : ($post_type === 'cash_inquiry' ? esc_html__('Cash Inquiry', 'autopuzzle') : ucfirst($post_type));
+                                                    echo '<a href="' . esc_url(get_edit_post_link($related_id)) . '" target="_blank" class="text-primary">';
+                                                    echo esc_html($post_type_label) . ' #' . esc_html($related_id);
+                                                    if ($post_title) {
+                                                        echo ' - ' . esc_html(wp_trim_words($post_title, 5));
+                                                    }
+                                                    echo '</a>';
+                                                } else {
+                                                    // Might be a user ID
+                                                    $user = get_user_by('ID', $related_id);
+                                                    if ($user) {
+                                                        echo '<a href="' . esc_url(admin_url('user-edit.php?user_id=' . $related_id)) . '" target="_blank" class="text-primary">';
+                                                        echo esc_html__('User', 'autopuzzle') . ' #' . esc_html($related_id) . ' - ' . esc_html($user->display_name);
+                                                        echo '</a>';
+                                                    } else {
+                                                        echo '<span class="text-muted">' . esc_html__('ID', 'autopuzzle') . ': ' . esc_html($related_id) . '</span>';
+                                                    }
+                                                }
+                                            } else {
+                                                echo '<span class="text-muted">-</span>';
+                                            }
+                                            ?>
                                         </td>
                                         <td>
                                             <?php
@@ -697,6 +826,8 @@ if (!wp_script_is('chartjs', 'enqueued')) {
                             <?php
                             $base_url = add_query_arg([
                                 'status' => $status_filter,
+                                'category' => $category_filter,
+                                'related_id' => $related_id_filter > 0 ? $related_id_filter : '',
                                 'date_from' => $date_from,
                                 'date_to' => $date_to,
                                 'search' => $search,

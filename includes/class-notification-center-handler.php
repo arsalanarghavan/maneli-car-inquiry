@@ -31,6 +31,7 @@ class Autopuzzle_Notification_Center_Handler {
         $results = [];
         $log_data = [
             'message' => $message,
+            'category' => $options['category'] ?? null,
             'related_id' => $options['related_id'] ?? null,
             'user_id' => $options['user_id'] ?? get_current_user_id(),
             'scheduled_at' => $options['scheduled_at'] ?? null,

@@ -1147,6 +1147,7 @@ class Autopuzzle_Installment_Inquiry_Handler {
      * Sends notifications to admin and customer for a new inquiry.
      */
     private function send_new_inquiry_notifications($buyer_data, $car_id) {
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         $sms_handler = new Autopuzzle_SMS_Handler();
         $customer_name = ($buyer_data['first_name'] ?? '') . ' ' . ($buyer_data['last_name'] ?? '');
         $car_name = get_the_title($car_id) ?? '';
@@ -1156,14 +1157,71 @@ class Autopuzzle_Installment_Inquiry_Handler {
         $admin_mobile = $options['admin_notification_mobile'] ?? '';
         $pattern_admin = $options['sms_pattern_new_inquiry'] ?? 0;
         if (!empty($admin_mobile) && $pattern_admin > 0) {
-            $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name]);
+            $result = $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name]);
+            
+            // Log SMS
+            $sms_success = false;
+            $message_id = null;
+            if (is_array($result) && isset($result['success'])) {
+                $sms_success = $result['success'];
+                $message_id = $result['message_id'] ?? null;
+            } elseif ($result === true) {
+                $sms_success = true;
+            }
+            
+            Autopuzzle_Database::log_notification([
+                'type' => 'sms',
+                'category' => 'inquiry_new',
+                'recipient' => $admin_mobile,
+                'message' => sprintf(esc_html__('New inquiry notification: Customer %s, Car %s', 'autopuzzle'), $customer_name, $car_name),
+                'status' => $sms_success ? 'sent' : 'failed',
+                'sent_at' => $sms_success ? current_time('mysql') : null,
+                'user_id' => 0,
+            ]);
         }
 
         // Notify Customer
         $customer_mobile = $buyer_data['mobile_number'] ?? '';
         $pattern_customer = $options['sms_pattern_pending'] ?? 0;
         if (!empty($customer_mobile) && $pattern_customer > 0) {
-            $sms_handler->send_pattern($pattern_customer, $customer_mobile, [$customer_name, $car_name]);
+            $result = $sms_handler->send_pattern($pattern_customer, $customer_mobile, [$customer_name, $car_name]);
+            
+            // Log SMS
+            $sms_success = false;
+            $message_id = null;
+            if (is_array($result) && isset($result['success'])) {
+                $sms_success = $result['success'];
+                $message_id = $result['message_id'] ?? null;
+            } elseif ($result === true) {
+                $sms_success = true;
+            }
+            
+            // Get inquiry post ID if available
+            $inquiry_id = null;
+            $user_id = $buyer_data['user_id'] ?? 0;
+            if ($user_id > 0) {
+                $inquiries = get_posts([
+                    'post_type' => 'inquiry',
+                    'author' => $user_id,
+                    'posts_per_page' => 1,
+                    'orderby' => 'date',
+                    'order' => 'DESC',
+                ]);
+                if (!empty($inquiries)) {
+                    $inquiry_id = $inquiries[0]->ID;
+                }
+            }
+            
+            Autopuzzle_Database::log_notification([
+                'type' => 'sms',
+                'category' => 'inquiry_new',
+                'recipient' => $customer_mobile,
+                'message' => sprintf(esc_html__('Inquiry confirmation: Car %s', 'autopuzzle'), $car_name),
+                'status' => $sms_success ? 'sent' : 'failed',
+                'sent_at' => $sms_success ? current_time('mysql') : null,
+                'related_id' => $inquiry_id,
+                'user_id' => $user_id,
+            ]);
         }
     }
     

@@ -2369,6 +2369,7 @@ class Autopuzzle_Dashboard_Handler {
         $_SESSION['autopuzzle_sms_time'] = time();
         
         // Get OTP pattern code from settings
+        $options = Autopuzzle_Options_Helper::get_all_options();
         $otp_pattern = $options['otp_pattern_code'] ?? '';
         
         // Send SMS using existing SMS handler
@@ -2417,6 +2418,37 @@ class Autopuzzle_Dashboard_Handler {
         if (defined('WP_DEBUG') && WP_DEBUG) {
         error_log('OTP Send Result: ' . ($result ? 'SUCCESS' : 'FAILED'));
         }
+        
+        // Log SMS to notification_logs
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
+        $message_text = !empty($otp_pattern) 
+            ? sprintf(esc_html__('OTP verification code sent via pattern', 'autopuzzle'))
+            : sprintf(esc_html__('Your verification code: %s', 'autopuzzle'), $code);
+        
+        $sms_success = false;
+        $message_id = null;
+        $error_message = null;
+        
+        if (is_array($result) && isset($result['success'])) {
+            $sms_success = $result['success'];
+            $message_id = $result['message_id'] ?? null;
+        } elseif ($result === true) {
+            $sms_success = true;
+        } else {
+            $sms_success = false;
+            $error_message = esc_html__('SMS sending failed', 'autopuzzle');
+        }
+        
+        Autopuzzle_Database::log_notification([
+            'type' => 'sms',
+            'category' => 'login',
+            'recipient' => $phone,
+            'message' => $message_text,
+            'status' => $sms_success ? 'sent' : 'failed',
+            'error_message' => $error_message,
+            'sent_at' => $sms_success ? current_time('mysql') : null,
+            'user_id' => 0, // OTP is sent to non-logged-in users
+        ]);
         
         if ($result) {
             wp_send_json_success(['message' => esc_html__('Verification code sent.', 'autopuzzle')]);
@@ -2764,6 +2796,37 @@ class Autopuzzle_Dashboard_Handler {
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('OTP Send Result: ' . ($result ? 'SUCCESS' : 'FAILED'));
         }
+        
+        // Log SMS to notification_logs
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
+        $message_text = !empty($otp_pattern) 
+            ? sprintf(esc_html__('OTP verification code sent via pattern', 'autopuzzle'))
+            : sprintf(esc_html__('Your verification code: %s', 'autopuzzle'), $code);
+        
+        $sms_success = false;
+        $message_id = null;
+        $error_message = null;
+        
+        if (is_array($result) && isset($result['success'])) {
+            $sms_success = $result['success'];
+            $message_id = $result['message_id'] ?? null;
+        } elseif ($result === true) {
+            $sms_success = true;
+        } else {
+            $sms_success = false;
+            $error_message = esc_html__('SMS sending failed', 'autopuzzle');
+        }
+        
+        Autopuzzle_Database::log_notification([
+            'type' => 'sms',
+            'category' => 'login',
+            'recipient' => $phone,
+            'message' => $message_text,
+            'status' => $sms_success ? 'sent' : 'failed',
+            'error_message' => $error_message,
+            'sent_at' => $sms_success ? current_time('mysql') : null,
+            'user_id' => $user_id ?? 0,
+        ]);
         
         if ($result) {
             wp_send_json_success(['message' => esc_html__('Verification code sent.', 'autopuzzle')]);

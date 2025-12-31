@@ -48,67 +48,43 @@ class Autopuzzle_Shortcode_Handler {
             return;
         }
 
-        // OPTIMIZED: Check if page actually has shortcodes before loading heavy CSS libraries
-        global $post;
+        // Always register styles (they will be enqueued by enqueue_calculator_assets if needed)
+        // This ensures styles are available when needed on product pages
         
-        // Check if page has shortcodes OR if it's a product page (for calculator and inquiry forms)
-        $has_shortcodes = is_a($post, 'WP_Post') && $this->post_has_shortcodes($post);
-        $is_product_page = is_product() || (is_a($post, 'WP_Post') && 'product' === get_post_type($post));
-        $should_load_assets = $has_shortcodes || $is_product_page;
-        
-        // Register Line Awesome Complete (but only enqueue if page has shortcodes or is product)
+        // Register Line Awesome Complete (always register, enqueue will be handled by calculator assets)
         $line_awesome_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-line-awesome-complete.css';
-        if (file_exists($line_awesome_path)) {
+        if (file_exists($line_awesome_path) && !wp_style_is('autopuzzle-line-awesome-complete', 'registered')) {
             wp_register_style('autopuzzle-line-awesome-complete', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-line-awesome-complete.css', [], '1.0.0');
-            // Only enqueue if needed - saves ~100KB per page
-            if ($should_load_assets) {
-                wp_enqueue_style('autopuzzle-line-awesome-complete');
-            }
         }
         
-        // Register and enqueue frontend styles - Check if frontend.css exists before enqueuing
+        // Register frontend styles - Check if frontend.css exists before registering
         $frontend_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/frontend.css';
-        if (file_exists($frontend_css_path)) {
-            $css_version = filemtime($frontend_css_path);
-            wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css', ['autopuzzle-line-awesome-complete'], $css_version);
-            // Only enqueue if page has shortcodes or is product page
-            if ($should_load_assets) {
-                wp_enqueue_style('autopuzzle-frontend-styles');
-            }
-        } else {
-            // Use autopuzzle-shortcode-assets.css as fallback if frontend.css doesn't exist
-            $fallback_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-shortcode-assets.css';
-            if (file_exists($fallback_css_path)) {
-                $css_version = filemtime($fallback_css_path);
-                wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-shortcode-assets.css', ['autopuzzle-line-awesome-complete'], $css_version);
-                wp_enqueue_style('autopuzzle-frontend-styles');
+        if (!wp_style_is('autopuzzle-frontend-styles', 'registered')) {
+            if (file_exists($frontend_css_path)) {
+                $css_version = filemtime($frontend_css_path);
+                wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css', ['autopuzzle-line-awesome-complete'], $css_version);
+            } else {
+                // Use autopuzzle-shortcode-assets.css as fallback if frontend.css doesn't exist
+                $fallback_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-shortcode-assets.css';
+                if (file_exists($fallback_css_path)) {
+                    $css_version = filemtime($fallback_css_path);
+                    wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-shortcode-assets.css', ['autopuzzle-line-awesome-complete'], $css_version);
+                }
             }
         }
         
-        // Register and enqueue Bootstrap RTL
-        wp_register_style('autopuzzle-bootstrap-shortcode', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
-        wp_enqueue_style('autopuzzle-bootstrap-shortcode');
+        // Register Bootstrap RTL (always register, enqueue will be handled by calculator assets)
+        if (!wp_style_is('autopuzzle-bootstrap-shortcode', 'registered')) {
+            wp_register_style('autopuzzle-bootstrap-shortcode', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        }
         
-        // Shortcode Xintra compat - check if file exists
+        // Register Shortcode Xintra compat (always register, enqueue will be handled by calculator assets)
         $xintra_compat_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
-        if (file_exists($xintra_compat_path)) {
+        if (file_exists($xintra_compat_path) && !wp_style_is('autopuzzle-shortcode-xintra-compat', 'registered')) {
             wp_register_style('autopuzzle-shortcode-xintra-compat', AUTOPUZZLE_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['autopuzzle-frontend-styles'], '1.0.0');
-            wp_enqueue_style('autopuzzle-shortcode-xintra-compat');
         }
         
-        // Enqueue Cash Inquiry Form Styles
-        $cash_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/cash-inquiry.css';
-        if (file_exists($cash_inquiry_css_path)) {
-            $css_version = filemtime($cash_inquiry_css_path);
-            wp_enqueue_style('autopuzzle-cash-inquiry-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/cash-inquiry.css', [], $css_version);
-        }
-        
-        // Enqueue Installment Inquiry Form Styles
-        $installment_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/installment-inquiry.css';
-        if (file_exists($installment_inquiry_css_path)) {
-            $css_version = filemtime($installment_inquiry_css_path);
-            wp_enqueue_style('autopuzzle-installment-inquiry-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/installment-inquiry.css', [], $css_version);
-        }
+        // Cash and Installment Inquiry styles will be registered/enqueued by calculator assets when needed
         
         // Enqueue jQuery (required for all scripts)
         wp_enqueue_script('jquery');
@@ -123,15 +99,9 @@ class Autopuzzle_Shortcode_Handler {
             wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
         }
 
-        // NOTE: calculator.js is enqueued conditionally by Autopuzzle_Loan_Calculator_Shortcode
-        // Only on product pages to ensure proper localization and avoid duplicate loading        
-        // Conditionally load assets for pages containing specific shortcodes that need Select2
-        // Also load on product pages for calculator and inquiry forms
-        if ($should_load_assets) {
-             // Note: Select2 is not available locally, keep CDN
-             wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
-             wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
-        }
+        // NOTE: calculator.js and Select2 are enqueued conditionally by Autopuzzle_Loan_Calculator_Shortcode
+        // Only on product pages to ensure proper localization and avoid duplicate loading
+        // Select2 will be enqueued by enqueue_calculator_assets() when needed
         
         // Logging tracker - Load on all frontend pages to track user actions (using optimized helper)
         $enable_user_logging = Autopuzzle_Options_Helper::is_option_enabled('enable_user_logging', false);

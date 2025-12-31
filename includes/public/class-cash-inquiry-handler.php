@@ -310,6 +310,7 @@ class Autopuzzle_Cash_Inquiry_Handler {
      * @param string $car_name      The name of the requested car.
      */
     private static function send_admin_notification($customer_name, $car_name) {
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
         $options = Autopuzzle_Options_Helper::get_all_options();
         $admin_mobile = $options['admin_notification_mobile'] ?? '';
         $pattern_admin = $options['sms_pattern_new_inquiry'] ?? 0;
@@ -317,7 +318,27 @@ class Autopuzzle_Cash_Inquiry_Handler {
         if (!empty($admin_mobile) && $pattern_admin > 0) {
             $sms_handler = new Autopuzzle_SMS_Handler();
             $car_name_suffix = sprintf('%s (%s)', $car_name, esc_html__('Cash', 'autopuzzle'));
-            $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name_suffix]);
+            $result = $sms_handler->send_pattern($pattern_admin, $admin_mobile, [$customer_name, $car_name_suffix]);
+            
+            // Log SMS
+            $sms_success = false;
+            $message_id = null;
+            if (is_array($result) && isset($result['success'])) {
+                $sms_success = $result['success'];
+                $message_id = $result['message_id'] ?? null;
+            } elseif ($result === true) {
+                $sms_success = true;
+            }
+            
+            Autopuzzle_Database::log_notification([
+                'type' => 'sms',
+                'category' => 'inquiry_new',
+                'recipient' => $admin_mobile,
+                'message' => sprintf(esc_html__('New cash inquiry notification: Customer %s, Car %s', 'autopuzzle'), $customer_name, $car_name_suffix),
+                'status' => $sms_success ? 'sent' : 'failed',
+                'sent_at' => $sms_success ? current_time('mysql') : null,
+                'user_id' => 0,
+            ]);
         }
     }
 }

@@ -23,7 +23,10 @@ class Autopuzzle_Loan_Calculator_Shortcode {
         }
         
         add_shortcode('loan_calculator', [$this, 'render_shortcode']);
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_calculator_assets']);
+        // Use priority 20 to ensure this runs after enqueue_global_assets (priority 10)
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_calculator_assets'], 20);
+        // Also hook into wp_head to ensure styles are printed (backup) - use priority 99 to run after all enqueues
+        add_action('wp_head', [$this, 'force_enqueue_calculator_assets'], 99);
         
         // Automatically add calculator to single product pages
         add_action('woocommerce_after_single_product_summary', [$this, 'render_shortcode'], 15);
@@ -42,31 +45,155 @@ class Autopuzzle_Loan_Calculator_Shortcode {
      */
     public function enqueue_calculator_assets() {
         // اطمینان از اینکه اسکریپت فقط در صفحات محصول یا صفحاتی که شورت‌کد در آن هست بارگذاری شود.
-        $current_post = get_post(get_the_ID());
-        if (!is_product() && (!$current_post || !has_shortcode($current_post->post_content ?? '', 'loan_calculator'))) {
+        global $post;
+        
+        // Multiple checks to ensure we detect product pages correctly
+        $is_product = false;
+        $has_shortcode = false;
+        
+        // Check 1: WooCommerce is_product() function
+        if (function_exists('is_product') && is_product()) {
+            $is_product = true;
+        }
+        
+        // Check 2: Post type check
+        if (!$is_product && is_a($post, 'WP_Post') && 'product' === get_post_type($post)) {
+            $is_product = true;
+        }
+        
+        // Check 3: Query var check
+        if (!$is_product && get_query_var('product')) {
+            $is_product = true;
+        }
+        
+        // Check 4: Current post ID check
+        $current_post_id = get_the_ID();
+        if (!$is_product && $current_post_id) {
+            $current_post = get_post($current_post_id);
+            if (is_a($current_post, 'WP_Post') && 'product' === get_post_type($current_post)) {
+                $is_product = true;
+            }
+        }
+        
+        // Check for shortcode in post content
+        if (!$is_product && is_a($post, 'WP_Post') && has_shortcode($post->post_content ?? '', 'loan_calculator')) {
+            $has_shortcode = true;
+        }
+        
+        // If neither product page nor has shortcode, don't load assets
+        if (!$is_product && !$has_shortcode) {
             return;
         }
 
-        // First, ensure frontend styles are registered/enqueued as dependencies
-        // This is handled by Autopuzzle_Shortcode_Handler, but we need to ensure they're available
+        // Force enqueue all required styles for product pages
+        // This ensures styles are loaded even if enqueue_global_assets didn't enqueue them
+        
+        // Ensure Peyda Font is registered and enqueued first (CRITICAL - must load before other styles)
+        $peyda_font_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/peyda-font.css';
+        if (file_exists($peyda_font_path)) {
+            if (!wp_style_is('autopuzzle-peyda-font', 'registered')) {
+                wp_register_style('autopuzzle-peyda-font', AUTOPUZZLE_PLUGIN_URL . 'assets/css/peyda-font.css', [], filemtime($peyda_font_path));
+            }
+            if (!wp_style_is('autopuzzle-peyda-font', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-peyda-font');
+            }
+        }
+        
+        // Ensure Line Awesome is registered and enqueued first (as dependency)
+        $line_awesome_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-line-awesome-complete.css';
+        if (file_exists($line_awesome_path)) {
+            if (!wp_style_is('autopuzzle-line-awesome-complete', 'registered')) {
+                wp_register_style('autopuzzle-line-awesome-complete', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-line-awesome-complete.css', [], '1.0.0');
+            }
+            if (!wp_style_is('autopuzzle-line-awesome-complete', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-line-awesome-complete');
+            }
+        }
+
+        // Ensure frontend styles are registered and enqueued
         $frontend_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/frontend.css';
-        if (!wp_style_is('autopuzzle-frontend-styles', 'registered')) {
-            if (file_exists($frontend_css_path)) {
+        if (file_exists($frontend_css_path)) {
+            if (!wp_style_is('autopuzzle-frontend-styles', 'registered')) {
                 $css_version = filemtime($frontend_css_path);
-                wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css', [], $css_version);
-            } else {
-                // Use autopuzzle-shortcode-assets.css as fallback if frontend.css doesn't exist
-                $fallback_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-shortcode-assets.css';
-                if (file_exists($fallback_css_path)) {
+                wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css', ['autopuzzle-line-awesome-complete'], $css_version);
+            }
+            if (!wp_style_is('autopuzzle-frontend-styles', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-frontend-styles');
+            }
+        } else {
+            // Use autopuzzle-shortcode-assets.css as fallback if frontend.css doesn't exist
+            $fallback_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-shortcode-assets.css';
+            if (file_exists($fallback_css_path)) {
+                if (!wp_style_is('autopuzzle-frontend-styles', 'registered')) {
                     $css_version = filemtime($fallback_css_path);
-                    wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-shortcode-assets.css', [], $css_version);
+                    wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-shortcode-assets.css', ['autopuzzle-line-awesome-complete'], $css_version);
+                }
+                if (!wp_style_is('autopuzzle-frontend-styles', 'enqueued')) {
+                    wp_enqueue_style('autopuzzle-frontend-styles');
                 }
             }
         }
 
-        // Ensure Bootstrap is registered/enqueued as dependency
+        // Ensure Bootstrap is registered and enqueued
         if (!wp_style_is('autopuzzle-bootstrap-shortcode', 'registered')) {
             wp_register_style('autopuzzle-bootstrap-shortcode', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        }
+        if (!wp_style_is('autopuzzle-bootstrap-shortcode', 'enqueued')) {
+            wp_enqueue_style('autopuzzle-bootstrap-shortcode');
+        }
+        
+        // Ensure Cash Inquiry styles are enqueued
+        $cash_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/cash-inquiry.css';
+        if (file_exists($cash_inquiry_css_path) && !wp_style_is('autopuzzle-cash-inquiry-styles', 'enqueued')) {
+            $css_version = filemtime($cash_inquiry_css_path);
+            wp_enqueue_style('autopuzzle-cash-inquiry-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/cash-inquiry.css', [], $css_version);
+        }
+        
+        // Ensure Installment Inquiry styles are enqueued
+        $installment_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/installment-inquiry.css';
+        if (file_exists($installment_inquiry_css_path) && !wp_style_is('autopuzzle-installment-inquiry-styles', 'enqueued')) {
+            $css_version = filemtime($installment_inquiry_css_path);
+            wp_enqueue_style('autopuzzle-installment-inquiry-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/installment-inquiry.css', [], $css_version);
+        }
+        
+        // Ensure Xintra compat styles are enqueued
+        $xintra_compat_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
+        if (file_exists($xintra_compat_path)) {
+            if (!wp_style_is('autopuzzle-shortcode-xintra-compat', 'registered')) {
+                wp_register_style('autopuzzle-shortcode-xintra-compat', AUTOPUZZLE_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css', ['autopuzzle-frontend-styles'], '1.0.0');
+            }
+            if (!wp_style_is('autopuzzle-shortcode-xintra-compat', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-shortcode-xintra-compat');
+            }
+        }
+
+        // Ensure jQuery is enqueued (required for all scripts)
+        if (!wp_script_is('jquery', 'enqueued')) {
+            wp_enqueue_script('jquery');
+        }
+
+        // Ensure SweetAlert2 is enqueued (required for forms)
+        $sweetalert2_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+        if (file_exists($sweetalert2_path)) {
+            if (!wp_style_is('sweetalert2', 'enqueued')) {
+                wp_enqueue_style('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+            }
+            if (!wp_script_is('sweetalert2', 'enqueued')) {
+                wp_enqueue_script('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+            }
+        } else {
+            // Fallback to CDN if local file doesn't exist
+            if (!wp_script_is('sweetalert2', 'enqueued')) {
+                wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+            }
+        }
+
+        // Ensure Select2 is enqueued (required for dropdowns)
+        if (!wp_style_is('select2', 'enqueued')) {
+            wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+        }
+        if (!wp_script_is('select2', 'enqueued')) {
+            wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
         }
 
         $options = Autopuzzle_Options_Helper::get_all_options();
@@ -75,12 +202,18 @@ class Autopuzzle_Loan_Calculator_Shortcode {
         $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
         
         // Enqueue calculator CSS - check if file exists first
+        // IMPORTANT: Include peyda-font as dependency so font loads before calculator CSS
+        $calculator_css_deps = ['autopuzzle-frontend-styles', 'autopuzzle-bootstrap-shortcode'];
+        if (wp_style_is('autopuzzle-peyda-font', 'registered') || wp_style_is('autopuzzle-peyda-font', 'enqueued')) {
+            $calculator_css_deps[] = 'autopuzzle-peyda-font';
+        }
+        
         $calculator_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/loan-calculator.css';
         if (file_exists($calculator_css_path)) {
             wp_enqueue_style(
                 'autopuzzle-loan-calculator', 
                 AUTOPUZZLE_PLUGIN_URL . 'assets/css/loan-calculator.css', 
-                ['autopuzzle-frontend-styles', 'autopuzzle-bootstrap-shortcode'],
+                $calculator_css_deps,
                 filemtime($calculator_css_path)
             );
         }
@@ -126,6 +259,135 @@ class Autopuzzle_Loan_Calculator_Shortcode {
         }
 
         wp_localize_script('autopuzzle-calculator-js', 'autopuzzle_ajax_object', $localize_data);
+    }
+
+    /**
+     * Force enqueue calculator assets in wp_head as backup
+     * This ensures styles are loaded even if wp_enqueue_scripts didn't catch the product page
+     * Uses direct HTML injection if enqueue doesn't work
+     */
+    public function force_enqueue_calculator_assets() {
+        // Only run on frontend
+        if (is_admin()) {
+            return;
+        }
+        
+        // Skip if this is dashboard page
+        if (get_query_var('autopuzzle_dashboard')) {
+            return;
+        }
+        
+        global $post, $wp_query;
+        
+        // Multiple checks to detect product page - be very aggressive in detection
+        $is_product = false;
+        $has_shortcode = false;
+        
+        // Check 1: URL pattern (most reliable in wp_head - check first!)
+        $request_uri = $_SERVER['REQUEST_URI'] ?? '';
+        if (!empty($request_uri)) {
+            // Decode URL to handle Persian characters
+            $decoded_uri = urldecode($request_uri);
+            // Check if URL contains /product/ pattern (case insensitive, handle encoded URLs)
+            if (stripos($request_uri, '/product/') !== false || 
+                stripos($decoded_uri, '/product/') !== false ||
+                preg_match('#/product/[^/]+/?$#i', $request_uri) ||
+                preg_match('#/product/[^/]+/?$#i', $decoded_uri)) {
+                $is_product = true;
+            }
+        }
+        
+        // Check 2: Queried object (reliable in wp_head)
+        if (!$is_product) {
+            $queried_object = get_queried_object();
+            if (is_a($queried_object, 'WP_Post') && 'product' === get_post_type($queried_object)) {
+                $is_product = true;
+                $post = $queried_object;
+            }
+        }
+        
+        // Check 3: WooCommerce is_product()
+        if (!$is_product && function_exists('is_product') && is_product()) {
+            $is_product = true;
+        }
+        
+        // Check 4: Post type check from global $post
+        if (!$is_product && is_a($post, 'WP_Post') && 'product' === get_post_type($post)) {
+            $is_product = true;
+        }
+        
+        // Check 5: Current post ID check
+        if (!$is_product) {
+            $current_post_id = get_the_ID();
+            if ($current_post_id) {
+                $current_post = get_post($current_post_id);
+                if (is_a($current_post, 'WP_Post') && 'product' === get_post_type($current_post)) {
+                    $is_product = true;
+                    $post = $current_post;
+                }
+            }
+        }
+        
+        // Check 6: Check if shortcode exists in post content
+        if (!$is_product && is_a($post, 'WP_Post') && has_shortcode($post->post_content ?? '', 'loan_calculator')) {
+            $has_shortcode = true;
+        }
+        
+        // Check 7: Check global query
+        if (!$is_product && !$has_shortcode && isset($wp_query) && is_a($wp_query, 'WP_Query')) {
+            if ($wp_query->is_singular('product') || 
+                (isset($wp_query->queried_object) && is_a($wp_query->queried_object, 'WP_Post') && 'product' === get_post_type($wp_query->queried_object))) {
+                $is_product = true;
+            }
+        }
+        
+        // If not a product page and no shortcode, don't do anything
+        if (!$is_product && !$has_shortcode) {
+            return;
+        }
+        
+        // CRITICAL: Always inject styles directly for product pages
+        // Don't rely on wp_style_is checks - always add if not already present
+        echo "\n<!-- AutoPuzzle Calculator Styles Direct Injection -->\n";
+        
+        // Peyda Font - CRITICAL! Must load first before other styles
+        $peyda_font_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/peyda-font.css';
+        if (file_exists($peyda_font_path) && !wp_style_is('autopuzzle-peyda-font', 'enqueued') && !wp_style_is('autopuzzle-peyda-font', 'done')) {
+            $css_version = filemtime($peyda_font_path);
+            echo '<link rel="stylesheet" id="autopuzzle-peyda-font-css" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/peyda-font.css') . '?ver=' . esc_attr($css_version) . '" media="all">' . "\n";
+        }
+        
+        // Icons CSS (contains line-awesome) - Always add if not already enqueued
+        $icons_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/icons.css';
+        if (file_exists($icons_css_path) && !wp_style_is('autopuzzle-icons', 'enqueued') && !wp_style_is('autopuzzle-icons', 'done')) {
+            $css_version = file_exists($icons_css_path) ? filemtime($icons_css_path) : '1.0.0';
+            echo '<link rel="stylesheet" id="autopuzzle-icons-css" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/icons.css') . '?ver=' . esc_attr($css_version) . '" media="all">' . "\n";
+        }
+        
+        // Shortcode assets CSS (fallback for frontend.css) - Always add if not already enqueued
+        $shortcode_assets_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/maneli-shortcode-assets.css';
+        if (file_exists($shortcode_assets_path) && !wp_style_is('autopuzzle-frontend-styles', 'enqueued') && !wp_style_is('autopuzzle-frontend-styles', 'done')) {
+            $css_version = filemtime($shortcode_assets_path);
+            echo '<link rel="stylesheet" id="autopuzzle-frontend-styles-css" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/maneli-shortcode-assets.css') . '?ver=' . esc_attr($css_version) . '" media="all">' . "\n";
+        }
+        
+        // Loan Calculator CSS - CRITICAL! Always add if file exists
+        // Note: Font should already be loaded above, but we ensure it's there
+        $calculator_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/loan-calculator.css';
+        if (file_exists($calculator_css_path)) {
+            // Always add - don't check wp_style_is as it may not work correctly
+            // Font is already loaded above, so it will be available
+            $css_version = filemtime($calculator_css_path);
+            echo '<link rel="stylesheet" id="autopuzzle-loan-calculator-css" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/loan-calculator.css') . '?ver=' . esc_attr($css_version) . '" media="all">' . "\n";
+        }
+        
+        // Xintra compat - Add if file exists
+        $xintra_compat_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/shortcode-xintra-compat.css';
+        if (file_exists($xintra_compat_path) && !wp_style_is('autopuzzle-shortcode-xintra-compat', 'enqueued') && !wp_style_is('autopuzzle-shortcode-xintra-compat', 'done')) {
+            echo '<link rel="stylesheet" id="autopuzzle-shortcode-xintra-compat-css" href="' . esc_url(AUTOPUZZLE_PLUGIN_URL . 'assets/css/shortcode-xintra-compat.css') . '?ver=1.0.0" media="all">' . "\n";
+        }
+        
+        echo "<!-- End AutoPuzzle Calculator Styles -->\n";
     }
 
     /**

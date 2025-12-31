@@ -97,6 +97,7 @@ class Autopuzzle_Activator {
         $sql_notification_logs = "CREATE TABLE IF NOT EXISTS $table_notification_logs (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             type varchar(50) NOT NULL COMMENT 'sms, telegram, email, notification',
+            category varchar(50) DEFAULT NULL COMMENT 'login, inquiry_new, inquiry_status, inquiry_followup, admin_notification, expert_assignment, meeting_reminder, other',
             recipient varchar(255) NOT NULL,
             message text NOT NULL,
             status varchar(50) DEFAULT 'pending' COMMENT 'pending, sent, failed',
@@ -108,6 +109,7 @@ class Autopuzzle_Activator {
             user_id bigint(20) DEFAULT NULL COMMENT 'User who triggered the notification',
             PRIMARY KEY (id),
             KEY type (type),
+            KEY category (category),
             KEY status (status),
             KEY recipient (recipient(100)),
             KEY scheduled_at (scheduled_at),
@@ -289,6 +291,9 @@ class Autopuzzle_Activator {
         dbDelta($sql_system_logs);
         dbDelta($sql_user_logs);
         
+        // Add category column to existing notification_logs table if it doesn't exist
+        self::add_category_column_to_notification_logs();
+        
         // License table
         $table_license = $wpdb->prefix . 'autopuzzle_license';
         $sql_license = "CREATE TABLE IF NOT EXISTS $table_license (
@@ -360,6 +365,37 @@ class Autopuzzle_Activator {
         if ($missing_tables || empty($stored_version) || version_compare($stored_version, $current_version, '<')) {
             self::create_tables();
             update_option('autopuzzle_db_version', $current_version);
+        }
+    }
+
+    /**
+     * Add category column to notification_logs table if it doesn't exist
+     */
+    private static function add_category_column_to_notification_logs() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'autopuzzle_notification_logs';
+        
+        // Check if column exists
+        $column_exists = $wpdb->get_results($wpdb->prepare(
+            "SELECT COLUMN_NAME FROM information_schema.COLUMNS 
+            WHERE TABLE_SCHEMA = %s 
+            AND TABLE_NAME = %s 
+            AND COLUMN_NAME = 'category'",
+            DB_NAME,
+            $table
+        ));
+        
+        if (empty($column_exists)) {
+            $wpdb->query("ALTER TABLE {$table} 
+                ADD COLUMN category varchar(50) DEFAULT NULL COMMENT 'login, inquiry_new, inquiry_status, inquiry_followup, admin_notification, expert_assignment, meeting_reminder, other' 
+                AFTER type");
+            
+            // Add index for category
+            $wpdb->query("ALTER TABLE {$table} ADD INDEX category (category)");
+            
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('AutoPuzzle: Added category column to ' . $table);
+            }
         }
     }
 

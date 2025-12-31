@@ -253,8 +253,8 @@ class Autopuzzle_Settings_Page {
      */
     public function handle_frontend_settings_save() {
         check_admin_referer('autopuzzle_save_frontend_settings_nonce');
-        // اطمینان از دسترسی کاربر به مدیریت پلاگین
-        if (!current_user_can('manage_autopuzzle_inquiries')) {
+        // اطمینان از دسترسی کاربر به مدیریت پلاگین (مدیر وردپرس یا مدیر افزونه)
+        if (!current_user_can('manage_autopuzzle_inquiries') && !current_user_can('manage_options')) {
             wp_die(esc_html__('You do not have permission to perform this action.', 'autopuzzle'));
         }
 

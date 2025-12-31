@@ -100,8 +100,30 @@ class Autopuzzle_Admin_Actions_Handler {
         
         $sms_pattern_id = $options[$sms_pattern_key] ?? 0;
         if ($sms_pattern_id > 0 && !empty($mobile_number)) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
             $sms_handler = new Autopuzzle_SMS_Handler();
-            $sms_handler->send_pattern($sms_pattern_id, $mobile_number, $sms_params);
+            $result = $sms_handler->send_pattern($sms_pattern_id, $mobile_number, $sms_params);
+            
+            // Log SMS
+            $sms_success = false;
+            $message_id = null;
+            if (is_array($result) && isset($result['success'])) {
+                $sms_success = $result['success'];
+                $message_id = $result['message_id'] ?? null;
+            } elseif ($result === true) {
+                $sms_success = true;
+            }
+            
+            Autopuzzle_Database::log_notification([
+                'type' => 'sms',
+                'category' => 'inquiry_status',
+                'recipient' => $mobile_number,
+                'message' => sprintf(esc_html__('Status change notification: Inquiry status changed to %s for %s', 'autopuzzle'), $final_status, $car_name),
+                'status' => $sms_success ? 'sent' : 'failed',
+                'sent_at' => $sms_success ? current_time('mysql') : null,
+                'related_id' => $post_id,
+                'user_id' => get_current_user_id(),
+            ]);
         }
         
         wp_redirect($redirect_url);
@@ -732,11 +754,34 @@ class Autopuzzle_Admin_Actions_Handler {
         }
 
         if ($pattern_id > 0 && !empty($expert_phone)) {
+            require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
             $expert_name = get_userdata($expert_id)->display_name;
             $car_name = get_the_title(get_post_meta($post_id, 'product_id', true));
             $params = [(string)$expert_name, (string)$customer_name, (string)$customer_mobile, (string)$car_name];
             
-            (new Autopuzzle_SMS_Handler())->send_pattern($pattern_id, $expert_phone, $params);
+            $sms_handler = new Autopuzzle_SMS_Handler();
+            $result = $sms_handler->send_pattern($pattern_id, $expert_phone, $params);
+            
+            // Log SMS
+            $sms_success = false;
+            $message_id = null;
+            if (is_array($result) && isset($result['success'])) {
+                $sms_success = $result['success'];
+                $message_id = $result['message_id'] ?? null;
+            } elseif ($result === true) {
+                $sms_success = true;
+            }
+            
+            Autopuzzle_Database::log_notification([
+                'type' => 'sms',
+                'category' => 'expert_assignment',
+                'recipient' => $expert_phone,
+                'message' => sprintf(esc_html__('Expert assignment notification: Assigned to inquiry for %s, Customer %s', 'autopuzzle'), $car_name, $customer_name),
+                'status' => $sms_success ? 'sent' : 'failed',
+                'sent_at' => $sms_success ? current_time('mysql') : null,
+                'related_id' => $post_id,
+                'user_id' => get_current_user_id(),
+            ]);
         }
     }
 

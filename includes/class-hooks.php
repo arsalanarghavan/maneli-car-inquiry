@@ -600,6 +600,7 @@ class Autopuzzle_Hooks {
                                     $recipients[$channel],
                                     $message,
                                     [
+                                        'category' => 'meeting_reminder',
                                         'related_id' => $meeting->ID,
                                         'title' => esc_html__('Meeting Reminder', 'autopuzzle'),
                                     ]
@@ -680,6 +681,7 @@ class Autopuzzle_Hooks {
                                     $recipients[$channel],
                                     $message,
                                     [
+                                        'category' => 'meeting_reminder',
                                         'related_id' => $meeting->ID,
                                         'title' => esc_html__('Meeting Reminder', 'autopuzzle'),
                                     ]

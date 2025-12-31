@@ -16,8 +16,13 @@
     border: 1px solid #e2e6f1;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     overflow: hidden;
-    font-family: 'Peyda', 'Tahoma', sans-serif;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
     padding: 0;
+}
+
+/* Apply font to all elements inside container */
+.autopuzzle-calculator-container * {
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 /* === Tab Navigation - Match Dashboard Tab Style === */
@@ -113,6 +118,7 @@
     margin-bottom: 0.5rem;
     font-size: 0.8rem;
     color: #4d5875;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 /* === Input Fields === */
@@ -132,6 +138,7 @@
     background-color: #fff;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     box-sizing: border-box;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 .autopuzzle-calculator-container .loan-calculator-form input[type="text"]:focus,
@@ -217,6 +224,7 @@
     color: #6e829f;
     margin-top: 0.5rem;
     padding: 0.5rem 0;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 .autopuzzle-calculator-container .loan-section .loan-subtitle {
@@ -224,6 +232,7 @@
     font-weight: 600;
     color: #212b37;
     margin-bottom: 0.875rem;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 .autopuzzle-calculator-container .loan-section .loan-requirements {
@@ -242,6 +251,7 @@
     line-height: 1.6;
     font-size: 0.8125rem;
     color: #212b37;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 .autopuzzle-calculator-container .loan-section .loan-requirements li:hover {
@@ -273,6 +283,7 @@
     font-weight: 500;
     font-size: 0.8125rem;
     color: #212b37;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 .autopuzzle-calculator-container .loan-section .loan-buttons .term-btn:hover:not(.active) {
@@ -309,6 +320,7 @@
     font-size: 0.875rem;
     color: #212b37;
     font-weight: 600;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 .autopuzzle-calculator-container .loan-section.result-section span {
@@ -339,6 +351,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
     display: inline-block;
     line-height: 1.5;
 }
@@ -382,12 +395,14 @@
     font-weight: 500;
     font-size: 0.8rem;
     color: #4d5875;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 .autopuzzle-calculator-container .cash-request-form .form-group input,
 .autopuzzle-calculator-container .cash-request-form .form-group select {
     display: block !important;
     width: 100% !important;
+    font-family: 'Peyda', 'Tahoma', sans-serif !important;
 }
 
 /* Remove any ::before and ::after pseudo-elements from form elements */

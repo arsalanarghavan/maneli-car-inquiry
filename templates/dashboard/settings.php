@@ -15,8 +15,8 @@ if (!function_exists('persian_numbers')) {
     }
 }
 
-// Permission check - Only Admin can access
-if (!current_user_can('manage_autopuzzle_inquiries')) {
+// Permission check - Only Admin can access (مدیر وردپرس یا مدیر افزونه)
+if (!current_user_can('manage_autopuzzle_inquiries') && !current_user_can('manage_options')) {
     wp_redirect(home_url('/dashboard'));
     exit;
 }

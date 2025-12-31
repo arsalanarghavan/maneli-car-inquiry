@@ -129,6 +129,7 @@ class Autopuzzle_Database {
         
         $defaults = array(
             'type' => 'sms',
+            'category' => null,
             'recipient' => '',
             'message' => '',
             'status' => 'pending',
@@ -143,6 +144,7 @@ class Autopuzzle_Database {
         
         $result = $wpdb->insert($table, array(
             'type' => sanitize_text_field($data['type']),
+            'category' => !empty($data['category']) ? sanitize_text_field($data['category']) : null,
             'recipient' => sanitize_text_field($data['recipient']),
             'message' => wp_kses_post($data['message']),
             'status' => sanitize_text_field($data['status']),
@@ -151,7 +153,7 @@ class Autopuzzle_Database {
             'sent_at' => $data['sent_at'] ? date('Y-m-d H:i:s', strtotime($data['sent_at'])) : null,
             'related_id' => $data['related_id'] ? (int)$data['related_id'] : null,
             'user_id' => $data['user_id'] ? (int)$data['user_id'] : null,
-        ), array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'));
+        ), array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'));
         
         if ($result === false) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
@@ -195,6 +197,7 @@ class Autopuzzle_Database {
         
         $defaults = array(
             'type' => '',
+            'category' => '',
             'status' => '',
             'recipient' => '',
             'related_id' => '',
@@ -214,6 +217,10 @@ class Autopuzzle_Database {
         
         if (!empty($args['type'])) {
             $where[] = $wpdb->prepare("type = %s", $args['type']);
+        }
+        
+        if (!empty($args['category'])) {
+            $where[] = $wpdb->prepare("category = %s", $args['category']);
         }
         
         if ($args['status'] !== '') {
@@ -242,7 +249,7 @@ class Autopuzzle_Database {
         
         if (!empty($args['search'])) {
             $search_term = '%' . $wpdb->esc_like($args['search']) . '%';
-            $where[] = $wpdb->prepare("(message LIKE %s OR recipient LIKE %s)", $search_term, $search_term);
+            $where[] = $wpdb->prepare("(message LIKE %s OR recipient LIKE %s OR category LIKE %s)", $search_term, $search_term, $search_term);
         }
         
         $where_clause = implode(' AND ', $where);
@@ -399,6 +406,7 @@ class Autopuzzle_Database {
         
         $defaults = array(
             'type' => '',
+            'category' => '',
             'status' => '',
             'recipient' => '',
             'related_id' => '',
@@ -414,6 +422,10 @@ class Autopuzzle_Database {
         
         if (!empty($args['type'])) {
             $where[] = $wpdb->prepare("type = %s", $args['type']);
+        }
+        
+        if (!empty($args['category'])) {
+            $where[] = $wpdb->prepare("category = %s", $args['category']);
         }
         
         if ($args['status'] !== '') {
@@ -442,7 +454,7 @@ class Autopuzzle_Database {
         
         if (!empty($args['search'])) {
             $search_term = '%' . $wpdb->esc_like($args['search']) . '%';
-            $where[] = $wpdb->prepare("(message LIKE %s OR recipient LIKE %s)", $search_term, $search_term);
+            $where[] = $wpdb->prepare("(message LIKE %s OR recipient LIKE %s OR category LIKE %s)", $search_term, $search_term, $search_term);
         }
         
         $where_clause = implode(' AND ', $where);

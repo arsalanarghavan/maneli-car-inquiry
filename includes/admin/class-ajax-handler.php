@@ -1316,8 +1316,30 @@ class Autopuzzle_Ajax_Handler {
             
             $pattern_id = $options['cash_inquiry_approved_pattern'] ?? 0;
             if ($pattern_id > 0 && !empty($customer_mobile)) {
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
                 $params = [(string)$customer_name, (string)$car_name, (string)Autopuzzle_Render_Helpers::format_money($amount)];
-                $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
+                $result = $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
+                
+                // Log SMS
+                $sms_success = false;
+                $message_id = null;
+                if (is_array($result) && isset($result['success'])) {
+                    $sms_success = $result['success'];
+                    $message_id = $result['message_id'] ?? null;
+                } elseif ($result === true) {
+                    $sms_success = true;
+                }
+                
+                Autopuzzle_Database::log_notification([
+                    'type' => 'sms',
+                    'category' => 'inquiry_status',
+                    'recipient' => $customer_mobile,
+                    'message' => sprintf(esc_html__('Status change notification: Cash inquiry status changed to awaiting_payment for %s', 'autopuzzle'), $car_name),
+                    'status' => $sms_success ? 'sent' : 'failed',
+                    'sent_at' => $sms_success ? current_time('mysql') : null,
+                    'related_id' => $inquiry_id,
+                    'user_id' => get_current_user_id(),
+                ]);
             }
             
         } elseif ($new_status === 'rejected') {
@@ -1357,8 +1379,30 @@ class Autopuzzle_Ajax_Handler {
             
             $pattern_id = $options['cash_inquiry_rejected_pattern'] ?? 0;
             if ($pattern_id > 0 && !empty($customer_mobile)) {
+                require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-autopuzzle-database.php';
                 $params = [(string)$customer_name, (string)$car_name, (string)$reason];
-                $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
+                $result = $sms_handler->send_pattern($pattern_id, $customer_mobile, $params);
+                
+                // Log SMS
+                $sms_success = false;
+                $message_id = null;
+                if (is_array($result) && isset($result['success'])) {
+                    $sms_success = $result['success'];
+                    $message_id = $result['message_id'] ?? null;
+                } elseif ($result === true) {
+                    $sms_success = true;
+                }
+                
+                Autopuzzle_Database::log_notification([
+                    'type' => 'sms',
+                    'category' => 'inquiry_status',
+                    'recipient' => $customer_mobile,
+                    'message' => sprintf(esc_html__('Status change notification: Cash inquiry status changed to rejected for %s', 'autopuzzle'), $car_name),
+                    'status' => $sms_success ? 'sent' : 'failed',
+                    'sent_at' => $sms_success ? current_time('mysql') : null,
+                    'related_id' => $inquiry_id,
+                    'user_id' => get_current_user_id(),
+                ]);
             }
         } else {
             wp_send_json_error(['message' => esc_html__('Invalid data submitted.', 'autopuzzle')]);
