@@ -80,6 +80,8 @@ class Autopuzzle_Hooks {
             add_action('wp_enqueue_scripts', [$this, 'enqueue_product_tags_styles'], 15);
             // Enqueue product buttons modal JS
             add_action('wp_enqueue_scripts', [$this, 'enqueue_product_buttons_modal_scripts'], 15);
+            // Enqueue shop filter JavaScript
+            add_action('wp_enqueue_scripts', [$this, 'enqueue_shop_filter_scripts'], 15);
             // AJAX handler for getting product tags
             add_action('wp_ajax_autopuzzle_get_product_payment_tags', [$this, 'ajax_get_product_payment_tags']);
             add_action('wp_ajax_nopriv_autopuzzle_get_product_payment_tags', [$this, 'ajax_get_product_payment_tags']);
@@ -98,6 +100,10 @@ class Autopuzzle_Hooks {
             // AJAX handler for getting product prices
             add_action('wp_ajax_autopuzzle_get_product_prices', [$this, 'ajax_get_product_prices']);
             add_action('wp_ajax_nopriv_autopuzzle_get_product_prices', [$this, 'ajax_get_product_prices']);
+            
+            // AJAX handler for filtering shop products by payment type
+            add_action('wp_ajax_autopuzzle_filter_shop_products', [$this, 'ajax_filter_shop_products']);
+            add_action('wp_ajax_nopriv_autopuzzle_filter_shop_products', [$this, 'ajax_filter_shop_products']);
             
             // Add calculator modal to footer
             add_action('wp_footer', [$this, 'add_calculator_modals_to_footer']);
@@ -1151,24 +1157,50 @@ class Autopuzzle_Hooks {
 
         $current_filter = isset($_GET['payment_type']) ? sanitize_text_field($_GET['payment_type']) : '';
         $base_url = remove_query_arg(['payment_type', 'paged']);
+        
+        // Get current category/taxonomy info for AJAX
+        global $wp_query;
+        $current_category = '';
+        $current_taxonomy = '';
+        $current_term = '';
+        if (is_product_category()) {
+            $term_obj = get_queried_object();
+            if ($term_obj && isset($term_obj->slug)) {
+                $current_category = $term_obj->slug;
+            }
+        } elseif (is_tax()) {
+            $term_obj = get_queried_object();
+            if ($term_obj && isset($term_obj->taxonomy) && isset($term_obj->slug)) {
+                $current_taxonomy = $term_obj->taxonomy;
+                $current_term = $term_obj->slug;
+            }
+        }
+        
+        // If category is empty, try to get from URL
+        if (empty($current_category) && isset($wp_query->query_vars['product_cat'])) {
+            $current_category = $wp_query->query_vars['product_cat'];
+        }
         ?>
-        <div class="autopuzzle-payment-filter" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
+        <div class="autopuzzle-payment-filter" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: flex-start;" data-base-url="<?php echo esc_attr($base_url); ?>" data-category="<?php echo esc_attr($current_category); ?>" data-taxonomy="<?php echo esc_attr($current_taxonomy); ?>" data-term="<?php echo esc_attr($current_term); ?>">
             <span style="font-weight: 600; margin-left: 10px;"><?php esc_html_e('Filter by Payment Type:', 'autopuzzle'); ?></span>
-            <a href="<?php echo esc_url($base_url); ?>" 
-               class="autopuzzle-filter-btn <?php echo empty($current_filter) ? 'active' : ''; ?>" 
-               style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; background-color: <?php echo empty($current_filter) ? '#333' : '#f0f0f0'; ?>; color: <?php echo empty($current_filter) ? '#fff' : '#333'; ?>; transition: all 0.3s;">
+            <button type="button" 
+                    class="autopuzzle-filter-btn <?php echo empty($current_filter) ? 'active' : ''; ?>" 
+                    data-payment-type=""
+                    style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; background-color: <?php echo empty($current_filter) ? '#333' : '#f0f0f0'; ?>; color: <?php echo empty($current_filter) ? '#fff' : '#333'; ?>; transition: all 0.3s;">
                 <?php esc_html_e('All', 'autopuzzle'); ?>
-            </a>
-            <a href="<?php echo esc_url(add_query_arg('payment_type', 'cash', $base_url)); ?>" 
-               class="autopuzzle-filter-btn <?php echo $current_filter === 'cash' ? 'active' : ''; ?>" 
-               style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; background-color: <?php echo $current_filter === 'cash' ? 'rgb(33, 206, 158)' : '#f0f0f0'; ?>; color: <?php echo $current_filter === 'cash' ? '#fff' : '#333'; ?>; transition: all 0.3s;">
+            </button>
+            <button type="button" 
+                    class="autopuzzle-filter-btn <?php echo $current_filter === 'cash' ? 'active' : ''; ?>" 
+                    data-payment-type="cash"
+                    style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; background-color: <?php echo $current_filter === 'cash' ? 'rgb(33, 206, 158)' : '#f0f0f0'; ?>; color: <?php echo $current_filter === 'cash' ? '#fff' : '#333'; ?>; transition: all 0.3s;">
                 <?php esc_html_e('Cash', 'autopuzzle'); ?>
-            </a>
-            <a href="<?php echo esc_url(add_query_arg('payment_type', 'installment', $base_url)); ?>" 
-               class="autopuzzle-filter-btn <?php echo $current_filter === 'installment' ? 'active' : ''; ?>" 
-               style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; background-color: <?php echo $current_filter === 'installment' ? 'rgb(14, 165, 232)' : '#f0f0f0'; ?>; color: <?php echo $current_filter === 'installment' ? '#fff' : '#333'; ?>; transition: all 0.3s;">
+            </button>
+            <button type="button" 
+                    class="autopuzzle-filter-btn <?php echo $current_filter === 'installment' ? 'active' : ''; ?>" 
+                    data-payment-type="installment"
+                    style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; background-color: <?php echo $current_filter === 'installment' ? 'rgb(14, 165, 232)' : '#f0f0f0'; ?>; color: <?php echo $current_filter === 'installment' ? '#fff' : '#333'; ?>; transition: all 0.3s;">
                 <?php esc_html_e('Installment', 'autopuzzle'); ?>
-            </a>
+            </button>
         </div>
         <?php
     }
@@ -1425,6 +1457,54 @@ class Autopuzzle_Hooks {
                 'cashPurchaseTitle' => esc_html__('Cash Purchase', 'autopuzzle'),
                 'installmentPurchaseTitle' => esc_html__('Installment Purchase', 'autopuzzle'),
                 'viewProductTitle' => esc_html__('View Product', 'autopuzzle'),
+            ]);
+        }
+    }
+
+    /**
+     * Enqueue shop filter JavaScript
+     */
+    public function enqueue_shop_filter_scripts() {
+        // Only enqueue on frontend, on shop/archive pages
+        if (is_admin()) {
+            return;
+        }
+
+        // Check if we're on a shop/archive page
+        $is_shop_page = false;
+        if (function_exists('is_shop') && is_shop()) {
+            $is_shop_page = true;
+        }
+        if (function_exists('is_product_category') && is_product_category()) {
+            $is_shop_page = true;
+        }
+        if (function_exists('is_product_tag') && is_product_tag()) {
+            $is_shop_page = true;
+        }
+        if (function_exists('is_product_taxonomy') && is_product_taxonomy()) {
+            $is_shop_page = true;
+        }
+
+        if (!$is_shop_page) {
+            return;
+        }
+
+        $js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/shop-filter.js';
+        if (file_exists($js_path)) {
+            wp_enqueue_script(
+                'autopuzzle-shop-filter',
+                AUTOPUZZLE_PLUGIN_URL . 'assets/js/shop-filter.js',
+                ['jquery'],
+                filemtime($js_path),
+                true
+            );
+
+            // Localize script
+            wp_localize_script('autopuzzle-shop-filter', 'autopuzzleShopFilter', [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('autopuzzle_shop_filter_nonce'),
+                'loadingText' => esc_html__('Loading...', 'autopuzzle'),
+                'errorText' => esc_html__('Error loading products. Please try again.', 'autopuzzle'),
             ]);
         }
     }
@@ -1775,6 +1855,189 @@ class Autopuzzle_Hooks {
         wp_send_json_success([
             'cash_price' => $cash_price,
             'installment_price' => $installment_price
+        ]);
+    }
+
+    /**
+     * AJAX handler for filtering shop products by payment type
+     */
+    public function ajax_filter_shop_products() {
+        check_ajax_referer('autopuzzle_shop_filter_nonce', 'nonce');
+        
+        $payment_type = isset($_POST['payment_type']) ? sanitize_text_field($_POST['payment_type']) : '';
+        $paged = isset($_POST['paged']) ? max(1, intval($_POST['paged'])) : 1;
+        $base_url = isset($_POST['base_url']) ? esc_url_raw($_POST['base_url']) : home_url('/shop/');
+        
+        // Get current category/taxonomy if exists
+        $category = isset($_POST['category']) ? sanitize_text_field($_POST['category']) : '';
+        $taxonomy = isset($_POST['taxonomy']) ? sanitize_text_field($_POST['taxonomy']) : '';
+        
+        // Get products per page
+        $posts_per_page = apply_filters('loop_shop_per_page', wc_get_default_products_per_row() * wc_get_default_product_rows_per_page());
+        
+        // Build query args using WooCommerce compatible format
+        $query_args = [
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => $posts_per_page,
+            'paged' => $paged,
+            'orderby' => 'menu_order title',
+            'order' => 'ASC',
+        ];
+        
+        // Add category/taxonomy filter if exists
+        $tax_query = [];
+        // Clean category value - remove if empty or '-'
+        if (!empty($category) && $category !== '-' && trim($category) !== '') {
+            // Decode URL-encoded category slug
+            $category = urldecode($category);
+            // Try to find category by slug
+            $cat_term = get_term_by('slug', $category, 'product_cat');
+            if ($cat_term && !is_wp_error($cat_term)) {
+                $tax_query[] = [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'term_id',
+                    'terms' => $cat_term->term_id,
+                ];
+            } else {
+                // Fallback to slug if term_id doesn't work
+                $tax_query[] = [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => $category,
+                ];
+            }
+        }
+        if (!empty($taxonomy) && !empty($_POST['term'])) {
+            $term_slug = sanitize_text_field($_POST['term']);
+            $tax_term = get_term_by('slug', $term_slug, $taxonomy);
+            if ($tax_term && !is_wp_error($tax_term)) {
+                $tax_query[] = [
+                    'taxonomy' => $taxonomy,
+                    'field' => 'term_id',
+                    'terms' => $tax_term->term_id,
+                ];
+            } else {
+                $tax_query[] = [
+                    'taxonomy' => $taxonomy,
+                    'field' => 'slug',
+                    'terms' => $term_slug,
+                ];
+            }
+        }
+        
+        // Add payment type tag filter if specified
+        // Using 'IN' operator means "has this tag" (products can have other tags too)
+        if (!empty($payment_type) && in_array($payment_type, ['cash', 'installment'], true)) {
+            $tag = get_term_by('slug', $payment_type, 'product_tag');
+            if ($tag && !is_wp_error($tag)) {
+                $tax_query[] = [
+                    'taxonomy' => 'product_tag',
+                    'field' => 'term_id',
+                    'terms' => $tag->term_id,
+                    'operator' => 'IN', // IN means "has this tag" (can have other tags too)
+                ];
+                
+                // Debug: Log tag info
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Autopuzzle Shop Filter - Tag found: ' . $tag->name . ' (ID: ' . $tag->term_id . ')');
+                }
+            } else {
+                // Tag doesn't exist - log for debugging
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Autopuzzle Shop Filter - Tag not found: ' . $payment_type);
+                    // Try to find all product tags
+                    $all_tags = get_terms(['taxonomy' => 'product_tag', 'hide_empty' => false]);
+                    error_log('Autopuzzle Shop Filter - All product tags: ' . print_r(array_map(function($t) { return $t->slug; }, $all_tags), true));
+                }
+                
+                // Return empty results
+                wp_send_json_success([
+                    'html' => '<div class="woocommerce-info">' . esc_html__('No products found.', 'woocommerce') . '</div>',
+                    'pagination' => '',
+                    'found_posts' => 0,
+                    'max_pages' => 0,
+                    'url' => $base_url,
+                ]);
+                return;
+            }
+        }
+        
+        // Set tax_query if we have any tax filters
+        if (!empty($tax_query)) {
+            if (count($tax_query) > 1) {
+                $tax_query['relation'] = 'AND';
+            }
+            $query_args['tax_query'] = $tax_query;
+        }
+        
+        // Set up global query for WooCommerce template functions
+        global $wp_query, $woocommerce_loop;
+        $original_query = $wp_query;
+        
+        // Don't apply woocommerce_product_query filter here as it might interfere
+        // Create query directly
+        $products_query = new WP_Query($query_args);
+        
+        // Debug: Log query info for troubleshooting (always log for now to debug)
+        error_log('Autopuzzle Shop Filter - Payment Type: ' . ($payment_type ?: 'all'));
+        error_log('Autopuzzle Shop Filter - Category: ' . ($category ?: 'none'));
+        error_log('Autopuzzle Shop Filter - Found Posts: ' . $products_query->found_posts);
+        error_log('Autopuzzle Shop Filter - Post Count: ' . $products_query->post_count);
+        error_log('Autopuzzle Shop Filter - Tax Query: ' . print_r($tax_query, true));
+        
+        $wp_query = $products_query;
+        
+        // Set up WooCommerce loop
+        $columns = wc_get_default_products_per_row();
+        $woocommerce_loop['columns'] = $columns;
+        
+        // Start output buffering
+        ob_start();
+        
+        if ($products_query->have_posts()) {
+            // Manually output products loop start
+            echo '<ul class="products columns-' . esc_attr($columns) . '">';
+            
+            while ($products_query->have_posts()) {
+                $products_query->the_post();
+                wc_get_template_part('content', 'product');
+            }
+            
+            // Manually output products loop end
+            echo '</ul>';
+        } else {
+            // No products found - use WooCommerce template
+            echo '<div class="woocommerce-info">' . esc_html__('No products found.', 'woocommerce') . '</div>';
+        }
+        
+        wp_reset_postdata();
+        $wp_query = $original_query;
+        
+        $products_html = ob_get_clean();
+        
+        // Get pagination
+        $wp_query = $products_query;
+        ob_start();
+        woocommerce_pagination();
+        $pagination_html = ob_get_clean();
+        wp_reset_postdata();
+        $wp_query = $original_query;
+        
+        // Update URL for history
+        $new_url = $base_url;
+        if (!empty($payment_type)) {
+            $new_url = add_query_arg('payment_type', $payment_type, $new_url);
+        } else {
+            $new_url = remove_query_arg('payment_type', $new_url);
+        }
+        
+        wp_send_json_success([
+            'html' => $products_html,
+            'pagination' => $pagination_html,
+            'found_posts' => $products_query->found_posts,
+            'max_pages' => $products_query->max_num_pages,
+            'url' => $new_url,
         ]);
     }
 
