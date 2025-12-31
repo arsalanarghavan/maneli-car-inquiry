@@ -46,7 +46,8 @@ class Autopuzzle_Hooks {
         // Visitor statistics tracking
         add_action('wp_footer', [$this, 'track_visitor_statistics'], 999);
         add_action('template_redirect', [$this, 'track_visitor_statistics_server_side'], 1);
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_visitor_tracking_scripts']);
+        // Visitor tracking scripts should only be loaded in dashboard, not on frontend
+        // Removed enqueue_visitor_tracking_scripts hook to prevent frontend loading
 
         // Frontend product title enhancements
         add_filter('the_title', [$this, 'append_year_badge_to_single_product_title'], 20, 2);
@@ -898,35 +899,10 @@ class Autopuzzle_Hooks {
      * Enqueue visitor tracking scripts
      */
     public function enqueue_visitor_tracking_scripts() {
-        // Check if visitor statistics is enabled (using optimized helper)
-        if (!Autopuzzle_Options_Helper::is_option_enabled('enable_visitor_statistics', false)) {
-            return;
-        }
-        
-        // Skip on dashboard pages (they use static HTML template, scripts will be injected manually)
-        if (get_query_var('autopuzzle_dashboard')) {
-            return;
-        }
-        
-        // Enqueue visitor tracking script for frontend pages
-        $script_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/frontend/visitor-tracking.js';
-        if (file_exists($script_path)) {
-            wp_enqueue_script(
-                'autopuzzle-visitor-tracking',
-                AUTOPUZZLE_PLUGIN_URL . 'assets/js/frontend/visitor-tracking.js',
-                ['jquery'],
-                filemtime($script_path),
-                true
-            );
-            
-            // Localize script
-            wp_localize_script('autopuzzle-visitor-tracking', 'maneliVisitorTracking', [
-                'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('autopuzzle_visitor_stats_nonce'),
-                'enabled' => true,
-                'debug' => defined('WP_DEBUG') && WP_DEBUG
-            ]);
-        }
+        // Visitor tracking should ONLY be loaded in dashboard pages
+        // Skip on all frontend pages - dashboard will inject it manually
+        // This prevents errors and unnecessary AJAX calls on frontend
+        return;
     }
 
     /**
@@ -1290,44 +1266,143 @@ class Autopuzzle_Hooks {
         }
 
         // Always enqueue on frontend (for carousels and other widgets)
-        if (!$is_product_page) {
-            $is_product_page = true; // Enable for all frontend pages to support carousels
+        // Enable for all frontend pages to support carousels and modals
+        $is_product_page = true;
+
+        // Enqueue Bootstrap if not already enqueued (for modal)
+        if (!wp_script_is('bootstrap', 'enqueued')) {
+            // Try to enqueue Bootstrap 5
+            wp_enqueue_script(
+                'bootstrap',
+                'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
+                [],
+                '5.3.0',
+                true
+            );
+        }
+        
+        // Enqueue Bootstrap CSS if not already enqueued
+        if (!wp_style_is('bootstrap', 'enqueued')) {
+            wp_enqueue_style(
+                'bootstrap',
+                'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+                [],
+                '5.3.0'
+            );
+        }
+        
+        // Force enqueue calculator assets for modal (on all frontend pages)
+        // This ensures calculator CSS and JS are available when modal opens
+        // We enqueue directly without checking is_product() to support carousels
+        
+        // Ensure Peyda Font is registered and enqueued first
+        $peyda_font_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/peyda-font.css';
+        if (file_exists($peyda_font_path)) {
+            if (!wp_style_is('autopuzzle-peyda-font', 'registered')) {
+                wp_register_style('autopuzzle-peyda-font', AUTOPUZZLE_PLUGIN_URL . 'assets/css/peyda-font.css', [], filemtime($peyda_font_path));
+            }
+            if (!wp_style_is('autopuzzle-peyda-font', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-peyda-font');
+            }
+        }
+        
+        // Ensure Line Awesome is registered and enqueued
+        $line_awesome_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-line-awesome-complete.css';
+        if (file_exists($line_awesome_path)) {
+            if (!wp_style_is('autopuzzle-line-awesome-complete', 'registered')) {
+                wp_register_style('autopuzzle-line-awesome-complete', AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-line-awesome-complete.css', [], '1.0.0');
+            }
+            if (!wp_style_is('autopuzzle-line-awesome-complete', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-line-awesome-complete');
+            }
         }
 
-        if (!$is_product_page) {
-            return;
+        // Ensure frontend styles are registered and enqueued
+        $frontend_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/frontend.css';
+        if (file_exists($frontend_css_path)) {
+            if (!wp_style_is('autopuzzle-frontend-styles', 'registered')) {
+                $css_version = filemtime($frontend_css_path);
+                wp_register_style('autopuzzle-frontend-styles', AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css', ['autopuzzle-line-awesome-complete'], $css_version);
+            }
+            if (!wp_style_is('autopuzzle-frontend-styles', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-frontend-styles');
+            }
         }
 
-            // Enqueue Bootstrap if not already enqueued (for modal)
-            if (!wp_script_is('bootstrap', 'enqueued')) {
-                // Try to enqueue Bootstrap 5
-                wp_enqueue_script(
-                    'bootstrap',
-                    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
-                    [],
-                    '5.3.0',
-                    true
-                );
+        // Ensure Bootstrap RTL is registered and enqueued
+        if (!wp_style_is('autopuzzle-bootstrap-shortcode', 'registered')) {
+            wp_register_style('autopuzzle-bootstrap-shortcode', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css', [], '5.3.0');
+        }
+        if (!wp_style_is('autopuzzle-bootstrap-shortcode', 'enqueued')) {
+            wp_enqueue_style('autopuzzle-bootstrap-shortcode');
+        }
+        
+        // Ensure Cash Inquiry styles are enqueued
+        $cash_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/cash-inquiry.css';
+        if (file_exists($cash_inquiry_css_path)) {
+            if (!wp_style_is('autopuzzle-cash-inquiry', 'registered')) {
+                wp_register_style('autopuzzle-cash-inquiry', AUTOPUZZLE_PLUGIN_URL . 'assets/css/cash-inquiry.css', ['autopuzzle-frontend-styles'], filemtime($cash_inquiry_css_path));
             }
-            
-            // Enqueue Bootstrap CSS if not already enqueued
-            if (!wp_style_is('bootstrap', 'enqueued')) {
-                wp_enqueue_style(
-                    'bootstrap',
-                    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
-                    [],
-                    '5.3.0'
-                );
+            if (!wp_style_is('autopuzzle-cash-inquiry', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-cash-inquiry');
             }
-            
-            // Ensure calculator assets are enqueued for modal
-            if (class_exists('Autopuzzle_Loan_Calculator_Shortcode')) {
-                $calculator_shortcode = new Autopuzzle_Loan_Calculator_Shortcode();
-                // This will enqueue calculator assets
-                if (method_exists($calculator_shortcode, 'enqueue_calculator_assets')) {
-                    $calculator_shortcode->enqueue_calculator_assets();
-                }
+        }
+        
+        // Ensure loan calculator CSS is enqueued
+        $calculator_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/loan-calculator.css';
+        if (file_exists($calculator_css_path)) {
+            if (!wp_style_is('autopuzzle-loan-calculator', 'registered')) {
+                wp_register_style('autopuzzle-loan-calculator', AUTOPUZZLE_PLUGIN_URL . 'assets/css/loan-calculator.css', ['autopuzzle-frontend-styles'], filemtime($calculator_css_path));
             }
+            if (!wp_style_is('autopuzzle-loan-calculator', 'enqueued')) {
+                wp_enqueue_style('autopuzzle-loan-calculator');
+            }
+        }
+        
+        // Ensure calculator JS is enqueued
+        $calculator_js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/calculator.js';
+        if (file_exists($calculator_js_path)) {
+            if (!wp_script_is('autopuzzle-calculator-js', 'registered')) {
+                wp_register_script('autopuzzle-calculator-js', AUTOPUZZLE_PLUGIN_URL . 'assets/js/calculator.js', ['jquery'], filemtime($calculator_js_path), true);
+            }
+            if (!wp_script_is('autopuzzle-calculator-js', 'enqueued')) {
+                wp_enqueue_script('autopuzzle-calculator-js');
+                
+                // Localize calculator script
+                $options = Autopuzzle_Options_Helper::get_all_options();
+                $interest_rate = floatval($options['loan_interest_rate'] ?? 0.035);
+                
+                $localize_data = [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'inquiry_page_url' => home_url('/dashboard/installment-inquiries'),
+                    'nonce' => wp_create_nonce('autopuzzle_ajax_nonce'),
+                    'cash_inquiry_nonce' => wp_create_nonce('autopuzzle_customer_cash_inquiry'),
+                    'interestRate' => $interest_rate,
+                ];
+                wp_localize_script('autopuzzle-calculator-js', 'autopuzzle_ajax_object', $localize_data);
+            }
+        }
+        
+        // Ensure SweetAlert2 is enqueued (for forms)
+        $sweetalert2_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.css';
+        $sweetalert2_js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+        if (file_exists($sweetalert2_css_path) && !wp_style_is('sweetalert2', 'enqueued')) {
+            wp_enqueue_style('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css', [], '11.0.0');
+        }
+        if (file_exists($sweetalert2_js_path) && !wp_script_is('sweetalert2', 'enqueued')) {
+            wp_enqueue_script('sweetalert2', AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js', ['jquery'], '11.0.0', true);
+        } elseif (!wp_script_is('sweetalert2', 'enqueued')) {
+            // Fallback to CDN
+            wp_enqueue_script('sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11', ['jquery'], null, true);
+        }
+        
+        // Ensure Select2 is enqueued (for dropdowns)
+        if (!wp_style_is('select2', 'enqueued')) {
+            wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', [], '4.1.0');
+        }
+        if (!wp_script_is('select2', 'enqueued')) {
+            wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', ['jquery'], '4.1.0', true);
+        }
 
         // Enqueue product buttons modal JS
         $js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/product-buttons-modal.js';
@@ -1465,13 +1540,21 @@ class Autopuzzle_Hooks {
      * AJAX handler to get calculator tab content for modal
      */
     public function ajax_get_calculator_tab() {
-        check_ajax_referer('autopuzzle_calculator_tab_nonce', 'nonce');
+        // Verify nonce - use flexible verification
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field($_POST['nonce']) : '';
+        if (!wp_verify_nonce($nonce, 'autopuzzle_calculator_tab_nonce')) {
+            // Try alternative nonce check
+            if (!check_ajax_referer('autopuzzle_calculator_tab_nonce', 'nonce', false)) {
+                wp_send_json_error(['message' => 'Security check failed. Please refresh the page and try again.']);
+                return;
+            }
+        }
 
         $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
         $tab_type = isset($_POST['tab_type']) ? sanitize_text_field($_POST['tab_type']) : '';
 
         if (!$product_id || !in_array($tab_type, ['cash', 'installment'], true)) {
-            wp_send_json_error(['message' => 'Invalid parameters']);
+            wp_send_json_error(['message' => 'Invalid parameters. Product ID: ' . $product_id . ', Tab type: ' . $tab_type]);
             return;
         }
 
@@ -1544,16 +1627,109 @@ class Autopuzzle_Hooks {
 
         // Render only the requested tab
         ob_start();
-        if ($tab_type === 'cash') {
-            autopuzzle_get_template_part('shortcodes/calculator/cash-tab-content', $template_args);
-        } else {
-            autopuzzle_get_template_part('shortcodes/calculator/installment-tab-content', $template_args);
+        try {
+            if ($tab_type === 'cash') {
+                $template_file = AUTOPUZZLE_PLUGIN_PATH . 'templates/shortcodes/calculator/cash-tab-content.php';
+                if (!file_exists($template_file)) {
+                    throw new Exception('Cash tab template not found: ' . $template_file);
+                }
+                // Extract template args
+                extract($template_args, EXTR_SKIP);
+                include $template_file;
+            } else {
+                $template_file = AUTOPUZZLE_PLUGIN_PATH . 'templates/shortcodes/calculator/installment-tab-content.php';
+                if (!file_exists($template_file)) {
+                    throw new Exception('Installment tab template not found: ' . $template_file);
+                }
+                // Extract template args
+                extract($template_args, EXTR_SKIP);
+                include $template_file;
+            }
+        } catch (Exception $e) {
+            ob_end_clean();
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('AutoPuzzle Calculator Tab Error: ' . $e->getMessage());
+            }
+            wp_send_json_error([
+                'message' => 'Error loading calculator. Please try again.'
+            ]);
+            return;
         }
+        
         $html = ob_get_clean();
+        
+        if (empty($html)) {
+            wp_send_json_error([
+                'message' => 'Calculator content is empty. Please try again.'
+            ]);
+            return;
+        }
+
+        // Get required assets URLs to ensure they're loaded
+        // Include ALL assets that shortcode uses
+        $assets = [];
+        
+        // Get Peyda Font
+        $peyda_font_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/peyda-font.css';
+        if (file_exists($peyda_font_path)) {
+            $assets['peyda_font'] = AUTOPUZZLE_PLUGIN_URL . 'assets/css/peyda-font.css?ver=' . filemtime($peyda_font_path);
+        }
+        
+        // Get Line Awesome
+        $line_awesome_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/autopuzzle-line-awesome-complete.css';
+        if (file_exists($line_awesome_path)) {
+            $assets['line_awesome'] = AUTOPUZZLE_PLUGIN_URL . 'assets/css/autopuzzle-line-awesome-complete.css?ver=1.0.0';
+        }
+        
+        // Get frontend CSS
+        $frontend_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/frontend.css';
+        if (file_exists($frontend_css_path)) {
+            $assets['frontend_css'] = AUTOPUZZLE_PLUGIN_URL . 'assets/css/frontend.css?ver=' . filemtime($frontend_css_path);
+        }
+        
+        // Get Bootstrap RTL
+        $bootstrap_rtl_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css';
+        if (file_exists($bootstrap_rtl_path)) {
+            $assets['bootstrap_rtl'] = AUTOPUZZLE_PLUGIN_URL . 'assets/libs/bootstrap/css/bootstrap.rtl.min.css?ver=5.3.0';
+        }
+        
+        // Get calculator CSS
+        $calculator_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/loan-calculator.css';
+        if (file_exists($calculator_css_path)) {
+            $assets['calculator_css'] = AUTOPUZZLE_PLUGIN_URL . 'assets/css/loan-calculator.css?ver=' . filemtime($calculator_css_path);
+        }
+        
+        // Get cash inquiry CSS
+        $cash_inquiry_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/cash-inquiry.css';
+        if (file_exists($cash_inquiry_css_path)) {
+            $assets['cash_inquiry_css'] = AUTOPUZZLE_PLUGIN_URL . 'assets/css/cash-inquiry.css?ver=' . filemtime($cash_inquiry_css_path);
+        }
+        
+        // Get calculator JS
+        $calculator_js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/calculator.js';
+        if (file_exists($calculator_js_path)) {
+            $assets['calculator_js'] = AUTOPUZZLE_PLUGIN_URL . 'assets/js/calculator.js?ver=' . filemtime($calculator_js_path);
+        }
+        
+        // Get SweetAlert2 (if needed)
+        $sweetalert2_css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.css';
+        if (file_exists($sweetalert2_css_path)) {
+            $assets['sweetalert2_css'] = AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.css?ver=11.0.0';
+        }
+        
+        $sweetalert2_js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/libs/sweetalert2/sweetalert2.min.js';
+        if (file_exists($sweetalert2_js_path)) {
+            $assets['sweetalert2_js'] = AUTOPUZZLE_PLUGIN_URL . 'assets/libs/sweetalert2/sweetalert2.min.js?ver=11.0.0';
+        }
+        
+        // Get Select2 (if needed)
+        $assets['select2_css'] = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css?ver=4.1.0';
+        $assets['select2_js'] = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js?ver=4.1.0';
 
         wp_send_json_success([
             'html' => $html,
-            'product_name' => $product->get_name()
+            'product_name' => $product->get_name(),
+            'assets' => $assets
         ]);
     }
 

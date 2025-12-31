@@ -103,36 +103,9 @@ class Autopuzzle_Shortcode_Handler {
         // Only on product pages to ensure proper localization and avoid duplicate loading
         // Select2 will be enqueued by enqueue_calculator_assets() when needed
         
-        // Logging tracker - Load on all frontend pages to track user actions (using optimized helper)
-        $enable_user_logging = Autopuzzle_Options_Helper::is_option_enabled('enable_user_logging', false);
-        
-        if ($enable_user_logging) {
-            $logging_tracker_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/logging-tracker.js';
-            if (file_exists($logging_tracker_path)) {
-                wp_enqueue_script(
-                    'autopuzzle-logging-tracker',
-                    AUTOPUZZLE_PLUGIN_URL . 'assets/js/logging-tracker.js',
-                    ['jquery'],
-                    filemtime($logging_tracker_path),
-                    true
-                );
-                
-                wp_localize_script('autopuzzle-logging-tracker', 'maneliAjax', array(
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('autopuzzle_ajax_nonce'),
-                ));
-                
-                wp_localize_script('autopuzzle-logging-tracker', 'maneliLoggingSettings', array(
-                    'enable_logging_system' => Autopuzzle_Options_Helper::is_option_enabled('enable_logging_system', false),
-                    'log_console_messages' => Autopuzzle_Options_Helper::is_option_enabled('log_console_messages', false),
-                    'enable_user_logging' => $enable_user_logging,
-                    'log_button_clicks' => Autopuzzle_Options_Helper::is_option_enabled('log_button_clicks', false),
-                    'log_form_submissions' => Autopuzzle_Options_Helper::is_option_enabled('log_form_submissions', false),
-                    'log_ajax_calls' => Autopuzzle_Options_Helper::is_option_enabled('log_ajax_calls', false),
-                    'log_page_views' => Autopuzzle_Options_Helper::is_option_enabled('log_page_views', false),
-                ));
-            }
-        }
+        // Logging tracker - ONLY load in dashboard pages (not on frontend)
+        // This script should only be enqueued in dashboard, not on frontend pages
+        // Removed from frontend to prevent errors and unnecessary AJAX calls
     }
 
     /**

@@ -182,57 +182,183 @@
                 },
                 success: function(response) {
                     if (response.success && response.data && response.data.html) {
-                        modalBody.html(response.data.html);
-                        
-                        // Initialize calculator if installment tab
-                        if (tabType === 'installment') {
-                            // Wait a bit for DOM to be ready
-                            setTimeout(function() {
-                                initializeInstallmentCalculator(productId);
-                            }, 100);
+                        // Ensure jQuery is available
+                        if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+                            modalBody.html('<div class="alert alert-danger">jQuery is not loaded. Please refresh the page.</div>');
+                            return;
                         }
                         
-                        // Ensure calculator assets are loaded
-                        // Load calculator.js if not already loaded
-                        if (typeof autopuzzle_ajax_object === 'undefined') {
-                            // Try to load calculator assets dynamically
-                            if (typeof jQuery !== 'undefined') {
-                                // Load calculator CSS
-                                if (!$('link[href*="loan-calculator.css"]').length) {
-                                    $('head').append('<link rel="stylesheet" href="' + autopuzzleButtonsModal.pluginUrl + 'assets/css/loan-calculator.css" type="text/css">');
+                        // Load ALL required assets first, then set up modal content
+                        if (response.data.assets) {
+                            const assets = response.data.assets;
+                            let assetsToLoad = 0;
+                            let assetsLoaded = 0;
+                            
+                            // Count assets that need to be loaded
+                            if (assets.peyda_font && !$('link[href*="peyda-font.css"]').length) assetsToLoad++;
+                            if (assets.line_awesome && !$('link[href*="line-awesome"]').length) assetsToLoad++;
+                            if (assets.frontend_css && !$('link[href*="frontend.css"]').length) assetsToLoad++;
+                            if (assets.bootstrap_rtl && !$('link[href*="bootstrap.rtl"]').length) assetsToLoad++;
+                            if (assets.calculator_css && !$('link[href*="loan-calculator.css"]').length) assetsToLoad++;
+                            if (assets.cash_inquiry_css && !$('link[href*="cash-inquiry.css"]').length) assetsToLoad++;
+                            if (assets.sweetalert2_css && !$('link[href*="sweetalert2"]').length) assetsToLoad++;
+                            if (assets.select2_css && !$('link[href*="select2"]').length) assetsToLoad++;
+                            if (assets.calculator_js && !$('script[src*="calculator.js"]').length) assetsToLoad++;
+                            if (assets.sweetalert2_js && !$('script[src*="sweetalert2"]').length) assetsToLoad++;
+                            if (assets.select2_js && !$('script[src*="select2"]').length) assetsToLoad++;
+                            
+                            // Function to check if all assets are loaded
+                            const checkAllAssetsLoaded = function() {
+                                assetsLoaded++;
+                                if (assetsLoaded >= assetsToLoad || assetsToLoad === 0) {
+                                    // All assets loaded, set up modal content
+                                    setupModalContent(response.data.html, tabType, productId, modalBody);
                                 }
-                                // Load calculator JS
-                                if (!$('script[src*="calculator.js"]').length) {
-                                    $.getScript(autopuzzleButtonsModal.pluginUrl + 'assets/js/calculator.js', function() {
-                                        if (tabType === 'installment') {
-                                            setTimeout(function() {
-                                                initializeInstallmentCalculator(productId);
-                                            }, 100);
-                                        }
-                                    });
+                            };
+                            
+                            // If no assets need loading, set up content immediately
+                            if (assetsToLoad === 0) {
+                                setupModalContent(response.data.html, tabType, productId, modalBody);
+                            } else {
+                                // Load CSS files
+                                if (assets.peyda_font && !$('link[href*="peyda-font.css"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.peyda_font})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.line_awesome && !$('link[href*="line-awesome"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.line_awesome})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.frontend_css && !$('link[href*="frontend.css"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.frontend_css})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.bootstrap_rtl && !$('link[href*="bootstrap.rtl"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.bootstrap_rtl})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.calculator_css && !$('link[href*="loan-calculator.css"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.calculator_css})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.cash_inquiry_css && !$('link[href*="cash-inquiry.css"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.cash_inquiry_css})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.sweetalert2_css && !$('link[href*="sweetalert2"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.sweetalert2_css})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.select2_css && !$('link[href*="select2"]').length) {
+                                    $('<link>').attr({rel: 'stylesheet', type: 'text/css', href: assets.select2_css})
+                                        .appendTo('head').on('load', checkAllAssetsLoaded).on('error', checkAllAssetsLoaded);
+                                }
+                                
+                                // Load JS files
+                                if (assets.calculator_js && !$('script[src*="calculator.js"]').length) {
+                                    $.getScript(assets.calculator_js)
+                                        .done(checkAllAssetsLoaded)
+                                        .fail(checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.sweetalert2_js && !$('script[src*="sweetalert2"]').length) {
+                                    $.getScript(assets.sweetalert2_js)
+                                        .done(checkAllAssetsLoaded)
+                                        .fail(checkAllAssetsLoaded);
+                                }
+                                
+                                if (assets.select2_js && !$('script[src*="select2"]').length) {
+                                    $.getScript(assets.select2_js)
+                                        .done(checkAllAssetsLoaded)
+                                        .fail(checkAllAssetsLoaded);
                                 }
                             }
                         } else {
-                            // Calculator assets already loaded
-                            if (tabType === 'installment') {
-                                setTimeout(function() {
-                                    initializeInstallmentCalculator(productId);
-                                }, 100);
-                            }
+                            // No assets in response, assume they're already loaded
+                            setupModalContent(response.data.html, tabType, productId, modalBody);
                         }
                     } else {
                         modalBody.html('<div class="alert alert-danger">' + (response.data && response.data.message ? response.data.message : autopuzzleButtonsModal.errorText) + '</div>');
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('AutoPuzzle: Error loading calculator tab', error);
-                    modalBody.html('<div class="alert alert-danger">' + autopuzzleButtonsModal.errorText + '</div>');
+                    // Only log errors in debug mode to prevent console spam
+                    if (typeof WP_DEBUG !== 'undefined' && WP_DEBUG) {
+                        console.error('AutoPuzzle: Error loading calculator tab', {
+                            status: status,
+                            error: error,
+                            statusCode: xhr.status,
+                            responseText: xhr.responseText
+                        });
+                    }
+                    
+                    // Try to parse error message from response
+                    let errorMessage = autopuzzleButtonsModal.errorText;
+                    try {
+                        if (xhr.responseText) {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.data && response.data.message) {
+                                errorMessage = response.data.message;
+                            }
+                        }
+                    } catch (e) {
+                        // Use default error message
+                    }
+                    
+                    modalBody.html('<div class="alert alert-danger">' + errorMessage + '</div>');
                 }
             });
         }
 
         /**
+         * Setup modal content and initialize calculator
+         *
+         * @param {string} html Modal HTML content
+         * @param {string} tabType Tab type ('cash' or 'installment')
+         * @param {number} productId Product ID
+         * @param {jQuery} $modalBody jQuery object for modal body
+         */
+        function setupModalContent(html, tabType, productId, $modalBody) {
+            // Get modal body if not provided
+            if (!$modalBody || $modalBody.length === 0) {
+                $modalBody = $('#autopuzzleCalculatorModalBody');
+            }
+            
+            // Ensure modal body exists
+            if (!$modalBody || $modalBody.length === 0) {
+                console.error('AutoPuzzle: Modal body not found');
+                return;
+            }
+            
+            $modalBody.html(html);
+            
+            // Wait for DOM to be ready and assets to be loaded
+            setTimeout(function() {
+                // Initialize calculator if installment tab
+                if (tabType === 'installment') {
+                    initializeInstallmentCalculator(productId);
+                }
+                
+                // Trigger any other initialization that might be needed
+                if (typeof window.autopuzzleInitializeCalculator === 'function') {
+                    // Already handled in initializeInstallmentCalculator
+                } else if (typeof initializeCalculator === 'function') {
+                    // Fallback to old function name if exists
+                    initializeCalculator();
+                }
+            }, 150);
+        }
+
+        /**
          * Initialize installment calculator in modal
+         * Uses the same logic as calculator.js but adapted for modal
          *
          * @param {number} productId Product ID
          */
@@ -241,102 +367,150 @@
             setTimeout(function() {
                 const calculatorEl = document.getElementById('loan-calculator-modal');
                 if (!calculatorEl) {
+                    console.warn('AutoPuzzle Modal: loan-calculator-modal not found');
                     return;
                 }
 
-                const price = parseFloat(calculatorEl.getAttribute('data-price')) || 0;
-                const minDown = parseFloat(calculatorEl.getAttribute('data-min-down')) || 0;
-                const maxDown = parseFloat(calculatorEl.getAttribute('data-max-down')) || 0;
+                const installmentTab = document.getElementById('installment-tab');
+                if (!installmentTab) {
+                    console.warn('AutoPuzzle Modal: installment-tab not found');
+                    return;
+                }
+
+                // Parse values from data attributes
+                const priceAttr = calculatorEl.getAttribute('data-price');
+                const minDownAttr = calculatorEl.getAttribute('data-min-down');
+                const maxDownAttr = calculatorEl.getAttribute('data-max-down');
                 const canSeePrices = calculatorEl.getAttribute('data-can-see-prices') === 'true';
                 const isUnavailable = calculatorEl.getAttribute('data-is-unavailable') === 'true';
 
-                if (isUnavailable || price <= 0) {
+                // Parse money values (handle Persian digits and formatting)
+                const parseMoney = function(value) {
+                    if (!value) return 0;
+                    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+                    const englishDigits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+                    let clean = String(value).replace(persianDigits, function(match) {
+                        return englishDigits[persianDigits.indexOf(match)];
+                    });
+                    clean = clean.replace(/[^\d]/g, '');
+                    return parseInt(clean, 10) || 0;
+                };
+
+                let productPrice = parseMoney(priceAttr);
+                let minDown = parseMoney(minDownAttr);
+                let maxDown = productPrice * 0.8;
+                if (maxDownAttr) {
+                    const parsedMax = parseMoney(maxDownAttr);
+                    if (parsedMax > 0) {
+                        maxDown = parsedMax;
+                    }
+                }
+
+                // Get DOM elements
+                const input = document.getElementById('downPaymentInputModal');
+                const slider = document.getElementById('downPaymentSliderModal');
+                const minDisplay = installmentTab.querySelector('#minDownDisplayModal');
+                let installmentEl = installmentTab.querySelector('#installmentAmountModal');
+                const termButtons = installmentTab.querySelectorAll('.term-btn');
+                const actionBtn = installmentTab.querySelector('.loan-action-btn');
+
+                if (!input || !slider || !installmentEl) {
+                    console.warn('AutoPuzzle Modal: Required calculator elements not found', {
+                        input: !!input,
+                        slider: !!slider,
+                        installmentEl: !!installmentEl
+                    });
                     return;
                 }
 
-                // Initialize calculator if the function exists
-                if (typeof window.autopuzzleInitializeCalculator === 'function') {
-                    window.autopuzzleInitializeCalculator('loan-calculator-modal', {
-                        price: price,
-                        minDown: minDown,
-                        maxDown: maxDown,
-                        canSeePrices: canSeePrices
-                    });
-                } else if (typeof initializeCalculator === 'function') {
-                    // Fallback to global function
-                    initializeCalculator();
-                } else {
-                    // Manual initialization
-                    initCalculatorManually(calculatorEl, price, minDown, maxDown);
-                }
-            }, 100);
-        }
+                // Format money for display
+                const formatMoney = function(amount) {
+                    if (typeof Intl !== 'undefined' && Intl.NumberFormat) {
+                        return new Intl.NumberFormat('fa-IR').format(amount);
+                    }
+                    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                };
 
-        /**
-         * Manually initialize calculator if auto-init doesn't work
-         */
-        function initCalculatorManually(calculatorEl, price, minDown, maxDown) {
-            const downPaymentInput = calculatorEl.querySelector('#downPaymentInputModal');
-            const downPaymentSlider = calculatorEl.querySelector('#downPaymentSliderModal');
-            const termButtons = calculatorEl.querySelectorAll('.term-btn');
-            const installmentAmount = calculatorEl.querySelector('#installmentAmountModal');
+                // Get interest rate
+                const interestRate = (typeof autopuzzle_ajax_object !== 'undefined' && autopuzzle_ajax_object.interestRate)
+                                   ? parseFloat(autopuzzle_ajax_object.interestRate) 
+                                   : 0.035;
 
-            if (!downPaymentInput || !downPaymentSlider || !installmentAmount) {
-                return;
-            }
+                // Calculate installment
+                const calculateInstallment = function() {
+                    const downPayment = parseMoney(input.value) || minDown;
+                    const activeBtn = installmentTab.querySelector('.term-btn.active');
+                    const months = activeBtn ? parseInt(activeBtn.getAttribute('data-months')) || 12 : 12;
+                    
+                    const loanAmount = productPrice - downPayment;
+                    if (loanAmount <= 0 || productPrice <= 0 || months <= 0) {
+                        installmentEl.innerText = formatMoney(0);
+                        return;
+                    }
 
-            // Set slider range
-            downPaymentSlider.min = minDown;
-            downPaymentSlider.max = maxDown;
-            downPaymentSlider.value = minDown;
+                    // Same calculation as calculator.js
+                    const monthlyInterestAmount = loanAmount * interestRate;
+                    const totalInterest = monthlyInterestAmount * (months + 1);
+                    const totalRepayment = loanAmount + totalInterest;
+                    const installment = totalRepayment / months;
 
-            // Format and set initial value
-            const formatNumber = function(num) {
-                return new Intl.NumberFormat('fa-IR').format(num);
-            };
+                    installmentEl.innerText = formatMoney(Math.ceil(installment));
+                };
 
-            const updateInstallment = function() {
-                const downPayment = parseFloat(downPaymentInput.value.replace(/,/g, '')) || minDown;
-                const selectedTerm = calculatorEl.querySelector('.term-btn.active');
-                const months = selectedTerm ? parseInt(selectedTerm.getAttribute('data-months')) : 12;
-                
-                const loanAmount = price - downPayment;
-                const interestRate = (typeof autopuzzle_ajax_object !== 'undefined' && autopuzzle_ajax_object.interestRate) 
-                    ? autopuzzle_ajax_object.interestRate 
-                    : 0.035; // Default 3.5% monthly
-                
-                const monthlyPayment = loanAmount * (interestRate * Math.pow(1 + interestRate, months)) / (Math.pow(1 + interestRate, months) - 1);
-                
-                installmentAmount.textContent = formatNumber(Math.round(monthlyPayment));
-            };
+                // Set slider range
+                slider.min = minDown;
+                slider.max = maxDown;
+                slider.value = minDown;
 
-            // Sync slider and input
-            downPaymentSlider.addEventListener('input', function() {
-                downPaymentInput.value = formatNumber(parseInt(this.value));
-                updateInstallment();
-            });
+                // Update slider visual
+                const updateSliderVisual = function() {
+                    if (!slider.max || slider.max === slider.min) return;
+                    const percentage = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+                    slider.style.setProperty('--value-percent', percentage + '%');
+                };
 
-            downPaymentInput.addEventListener('input', function() {
-                let value = parseInt(this.value.replace(/,/g, '')) || minDown;
-                value = Math.max(minDown, Math.min(maxDown, value));
-                this.value = formatNumber(value);
-                downPaymentSlider.value = value;
-                updateInstallment();
-            });
-
-            // Term button handlers
-            termButtons.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    termButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    updateInstallment();
+                // Sync slider and input
+                slider.addEventListener('input', function() {
+                    input.value = formatMoney(parseInt(this.value));
+                    updateSliderVisual();
+                    calculateInstallment();
                 });
-            });
 
-            // Initial calculation
-            downPaymentInput.value = formatNumber(minDown);
-            updateInstallment();
+                input.addEventListener('input', function() {
+                    let value = parseMoney(this.value) || minDown;
+                    value = Math.max(minDown, Math.min(maxDown, value));
+                    this.value = formatMoney(value);
+                    slider.value = value;
+                    updateSliderVisual();
+                    calculateInstallment();
+                });
+
+                // Term button handlers
+                termButtons.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        termButtons.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        calculateInstallment();
+                    });
+                });
+
+                // Initial setup
+                input.value = formatMoney(minDown);
+                updateSliderVisual();
+                calculateInstallment();
+
+                // Make sure elements are visible
+                if (installmentEl && installmentEl.style.display === 'none') {
+                    installmentEl.style.display = '';
+                }
+                if (minDisplay && minDisplay.style.display === 'none' && minDown > 0) {
+                    minDisplay.style.display = '';
+                }
+
+                console.log('AutoPuzzle Modal: Calculator initialized successfully');
+            }, 150);
         }
+
 
         // Clean up on modal close
         $(document).on('hidden.bs.modal', '#autopuzzleCalculatorModal', function() {

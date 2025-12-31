@@ -20,7 +20,8 @@
 
         const calcContainer = document.querySelector(".autopuzzle-calculator-container");
         if (!calcContainer) {
-            console.log('AutoPuzzle Calculator: Container not found yet, will retry...');
+            // Container not found - this is normal on pages without calculator
+            // Don't log or retry - just return silently
             return false;
         }
 
@@ -50,6 +51,14 @@
 
     // Try initialization with multiple strategies
     function tryInit() {
+        // First check: if container doesn't exist, don't try to initialize
+        // This prevents unnecessary retries and console logs on pages without calculator
+        const calcContainer = document.querySelector(".autopuzzle-calculator-container");
+        if (!calcContainer) {
+            // Container doesn't exist on this page - this is normal, don't log or retry
+            return;
+        }
+
         if (initializeCalculator()) {
             return;
         }
@@ -57,16 +66,22 @@
         // Retry after DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(initializeCalculator, 100);
+                // Check again before retrying
+                if (document.querySelector(".autopuzzle-calculator-container")) {
+                    setTimeout(initializeCalculator, 100);
+                }
             });
         } else {
-            setTimeout(initializeCalculator, 100);
+            // Check again before retrying
+            if (document.querySelector(".autopuzzle-calculator-container")) {
+                setTimeout(initializeCalculator, 100);
+            }
         }
 
         // Final retry after page load
         window.addEventListener('load', function() {
             setTimeout(function() {
-                if (!initialized) {
+                if (!initialized && document.querySelector(".autopuzzle-calculator-container")) {
                     console.warn('AutoPuzzle Calculator: Final retry after window load');
                     initializeCalculator();
                 }
@@ -74,7 +89,7 @@
         });
     }
 
-    // Start initialization
+    // Start initialization only if container exists
     tryInit();
 
     // === TAB SWITCHING ===
