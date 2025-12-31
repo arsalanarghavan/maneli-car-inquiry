@@ -151,6 +151,9 @@ final class Autopuzzle_Car_Inquiry_Plugin {
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-frontend-theme-handler.php';
         require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-dashboard-handler.php';
         
+        // Product Tags Manager
+        require_once AUTOPUZZLE_PLUGIN_PATH . 'includes/class-product-tags-manager.php';
+        
         // Elementor Integration
         // Elementor Integration - Temporarily disabled for custom theme design
         // Will be re-enabled in next phase with custom theme builder
@@ -179,6 +182,9 @@ final class Autopuzzle_Car_Inquiry_Plugin {
         new Autopuzzle_User_Profile();
         new Autopuzzle_Product_Editor_Page();
         new Autopuzzle_Credit_Report_Page();
+        
+        // Initialize Product Tags Manager
+        new Autopuzzle_Product_Tags_Manager();
 
         // Check if grouped attributes is enabled (using optimized helper)
         if (Autopuzzle_Options_Helper::is_option_enabled('enable_grouped_attributes', false)) {

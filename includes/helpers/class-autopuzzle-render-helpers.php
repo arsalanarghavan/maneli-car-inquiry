@@ -1002,4 +1002,41 @@ class Autopuzzle_Render_Helpers {
         
         return null;
     }
+
+    /**
+     * Render payment tags (cash/installment) for a product
+     *
+     * @param int    $product_id Product ID
+     * @param string $context    Display context: 'loop' (archive/carousel) or 'single' (product page)
+     * @return void
+     */
+    public static function render_product_payment_tags($product_id, $context = 'loop') {
+        if (!$product_id || !class_exists('Autopuzzle_Product_Tags_Manager')) {
+            return;
+        }
+
+        $tags_manager = new Autopuzzle_Product_Tags_Manager();
+        $payment_tags = $tags_manager->get_product_payment_tags($product_id);
+
+        // If no tags, don't render anything
+        if (!$payment_tags['cash'] && !$payment_tags['installment']) {
+            return;
+        }
+
+        $context_class = 'autopuzzle-payment-tag-' . esc_attr($context);
+        ?>
+        <div class="autopuzzle-payment-tags <?php echo esc_attr($context_class); ?>">
+            <?php if ($payment_tags['cash']) : ?>
+                <span class="autopuzzle-payment-tag autopuzzle-payment-tag--cash">
+                    <?php echo esc_html(Autopuzzle_Product_Tags_Manager::TAG_CASH_NAME); ?>
+                </span>
+            <?php endif; ?>
+            <?php if ($payment_tags['installment']) : ?>
+                <span class="autopuzzle-payment-tag autopuzzle-payment-tag--installment">
+                    <?php echo esc_html(Autopuzzle_Product_Tags_Manager::TAG_INSTALLMENT_NAME); ?>
+                </span>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
 }

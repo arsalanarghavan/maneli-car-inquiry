@@ -56,6 +56,52 @@ class Autopuzzle_Hooks {
         add_action('autopuzzle_cleanup_old_logs', [$this, 'cleanup_old_logs']);
         add_action('init', [$this, 'schedule_log_cleanup_cron']);
         
+        // Product tags management (cash/installment)
+        if (class_exists('Autopuzzle_Product_Tags_Manager')) {
+            // Auto-tagging on product save/update
+            add_action('woocommerce_update_product', [$this, 'auto_update_product_tags'], 20, 1);
+            add_action('woocommerce_new_product', [$this, 'auto_update_product_tags'], 20, 1);
+            // Display tags in shop loop
+            add_action('woocommerce_before_shop_loop_item_title', [$this, 'display_product_payment_tags_in_loop'], 15);
+            // Display tags in Elementor carousel (hook into product image wrap) - multiple hooks for compatibility
+            add_action('woocommerce_before_shop_loop_item', [$this, 'display_product_payment_tags_in_carousel'], 5);
+            add_action('woocommerce_shop_loop_item_title', [$this, 'display_product_payment_tags_in_carousel'], 1);
+            // Also hook into product thumbnail for Elementor
+            add_action('woocommerce_template_loop_product_thumbnail', [$this, 'display_product_payment_tags_after_thumbnail'], 25);
+            // Display tags in single product
+            add_action('woocommerce_single_product_summary', [$this, 'display_product_payment_tags_in_single'], 5);
+            // Filter products by payment type - use pre_get_posts for main query
+            // Priority 25 to run after modify_product_query_for_customers (priority 10)
+            add_action('pre_get_posts', [$this, 'filter_products_by_payment_type'], 25);
+            // Add payment type filter buttons in shop archive
+            add_action('woocommerce_before_shop_loop', [$this, 'display_payment_type_filter'], 15);
+            // Enqueue product tags CSS and JS
+            add_action('wp_enqueue_scripts', [$this, 'enqueue_product_tags_styles'], 15);
+            // Enqueue product buttons modal JS
+            add_action('wp_enqueue_scripts', [$this, 'enqueue_product_buttons_modal_scripts'], 15);
+            // AJAX handler for getting product tags
+            add_action('wp_ajax_autopuzzle_get_product_payment_tags', [$this, 'ajax_get_product_payment_tags']);
+            add_action('wp_ajax_nopriv_autopuzzle_get_product_payment_tags', [$this, 'ajax_get_product_payment_tags']);
+            
+            // Replace "Add to Cart" button with "View Product" button
+            add_filter('woocommerce_product_add_to_cart_text', [$this, 'change_add_to_cart_text'], 10, 2);
+            add_filter('woocommerce_loop_add_to_cart_link', [$this, 'replace_add_to_cart_with_view_product'], 10, 2);
+            
+            // Add purchase buttons (Cash/Installment) and View Product button in carousels
+            add_action('woocommerce_after_shop_loop_item', [$this, 'add_carousel_purchase_buttons'], 10);
+            
+            // AJAX handler for loading calculator tab content in modal
+            add_action('wp_ajax_autopuzzle_get_calculator_tab', [$this, 'ajax_get_calculator_tab']);
+            add_action('wp_ajax_nopriv_autopuzzle_get_calculator_tab', [$this, 'ajax_get_calculator_tab']);
+            
+            // AJAX handler for getting product prices
+            add_action('wp_ajax_autopuzzle_get_product_prices', [$this, 'ajax_get_product_prices']);
+            add_action('wp_ajax_nopriv_autopuzzle_get_product_prices', [$this, 'ajax_get_product_prices']);
+            
+            // Add calculator modal to footer
+            add_action('wp_footer', [$this, 'add_calculator_modals_to_footer']);
+        }
+        
     }
 
     /**
@@ -928,6 +974,675 @@ class Autopuzzle_Hooks {
         if (defined('WP_DEBUG') && WP_DEBUG && $deleted_count > 0) {
             error_log(sprintf('AutoPuzzle Log Cleanup: Deleted %d old log entries', $deleted_count));
         }
+    }
+
+    /**
+     * Auto-update product tags when product is saved/updated
+     *
+     * @param int $product_id Product ID
+     */
+    public function auto_update_product_tags($product_id) {
+        if (!class_exists('Autopuzzle_Product_Tags_Manager')) {
+            return;
+        }
+
+        $tags_manager = new Autopuzzle_Product_Tags_Manager();
+        $tags_manager->update_product_tags($product_id);
+    }
+
+    /**
+     * Display payment tags in shop loop (archive pages, carousels)
+     */
+    public function display_product_payment_tags_in_loop() {
+        global $product;
+        
+        if (!$product || !is_a($product, 'WC_Product')) {
+            return;
+        }
+
+        if (!class_exists('Autopuzzle_Render_Helpers')) {
+            return;
+        }
+
+        // Display tags - they will be positioned absolutely on the product image
+        Autopuzzle_Render_Helpers::render_product_payment_tags($product->get_id(), 'loop');
+    }
+
+    /**
+     * Display payment tags in Elementor carousel (early hook to ensure tags are inside image-wrap)
+     * Also add data attributes for fast JavaScript rendering
+     */
+    public function display_product_payment_tags_in_carousel() {
+        global $product;
+        
+        if (!$product || !is_a($product, 'WC_Product')) {
+            return;
+        }
+
+        if (!class_exists('Autopuzzle_Render_Helpers') || !class_exists('Autopuzzle_Product_Tags_Manager')) {
+            return;
+        }
+
+        $product_id = $product->get_id();
+        
+        // Prevent duplicate rendering
+        static $rendered_products = [];
+        if (isset($rendered_products[$product_id])) {
+            return;
+        }
+        $rendered_products[$product_id] = true;
+
+        $tags_manager = new Autopuzzle_Product_Tags_Manager();
+        $payment_tags = $tags_manager->get_product_payment_tags($product_id);
+
+        // Add data attributes to product element for fast JavaScript access
+        echo '<script type="text/javascript">';
+        echo '(function() {';
+        echo 'if (typeof autopuzzleProductTags === "undefined") { window.autopuzzleProductTags = { products: {} }; }';
+        echo 'autopuzzleProductTags.products[' . intval($product_id) . '] = {';
+        echo 'cash: ' . ($payment_tags['cash'] ? 'true' : 'false') . ',';
+        echo 'installment: ' . ($payment_tags['installment'] ? 'true' : 'false');
+        echo '};';
+        echo '})();';
+        echo '</script>';
+
+        // Also render tags directly (faster than waiting for JavaScript)
+        Autopuzzle_Render_Helpers::render_product_payment_tags($product_id, 'loop');
+    }
+
+    /**
+     * Display payment tags after product thumbnail (for Elementor carousel compatibility)
+     */
+    public function display_product_payment_tags_after_thumbnail() {
+        // This hook runs after thumbnail, so we can add tags right after image
+        $this->display_product_payment_tags_in_carousel();
+    }
+
+    /**
+     * Display payment tags in single product page
+     */
+    public function display_product_payment_tags_in_single() {
+        global $product;
+        
+        if (!$product || !is_a($product, 'WC_Product')) {
+            return;
+        }
+
+        if (!class_exists('Autopuzzle_Render_Helpers')) {
+            return;
+        }
+
+        Autopuzzle_Render_Helpers::render_product_payment_tags($product->get_id(), 'single');
+    }
+
+    /**
+     * Filter products by payment type (cash/installment) via query parameter
+     *
+     * @param WP_Query $query WordPress query
+     */
+    public function filter_products_by_payment_type($query) {
+        // Only run on frontend main query for shop/archive pages
+        if (is_admin() || !$query->is_main_query()) {
+            return;
+        }
+
+        // Only on shop/archive pages
+        if (!function_exists('is_shop') || (!is_shop() && !is_product_category() && !is_product_tag() && !is_product_taxonomy())) {
+            return;
+        }
+
+        // Check for payment_type parameter
+        $payment_type = isset($_GET['payment_type']) ? sanitize_text_field($_GET['payment_type']) : '';
+        
+        if (empty($payment_type) || !in_array($payment_type, ['cash', 'installment'], true)) {
+            return;
+        }
+
+        // Get the tag slug
+        $tag_slug = $payment_type; // 'cash' or 'installment'
+
+        // Get the tag term
+        $tag = get_term_by('slug', $tag_slug, 'product_tag');
+        if (!$tag || is_wp_error($tag)) {
+            return;
+        }
+
+        // Get existing tax_query
+        $tax_query = $query->get('tax_query');
+        if (!is_array($tax_query)) {
+            $tax_query = [];
+        }
+
+        // Preserve existing tax queries (like product_cat from WooCommerce)
+        $existing_tax_queries = [];
+        $relation = 'AND';
+
+        // Extract relation if exists
+        if (isset($tax_query['relation'])) {
+            $relation = $tax_query['relation'];
+        }
+
+        // Extract all tax query items (excluding relation key)
+        foreach ($tax_query as $key => $tax_item) {
+            if ($key !== 'relation' && is_array($tax_item) && isset($tax_item['taxonomy'])) {
+                $existing_tax_queries[] = $tax_item;
+            }
+        }
+
+        // Add product_tag filter
+        $existing_tax_queries[] = [
+            'taxonomy' => 'product_tag',
+            'field' => 'term_id',
+            'terms' => $tag->term_id,
+            'operator' => 'IN',
+        ];
+
+        // Rebuild tax_query with proper structure
+        $new_tax_query = $existing_tax_queries;
+        
+        // Always set relation if we have multiple queries
+        if (count($existing_tax_queries) > 1) {
+            $new_tax_query['relation'] = $relation;
+        }
+
+        $query->set('tax_query', $new_tax_query);
+    }
+
+    /**
+     * Display payment type filter buttons in shop archive
+     */
+    public function display_payment_type_filter() {
+        // Only show on shop/archive pages (not on single product pages)
+        if (!function_exists('is_shop') || is_product()) {
+            return;
+        }
+
+        // Check if we're on a shop/archive page
+        $is_archive = false;
+        if (is_shop() || is_product_category() || is_product_tag() || is_product_taxonomy()) {
+            $is_archive = true;
+        }
+
+        // Also check if we're on the main products query
+        global $wp_query;
+        if (!$is_archive && isset($wp_query) && $wp_query->is_main_query() && (is_post_type_archive('product') || is_tax('product_cat') || is_tax('product_tag'))) {
+            $is_archive = true;
+        }
+
+        if (!$is_archive) {
+            return;
+        }
+
+        $current_filter = isset($_GET['payment_type']) ? sanitize_text_field($_GET['payment_type']) : '';
+        $base_url = remove_query_arg(['payment_type', 'paged']);
+        ?>
+        <div class="autopuzzle-payment-filter" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: flex-start;">
+            <span style="font-weight: 600; margin-left: 10px;"><?php esc_html_e('Filter by Payment Type:', 'autopuzzle'); ?></span>
+            <a href="<?php echo esc_url($base_url); ?>" 
+               class="autopuzzle-filter-btn <?php echo empty($current_filter) ? 'active' : ''; ?>" 
+               style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; background-color: <?php echo empty($current_filter) ? '#333' : '#f0f0f0'; ?>; color: <?php echo empty($current_filter) ? '#fff' : '#333'; ?>; transition: all 0.3s;">
+                <?php esc_html_e('All', 'autopuzzle'); ?>
+            </a>
+            <a href="<?php echo esc_url(add_query_arg('payment_type', 'cash', $base_url)); ?>" 
+               class="autopuzzle-filter-btn <?php echo $current_filter === 'cash' ? 'active' : ''; ?>" 
+               style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; background-color: <?php echo $current_filter === 'cash' ? 'rgb(33, 206, 158)' : '#f0f0f0'; ?>; color: <?php echo $current_filter === 'cash' ? '#fff' : '#333'; ?>; transition: all 0.3s;">
+                <?php esc_html_e('Cash', 'autopuzzle'); ?>
+            </a>
+            <a href="<?php echo esc_url(add_query_arg('payment_type', 'installment', $base_url)); ?>" 
+               class="autopuzzle-filter-btn <?php echo $current_filter === 'installment' ? 'active' : ''; ?>" 
+               style="display: inline-block; padding: 8px 16px; border-radius: 4px; text-decoration: none; background-color: <?php echo $current_filter === 'installment' ? 'rgb(14, 165, 232)' : '#f0f0f0'; ?>; color: <?php echo $current_filter === 'installment' ? '#fff' : '#333'; ?>; transition: all 0.3s;">
+                <?php esc_html_e('Installment', 'autopuzzle'); ?>
+            </a>
+        </div>
+        <?php
+    }
+
+    /**
+     * Enqueue product tags CSS styles
+     */
+    public function enqueue_product_tags_styles() {
+        // Only enqueue on frontend, on product-related pages
+        if (is_admin()) {
+            return;
+        }
+
+        // Check if we're on a product-related page
+        $is_product_page = false;
+        if (function_exists('is_product') && is_product()) {
+            $is_product_page = true;
+        }
+        if (function_exists('is_shop') && is_shop()) {
+            $is_product_page = true;
+        }
+        if (function_exists('is_product_category') && is_product_category()) {
+            $is_product_page = true;
+        }
+        if (function_exists('is_product_tag') && is_product_tag()) {
+            $is_product_page = true;
+        }
+
+        // Also check if we're on archive or any page that might show products
+        global $post;
+        if (!$is_product_page && is_a($post, 'WP_Post') && 'product' === get_post_type($post)) {
+            $is_product_page = true;
+        }
+
+        // Always enqueue on frontend (for carousels and other widgets)
+        if (!$is_product_page) {
+            $is_product_page = true; // Enable for all frontend pages to support carousels
+        }
+
+        if (!$is_product_page) {
+            return;
+        }
+
+        $css_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/css/product-tags.css';
+        if (file_exists($css_path)) {
+            wp_enqueue_style(
+                'autopuzzle-product-tags',
+                AUTOPUZZLE_PLUGIN_URL . 'assets/css/product-tags.css',
+                [],
+                filemtime($css_path)
+            );
+        }
+
+        // Enqueue JavaScript for carousel support
+        $js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/product-tags-carousel.js';
+        if (file_exists($js_path)) {
+            wp_enqueue_script(
+                'autopuzzle-product-tags-carousel',
+                AUTOPUZZLE_PLUGIN_URL . 'assets/js/product-tags-carousel.js',
+                ['jquery'],
+                filemtime($js_path),
+                true
+            );
+
+            // Localize script
+            wp_localize_script('autopuzzle-product-tags-carousel', 'autopuzzleProductTags', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('autopuzzle_product_tags_nonce'),
+            ]);
+        }
+    }
+
+    /**
+     * Enqueue product buttons modal JavaScript
+     */
+    public function enqueue_product_buttons_modal_scripts() {
+        // Only enqueue on frontend
+        if (is_admin()) {
+            return;
+        }
+
+        // Check if we're on a product-related page
+        $is_product_page = false;
+        if (function_exists('is_product') && is_product()) {
+            $is_product_page = true;
+        }
+        if (function_exists('is_shop') && is_shop()) {
+            $is_product_page = true;
+        }
+        if (function_exists('is_product_category') && is_product_category()) {
+            $is_product_page = true;
+        }
+        if (function_exists('is_product_tag') && is_product_tag()) {
+            $is_product_page = true;
+        }
+
+        // Always enqueue on frontend (for carousels and other widgets)
+        if (!$is_product_page) {
+            $is_product_page = true; // Enable for all frontend pages to support carousels
+        }
+
+        if (!$is_product_page) {
+            return;
+        }
+
+            // Enqueue Bootstrap if not already enqueued (for modal)
+            if (!wp_script_is('bootstrap', 'enqueued')) {
+                // Try to enqueue Bootstrap 5
+                wp_enqueue_script(
+                    'bootstrap',
+                    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
+                    [],
+                    '5.3.0',
+                    true
+                );
+            }
+            
+            // Enqueue Bootstrap CSS if not already enqueued
+            if (!wp_style_is('bootstrap', 'enqueued')) {
+                wp_enqueue_style(
+                    'bootstrap',
+                    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+                    [],
+                    '5.3.0'
+                );
+            }
+            
+            // Ensure calculator assets are enqueued for modal
+            if (class_exists('Autopuzzle_Loan_Calculator_Shortcode')) {
+                $calculator_shortcode = new Autopuzzle_Loan_Calculator_Shortcode();
+                // This will enqueue calculator assets
+                if (method_exists($calculator_shortcode, 'enqueue_calculator_assets')) {
+                    $calculator_shortcode->enqueue_calculator_assets();
+                }
+            }
+
+        // Enqueue product buttons modal JS
+        $js_path = AUTOPUZZLE_PLUGIN_PATH . 'assets/js/product-buttons-modal.js';
+        if (file_exists($js_path)) {
+            wp_enqueue_script(
+                'autopuzzle-product-buttons-modal',
+                AUTOPUZZLE_PLUGIN_URL . 'assets/js/product-buttons-modal.js',
+                ['jquery'],
+                filemtime($js_path),
+                true
+            );
+
+            // Localize script
+            wp_localize_script('autopuzzle-product-buttons-modal', 'autopuzzleButtonsModal', [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('autopuzzle_calculator_tab_nonce'),
+                'pluginUrl' => AUTOPUZZLE_PLUGIN_URL,
+                'loadingText' => esc_html__('Loading...', 'autopuzzle'),
+                'errorText' => esc_html__('Error loading calculator. Please try again.', 'autopuzzle'),
+                'cashPurchaseTitle' => esc_html__('Cash Purchase', 'autopuzzle'),
+                'installmentPurchaseTitle' => esc_html__('Installment Purchase', 'autopuzzle'),
+                'viewProductTitle' => esc_html__('View Product', 'autopuzzle'),
+            ]);
+        }
+    }
+
+    /**
+     * AJAX handler to get product payment tags HTML
+     */
+    public function ajax_get_product_payment_tags() {
+        check_ajax_referer('autopuzzle_product_tags_nonce', 'nonce');
+
+        $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+
+        if (!$product_id || !class_exists('Autopuzzle_Render_Helpers') || !class_exists('Autopuzzle_Product_Tags_Manager')) {
+            wp_send_json_error(['message' => 'Invalid product ID']);
+            return;
+        }
+
+        $tags_manager = new Autopuzzle_Product_Tags_Manager();
+        $payment_tags = $tags_manager->get_product_payment_tags($product_id);
+
+        // Return both HTML and data for flexibility
+        ob_start();
+        Autopuzzle_Render_Helpers::render_product_payment_tags($product_id, 'loop');
+        $html = ob_get_clean();
+
+        wp_send_json_success([
+            'html' => $html,
+            'cash' => $payment_tags['cash'],
+            'installment' => $payment_tags['installment']
+        ]);
+    }
+
+    /**
+     * Change "Add to Cart" button text to "View Product"
+     *
+     * @param string $text Button text
+     * @param WC_Product $product Product object
+     * @return string
+     */
+    public function change_add_to_cart_text($text, $product) {
+        return esc_html__('View Product', 'autopuzzle');
+    }
+
+    /**
+     * Replace "Add to Cart" button with "View Product" link
+     *
+     * @param string $button_html The button HTML
+     * @param WC_Product $product The product object
+     * @return string
+     */
+    public function replace_add_to_cart_with_view_product($button_html, $product) {
+        if (!$product) {
+            return $button_html;
+        }
+
+        $product_id = $product->get_id();
+        $product_url = get_permalink($product_id);
+        
+        $button_html = sprintf(
+            '<a href="%s" class="button autopuzzle-view-product-btn">%s</a>',
+            esc_url($product_url),
+            esc_html__('View Product', 'autopuzzle')
+        );
+
+        return $button_html;
+    }
+
+    /**
+     * Add purchase buttons (Cash/Installment) and View Product button in carousels and archive pages
+     */
+    public function add_carousel_purchase_buttons() {
+        global $product;
+        
+        if (!$product || !is_a($product, 'WC_Product')) {
+            return;
+        }
+
+        if (!class_exists('Autopuzzle_Product_Tags_Manager')) {
+            return;
+        }
+
+        $product_id = $product->get_id();
+        $tags_manager = new Autopuzzle_Product_Tags_Manager();
+        $payment_tags = $tags_manager->get_product_payment_tags($product_id);
+
+        // Get prices
+        $cash_price = (float) $product->get_regular_price();
+        $installment_price = (float) get_post_meta($product_id, 'installment_price', true);
+
+        $product_url = get_permalink($product_id);
+        ?>
+        <div class="autopuzzle-product-buttons" data-product-id="<?php echo esc_attr($product_id); ?>">
+            <?php if ($cash_price > 0): ?>
+                <button type="button" class="autopuzzle-btn autopuzzle-btn-cash" data-product-id="<?php echo esc_attr($product_id); ?>" data-tab-type="cash">
+                    <?php esc_html_e('Cash Purchase', 'autopuzzle'); ?>
+                </button>
+            <?php endif; ?>
+            
+            <?php if ($installment_price > 0): ?>
+                <button type="button" class="autopuzzle-btn autopuzzle-btn-installment" data-product-id="<?php echo esc_attr($product_id); ?>" data-tab-type="installment">
+                    <?php esc_html_e('Installment Purchase', 'autopuzzle'); ?>
+                </button>
+            <?php endif; ?>
+            
+            <a href="<?php echo esc_url($product_url); ?>" class="autopuzzle-btn autopuzzle-btn-view">
+                <?php esc_html_e('View Product', 'autopuzzle'); ?>
+            </a>
+        </div>
+        <?php
+    }
+
+    /**
+     * AJAX handler to get calculator tab content for modal
+     */
+    public function ajax_get_calculator_tab() {
+        check_ajax_referer('autopuzzle_calculator_tab_nonce', 'nonce');
+
+        $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+        $tab_type = isset($_POST['tab_type']) ? sanitize_text_field($_POST['tab_type']) : '';
+
+        if (!$product_id || !in_array($tab_type, ['cash', 'installment'], true)) {
+            wp_send_json_error(['message' => 'Invalid parameters']);
+            return;
+        }
+
+        $product = wc_get_product($product_id);
+        if (!$product) {
+            wp_send_json_error(['message' => 'Product not found']);
+            return;
+        }
+
+        // Get product data
+        $cash_price_raw = $product->get_regular_price();
+        if ($cash_price_raw === '' || $cash_price_raw === null || $cash_price_raw === false || $cash_price_raw === 0 || $cash_price_raw === '0') {
+            $cash_price = 0;
+        } else {
+            $cash_price_str = (string)$cash_price_raw;
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $cash_price_str = str_replace($persian_digits, $english_digits, $cash_price_str);
+            $cash_price_str = preg_replace('/[^\d]/', '', $cash_price_str);
+            $cash_price = (!empty($cash_price_str) && $cash_price_str !== '0') ? (int)$cash_price_str : 0;
+        }
+
+        $installment_price_raw = get_post_meta($product_id, 'installment_price', true);
+        if (is_string($installment_price_raw) && !empty($installment_price_raw)) {
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $installment_price_raw = str_replace($persian_digits, $english_digits, $installment_price_raw);
+            $installment_price_raw = preg_replace('/[^\d]/', '', $installment_price_raw);
+        }
+        $installment_price = (!empty($installment_price_raw) && $installment_price_raw !== '0') ? (int)$installment_price_raw : 0;
+
+        $min_down_payment_raw = get_post_meta($product_id, 'min_downpayment', true);
+        if (is_string($min_down_payment_raw) && !empty($min_down_payment_raw)) {
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $min_down_payment_raw = str_replace($persian_digits, $english_digits, $min_down_payment_raw);
+            $min_down_payment_raw = preg_replace('/[^\d]/', '', $min_down_payment_raw);
+        }
+        $min_down_payment = !empty($min_down_payment_raw) ? (int)$min_down_payment_raw : 0;
+        if ($min_down_payment <= 0 && $installment_price > 0) {
+            $min_down_payment = (int)($installment_price * 0.2);
+        }
+
+        $car_colors_str = get_post_meta($product_id, '_maneli_car_colors', true);
+        $car_colors = !empty($car_colors_str) ? array_map('trim', explode(',', $car_colors_str)) : [];
+
+        $car_status = get_post_meta($product_id, '_maneli_car_status', true);
+        if (empty($car_status) || !in_array($car_status, ['special_sale', 'unavailable', 'disabled'], true)) {
+            $car_status = 'special_sale';
+        }
+
+        $is_unavailable = ($car_status === 'unavailable');
+        $cash_unavailable = ($is_unavailable || $cash_price <= 0);
+        $installment_unavailable = ($is_unavailable || $installment_price <= 0);
+        $can_see_prices = true;
+
+        $template_args = [
+            'product'                => $product,
+            'cash_price'             => $cash_price,
+            'installment_price'      => $installment_price,
+            'min_down_payment'       => $min_down_payment,
+            'max_down_payment'       => (int)($installment_price * 0.8),
+            'car_colors'             => $car_colors,
+            'car_status'             => $car_status,
+            'can_see_prices'         => $can_see_prices,
+            'is_unavailable'         => $is_unavailable,
+            'cash_unavailable'       => $cash_unavailable,
+            'installment_unavailable' => $installment_unavailable,
+        ];
+
+        // Render only the requested tab
+        ob_start();
+        if ($tab_type === 'cash') {
+            autopuzzle_get_template_part('shortcodes/calculator/cash-tab-content', $template_args);
+        } else {
+            autopuzzle_get_template_part('shortcodes/calculator/installment-tab-content', $template_args);
+        }
+        $html = ob_get_clean();
+
+        wp_send_json_success([
+            'html' => $html,
+            'product_name' => $product->get_name()
+        ]);
+    }
+
+    /**
+     * AJAX handler to get product prices (cash and installment)
+     */
+    public function ajax_get_product_prices() {
+        check_ajax_referer('autopuzzle_calculator_tab_nonce', 'nonce');
+
+        $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+
+        if (!$product_id) {
+            wp_send_json_error(['message' => 'Invalid product ID']);
+            return;
+        }
+
+        $product = wc_get_product($product_id);
+        if (!$product) {
+            wp_send_json_error(['message' => 'Product not found']);
+            return;
+        }
+
+        // Get cash price
+        $cash_price_raw = $product->get_regular_price();
+        if ($cash_price_raw === '' || $cash_price_raw === null || $cash_price_raw === false || $cash_price_raw === 0 || $cash_price_raw === '0') {
+            $cash_price = 0;
+        } else {
+            $cash_price_str = (string)$cash_price_raw;
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $cash_price_str = str_replace($persian_digits, $english_digits, $cash_price_str);
+            $cash_price_str = preg_replace('/[^\d]/', '', $cash_price_str);
+            $cash_price = (!empty($cash_price_str) && $cash_price_str !== '0') ? (float)$cash_price_str : 0;
+        }
+
+        // Get installment price
+        $installment_price_raw = get_post_meta($product_id, 'installment_price', true);
+        if (is_string($installment_price_raw) && !empty($installment_price_raw)) {
+            $persian_digits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            $english_digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            $installment_price_raw = str_replace($persian_digits, $english_digits, $installment_price_raw);
+            $installment_price_raw = preg_replace('/[^\d]/', '', $installment_price_raw);
+        }
+        $installment_price = (!empty($installment_price_raw) && $installment_price_raw !== '0') ? (float)$installment_price_raw : 0;
+
+        wp_send_json_success([
+            'cash_price' => $cash_price,
+            'installment_price' => $installment_price
+        ]);
+    }
+
+    /**
+     * Add calculator modals to footer
+     * Note: Modal will be moved to body by JavaScript for proper display
+     */
+    public function add_calculator_modals_to_footer() {
+        // Only add on frontend pages that might show products
+        if (is_admin()) {
+            return;
+        }
+        ?>
+        <!-- AutoPuzzle Calculator Modals -->
+        <div class="autopuzzle-calculator-modal modal fade" id="autopuzzleCalculatorModal" tabindex="-1" aria-labelledby="autopuzzleCalculatorModalLabel" aria-hidden="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1055;">
+            <div class="modal-dialog modal-lg modal-dialog-centered" style="margin: 1.75rem auto; max-width: 800px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="autopuzzleCalculatorModalLabel"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php esc_attr_e('Close', 'autopuzzle'); ?>"></button>
+                    </div>
+                    <div class="modal-body" id="autopuzzleCalculatorModalBody">
+                        <div class="text-center">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden"><?php esc_html_e('Loading...', 'autopuzzle'); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+        // Immediately move modal to body on page load
+        (function() {
+            const modalElement = document.getElementById('autopuzzleCalculatorModal');
+            if (modalElement && modalElement.parentElement && modalElement.parentElement.tagName !== 'BODY') {
+                document.body.appendChild(modalElement);
+            }
+        })();
+        </script>
+        <?php
     }
     
 }

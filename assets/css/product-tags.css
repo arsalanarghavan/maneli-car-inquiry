@@ -1,0 +1,534 @@
+/**
+ * Product Payment Tags Styles
+ * Displays cash and installment tags on products
+ *
+ * @package Autopuzzle_Car_Inquiry/Assets/CSS
+ * @version 1.0.0
+ */
+
+/* Payment Tags Container */
+.autopuzzle-payment-tags {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    pointer-events: none;
+    flex-wrap: wrap;
+}
+
+/* Individual Payment Tag */
+.autopuzzle-payment-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    pointer-events: auto;
+}
+
+/* Cash Tag - Success Color (Green) */
+.autopuzzle-payment-tag--cash {
+    background-color: rgb(33, 206, 158);
+    color: #ffffff;
+}
+
+/* Installment Tag - Info Color (Blue) */
+.autopuzzle-payment-tag--installment {
+    background-color: rgb(14, 165, 232);
+    color: #ffffff;
+}
+
+/* Hover Effect */
+.autopuzzle-payment-tag:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Context: Loop (Archive, Carousel) - Tags are positioned on product image via absolute positioning */
+
+/* Ensure product image container is relative */
+.woocommerce ul.products li.product,
+.woocommerce ul.products li.product .woocommerce-loop-product__link,
+.woocommerce ul.products li.product a,
+.woocommerce ul.products li.product .woocommerce-loop-product__link img,
+.product-card,
+.product-image,
+.woocommerce-loop-product__link {
+    position: relative;
+}
+
+/* Ensure tags are positioned correctly within product link */
+.woocommerce ul.products li.product .woocommerce-loop-product__link {
+    display: block;
+    position: relative;
+}
+
+/* Context: Single Product Page - Tags are positioned differently (relative, not absolute) */
+
+.single-product .autopuzzle-payment-tags {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-bottom: 15px;
+    flex-direction: row;
+    gap: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .autopuzzle-payment-tag {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+
+    .autopuzzle-payment-tags {
+        top: 8px;
+        right: 8px;
+        gap: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .autopuzzle-payment-tag {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+
+    .autopuzzle-payment-tags {
+        top: 5px;
+        right: 5px;
+        gap: 3px;
+    }
+}
+
+/* RTL Support */
+[dir="rtl"] .autopuzzle-payment-tags {
+    right: auto;
+    left: 10px;
+}
+
+[dir="rtl"] .single-product .autopuzzle-payment-tags {
+    left: auto;
+}
+
+/* Compatibility with custom product card templates */
+.product-card .autopuzzle-payment-tags,
+.product-image .autopuzzle-payment-tags,
+.woocommerce-loop-product__link .autopuzzle-payment-tags {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+[dir="rtl"] .product-card .autopuzzle-payment-tags,
+[dir="rtl"] .product-image .autopuzzle-payment-tags,
+[dir="rtl"] .woocommerce-loop-product__link .autopuzzle-payment-tags {
+    right: auto;
+    left: 10px;
+}
+
+/* Elementor Carousel Support */
+.eael-product-carousel .autopuzzle-payment-tags,
+.product-image-wrap .autopuzzle-payment-tags,
+.image-wrap .autopuzzle-payment-tags,
+.swiper-slide .autopuzzle-payment-tags {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 20;
+    flex-direction: row !important;
+    gap: 6px;
+}
+
+[dir="rtl"] .eael-product-carousel .autopuzzle-payment-tags,
+[dir="rtl"] .product-image-wrap .autopuzzle-payment-tags,
+[dir="rtl"] .image-wrap .autopuzzle-payment-tags,
+[dir="rtl"] .swiper-slide .autopuzzle-payment-tags {
+    right: auto;
+    left: 10px;
+}
+
+/* Ensure image-wrap is relative for absolute positioning */
+.eael-product-carousel .product-image-wrap,
+.eael-product-carousel .image-wrap {
+    position: relative;
+}
+
+/* Payment Filter Styles */
+.autopuzzle-payment-filter {
+    margin-bottom: 20px;
+}
+
+.autopuzzle-filter-btn:hover {
+    opacity: 0.8;
+    transform: translateY(-2px);
+}
+
+.autopuzzle-filter-btn.active {
+    font-weight: 600;
+}
+
+/* Product Buttons Styles */
+.autopuzzle-product-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 15px 0;
+}
+
+.autopuzzle-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.autopuzzle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0.9;
+}
+
+.autopuzzle-btn-cash {
+    background-color: rgb(33, 206, 158);
+    color: #ffffff;
+}
+
+.autopuzzle-btn-installment {
+    background-color: rgb(14, 165, 232);
+    color: #ffffff;
+}
+
+.autopuzzle-btn-view {
+    background-color: #333;
+    color: #ffffff;
+}
+
+.autopuzzle-view-product-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    background-color: #333;
+    color: #ffffff;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.autopuzzle-view-product-btn:hover {
+    background-color: #555;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+/* Calculator Modal Styles */
+#autopuzzleCalculatorModal {
+    z-index: 1055 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: auto !important;
+    display: none !important;
+}
+
+#autopuzzleCalculatorModal.show {
+    display: block !important;
+}
+
+#autopuzzleCalculatorModal .modal-dialog {
+    z-index: 1056 !important;
+    position: relative !important;
+    margin: 1.75rem auto !important;
+    max-width: 800px !important;
+}
+
+#autopuzzleCalculatorModal.modal-dialog-centered .modal-dialog {
+    display: flex !important;
+    align-items: center !important;
+    min-height: calc(100% - 3.5rem) !important;
+}
+
+#autopuzzleCalculatorModal .modal-content {
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    background-color: #fff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Ensure backdrop is properly styled */
+.modal-backdrop {
+    z-index: 1050 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ensure body doesn't scroll when modal is open */
+body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+
+/* Hide original Elementor buttons immediately - they will be replaced */
+.eael-woo-product-carousel .eael-product-quick-view,
+.eael-woo-product-carousel .view-details,
+.swiper-slide .eael-product-quick-view,
+.swiper-slide .view-details {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Show our buttons immediately */
+.eael-woo-product-carousel .autopuzzle-cash-purchase,
+.eael-woo-product-carousel .autopuzzle-installment-purchase,
+.eael-woo-product-carousel .autopuzzle-view-product,
+.swiper-slide .autopuzzle-cash-purchase,
+.swiper-slide .autopuzzle-installment-purchase,
+.swiper-slide .autopuzzle-view-product {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.autopuzzle-calculator-modal .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px 20px;
+}
+
+.autopuzzle-calculator-modal .modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.autopuzzle-calculator-modal .modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.autopuzzle-calculator-modal .tab-content {
+    display: block !important;
+}
+
+.autopuzzle-calculator-modal .tab-content.active {
+    display: block !important;
+}
+
+/* Responsive Design for Buttons */
+@media (max-width: 768px) {
+    .autopuzzle-product-buttons {
+        gap: 8px;
+        padding: 10px 0;
+    }
+
+    .autopuzzle-btn,
+    .autopuzzle-view-product-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .autopuzzle-product-buttons {
+        gap: 6px;
+        padding: 8px 0;
+    }
+
+    .autopuzzle-btn,
+    .autopuzzle-view-product-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+
+/* RTL Support for Buttons */
+[dir="rtl"] .autopuzzle-product-buttons {
+    direction: rtl;
+}
+
+[dir="rtl"] .autopuzzle-btn,
+[dir="rtl"] .autopuzzle-view-product-btn {
+    text-align: center;
+}
+
+/* Elementor Carousel Button Styles */
+.eael-woo-product-carousel .autopuzzle-cash-purchase,
+.eael-woo-product-carousel .autopuzzle-installment-purchase,
+.eael-woo-product-carousel .autopuzzle-view-product,
+.swiper-slide .autopuzzle-cash-purchase,
+.swiper-slide .autopuzzle-installment-purchase,
+.swiper-slide .autopuzzle-view-product {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 0;
+    vertical-align: middle;
+}
+
+/* Ensure buttons container displays buttons in a row */
+.eael-woo-product-carousel .buttons-wrap .icons-wrap,
+.swiper-slide .buttons-wrap .icons-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: nowrap;
+}
+
+.eael-woo-product-carousel .autopuzzle-cash-purchase a,
+.eael-woo-product-carousel .autopuzzle-installment-purchase a,
+.eael-woo-product-carousel .autopuzzle-view-product a,
+.swiper-slide .autopuzzle-cash-purchase a,
+.swiper-slide .autopuzzle-installment-purchase a,
+.swiper-slide .autopuzzle-view-product a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.eael-woo-product-carousel .autopuzzle-cash-purchase a:hover,
+.eael-woo-product-carousel .autopuzzle-installment-purchase a:hover,
+.eael-woo-product-carousel .autopuzzle-view-product a:hover,
+.swiper-slide .autopuzzle-cash-purchase a:hover,
+.swiper-slide .autopuzzle-installment-purchase a:hover,
+.swiper-slide .autopuzzle-view-product a:hover {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.eael-woo-product-carousel .autopuzzle-cash-purchase a {
+    color: rgb(33, 206, 158);
+}
+
+.eael-woo-product-carousel .autopuzzle-cash-purchase a:hover {
+    background-color: rgb(33, 206, 158);
+    color: #ffffff;
+}
+
+.eael-woo-product-carousel .autopuzzle-installment-purchase a {
+    color: rgb(14, 165, 232);
+}
+
+.eael-woo-product-carousel .autopuzzle-installment-purchase a:hover {
+    background-color: rgb(14, 165, 232);
+    color: #ffffff;
+}
+
+.eael-woo-product-carousel .autopuzzle-view-product a,
+.swiper-slide .autopuzzle-view-product a {
+    color: #333;
+}
+
+.eael-woo-product-carousel .autopuzzle-view-product a:hover,
+.swiper-slide .autopuzzle-view-product a:hover {
+    background-color: #333;
+    color: #ffffff;
+}
+
+.eael-woo-product-carousel .autopuzzle-cash-purchase i,
+.eael-woo-product-carousel .autopuzzle-installment-purchase i,
+.eael-woo-product-carousel .autopuzzle-view-product i,
+.swiper-slide .autopuzzle-cash-purchase i,
+.swiper-slide .autopuzzle-installment-purchase i,
+.swiper-slide .autopuzzle-view-product i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* Ensure buttons are visible in carousel overlay */
+.eael-product-carousel .product-overlay-content .buttons-wrap .icons-wrap .autopuzzle-cash-purchase,
+.eael-product-carousel .product-overlay-content .buttons-wrap .icons-wrap .autopuzzle-installment-purchase {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Responsive adjustments for carousel buttons */
+@media (max-width: 768px) {
+    .eael-woo-product-carousel .autopuzzle-cash-purchase a,
+    .eael-woo-product-carousel .autopuzzle-installment-purchase a,
+    .swiper-slide .autopuzzle-cash-purchase a,
+    .swiper-slide .autopuzzle-installment-purchase a {
+        width: 36px;
+        height: 36px;
+    }
+
+    .eael-woo-product-carousel .autopuzzle-cash-purchase i,
+    .eael-woo-product-carousel .autopuzzle-installment-purchase i,
+    .swiper-slide .autopuzzle-cash-purchase i,
+    .swiper-slide .autopuzzle-installment-purchase i {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .eael-woo-product-carousel .autopuzzle-cash-purchase a,
+    .eael-woo-product-carousel .autopuzzle-installment-purchase a,
+    .swiper-slide .autopuzzle-cash-purchase a,
+    .swiper-slide .autopuzzle-installment-purchase a {
+        width: 32px;
+        height: 32px;
+    }
+
+    .eael-woo-product-carousel .autopuzzle-cash-purchase i,
+    .eael-woo-product-carousel .autopuzzle-installment-purchase i,
+    .eael-woo-product-carousel .autopuzzle-view-product i,
+    .swiper-slide .autopuzzle-cash-purchase i,
+    .swiper-slide .autopuzzle-installment-purchase i,
+    .swiper-slide .autopuzzle-view-product i {
+        font-size: 12px;
+    }
+}
+
+/* Product Title Alignment in Carousel */
+.eael-woo-product-carousel .eael-product-title,
+.eael-woo-product-carousel .eael-product-title h3,
+.eael-woo-product-carousel .eael-product-title a,
+.swiper-slide .eael-product-title,
+.swiper-slide .eael-product-title h3,
+.swiper-slide .eael-product-title a {
+    text-align: right !important;
+    direction: rtl;
+}
+
+.eael-woo-product-carousel .product-details-wrap .product-details,
+.swiper-slide .product-details-wrap .product-details {
+    text-align: right;
+    direction: rtl;
+}
+

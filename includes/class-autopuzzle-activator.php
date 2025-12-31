@@ -30,6 +30,9 @@ class Autopuzzle_Activator {
         // Store current database schema version
         $current_version = defined('AUTOPUZZLE_DB_VERSION') ? AUTOPUZZLE_DB_VERSION : AUTOPUZZLE_VERSION;
         update_option('autopuzzle_db_version', $current_version);
+        
+        // Migrate product tags for existing products
+        self::migrate_product_tags();
     }
 
     /**
@@ -472,6 +475,86 @@ class Autopuzzle_Activator {
             if (get_option($key) === false) {
                 add_option($key, $value);
             }
+        }
+    }
+
+    /**
+     * Migrate product tags for all existing products
+     * This ensures all products have the correct cash/installment tags
+     */
+    private static function migrate_product_tags() {
+        // Check if migration has already been run
+        $migration_done = get_option('autopuzzle_product_tags_migrated', false);
+        if ($migration_done) {
+            return;
+        }
+
+        // Only run if WooCommerce and the tags manager class are available
+        if (!class_exists('WooCommerce') || !class_exists('Autopuzzle_Product_Tags_Manager')) {
+            return;
+        }
+
+        // Ensure tags exist first
+        $tags_manager = new Autopuzzle_Product_Tags_Manager();
+        $tags_manager->ensure_tags_exist();
+
+        // Update tags for all products in batches
+        $batch_size = 50;
+        $offset = 0;
+        $total_processed = 0;
+        $total_updated = 0;
+
+        do {
+            $args = [
+                'post_type' => 'product',
+                'post_status' => 'any',
+                'posts_per_page' => $batch_size,
+                'offset' => $offset,
+                'fields' => 'ids',
+            ];
+
+            $products = get_posts($args);
+            $batch_processed = 0;
+            $batch_updated = 0;
+
+            foreach ($products as $product_id) {
+                $batch_processed++;
+                if ($tags_manager->update_product_tags($product_id)) {
+                    $batch_updated++;
+                }
+            }
+
+            $total_processed += $batch_processed;
+            $total_updated += $batch_updated;
+            $offset += $batch_size;
+
+            // Break if no more products
+            if (count($products) < $batch_size) {
+                break;
+            }
+
+            // Prevent timeout on large sites - process in smaller chunks
+            if ($total_processed >= 200) {
+                // Schedule continuation via cron or admin notice
+                update_option('autopuzzle_product_tags_migration_offset', $offset);
+                update_option('autopuzzle_product_tags_migration_total', $total_processed);
+                break;
+            }
+        } while (count($products) > 0);
+
+        // Mark migration as done if all products processed
+        if ($offset >= $total_processed || count($products) < $batch_size) {
+            update_option('autopuzzle_product_tags_migrated', true);
+            delete_option('autopuzzle_product_tags_migration_offset');
+            delete_option('autopuzzle_product_tags_migration_total');
+        }
+
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf(
+                'AutoPuzzle Product Tags Migration: Processed %d products, updated %d',
+                $total_processed,
+                $total_updated
+            ));
         }
     }
 }

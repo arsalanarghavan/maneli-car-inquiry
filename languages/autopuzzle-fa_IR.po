@@ -2448,9 +2448,6 @@ msgid "Search"
 msgstr "جستجو"
 
 
-msgid "Loading..."
-msgstr "در حال بارگذاری..."
-
 
 msgid "Error loading products."
 msgstr "خطا در بارگذاری محصولات."
@@ -6450,9 +6447,6 @@ msgstr "خودرو:"
 msgid "Time:"
 msgstr "ساعت:"
 
-
-msgid "Close"
-msgstr "بستن"
 
 
 msgid "Price Display Settings"
@@ -11920,4 +11914,20 @@ msgstr "بررسی امنیتی ناموفق بود"
 
 msgid "You do not have permission to perform this action"
 msgstr "شما مجوز انجام این عمل را ندارید"
+
+msgid "Filter by Payment Type:"
+msgstr "فیلتر بر اساس نوع پرداخت:"
+
+
+msgid "View Product"
+msgstr "نمایش محصول"
+
+msgid "Cash Purchase"
+msgstr "خرید نقدی"
+
+msgid "Installment Purchase"
+msgstr "خرید اقساطی"
+
+msgid "Error loading calculator. Please try again."
+msgstr "خطا در بارگذاری ماشین حساب. لطفاً دوباره تلاش کنید."
 
