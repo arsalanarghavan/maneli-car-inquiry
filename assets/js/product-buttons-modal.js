@@ -68,6 +68,48 @@
         });
 
         /**
+         * Organize buttons to be displayed inline next to View Product button
+         */
+        function organizeProductButtons() {
+            $('.woocommerce ul.products li.product').each(function() {
+                const $product = $(this);
+                const $viewProductWrapper = $product.find('.autopuzzle-view-product-wrapper');
+                const $productButtons = $product.find('.autopuzzle-product-buttons');
+                
+                // If both exist, move buttons next to View Product button
+                if ($viewProductWrapper.length && $productButtons.length) {
+                    // Create a container for all buttons
+                    let $buttonsContainer = $product.find('.autopuzzle-all-buttons-container');
+                    if (!$buttonsContainer.length) {
+                        $buttonsContainer = $('<div class="autopuzzle-all-buttons-container"></div>');
+                        // Insert after price or before any existing buttons
+                        const $price = $product.find('.price, .woocommerce-Price-amount');
+                        if ($price.length) {
+                            $price.parent().after($buttonsContainer);
+                        } else {
+                            $viewProductWrapper.parent().append($buttonsContainer);
+                        }
+                    }
+                    
+                    // Move buttons into container if not already there
+                    if ($viewProductWrapper.parent('.autopuzzle-all-buttons-container').length === 0) {
+                        $buttonsContainer.append($viewProductWrapper);
+                    }
+                    if ($productButtons.parent('.autopuzzle-all-buttons-container').length === 0) {
+                        $buttonsContainer.append($productButtons);
+                    }
+                }
+            });
+        }
+
+        // Organize buttons on page load
+        organizeProductButtons();
+        
+        // Also organize after AJAX content loads (for infinite scroll, etc.)
+        $(document).on('woocommerce_loaded', organizeProductButtons);
+        $(document).on('updated_wc_div', organizeProductButtons);
+
+        /**
          * Open calculator modal with specified tab
          *
          * @param {number} productId Product ID
@@ -341,19 +383,31 @@
             
             // Wait for DOM to be ready and assets to be loaded
             setTimeout(function() {
-                // Initialize calculator if installment tab
+                // For installment tab, initialize calculator using calculator.js functions
                 if (tabType === 'installment') {
-                    initializeInstallmentCalculator(productId);
+                    // Use calculator.js exported function
+                    if (typeof window.autopuzzleInitInstallmentCalculator === 'function') {
+                        // Pass null as container since we don't have .autopuzzle-calculator-container in modal
+                        // initInstallmentCalculator will find elements by ID (#loan-calculator, #installment-tab)
+                        const result = window.autopuzzleInitInstallmentCalculator(null);
+                        if (!result) {
+                            // Fallback to manual initialization
+                            initializeInstallmentCalculator(productId);
+                        }
+                    } else {
+                        // Fallback to manual initialization
+                        initializeInstallmentCalculator(productId);
+                    }
                 }
                 
-                // Trigger any other initialization that might be needed
-                if (typeof window.autopuzzleInitializeCalculator === 'function') {
-                    // Already handled in initializeInstallmentCalculator
-                } else if (typeof initializeCalculator === 'function') {
-                    // Fallback to old function name if exists
-                    initializeCalculator();
+                // For cash tab, initialize cash form handlers
+                if (tabType === 'cash') {
+                    // Use calculator.js exported function
+                    if (typeof window.autopuzzleInitCashTab === 'function') {
+                        window.autopuzzleInitCashTab();
+                    }
                 }
-            }, 150);
+            }, 200);
         }
 
         /**
@@ -365,9 +419,10 @@
         function initializeInstallmentCalculator(productId) {
             // Wait a bit for DOM to be ready
             setTimeout(function() {
-                const calculatorEl = document.getElementById('loan-calculator-modal');
+                // Use same ID as shortcode for compatibility
+                const calculatorEl = document.getElementById('loan-calculator');
                 if (!calculatorEl) {
-                    console.warn('AutoPuzzle Modal: loan-calculator-modal not found');
+                    console.warn('AutoPuzzle Modal: loan-calculator not found');
                     return;
                 }
 
@@ -406,11 +461,11 @@
                     }
                 }
 
-                // Get DOM elements
-                const input = document.getElementById('downPaymentInputModal');
-                const slider = document.getElementById('downPaymentSliderModal');
-                const minDisplay = installmentTab.querySelector('#minDownDisplayModal');
-                let installmentEl = installmentTab.querySelector('#installmentAmountModal');
+                // Get DOM elements - use same IDs as shortcode
+                const input = document.getElementById('downPaymentInput');
+                const slider = document.getElementById('downPaymentSlider');
+                const minDisplay = installmentTab.querySelector('#minDownDisplay');
+                let installmentEl = installmentTab.querySelector('#installmentAmount');
                 const termButtons = installmentTab.querySelectorAll('.term-btn');
                 const actionBtn = installmentTab.querySelector('.loan-action-btn');
 

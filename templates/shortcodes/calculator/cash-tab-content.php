@@ -16,7 +16,9 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div id="cash-tab" class="tab-content<?php echo (isset($cash_unavailable) && $cash_unavailable) ? ' unavailable-tab' : ''; ?>">
+<div class="autopuzzle-calculator-container">
+    <div class="tabs-content-wrapper">
+        <div id="cash-tab" class="tab-content<?php echo (isset($cash_unavailable) && $cash_unavailable) ? ' unavailable-tab' : ''; ?>">
     <?php if (isset($cash_unavailable) && $cash_unavailable): ?>
         <?php 
         $options = get_option('autopuzzle_inquiry_all_options', []);
@@ -54,30 +56,30 @@ if (!defined('ABSPATH')) {
             <div class="form-grid">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="cash_first_name_modal"><?php esc_html_e('First Name:', 'autopuzzle'); ?></label>
-                        <input type="text" id="cash_first_name_modal" name="cash_first_name" value="<?php echo esc_attr($current_user->first_name); ?>" required>
+                        <label for="cash_first_name"><?php esc_html_e('First Name:', 'autopuzzle'); ?></label>
+                        <input type="text" id="cash_first_name" name="cash_first_name" value="<?php echo esc_attr($current_user->first_name); ?>" required>
                     </div>
                     <div class="form-group">
-                        <label for="cash_last_name_modal"><?php esc_html_e('Last Name:', 'autopuzzle'); ?></label>
-                        <input type="text" id="cash_last_name_modal" name="cash_last_name" value="<?php echo esc_attr($current_user->last_name); ?>" required>
+                        <label for="cash_last_name"><?php esc_html_e('Last Name:', 'autopuzzle'); ?></label>
+                        <input type="text" id="cash_last_name" name="cash_last_name" value="<?php echo esc_attr($current_user->last_name); ?>" required>
                     </div>
                 </div>
                 <div class="form-row">
                      <div class="form-group">
-                        <label for="cash_mobile_number_modal"><?php esc_html_e('Mobile Number:', 'autopuzzle'); ?></label>
-                        <input type="tel" id="cash_mobile_number_modal" name="cash_mobile_number" value="<?php echo esc_attr(get_user_meta($current_user->ID, 'mobile_number', true)); ?>" required>
+                        <label for="cash_mobile_number"><?php esc_html_e('Mobile Number:', 'autopuzzle'); ?></label>
+                        <input type="tel" id="cash_mobile_number" name="cash_mobile_number" value="<?php echo esc_attr(get_user_meta($current_user->ID, 'mobile_number', true)); ?>" required>
                     </div>
                     <div class="form-group">
-                        <label for="cash_car_color_modal"><?php esc_html_e('Car Color:', 'autopuzzle'); ?></label>
+                        <label for="cash_car_color"><?php esc_html_e('Car Color:', 'autopuzzle'); ?></label>
                         <?php if (!empty($car_colors)): ?>
-                            <select id="cash_car_color_modal" name="cash_car_color" required>
+                            <select id="cash_car_color" name="cash_car_color" required>
                                  <option value=""><?php esc_html_e('-- Select a color --', 'autopuzzle'); ?></option>
                                 <?php foreach ($car_colors as $color): ?>
                                     <option value="<?php echo esc_attr($color); ?>"><?php echo esc_html($color); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         <?php else: ?>
-                            <input type="text" id="cash_car_color_modal" name="cash_car_color" placeholder="<?php esc_attr_e('Enter your desired color', 'autopuzzle'); ?>" required>
+                            <input type="text" id="cash_car_color" name="cash_car_color" placeholder="<?php esc_attr_e('Enter your desired color', 'autopuzzle'); ?>" required>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -95,7 +97,7 @@ if (!defined('ABSPATH')) {
             <?php elseif (empty($cash_price) || $cash_price <= 0): ?>
                 <span class="price-hidden"><?php esc_html_e('-', 'autopuzzle'); ?></span>
             <?php else: ?>
-                <span id="cashPriceAmountModal"><?php echo esc_html(function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($cash_price) : number_format_i18n($cash_price)); ?></span>
+                <span id="cashPriceAmount"><?php echo esc_html(function_exists('autopuzzle_number_format_persian') ? autopuzzle_number_format_persian($cash_price) : number_format_i18n($cash_price)); ?></span>
                 <span><?php esc_html_e('Toman', 'autopuzzle'); ?></span>
             <?php endif; ?>
         </div>
@@ -117,5 +119,7 @@ if (!defined('ABSPATH')) {
             </div>
         <?php endif; ?>
     </form>
+        </div>
+    </div>
 </div>
 

@@ -123,7 +123,16 @@
     }
 
     // === CASH TAB ===
+    // Export to window for use in modals
+    window.autopuzzleInitCashTab = function() {
+        return initCashTabInternal();
+    };
+    
     function initCashTab() {
+        return initCashTabInternal();
+    }
+    
+    function initCashTabInternal() {
         const cashPriceEl = document.getElementById('cashPriceAmount');
         if (cashPriceEl && cashPriceEl.innerText) {
             const priceValue = parseMoney(cashPriceEl.innerText);
@@ -280,7 +289,16 @@
     }
 
     // === INSTALLMENT CALCULATOR ===
+    // Export to window for use in modals
+    window.autopuzzleInitInstallmentCalculator = function(container) {
+        return initInstallmentCalculatorInternal(container);
+    };
+    
     function initInstallmentCalculator(container) {
+        return initInstallmentCalculatorInternal(container);
+    }
+    
+    function initInstallmentCalculatorInternal(container) {
         const installmentTab = document.getElementById("installment-tab");
         if (!installmentTab) {
             console.error('AutoPuzzle Calculator: installment-tab not found');

@@ -1470,6 +1470,7 @@ class Autopuzzle_Hooks {
 
     /**
      * Replace "Add to Cart" button with "View Product" link
+     * Also wraps it in a container to align with purchase buttons
      *
      * @param string $button_html The button HTML
      * @param WC_Product $product The product object
@@ -1484,7 +1485,7 @@ class Autopuzzle_Hooks {
         $product_url = get_permalink($product_id);
         
         $button_html = sprintf(
-            '<a href="%s" class="button autopuzzle-view-product-btn">%s</a>',
+            '<div class="autopuzzle-view-product-wrapper"><a href="%s" class="button autopuzzle-view-product-btn">%s</a></div>',
             esc_url($product_url),
             esc_html__('View Product', 'autopuzzle')
         );
@@ -1493,7 +1494,8 @@ class Autopuzzle_Hooks {
     }
 
     /**
-     * Add purchase buttons (Cash/Installment) and View Product button in carousels and archive pages
+     * Add purchase buttons (Cash/Installment) in carousels and archive pages
+     * Note: View Product button is handled by replace_add_to_cart_with_view_product filter
      */
     public function add_carousel_purchase_buttons() {
         global $product;
@@ -1514,7 +1516,6 @@ class Autopuzzle_Hooks {
         $cash_price = (float) $product->get_regular_price();
         $installment_price = (float) get_post_meta($product_id, 'installment_price', true);
 
-        $product_url = get_permalink($product_id);
         ?>
         <div class="autopuzzle-product-buttons" data-product-id="<?php echo esc_attr($product_id); ?>">
             <?php if ($cash_price > 0): ?>
@@ -1528,10 +1529,6 @@ class Autopuzzle_Hooks {
                     <?php esc_html_e('Installment Purchase', 'autopuzzle'); ?>
                 </button>
             <?php endif; ?>
-            
-            <a href="<?php echo esc_url($product_url); ?>" class="autopuzzle-btn autopuzzle-btn-view">
-                <?php esc_html_e('View Product', 'autopuzzle'); ?>
-            </a>
         </div>
         <?php
     }

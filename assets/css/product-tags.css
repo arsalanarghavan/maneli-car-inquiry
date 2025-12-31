@@ -179,10 +179,16 @@
 /* Product Buttons Styles */
 .autopuzzle-product-buttons {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 10px;
     margin-top: 15px;
     padding: 15px 0;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.autopuzzle-view-product-wrapper {
+    display: inline-block;
 }
 
 .autopuzzle-btn {
@@ -194,10 +200,13 @@
     text-align: center;
     text-decoration: none;
     cursor: pointer;
-    border: none;
+    border: 2px solid transparent;
     transition: all 0.3s ease;
-    width: 100%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    background-color: #ffffff;
+    min-width: auto;
+    width: auto;
 }
 
 .autopuzzle-btn:hover {
@@ -207,18 +216,31 @@
 }
 
 .autopuzzle-btn-cash {
+    background-color: #ffffff;
+    border: 2px solid rgb(33, 206, 158);
+    color: rgb(33, 206, 158);
+}
+
+.autopuzzle-btn-cash:hover {
     background-color: rgb(33, 206, 158);
     color: #ffffff;
 }
 
 .autopuzzle-btn-installment {
+    background-color: #ffffff;
+    border: 2px solid rgb(14, 165, 232);
+    color: rgb(14, 165, 232);
+}
+
+.autopuzzle-btn-installment:hover {
     background-color: rgb(14, 165, 232);
     color: #ffffff;
 }
 
 .autopuzzle-btn-view {
-    background-color: #333;
-    color: #ffffff;
+    background-color: #ffffff;
+    border: 2px solid rgb(14, 165, 232);
+    color: rgb(14, 165, 232);
 }
 
 .autopuzzle-view-product-btn {
@@ -229,20 +251,61 @@
     font-weight: 600;
     text-align: center;
     text-decoration: none;
-    background-color: #333;
-    color: #ffffff;
+    background-color: #ffffff;
+    color: rgb(14, 165, 232);
     transition: all 0.3s ease;
-    border: none;
+    border: 2px dashed rgb(14, 165, 232);
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    min-width: auto;
+    width: auto;
 }
 
 .autopuzzle-view-product-btn:hover {
-    background-color: #555;
+    background-color: rgb(14, 165, 232);
+    border-color: rgb(14, 165, 232);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     color: #ffffff;
     text-decoration: none;
+}
+
+/* Container for all buttons */
+.autopuzzle-all-buttons-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+/* Align buttons container with View Product button */
+.woocommerce ul.products li.product .autopuzzle-product-buttons,
+.woocommerce ul.products li.product .autopuzzle-view-product-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+.woocommerce ul.products li.product .autopuzzle-view-product-wrapper + .autopuzzle-product-buttons,
+.woocommerce ul.products li.product .autopuzzle-product-buttons + .autopuzzle-view-product-wrapper {
+    margin-top: 0;
+}
+
+/* Ensure buttons are on the same line */
+.woocommerce ul.products li.product .button,
+.woocommerce ul.products li.product .autopuzzle-view-product-wrapper {
+    margin: 0;
+}
+
+/* Remove margin from buttons container when inside all-buttons-container */
+.autopuzzle-all-buttons-container .autopuzzle-product-buttons {
+    margin-top: 0;
+    padding: 0;
 }
 
 /* Calculator Modal Styles */
@@ -342,6 +405,35 @@ body.modal-open {
     display: block !important;
 }
 
+/* Ensure buttons are displayed inline in WooCommerce loop */
+.woocommerce ul.products li.product .button,
+.woocommerce ul.products li.product .autopuzzle-view-product-wrapper {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.woocommerce ul.products li.product .autopuzzle-product-buttons {
+    display: inline-flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 0;
+    margin-right: 10px;
+    padding: 0;
+    vertical-align: middle;
+}
+
+/* Ensure all buttons have same size in WooCommerce loop */
+.woocommerce ul.products li.product .autopuzzle-btn,
+.woocommerce ul.products li.product .autopuzzle-view-product-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 6px;
+    min-width: auto;
+    width: auto;
+    box-sizing: border-box;
+}
+
 /* Responsive Design for Buttons */
 @media (max-width: 768px) {
     .autopuzzle-product-buttons {
@@ -353,6 +445,13 @@ body.modal-open {
     .autopuzzle-view-product-btn {
         padding: 10px 16px;
         font-size: 13px;
+        min-width: auto;
+        width: auto;
+    }
+    
+    .woocommerce ul.products li.product .autopuzzle-product-buttons {
+        gap: 8px;
+        margin-right: 8px;
     }
 }
 
@@ -360,12 +459,23 @@ body.modal-open {
     .autopuzzle-product-buttons {
         gap: 6px;
         padding: 8px 0;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 
     .autopuzzle-btn,
     .autopuzzle-view-product-btn {
         padding: 8px 12px;
         font-size: 12px;
+        min-width: auto;
+        width: auto;
+    }
+    
+    .woocommerce ul.products li.product .autopuzzle-product-buttons {
+        gap: 6px;
+        margin-right: 6px;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 }
 
