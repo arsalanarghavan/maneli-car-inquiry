@@ -1510,6 +1510,24 @@ class Autopuzzle_Dashboard_Handler {
     }
     
     /**
+     * Determine user role from WordPress user roles
+     * 
+     * @param WP_User $wp_user WordPress user object
+     * @return string User role: 'administrator', 'autopuzzle_manager', 'autopuzzle_expert', or 'customer'
+     */
+    private function determine_user_role($wp_user) {
+        if (in_array('administrator', $wp_user->roles, true)) {
+            return 'administrator';
+        } elseif (in_array('autopuzzle_admin', $wp_user->roles, true) || in_array('autopuzzle_manager', $wp_user->roles, true)) {
+            return 'autopuzzle_manager';
+        } elseif (in_array('autopuzzle_expert', $wp_user->roles, true)) {
+            return 'autopuzzle_expert';
+        } else {
+            return 'customer';
+        }
+    }
+    
+    /**
      * Get current user
      * CRITICAL: Support both WordPress login and session-based login
      * Always use WordPress user roles from database when available
@@ -1527,16 +1545,7 @@ class Autopuzzle_Dashboard_Handler {
             
             // Determine actual role from WordPress user roles (always fresh from database)
             // Note: autopuzzle_admin is the actual role name, but we use 'autopuzzle_manager' as internal identifier
-            $user_role = 'customer';
-            if (in_array('administrator', $wp_user->roles, true)) {
-                $user_role = 'administrator';
-            } elseif (in_array('autopuzzle_admin', $wp_user->roles, true) || in_array('autopuzzle_manager', $wp_user->roles, true)) {
-                $user_role = 'autopuzzle_manager';
-            } elseif (in_array('autopuzzle_expert', $wp_user->roles, true)) {
-                $user_role = 'autopuzzle_expert';
-            } else {
-                $user_role = 'customer';
-            }
+            $user_role = $this->determine_user_role($wp_user);
             
             return [
                 'name' => $wp_user->display_name,
@@ -1585,16 +1594,7 @@ class Autopuzzle_Dashboard_Handler {
         
         // Determine actual role from WordPress user roles (always fresh from database)
         // Note: autopuzzle_admin is the actual role name, but we use 'autopuzzle_manager' as internal identifier
-        $user_role = 'customer';
-        if (in_array('administrator', $wp_user->roles, true)) {
-            $user_role = 'administrator';
-        } elseif (in_array('autopuzzle_admin', $wp_user->roles, true) || in_array('autopuzzle_manager', $wp_user->roles, true)) {
-            $user_role = 'autopuzzle_manager';
-        } elseif (in_array('autopuzzle_expert', $wp_user->roles, true)) {
-            $user_role = 'autopuzzle_expert';
-        } else {
-            $user_role = 'customer';
-        }
+        $user_role = $this->determine_user_role($wp_user);
         
         return [
             'name' => $wp_user->display_name,
@@ -1621,15 +1621,14 @@ class Autopuzzle_Dashboard_Handler {
             $wp_user = wp_get_current_user();
             $user_id = $wp_user->ID;
             
-            // Determine role
-            if (in_array('administrator', $wp_user->roles)) {
-                $user_role = 'administrator';
-            } elseif (in_array('autopuzzle_admin', $wp_user->roles) || in_array('autopuzzle_manager', $wp_user->roles)) {
-                $user_role = 'autopuzzle_manager';
-            } elseif (in_array('autopuzzle_expert', $wp_user->roles)) {
-                $user_role = 'autopuzzle_expert';
-            } else {
-                $user_role = 'customer';
+            // Determine role using helper method
+            $user_role = $this->determine_user_role($wp_user);
+            
+            // CRITICAL: Update session with correct role if it exists
+            // This ensures session is always in sync with database
+            $this->maybe_start_session();
+            if (isset($_SESSION['autopuzzle_user_id']) && $_SESSION['autopuzzle_user_id'] == $user_id) {
+                $_SESSION['autopuzzle_user_role'] = $user_role;
             }
             
             // Get name
@@ -1666,16 +1665,12 @@ class Autopuzzle_Dashboard_Handler {
                 $wp_user = get_user_by('ID', $user_id);
                 
                 if ($wp_user) {
-                    // Determine role from database
-                    if (in_array('administrator', $wp_user->roles)) {
-                        $user_role = 'administrator';
-                    } elseif (in_array('autopuzzle_admin', $wp_user->roles) || in_array('autopuzzle_manager', $wp_user->roles)) {
-                        $user_role = 'autopuzzle_manager';
-                    } elseif (in_array('autopuzzle_expert', $wp_user->roles)) {
-                        $user_role = 'autopuzzle_expert';
-                    } else {
-                        $user_role = 'customer';
-                    }
+                    // Determine role from database using helper method
+                    $user_role = $this->determine_user_role($wp_user);
+                    
+                    // CRITICAL: Update session with correct role
+                    // This ensures session is always in sync with database
+                    $_SESSION['autopuzzle_user_role'] = $user_role;
                     
                     // Get name
                     $first_name = get_user_meta($user_id, 'first_name', true);
@@ -1697,16 +1692,48 @@ class Autopuzzle_Dashboard_Handler {
                         $user_phone = $wp_user->user_login;
                     }
                 } else {
-                    // Fallback to old session format
-            $user_name = $_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle');
-            $user_phone = $_SESSION['autopuzzle_user_phone'] ?? '';
-            $user_role = $_SESSION['autopuzzle_user_role'] ?? 'customer';
+                    // Fallback to old session format - but try to get user from session user_id if available
+                    $session_user_id = isset($_SESSION['autopuzzle_user_id']) ? (int)$_SESSION['autopuzzle_user_id'] : 0;
+                    if ($session_user_id > 0) {
+                        $session_user = get_user_by('ID', $session_user_id);
+                        if ($session_user) {
+                            $user_role = $this->determine_user_role($session_user);
+                            // CRITICAL: Update session with correct role
+                            $_SESSION['autopuzzle_user_role'] = $user_role;
+                            $user_name = $session_user->display_name ?: ($_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle'));
+                            $user_phone = get_user_meta($session_user_id, 'billing_phone', true) ?: ($_SESSION['autopuzzle_user_phone'] ?? '');
+                        } else {
+                            $user_name = $_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle');
+                            $user_phone = $_SESSION['autopuzzle_user_phone'] ?? '';
+                            $user_role = $_SESSION['autopuzzle_user_role'] ?? 'customer';
+                        }
+                    } else {
+                        $user_name = $_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle');
+                        $user_phone = $_SESSION['autopuzzle_user_phone'] ?? '';
+                        $user_role = $_SESSION['autopuzzle_user_role'] ?? 'customer';
+                    }
                 }
             } else {
-                // Use old session format
-                $user_name = $_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle');
-                $user_phone = $_SESSION['autopuzzle_user_phone'] ?? '';
-                $user_role = $_SESSION['autopuzzle_user_role'] ?? 'customer';
+                // Use old session format - but try to get user from session user_id if available
+                $session_user_id = isset($_SESSION['autopuzzle_user_id']) ? (int)$_SESSION['autopuzzle_user_id'] : 0;
+                if ($session_user_id > 0) {
+                    $session_user = get_user_by('ID', $session_user_id);
+                    if ($session_user) {
+                        $user_role = $this->determine_user_role($session_user);
+                        // CRITICAL: Update session with correct role
+                        $_SESSION['autopuzzle_user_role'] = $user_role;
+                        $user_name = $session_user->display_name ?: ($_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle'));
+                        $user_phone = get_user_meta($session_user_id, 'billing_phone', true) ?: ($_SESSION['autopuzzle_user_phone'] ?? '');
+                    } else {
+                        $user_name = $_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle');
+                        $user_phone = $_SESSION['autopuzzle_user_phone'] ?? '';
+                        $user_role = $_SESSION['autopuzzle_user_role'] ?? 'customer';
+                    }
+                } else {
+                    $user_name = $_SESSION['autopuzzle_user_name'] ?? esc_html__('User', 'autopuzzle');
+                    $user_phone = $_SESSION['autopuzzle_user_phone'] ?? '';
+                    $user_role = $_SESSION['autopuzzle_user_role'] ?? 'customer';
+                }
             }
         }
         
@@ -2928,7 +2955,7 @@ class Autopuzzle_Dashboard_Handler {
             $this->maybe_start_session();
             $_SESSION['autopuzzle_dashboard_logged_in'] = true;
             $_SESSION['autopuzzle_user_id'] = $user->ID;
-            $_SESSION['autopuzzle_user_role'] = 'customer';
+            $_SESSION['autopuzzle_user_role'] = $this->determine_user_role($user);
             $_SESSION['autopuzzle_user_phone'] = $phone;
             $_SESSION['autopuzzle_user_name'] = $user->display_name;
             
@@ -3003,7 +3030,7 @@ class Autopuzzle_Dashboard_Handler {
         $this->maybe_start_session();
         $_SESSION['autopuzzle_dashboard_logged_in'] = true;
         $_SESSION['autopuzzle_user_id'] = $user->ID;
-        $_SESSION['autopuzzle_user_role'] = 'customer';
+        $_SESSION['autopuzzle_user_role'] = $this->determine_user_role($user);
         $_SESSION['autopuzzle_user_phone'] = $phone;
         $_SESSION['autopuzzle_user_name'] = $user->display_name;
         
@@ -3084,7 +3111,7 @@ class Autopuzzle_Dashboard_Handler {
         $this->maybe_start_session();
         $_SESSION['autopuzzle_dashboard_logged_in'] = true;
         $_SESSION['autopuzzle_user_id'] = $user->ID;
-        $_SESSION['autopuzzle_user_role'] = 'customer';
+        $_SESSION['autopuzzle_user_role'] = $this->determine_user_role($user);
         $_SESSION['autopuzzle_user_phone'] = $user->user_login;
         
         // Update last login
